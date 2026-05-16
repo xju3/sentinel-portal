@@ -14,6 +14,7 @@ from influxdb_client import InfluxDBClient
 from minio import Minio
 from minio.error import S3Error
 
+from app.models import Base
 from app.config import settings
 
 logger = logging.getLogger(__name__)
@@ -39,6 +40,9 @@ class DatabaseManager:
             self.SessionLocal = async_sessionmaker(
                 self.engine, class_=AsyncSession, expire_on_commit=False
             )
+            # Create all tables if they do not exist
+            async with self.engine.begin() as conn:
+                await conn.run_sync(Base.metadata.create_all)
             logger.info("MySQL database initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize MySQL database: {e}")

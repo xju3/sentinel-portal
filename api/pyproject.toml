@@ -30,6 +30,8 @@ dependencies = [
     "pytest==7.4.3",
     "pytest-asyncio==0.21.1",
     "httpx==0.25.2",
+    "aiomysql>=0.3.2",
+    "greenlet>=3.5.0",
 ]
 
 [project.optional-dependencies]

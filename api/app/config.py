@@ -15,7 +15,7 @@ class Settings(BaseSettings):
     cors_origins: List[str] = ["*"]
     
     # MySQL Database
-    mysql_url: str = "mysql+aiomysql://pl@pl@sH123@139.9.50.7:3306/platform"
+    mysql_url: str = "mysql+aiomysql://pl:pl098POI@139.9.50.7:3306/platform"
     
     # Redis
     redis_url: str = "redis://139.9.50.7:6379/0"
@@ -28,10 +28,10 @@ class Settings(BaseSettings):
     
     # MinIO
     minio_endpoint: str = "139.9.50.7:9000"
-    minio_access_key: str = "minioadmin"
-    minio_secret_key: str = "minioadmin"
+    minio_access_key: str = "admin"
+    minio_secret_key: str = "Qw7!pL9z@eX2#vRt"
     minio_secure: bool = False
-    minio_bucket: str = "sensors"
+    minio_bucket: str = "fft"
 
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
 

@@ -10,7 +10,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 from app.database import db_manager
-from app.models.sensor import Sensor, SensorReading
+from app.models.sensor import Sensor
 from app.services.sensor_service import SensorService
 
 router = APIRouter(prefix="/sensors", tags=["sensors"])
@@ -49,19 +49,6 @@ class SensorResponse(BaseModel):
     class Config:
         from_attributes = True
 
-
-class SensorReadingCreate(BaseModel):
-    """Create sensor reading request model"""
-    value: float
-    unit: str = "C"
-    timestamp: Optional[datetime] = None
-
-
-class SensorReadingResponse(BaseModel):
-    """Sensor reading response model"""
-    timestamp: datetime
-    value: float
-    unit: Optional[str] = None
 
 @router.get("", response_model=List[SensorResponse])
 async def list_sensors(
@@ -159,65 +146,3 @@ async def delete_sensor(
     await session.delete(db_sensor)
     await session.commit()
     return {"message": "Sensor deleted successfully"}
-
-
-@router.post("/{sensor_id}/readings")
-async def add_sensor_reading(
-    sensor_id: int,
-    reading: SensorReadingCreate,
-    session: AsyncSession = Depends(db_manager.get_session),
-):
-    """
-    Add a new reading for a specific sensor (stored in InfluxDB)
-    """
-    stmt = select(Sensor).where(Sensor.id == sensor_id)
-    result = await session.execute(stmt)
-    if not result.scalar_one_or_none():
-        raise HTTPException(status_code=404, detail="Sensor not found")
-
-    success = SensorService.write_sensor_data(
-        sensor_id=sensor_id,
-        value=reading.value,
-        unit=reading.unit,
-        timestamp=reading.timestamp
-    )
-    if not success:
-        raise HTTPException(status_code=500, detail="Failed to write sensor data")
-    return {"message": "Reading added successfully"}
-
-
-@router.get("/{sensor_id}/readings", response_model=List[SensorReadingResponse])
-async def get_sensor_readings(
-    sensor_id: int,
-    start_time: Optional[datetime] = None,
-    end_time: Optional[datetime] = None,
-    session: AsyncSession = Depends(db_manager.get_session),
-):
-    """
-    Get historical readings for a sensor from InfluxDB
-    """
-    stmt = select(Sensor).where(Sensor.id == sensor_id)
-    result = await session.execute(stmt)
-    if not result.scalar_one_or_none():
-        raise HTTPException(status_code=404, detail="Sensor not found")
-
-    return SensorService.get_sensor_readings(sensor_id, start_time, end_time)
-
-
-@router.get("/{sensor_id}/readings/latest", response_model=SensorReadingResponse)
-async def get_latest_sensor_reading(
-    sensor_id: int,
-    session: AsyncSession = Depends(db_manager.get_session),
-):
-    """
-    Get the most recent reading for a sensor from InfluxDB
-    """
-    stmt = select(Sensor).where(Sensor.id == sensor_id)
-    result = await session.execute(stmt)
-    if not result.scalar_one_or_none():
-        raise HTTPException(status_code=404, detail="Sensor not found")
-
-    reading = SensorService.get_latest_reading(sensor_id)
-    if not reading:
-        raise HTTPException(status_code=404, detail="No readings found for sensor")
-    return reading

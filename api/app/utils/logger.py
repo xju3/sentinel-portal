@@ -1,6 +1,7 @@
 """
 Logger configuration
 """
+import os
 
 import logging
 import logging.config
@@ -40,6 +41,10 @@ LOGGING_CONFIG = {
 
 def setup_logging():
     """Configure application logging"""
+    log_dir = "logs"
+    if not os.path.exists(log_dir):
+        os.makedirs(log_dir)
+
     logging.config.dictConfig(LOGGING_CONFIG)
     logger = logging.getLogger(__name__)
     logger.info(f"Logging configured for {settings.environment} environment")
