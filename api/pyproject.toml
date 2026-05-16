@@ -18,7 +18,7 @@ dependencies = [
     "fastapi==0.104.1",
     "uvicorn[standard]==0.24.0",
     "sqlalchemy==2.0.23",
-    "pymysql==1.1.0",
+    "pymysql[rsa]==1.1.0",
     "redis==5.0.1",
     "influxdb-client==1.18.0",
     "minio==7.2.0",
@@ -32,6 +32,7 @@ dependencies = [
     "httpx==0.25.2",
     "aiomysql>=0.3.2",
     "greenlet>=3.5.0",
+    "cryptography>=48.0.0",
 ]
 
 [project.optional-dependencies]

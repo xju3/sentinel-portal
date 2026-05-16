@@ -4,15 +4,89 @@ Sensor service - business logic for sensor operations
 
 import logging
 from datetime import datetime, timedelta
-from typing import Optional
+from typing import List, Optional
+from uuid import UUID
 
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
 from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb_client.client.query_api import QueryApi
 
 from app.database import influxdb_manager
 from app.config import settings
+from app.models.sensor import SensorType, Sensor
 
 logger = logging.getLogger(__name__)
+
+
+class SensorTypeService:
+    @staticmethod
+    async def get_all(session: AsyncSession, skip: int, limit: int) -> List[SensorType]:
+        stmt = select(SensorType).offset(skip).limit(limit)
+        result = await session.execute(stmt)
+        return result.scalars().all()
+
+    @staticmethod
+    async def get_by_id(session: AsyncSession, obj_id: UUID) -> Optional[SensorType]:
+        stmt = select(SensorType).where(SensorType.id == obj_id)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def create(session: AsyncSession, data: dict) -> SensorType:
+        db_obj = SensorType(**data)
+        session.add(db_obj)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def update(session: AsyncSession, db_obj: SensorType, data: dict) -> SensorType:
+        for key, value in data.items():
+            setattr(db_obj, key, value)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def delete(session: AsyncSession, db_obj: SensorType) -> None:
+        await session.delete(db_obj)
+        await session.commit()
+
+
+class SensorDbService:
+    @staticmethod
+    async def get_all(session: AsyncSession, skip: int, limit: int) -> List[Sensor]:
+        stmt = select(Sensor).offset(skip).limit(limit)
+        result = await session.execute(stmt)
+        return result.scalars().all()
+
+    @staticmethod
+    async def get_by_id(session: AsyncSession, obj_id: UUID) -> Optional[Sensor]:
+        stmt = select(Sensor).where(Sensor.id == obj_id)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def create(session: AsyncSession, data: dict) -> Sensor:
+        db_obj = Sensor(**data)
+        session.add(db_obj)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def update(session: AsyncSession, db_obj: Sensor, data: dict) -> Sensor:
+        for key, value in data.items():
+            setattr(db_obj, key, value)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def delete(session: AsyncSession, db_obj: Sensor) -> None:
+        await session.delete(db_obj)
+        await session.commit()
 
 
 class SensorService:

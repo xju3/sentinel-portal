@@ -7,47 +7,131 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from datetime import datetime, timedelta
 from typing import List, Optional
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict
+from uuid import UUID
 
 from app.database import db_manager
-from app.models.sensor import Sensor
-from app.services.sensor_service import SensorService
+from app.services.sensor_service import SensorTypeService, SensorDbService
 
 router = APIRouter(prefix="/sensors", tags=["sensors"])
 
 
-class SensorCreate(BaseModel):
-    """Create sensor request model"""
-
+# ==========================================
+# 1. SensorType
+# ==========================================
+class SensorTypeCreate(BaseModel):
     name: str
-    sensor_type: str
-    location: Optional[str] = None
+    battery_capacity: Optional[int] = 0
+    network: Optional[int] = 1
+    bluetooth: Optional[bool] = False
     description: Optional[str] = None
+
+
+class SensorTypeUpdate(BaseModel):
+    name: Optional[str] = None
+    battery_capacity: Optional[int] = None
+    network: Optional[int] = None
+    bluetooth: Optional[bool] = None
+    description: Optional[str] = None
+
+
+class SensorTypeResponse(BaseModel):
+    id: UUID
+    name: str
+    battery_capacity: int
+    network: int
+    bluetooth: bool
+    description: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+@router.get("/types", response_model=List[SensorTypeResponse])
+async def list_sensor_types(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    return await SensorTypeService.get_all(session, skip, limit)
+
+
+@router.get("/types/{obj_id}", response_model=SensorTypeResponse)
+async def get_sensor_type(
+    obj_id: UUID,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    obj = await SensorTypeService.get_by_id(session, obj_id)
+    if not obj:
+        raise HTTPException(status_code=404, detail="SensorType not found")
+    return obj
+
+
+@router.post("/types", response_model=SensorTypeResponse)
+async def create_sensor_type(
+    item: SensorTypeCreate,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    return await SensorTypeService.create(session, item.model_dump())
+
+
+@router.put("/types/{obj_id}", response_model=SensorTypeResponse)
+async def update_sensor_type(
+    obj_id: UUID,
+    item: SensorTypeUpdate,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    db_obj = await SensorTypeService.get_by_id(session, obj_id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="SensorType not found")
+
+    update_data = item.model_dump(exclude_unset=True)
+    return await SensorTypeService.update(session, db_obj, update_data)
+
+
+@router.delete("/types/{obj_id}")
+async def delete_sensor_type(
+    obj_id: UUID,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    db_obj = await SensorTypeService.get_by_id(session, obj_id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="SensorType not found")
+
+    await SensorTypeService.delete(session, db_obj)
+    return {"message": "SensorType deleted successfully"}
+
+
+# ==========================================
+# 2. Sensor
+# ==========================================
+class SensorCreate(BaseModel):
+    sn: str
+    description: Optional[str] = None
+    battery: Optional[float] = 100.0
+    active: Optional[bool] = True
+    sensor_type_id: UUID
 
 
 class SensorUpdate(BaseModel):
-    """Update sensor request model"""
-
-    name: Optional[str] = None
-    location: Optional[str] = None
+    sn: Optional[str] = None
     description: Optional[str] = None
-    is_active: Optional[bool] = None
+    battery: Optional[float] = None
+    active: Optional[bool] = None
+    sensor_type_id: Optional[UUID] = None
 
 
 class SensorResponse(BaseModel):
-    """Sensor response model"""
-
-    id: int
-    name: str
-    sensor_type: str
-    location: Optional[str] = None
+    id: UUID
+    sn: str
     description: Optional[str] = None
-    is_active: bool
+    battery: float
+    active: bool
+    active_at: datetime
     created_at: datetime
     updated_at: datetime
+    sensor_type_id: UUID
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 @router.get("", response_model=List[SensorResponse])
@@ -56,93 +140,50 @@ async def list_sensors(
     limit: int = Query(10, ge=1, le=100),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    """
-    List all sensors with pagination
-    """
-    stmt = select(Sensor).offset(skip).limit(limit)
-    result = await session.execute(stmt)
-    sensors = result.scalars().all()
-    return sensors
+    return await SensorDbService.get_all(session, skip, limit)
 
 
-@router.get("/{sensor_id}", response_model=SensorResponse)
+@router.get("/{obj_id}", response_model=SensorResponse)
 async def get_sensor(
-    sensor_id: int,
+    obj_id: UUID,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    """
-    Get sensor details by ID
-    """
-    stmt = select(Sensor).where(Sensor.id == sensor_id)
-    result = await session.execute(stmt)
-    sensor = result.scalar_one_or_none()
-
-    if not sensor:
+    obj = await SensorDbService.get_by_id(session, obj_id)
+    if not obj:
         raise HTTPException(status_code=404, detail="Sensor not found")
-
-    return sensor
+    return obj
 
 
 @router.post("", response_model=SensorResponse)
 async def create_sensor(
-    sensor: SensorCreate,
+    item: SensorCreate,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    """
-    Create a new sensor
-    """
-    db_sensor = Sensor(
-        name=sensor.name,
-        sensor_type=sensor.sensor_type,
-        location=sensor.location,
-        description=sensor.description,
-    )
-    session.add(db_sensor)
-    await session.commit()
-    await session.refresh(db_sensor)
-    return db_sensor
+    return await SensorDbService.create(session, item.model_dump())
 
 
-@router.put("/{sensor_id}", response_model=SensorResponse)
+@router.put("/{obj_id}", response_model=SensorResponse)
 async def update_sensor(
-    sensor_id: int,
-    sensor: SensorUpdate,
+    obj_id: UUID,
+    item: SensorUpdate,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    """
-    Update sensor information
-    """
-    stmt = select(Sensor).where(Sensor.id == sensor_id)
-    result = await session.execute(stmt)
-    db_sensor = result.scalar_one_or_none()
-
-    if not db_sensor:
+    db_obj = await SensorDbService.get_by_id(session, obj_id)
+    if not db_obj:
         raise HTTPException(status_code=404, detail="Sensor not found")
 
-    update_data = sensor.model_dump(exclude_unset=True)
-    for key, value in update_data.items():
-        setattr(db_sensor, key, value)
-
-    await session.commit()
-    await session.refresh(db_sensor)
-    return db_sensor
+    update_data = item.model_dump(exclude_unset=True)
+    return await SensorDbService.update(session, db_obj, update_data)
 
 
-@router.delete("/{sensor_id}")
+@router.delete("/{obj_id}")
 async def delete_sensor(
-    sensor_id: int,
+    obj_id: UUID,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    """
-    Delete a sensor
-    """
-    stmt = select(Sensor).where(Sensor.id == sensor_id)
-    result = await session.execute(stmt)
-    db_sensor = result.scalar_one_or_none()
-
-    if not db_sensor:
+    db_obj = await SensorDbService.get_by_id(session, obj_id)
+    if not db_obj:
         raise HTTPException(status_code=404, detail="Sensor not found")
 
-    await session.delete(db_sensor)
-    await session.commit()
+    await SensorDbService.delete(session, db_obj)
     return {"message": "Sensor deleted successfully"}

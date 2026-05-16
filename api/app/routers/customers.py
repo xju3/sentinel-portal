@@ -1,0 +1,454 @@
+"""
+Customer related management endpoints
+"""
+
+from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy.ext.asyncio import AsyncSession
+from typing import List, Optional
+from pydantic import BaseModel, ConfigDict
+from uuid import UUID
+
+from app.database import db_manager
+from app.services.customer_service import (
+    TenantService,
+    TenantSensorService,
+    SupplierService,
+    AccountService,
+    AreaService,
+    HealthCheckFreqService,
+)
+
+router = APIRouter(tags=["customers"])
+
+
+# ==========================================
+# 1. Tenant
+# ==========================================
+class TenantCreate(BaseModel):
+    code: str
+    name: str
+    host: str
+    active: Optional[bool] = True
+
+
+class TenantUpdate(BaseModel):
+    code: Optional[str] = None
+    name: Optional[str] = None
+    host: Optional[str] = None
+    active: Optional[bool] = None
+
+
+class TenantResponse(BaseModel):
+    id: UUID
+    code: str
+    name: str
+    host: str
+    active: bool
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+@router.get("/tenants", response_model=List[TenantResponse])
+async def list_tenants(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    return await TenantService.get_tenants(session, skip, limit)
+
+
+@router.get("/tenants/{tenant_id}", response_model=TenantResponse)
+async def get_tenant(
+    tenant_id: UUID,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    tenant = await TenantService.get_tenant(session, tenant_id)
+    if not tenant:
+        raise HTTPException(status_code=404, detail="Tenant not found")
+    return tenant
+
+
+@router.post("/tenants", response_model=TenantResponse)
+async def create_tenant(
+    tenant: TenantCreate,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    return await TenantService.create_tenant(session, tenant.model_dump())
+
+
+@router.put("/tenants/{tenant_id}", response_model=TenantResponse)
+async def update_tenant(
+    tenant_id: UUID,
+    tenant: TenantUpdate,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    db_tenant = await TenantService.get_tenant(session, tenant_id)
+    if not db_tenant:
+        raise HTTPException(status_code=404, detail="Tenant not found")
+
+    update_data = tenant.model_dump(exclude_unset=True)
+    return await TenantService.update_tenant(session, db_tenant, update_data)
+
+
+@router.delete("/tenants/{tenant_id}")
+async def delete_tenant(
+    tenant_id: UUID,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    db_tenant = await TenantService.get_tenant(session, tenant_id)
+    if not db_tenant:
+        raise HTTPException(status_code=404, detail="Tenant not found")
+
+    await TenantService.delete_tenant(session, db_tenant)
+    return {"message": "Tenant deleted successfully"}
+
+
+# ==========================================
+# 2. TenantSensor
+# ==========================================
+class TenantSensorCreate(BaseModel):
+    tenant_id: UUID
+    sensor_id: UUID
+    available: Optional[bool] = True
+
+
+class TenantSensorUpdate(BaseModel):
+    available: Optional[bool] = None
+
+
+class TenantSensorResponse(BaseModel):
+    id: UUID
+    tenant_id: UUID
+    sensor_id: UUID
+    available: bool
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+@router.get("/tenant-sensors", response_model=List[TenantSensorResponse])
+async def list_tenant_sensors(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    return await TenantSensorService.get_tenant_sensors(session, skip, limit)
+
+
+@router.get("/tenant-sensors/{ts_id}", response_model=TenantSensorResponse)
+async def get_tenant_sensor(
+    ts_id: UUID,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    ts = await TenantSensorService.get_tenant_sensor(session, ts_id)
+    if not ts:
+        raise HTTPException(status_code=404, detail="TenantSensor not found")
+    return ts
+
+
+@router.post("/tenant-sensors", response_model=TenantSensorResponse)
+async def create_tenant_sensor(
+    ts: TenantSensorCreate,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    return await TenantSensorService.create_tenant_sensor(session, ts.model_dump())
+
+
+@router.put("/tenant-sensors/{ts_id}", response_model=TenantSensorResponse)
+async def update_tenant_sensor(
+    ts_id: UUID,
+    ts: TenantSensorUpdate,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    db_ts = await TenantSensorService.get_tenant_sensor(session, ts_id)
+    if not db_ts:
+        raise HTTPException(status_code=404, detail="TenantSensor not found")
+
+    update_data = ts.model_dump(exclude_unset=True)
+    return await TenantSensorService.update_tenant_sensor(session, db_ts, update_data)
+
+
+@router.delete("/tenant-sensors/{ts_id}")
+async def delete_tenant_sensor(
+    ts_id: UUID,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    db_ts = await TenantSensorService.get_tenant_sensor(session, ts_id)
+    if not db_ts:
+        raise HTTPException(status_code=404, detail="TenantSensor not found")
+
+    await TenantSensorService.delete_tenant_sensor(session, db_ts)
+    return {"message": "TenantSensor deleted successfully"}
+
+
+# ==========================================
+# 3. Supplier
+# ==========================================
+class SupplierCreate(BaseModel):
+    name: str
+    brand: str
+    contact_info: Optional[str] = None
+    active: Optional[bool] = True
+    tenant_id: UUID
+
+
+class SupplierUpdate(BaseModel):
+    name: Optional[str] = None
+    brand: Optional[str] = None
+    contact_info: Optional[str] = None
+    active: Optional[bool] = None
+
+
+class SupplierResponse(BaseModel):
+    id: UUID
+    name: str
+    brand: str
+    contact_info: Optional[str] = None
+    active: bool
+    tenant_id: UUID
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+@router.get("/suppliers", response_model=List[SupplierResponse])
+async def list_suppliers(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    return await SupplierService.get_suppliers(session, skip, limit)
+
+
+@router.get("/suppliers/{supplier_id}", response_model=SupplierResponse)
+async def get_supplier(
+    supplier_id: UUID,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    supplier = await SupplierService.get_supplier(session, supplier_id)
+    if not supplier:
+        raise HTTPException(status_code=404, detail="Supplier not found")
+    return supplier
+
+
+@router.post("/suppliers", response_model=SupplierResponse)
+async def create_supplier(
+    supplier: SupplierCreate,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    return await SupplierService.create_supplier(session, supplier.model_dump())
+
+
+@router.put("/suppliers/{supplier_id}", response_model=SupplierResponse)
+async def update_supplier(
+    supplier_id: UUID,
+    supplier: SupplierUpdate,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    db_supplier = await SupplierService.get_supplier(session, supplier_id)
+    if not db_supplier:
+        raise HTTPException(status_code=404, detail="Supplier not found")
+
+    update_data = supplier.model_dump(exclude_unset=True)
+    return await SupplierService.update_supplier(session, db_supplier, update_data)
+
+
+@router.delete("/suppliers/{supplier_id}")
+async def delete_supplier(
+    supplier_id: UUID,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    db_supplier = await SupplierService.get_supplier(session, supplier_id)
+    if not db_supplier:
+        raise HTTPException(status_code=404, detail="Supplier not found")
+
+    await SupplierService.delete_supplier(session, db_supplier)
+    return {"message": "Supplier deleted successfully"}
+
+
+# ==========================================
+# 4. Account
+# ==========================================
+class AccountCreate(BaseModel):
+    username: str
+    password: str
+    email: str
+    mobile: Optional[str] = None
+    active: Optional[bool] = True
+    tenant_id: UUID
+
+
+class AccountUpdate(BaseModel):
+    username: Optional[str] = None
+    password: Optional[str] = None
+    email: Optional[str] = None
+    mobile: Optional[str] = None
+    active: Optional[bool] = None
+
+
+class AccountResponse(BaseModel):
+    id: UUID
+    username: str
+    email: str
+    mobile: Optional[str] = None
+    active: bool
+    tenant_id: UUID
+    # 响应中不包含 password 字段
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+@router.get("/accounts", response_model=List[AccountResponse])
+async def list_accounts(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    return await AccountService.get_accounts(session, skip, limit)
+
+
+@router.get("/accounts/{account_id}", response_model=AccountResponse)
+async def get_account(
+    account_id: UUID,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    account = await AccountService.get_account(session, account_id)
+    if not account:
+        raise HTTPException(status_code=404, detail="Account not found")
+    return account
+
+
+@router.post("/accounts", response_model=AccountResponse)
+async def create_account(
+    account: AccountCreate,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    # 在实际应用中, 此处通常需对 password 进行哈希处理
+    return await AccountService.create_account(session, account.model_dump())
+
+
+@router.put("/accounts/{account_id}", response_model=AccountResponse)
+async def update_account(
+    account_id: UUID,
+    account: AccountUpdate,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    db_account = await AccountService.get_account(session, account_id)
+    if not db_account:
+        raise HTTPException(status_code=404, detail="Account not found")
+
+    update_data = account.model_dump(exclude_unset=True)
+    # 实际项目中如果修改 password，也需重新哈希处理
+    return await AccountService.update_account(session, db_account, update_data)
+
+
+@router.delete("/accounts/{account_id}")
+async def delete_account(
+    account_id: UUID,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    db_account = await AccountService.get_account(session, account_id)
+    if not db_account:
+        raise HTTPException(status_code=404, detail="Account not found")
+
+    await AccountService.delete_account(session, db_account)
+    return {"message": "Account deleted successfully"}
+
+
+# ==========================================
+# 5. Area
+# ==========================================
+class AreaCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    ssid: Optional[str] = None
+    passwd: Optional[str] = None
+    parent_id: Optional[UUID] = None
+    tenant_id: UUID
+
+
+class AreaUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    ssid: Optional[str] = None
+    passwd: Optional[str] = None
+    parent_id: Optional[UUID] = None
+
+
+class AreaResponse(BaseModel):
+    id: UUID
+    name: str
+    description: Optional[str] = None
+    ssid: Optional[str] = None
+    passwd: Optional[str] = None
+    parent_id: Optional[UUID] = None
+    tenant_id: UUID
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+@router.get("/areas", response_model=List[AreaResponse])
+async def list_areas(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    return await AreaService.get_areas(session, skip, limit)
+
+
+@router.post("/areas", response_model=AreaResponse)
+async def create_area(
+    area: AreaCreate,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    return await AreaService.create_area(session, area.model_dump())
+
+
+@router.delete("/areas/{area_id}")
+async def delete_area(
+    area_id: UUID,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    db_area = await AreaService.get_area(session, area_id)
+    if not db_area:
+        raise HTTPException(status_code=404, detail="Area not found")
+
+    await AreaService.delete_area(session, db_area)
+    return {"message": "Area deleted successfully"}
+
+
+# ==========================================
+# 6. HealthCheckFreq
+# ==========================================
+class HealthCheckFreqCreate(BaseModel):
+    patrol: Optional[int] = 60
+    diagnosis: Optional[int] = 1440
+    report: Optional[int] = 1
+    status: Optional[bool] = True
+    tenant_id: UUID
+
+
+class HealthCheckFreqResponse(BaseModel):
+    id: UUID
+    patrol: int
+    diagnosis: int
+    report: int
+    status: bool
+    tenant_id: UUID
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+@router.get("/health-check-freqs", response_model=List[HealthCheckFreqResponse])
+async def list_health_check_freqs(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    return await HealthCheckFreqService.get_health_check_freqs(session, skip, limit)
+
+
+@router.post("/health-check-freqs", response_model=HealthCheckFreqResponse)
+async def create_health_check_freq(
+    freq: HealthCheckFreqCreate,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    return await HealthCheckFreqService.create_health_check_freq(session, freq.model_dump())
