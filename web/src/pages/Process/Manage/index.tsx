@@ -9,6 +9,7 @@ import {
 } from '@ant-design/pro-components';
 import { Button, Modal, Popconfirm, Select, Space, Tag, message } from 'antd';
 
+import { Area, listAllAreas } from '@/services/area';
 import { DeviceInst, listAllDeviceInsts } from '@/services/deviceInst';
 import { DeviceSpec, listAllDeviceSpecs } from '@/services/deviceSpec';
 import {
@@ -31,6 +32,7 @@ type ProcessDeviceFormValues = {
   code: string;
   sn: string;
   process_id: string;
+  area_id?: string;
   status: number;
 };
 
@@ -52,10 +54,7 @@ const makeItemCode = (instanceCode: string, seq: number): string => {
   return `${prefix}${stamp}${index}`.slice(0, 16);
 };
 
-const clampSelections = (
-  values: string[],
-  max: number,
-): string[] => {
+const clampSelections = (values: string[], max: number): string[] => {
   if (values.length <= max) {
     return values;
   }
@@ -75,6 +74,7 @@ const ProcessManagePage = () => {
   const [deviceSpecs, setDeviceSpecs] = useState<DeviceSpec[]>([]);
   const [deviceInsts, setDeviceInsts] = useState<DeviceInst[]>([]);
   const [processDeviceItems, setProcessDeviceItems] = useState<ProcessDeviceItem[]>([]);
+  const [areas, setAreas] = useState<Area[]>([]);
 
   const [configOpen, setConfigOpen] = useState(false);
   const [currentInstance, setCurrentInstance] = useState<ProcessDevice | null>(null);
@@ -84,17 +84,19 @@ const ProcessManagePage = () => {
   const processMap = useMemo(() => new Map(processes.map((item) => [item.id, item])), [processes]);
   const specMap = useMemo(() => new Map(deviceSpecs.map((item) => [item.id, item])), [deviceSpecs]);
   const instMap = useMemo(() => new Map(deviceInsts.map((item) => [item.id, item])), [deviceInsts]);
+  const areaMap = useMemo(() => new Map(areas.map((item) => [item.id, item.name])), [areas]);
 
   const loadAll = async () => {
     setLoading(true);
     try {
-      const [instances, templates, templateItems, specs, insts, instanceItems] = await Promise.all([
+      const [instances, templates, templateItems, specs, insts, instanceItems, areaRows] = await Promise.all([
         listAllProcessDevices(),
         listAllProcesses(),
         listAllProcessItems(),
         listAllDeviceSpecs(),
         listAllDeviceInsts(),
         listAllProcessDeviceItems(),
+        listAllAreas(),
       ]);
       setRows(instances);
       setProcesses(templates);
@@ -102,6 +104,7 @@ const ProcessManagePage = () => {
       setDeviceSpecs(specs);
       setDeviceInsts(insts);
       setProcessDeviceItems(instanceItems);
+      setAreas(areaRows);
     } catch (error) {
       message.error(toErrorMessage(error));
     } finally {
@@ -131,6 +134,15 @@ const ProcessManagePage = () => {
           return false;
         }
       }
+      if (query.area_id) {
+        const areaName = row.area_id ? areaMap.get(row.area_id) || '' : '';
+        const hit =
+          norm(areaName).includes(norm(query.area_id)) ||
+          norm(row.area_id).includes(norm(query.area_id));
+        if (!hit) {
+          return false;
+        }
+      }
       if (
         query.status !== undefined &&
         query.status !== null &&
@@ -140,7 +152,7 @@ const ProcessManagePage = () => {
       }
       return true;
     });
-  }, [processMap, query, rows]);
+  }, [areaMap, processMap, query, rows]);
 
   const currentTemplateItems = useMemo(() => {
     if (!currentInstance?.process_id) {
@@ -181,13 +193,7 @@ const ProcessManagePage = () => {
   };
 
   const columns: ProColumns<ProcessDevice>[] = [
-    {
-      title: '序号',
-      valueType: 'indexBorder',
-      width: 68,
-      hideInSearch: true,
-      fixed: 'left',
-    },
+    { title: '序号', valueType: 'indexBorder', width: 68, hideInSearch: true, fixed: 'left' },
     { title: '实例编码', dataIndex: 'code', width: 140 },
     { title: '实例SN', dataIndex: 'sn', width: 180 },
     {
@@ -197,14 +203,17 @@ const ProcessManagePage = () => {
       render: (_, row) => processMap.get(row.process_id)?.name || row.process_id,
     },
     {
+      title: '工作区域',
+      dataIndex: 'area_id',
+      width: 180,
+      render: (_, row) => (row.area_id ? areaMap.get(row.area_id) || row.area_id : '-'),
+    },
+    {
       title: '状态',
       dataIndex: 'status',
       width: 100,
       valueType: 'select',
-      valueEnum: {
-        1: { text: '启用' },
-        0: { text: '停用' },
-      },
+      valueEnum: { 1: { text: '启用' }, 0: { text: '停用' } },
       render: (_, row) => (Number(row.status) === 1 ? '启用' : '停用'),
     },
     {
@@ -258,6 +267,10 @@ const ProcessManagePage = () => {
     () => processes.map((item) => ({ label: `${item.code} - ${item.name}`, value: item.id })),
     [processes],
   );
+  const areaOptions = useMemo(
+    () => areas.map((item) => ({ label: item.name, value: item.id })),
+    [areas],
+  );
 
   return (
     <PageContainer title="工段管理">
@@ -304,11 +317,10 @@ const ProcessManagePage = () => {
                 code: editing.code,
                 sn: editing.sn,
                 process_id: editing.process_id,
+                area_id: editing.area_id || undefined,
                 status: Number(editing.status),
               }
-            : {
-                status: 1,
-              }
+            : { status: 1 }
         }
         onFinish={async (values) => {
           setSaving(true);
@@ -317,6 +329,7 @@ const ProcessManagePage = () => {
               code: values.code.trim(),
               sn: values.sn.trim(),
               process_id: values.process_id,
+              area_id: values.area_id || null,
               status: Number(values.status ?? 1),
             };
             if (editing) {
@@ -341,18 +354,12 @@ const ProcessManagePage = () => {
         <ProFormText
           name="code"
           label="实例编码"
-          rules={[
-            { required: true, message: '请输入实例编码' },
-            { max: 8, message: '实例编码最多8个字符' },
-          ]}
+          rules={[{ required: true, message: '请输入实例编码' }, { max: 8, message: '实例编码最多8个字符' }]}
         />
         <ProFormText
           name="sn"
           label="实例SN"
-          rules={[
-            { required: true, message: '请输入实例SN' },
-            { max: 64, message: '实例SN最多64个字符' },
-          ]}
+          rules={[{ required: true, message: '请输入实例SN' }, { max: 64, message: '实例SN最多64个字符' }]}
         />
         <ProFormSelect
           name="process_id"
@@ -360,6 +367,7 @@ const ProcessManagePage = () => {
           options={processOptions}
           rules={[{ required: true, message: '请选择工段模板' }]}
         />
+        <ProFormSelect name="area_id" label="工作区域" options={areaOptions} allowClear />
         <ProFormSelect
           name="status"
           label="状态"
@@ -408,7 +416,6 @@ const ProcessManagePage = () => {
           setConfigSaving(true);
           try {
             await Promise.all(currentInstanceItems.map((item) => deleteProcessDeviceItem(item.id)));
-
             const createTasks: Promise<any>[] = [];
             let seq = 1;
             for (const row of currentTemplateItems) {

@@ -17,8 +17,8 @@ from app.models.device import (
     ProcessItem,
     ProcessDevice,
     ProcessDeviceItem,
-    SensorMonitoring,
 )
+from app.models.sensor import SensorMonitoring
 from app.models.customer import HealthCheckFreq
 
 

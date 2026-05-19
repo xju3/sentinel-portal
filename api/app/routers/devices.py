@@ -4,13 +4,16 @@ Device related management endpoints
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from datetime import date
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 from pydantic import BaseModel, ConfigDict
 from uuid import UUID
 
 from app.database import db_manager
-from app.models.customer import Account as AccountModel
+from app.models.customer import Account as AccountModel, Location, TenantSensor
+from app.models.device import DeviceCategory, DeviceInst, DeviceSpec
+from app.models.sensor import SensorMonitoring
 from app.services.device_service import (
     IsoStandardService,
     DeviceCategoryService,
@@ -25,6 +28,57 @@ from app.services.device_service import (
 from app.utils.auth import get_current_account
 
 router = APIRouter(tags=["devices"])
+
+
+async def _is_tenant_device_inst(
+    session: AsyncSession,
+    tenant_id: UUID,
+    device_inst_id: UUID,
+) -> bool:
+    stmt = (
+        select(DeviceInst.id)
+        .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
+        .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+        .where(
+            DeviceInst.id == device_inst_id,
+            DeviceCategory.tenant_id == tenant_id,
+        )
+        .limit(1)
+    )
+    result = await session.execute(stmt)
+    return result.scalar_one_or_none() is not None
+
+
+async def _validate_sensor_monitoring_refs(
+    session: AsyncSession,
+    tenant_id: UUID,
+    data: dict,
+) -> None:
+    device_inst_id = data.get("device_inst_id")
+    if device_inst_id is not None:
+        ok = await _is_tenant_device_inst(session, tenant_id, device_inst_id)
+        if not ok:
+            raise HTTPException(status_code=400, detail="device_inst_id is not owned by current tenant")
+
+    location_id = data.get("location_id")
+    if location_id is not None:
+        stmt_loc = select(Location.id).where(
+            Location.id == location_id,
+            Location.tenant_id == tenant_id,
+        ).limit(1)
+        loc_result = await session.execute(stmt_loc)
+        if loc_result.scalar_one_or_none() is None:
+            raise HTTPException(status_code=400, detail="location_id is not owned by current tenant")
+
+    sensor_id = data.get("sensor_id")
+    if sensor_id is not None:
+        stmt_ts = select(TenantSensor.id).where(
+            TenantSensor.tenant_id == tenant_id,
+            TenantSensor.sensor_id == sensor_id,
+        ).limit(1)
+        ts_result = await session.execute(stmt_ts)
+        if ts_result.scalar_one_or_none() is None:
+            raise HTTPException(status_code=400, detail="sensor_id is not assigned to current tenant")
 
 
 # ==========================================
@@ -688,6 +742,7 @@ class ProcessDeviceCreate(BaseModel):
     code: str
     process_id: UUID
     sn: str
+    area_id: Optional[UUID] = None
     status: Optional[int] = 1
 
 
@@ -695,6 +750,7 @@ class ProcessDeviceUpdate(BaseModel):
     code: Optional[str] = None
     process_id: Optional[UUID] = None
     sn: Optional[str] = None
+    area_id: Optional[UUID] = None
     status: Optional[int] = None
 
 
@@ -703,6 +759,7 @@ class ProcessDeviceResponse(BaseModel):
     code: str
     process_id: UUID
     sn: str
+    area_id: Optional[UUID] = None
     status: int
 
     model_config = ConfigDict(from_attributes=True)
@@ -879,17 +936,71 @@ class SensorMonitoringResponse(BaseModel):
 async def list_sensor_monitorings(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    return await SensorMonitoringService.get_all(session, skip, limit)
+    tenant_id = current_account.tenant_id
+    stmt = (
+        select(SensorMonitoring)
+        .join(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
+        .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
+        .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+        .where(DeviceCategory.tenant_id == tenant_id)
+        .offset(skip)
+        .limit(limit)
+    )
+    result = await session.execute(stmt)
+    return result.scalars().all()
+
+
+class SensorMonitoringDeviceInstOption(BaseModel):
+    id: UUID
+    code: str
+    sn: str
+    device_spec_id: UUID
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+@router.get(
+    "/sensor-monitorings/device-insts",
+    response_model=List[SensorMonitoringDeviceInstOption],
+)
+async def list_sensor_monitoring_device_insts(
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    tenant_id = current_account.tenant_id
+    stmt = (
+        select(DeviceInst)
+        .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
+        .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+        .where(DeviceCategory.tenant_id == tenant_id)
+    )
+    result = await session.execute(stmt)
+    return result.scalars().all()
 
 
 @router.get("/sensor-monitorings/{obj_id}", response_model=SensorMonitoringResponse)
 async def get_sensor_monitoring(
     obj_id: UUID,
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    obj = await SensorMonitoringService.get_by_id(session, obj_id)
+    tenant_id = current_account.tenant_id
+    stmt = (
+        select(SensorMonitoring)
+        .join(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
+        .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
+        .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+        .where(
+            SensorMonitoring.id == obj_id,
+            DeviceCategory.tenant_id == tenant_id,
+        )
+        .limit(1)
+    )
+    result = await session.execute(stmt)
+    obj = result.scalar_one_or_none()
     if not obj:
         raise HTTPException(status_code=404, detail="SensorMonitoring not found")
     return obj
@@ -898,31 +1009,64 @@ async def get_sensor_monitoring(
 @router.post("/sensor-monitorings", response_model=SensorMonitoringResponse)
 async def create_sensor_monitoring(
     item: SensorMonitoringCreate,
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    return await SensorMonitoringService.create(session, item.model_dump())
+    tenant_id = current_account.tenant_id
+    payload = item.model_dump()
+    await _validate_sensor_monitoring_refs(session, tenant_id, payload)
+    return await SensorMonitoringService.create(session, payload)
 
 
 @router.put("/sensor-monitorings/{obj_id}", response_model=SensorMonitoringResponse)
 async def update_sensor_monitoring(
     obj_id: UUID,
     item: SensorMonitoringUpdate,
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    db_obj = await SensorMonitoringService.get_by_id(session, obj_id)
+    tenant_id = current_account.tenant_id
+    stmt = (
+        select(SensorMonitoring)
+        .join(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
+        .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
+        .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+        .where(
+            SensorMonitoring.id == obj_id,
+            DeviceCategory.tenant_id == tenant_id,
+        )
+        .limit(1)
+    )
+    result = await session.execute(stmt)
+    db_obj = result.scalar_one_or_none()
     if not db_obj:
         raise HTTPException(status_code=404, detail="SensorMonitoring not found")
 
     update_data = item.model_dump(exclude_unset=True)
+    await _validate_sensor_monitoring_refs(session, tenant_id, update_data)
     return await SensorMonitoringService.update(session, db_obj, update_data)
 
 
 @router.delete("/sensor-monitorings/{obj_id}")
 async def delete_sensor_monitoring(
     obj_id: UUID,
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    db_obj = await SensorMonitoringService.get_by_id(session, obj_id)
+    tenant_id = current_account.tenant_id
+    stmt = (
+        select(SensorMonitoring)
+        .join(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
+        .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
+        .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+        .where(
+            SensorMonitoring.id == obj_id,
+            DeviceCategory.tenant_id == tenant_id,
+        )
+        .limit(1)
+    )
+    result = await session.execute(stmt)
+    db_obj = result.scalar_one_or_none()
     if not db_obj:
         raise HTTPException(status_code=404, detail="SensorMonitoring not found")
 

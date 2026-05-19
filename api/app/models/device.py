@@ -76,7 +76,7 @@ class Process(Base):
     tenant_id = Column(Uuid(as_uuid=True), default=uuid.uuid4, index=False)
     code = Column(String(8), nullable=False, unique=True, index=True)
     name = Column(String(64), nullable=False)
-    area_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Optional link to area for location-based processes
+    
     status = Column(SmallInteger, default=1, comment="tiny(1) status")
 
 
@@ -101,6 +101,7 @@ class ProcessDevice(Base):
     process_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to processes
     sn = Column(String(64), nullable=False, unique=True, index=True)
     status = Column(SmallInteger, default=1, comment="tiny(1) status")
+    area_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Optional link to area for location-based processes
     
     def __repr__(self):
         return f"<ProcessDevice {self.id}: {self.code} - {self.sn}>"
@@ -115,15 +116,3 @@ class ProcessDeviceItem(Base):
     desc = Column(String(128), nullable=False)
     device_inst_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to device_insts
     process_device_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to process_devices
-
-class SensorMonitoring(Base):
-    """Sensor monitoring entity model"""
-
-    __tablename__ = "sensor_monitoring"
-
-    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    device_inst_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to device_insts
-    location_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Optional link to location for asset tracking
-    sensor_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Optional link to sensors
-    direction = Column(String(16), nullable=True)  # e.g. 'horizontal' or 'vertical' for sensor connections
-    status = Column(SmallInteger, default=1, comment="tiny(1) status")

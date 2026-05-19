@@ -2,8 +2,9 @@
 Sensor data models
 """
 
+import uuid
 from datetime import datetime
-from sqlalchemy import Uuid, Column, Integer, String, Float, DateTime, Boolean, Text
+from sqlalchemy import Uuid, Column, SmallInteger, Integer, String, Float, DateTime, Boolean, Text
 
 from app.models import Base
 
@@ -36,3 +37,16 @@ class Sensor(Base):
 
     def __repr__(self):
         return f"<Sensor {self.id}: {self.sn}>"
+
+
+class SensorMonitoring(Base):
+    """Sensor monitoring entity model"""
+
+    __tablename__ = "sensor_monitoring"
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    device_inst_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to device_insts
+    location_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Optional link to location for asset tracking
+    sensor_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Optional link to sensors
+    direction = Column(String(16), nullable=True)  # e.g. 'horizontal' or 'vertical' for sensor connections
+    status = Column(SmallInteger, default=1, comment="tiny(1) status")

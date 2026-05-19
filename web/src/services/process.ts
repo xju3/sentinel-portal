@@ -33,6 +33,7 @@ export type ProcessDevice = {
   code: string;
   process_id: string;
   sn: string;
+  area_id?: string | null;
   status: number;
 };
 
@@ -40,6 +41,7 @@ export type ProcessDevicePayload = {
   code: string;
   process_id: string;
   sn: string;
+  area_id?: string | null;
   status: number;
 };
 
