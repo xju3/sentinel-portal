@@ -24,6 +24,7 @@ import {
   updateDeviceCategory,
 } from '@/services/deviceCategory';
 
+import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
 type CategoryTreeRow = DeviceCategory & {
   children?: CategoryTreeRow[];
 };
@@ -331,6 +332,7 @@ const DeviceCategoryPage = () => {
         onSubmit={(values) => setQuery(values)}
         onReset={() => setQuery({})}
         options={{ reload: loadCategories }}
+        optionsRender={renderRefSafeTableOptions}
         toolBarRender={() => [
           <Button
             key="create"

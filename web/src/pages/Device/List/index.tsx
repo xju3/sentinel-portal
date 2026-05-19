@@ -25,6 +25,7 @@ import {
 } from '@/services/deviceInst';
 import { DeviceSpec, listAllDeviceSpecs, queryDeviceSpecs } from '@/services/deviceSpec';
 
+import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
 type DeviceInstFormValues = {
   code: string;
   device_spec_id: string;
@@ -259,6 +260,7 @@ const DeviceListPage = () => {
         onSubmit={(values) => setQuery(values)}
         onReset={() => setQuery({})}
         options={{ reload: loadRows }}
+        optionsRender={renderRefSafeTableOptions}
         toolBarRender={() => [
           <Button
             key="create"

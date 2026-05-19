@@ -28,6 +28,7 @@ import {
   updateProcessDevice,
 } from '@/services/process';
 
+import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
 type ProcessDeviceFormValues = {
   code: string;
   sn: string;
@@ -283,6 +284,7 @@ const ProcessManagePage = () => {
         onSubmit={(values) => setQuery(values)}
         onReset={() => setQuery({})}
         options={{ reload: loadAll }}
+        optionsRender={renderRefSafeTableOptions}
         toolBarRender={() => [
           <Button
             key="create"

@@ -27,6 +27,7 @@ import {
 } from '@/services/deviceSpec';
 import { Supplier, listAllSuppliers, querySuppliers } from '@/services/supplier';
 
+import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
 type DeviceSpecFormValues = {
   name: string;
   model: string;
@@ -265,6 +266,7 @@ const DeviceSpecPage = () => {
         onSubmit={(values) => setQuery(values)}
         onReset={() => setQuery({})}
         options={{ reload: loadRows }}
+        optionsRender={renderRefSafeTableOptions}
         toolBarRender={() => [
           <Button
             key="create"

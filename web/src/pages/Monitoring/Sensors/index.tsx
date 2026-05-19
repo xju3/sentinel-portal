@@ -4,6 +4,7 @@ import { Tag, message } from 'antd';
 
 import { listAllSensors, listAllTenantSensors, Sensor, TenantSensor } from '@/services/tenantSensor';
 
+import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
 type SensorViewRow = TenantSensor & {
   sensor_sn: string;
   sensor_type_id: string;
@@ -158,6 +159,7 @@ const MonitoringSensorsPage = () => {
         onSubmit={(values) => setQuery(values)}
         onReset={() => setQuery({})}
         options={{ reload: loadRows }}
+        optionsRender={renderRefSafeTableOptions}
         toolBarRender={false}
       />
     </PageContainer>

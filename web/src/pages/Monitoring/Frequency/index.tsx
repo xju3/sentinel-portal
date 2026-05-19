@@ -18,6 +18,7 @@ import {
   updateHealthCheckFreq,
 } from '@/services/healthCheckFreq';
 
+import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
 type HealthCheckFreqFormValues = {
   patrol: number;
   diagnosis: number;
@@ -164,6 +165,7 @@ const MonitoringFrequencyPage = () => {
         columns={columns}
         dataSource={filteredRows}
         options={{ reload: loadRows }}
+        optionsRender={renderRefSafeTableOptions}
         toolBarRender={() => [
           <Button
             key="create"

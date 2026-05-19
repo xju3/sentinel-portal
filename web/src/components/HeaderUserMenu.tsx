@@ -1,10 +1,12 @@
 import { history } from '@umijs/max';
 import { LockOutlined, LogoutOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Dropdown, MenuProps, Space, message } from 'antd';
+import { useRef } from 'react';
 
 import { clearSession, getSession } from '@/utils/session';
 
 const HeaderUserMenu = () => {
+  const triggerRef = useRef<HTMLSpanElement>(null);
   const session = getSession();
   const contactName = session?.contact_name || session?.username || '未命名用户';
 
@@ -44,12 +46,14 @@ const HeaderUserMenu = () => {
 
   return (
     <Dropdown menu={{ items, onClick: onMenuClick }} placement="bottomRight" trigger={['click']}>
-      <Button type="text">
-        <Space>
-          <UserOutlined />
-          {contactName}
-        </Space>
-      </Button>
+      <span ref={triggerRef} style={{ display: 'inline-flex' }}>
+        <Button type="text">
+          <Space>
+            <UserOutlined />
+            {contactName}
+          </Space>
+        </Button>
+      </span>
     </Dropdown>
   );
 };

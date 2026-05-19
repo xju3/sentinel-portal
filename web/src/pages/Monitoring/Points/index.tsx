@@ -21,6 +21,7 @@ import {
 } from '@/services/sensorMonitoring';
 import { listAllSensors, listAllTenantSensors, Sensor, TenantSensor } from '@/services/tenantSensor';
 
+import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
 type SensorMonitoringFormValues = {
   device_inst_id: string;
   location_id?: string;
@@ -222,6 +223,7 @@ const MonitoringPointsPage = () => {
         onSubmit={(values) => setQuery(values)}
         onReset={() => setQuery({})}
         options={{ reload: loadData }}
+        optionsRender={renderRefSafeTableOptions}
         toolBarRender={() => [
           <Button
             key="create"

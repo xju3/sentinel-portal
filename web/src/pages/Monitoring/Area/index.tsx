@@ -10,6 +10,7 @@ import { Button, Popconfirm, message } from 'antd';
 
 import { Area, AreaPayload, createArea, deleteArea, listAllAreas, updateArea } from '@/services/area';
 
+import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
 type AreaFormValues = {
   name: string;
   description?: string;
@@ -154,6 +155,7 @@ const MonitoringAreaPage = () => {
         columns={columns}
         dataSource={filteredRows}
         options={{ reload: loadRows }}
+        optionsRender={renderRefSafeTableOptions}
         toolBarRender={() => [
           <Button
             key="create"

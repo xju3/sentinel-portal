@@ -18,6 +18,7 @@ import {
   updateLocation,
 } from '@/services/location';
 
+import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
 type LocationFormValues = {
   name: string;
   description?: string;
@@ -157,6 +158,7 @@ const MonitoringLocationPage = () => {
         columns={columns}
         dataSource={filteredRows}
         options={{ reload: loadRows }}
+        optionsRender={renderRefSafeTableOptions}
         toolBarRender={() => [
           <Button
             key="create"

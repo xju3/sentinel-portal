@@ -27,6 +27,7 @@ import {
   updateProcessItem,
 } from '@/services/process';
 
+import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
 type ProcessFormValues = {
   code: string;
   name: string;
@@ -276,6 +277,7 @@ const ProcessTemplatePage = () => {
         onSubmit={(values) => setQuery(values)}
         onReset={() => setQuery({})}
         options={{ reload: loadProcesses }}
+        optionsRender={renderRefSafeTableOptions}
         toolBarRender={() => [
           <Button
             key="create"
