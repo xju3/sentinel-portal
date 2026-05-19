@@ -17,7 +17,7 @@ function hasSession() {
 
 export const layout: RunTimeLayoutConfig = () => {
   return {
-    menuHeaderRender: false,
+    layout: 'mix',
     headerTitleRender: () => {
       const session = getSession();
       const tenantName = session?.tenant_name || '未识别租户';
