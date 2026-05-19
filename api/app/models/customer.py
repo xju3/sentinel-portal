@@ -3,7 +3,7 @@ Customer data models
 """
 
 import uuid
-from sqlalchemy import Column, String, Uuid, Boolean, Integer
+from sqlalchemy import Column, String, Uuid, Boolean, Date, Integer, SmallInteger
 
 from app.models import Base
 
@@ -31,6 +31,8 @@ class TenantSensor(Base):
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     tenant_id = Column(Uuid(as_uuid=True), nullable=False, index=False)
     sensor_id = Column(Uuid(as_uuid=True), nullable=False, index=False)
+    qty = Column(Integer, nullable=False, default=1)
+    trans_date = Column(Date, nullable=False)  # transaction date for inventory changes
     available = Column(Boolean, nullable=False, default=True)
 
 
@@ -51,6 +53,24 @@ class Supplier(Base):
 
     def __repr__(self):
         return f"<Supplier {self.id}: {self.name}>"
+
+class Contact(Base):
+    """Contact entity model"""
+
+    __tablename__ = "contact"
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    name = Column(String(64), nullable=False)
+    mobile = Column(String(20), nullable=True, unique=True)
+    email = Column(String(255), nullable=True, unique=True)
+    active = Column(Boolean, default=True)
+    tenant_id = Column(
+        Uuid(as_uuid=True), nullable=False, default=uuid.uuid4, index=False
+    )  # link to tenant for multi-tenant support
+
+    def __repr__(self):
+        return f"<Contact {self.id}: {self.name}>"
+
     
 class Account(Base):
     """Account entity model"""
@@ -59,10 +79,12 @@ class Account(Base):
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     username = Column(String(64), nullable=False, unique=True)
-    password = Column(String(255), nullable=False)
-    email = Column(String(255), nullable=False, unique=True)
+    email = Column(String(255), nullable=True, unique=True)
     mobile = Column(String(20), nullable=True, unique=True)
+    flag = Column(SmallInteger, nullable=False, default=2, comment="tinyint: 1=email, 2=mobile")
+    password = Column(String(255), nullable=False)
     active = Column(Boolean, default=True)
+    contact_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Optional link to contacts
     tenant_id = Column(Uuid(as_uuid=True), nullable=False, default=uuid.uuid4, index=False) # link to tenant for multi-tenant support
 
     def __repr__(self):

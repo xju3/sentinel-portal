@@ -11,6 +11,7 @@ from app.models.customer import (
     Tenant,
     TenantSensor,
     Supplier,
+    Contact,
     Account,
     Area,
     HealthCheckFreq,
@@ -120,6 +121,22 @@ class SupplierService:
     async def delete_supplier(session: AsyncSession, db_supplier: Supplier) -> None:
         await session.delete(db_supplier)
         await session.commit()
+
+
+class ContactService:
+    @staticmethod
+    async def get_contacts(session: AsyncSession, skip: int, limit: int) -> List[Contact]:
+        stmt = select(Contact).offset(skip).limit(limit)
+        result = await session.execute(stmt)
+        return result.scalars().all()
+
+    @staticmethod
+    async def create_contact(session: AsyncSession, data: dict) -> Contact:
+        db_contact = Contact(**data)
+        session.add(db_contact)
+        await session.commit()
+        await session.refresh(db_contact)
+        return db_contact
 
 
 class AccountService:

@@ -270,9 +270,11 @@ async def delete_supplier(
 class AccountCreate(BaseModel):
     username: str
     password: str
-    email: str
+    email: Optional[str] = None
     mobile: Optional[str] = None
+    flag: Optional[int] = 2
     active: Optional[bool] = True
+    contact_id: Optional[UUID] = None
     tenant_id: UUID
 
 
@@ -281,15 +283,19 @@ class AccountUpdate(BaseModel):
     password: Optional[str] = None
     email: Optional[str] = None
     mobile: Optional[str] = None
+    flag: Optional[int] = None
     active: Optional[bool] = None
+    contact_id: Optional[UUID] = None
 
 
 class AccountResponse(BaseModel):
     id: UUID
     username: str
-    email: str
+    email: Optional[str] = None
     mobile: Optional[str] = None
+    flag: int
     active: bool
+    contact_id: Optional[UUID] = None
     tenant_id: UUID
     # 响应中不包含 password 字段
 
