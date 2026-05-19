@@ -47,8 +47,7 @@ const RegisterPage = () => {
                 email: values.email?.trim() || undefined,
               });
               setResult(res);
-              message.success('注册成功，正在返回登录页');
-              setTimeout(() => navigate('/login'), 800);
+              message.success('注册成功，请使用生成的临时密码登录');
               return true;
             } catch (error: any) {
               const detail = error?.data?.detail || '注册失败，请检查输入后重试';
@@ -116,7 +115,7 @@ const RegisterPage = () => {
                   {loginChannel === 'email' ? ' 邮箱作为登录账号' : ' 手机号作为登录账号'}
                 </Typography.Text>
                 <Typography.Text type="secondary">
-                  临时密码会通过短信或邮件发送，请注意查收。
+                  注册成功后会直接显示系统生成的临时密码。
                 </Typography.Text>
               </Space>
             }
@@ -131,11 +130,15 @@ const RegisterPage = () => {
             description={
               <Space direction="vertical" size={0}>
                 <Typography.Text>登录账号: {result.account_username}</Typography.Text>
+                <Typography.Text>临时密码: {result.generated_password}</Typography.Text>
                 <Typography.Text type="secondary">
                   登录账号类型: {result.login_channel === 'email' ? '邮箱' : '手机号'}
                 </Typography.Text>
                 <Typography.Text type="secondary">
-                  临时密码会通过短信或邮件发送，请在首次登录后立即修改密码。
+                  请使用上面的临时密码登录，并在首次登录后立即修改密码。
+                </Typography.Text>
+                <Typography.Text>
+                  <Typography.Link onClick={() => navigate('/login')}>前往登录</Typography.Link>
                 </Typography.Text>
               </Space>
             }

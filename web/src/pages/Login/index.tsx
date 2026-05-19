@@ -55,15 +55,22 @@ const LoginPage = () => {
                 },
               }}
               onFinish={async (values) => {
-                const res = await login({
-                  username: values.username,
-                  password: values.password,
-                });
-                saveSession(res);
-                setSession(res);
-                message.success('登录成功');
-                navigate('/device/categories');
-                return true;
+                try {
+                  const res = await login({
+                    username: values.username,
+                    password: values.password,
+                  });
+                  saveSession(res);
+                  setSession(res);
+                  message.success('登录成功');
+                  navigate('/device/categories');
+                  return true;
+                } catch (error: any) {
+                  const detail =
+                    error?.data?.detail || error?.info?.errorMessage || '登录失败，请检查用户名和密码';
+                  message.error(String(detail));
+                  return false;
+                }
               }}
             >
               <ProFormText

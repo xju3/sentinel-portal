@@ -29,7 +29,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -89,7 +89,7 @@
             2
           ]
         },
-        "register": 2
+        "register": 4
       },
       "enableBy": "register"
     },
@@ -133,7 +133,7 @@
       "time": {
         "hooks": {
           "modifyAppData": [
-            18
+            19
           ]
         },
         "register": 14
@@ -1111,7 +1111,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 53
+        "register": 52
       },
       "enableBy": "register"
     },
@@ -1124,7 +1124,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 26
+        "register": 28
       },
       "enableBy": "config"
     },
@@ -1137,7 +1137,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 9
+        "register": 8
       },
       "enableBy": "config"
     },
@@ -1154,7 +1154,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1167,7 +1167,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1193,7 +1193,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 23
+        "register": 24
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/mpa/mpa": {
@@ -1285,7 +1285,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1298,7 +1298,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1363,7 +1363,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/ssr/ssr": {
@@ -1375,7 +1375,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1388,7 +1388,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -1427,7 +1427,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1440,7 +1440,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 4
+        "register": 3
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/monorepo/redirect": {
@@ -1452,7 +1452,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 14
+        "register": 13
       },
       "enableBy": "config"
     },
@@ -1465,7 +1465,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/clickToComponent/clickToComponent": {
@@ -1477,7 +1477,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/legacy/legacy": {
@@ -1531,7 +1531,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1544,7 +1544,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 2
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/mako/mako": {
@@ -1556,7 +1556,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1593,7 +1593,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 19
+        "register": 17
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/forget/forget": {
@@ -1669,7 +1669,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1682,7 +1682,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1721,7 +1721,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1734,7 +1734,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1747,7 +1747,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1760,7 +1760,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1773,7 +1773,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1825,7 +1825,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1851,7 +1851,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1864,7 +1864,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1903,7 +1903,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 15
+        "register": 14
       },
       "enableBy": "register"
     },
@@ -1916,7 +1916,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1970,7 +1970,7 @@
       "time": {
         "hooks": {
           "modifyConfig": [
-            2
+            1
           ],
           "modifyAppData": [
             0
@@ -1979,7 +1979,7 @@
             0
           ]
         },
-        "register": 6
+        "register": 5
       }
     },
     "./node_modules/@umijs/plugins/dist/dva": {
@@ -1991,7 +1991,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 6
+        "register": 8
       },
       "enableBy": "config"
     },
@@ -2004,7 +2004,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2023,13 +2023,13 @@
             0
           ],
           "addLayouts": [
-            0
+            1
           ],
           "modifyAppData": [
-            1
+            0
           ]
         },
-        "register": 2
+        "register": 3
       },
       "enableBy": "config"
     },
@@ -2042,7 +2042,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2094,7 +2094,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -2131,7 +2131,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2144,7 +2144,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2183,7 +2183,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2200,7 +2200,7 @@
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -3517,7 +3517,7 @@
       "file": "@/pages/Login/index.tsx",
       "id": "1",
       "absPath": "/login",
-      "__content": "import { Link, useNavigate } from '@umijs/max';\nimport { PageContainer, ProCard, ProForm, ProFormText } from '@ant-design/pro-components';\nimport { Alert, Button, Space, Typography, message } from 'antd';\nimport { useEffect, useState } from 'react';\n\nimport { login, type LoginResult } from '@/services/auth';\nimport { clearSession, getSession, saveSession } from '@/utils/session';\n\ntype LoginFormValues = {\n  username: string;\n  password: string;\n};\n\nconst LoginPage = () => {\n  const navigate = useNavigate();\n  const [session, setSession] = useState<LoginResult | null>(null);\n\n  useEffect(() => {\n    const parsed = getSession();\n    if (parsed) setSession(parsed);\n  }, []);\n\n  const handleLogout = () => {\n    clearSession();\n    setSession(null);\n    message.success('已退出登录');\n  };\n\n  return (\n    <PageContainer title=\"账号登录\" content=\"使用用户名和密码登录平台。\" ghost>\n      <ProCard colSpan={12} style={{ maxWidth: 560, margin: '0 auto' }}>\n        {session ? (\n          <Alert\n            type=\"success\"\n            showIcon\n            message=\"当前已登录\"\n            description={\n              <Space direction=\"vertical\" size={4}>\n                <Typography.Text>用户名: {session.username}</Typography.Text>\n                <Space>\n                  <Button type=\"primary\" onClick={() => navigate('/device/categories')}>\n                    进入主应用\n                  </Button>\n                  <Button onClick={handleLogout}>退出登录</Button>\n                </Space>\n              </Space>\n            }\n          />\n        ) : (\n          <>\n            <ProForm<LoginFormValues>\n              submitter={{\n                searchConfig: {\n                  submitText: '登录',\n                },\n              }}\n              onFinish={async (values) => {\n                const res = await login({\n                  username: values.username,\n                  password: values.password,\n                });\n                saveSession(res);\n                setSession(res);\n                message.success('登录成功');\n                navigate('/device/categories');\n                return true;\n              }}\n            >\n              <ProFormText\n                name=\"username\"\n                label=\"用户名\"\n                placeholder=\"请输入用户名\"\n                rules={[{ required: true, message: '请输入用户名' }]}\n              />\n\n              <ProFormText.Password\n                name=\"password\"\n                label=\"密码\"\n                placeholder=\"请输入密码\"\n                rules={[{ required: true, message: '请输入密码' }]}\n              />\n            </ProForm>\n\n            <Alert\n              type=\"info\"\n              showIcon\n              message=\"还没有账号？\"\n              description={\n                <Typography.Text>\n                  请先前往 <Link to=\"/register\">注册页</Link> 创建账号。\n                </Typography.Text>\n              }\n            />\n          </>\n        )}\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default LoginPage;\n",
+      "__content": "import { Link, useNavigate } from '@umijs/max';\nimport { PageContainer, ProCard, ProForm, ProFormText } from '@ant-design/pro-components';\nimport { Alert, Button, Space, Typography, message } from 'antd';\nimport { useEffect, useState } from 'react';\n\nimport { login, type LoginResult } from '@/services/auth';\nimport { clearSession, getSession, saveSession } from '@/utils/session';\n\ntype LoginFormValues = {\n  username: string;\n  password: string;\n};\n\nconst LoginPage = () => {\n  const navigate = useNavigate();\n  const [session, setSession] = useState<LoginResult | null>(null);\n\n  useEffect(() => {\n    const parsed = getSession();\n    if (parsed) setSession(parsed);\n  }, []);\n\n  const handleLogout = () => {\n    clearSession();\n    setSession(null);\n    message.success('已退出登录');\n  };\n\n  return (\n    <PageContainer title=\"账号登录\" content=\"使用用户名和密码登录平台。\" ghost>\n      <ProCard colSpan={12} style={{ maxWidth: 560, margin: '0 auto' }}>\n        {session ? (\n          <Alert\n            type=\"success\"\n            showIcon\n            message=\"当前已登录\"\n            description={\n              <Space direction=\"vertical\" size={4}>\n                <Typography.Text>用户名: {session.username}</Typography.Text>\n                <Space>\n                  <Button type=\"primary\" onClick={() => navigate('/device/categories')}>\n                    进入主应用\n                  </Button>\n                  <Button onClick={handleLogout}>退出登录</Button>\n                </Space>\n              </Space>\n            }\n          />\n        ) : (\n          <>\n            <ProForm<LoginFormValues>\n              submitter={{\n                searchConfig: {\n                  submitText: '登录',\n                },\n              }}\n              onFinish={async (values) => {\n                try {\n                  const res = await login({\n                    username: values.username,\n                    password: values.password,\n                  });\n                  saveSession(res);\n                  setSession(res);\n                  message.success('登录成功');\n                  navigate('/device/categories');\n                  return true;\n                } catch (error: any) {\n                  const detail =\n                    error?.data?.detail || error?.info?.errorMessage || '登录失败，请检查用户名和密码';\n                  message.error(String(detail));\n                  return false;\n                }\n              }}\n            >\n              <ProFormText\n                name=\"username\"\n                label=\"用户名\"\n                placeholder=\"请输入用户名\"\n                rules={[{ required: true, message: '请输入用户名' }]}\n              />\n\n              <ProFormText.Password\n                name=\"password\"\n                label=\"密码\"\n                placeholder=\"请输入密码\"\n                rules={[{ required: true, message: '请输入密码' }]}\n              />\n            </ProForm>\n\n            <Alert\n              type=\"info\"\n              showIcon\n              message=\"还没有账号？\"\n              description={\n                <Typography.Text>\n                  请先前往 <Link to=\"/register\">注册页</Link> 创建账号。\n                </Typography.Text>\n              }\n            />\n          </>\n        )}\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default LoginPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Login/index.tsx"
     },
@@ -3527,7 +3527,7 @@
       "file": "@/pages/Register/index.tsx",
       "id": "2",
       "absPath": "/register",
-      "__content": "import { useNavigate } from '@umijs/max';\nimport { PageContainer, ProCard, ProForm, ProFormText } from '@ant-design/pro-components';\nimport { Alert, Space, Typography, message } from 'antd';\nimport { useState } from 'react';\n\nimport { registerTenant, type RegisterResult } from '@/services/register';\nimport './index.less';\n\nconst RegisterPage = () => {\n  const navigate = useNavigate();\n  const [result, setResult] = useState<RegisterResult | null>(null);\n  const [loginAccount, setLoginAccount] = useState<string>('');\n  const [loginChannel, setLoginChannel] = useState<'email' | 'mobile'>('mobile');\n\n  const updateLoginPreview = (values: Record<string, string | undefined>) => {\n    const email = (values.email || '').trim();\n    const phone = (values.phone || '').trim();\n    if (email) {\n      setLoginChannel('email');\n      setLoginAccount(email.toLowerCase());\n      return;\n    }\n    const normalizedPhone = phone.replace(/\\D/g, '');\n    setLoginChannel('mobile');\n    setLoginAccount(normalizedPhone);\n  };\n\n  return (\n    <PageContainer\n      title=\"企业注册\"\n      content=\"提交后系统会自动创建租户、联系人，并创建平台账号。邮箱优先作为登录账号，若未填写邮箱则使用手机号。\"\n      ghost\n    >\n      <ProCard colSpan={12} style={{ maxWidth: 680, margin: '0 auto' }}>\n        <ProForm\n          submitter={{\n            searchConfig: {\n              submitText: '提交注册',\n            },\n          }}\n          onFinish={async (values) => {\n            try {\n              const res = await registerTenant({\n                company_name: values.company_name,\n                contact_name: values.contact_name,\n                phone: values.phone,\n                email: values.email?.trim() || undefined,\n              });\n              setResult(res);\n              message.success('注册成功，正在返回登录页');\n              setTimeout(() => navigate('/login'), 800);\n              return true;\n            } catch (error: any) {\n              const detail = error?.data?.detail || '注册失败，请检查输入后重试';\n              message.error(String(detail));\n              return false;\n            }\n          }}\n          onValuesChange={(_, values) => {\n            updateLoginPreview(values as Record<string, string | undefined>);\n          }}\n        >\n          <ProFormText\n            name=\"company_name\"\n            label=\"公司名称\"\n            placeholder=\"请输入公司名称\"\n            rules={[{ required: true, message: '请输入公司名称' }]}\n          />\n\n          <ProFormText\n            name=\"contact_name\"\n            label=\"联系人\"\n            placeholder=\"请输入联系人\"\n            rules={[{ required: true, message: '请输入联系人' }]}\n          />\n\n          <ProFormText\n            name=\"phone\"\n            label=\"电话\"\n            placeholder=\"请输入联系电话\"\n            rules={[\n              { required: true, message: '请输入联系电话' },\n              { pattern: /^[0-9+()\\-\\s]{6,20}$/, message: '电话格式不正确' },\n            ]}\n          />\n\n          <ProFormText\n            name=\"email\"\n            label=\"电子邮件\"\n            placeholder=\"请输入电子邮件（可选）\"\n            rules={[\n              { type: 'email', message: '电子邮件格式不正确' },\n            ]}\n          />\n\n          <Alert\n            showIcon\n            type=\"info\"\n            message=\"登录账号预览\"\n            description={\n              <Space direction=\"vertical\" size={2}>\n                <Typography.Text>\n                  当前将使用:\n                  <Typography.Text\n                    style={{\n                      color: loginChannel === 'email' ? '#389e0d' : '#d46b08',\n                      marginLeft: 6,\n                      fontWeight: 600,\n                    }}\n                  >\n                    {loginAccount || '请先填写手机号，或填写邮箱'}\n                  </Typography.Text>\n                </Typography.Text>\n                <Typography.Text type=\"secondary\">\n                  标记:\n                  {loginChannel === 'email' ? ' 邮箱作为登录账号' : ' 手机号作为登录账号'}\n                </Typography.Text>\n                <Typography.Text type=\"secondary\">\n                  临时密码会通过短信或邮件发送，请注意查收。\n                </Typography.Text>\n              </Space>\n            }\n          />\n        </ProForm>\n\n        {result ? (\n          <Alert\n            type=\"success\"\n            showIcon\n            message=\"账号已创建\"\n            description={\n              <Space direction=\"vertical\" size={0}>\n                <Typography.Text>登录账号: {result.account_username}</Typography.Text>\n                <Typography.Text type=\"secondary\">\n                  登录账号类型: {result.login_channel === 'email' ? '邮箱' : '手机号'}\n                </Typography.Text>\n                <Typography.Text type=\"secondary\">\n                  临时密码会通过短信或邮件发送，请在首次登录后立即修改密码。\n                </Typography.Text>\n              </Space>\n            }\n          />\n        ) : null}\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default RegisterPage;\n",
+      "__content": "import { useNavigate } from '@umijs/max';\nimport { PageContainer, ProCard, ProForm, ProFormText } from '@ant-design/pro-components';\nimport { Alert, Space, Typography, message } from 'antd';\nimport { useState } from 'react';\n\nimport { registerTenant, type RegisterResult } from '@/services/register';\nimport './index.less';\n\nconst RegisterPage = () => {\n  const navigate = useNavigate();\n  const [result, setResult] = useState<RegisterResult | null>(null);\n  const [loginAccount, setLoginAccount] = useState<string>('');\n  const [loginChannel, setLoginChannel] = useState<'email' | 'mobile'>('mobile');\n\n  const updateLoginPreview = (values: Record<string, string | undefined>) => {\n    const email = (values.email || '').trim();\n    const phone = (values.phone || '').trim();\n    if (email) {\n      setLoginChannel('email');\n      setLoginAccount(email.toLowerCase());\n      return;\n    }\n    const normalizedPhone = phone.replace(/\\D/g, '');\n    setLoginChannel('mobile');\n    setLoginAccount(normalizedPhone);\n  };\n\n  return (\n    <PageContainer\n      title=\"企业注册\"\n      content=\"提交后系统会自动创建租户、联系人，并创建平台账号。邮箱优先作为登录账号，若未填写邮箱则使用手机号。\"\n      ghost\n    >\n      <ProCard colSpan={12} style={{ maxWidth: 680, margin: '0 auto' }}>\n        <ProForm\n          submitter={{\n            searchConfig: {\n              submitText: '提交注册',\n            },\n          }}\n          onFinish={async (values) => {\n            try {\n              const res = await registerTenant({\n                company_name: values.company_name,\n                contact_name: values.contact_name,\n                phone: values.phone,\n                email: values.email?.trim() || undefined,\n              });\n              setResult(res);\n              message.success('注册成功，请使用生成的临时密码登录');\n              return true;\n            } catch (error: any) {\n              const detail = error?.data?.detail || '注册失败，请检查输入后重试';\n              message.error(String(detail));\n              return false;\n            }\n          }}\n          onValuesChange={(_, values) => {\n            updateLoginPreview(values as Record<string, string | undefined>);\n          }}\n        >\n          <ProFormText\n            name=\"company_name\"\n            label=\"公司名称\"\n            placeholder=\"请输入公司名称\"\n            rules={[{ required: true, message: '请输入公司名称' }]}\n          />\n\n          <ProFormText\n            name=\"contact_name\"\n            label=\"联系人\"\n            placeholder=\"请输入联系人\"\n            rules={[{ required: true, message: '请输入联系人' }]}\n          />\n\n          <ProFormText\n            name=\"phone\"\n            label=\"电话\"\n            placeholder=\"请输入联系电话\"\n            rules={[\n              { required: true, message: '请输入联系电话' },\n              { pattern: /^[0-9+()\\-\\s]{6,20}$/, message: '电话格式不正确' },\n            ]}\n          />\n\n          <ProFormText\n            name=\"email\"\n            label=\"电子邮件\"\n            placeholder=\"请输入电子邮件（可选）\"\n            rules={[\n              { type: 'email', message: '电子邮件格式不正确' },\n            ]}\n          />\n\n          <Alert\n            showIcon\n            type=\"info\"\n            message=\"登录账号预览\"\n            description={\n              <Space direction=\"vertical\" size={2}>\n                <Typography.Text>\n                  当前将使用:\n                  <Typography.Text\n                    style={{\n                      color: loginChannel === 'email' ? '#389e0d' : '#d46b08',\n                      marginLeft: 6,\n                      fontWeight: 600,\n                    }}\n                  >\n                    {loginAccount || '请先填写手机号，或填写邮箱'}\n                  </Typography.Text>\n                </Typography.Text>\n                <Typography.Text type=\"secondary\">\n                  标记:\n                  {loginChannel === 'email' ? ' 邮箱作为登录账号' : ' 手机号作为登录账号'}\n                </Typography.Text>\n                <Typography.Text type=\"secondary\">\n                  注册成功后会直接显示系统生成的临时密码。\n                </Typography.Text>\n              </Space>\n            }\n          />\n        </ProForm>\n\n        {result ? (\n          <Alert\n            type=\"success\"\n            showIcon\n            message=\"账号已创建\"\n            description={\n              <Space direction=\"vertical\" size={0}>\n                <Typography.Text>登录账号: {result.account_username}</Typography.Text>\n                <Typography.Text>临时密码: {result.generated_password}</Typography.Text>\n                <Typography.Text type=\"secondary\">\n                  登录账号类型: {result.login_channel === 'email' ? '邮箱' : '手机号'}\n                </Typography.Text>\n                <Typography.Text type=\"secondary\">\n                  请使用上面的临时密码登录，并在首次登录后立即修改密码。\n                </Typography.Text>\n                <Typography.Text>\n                  <Typography.Link onClick={() => navigate('/login')}>前往登录</Typography.Link>\n                </Typography.Text>\n              </Space>\n            }\n          />\n        ) : null}\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default RegisterPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Register/index.tsx"
     },
