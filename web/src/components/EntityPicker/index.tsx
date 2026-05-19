@@ -151,7 +151,7 @@ function EntityPicker<T extends EntityRow>({
           setOpen(false);
         }}
         okButtonProps={{ disabled: !selectedId }}
-        destroyOnClose
+        destroyOnHidden
       >
         <Input.Search
           placeholder="输入关键字查询"

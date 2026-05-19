@@ -177,7 +177,7 @@ const DeviceSupplierPage = () => {
         title={editing ? '编辑供应商' : '新建供应商'}
         open={modalOpen}
         modalProps={{
-          destroyOnClose: true,
+          destroyOnHidden: true,
           onCancel: () => {
             setModalOpen(false);
             setEditing(null);

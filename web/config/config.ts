@@ -44,11 +44,16 @@ export default defineConfig({
           component: '@/pages/Device/Supplier',
         },
         {
-          path: '/data/frequency',
+          path: '/data/locations',
           name: '故障测点',
-          component: '@/pages/Monitoring/Frequency',
+          component: '@/pages/Monitoring/Location',
         },
-            {
+        {
+          path: '/data/areas',
+          name: '工作区域',
+          component: '@/pages/Monitoring/Area',
+        },
+        {
           path: '/data/frequency',
           name: '监测频率',
           component: '@/pages/Monitoring/Frequency',

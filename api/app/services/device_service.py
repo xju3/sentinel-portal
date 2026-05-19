@@ -13,11 +13,11 @@ from app.models.device import (
     DeviceCategory,
     DeviceSpec,
     DeviceInst,
-    DeviceComboSpec,
-    DeviceComboSpecItem,
-    DeviceComboInst,
-    DeviceComboInstItem,
-    DeviceInstTag,
+    Process,
+    ProcessItem,
+    ProcessDevice,
+    ProcessDeviceItem,
+    SensorMonitoring,
 )
 from app.models.customer import HealthCheckFreq
 
@@ -273,8 +273,15 @@ def generate_standard_service(model_class):
 # 使用工厂模式来创建剩余的模型 Service 以减少代码冗余
 # 如果这些模型后续需要扩展复杂的特定业务逻辑，可以随时像上面那样独立定义类
 
-DeviceComboSpecService = generate_standard_service(DeviceComboSpec)
-DeviceComboSpecItemService = generate_standard_service(DeviceComboSpecItem)
-DeviceComboInstService = generate_standard_service(DeviceComboInst)
-DeviceComboInstItemService = generate_standard_service(DeviceComboInstItem)
-DeviceInstTagService = generate_standard_service(DeviceInstTag)
+ProcessService = generate_standard_service(Process)
+ProcessItemService = generate_standard_service(ProcessItem)
+ProcessDeviceService = generate_standard_service(ProcessDevice)
+ProcessDeviceItemService = generate_standard_service(ProcessDeviceItem)
+SensorMonitoringService = generate_standard_service(SensorMonitoring)
+
+# Backward-compatible aliases for legacy router names.
+DeviceComboSpecService = ProcessService
+DeviceComboSpecItemService = ProcessItemService
+DeviceComboInstService = ProcessDeviceService
+DeviceComboInstItemService = ProcessDeviceItemService
+DeviceInstTagService = SensorMonitoringService

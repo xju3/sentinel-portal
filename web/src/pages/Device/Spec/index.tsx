@@ -283,7 +283,7 @@ const DeviceSpecPage = () => {
         title={editing ? '编辑设备规格' : '新建设备规格'}
         open={modalOpen}
         modalProps={{
-          destroyOnClose: true,
+          destroyOnHidden: true,
           onCancel: () => {
             setModalOpen(false);
             setEditing(null);

@@ -356,7 +356,7 @@ const DeviceCategoryPage = () => {
         }
         open={modalOpen}
         modalProps={{
-          destroyOnClose: true,
+          destroyOnHidden: true,
           onCancel: () => {
             setModalOpen(false);
             setEditing(null);

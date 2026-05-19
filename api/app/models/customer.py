@@ -105,6 +105,19 @@ class Area(Base):
 
     def __repr__(self):
         return f"<Area {self.id}: {self.name}>"
+
+        
+class Location(Base):
+    """Location entity model"""
+
+    __tablename__ = "location"
+    
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)   
+    name = Column(String(64), nullable=False)
+    description = Column(String(255))
+    status  = Column(SmallInteger, nullable=False, default=1)  # tinyint(1) for status
+    tenant_id = Column(Uuid(as_uuid=True), nullable=False, default=uuid.uuid4, index=False) # link to tenant for multi-tenant support
+
     
 class HealthCheckFreq(Base):
     """Health check frequency entity model"""

@@ -15,6 +15,7 @@ from app.models.customer import (
     Contact,
     Account,
     Area,
+    Location,
     HealthCheckFreq,
 )
 
@@ -219,14 +220,31 @@ class AccountService:
 
 class AreaService:
     @staticmethod
-    async def get_areas(session: AsyncSession, skip: int, limit: int) -> List[Area]:
-        stmt = select(Area).offset(skip).limit(limit)
+    async def get_areas(
+        session: AsyncSession,
+        tenant_id: UUID,
+        skip: int,
+        limit: int,
+    ) -> List[Area]:
+        stmt = (
+            select(Area)
+            .where(Area.tenant_id == tenant_id)
+            .offset(skip)
+            .limit(limit)
+        )
         result = await session.execute(stmt)
         return result.scalars().all()
 
     @staticmethod
-    async def get_area(session: AsyncSession, area_id: UUID) -> Optional[Area]:
-        stmt = select(Area).where(Area.id == area_id)
+    async def get_area(
+        session: AsyncSession,
+        tenant_id: UUID,
+        area_id: UUID,
+    ) -> Optional[Area]:
+        stmt = select(Area).where(
+            Area.id == area_id,
+            Area.tenant_id == tenant_id,
+        )
         result = await session.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -239,8 +257,76 @@ class AreaService:
         return db_area
 
     @staticmethod
+    async def update_area(
+        session: AsyncSession,
+        db_area: Area,
+        data: dict,
+    ) -> Area:
+        for key, value in data.items():
+            setattr(db_area, key, value)
+        await session.commit()
+        await session.refresh(db_area)
+        return db_area
+
+    @staticmethod
     async def delete_area(session: AsyncSession, db_area: Area) -> None:
         await session.delete(db_area)
+        await session.commit()
+
+
+class LocationService:
+    @staticmethod
+    async def get_locations(
+        session: AsyncSession,
+        tenant_id: UUID,
+        skip: int,
+        limit: int,
+    ) -> List[Location]:
+        stmt = (
+            select(Location)
+            .where(Location.tenant_id == tenant_id)
+            .offset(skip)
+            .limit(limit)
+        )
+        result = await session.execute(stmt)
+        return result.scalars().all()
+
+    @staticmethod
+    async def get_location(
+        session: AsyncSession,
+        tenant_id: UUID,
+        location_id: UUID,
+    ) -> Optional[Location]:
+        stmt = select(Location).where(
+            Location.id == location_id,
+            Location.tenant_id == tenant_id,
+        )
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def create_location(session: AsyncSession, data: dict) -> Location:
+        db_obj = Location(**data)
+        session.add(db_obj)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def update_location(
+        session: AsyncSession,
+        db_obj: Location,
+        data: dict,
+    ) -> Location:
+        for key, value in data.items():
+            setattr(db_obj, key, value)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def delete_location(session: AsyncSession, db_obj: Location) -> None:
+        await session.delete(db_obj)
         await session.commit()
 
 

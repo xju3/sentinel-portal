@@ -3,26 +3,25 @@ import {
   ModalForm,
   PageContainer,
   ProColumns,
-  ProFormDigit,
-  ProFormSwitch,
+  ProFormSelect,
+  ProFormText,
   ProTable,
 } from '@ant-design/pro-components';
 import { Button, Popconfirm, Tag, message } from 'antd';
 
 import {
-  HealthCheckFreq,
-  HealthCheckFreqPayload,
-  createHealthCheckFreq,
-  deleteHealthCheckFreq,
-  listAllHealthCheckFreqs,
-  updateHealthCheckFreq,
-} from '@/services/healthCheckFreq';
+  createLocation,
+  deleteLocation,
+  listAllLocations,
+  Location,
+  LocationPayload,
+  updateLocation,
+} from '@/services/location';
 
-type HealthCheckFreqFormValues = {
-  patrol: number;
-  diagnosis: number;
-  report: number;
-  status: boolean;
+type LocationFormValues = {
+  name: string;
+  description?: string;
+  status: number;
 };
 
 const toErrorMessage = (error: unknown): string => {
@@ -36,18 +35,18 @@ const toErrorMessage = (error: unknown): string => {
   return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';
 };
 
-const MonitoringFrequencyPage = () => {
+const MonitoringLocationPage = () => {
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [rows, setRows] = useState<HealthCheckFreq[]>([]);
-  const [editing, setEditing] = useState<HealthCheckFreq | null>(null);
+  const [rows, setRows] = useState<Location[]>([]);
+  const [editing, setEditing] = useState<Location | null>(null);
   const [query, setQuery] = useState<Record<string, any>>({});
 
   const loadRows = async () => {
     setLoading(true);
     try {
-      setRows(await listAllHealthCheckFreqs());
+      setRows(await listAllLocations());
     } catch (error) {
       message.error(toErrorMessage(error));
     } finally {
@@ -60,28 +59,27 @@ const MonitoringFrequencyPage = () => {
   }, []);
 
   const filteredRows = useMemo(() => {
+    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();
     return rows.filter((row) => {
-      if (query.patrol !== undefined && query.patrol !== null && String(row.patrol) !== String(query.patrol)) {
+      if (query.name && !norm(row.name).includes(norm(query.name))) {
+        return false;
+      }
+      if (query.description && !norm(row.description).includes(norm(query.description))) {
         return false;
       }
       if (
-        query.diagnosis !== undefined &&
-        query.diagnosis !== null &&
-        String(row.diagnosis) !== String(query.diagnosis)
+        query.status !== undefined &&
+        query.status !== null &&
+        query.status !== '' &&
+        String(row.status) !== String(query.status)
       ) {
-        return false;
-      }
-      if (query.report !== undefined && query.report !== null && String(row.report) !== String(query.report)) {
-        return false;
-      }
-      if (query.status !== undefined && query.status !== null && row.status !== query.status) {
         return false;
       }
       return true;
     });
   }, [query, rows]);
 
-  const columns: ProColumns<HealthCheckFreq>[] = [
+  const columns: ProColumns<Location>[] = [
     {
       title: '序号',
       valueType: 'indexBorder',
@@ -90,32 +88,27 @@ const MonitoringFrequencyPage = () => {
       fixed: 'left',
     },
     {
-      title: '巡检频率(分钟)',
-      dataIndex: 'patrol',
-      width: 140,
-      valueType: 'digit',
+      title: '测点名称',
+      dataIndex: 'name',
+      width: 220,
     },
     {
-      title: '诊断频率(分钟)',
-      dataIndex: 'diagnosis',
-      width: 140,
-      valueType: 'digit',
-    },
-    {
-      title: '上报批次',
-      dataIndex: 'report',
-      width: 120,
-      valueType: 'digit',
+      title: '描述',
+      dataIndex: 'description',
+      ellipsis: true,
+      render: (_, row) => row.description || '-',
     },
     {
       title: '状态',
       dataIndex: 'status',
       width: 100,
+      valueType: 'select',
       valueEnum: {
-        true: { text: '启用' },
-        false: { text: '停用' },
+        1: { text: '启用' },
+        0: { text: '停用' },
       },
-      render: (_, row) => (row.status ? <Tag color="success">启用</Tag> : <Tag>停用</Tag>),
+      render: (_, row) =>
+        Number(row.status) === 1 ? <Tag color="success">启用</Tag> : <Tag>停用</Tag>,
     },
     {
       title: '操作',
@@ -134,10 +127,10 @@ const MonitoringFrequencyPage = () => {
         </Button>,
         <Popconfirm
           key="delete"
-          title="确认删除该监测频率吗？"
+          title="确认删除该故障测点吗？"
           onConfirm={async () => {
             try {
-              await deleteHealthCheckFreq(row.id);
+              await deleteLocation(row.id);
               message.success('删除成功');
               await loadRows();
             } catch (error) {
@@ -154,8 +147,8 @@ const MonitoringFrequencyPage = () => {
   ];
 
   return (
-    <PageContainer title="监测频率">
-      <ProTable<HealthCheckFreq>
+    <PageContainer title="故障测点">
+      <ProTable<Location>
         rowKey="id"
         search={{ labelWidth: 'auto' }}
         onSubmit={(values) => setQuery(values)}
@@ -173,27 +166,23 @@ const MonitoringFrequencyPage = () => {
               setModalOpen(true);
             }}
           >
-            新建频率
+            新建测点
           </Button>,
         ]}
       />
 
-      <ModalForm<HealthCheckFreqFormValues>
-        title={editing ? '编辑监测频率' : '新建监测频率'}
+      <ModalForm<LocationFormValues>
+        title={editing ? '编辑故障测点' : '新建故障测点'}
         open={modalOpen}
         initialValues={
           editing
             ? {
-                patrol: editing.patrol,
-                diagnosis: editing.diagnosis,
-                report: editing.report,
-                status: editing.status,
+                name: editing.name,
+                description: editing.description,
+                status: Number(editing.status),
               }
             : {
-                patrol: 60,
-                diagnosis: 1440,
-                report: 1,
-                status: true,
+                status: 1,
               }
         }
         modalProps={{
@@ -208,19 +197,18 @@ const MonitoringFrequencyPage = () => {
           searchConfig: { submitText: '保存' },
         }}
         onFinish={async (values) => {
-          const payload: HealthCheckFreqPayload = {
-            patrol: values.patrol,
-            diagnosis: values.diagnosis,
-            report: values.report,
-            status: values.status ?? true,
+          const payload: LocationPayload = {
+            name: values.name.trim(),
+            description: values.description?.trim() || undefined,
+            status: Number(values.status ?? 1),
           };
 
           setSaving(true);
           try {
             if (editing) {
-              await updateHealthCheckFreq(editing.id, payload);
+              await updateLocation(editing.id, payload);
             } else {
-              await createHealthCheckFreq(payload);
+              await createLocation(payload);
             }
             message.success('保存成功');
             setModalOpen(false);
@@ -235,31 +223,31 @@ const MonitoringFrequencyPage = () => {
           }
         }}
       >
-        <ProFormDigit
-          name="patrol"
-          label="巡检频率(分钟)"
-          min={1}
-          fieldProps={{ precision: 0 }}
-          rules={[{ required: true, message: '请输入巡检频率' }]}
+        <ProFormText
+          name="name"
+          label="测点名称"
+          rules={[
+            { required: true, message: '请输入测点名称' },
+            { max: 64, message: '测点名称最多64个字符' },
+          ]}
         />
-        <ProFormDigit
-          name="diagnosis"
-          label="诊断频率(分钟)"
-          min={1}
-          fieldProps={{ precision: 0 }}
-          rules={[{ required: true, message: '请输入诊断频率' }]}
+        <ProFormText
+          name="description"
+          label="描述"
+          rules={[{ max: 255, message: '描述最多255个字符' }]}
         />
-        <ProFormDigit
-          name="report"
-          label="上报批次"
-          min={1}
-          fieldProps={{ precision: 0 }}
-          rules={[{ required: true, message: '请输入上报批次' }]}
+        <ProFormSelect
+          name="status"
+          label="状态"
+          options={[
+            { label: '启用', value: 1 },
+            { label: '停用', value: 0 },
+          ]}
+          rules={[{ required: true, message: '请选择状态' }]}
         />
-        <ProFormSwitch name="status" label="启用状态" />
       </ModalForm>
     </PageContainer>
   );
 };
 
-export default MonitoringFrequencyPage;
+export default MonitoringLocationPage;

@@ -16,6 +16,7 @@ from app.services.customer_service import (
     SupplierService,
     AccountService,
     AreaService,
+    LocationService,
     HealthCheckFreqService,
 )
 from app.utils.auth import get_current_account
@@ -400,7 +401,7 @@ class AreaCreate(BaseModel):
     ssid: Optional[str] = None
     passwd: Optional[str] = None
     parent_id: Optional[UUID] = None
-    tenant_id: UUID
+    tenant_id: Optional[UUID] = None
 
 
 class AreaUpdate(BaseModel):
@@ -409,6 +410,7 @@ class AreaUpdate(BaseModel):
     ssid: Optional[str] = None
     passwd: Optional[str] = None
     parent_id: Optional[UUID] = None
+    tenant_id: Optional[UUID] = None
 
 
 class AreaResponse(BaseModel):
@@ -427,25 +429,54 @@ class AreaResponse(BaseModel):
 async def list_areas(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    return await AreaService.get_areas(session, skip, limit)
+    tenant_id = current_account.tenant_id
+    return await AreaService.get_areas(session, tenant_id, skip, limit)
 
 
 @router.post("/areas", response_model=AreaResponse)
 async def create_area(
     area: AreaCreate,
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    return await AreaService.create_area(session, area.model_dump())
+    tenant_id = current_account.tenant_id
+    payload = area.model_dump(exclude_unset=True)
+    if "tenant_id" in payload and payload["tenant_id"] is not None and payload["tenant_id"] != tenant_id:
+        raise HTTPException(status_code=400, detail="tenant_id mismatch")
+    payload["tenant_id"] = tenant_id
+    return await AreaService.create_area(session, payload)
+
+
+@router.put("/areas/{area_id}", response_model=AreaResponse)
+async def update_area(
+    area_id: UUID,
+    area: AreaUpdate,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    tenant_id = current_account.tenant_id
+    db_area = await AreaService.get_area(session, tenant_id, area_id)
+    if not db_area:
+        raise HTTPException(status_code=404, detail="Area not found")
+
+    update_data = area.model_dump(exclude_unset=True)
+    if "tenant_id" in update_data and update_data["tenant_id"] != tenant_id:
+        raise HTTPException(status_code=400, detail="tenant_id cannot be changed")
+    update_data.pop("tenant_id", None)
+    return await AreaService.update_area(session, db_area, update_data)
 
 
 @router.delete("/areas/{area_id}")
 async def delete_area(
     area_id: UUID,
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    db_area = await AreaService.get_area(session, area_id)
+    tenant_id = current_account.tenant_id
+    db_area = await AreaService.get_area(session, tenant_id, area_id)
     if not db_area:
         raise HTTPException(status_code=404, detail="Area not found")
 
@@ -454,7 +485,93 @@ async def delete_area(
 
 
 # ==========================================
-# 6. HealthCheckFreq
+# 6. Location
+# ==========================================
+class LocationCreate(BaseModel):
+    name: str
+    description: Optional[str] = None
+    status: Optional[int] = 1
+    tenant_id: Optional[UUID] = None
+
+
+class LocationUpdate(BaseModel):
+    name: Optional[str] = None
+    description: Optional[str] = None
+    status: Optional[int] = None
+    tenant_id: Optional[UUID] = None
+
+
+class LocationResponse(BaseModel):
+    id: UUID
+    name: str
+    description: Optional[str] = None
+    status: int
+    tenant_id: UUID
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+@router.get("/locations", response_model=List[LocationResponse])
+async def list_locations(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100),
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    tenant_id = current_account.tenant_id
+    return await LocationService.get_locations(session, tenant_id, skip, limit)
+
+
+@router.post("/locations", response_model=LocationResponse)
+async def create_location(
+    location: LocationCreate,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    tenant_id = current_account.tenant_id
+    payload = location.model_dump(exclude_unset=True)
+    if "tenant_id" in payload and payload["tenant_id"] is not None and payload["tenant_id"] != tenant_id:
+        raise HTTPException(status_code=400, detail="tenant_id mismatch")
+    payload["tenant_id"] = tenant_id
+    return await LocationService.create_location(session, payload)
+
+
+@router.put("/locations/{location_id}", response_model=LocationResponse)
+async def update_location(
+    location_id: UUID,
+    location: LocationUpdate,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    tenant_id = current_account.tenant_id
+    db_obj = await LocationService.get_location(session, tenant_id, location_id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Location not found")
+
+    update_data = location.model_dump(exclude_unset=True)
+    if "tenant_id" in update_data and update_data["tenant_id"] != tenant_id:
+        raise HTTPException(status_code=400, detail="tenant_id cannot be changed")
+    update_data.pop("tenant_id", None)
+    return await LocationService.update_location(session, db_obj, update_data)
+
+
+@router.delete("/locations/{location_id}")
+async def delete_location(
+    location_id: UUID,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    tenant_id = current_account.tenant_id
+    db_obj = await LocationService.get_location(session, tenant_id, location_id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="Location not found")
+
+    await LocationService.delete_location(session, db_obj)
+    return {"message": "Location deleted successfully"}
+
+
+# ==========================================
+# 7. HealthCheckFreq
 # ==========================================
 class HealthCheckFreqCreate(BaseModel):
     patrol: Optional[int] = 60

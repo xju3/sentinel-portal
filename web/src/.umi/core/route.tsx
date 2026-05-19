@@ -4,7 +4,7 @@
 import React from 'react';
 
 export async function getRoutes() {
-  const routes = {"1":{"path":"/login","layout":false,"id":"1"},"2":{"path":"/register","layout":false,"id":"2"},"3":{"path":"/data","name":"基础数据","icon":"AppstoreOutlined","parentId":"ant-design-pro-layout","id":"3"},"4":{"path":"/data/suppliers","name":"供应商","parentId":"3","id":"4"},"5":{"path":"/data/frequency","name":"故障测点","parentId":"3","id":"5"},"6":{"path":"/data/frequency","name":"监测频率","parentId":"3","id":"6"},"7":{"path":"/data","redirect":"/data/suppliers","parentId":"3","id":"7"},"8":{"path":"/device","name":"设备管理","icon":"AppstoreOutlined","parentId":"ant-design-pro-layout","id":"8"},"9":{"path":"/device/categories","name":"设备分类","parentId":"8","id":"9"},"10":{"path":"/device/specs","name":"设备规格","parentId":"8","id":"10"},"11":{"path":"/device/list","name":"实例列表","parentId":"8","id":"11"},"12":{"path":"/device","redirect":"/device/categories","parentId":"8","id":"12"},"13":{"path":"/process","name":"生产工艺","icon":"ClusterOutlined","parentId":"ant-design-pro-layout","id":"13"},"14":{"path":"/process/templates","name":"工段模板","parentId":"13","id":"14"},"15":{"path":"/process/manage","name":"工段管理","parentId":"13","id":"15"},"16":{"path":"/process","redirect":"/process/templates","parentId":"13","id":"16"},"17":{"path":"/monitoring","name":"监测管理","icon":"RadarChartOutlined","parentId":"ant-design-pro-layout","id":"17"},"18":{"path":"/monitoring/sensors","name":"传感器","parentId":"17","id":"18"},"19":{"path":"/monitoring/points","name":"测点设置","parentId":"17","id":"19"},"20":{"path":"/monitoring","redirect":"/monitoring/sensors","parentId":"17","id":"20"},"21":{"path":"/welcome","name":"Welcome","hideInMenu":true,"parentId":"ant-design-pro-layout","id":"21"},"22":{"path":"/profile","hideInMenu":true,"parentId":"ant-design-pro-layout","id":"22"},"23":{"path":"/change-password","hideInMenu":true,"parentId":"ant-design-pro-layout","id":"23"},"24":{"path":"/","redirect":"/device/categories","parentId":"ant-design-pro-layout","id":"24"},"ant-design-pro-layout":{"id":"ant-design-pro-layout","path":"/","isLayout":true}} as const;
+  const routes = {"1":{"path":"/login","layout":false,"id":"1"},"2":{"path":"/register","layout":false,"id":"2"},"3":{"path":"/data","name":"基础数据","icon":"AppstoreOutlined","parentId":"ant-design-pro-layout","id":"3"},"4":{"path":"/data/suppliers","name":"供应商","parentId":"3","id":"4"},"5":{"path":"/data/locations","name":"故障测点","parentId":"3","id":"5"},"6":{"path":"/data/areas","name":"工作区域","parentId":"3","id":"6"},"7":{"path":"/data/frequency","name":"监测频率","parentId":"3","id":"7"},"8":{"path":"/data","redirect":"/data/suppliers","parentId":"3","id":"8"},"9":{"path":"/device","name":"设备管理","icon":"AppstoreOutlined","parentId":"ant-design-pro-layout","id":"9"},"10":{"path":"/device/categories","name":"设备分类","parentId":"9","id":"10"},"11":{"path":"/device/specs","name":"设备规格","parentId":"9","id":"11"},"12":{"path":"/device/list","name":"实例列表","parentId":"9","id":"12"},"13":{"path":"/device","redirect":"/device/categories","parentId":"9","id":"13"},"14":{"path":"/process","name":"生产工艺","icon":"ClusterOutlined","parentId":"ant-design-pro-layout","id":"14"},"15":{"path":"/process/templates","name":"工段模板","parentId":"14","id":"15"},"16":{"path":"/process/manage","name":"工段管理","parentId":"14","id":"16"},"17":{"path":"/process","redirect":"/process/templates","parentId":"14","id":"17"},"18":{"path":"/monitoring","name":"监测管理","icon":"RadarChartOutlined","parentId":"ant-design-pro-layout","id":"18"},"19":{"path":"/monitoring/sensors","name":"传感器","parentId":"18","id":"19"},"20":{"path":"/monitoring/points","name":"测点设置","parentId":"18","id":"20"},"21":{"path":"/monitoring","redirect":"/monitoring/sensors","parentId":"18","id":"21"},"22":{"path":"/welcome","name":"Welcome","hideInMenu":true,"parentId":"ant-design-pro-layout","id":"22"},"23":{"path":"/profile","hideInMenu":true,"parentId":"ant-design-pro-layout","id":"23"},"24":{"path":"/change-password","hideInMenu":true,"parentId":"ant-design-pro-layout","id":"24"},"25":{"path":"/","redirect":"/device/categories","parentId":"ant-design-pro-layout","id":"25"},"ant-design-pro-layout":{"id":"ant-design-pro-layout","path":"/","isLayout":true}} as const;
   return {
     routes,
     routeComponents: {
@@ -12,26 +12,27 @@ export async function getRoutes() {
 '2': React.lazy(() => import(/* webpackChunkName: "p__Register__index" */'@/pages/Register/index.tsx')),
 '3': React.lazy(() => import('./EmptyRoute')),
 '4': React.lazy(() => import(/* webpackChunkName: "p__Device__Supplier__index" */'@/pages/Device/Supplier/index.tsx')),
-'5': React.lazy(() => import(/* webpackChunkName: "p__Monitoring__Frequency__index" */'@/pages/Monitoring/Frequency/index.tsx')),
-'6': React.lazy(() => import(/* webpackChunkName: "p__Monitoring__Frequency__index" */'@/pages/Monitoring/Frequency/index.tsx')),
-'7': React.lazy(() => import('./EmptyRoute')),
+'5': React.lazy(() => import(/* webpackChunkName: "p__Monitoring__Location__index" */'@/pages/Monitoring/Location/index.tsx')),
+'6': React.lazy(() => import(/* webpackChunkName: "p__Monitoring__Area__index" */'@/pages/Monitoring/Area/index.tsx')),
+'7': React.lazy(() => import(/* webpackChunkName: "p__Monitoring__Frequency__index" */'@/pages/Monitoring/Frequency/index.tsx')),
 '8': React.lazy(() => import('./EmptyRoute')),
-'9': React.lazy(() => import(/* webpackChunkName: "p__Device__Category__index" */'@/pages/Device/Category/index.tsx')),
-'10': React.lazy(() => import(/* webpackChunkName: "p__Device__Spec__index" */'@/pages/Device/Spec/index.tsx')),
-'11': React.lazy(() => import(/* webpackChunkName: "p__Device__List__index" */'@/pages/Device/List/index.tsx')),
-'12': React.lazy(() => import('./EmptyRoute')),
+'9': React.lazy(() => import('./EmptyRoute')),
+'10': React.lazy(() => import(/* webpackChunkName: "p__Device__Category__index" */'@/pages/Device/Category/index.tsx')),
+'11': React.lazy(() => import(/* webpackChunkName: "p__Device__Spec__index" */'@/pages/Device/Spec/index.tsx')),
+'12': React.lazy(() => import(/* webpackChunkName: "p__Device__List__index" */'@/pages/Device/List/index.tsx')),
 '13': React.lazy(() => import('./EmptyRoute')),
-'14': React.lazy(() => import(/* webpackChunkName: "p__Process__Template__index" */'@/pages/Process/Template/index.tsx')),
-'15': React.lazy(() => import(/* webpackChunkName: "p__Process__Manage__index" */'@/pages/Process/Manage/index.tsx')),
-'16': React.lazy(() => import('./EmptyRoute')),
+'14': React.lazy(() => import('./EmptyRoute')),
+'15': React.lazy(() => import(/* webpackChunkName: "p__Process__Template__index" */'@/pages/Process/Template/index.tsx')),
+'16': React.lazy(() => import(/* webpackChunkName: "p__Process__Manage__index" */'@/pages/Process/Manage/index.tsx')),
 '17': React.lazy(() => import('./EmptyRoute')),
-'18': React.lazy(() => import(/* webpackChunkName: "p__Monitoring__Sensors__index" */'@/pages/Monitoring/Sensors/index.tsx')),
-'19': React.lazy(() => import(/* webpackChunkName: "p__Monitoring__Points__index" */'@/pages/Monitoring/Points/index.tsx')),
-'20': React.lazy(() => import('./EmptyRoute')),
-'21': React.lazy(() => import(/* webpackChunkName: "p__Welcome__index" */'@/pages/Welcome/index.tsx')),
-'22': React.lazy(() => import(/* webpackChunkName: "p__Profile__index" */'@/pages/Profile/index.tsx')),
-'23': React.lazy(() => import(/* webpackChunkName: "p__ChangePassword__index" */'@/pages/ChangePassword/index.tsx')),
-'24': React.lazy(() => import('./EmptyRoute')),
+'18': React.lazy(() => import('./EmptyRoute')),
+'19': React.lazy(() => import(/* webpackChunkName: "p__Monitoring__Sensors__index" */'@/pages/Monitoring/Sensors/index.tsx')),
+'20': React.lazy(() => import(/* webpackChunkName: "p__Monitoring__Points__index" */'@/pages/Monitoring/Points/index.tsx')),
+'21': React.lazy(() => import('./EmptyRoute')),
+'22': React.lazy(() => import(/* webpackChunkName: "p__Welcome__index" */'@/pages/Welcome/index.tsx')),
+'23': React.lazy(() => import(/* webpackChunkName: "p__Profile__index" */'@/pages/Profile/index.tsx')),
+'24': React.lazy(() => import(/* webpackChunkName: "p__ChangePassword__index" */'@/pages/ChangePassword/index.tsx')),
+'25': React.lazy(() => import('./EmptyRoute')),
 'ant-design-pro-layout': React.lazy(() => import(/* webpackChunkName: "umi__plugin-layout__Layout" */'/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/.umi/plugin-layout/Layout.tsx')),
 },
   };

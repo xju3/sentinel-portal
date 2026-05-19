@@ -16,11 +16,11 @@ from app.services.device_service import (
     DeviceCategoryService,
     DeviceSpecService,
     DeviceInstService,
-    DeviceComboSpecService,
-    DeviceComboSpecItemService,
-    DeviceComboInstService,
-    DeviceComboInstItemService,
-    DeviceInstTagService,
+    ProcessService,
+    ProcessItemService,
+    ProcessDeviceService,
+    ProcessDeviceItemService,
+    SensorMonitoringService,
 )
 from app.utils.auth import get_current_account
 
@@ -521,23 +521,23 @@ async def delete_device_inst(
 
 
 # ==========================================
-# 5. DeviceComboSpec
+# 5. Process
 # ==========================================
-class DeviceComboSpecCreate(BaseModel):
+class ProcessCreate(BaseModel):
     tenant_id: Optional[UUID] = None
     code: str
     name: str
     status: Optional[int] = 1
 
 
-class DeviceComboSpecUpdate(BaseModel):
+class ProcessUpdate(BaseModel):
     tenant_id: Optional[UUID] = None
     code: Optional[str] = None
     name: Optional[str] = None
     status: Optional[int] = None
 
 
-class DeviceComboSpecResponse(BaseModel):
+class ProcessResponse(BaseModel):
     id: UUID
     tenant_id: Optional[UUID] = None
     code: str
@@ -547,381 +547,384 @@ class DeviceComboSpecResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-@router.get("/device-combo-specs", response_model=List[DeviceComboSpecResponse])
-async def list_device_combo_specs(
+@router.get("/processes", response_model=List[ProcessResponse])
+async def list_processes(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    return await DeviceComboSpecService.get_all(session, skip, limit)
+    return await ProcessService.get_all(session, skip, limit)
 
 
-@router.get("/device-combo-specs/{obj_id}", response_model=DeviceComboSpecResponse)
-async def get_device_combo_spec(
+@router.get("/processes/{obj_id}", response_model=ProcessResponse)
+async def get_process(
     obj_id: UUID,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    obj = await DeviceComboSpecService.get_by_id(session, obj_id)
+    obj = await ProcessService.get_by_id(session, obj_id)
     if not obj:
-        raise HTTPException(status_code=404, detail="DeviceComboSpec not found")
+        raise HTTPException(status_code=404, detail="Process not found")
     return obj
 
 
-@router.post("/device-combo-specs", response_model=DeviceComboSpecResponse)
-async def create_device_combo_spec(
-    item: DeviceComboSpecCreate,
+@router.post("/processes", response_model=ProcessResponse)
+async def create_process(
+    item: ProcessCreate,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    return await DeviceComboSpecService.create(session, item.model_dump())
+    return await ProcessService.create(session, item.model_dump())
 
 
-@router.put("/device-combo-specs/{obj_id}", response_model=DeviceComboSpecResponse)
-async def update_device_combo_spec(
+@router.put("/processes/{obj_id}", response_model=ProcessResponse)
+async def update_process(
     obj_id: UUID,
-    item: DeviceComboSpecUpdate,
+    item: ProcessUpdate,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    db_obj = await DeviceComboSpecService.get_by_id(session, obj_id)
+    db_obj = await ProcessService.get_by_id(session, obj_id)
     if not db_obj:
-        raise HTTPException(status_code=404, detail="DeviceComboSpec not found")
+        raise HTTPException(status_code=404, detail="Process not found")
 
     update_data = item.model_dump(exclude_unset=True)
-    return await DeviceComboSpecService.update(session, db_obj, update_data)
+    return await ProcessService.update(session, db_obj, update_data)
 
 
-@router.delete("/device-combo-specs/{obj_id}")
-async def delete_device_combo_spec(
+@router.delete("/processes/{obj_id}")
+async def delete_process(
     obj_id: UUID,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    db_obj = await DeviceComboSpecService.get_by_id(session, obj_id)
+    db_obj = await ProcessService.get_by_id(session, obj_id)
     if not db_obj:
-        raise HTTPException(status_code=404, detail="DeviceComboSpec not found")
+        raise HTTPException(status_code=404, detail="Process not found")
 
-    await DeviceComboSpecService.delete(session, db_obj)
-    return {"message": "DeviceComboSpec deleted successfully"}
+    await ProcessService.delete(session, db_obj)
+    return {"message": "Process deleted successfully"}
 
 
 # ==========================================
-# 6. DeviceComboSpecItem
+# 6. ProcessItem
 # ==========================================
-class DeviceComboSpecItemCreate(BaseModel):
-    device_combo_id: UUID
+class ProcessItemCreate(BaseModel):
+    process_id: UUID
     device_spec_id: UUID
     qty: Optional[int] = 1
 
 
-class DeviceComboSpecItemUpdate(BaseModel):
-    device_combo_id: Optional[UUID] = None
+class ProcessItemUpdate(BaseModel):
+    process_id: Optional[UUID] = None
     device_spec_id: Optional[UUID] = None
     qty: Optional[int] = None
 
 
-class DeviceComboSpecItemResponse(BaseModel):
+class ProcessItemResponse(BaseModel):
     id: UUID
-    device_combo_id: UUID
+    process_id: UUID
     device_spec_id: UUID
     qty: int
 
     model_config = ConfigDict(from_attributes=True)
 
 
-@router.get("/device-combo-spec-items", response_model=List[DeviceComboSpecItemResponse])
-async def list_device_combo_spec_items(
+@router.get("/process-items", response_model=List[ProcessItemResponse])
+async def list_process_items(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    return await DeviceComboSpecItemService.get_all(session, skip, limit)
+    return await ProcessItemService.get_all(session, skip, limit)
 
 
-@router.get("/device-combo-spec-items/{obj_id}", response_model=DeviceComboSpecItemResponse)
-async def get_device_combo_spec_item(
+@router.get("/process-items/{obj_id}", response_model=ProcessItemResponse)
+async def get_process_item(
     obj_id: UUID,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    obj = await DeviceComboSpecItemService.get_by_id(session, obj_id)
+    obj = await ProcessItemService.get_by_id(session, obj_id)
     if not obj:
-        raise HTTPException(status_code=404, detail="DeviceComboSpecItem not found")
+        raise HTTPException(status_code=404, detail="ProcessItem not found")
     return obj
 
 
-@router.post("/device-combo-spec-items", response_model=DeviceComboSpecItemResponse)
-async def create_device_combo_spec_item(
-    item: DeviceComboSpecItemCreate,
+@router.post("/process-items", response_model=ProcessItemResponse)
+async def create_process_item(
+    item: ProcessItemCreate,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    return await DeviceComboSpecItemService.create(session, item.model_dump())
+    return await ProcessItemService.create(session, item.model_dump())
 
 
-@router.put("/device-combo-spec-items/{obj_id}", response_model=DeviceComboSpecItemResponse)
-async def update_device_combo_spec_item(
+@router.put("/process-items/{obj_id}", response_model=ProcessItemResponse)
+async def update_process_item(
     obj_id: UUID,
-    item: DeviceComboSpecItemUpdate,
+    item: ProcessItemUpdate,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    db_obj = await DeviceComboSpecItemService.get_by_id(session, obj_id)
+    db_obj = await ProcessItemService.get_by_id(session, obj_id)
     if not db_obj:
-        raise HTTPException(status_code=404, detail="DeviceComboSpecItem not found")
+        raise HTTPException(status_code=404, detail="ProcessItem not found")
 
     update_data = item.model_dump(exclude_unset=True)
-    return await DeviceComboSpecItemService.update(session, db_obj, update_data)
+    return await ProcessItemService.update(session, db_obj, update_data)
 
 
-@router.delete("/device-combo-spec-items/{obj_id}")
-async def delete_device_combo_spec_item(
+@router.delete("/process-items/{obj_id}")
+async def delete_process_item(
     obj_id: UUID,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    db_obj = await DeviceComboSpecItemService.get_by_id(session, obj_id)
+    db_obj = await ProcessItemService.get_by_id(session, obj_id)
     if not db_obj:
-        raise HTTPException(status_code=404, detail="DeviceComboSpecItem not found")
+        raise HTTPException(status_code=404, detail="ProcessItem not found")
 
-    await DeviceComboSpecItemService.delete(session, db_obj)
-    return {"message": "DeviceComboSpecItem deleted successfully"}
+    await ProcessItemService.delete(session, db_obj)
+    return {"message": "ProcessItem deleted successfully"}
 
 
 # ==========================================
-# 7. DeviceComboInst
+# 7. ProcessDevice
 # ==========================================
-class DeviceComboInstCreate(BaseModel):
+class ProcessDeviceCreate(BaseModel):
     code: str
-    device_combo_spec_id: UUID
+    process_id: UUID
     sn: str
     status: Optional[int] = 1
 
 
-class DeviceComboInstUpdate(BaseModel):
+class ProcessDeviceUpdate(BaseModel):
     code: Optional[str] = None
-    device_combo_spec_id: Optional[UUID] = None
+    process_id: Optional[UUID] = None
     sn: Optional[str] = None
     status: Optional[int] = None
 
 
-class DeviceComboInstResponse(BaseModel):
+class ProcessDeviceResponse(BaseModel):
     id: UUID
     code: str
-    device_combo_spec_id: UUID
+    process_id: UUID
     sn: str
     status: int
 
     model_config = ConfigDict(from_attributes=True)
 
 
-@router.get("/device-combo-insts", response_model=List[DeviceComboInstResponse])
-async def list_device_combo_insts(
+@router.get("/process-devices", response_model=List[ProcessDeviceResponse])
+async def list_process_devices(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    return await DeviceComboInstService.get_all(session, skip, limit)
+    return await ProcessDeviceService.get_all(session, skip, limit)
 
 
-@router.get("/device-combo-insts/{obj_id}", response_model=DeviceComboInstResponse)
-async def get_device_combo_inst(
+@router.get("/process-devices/{obj_id}", response_model=ProcessDeviceResponse)
+async def get_process_device(
     obj_id: UUID,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    obj = await DeviceComboInstService.get_by_id(session, obj_id)
+    obj = await ProcessDeviceService.get_by_id(session, obj_id)
     if not obj:
-        raise HTTPException(status_code=404, detail="DeviceComboInst not found")
+        raise HTTPException(status_code=404, detail="ProcessDevice not found")
     return obj
 
 
-@router.post("/device-combo-insts", response_model=DeviceComboInstResponse)
-async def create_device_combo_inst(
-    item: DeviceComboInstCreate,
+@router.post("/process-devices", response_model=ProcessDeviceResponse)
+async def create_process_device(
+    item: ProcessDeviceCreate,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    return await DeviceComboInstService.create(session, item.model_dump())
+    return await ProcessDeviceService.create(session, item.model_dump())
 
 
-@router.put("/device-combo-insts/{obj_id}", response_model=DeviceComboInstResponse)
-async def update_device_combo_inst(
+@router.put("/process-devices/{obj_id}", response_model=ProcessDeviceResponse)
+async def update_process_device(
     obj_id: UUID,
-    item: DeviceComboInstUpdate,
+    item: ProcessDeviceUpdate,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    db_obj = await DeviceComboInstService.get_by_id(session, obj_id)
+    db_obj = await ProcessDeviceService.get_by_id(session, obj_id)
     if not db_obj:
-        raise HTTPException(status_code=404, detail="DeviceComboInst not found")
+        raise HTTPException(status_code=404, detail="ProcessDevice not found")
 
     update_data = item.model_dump(exclude_unset=True)
-    return await DeviceComboInstService.update(session, db_obj, update_data)
+    return await ProcessDeviceService.update(session, db_obj, update_data)
 
 
-@router.delete("/device-combo-insts/{obj_id}")
-async def delete_device_combo_inst(
+@router.delete("/process-devices/{obj_id}")
+async def delete_process_device(
     obj_id: UUID,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    db_obj = await DeviceComboInstService.get_by_id(session, obj_id)
+    db_obj = await ProcessDeviceService.get_by_id(session, obj_id)
     if not db_obj:
-        raise HTTPException(status_code=404, detail="DeviceComboInst not found")
+        raise HTTPException(status_code=404, detail="ProcessDevice not found")
 
-    await DeviceComboInstService.delete(session, db_obj)
-    return {"message": "DeviceComboInst deleted successfully"}
+    await ProcessDeviceService.delete(session, db_obj)
+    return {"message": "ProcessDevice deleted successfully"}
 
 
 # ==========================================
-# 8. DeviceComboInstItem
+# 8. ProcessDeviceItem
 # ==========================================
-class DeviceComboInstItemCreate(BaseModel):
+class ProcessDeviceItemCreate(BaseModel):
     code: str
     desc: str
     device_inst_id: UUID
-    device_combo_inst_id: UUID
+    process_device_id: UUID
 
 
-class DeviceComboInstItemUpdate(BaseModel):
+class ProcessDeviceItemUpdate(BaseModel):
     code: Optional[str] = None
     desc: Optional[str] = None
     device_inst_id: Optional[UUID] = None
-    device_combo_inst_id: Optional[UUID] = None
+    process_device_id: Optional[UUID] = None
 
 
-class DeviceComboInstItemResponse(BaseModel):
+class ProcessDeviceItemResponse(BaseModel):
     id: UUID
     code: str
     desc: str
     device_inst_id: UUID
-    device_combo_inst_id: UUID
+    process_device_id: UUID
 
     model_config = ConfigDict(from_attributes=True)
 
 
-@router.get("/device-combo-inst-items", response_model=List[DeviceComboInstItemResponse])
-async def list_device_combo_inst_items(
+@router.get("/process-device-items", response_model=List[ProcessDeviceItemResponse])
+async def list_process_device_items(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    return await DeviceComboInstItemService.get_all(session, skip, limit)
+    return await ProcessDeviceItemService.get_all(session, skip, limit)
 
 
-@router.get("/device-combo-inst-items/{obj_id}", response_model=DeviceComboInstItemResponse)
-async def get_device_combo_inst_item(
+@router.get("/process-device-items/{obj_id}", response_model=ProcessDeviceItemResponse)
+async def get_process_device_item(
     obj_id: UUID,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    obj = await DeviceComboInstItemService.get_by_id(session, obj_id)
+    obj = await ProcessDeviceItemService.get_by_id(session, obj_id)
     if not obj:
-        raise HTTPException(status_code=404, detail="DeviceComboInstItem not found")
+        raise HTTPException(status_code=404, detail="ProcessDeviceItem not found")
     return obj
 
 
-@router.post("/device-combo-inst-items", response_model=DeviceComboInstItemResponse)
-async def create_device_combo_inst_item(
-    item: DeviceComboInstItemCreate,
+@router.post("/process-device-items", response_model=ProcessDeviceItemResponse)
+async def create_process_device_item(
+    item: ProcessDeviceItemCreate,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    return await DeviceComboInstItemService.create(session, item.model_dump())
+    return await ProcessDeviceItemService.create(session, item.model_dump())
 
 
-@router.put("/device-combo-inst-items/{obj_id}", response_model=DeviceComboInstItemResponse)
-async def update_device_combo_inst_item(
+@router.put("/process-device-items/{obj_id}", response_model=ProcessDeviceItemResponse)
+async def update_process_device_item(
     obj_id: UUID,
-    item: DeviceComboInstItemUpdate,
+    item: ProcessDeviceItemUpdate,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    db_obj = await DeviceComboInstItemService.get_by_id(session, obj_id)
+    db_obj = await ProcessDeviceItemService.get_by_id(session, obj_id)
     if not db_obj:
-        raise HTTPException(status_code=404, detail="DeviceComboInstItem not found")
+        raise HTTPException(status_code=404, detail="ProcessDeviceItem not found")
 
     update_data = item.model_dump(exclude_unset=True)
-    return await DeviceComboInstItemService.update(session, db_obj, update_data)
+    return await ProcessDeviceItemService.update(session, db_obj, update_data)
 
 
-@router.delete("/device-combo-inst-items/{obj_id}")
-async def delete_device_combo_inst_item(
+@router.delete("/process-device-items/{obj_id}")
+async def delete_process_device_item(
     obj_id: UUID,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    db_obj = await DeviceComboInstItemService.get_by_id(session, obj_id)
+    db_obj = await ProcessDeviceItemService.get_by_id(session, obj_id)
     if not db_obj:
-        raise HTTPException(status_code=404, detail="DeviceComboInstItem not found")
+        raise HTTPException(status_code=404, detail="ProcessDeviceItem not found")
 
-    await DeviceComboInstItemService.delete(session, db_obj)
-    return {"message": "DeviceComboInstItem deleted successfully"}
+    await ProcessDeviceItemService.delete(session, db_obj)
+    return {"message": "ProcessDeviceItem deleted successfully"}
 
 
 # ==========================================
-# 9. DeviceInstTag
+# 9. SensorMonitoring
 # ==========================================
-class DeviceInstTagCreate(BaseModel):
+class SensorMonitoringCreate(BaseModel):
     device_inst_id: UUID
-    point: str
+    location_id: Optional[UUID] = None
     sensor_id: Optional[UUID] = None
+    direction: Optional[str] = None
     status: Optional[int] = 1
 
 
-class DeviceInstTagUpdate(BaseModel):
+class SensorMonitoringUpdate(BaseModel):
     device_inst_id: Optional[UUID] = None
-    point: Optional[str] = None
+    location_id: Optional[UUID] = None
     sensor_id: Optional[UUID] = None
+    direction: Optional[str] = None
     status: Optional[int] = None
 
 
-class DeviceInstTagResponse(BaseModel):
+class SensorMonitoringResponse(BaseModel):
     id: UUID
     device_inst_id: UUID
-    point: str
+    location_id: Optional[UUID] = None
     sensor_id: Optional[UUID] = None
+    direction: Optional[str] = None
     status: int
 
     model_config = ConfigDict(from_attributes=True)
 
 
-@router.get("/device-inst-tags", response_model=List[DeviceInstTagResponse])
-async def list_device_inst_tags(
+@router.get("/sensor-monitorings", response_model=List[SensorMonitoringResponse])
+async def list_sensor_monitorings(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    return await DeviceInstTagService.get_all(session, skip, limit)
+    return await SensorMonitoringService.get_all(session, skip, limit)
 
 
-@router.get("/device-inst-tags/{obj_id}", response_model=DeviceInstTagResponse)
-async def get_device_inst_tag(
+@router.get("/sensor-monitorings/{obj_id}", response_model=SensorMonitoringResponse)
+async def get_sensor_monitoring(
     obj_id: UUID,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    obj = await DeviceInstTagService.get_by_id(session, obj_id)
+    obj = await SensorMonitoringService.get_by_id(session, obj_id)
     if not obj:
-        raise HTTPException(status_code=404, detail="DeviceInstTag not found")
+        raise HTTPException(status_code=404, detail="SensorMonitoring not found")
     return obj
 
 
-@router.post("/device-inst-tags", response_model=DeviceInstTagResponse)
-async def create_device_inst_tag(
-    item: DeviceInstTagCreate,
+@router.post("/sensor-monitorings", response_model=SensorMonitoringResponse)
+async def create_sensor_monitoring(
+    item: SensorMonitoringCreate,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    return await DeviceInstTagService.create(session, item.model_dump())
+    return await SensorMonitoringService.create(session, item.model_dump())
 
 
-@router.put("/device-inst-tags/{obj_id}", response_model=DeviceInstTagResponse)
-async def update_device_inst_tag(
+@router.put("/sensor-monitorings/{obj_id}", response_model=SensorMonitoringResponse)
+async def update_sensor_monitoring(
     obj_id: UUID,
-    item: DeviceInstTagUpdate,
+    item: SensorMonitoringUpdate,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    db_obj = await DeviceInstTagService.get_by_id(session, obj_id)
+    db_obj = await SensorMonitoringService.get_by_id(session, obj_id)
     if not db_obj:
-        raise HTTPException(status_code=404, detail="DeviceInstTag not found")
+        raise HTTPException(status_code=404, detail="SensorMonitoring not found")
 
     update_data = item.model_dump(exclude_unset=True)
-    return await DeviceInstTagService.update(session, db_obj, update_data)
+    return await SensorMonitoringService.update(session, db_obj, update_data)
 
 
-@router.delete("/device-inst-tags/{obj_id}")
-async def delete_device_inst_tag(
+@router.delete("/sensor-monitorings/{obj_id}")
+async def delete_sensor_monitoring(
     obj_id: UUID,
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    db_obj = await DeviceInstTagService.get_by_id(session, obj_id)
+    db_obj = await SensorMonitoringService.get_by_id(session, obj_id)
     if not db_obj:
-        raise HTTPException(status_code=404, detail="DeviceInstTag not found")
+        raise HTTPException(status_code=404, detail="SensorMonitoring not found")
 
-    await DeviceInstTagService.delete(session, db_obj)
-    return {"message": "DeviceInstTag deleted successfully"}
+    await SensorMonitoringService.delete(session, db_obj)
+    return {"message": "SensorMonitoring deleted successfully"}

@@ -277,7 +277,7 @@ const DeviceListPage = () => {
         title={editing ? '编辑设备实例' : '新建设备实例'}
         open={modalOpen}
         modalProps={{
-          destroyOnClose: true,
+          destroyOnHidden: true,
           onCancel: () => {
             setModalOpen(false);
             setEditing(null);

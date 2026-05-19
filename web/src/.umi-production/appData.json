@@ -38,7 +38,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 5
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -51,7 +51,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -82,7 +82,7 @@
       "time": {
         "hooks": {
           "onStart": [
-            2
+            1
           ]
         },
         "register": 2
@@ -102,7 +102,7 @@
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -115,7 +115,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -129,7 +129,7 @@
       "time": {
         "hooks": {
           "modifyAppData": [
-            15
+            14
           ]
         },
         "register": 14
@@ -145,7 +145,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -165,7 +165,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -182,7 +182,7 @@
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -195,7 +195,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -212,7 +212,7 @@
             0
           ]
         },
-        "register": 5
+        "register": 4
       },
       "enableBy": "register"
     },
@@ -1078,7 +1078,7 @@
       "time": {
         "hooks": {
           "onStart": [
-            0
+            1
           ]
         },
         "register": 1
@@ -1120,7 +1120,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 19
+        "register": 24
       },
       "enableBy": "config"
     },
@@ -1133,7 +1133,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 9
+        "register": 7
       },
       "enableBy": "config"
     },
@@ -1189,7 +1189,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 25
+        "register": 23
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/mpa/mpa": {
@@ -1201,7 +1201,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1214,7 +1214,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/overrides/overrides": {
@@ -1239,7 +1239,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1359,7 +1359,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/ssr/ssr": {
@@ -1397,7 +1397,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -1410,7 +1410,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1423,7 +1423,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1448,7 +1448,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 15
+        "register": 13
       },
       "enableBy": "config"
     },
@@ -1461,7 +1461,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/clickToComponent/clickToComponent": {
@@ -1473,7 +1473,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/legacy/legacy": {
@@ -1485,7 +1485,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1498,7 +1498,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1511,7 +1511,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/swc/swc": {
@@ -1527,7 +1527,7 @@
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1540,7 +1540,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/mako/mako": {
@@ -1552,7 +1552,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1565,7 +1565,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/hmrGuardian/hmrGuardian": {
@@ -1577,7 +1577,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/routePreloadOnLoad/routePreloadOnLoad": {
@@ -1653,7 +1653,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 20
+        "register": 19
       }
     },
     "./node_modules/@umijs/preset-umi/dist/commands/help": {
@@ -1678,7 +1678,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1691,7 +1691,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1938,7 +1938,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1953,7 +1953,7 @@
       },
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/plugins/dist/antd": {
@@ -1987,7 +1987,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 4
+        "register": 3
       },
       "enableBy": "config"
     },
@@ -2000,7 +2000,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2025,7 +2025,7 @@
             0
           ]
         },
-        "register": 2
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2038,7 +2038,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2051,7 +2051,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "config"
     },
@@ -2064,7 +2064,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2077,7 +2077,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2090,7 +2090,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -2115,7 +2115,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/plugins/dist/react-query": {
@@ -2127,7 +2127,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2140,7 +2140,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2153,7 +2153,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2166,7 +2166,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2179,7 +2179,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2193,7 +2193,7 @@
       "time": {
         "hooks": {
           "modifyConfig": [
-            1
+            0
           ]
         },
         "register": 0
@@ -2230,7 +2230,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -2243,7 +2243,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     }
@@ -2297,9 +2297,9 @@
             "component": "@/pages/Device/Supplier"
           },
           {
-            "path": "/data/frequency",
+            "path": "/data/locations",
             "name": "故障测点",
-            "component": "@/pages/Monitoring/Frequency"
+            "component": "@/pages/Monitoring/Location"
           },
           {
             "path": "/data/frequency",
@@ -2475,9 +2475,9 @@
             "component": "@/pages/Device/Supplier"
           },
           {
-            "path": "/data/frequency",
+            "path": "/data/locations",
             "name": "故障测点",
-            "component": "@/pages/Monitoring/Frequency"
+            "component": "@/pages/Monitoring/Location"
           },
           {
             "path": "/data/frequency",
@@ -3537,15 +3537,15 @@
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Device/Supplier/index.tsx"
     },
     "5": {
-      "path": "/data/frequency",
+      "path": "/data/locations",
       "name": "故障测点",
-      "file": "@/pages/Monitoring/Frequency/index.tsx",
+      "file": "@/pages/Monitoring/Location/index.tsx",
       "parentId": "3",
       "id": "5",
-      "absPath": "/data/frequency",
-      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProFormDigit,\n  ProFormSwitch,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, Tag, message } from 'antd';\n\nimport {\n  HealthCheckFreq,\n  HealthCheckFreqPayload,\n  createHealthCheckFreq,\n  deleteHealthCheckFreq,\n  listAllHealthCheckFreqs,\n  updateHealthCheckFreq,\n} from '@/services/healthCheckFreq';\n\ntype HealthCheckFreqFormValues = {\n  patrol: number;\n  diagnosis: number;\n  report: number;\n  status: boolean;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst MonitoringFrequencyPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [rows, setRows] = useState<HealthCheckFreq[]>([]);\n  const [editing, setEditing] = useState<HealthCheckFreq | null>(null);\n  const [query, setQuery] = useState<Record<string, any>>({});\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      setRows(await listAllHealthCheckFreqs());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    return rows.filter((row) => {\n      if (query.patrol !== undefined && query.patrol !== null && String(row.patrol) !== String(query.patrol)) {\n        return false;\n      }\n      if (\n        query.diagnosis !== undefined &&\n        query.diagnosis !== null &&\n        String(row.diagnosis) !== String(query.diagnosis)\n      ) {\n        return false;\n      }\n      if (query.report !== undefined && query.report !== null && String(row.report) !== String(query.report)) {\n        return false;\n      }\n      if (query.status !== undefined && query.status !== null && row.status !== query.status) {\n        return false;\n      }\n      return true;\n    });\n  }, [query, rows]);\n\n  const columns: ProColumns<HealthCheckFreq>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '巡检频率(分钟)',\n      dataIndex: 'patrol',\n      width: 140,\n      valueType: 'digit',\n    },\n    {\n      title: '诊断频率(分钟)',\n      dataIndex: 'diagnosis',\n      width: 140,\n      valueType: 'digit',\n    },\n    {\n      title: '上报批次',\n      dataIndex: 'report',\n      width: 120,\n      valueType: 'digit',\n    },\n    {\n      title: '状态',\n      dataIndex: 'status',\n      width: 100,\n      valueEnum: {\n        true: { text: '启用' },\n        false: { text: '停用' },\n      },\n      render: (_, row) => (row.status ? <Tag color=\"success\">启用</Tag> : <Tag>停用</Tag>),\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 180,\n      render: (_, row) => [\n        <Button\n          key=\"edit\"\n          type=\"link\"\n          onClick={() => {\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </Button>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该监测频率吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteHealthCheckFreq(row.id);\n              message.success('删除成功');\n              await loadRows();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <Button danger type=\"link\">\n            删除\n          </Button>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  return (\n    <PageContainer title=\"监测频率\">\n      <ProTable<HealthCheckFreq>\n        rowKey=\"id\"\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        options={{ reload: loadRows }}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建频率\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<HealthCheckFreqFormValues>\n        title={editing ? '编辑监测频率' : '新建监测频率'}\n        open={modalOpen}\n        initialValues={\n          editing\n            ? {\n                patrol: editing.patrol,\n                diagnosis: editing.diagnosis,\n                report: editing.report,\n                status: editing.status,\n              }\n            : {\n                patrol: 60,\n                diagnosis: 1440,\n                report: 1,\n                status: true,\n              }\n        }\n        modalProps={{\n          destroyOnClose: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        onFinish={async (values) => {\n          const payload: HealthCheckFreqPayload = {\n            patrol: values.patrol,\n            diagnosis: values.diagnosis,\n            report: values.report,\n            status: values.status ?? true,\n          };\n\n          setSaving(true);\n          try {\n            if (editing) {\n              await updateHealthCheckFreq(editing.id, payload);\n            } else {\n              await createHealthCheckFreq(payload);\n            }\n            message.success('保存成功');\n            setModalOpen(false);\n            setEditing(null);\n            await loadRows();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormDigit\n          name=\"patrol\"\n          label=\"巡检频率(分钟)\"\n          min={1}\n          fieldProps={{ precision: 0 }}\n          rules={[{ required: true, message: '请输入巡检频率' }]}\n        />\n        <ProFormDigit\n          name=\"diagnosis\"\n          label=\"诊断频率(分钟)\"\n          min={1}\n          fieldProps={{ precision: 0 }}\n          rules={[{ required: true, message: '请输入诊断频率' }]}\n        />\n        <ProFormDigit\n          name=\"report\"\n          label=\"上报批次\"\n          min={1}\n          fieldProps={{ precision: 0 }}\n          rules={[{ required: true, message: '请输入上报批次' }]}\n        />\n        <ProFormSwitch name=\"status\" label=\"启用状态\" />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default MonitoringFrequencyPage;\n",
+      "absPath": "/data/locations",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProFormSelect,\n  ProFormText,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, Tag, message } from 'antd';\n\nimport {\n  createLocation,\n  deleteLocation,\n  listAllLocations,\n  Location,\n  LocationPayload,\n  updateLocation,\n} from '@/services/location';\n\ntype LocationFormValues = {\n  name: string;\n  description?: string;\n  status: number;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst MonitoringLocationPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [rows, setRows] = useState<Location[]>([]);\n  const [editing, setEditing] = useState<Location | null>(null);\n  const [query, setQuery] = useState<Record<string, any>>({});\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      setRows(await listAllLocations());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    return rows.filter((row) => {\n      if (query.name && !norm(row.name).includes(norm(query.name))) {\n        return false;\n      }\n      if (query.description && !norm(row.description).includes(norm(query.description))) {\n        return false;\n      }\n      if (\n        query.status !== undefined &&\n        query.status !== null &&\n        query.status !== '' &&\n        String(row.status) !== String(query.status)\n      ) {\n        return false;\n      }\n      return true;\n    });\n  }, [query, rows]);\n\n  const columns: ProColumns<Location>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '测点名称',\n      dataIndex: 'name',\n      width: 220,\n    },\n    {\n      title: '描述',\n      dataIndex: 'description',\n      ellipsis: true,\n      render: (_, row) => row.description || '-',\n    },\n    {\n      title: '状态',\n      dataIndex: 'status',\n      width: 100,\n      valueType: 'select',\n      valueEnum: {\n        1: { text: '启用' },\n        0: { text: '停用' },\n      },\n      render: (_, row) =>\n        Number(row.status) === 1 ? <Tag color=\"success\">启用</Tag> : <Tag>停用</Tag>,\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 180,\n      render: (_, row) => [\n        <Button\n          key=\"edit\"\n          type=\"link\"\n          onClick={() => {\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </Button>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该故障测点吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteLocation(row.id);\n              message.success('删除成功');\n              await loadRows();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <Button danger type=\"link\">\n            删除\n          </Button>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  return (\n    <PageContainer title=\"故障测点\">\n      <ProTable<Location>\n        rowKey=\"id\"\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        options={{ reload: loadRows }}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建测点\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<LocationFormValues>\n        title={editing ? '编辑故障测点' : '新建故障测点'}\n        open={modalOpen}\n        initialValues={\n          editing\n            ? {\n                name: editing.name,\n                description: editing.description,\n                status: Number(editing.status),\n              }\n            : {\n                status: 1,\n              }\n        }\n        modalProps={{\n          destroyOnClose: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        onFinish={async (values) => {\n          const payload: LocationPayload = {\n            name: values.name.trim(),\n            description: values.description?.trim() || undefined,\n            status: Number(values.status ?? 1),\n          };\n\n          setSaving(true);\n          try {\n            if (editing) {\n              await updateLocation(editing.id, payload);\n            } else {\n              await createLocation(payload);\n            }\n            message.success('保存成功');\n            setModalOpen(false);\n            setEditing(null);\n            await loadRows();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormText\n          name=\"name\"\n          label=\"测点名称\"\n          rules={[\n            { required: true, message: '请输入测点名称' },\n            { max: 64, message: '测点名称最多64个字符' },\n          ]}\n        />\n        <ProFormText\n          name=\"description\"\n          label=\"描述\"\n          rules={[{ max: 255, message: '描述最多255个字符' }]}\n        />\n        <ProFormSelect\n          name=\"status\"\n          label=\"状态\"\n          options={[\n            { label: '启用', value: 1 },\n            { label: '停用', value: 0 },\n          ]}\n          rules={[{ required: true, message: '请选择状态' }]}\n        />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default MonitoringLocationPage;\n",
       "__isJSFile": true,
-      "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Monitoring/Frequency/index.tsx"
+      "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Monitoring/Location/index.tsx"
     },
     "6": {
       "path": "/data/frequency",
@@ -3628,7 +3628,7 @@
       "parentId": "13",
       "id": "14",
       "absPath": "/process/templates",
-      "__content": "import BusinessPlaceholder from '@/components/BusinessPlaceholder';\n\nconst ProcessTemplatePage = () => (\n  <BusinessPlaceholder\n    title=\"工段模板\"\n    description=\"定义工段模板及其包含的设备组合，不直接对应具体现场实例。\"\n    model=\"device_combo_spec + device_combo_spec_item\"\n    apiPath=\"/api/v1/device-combo-specs\"\n  />\n);\n\nexport default ProcessTemplatePage;\n",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProForm,\n  ProFormDigit,\n  ProFormSelect,\n  ProFormText,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Modal, Popconfirm, message } from 'antd';\nimport type { ColumnsType } from 'antd/es/table';\n\nimport EntityPicker from '@/components/EntityPicker';\nimport { DeviceSpec, listAllDeviceSpecs, queryDeviceSpecs } from '@/services/deviceSpec';\nimport {\n  createProcess,\n  createProcessItem,\n  deleteProcess,\n  deleteProcessItem,\n  listAllProcessItems,\n  listAllProcesses,\n  Process,\n  ProcessItem,\n  updateProcess,\n  updateProcessItem,\n} from '@/services/process';\n\ntype ProcessFormValues = {\n  code: string;\n  name: string;\n  status: number;\n};\n\ntype ProcessItemFormValues = {\n  device_spec_id: string;\n  qty: number;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst ProcessTemplatePage = () => {\n  const [loading, setLoading] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [editing, setEditing] = useState<Process | null>(null);\n  const [query, setQuery] = useState<Record<string, any>>({});\n  const [rows, setRows] = useState<Process[]>([]);\n\n  const [configOpen, setConfigOpen] = useState(false);\n  const [currentProcess, setCurrentProcess] = useState<Process | null>(null);\n  const [processItems, setProcessItems] = useState<ProcessItem[]>([]);\n  const [itemSaving, setItemSaving] = useState(false);\n  const [itemModalOpen, setItemModalOpen] = useState(false);\n  const [editingItem, setEditingItem] = useState<ProcessItem | null>(null);\n  const [specs, setSpecs] = useState<DeviceSpec[]>([]);\n\n  const specMap = useMemo(\n    () =>\n      new Map(\n        specs.map((item) => [\n          item.id,\n          `${item.name} / ${item.model}${item.brand ? ` / ${item.brand}` : ''}`,\n        ]),\n      ),\n    [specs],\n  );\n\n  const loadProcesses = async () => {\n    setLoading(true);\n    try {\n      setRows(await listAllProcesses());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  const loadItems = async () => {\n    try {\n      setProcessItems(await listAllProcessItems());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    }\n  };\n\n  const loadSpecs = async () => {\n    try {\n      setSpecs(await listAllDeviceSpecs());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    }\n  };\n\n  useEffect(() => {\n    loadProcesses();\n    loadItems();\n    loadSpecs();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    return rows.filter((row) => {\n      if (query.code && !norm(row.code).includes(norm(query.code))) {\n        return false;\n      }\n      if (query.name && !norm(row.name).includes(norm(query.name))) {\n        return false;\n      }\n      if (\n        query.status !== undefined &&\n        query.status !== null &&\n        String(row.status) !== String(query.status)\n      ) {\n        return false;\n      }\n      return true;\n    });\n  }, [query, rows]);\n\n  const currentProcessItems = useMemo(() => {\n    if (!currentProcess?.id) {\n      return [];\n    }\n    return processItems.filter((item) => item.process_id === currentProcess.id);\n  }, [currentProcess?.id, processItems]);\n\n  const columns: ProColumns<Process>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    { title: '工段编码', dataIndex: 'code', width: 140 },\n    { title: '工段名称', dataIndex: 'name', width: 220 },\n    {\n      title: '状态',\n      dataIndex: 'status',\n      width: 100,\n      valueType: 'select',\n      valueEnum: {\n        1: { text: '启用' },\n        0: { text: '停用' },\n      },\n      render: (_, row) => (Number(row.status) === 1 ? '启用' : '停用'),\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 260,\n      render: (_, row) => [\n        <Button\n          key=\"config\"\n          type=\"link\"\n          onClick={async () => {\n            setCurrentProcess(row);\n            setConfigOpen(true);\n            await loadItems();\n          }}\n        >\n          配置\n        </Button>,\n        <Button\n          key=\"edit\"\n          type=\"link\"\n          onClick={() => {\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </Button>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该工段模板吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteProcess(row.id);\n              message.success('删除成功');\n              await loadProcesses();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <Button danger type=\"link\">\n            删除\n          </Button>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  const itemColumns: ProColumns<ProcessItem>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n    },\n    {\n      title: '设备规格',\n      dataIndex: 'device_spec_id',\n      render: (_, row) => specMap.get(row.device_spec_id) || row.device_spec_id,\n    },\n    {\n      title: '数量',\n      dataIndex: 'qty',\n      width: 120,\n      valueType: 'digit',\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 180,\n      render: (_, row) => [\n        <Button\n          key=\"edit\"\n          type=\"link\"\n          onClick={() => {\n            setEditingItem(row);\n            setItemModalOpen(true);\n          }}\n        >\n          编辑\n        </Button>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该子项吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteProcessItem(row.id);\n              message.success('删除成功');\n              await loadItems();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <Button danger type=\"link\">\n            删除\n          </Button>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  const specPickerColumns: ColumnsType<DeviceSpec> = [\n    { title: '规格名称', dataIndex: 'name' },\n    { title: '型号', dataIndex: 'model' },\n    { title: '品牌', dataIndex: 'brand' },\n    { title: '电压(V)', dataIndex: 'voltage' },\n    { title: '转速(RPM)', dataIndex: 'rpm' },\n  ];\n\n  return (\n    <PageContainer title=\"工段模板\">\n      <ProTable<Process>\n        rowKey=\"id\"\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        options={{ reload: loadProcesses }}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建工段模板\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<ProcessFormValues>\n        title={editing ? '编辑工段模板' : '新建工段模板'}\n        open={modalOpen}\n        modalProps={{\n          destroyOnClose: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        initialValues={\n          editing\n            ? { code: editing.code, name: editing.name, status: Number(editing.status) }\n            : { status: 1 }\n        }\n        onFinish={async (values) => {\n          setSaving(true);\n          try {\n            const payload = {\n              code: values.code.trim(),\n              name: values.name.trim(),\n              status: Number(values.status ?? 1),\n            };\n            if (editing) {\n              await updateProcess(editing.id, payload);\n              message.success('更新成功');\n            } else {\n              await createProcess(payload);\n              message.success('创建成功');\n            }\n            setModalOpen(false);\n            setEditing(null);\n            await loadProcesses();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormText\n          name=\"code\"\n          label=\"工段编码\"\n          rules={[\n            { required: true, message: '请输入工段编码' },\n            { max: 8, message: '工段编码最多8个字符' },\n          ]}\n        />\n        <ProFormText\n          name=\"name\"\n          label=\"工段名称\"\n          rules={[\n            { required: true, message: '请输入工段名称' },\n            { max: 64, message: '工段名称最多64个字符' },\n          ]}\n        />\n        <ProFormSelect\n          name=\"status\"\n          label=\"状态\"\n          options={[\n            { label: '启用', value: 1 },\n            { label: '停用', value: 0 },\n          ]}\n          rules={[{ required: true, message: '请选择状态' }]}\n        />\n      </ModalForm>\n\n      <Modal\n        title={`工段配置 - ${currentProcess?.name || ''}`}\n        open={configOpen}\n        width={960}\n        destroyOnClose\n        onCancel={() => {\n          setConfigOpen(false);\n          setCurrentProcess(null);\n          setEditingItem(null);\n          setItemModalOpen(false);\n        }}\n        footer={null}\n      >\n        <ProTable<ProcessItem>\n          rowKey=\"id\"\n          columns={itemColumns}\n          dataSource={currentProcessItems}\n          search={false}\n          pagination={{ pageSize: 8 }}\n          options={false}\n          toolBarRender={() => [\n            <Button\n              key=\"create\"\n              type=\"primary\"\n              onClick={() => {\n                setEditingItem(null);\n                setItemModalOpen(true);\n              }}\n            >\n              新增子项\n            </Button>,\n          ]}\n        />\n\n        <ModalForm<ProcessItemFormValues>\n          title={editingItem ? '编辑子项' : '新增子项'}\n          open={itemModalOpen}\n          modalProps={{\n            destroyOnClose: true,\n            onCancel: () => {\n              setItemModalOpen(false);\n              setEditingItem(null);\n            },\n          }}\n          submitter={{\n            submitButtonProps: { loading: itemSaving },\n            searchConfig: { submitText: '保存' },\n          }}\n          initialValues={\n            editingItem\n              ? {\n                  device_spec_id: editingItem.device_spec_id,\n                  qty: editingItem.qty,\n                }\n              : {\n                  qty: 1,\n                }\n          }\n          onFinish={async (values) => {\n            if (!currentProcess?.id) {\n              message.error('未选择工段模板');\n              return false;\n            }\n            setItemSaving(true);\n            try {\n              const payload = {\n                process_id: currentProcess.id,\n                device_spec_id: values.device_spec_id,\n                qty: Number(values.qty ?? 1),\n              };\n              if (editingItem) {\n                await updateProcessItem(editingItem.id, payload);\n                message.success('更新成功');\n              } else {\n                await createProcessItem(payload);\n                message.success('创建成功');\n              }\n              setItemModalOpen(false);\n              setEditingItem(null);\n              await loadItems();\n              return true;\n            } catch (error) {\n              message.error(toErrorMessage(error));\n              return false;\n            } finally {\n              setItemSaving(false);\n            }\n          }}\n        >\n          <ProForm.Item\n            name=\"device_spec_id\"\n            label=\"设备规格\"\n            rules={[{ required: true, message: '请选择设备规格' }]}\n          >\n            <EntityPicker<DeviceSpec>\n              placeholder=\"请点击选择设备规格\"\n              modalTitle=\"选择设备规格\"\n              triggerText=\"选择\"\n              valueLabel={\n                editingItem?.device_spec_id\n                  ? specMap.get(editingItem.device_spec_id) || editingItem.device_spec_id\n                  : undefined\n              }\n              columns={specPickerColumns}\n              getRecordLabel={(record) => `${record.name} / ${record.model} / ${record.brand}`}\n              fetcher={queryDeviceSpecs}\n            />\n          </ProForm.Item>\n          <ProFormDigit\n            name=\"qty\"\n            label=\"数量\"\n            min={1}\n            fieldProps={{ precision: 0 }}\n            rules={[{ required: true, message: '请输入数量' }]}\n          />\n        </ModalForm>\n      </Modal>\n    </PageContainer>\n  );\n};\n\nexport default ProcessTemplatePage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Process/Template/index.tsx"
     },
@@ -3639,7 +3639,7 @@
       "parentId": "13",
       "id": "15",
       "absPath": "/process/manage",
-      "__content": "import BusinessPlaceholder from '@/components/BusinessPlaceholder';\n\nconst ProcessManagePage = () => (\n  <BusinessPlaceholder\n    title=\"工段管理\"\n    description=\"管理工段实例化数据，基于工段模板创建并维护现场工段实例。\"\n    model=\"device_combo_inst + device_combo_inst_item\"\n    apiPath=\"/api/v1/device-combo-insts\"\n  />\n);\n\nexport default ProcessManagePage;\n",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProFormSelect,\n  ProFormText,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Modal, Popconfirm, Select, Space, Tag, message } from 'antd';\n\nimport { DeviceInst, listAllDeviceInsts } from '@/services/deviceInst';\nimport { DeviceSpec, listAllDeviceSpecs } from '@/services/deviceSpec';\nimport {\n  createProcessDevice,\n  createProcessDeviceItem,\n  deleteProcessDevice,\n  deleteProcessDeviceItem,\n  listAllProcessDeviceItems,\n  listAllProcessDevices,\n  listAllProcessItems,\n  listAllProcesses,\n  Process,\n  ProcessDevice,\n  ProcessDeviceItem,\n  ProcessItem,\n  updateProcessDevice,\n} from '@/services/process';\n\ntype ProcessDeviceFormValues = {\n  code: string;\n  sn: string;\n  process_id: string;\n  status: number;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst makeItemCode = (instanceCode: string, seq: number): string => {\n  const prefix = instanceCode.replace(/[^a-zA-Z0-9]/g, '').slice(0, 4).toUpperCase() || 'PROC';\n  const stamp = Date.now().toString(36).slice(-5).toUpperCase();\n  const index = seq.toString(36).padStart(2, '0').toUpperCase();\n  return `${prefix}${stamp}${index}`.slice(0, 16);\n};\n\nconst clampSelections = (\n  values: string[],\n  max: number,\n): string[] => {\n  if (values.length <= max) {\n    return values;\n  }\n  return values.slice(0, max);\n};\n\nconst ProcessManagePage = () => {\n  const [loading, setLoading] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [editing, setEditing] = useState<ProcessDevice | null>(null);\n  const [query, setQuery] = useState<Record<string, any>>({});\n  const [rows, setRows] = useState<ProcessDevice[]>([]);\n\n  const [processes, setProcesses] = useState<Process[]>([]);\n  const [processItems, setProcessItems] = useState<ProcessItem[]>([]);\n  const [deviceSpecs, setDeviceSpecs] = useState<DeviceSpec[]>([]);\n  const [deviceInsts, setDeviceInsts] = useState<DeviceInst[]>([]);\n  const [processDeviceItems, setProcessDeviceItems] = useState<ProcessDeviceItem[]>([]);\n\n  const [configOpen, setConfigOpen] = useState(false);\n  const [currentInstance, setCurrentInstance] = useState<ProcessDevice | null>(null);\n  const [configSelections, setConfigSelections] = useState<Record<string, string[]>>({});\n  const [configSaving, setConfigSaving] = useState(false);\n\n  const processMap = useMemo(() => new Map(processes.map((item) => [item.id, item])), [processes]);\n  const specMap = useMemo(() => new Map(deviceSpecs.map((item) => [item.id, item])), [deviceSpecs]);\n  const instMap = useMemo(() => new Map(deviceInsts.map((item) => [item.id, item])), [deviceInsts]);\n\n  const loadAll = async () => {\n    setLoading(true);\n    try {\n      const [instances, templates, templateItems, specs, insts, instanceItems] = await Promise.all([\n        listAllProcessDevices(),\n        listAllProcesses(),\n        listAllProcessItems(),\n        listAllDeviceSpecs(),\n        listAllDeviceInsts(),\n        listAllProcessDeviceItems(),\n      ]);\n      setRows(instances);\n      setProcesses(templates);\n      setProcessItems(templateItems);\n      setDeviceSpecs(specs);\n      setDeviceInsts(insts);\n      setProcessDeviceItems(instanceItems);\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    loadAll();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    return rows.filter((row) => {\n      const processName = processMap.get(row.process_id)?.name || '';\n      if (query.code && !norm(row.code).includes(norm(query.code))) {\n        return false;\n      }\n      if (query.sn && !norm(row.sn).includes(norm(query.sn))) {\n        return false;\n      }\n      if (query.process_id) {\n        const hit =\n          norm(processName).includes(norm(query.process_id)) ||\n          norm(row.process_id).includes(norm(query.process_id));\n        if (!hit) {\n          return false;\n        }\n      }\n      if (\n        query.status !== undefined &&\n        query.status !== null &&\n        String(row.status) !== String(query.status)\n      ) {\n        return false;\n      }\n      return true;\n    });\n  }, [processMap, query, rows]);\n\n  const currentTemplateItems = useMemo(() => {\n    if (!currentInstance?.process_id) {\n      return [];\n    }\n    return processItems.filter((item) => item.process_id === currentInstance.process_id);\n  }, [currentInstance?.process_id, processItems]);\n\n  const currentInstanceItems = useMemo(() => {\n    if (!currentInstance?.id) {\n      return [];\n    }\n    return processDeviceItems.filter((item) => item.process_device_id === currentInstance.id);\n  }, [currentInstance?.id, processDeviceItems]);\n\n  const initializeConfigSelections = (instance: ProcessDevice) => {\n    const templateRows = processItems.filter((item) => item.process_id === instance.process_id);\n    const itemRows = processDeviceItems.filter((item) => item.process_device_id === instance.id);\n\n    const grouped = new Map<string, string[]>();\n    itemRows.forEach((item) => {\n      const inst = instMap.get(item.device_inst_id);\n      if (!inst) {\n        return;\n      }\n      const list = grouped.get(inst.device_spec_id) || [];\n      list.push(inst.id);\n      grouped.set(inst.device_spec_id, list);\n    });\n\n    const selections: Record<string, string[]> = {};\n    templateRows.forEach((row) => {\n      const all = grouped.get(row.device_spec_id) || [];\n      selections[row.id] = all.slice(0, row.qty);\n      grouped.set(row.device_spec_id, all.slice(row.qty));\n    });\n    setConfigSelections(selections);\n  };\n\n  const columns: ProColumns<ProcessDevice>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    { title: '实例编码', dataIndex: 'code', width: 140 },\n    { title: '实例SN', dataIndex: 'sn', width: 180 },\n    {\n      title: '工段模板',\n      dataIndex: 'process_id',\n      width: 220,\n      render: (_, row) => processMap.get(row.process_id)?.name || row.process_id,\n    },\n    {\n      title: '状态',\n      dataIndex: 'status',\n      width: 100,\n      valueType: 'select',\n      valueEnum: {\n        1: { text: '启用' },\n        0: { text: '停用' },\n      },\n      render: (_, row) => (Number(row.status) === 1 ? '启用' : '停用'),\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 260,\n      render: (_, row) => [\n        <Button\n          key=\"config\"\n          type=\"link\"\n          onClick={() => {\n            setCurrentInstance(row);\n            initializeConfigSelections(row);\n            setConfigOpen(true);\n          }}\n        >\n          配置\n        </Button>,\n        <Button\n          key=\"edit\"\n          type=\"link\"\n          onClick={() => {\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </Button>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该工段实例吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteProcessDevice(row.id);\n              message.success('删除成功');\n              await loadAll();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <Button danger type=\"link\">\n            删除\n          </Button>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  const processOptions = useMemo(\n    () => processes.map((item) => ({ label: `${item.code} - ${item.name}`, value: item.id })),\n    [processes],\n  );\n\n  return (\n    <PageContainer title=\"工段管理\">\n      <ProTable<ProcessDevice>\n        rowKey=\"id\"\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        options={{ reload: loadAll }}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建工段实例\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<ProcessDeviceFormValues>\n        title={editing ? '编辑工段实例' : '新建工段实例'}\n        open={modalOpen}\n        modalProps={{\n          destroyOnClose: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        initialValues={\n          editing\n            ? {\n                code: editing.code,\n                sn: editing.sn,\n                process_id: editing.process_id,\n                status: Number(editing.status),\n              }\n            : {\n                status: 1,\n              }\n        }\n        onFinish={async (values) => {\n          setSaving(true);\n          try {\n            const payload = {\n              code: values.code.trim(),\n              sn: values.sn.trim(),\n              process_id: values.process_id,\n              status: Number(values.status ?? 1),\n            };\n            if (editing) {\n              await updateProcessDevice(editing.id, payload);\n              message.success('更新成功');\n            } else {\n              await createProcessDevice(payload);\n              message.success('创建成功');\n            }\n            setModalOpen(false);\n            setEditing(null);\n            await loadAll();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormText\n          name=\"code\"\n          label=\"实例编码\"\n          rules={[\n            { required: true, message: '请输入实例编码' },\n            { max: 8, message: '实例编码最多8个字符' },\n          ]}\n        />\n        <ProFormText\n          name=\"sn\"\n          label=\"实例SN\"\n          rules={[\n            { required: true, message: '请输入实例SN' },\n            { max: 64, message: '实例SN最多64个字符' },\n          ]}\n        />\n        <ProFormSelect\n          name=\"process_id\"\n          label=\"工段模板\"\n          options={processOptions}\n          rules={[{ required: true, message: '请选择工段模板' }]}\n        />\n        <ProFormSelect\n          name=\"status\"\n          label=\"状态\"\n          options={[\n            { label: '启用', value: 1 },\n            { label: '停用', value: 0 },\n          ]}\n          rules={[{ required: true, message: '请选择状态' }]}\n        />\n      </ModalForm>\n\n      <Modal\n        title={`实例配置 - ${currentInstance?.code || ''}`}\n        open={configOpen}\n        width={980}\n        onCancel={() => {\n          setConfigOpen(false);\n          setCurrentInstance(null);\n          setConfigSelections({});\n        }}\n        onOk={async () => {\n          if (!currentInstance) {\n            return;\n          }\n          const allSelected = new Set<string>();\n          for (const row of currentTemplateItems) {\n            const selected = configSelections[row.id] || [];\n            if (selected.length !== row.qty) {\n              message.error(`规格 ${specMap.get(row.device_spec_id)?.name || row.device_spec_id} 需要 ${row.qty} 台`);\n              return;\n            }\n            for (const instId of selected) {\n              const inst = instMap.get(instId);\n              if (!inst || inst.device_spec_id !== row.device_spec_id) {\n                message.error('存在设备规格与模板子项不匹配的选择');\n                return;\n              }\n              if (allSelected.has(instId)) {\n                message.error('同一设备不能重复分配到多个模板子项');\n                return;\n              }\n              allSelected.add(instId);\n            }\n          }\n\n          setConfigSaving(true);\n          try {\n            await Promise.all(currentInstanceItems.map((item) => deleteProcessDeviceItem(item.id)));\n\n            const createTasks: Promise<any>[] = [];\n            let seq = 1;\n            for (const row of currentTemplateItems) {\n              const selected = configSelections[row.id] || [];\n              for (const instId of selected) {\n                const specName = specMap.get(row.device_spec_id)?.name || row.device_spec_id;\n                createTasks.push(\n                  createProcessDeviceItem({\n                    code: makeItemCode(currentInstance.code, seq++),\n                    desc: `${currentInstance.code}-${specName}`,\n                    device_inst_id: instId,\n                    process_device_id: currentInstance.id,\n                  }),\n                );\n              }\n            }\n            await Promise.all(createTasks);\n            message.success('配置保存成功');\n            await loadAll();\n            setConfigOpen(false);\n            setCurrentInstance(null);\n            setConfigSelections({});\n          } catch (error) {\n            message.error(toErrorMessage(error));\n          } finally {\n            setConfigSaving(false);\n          }\n        }}\n        confirmLoading={configSaving}\n      >\n        <Space direction=\"vertical\" size={12} style={{ width: '100%' }}>\n          {currentTemplateItems.length === 0 ? (\n            <Tag color=\"warning\">当前工段模板没有子项，请先在工段模板中配置 ProcessItem</Tag>\n          ) : null}\n          {currentTemplateItems.map((row) => {\n            const spec = specMap.get(row.device_spec_id);\n            const selectedInOthers = new Set<string>();\n            currentTemplateItems.forEach((other) => {\n              if (other.id === row.id) {\n                return;\n              }\n              (configSelections[other.id] || []).forEach((instId) => selectedInOthers.add(instId));\n            });\n            const options = deviceInsts\n              .filter((item) => item.device_spec_id === row.device_spec_id)\n              .map((item) => ({\n                label: `${item.code} / ${item.sn}`,\n                value: item.id,\n                disabled: selectedInOthers.has(item.id),\n              }));\n            const selected = configSelections[row.id] || [];\n            return (\n              <div key={row.id} style={{ border: '1px solid #f0f0f0', borderRadius: 6, padding: 12 }}>\n                <div style={{ marginBottom: 8 }}>\n                  <b>{spec ? `${spec.name} / ${spec.model}` : row.device_spec_id}</b>\n                  <span style={{ marginLeft: 8, color: '#999' }}>模板数量: {row.qty}</span>\n                  <span style={{ marginLeft: 8, color: selected.length === row.qty ? '#389e0d' : '#cf1322' }}>\n                    已选: {selected.length}\n                  </span>\n                </div>\n                <Select\n                  mode=\"multiple\"\n                  style={{ width: '100%' }}\n                  placeholder=\"请选择设备实例\"\n                  options={options}\n                  value={selected}\n                  onChange={(vals) => {\n                    const next = clampSelections(vals, row.qty);\n                    if (vals.length > row.qty) {\n                      message.warning(`该规格最多只能选择 ${row.qty} 台设备`);\n                    }\n                    setConfigSelections((prev) => ({ ...prev, [row.id]: next }));\n                  }}\n                  maxCount={row.qty}\n                  maxTagCount=\"responsive\"\n                />\n              </div>\n            );\n          })}\n        </Space>\n      </Modal>\n    </PageContainer>\n  );\n};\n\nexport default ProcessManagePage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Process/Manage/index.tsx"
     },
@@ -3665,7 +3665,7 @@
       "parentId": "17",
       "id": "18",
       "absPath": "/monitoring/sensors",
-      "__content": "import BusinessPlaceholder from '@/components/BusinessPlaceholder';\n\nconst MonitoringSensorsPage = () => (\n  <BusinessPlaceholder\n    title=\"传感器\"\n    description=\"仅展示当前租户已分配的传感器数据，不管理传感器型号。\"\n    model=\"tenant_sensor\"\n    apiPath=\"/api/v1/tenant-sensors\"\n  />\n);\n\nexport default MonitoringSensorsPage;\n",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport { PageContainer, ProColumns, ProTable } from '@ant-design/pro-components';\nimport { Tag, message } from 'antd';\n\nimport { listAllSensors, listAllTenantSensors, Sensor, TenantSensor } from '@/services/tenantSensor';\n\ntype SensorViewRow = TenantSensor & {\n  sensor_sn: string;\n  sensor_type_id: string;\n  description?: string;\n  battery?: number;\n  active?: boolean;\n  active_at?: string;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst MonitoringSensorsPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [rows, setRows] = useState<SensorViewRow[]>([]);\n  const [query, setQuery] = useState<Record<string, any>>({});\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      const [tenantSensors, sensors] = await Promise.all([listAllTenantSensors(), listAllSensors()]);\n      const sensorMap = new Map<string, Sensor>(sensors.map((item) => [item.id, item]));\n      const merged: SensorViewRow[] = tenantSensors.map((item) => {\n        const sensor = sensorMap.get(item.sensor_id);\n        return {\n          ...item,\n          sensor_sn: sensor?.sn || '-',\n          sensor_type_id: sensor?.sensor_type_id || '-',\n          description: sensor?.description,\n          battery: sensor?.battery,\n          active: sensor?.active,\n          active_at: sensor?.active_at,\n        };\n      });\n      setRows(merged);\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    return rows.filter((row) => {\n      if (query.sensor_sn && !norm(row.sensor_sn).includes(norm(query.sensor_sn))) {\n        return false;\n      }\n      if (query.sensor_id && !norm(row.sensor_id).includes(norm(query.sensor_id))) {\n        return false;\n      }\n      if (query.sensor_type_id && !norm(row.sensor_type_id).includes(norm(query.sensor_type_id))) {\n        return false;\n      }\n      if (query.tenant_id && !norm(row.tenant_id).includes(norm(query.tenant_id))) {\n        return false;\n      }\n      if (query.available !== undefined && query.available !== null && query.available !== '') {\n        if (String(row.available) !== String(query.available)) {\n          return false;\n        }\n      }\n      if (query.active !== undefined && query.active !== null && query.active !== '') {\n        if (String(row.active) !== String(query.active)) {\n          return false;\n        }\n      }\n      return true;\n    });\n  }, [query, rows]);\n\n  const columns: ProColumns<SensorViewRow>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '传感器SN',\n      dataIndex: 'sensor_sn',\n      width: 180,\n    },\n    {\n      title: '电量(%)',\n      dataIndex: 'battery',\n      width: 100,\n      hideInSearch: true,\n      render: (_, row) => (row.battery === undefined ? '-' : Number(row.battery).toFixed(1)),\n    },\n    {\n      title: '可用状态',\n      dataIndex: 'available',\n      width: 110,\n      valueType: 'select',\n      valueEnum: {\n        true: { text: '可用' },\n        false: { text: '不可用' },\n      },\n      render: (_, row) => (row.available ? <Tag color=\"green\">可用</Tag> : <Tag>不可用</Tag>),\n    },\n    {\n      title: '设备状态',\n      dataIndex: 'active',\n      width: 110,\n      valueType: 'select',\n      valueEnum: {\n        true: { text: '在线' },\n        false: { text: '离线' },\n      },\n      render: (_, row) =>\n        row.active === undefined ? '-' : row.active ? <Tag color=\"green\">在线</Tag> : <Tag>离线</Tag>,\n    },\n    {\n      title: '最近活跃',\n      dataIndex: 'active_at',\n      width: 180,\n      valueType: 'dateTime',\n      hideInSearch: true,\n      render: (_, row) => row.active_at || '-',\n    },\n    {\n      title: '备注',\n      dataIndex: 'description',\n      hideInSearch: true,\n      ellipsis: true,\n      render: (_, row) => row.description || '-',\n    },\n  ];\n\n  return (\n    <PageContainer title=\"传感器\">\n      <ProTable<SensorViewRow>\n        rowKey=\"id\"\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        options={{ reload: loadRows }}\n        toolBarRender={false}\n      />\n    </PageContainer>\n  );\n};\n\nexport default MonitoringSensorsPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Monitoring/Sensors/index.tsx"
     },
@@ -3676,7 +3676,7 @@
       "parentId": "17",
       "id": "19",
       "absPath": "/monitoring/points",
-      "__content": "import BusinessPlaceholder from '@/components/BusinessPlaceholder';\n\nconst MonitoringPointsPage = () => (\n  <BusinessPlaceholder\n    title=\"测点设置\"\n    description=\"将传感器绑定至工段实例中的具体设备测点。\"\n    model=\"device_inst_tag\"\n    apiPath=\"/api/v1/device-inst-tags\"\n  />\n);\n\nexport default MonitoringPointsPage;\n",
+      "__content": "import BusinessPlaceholder from '@/components/BusinessPlaceholder';\n\nconst MonitoringPointsPage = () => (\n  <BusinessPlaceholder\n    title=\"测点设置\"\n    description=\"将传感器绑定至设备实例和故障测点，记录方向与状态。\"\n    model=\"sensor_monitoring\"\n    apiPath=\"/api/v1/sensor-monitorings\"\n  />\n);\n\nexport default MonitoringPointsPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Monitoring/Points/index.tsx"
     },

@@ -76,11 +76,12 @@ class Process(Base):
     tenant_id = Column(Uuid(as_uuid=True), default=uuid.uuid4, index=False)
     code = Column(String(8), nullable=False, unique=True, index=True)
     name = Column(String(64), nullable=False)
+    area_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Optional link to area for location-based processes
     status = Column(SmallInteger, default=1, comment="tiny(1) status")
 
 
 class ProcessItem(Base):
-    """Device combo detail entity model"""
+    """Process item entity model"""
 
     __tablename__ = "process_item"
 
@@ -91,37 +92,38 @@ class ProcessItem(Base):
 
     
 class ProcessDevice(Base):
-    """Device combo instance entity model"""
+    """Process device entity model"""
 
-    __tablename__ = "device_combo_inst"
+    __tablename__ = "process_device"
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     code = Column(String(8), nullable=False, unique=True, index=True)
-    device_combo_spec_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to device_combo_specs
+    process_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to processes
     sn = Column(String(64), nullable=False, unique=True, index=True)
     status = Column(SmallInteger, default=1, comment="tiny(1) status")
     
     def __repr__(self):
-        return f"<DeviceComboInst {self.id}: {self.code} - {self.sn}>"
+        return f"<ProcessDevice {self.id}: {self.code} - {self.sn}>"
 
 class ProcessDeviceItem(Base):
     """Device combo instance detail entity model"""
 
-    __tablename__ = "device_combo_inst_item"
+    __tablename__ = "process_device_item"
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     code = Column(String(16), nullable=False, unique=True, index=True)
     desc = Column(String(128), nullable=False)
     device_inst_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to device_insts
-    device_combo_inst_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to device_combo_insts
+    process_device_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to process_devices
 
-class DeviceInstTag(Base):
-    """Device instance tag entity model"""
+class SensorMonitoring(Base):
+    """Sensor monitoring entity model"""
 
-    __tablename__ = "device_inst_tag"
+    __tablename__ = "sensor_monitoring"
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     device_inst_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to device_insts
-    point = Column(String(64), nullable=False, index=True)
+    location_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Optional link to location for asset tracking
     sensor_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Optional link to sensors
+    direction = Column(String(16), nullable=True)  # e.g. 'horizontal' or 'vertical' for sensor connections
     status = Column(SmallInteger, default=1, comment="tiny(1) status")
