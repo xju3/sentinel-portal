@@ -6,6 +6,7 @@ from uuid import UUID
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import func, or_
 
 from app.models.customer import (
     Tenant,
@@ -90,14 +91,56 @@ class TenantSensorService:
 
 class SupplierService:
     @staticmethod
-    async def get_suppliers(session: AsyncSession, skip: int, limit: int) -> List[Supplier]:
-        stmt = select(Supplier).offset(skip).limit(limit)
+    async def get_suppliers(
+        session: AsyncSession,
+        tenant_id: UUID,
+        skip: int,
+        limit: int,
+        keyword: Optional[str] = None,
+    ) -> List[Supplier]:
+        stmt = select(Supplier).where(Supplier.tenant_id == tenant_id)
+        if keyword:
+            like_kw = f"%{keyword.strip()}%"
+            stmt = stmt.where(
+                or_(
+                    Supplier.name.ilike(like_kw),
+                    Supplier.brand.ilike(like_kw),
+                    Supplier.contact_info.ilike(like_kw),
+                )
+            )
+        stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return result.scalars().all()
 
     @staticmethod
-    async def get_supplier(session: AsyncSession, supplier_id: UUID) -> Optional[Supplier]:
-        stmt = select(Supplier).where(Supplier.id == supplier_id)
+    async def count_suppliers(
+        session: AsyncSession,
+        tenant_id: UUID,
+        keyword: Optional[str] = None,
+    ) -> int:
+        stmt = select(func.count(Supplier.id)).where(Supplier.tenant_id == tenant_id)
+        if keyword:
+            like_kw = f"%{keyword.strip()}%"
+            stmt = stmt.where(
+                or_(
+                    Supplier.name.ilike(like_kw),
+                    Supplier.brand.ilike(like_kw),
+                    Supplier.contact_info.ilike(like_kw),
+                )
+            )
+        result = await session.execute(stmt)
+        return int(result.scalar_one() or 0)
+
+    @staticmethod
+    async def get_supplier(
+        session: AsyncSession,
+        tenant_id: UUID,
+        supplier_id: UUID,
+    ) -> Optional[Supplier]:
+        stmt = select(Supplier).where(
+            Supplier.id == supplier_id,
+            Supplier.tenant_id == tenant_id,
+        )
         result = await session.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -203,10 +246,33 @@ class AreaService:
 
 class HealthCheckFreqService:
     @staticmethod
-    async def get_health_check_freqs(session: AsyncSession, skip: int, limit: int) -> List[HealthCheckFreq]:
-        stmt = select(HealthCheckFreq).offset(skip).limit(limit)
+    async def get_health_check_freqs(
+        session: AsyncSession,
+        tenant_id: UUID,
+        skip: int,
+        limit: int,
+    ) -> List[HealthCheckFreq]:
+        stmt = (
+            select(HealthCheckFreq)
+            .where(HealthCheckFreq.tenant_id == tenant_id)
+            .offset(skip)
+            .limit(limit)
+        )
         result = await session.execute(stmt)
         return result.scalars().all()
+
+    @staticmethod
+    async def get_health_check_freq(
+        session: AsyncSession,
+        tenant_id: UUID,
+        freq_id: UUID,
+    ) -> Optional[HealthCheckFreq]:
+        stmt = select(HealthCheckFreq).where(
+            HealthCheckFreq.id == freq_id,
+            HealthCheckFreq.tenant_id == tenant_id,
+        )
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
 
     @staticmethod
     async def create_health_check_freq(session: AsyncSession, data: dict) -> HealthCheckFreq:
@@ -215,3 +281,20 @@ class HealthCheckFreqService:
         await session.commit()
         await session.refresh(db_freq)
         return db_freq
+
+    @staticmethod
+    async def update_health_check_freq(
+        session: AsyncSession,
+        db_freq: HealthCheckFreq,
+        data: dict,
+    ) -> HealthCheckFreq:
+        for key, value in data.items():
+            setattr(db_freq, key, value)
+        await session.commit()
+        await session.refresh(db_freq)
+        return db_freq
+
+    @staticmethod
+    async def delete_health_check_freq(session: AsyncSession, db_freq: HealthCheckFreq) -> None:
+        await session.delete(db_freq)
+        await session.commit()

@@ -37,7 +37,6 @@ const LoginPage = () => {
             description={
               <Space direction="vertical" size={4}>
                 <Typography.Text>用户名: {session.username}</Typography.Text>
-                <Typography.Text type="secondary">租户ID: {session.tenant_id}</Typography.Text>
                 <Space>
                   <Button type="primary" onClick={() => navigate('/device/categories')}>
                     进入主应用

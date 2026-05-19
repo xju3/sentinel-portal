@@ -13,6 +13,10 @@ class Settings(BaseSettings):
     debug: bool = False
     api_prefix: str = "/api/v1"
     cors_origins: List[str] = ["*"]
+
+    # JWT
+    jwt_secret_key: str = "change-this-secret-in-production"
+    jwt_access_token_expires_minutes: int = 1440
     
     # MySQL Database
     mysql_url: str = "mysql+aiomysql://pl:pl098POI@139.9.50.7:3306/platform"

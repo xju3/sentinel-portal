@@ -25,7 +25,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -38,7 +38,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -68,7 +68,7 @@
             0
           ]
         },
-        "register": 2
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -82,10 +82,10 @@
       "time": {
         "hooks": {
           "onStart": [
-            1
+            2
           ]
         },
-        "register": 2
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -101,10 +101,34 @@
           "modifyRoutes": [
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -118,14 +142,43 @@
       "time": {
         "hooks": {
           "onDevCompileDone": [
-            11,
+            10,
+            2,
+            3,
+            2,
+            2,
+            3,
+            3,
+            3,
+            2,
+            2,
             1,
             3,
             2,
-            3
+            2,
+            2,
+            3,
+            1,
+            3,
+            2,
+            3,
+            3,
+            2,
+            2,
+            2,
+            2,
+            3,
+            3,
+            1,
+            2,
+            2,
+            2,
+            3,
+            3,
+            2
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -139,15 +192,39 @@
       "time": {
         "hooks": {
           "modifyAppData": [
-            34
+            31
           ],
           "onGenerateFiles": [
             1,
-            16,
-            19
+            5,
+            22,
+            9,
+            4,
+            4,
+            12,
+            20,
+            22,
+            10,
+            8,
+            8,
+            5,
+            7,
+            18,
+            20,
+            6,
+            7,
+            21,
+            12,
+            7,
+            7,
+            13,
+            10,
+            7,
+            22,
+            4
           ]
         },
-        "register": 15
+        "register": 11
       },
       "enableBy": "register"
     },
@@ -161,6 +238,30 @@
       "time": {
         "hooks": {
           "addEntryCode": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0,
             0,
             0
@@ -180,12 +281,60 @@
       "time": {
         "hooks": {
           "onCheckConfig": [
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "onCheck": [
-            1
+            0
           ],
           "onPrepareBuildSuccess": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0,
             0,
             0,
@@ -193,6 +342,61 @@
             0
           ],
           "onCheckCode": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0,
             0,
             0,
@@ -242,7 +446,7 @@
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -255,7 +459,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -269,10 +473,29 @@
       "time": {
         "hooks": {
           "modifyConfig": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
             0
           ]
         },
-        "register": 5
+        "register": 3
       },
       "enableBy": "register"
     },
@@ -1124,7 +1347,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1138,10 +1361,10 @@
       "time": {
         "hooks": {
           "onStart": [
-            1
+            0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1155,10 +1378,10 @@
       "time": {
         "hooks": {
           "addBeforeMiddlewares": [
-            6
+            5
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1171,7 +1394,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 52
+        "register": 48
       },
       "enableBy": "register"
     },
@@ -1184,7 +1407,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 26
+        "register": 14
       },
       "enableBy": "config"
     },
@@ -1197,7 +1420,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 14
+        "register": 12
       },
       "enableBy": "config"
     },
@@ -1247,10 +1470,37 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1264,17 +1514,65 @@
       "time": {
         "hooks": {
           "onGenerateFiles": [
+            0,
+            0,
+            0,
             1,
-            2,
+            0,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            1,
+            1,
+            1,
+            0,
+            1,
+            0,
+            0,
+            1,
             1
           ],
           "addRuntimePlugin": [
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1287,7 +1585,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1301,13 +1599,13 @@
       "time": {
         "hooks": {
           "onStart": [
-            0
+            1
           ],
           "addBeforeMiddlewares": [
             0
           ]
         },
-        "register": 23
+        "register": 20
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/mpa/mpa": {
@@ -1319,7 +1617,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1347,6 +1645,30 @@
           "onGenerateFiles": [
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "addEntryImports": [
@@ -1354,7 +1676,55 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ]
         },
@@ -1385,14 +1755,105 @@
       "time": {
         "hooks": {
           "modifyConfig": [
-            1
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0
           ],
           "onGenerateFiles": [
-            46,
-            34,
-            18
+            43,
+            15,
+            32,
+            20,
+            10,
+            14,
+            9,
+            25,
+            19,
+            12,
+            14,
+            12,
+            7,
+            16,
+            25,
+            29,
+            9,
+            10,
+            27,
+            18,
+            13,
+            14,
+            15,
+            14,
+            15,
+            20,
+            7
           ],
           "addPolyfillImports": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0,
             0,
             0,
@@ -1419,10 +1880,58 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1436,7 +1945,31 @@
       "time": {
         "hooks": {
           "onGenerateFiles": [
-            55,
+            48,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0,
             0
           ]
@@ -1482,7 +2015,31 @@
         "hooks": {
           "onGenerateFiles": [
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
             0
           ],
           "addBeforeMiddlewares": [
@@ -1503,15 +2060,63 @@
       "time": {
         "hooks": {
           "onGenerateFiles": [
-            8,
+            7,
             4,
+            9,
+            2,
+            9,
+            2,
+            9,
+            1,
+            6,
+            3,
+            9,
+            3,
+            8,
+            3,
+            8,
+            2,
+            11,
+            1,
+            11,
+            1,
+            14,
+            2,
+            9,
+            2,
+            8,
+            2,
+            14,
+            2,
+            9,
+            2,
+            9,
+            2,
+            7,
+            2,
+            8,
+            3,
+            15,
+            2,
+            12,
+            2,
+            7,
+            2,
+            6,
+            1,
+            9,
+            2,
+            9,
+            3,
             7,
             3,
+            11,
+            2,
             7,
             2
           ]
         },
-        "register": 3
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -1524,7 +2129,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1563,12 +2168,36 @@
       "time": {
         "hooks": {
           "onGenerateFiles": [
-            276,
-            10,
-            7
+            265,
+            18,
+            8,
+            7,
+            5,
+            9,
+            5,
+            6,
+            9,
+            8,
+            7,
+            7,
+            5,
+            7,
+            8,
+            6,
+            6,
+            8,
+            9,
+            7,
+            6,
+            5,
+            7,
+            8,
+            7,
+            9,
+            6
           ]
         },
-        "register": 2
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1598,7 +2227,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1611,7 +2240,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1624,7 +2253,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/monorepo/redirect": {
@@ -1636,7 +2265,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 15
+        "register": 13
       },
       "enableBy": "config"
     },
@@ -1651,11 +2280,35 @@
         "hooks": {
           "onGenerateFiles": [
             1,
+            1,
+            1,
             0,
+            0,
+            1,
+            0,
+            1,
+            1,
+            1,
+            1,
+            0,
+            1,
+            1,
+            1,
+            1,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            1,
             1
           ]
         },
-        "register": 1
+        "register": 0
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/clickToComponent/clickToComponent": {
@@ -1667,7 +2320,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1680,7 +2333,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1693,7 +2346,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1722,7 +2375,7 @@
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1760,7 +2413,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/hmrGuardian/hmrGuardian": {
@@ -1785,7 +2438,15 @@
       "time": {
         "hooks": {
           "addHTMLHeadScripts": [
-            9,
+            7,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
             0,
             0,
             0,
@@ -1811,6 +2472,25 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
             0,
             0,
             0,
@@ -1818,7 +2498,7 @@
             0
           ]
         },
-        "register": 19
+        "register": 17
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/forget/forget": {
@@ -1830,7 +2510,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1844,7 +2524,7 @@
       "time": {
         "hooks": {
           "modifyUniBundler": [
-            325
+            239
           ]
         },
         "register": 1
@@ -1860,7 +2540,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1873,7 +2553,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 24
+        "register": 20
       },
       "enableBy": "register"
     },
@@ -1887,10 +2567,10 @@
       "time": {
         "hooks": {
           "modifyAppData": [
-            15
+            13
           ]
         },
-        "register": 20
+        "register": 11
       }
     },
     "./node_modules/@umijs/preset-umi/dist/commands/help": {
@@ -1928,7 +2608,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1941,7 +2621,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1954,7 +2634,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1967,7 +2647,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1980,7 +2660,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -2006,7 +2686,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -2071,7 +2751,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -2110,7 +2790,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -2123,7 +2803,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -2136,7 +2816,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 14
+        "register": 12
       },
       "enableBy": "register"
     },
@@ -2175,7 +2855,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2190,7 +2870,7 @@
       },
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       }
     },
     "./node_modules/@umijs/plugins/dist/antd": {
@@ -2203,7 +2883,26 @@
       "time": {
         "hooks": {
           "modifyConfig": [
-            3
+            2,
+            1,
+            1,
+            2,
+            1,
+            1,
+            2,
+            1,
+            1,
+            2,
+            3,
+            6,
+            1,
+            2,
+            1,
+            1,
+            2,
+            2,
+            3,
+            1
           ],
           "modifyAppData": [
             0
@@ -2212,14 +2911,86 @@
             0
           ],
           "addEntryImportsAhead": [
+            1,
             0,
             0,
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
             0
           ],
           "addRuntimePlugin": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0,
             0,
             0
@@ -2227,12 +2998,60 @@
           "addRuntimePluginKey": [
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "onGenerateFiles": [
-            2,
             1,
-            0
+            1,
+            0,
+            1,
+            0,
+            1,
+            1,
+            0,
+            1,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            1,
+            1,
+            1,
+            0,
+            1,
+            1,
+            1,
+            1
           ],
           "addExtraBabelPlugins": [
             0
@@ -2241,7 +3060,7 @@
             0
           ]
         },
-        "register": 6
+        "register": 5
       }
     },
     "./node_modules/@umijs/plugins/dist/dva": {
@@ -2253,7 +3072,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 4
+        "register": 3
       },
       "enableBy": "config"
     },
@@ -2266,7 +3085,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2282,17 +3101,84 @@
       "time": {
         "hooks": {
           "modifyConfig": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "addLayouts": [
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0,
             0,
             0
           ],
           "modifyAppData": [
-            0
+            1
           ],
           "addRuntimePlugin": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0,
             0,
             0
@@ -2300,10 +3186,58 @@
           "addRuntimePluginKey": [
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "onGenerateFiles": [
+            2,
+            2,
+            2,
+            1,
+            1,
             3,
+            1,
+            1,
+            2,
+            1,
+            2,
+            1,
+            1,
+            2,
+            3,
+            2,
+            1,
+            2,
+            2,
+            2,
+            2,
+            1,
+            2,
+            3,
+            1,
             2,
             2
           ]
@@ -2321,7 +3255,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2350,15 +3284,63 @@
           "addRuntimePlugin": [
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "onGenerateFiles": [
             9,
             10,
-            10
+            11,
+            8,
+            9,
+            9,
+            8,
+            9,
+            11,
+            8,
+            11,
+            11,
+            9,
+            12,
+            9,
+            10,
+            12,
+            11,
+            11,
+            9,
+            8,
+            8,
+            10,
+            11,
+            10,
+            10,
+            8
           ],
           "addTmpGenerateWatcherPaths": [
-            0
+            1
           ]
         },
         "register": 1
@@ -2390,10 +3372,34 @@
           "addRuntimePluginKey": [
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -2418,7 +3424,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       }
     },
     "./node_modules/@umijs/plugins/dist/react-query": {
@@ -2430,7 +3436,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2446,15 +3452,63 @@
           "addRuntimePluginKey": [
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "onGenerateFiles": [
-            2,
+            1,
+            1,
+            1,
+            1,
             0,
-            1
+            0,
+            0,
+            1,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            1,
+            0,
+            0,
+            0,
+            1,
+            0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2467,7 +3521,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2480,7 +3534,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2507,10 +3561,29 @@
       "time": {
         "hooks": {
           "modifyConfig": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -2557,7 +3630,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     }
@@ -2661,6 +3734,11 @@
             "path": "/monitoring/points",
             "name": "测点设置",
             "component": "@/pages/Monitoring/Points"
+          },
+          {
+            "path": "/monitoring/frequency",
+            "name": "监测频率",
+            "component": "@/pages/Monitoring/Frequency"
           },
           {
             "path": "/monitoring",
@@ -2813,6 +3891,11 @@
             "path": "/monitoring/points",
             "name": "测点设置",
             "component": "@/pages/Monitoring/Points"
+          },
+          {
+            "path": "/monitoring/frequency",
+            "name": "监测频率",
+            "component": "@/pages/Monitoring/Frequency"
           },
           {
             "path": "/monitoring",
@@ -3765,7 +4848,7 @@
       "file": "@/pages/Login/index.tsx",
       "id": "1",
       "absPath": "/login",
-      "__content": "import { Link, useNavigate } from '@umijs/max';\nimport { PageContainer, ProCard, ProForm, ProFormText } from '@ant-design/pro-components';\nimport { Alert, Button, Space, Typography, message } from 'antd';\nimport { useEffect, useState } from 'react';\n\nimport { login, type LoginResult } from '@/services/auth';\nimport { clearSession, getSession, saveSession } from '@/utils/session';\n\ntype LoginFormValues = {\n  username: string;\n  password: string;\n};\n\nconst LoginPage = () => {\n  const navigate = useNavigate();\n  const [session, setSession] = useState<LoginResult | null>(null);\n\n  useEffect(() => {\n    const parsed = getSession();\n    if (parsed) setSession(parsed);\n  }, []);\n\n  const handleLogout = () => {\n    clearSession();\n    setSession(null);\n    message.success('已退出登录');\n  };\n\n  return (\n    <PageContainer title=\"账号登录\" content=\"使用用户名和密码登录平台。\" ghost>\n      <ProCard colSpan={12} style={{ maxWidth: 560, margin: '0 auto' }}>\n        {session ? (\n          <Alert\n            type=\"success\"\n            showIcon\n            message=\"当前已登录\"\n            description={\n              <Space direction=\"vertical\" size={4}>\n                <Typography.Text>用户名: {session.username}</Typography.Text>\n                <Typography.Text type=\"secondary\">租户ID: {session.tenant_id}</Typography.Text>\n                <Space>\n                  <Button type=\"primary\" onClick={() => navigate('/device/categories')}>\n                    进入主应用\n                  </Button>\n                  <Button onClick={handleLogout}>退出登录</Button>\n                </Space>\n              </Space>\n            }\n          />\n        ) : (\n          <>\n            <ProForm<LoginFormValues>\n              submitter={{\n                searchConfig: {\n                  submitText: '登录',\n                },\n              }}\n              onFinish={async (values) => {\n                const res = await login({\n                  username: values.username,\n                  password: values.password,\n                });\n                saveSession(res);\n                setSession(res);\n                message.success('登录成功');\n                navigate('/device/categories');\n                return true;\n              }}\n            >\n              <ProFormText\n                name=\"username\"\n                label=\"用户名\"\n                placeholder=\"请输入用户名\"\n                rules={[{ required: true, message: '请输入用户名' }]}\n              />\n\n              <ProFormText.Password\n                name=\"password\"\n                label=\"密码\"\n                placeholder=\"请输入密码\"\n                rules={[{ required: true, message: '请输入密码' }]}\n              />\n            </ProForm>\n\n            <Alert\n              type=\"info\"\n              showIcon\n              message=\"还没有账号？\"\n              description={\n                <Typography.Text>\n                  请先前往 <Link to=\"/register\">注册页</Link> 创建账号。\n                </Typography.Text>\n              }\n            />\n          </>\n        )}\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default LoginPage;\n",
+      "__content": "import { Link, useNavigate } from '@umijs/max';\nimport { PageContainer, ProCard, ProForm, ProFormText } from '@ant-design/pro-components';\nimport { Alert, Button, Space, Typography, message } from 'antd';\nimport { useEffect, useState } from 'react';\n\nimport { login, type LoginResult } from '@/services/auth';\nimport { clearSession, getSession, saveSession } from '@/utils/session';\n\ntype LoginFormValues = {\n  username: string;\n  password: string;\n};\n\nconst LoginPage = () => {\n  const navigate = useNavigate();\n  const [session, setSession] = useState<LoginResult | null>(null);\n\n  useEffect(() => {\n    const parsed = getSession();\n    if (parsed) setSession(parsed);\n  }, []);\n\n  const handleLogout = () => {\n    clearSession();\n    setSession(null);\n    message.success('已退出登录');\n  };\n\n  return (\n    <PageContainer title=\"账号登录\" content=\"使用用户名和密码登录平台。\" ghost>\n      <ProCard colSpan={12} style={{ maxWidth: 560, margin: '0 auto' }}>\n        {session ? (\n          <Alert\n            type=\"success\"\n            showIcon\n            message=\"当前已登录\"\n            description={\n              <Space direction=\"vertical\" size={4}>\n                <Typography.Text>用户名: {session.username}</Typography.Text>\n                <Space>\n                  <Button type=\"primary\" onClick={() => navigate('/device/categories')}>\n                    进入主应用\n                  </Button>\n                  <Button onClick={handleLogout}>退出登录</Button>\n                </Space>\n              </Space>\n            }\n          />\n        ) : (\n          <>\n            <ProForm<LoginFormValues>\n              submitter={{\n                searchConfig: {\n                  submitText: '登录',\n                },\n              }}\n              onFinish={async (values) => {\n                const res = await login({\n                  username: values.username,\n                  password: values.password,\n                });\n                saveSession(res);\n                setSession(res);\n                message.success('登录成功');\n                navigate('/device/categories');\n                return true;\n              }}\n            >\n              <ProFormText\n                name=\"username\"\n                label=\"用户名\"\n                placeholder=\"请输入用户名\"\n                rules={[{ required: true, message: '请输入用户名' }]}\n              />\n\n              <ProFormText.Password\n                name=\"password\"\n                label=\"密码\"\n                placeholder=\"请输入密码\"\n                rules={[{ required: true, message: '请输入密码' }]}\n              />\n            </ProForm>\n\n            <Alert\n              type=\"info\"\n              showIcon\n              message=\"还没有账号？\"\n              description={\n                <Typography.Text>\n                  请先前往 <Link to=\"/register\">注册页</Link> 创建账号。\n                </Typography.Text>\n              }\n            />\n          </>\n        )}\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default LoginPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Login/index.tsx"
     },
@@ -3780,166 +4863,214 @@
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Register/index.tsx"
     },
     "3": {
+      "path": "/data",
+      "name": "基础数据",
+      "icon": "AppstoreOutlined",
+      "parentId": "ant-design-pro-layout",
+      "id": "3",
+      "absPath": "/data"
+    },
+    "4": {
+      "path": "/data/suppliers",
+      "name": "供应商",
+      "file": "@/pages/Device/Supplier/index.tsx",
+      "parentId": "3",
+      "id": "4",
+      "absPath": "/data/suppliers",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProFormSwitch,\n  ProFormText,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, Tag, message } from 'antd';\n\nimport {\n  Supplier,\n  SupplierPayload,\n  createSupplier,\n  deleteSupplier,\n  listAllSuppliers,\n  updateSupplier,\n} from '@/services/supplier';\n\ntype SupplierFormValues = {\n  name: string;\n  brand: string;\n  contact_info?: string;\n  active: boolean;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst DeviceSupplierPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [rows, setRows] = useState<Supplier[]>([]);\n  const [editing, setEditing] = useState<Supplier | null>(null);\n  const [query, setQuery] = useState<Record<string, any>>({});\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      setRows(await listAllSuppliers());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    return rows.filter((row) => {\n      if (query.name && !norm(row.name).includes(norm(query.name))) {\n        return false;\n      }\n      if (query.brand && !norm(row.brand).includes(norm(query.brand))) {\n        return false;\n      }\n      if (query.contact_info && !norm(row.contact_info).includes(norm(query.contact_info))) {\n        return false;\n      }\n      if (query.active !== undefined && query.active !== null && row.active !== query.active) {\n        return false;\n      }\n      return true;\n    });\n  }, [query, rows]);\n\n  const columns: ProColumns<Supplier>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '供应商名称',\n      dataIndex: 'name',\n      width: 180,\n    },\n    {\n      title: '品牌',\n      dataIndex: 'brand',\n      width: 160,\n    },\n    {\n      title: '联系方式',\n      dataIndex: 'contact_info',\n      ellipsis: true,\n      render: (_, row) => row.contact_info || '-',\n    },\n    {\n      title: '状态',\n      dataIndex: 'active',\n      width: 100,\n      valueEnum: {\n        true: { text: '启用' },\n        false: { text: '停用' },\n      },\n      render: (_, row) => (row.active ? <Tag color=\"success\">启用</Tag> : <Tag>停用</Tag>),\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 170,\n      render: (_, row) => [\n        <Button\n          key=\"edit\"\n          type=\"link\"\n          onClick={() => {\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </Button>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该供应商吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteSupplier(row.id);\n              message.success('删除成功');\n              await loadRows();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <Button danger type=\"link\">\n            删除\n          </Button>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  return (\n    <PageContainer title=\"供应商\">\n      <ProTable<Supplier>\n        rowKey=\"id\"\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        options={{ reload: loadRows }}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建供应商\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<SupplierFormValues>\n        title={editing ? '编辑供应商' : '新建供应商'}\n        open={modalOpen}\n        modalProps={{\n          destroyOnClose: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        initialValues={\n          editing\n            ? {\n                name: editing.name,\n                brand: editing.brand,\n                contact_info: editing.contact_info,\n                active: editing.active,\n              }\n            : {\n                active: true,\n              }\n        }\n        onFinish={async (values) => {\n          const payload: SupplierPayload = {\n            name: values.name.trim(),\n            brand: values.brand.trim(),\n            contact_info: values.contact_info || undefined,\n            active: values.active ?? true,\n          };\n          setSaving(true);\n          try {\n            if (editing) {\n              await updateSupplier(editing.id, payload);\n            } else {\n              await createSupplier(payload);\n            }\n            message.success('保存成功');\n            setModalOpen(false);\n            setEditing(null);\n            await loadRows();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormText\n          name=\"name\"\n          label=\"供应商名称\"\n          rules={[{ required: true, message: '请输入供应商名称' }]}\n        />\n        <ProFormText name=\"brand\" label=\"品牌\" rules={[{ required: true, message: '请输入品牌' }]} />\n        <ProFormText name=\"contact_info\" label=\"联系方式\" />\n        <ProFormSwitch name=\"active\" label=\"启用状态\" />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default DeviceSupplierPage;\n",
+      "__isJSFile": true,
+      "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Device/Supplier/index.tsx"
+    },
+    "5": {
+      "path": "/data/frequency",
+      "name": "故障测点",
+      "file": "@/pages/Monitoring/Frequency/index.tsx",
+      "parentId": "3",
+      "id": "5",
+      "absPath": "/data/frequency",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProFormDigit,\n  ProFormSwitch,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, Tag, message } from 'antd';\n\nimport {\n  HealthCheckFreq,\n  HealthCheckFreqPayload,\n  createHealthCheckFreq,\n  deleteHealthCheckFreq,\n  listAllHealthCheckFreqs,\n  updateHealthCheckFreq,\n} from '@/services/healthCheckFreq';\n\ntype HealthCheckFreqFormValues = {\n  patrol: number;\n  diagnosis: number;\n  report: number;\n  status: boolean;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst MonitoringFrequencyPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [rows, setRows] = useState<HealthCheckFreq[]>([]);\n  const [editing, setEditing] = useState<HealthCheckFreq | null>(null);\n  const [query, setQuery] = useState<Record<string, any>>({});\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      setRows(await listAllHealthCheckFreqs());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    return rows.filter((row) => {\n      if (query.patrol !== undefined && query.patrol !== null && String(row.patrol) !== String(query.patrol)) {\n        return false;\n      }\n      if (\n        query.diagnosis !== undefined &&\n        query.diagnosis !== null &&\n        String(row.diagnosis) !== String(query.diagnosis)\n      ) {\n        return false;\n      }\n      if (query.report !== undefined && query.report !== null && String(row.report) !== String(query.report)) {\n        return false;\n      }\n      if (query.status !== undefined && query.status !== null && row.status !== query.status) {\n        return false;\n      }\n      return true;\n    });\n  }, [query, rows]);\n\n  const columns: ProColumns<HealthCheckFreq>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '巡检频率(分钟)',\n      dataIndex: 'patrol',\n      width: 140,\n      valueType: 'digit',\n    },\n    {\n      title: '诊断频率(分钟)',\n      dataIndex: 'diagnosis',\n      width: 140,\n      valueType: 'digit',\n    },\n    {\n      title: '上报批次',\n      dataIndex: 'report',\n      width: 120,\n      valueType: 'digit',\n    },\n    {\n      title: '状态',\n      dataIndex: 'status',\n      width: 100,\n      valueEnum: {\n        true: { text: '启用' },\n        false: { text: '停用' },\n      },\n      render: (_, row) => (row.status ? <Tag color=\"success\">启用</Tag> : <Tag>停用</Tag>),\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 180,\n      render: (_, row) => [\n        <Button\n          key=\"edit\"\n          type=\"link\"\n          onClick={() => {\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </Button>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该监测频率吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteHealthCheckFreq(row.id);\n              message.success('删除成功');\n              await loadRows();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <Button danger type=\"link\">\n            删除\n          </Button>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  return (\n    <PageContainer title=\"监测频率\">\n      <ProTable<HealthCheckFreq>\n        rowKey=\"id\"\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        options={{ reload: loadRows }}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建频率\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<HealthCheckFreqFormValues>\n        title={editing ? '编辑监测频率' : '新建监测频率'}\n        open={modalOpen}\n        initialValues={\n          editing\n            ? {\n                patrol: editing.patrol,\n                diagnosis: editing.diagnosis,\n                report: editing.report,\n                status: editing.status,\n              }\n            : {\n                patrol: 60,\n                diagnosis: 1440,\n                report: 1,\n                status: true,\n              }\n        }\n        modalProps={{\n          destroyOnClose: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        onFinish={async (values) => {\n          const payload: HealthCheckFreqPayload = {\n            patrol: values.patrol,\n            diagnosis: values.diagnosis,\n            report: values.report,\n            status: values.status ?? true,\n          };\n\n          setSaving(true);\n          try {\n            if (editing) {\n              await updateHealthCheckFreq(editing.id, payload);\n            } else {\n              await createHealthCheckFreq(payload);\n            }\n            message.success('保存成功');\n            setModalOpen(false);\n            setEditing(null);\n            await loadRows();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormDigit\n          name=\"patrol\"\n          label=\"巡检频率(分钟)\"\n          min={1}\n          fieldProps={{ precision: 0 }}\n          rules={[{ required: true, message: '请输入巡检频率' }]}\n        />\n        <ProFormDigit\n          name=\"diagnosis\"\n          label=\"诊断频率(分钟)\"\n          min={1}\n          fieldProps={{ precision: 0 }}\n          rules={[{ required: true, message: '请输入诊断频率' }]}\n        />\n        <ProFormDigit\n          name=\"report\"\n          label=\"上报批次\"\n          min={1}\n          fieldProps={{ precision: 0 }}\n          rules={[{ required: true, message: '请输入上报批次' }]}\n        />\n        <ProFormSwitch name=\"status\" label=\"启用状态\" />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default MonitoringFrequencyPage;\n",
+      "__isJSFile": true,
+      "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Monitoring/Frequency/index.tsx"
+    },
+    "6": {
+      "path": "/data/frequency",
+      "name": "监测频率",
+      "file": "@/pages/Monitoring/Frequency/index.tsx",
+      "parentId": "3",
+      "id": "6",
+      "absPath": "/data/frequency",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProFormDigit,\n  ProFormSwitch,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, Tag, message } from 'antd';\n\nimport {\n  HealthCheckFreq,\n  HealthCheckFreqPayload,\n  createHealthCheckFreq,\n  deleteHealthCheckFreq,\n  listAllHealthCheckFreqs,\n  updateHealthCheckFreq,\n} from '@/services/healthCheckFreq';\n\ntype HealthCheckFreqFormValues = {\n  patrol: number;\n  diagnosis: number;\n  report: number;\n  status: boolean;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst MonitoringFrequencyPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [rows, setRows] = useState<HealthCheckFreq[]>([]);\n  const [editing, setEditing] = useState<HealthCheckFreq | null>(null);\n  const [query, setQuery] = useState<Record<string, any>>({});\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      setRows(await listAllHealthCheckFreqs());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    return rows.filter((row) => {\n      if (query.patrol !== undefined && query.patrol !== null && String(row.patrol) !== String(query.patrol)) {\n        return false;\n      }\n      if (\n        query.diagnosis !== undefined &&\n        query.diagnosis !== null &&\n        String(row.diagnosis) !== String(query.diagnosis)\n      ) {\n        return false;\n      }\n      if (query.report !== undefined && query.report !== null && String(row.report) !== String(query.report)) {\n        return false;\n      }\n      if (query.status !== undefined && query.status !== null && row.status !== query.status) {\n        return false;\n      }\n      return true;\n    });\n  }, [query, rows]);\n\n  const columns: ProColumns<HealthCheckFreq>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '巡检频率(分钟)',\n      dataIndex: 'patrol',\n      width: 140,\n      valueType: 'digit',\n    },\n    {\n      title: '诊断频率(分钟)',\n      dataIndex: 'diagnosis',\n      width: 140,\n      valueType: 'digit',\n    },\n    {\n      title: '上报批次',\n      dataIndex: 'report',\n      width: 120,\n      valueType: 'digit',\n    },\n    {\n      title: '状态',\n      dataIndex: 'status',\n      width: 100,\n      valueEnum: {\n        true: { text: '启用' },\n        false: { text: '停用' },\n      },\n      render: (_, row) => (row.status ? <Tag color=\"success\">启用</Tag> : <Tag>停用</Tag>),\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 180,\n      render: (_, row) => [\n        <Button\n          key=\"edit\"\n          type=\"link\"\n          onClick={() => {\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </Button>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该监测频率吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteHealthCheckFreq(row.id);\n              message.success('删除成功');\n              await loadRows();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <Button danger type=\"link\">\n            删除\n          </Button>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  return (\n    <PageContainer title=\"监测频率\">\n      <ProTable<HealthCheckFreq>\n        rowKey=\"id\"\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        options={{ reload: loadRows }}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建频率\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<HealthCheckFreqFormValues>\n        title={editing ? '编辑监测频率' : '新建监测频率'}\n        open={modalOpen}\n        initialValues={\n          editing\n            ? {\n                patrol: editing.patrol,\n                diagnosis: editing.diagnosis,\n                report: editing.report,\n                status: editing.status,\n              }\n            : {\n                patrol: 60,\n                diagnosis: 1440,\n                report: 1,\n                status: true,\n              }\n        }\n        modalProps={{\n          destroyOnClose: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        onFinish={async (values) => {\n          const payload: HealthCheckFreqPayload = {\n            patrol: values.patrol,\n            diagnosis: values.diagnosis,\n            report: values.report,\n            status: values.status ?? true,\n          };\n\n          setSaving(true);\n          try {\n            if (editing) {\n              await updateHealthCheckFreq(editing.id, payload);\n            } else {\n              await createHealthCheckFreq(payload);\n            }\n            message.success('保存成功');\n            setModalOpen(false);\n            setEditing(null);\n            await loadRows();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormDigit\n          name=\"patrol\"\n          label=\"巡检频率(分钟)\"\n          min={1}\n          fieldProps={{ precision: 0 }}\n          rules={[{ required: true, message: '请输入巡检频率' }]}\n        />\n        <ProFormDigit\n          name=\"diagnosis\"\n          label=\"诊断频率(分钟)\"\n          min={1}\n          fieldProps={{ precision: 0 }}\n          rules={[{ required: true, message: '请输入诊断频率' }]}\n        />\n        <ProFormDigit\n          name=\"report\"\n          label=\"上报批次\"\n          min={1}\n          fieldProps={{ precision: 0 }}\n          rules={[{ required: true, message: '请输入上报批次' }]}\n        />\n        <ProFormSwitch name=\"status\" label=\"启用状态\" />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default MonitoringFrequencyPage;\n",
+      "__isJSFile": true,
+      "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Monitoring/Frequency/index.tsx"
+    },
+    "7": {
+      "path": "/data",
+      "redirect": "/data/suppliers",
+      "parentId": "3",
+      "id": "7",
+      "absPath": "/data"
+    },
+    "8": {
       "path": "/device",
       "name": "设备管理",
       "icon": "AppstoreOutlined",
       "parentId": "ant-design-pro-layout",
-      "id": "3",
+      "id": "8",
       "absPath": "/device"
     },
-    "4": {
+    "9": {
       "path": "/device/categories",
       "name": "设备分类",
       "file": "@/pages/Device/Category/index.tsx",
-      "parentId": "3",
-      "id": "4",
+      "parentId": "8",
+      "id": "9",
       "absPath": "/device/categories",
-      "__content": "import BusinessPlaceholder from '@/components/BusinessPlaceholder';\n\nconst DeviceCategoryPage = () => (\n  <BusinessPlaceholder\n    title=\"设备分类\"\n    description=\"管理设备分类，并可在分类中选择对应 ISO 标准作为可选项。\"\n    model=\"device_category\"\n    apiPath=\"/api/v1/device-categories\"\n  />\n);\n\nexport default DeviceCategoryPage;\n",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProForm,\n  ProColumns,\n  ProFormSelect,\n  ProFormText,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, message } from 'antd';\nimport type { ColumnsType } from 'antd/es/table';\nimport EntityPicker from '@/components/EntityPicker';\n\nimport {\n  DeviceCategory,\n  DeviceCategoryPayload,\n  createDeviceCategory,\n  deleteDeviceCategory,\n  listAllDeviceCategories,\n  listHealthCheckFreqs,\n  listIsoStandards,\n  queryDeviceCategories,\n  updateDeviceCategory,\n} from '@/services/deviceCategory';\n\ntype CategoryTreeRow = DeviceCategory & {\n  children?: CategoryTreeRow[];\n};\n\ntype CategoryFormValues = {\n  name: string;\n  description?: string;\n  parent_id?: string;\n  health_check_freq_id: string;\n  iso_standard_id?: string;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return (\n    e?.data?.detail ||\n    e?.info?.errorMessage ||\n    e?.message ||\n    '请求失败，请稍后重试'\n  );\n};\n\nconst buildCategoryTree = (rows: DeviceCategory[]): CategoryTreeRow[] => {\n  const nodeMap = new Map<string, CategoryTreeRow>();\n  rows.forEach((item) => nodeMap.set(item.id, { ...item, children: [] }));\n\n  const roots: CategoryTreeRow[] = [];\n  rows.forEach((item) => {\n    const node = nodeMap.get(item.id);\n    if (!node) {\n      return;\n    }\n    const pid = item.parent_id || undefined;\n    if (pid && nodeMap.has(pid)) {\n      const parent = nodeMap.get(pid);\n      if (parent) {\n        parent.children = parent.children || [];\n        parent.children.push(node);\n      }\n      return;\n    }\n    roots.push(node);\n  });\n\n  const sortTree = (nodes: CategoryTreeRow[]) => {\n    nodes.sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));\n    nodes.forEach((item) => {\n      if (item.children && item.children.length > 0) {\n        sortTree(item.children);\n      }\n    });\n  };\n  sortTree(roots);\n  return roots;\n};\n\nconst DeviceCategoryPage = () => {\n  const [tableLoading, setTableLoading] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [editing, setEditing] = useState<DeviceCategory | null>(null);\n  const [createChildParent, setCreateChildParent] = useState<DeviceCategory | null>(null);\n\n  const [categories, setCategories] = useState<DeviceCategory[]>([]);\n  const [query, setQuery] = useState<Record<string, any>>({});\n  const [healthFreqOptions, setHealthFreqOptions] = useState<\n    { label: string; value: string }[]\n  >([]);\n  const [isoOptions, setIsoOptions] = useState<{ label: string; value: string }[]>([]);\n\n  const treeData = useMemo(() => buildCategoryTree(categories), [categories]);\n  const categoryMap = useMemo(\n    () => new Map(categories.map((item) => [item.id, item])),\n    [categories],\n  );\n\n  const blockedParentIds = useMemo(() => {\n    const blockedIds = new Set<string>();\n    if (!editing?.id) {\n      return blockedIds;\n    }\n\n    blockedIds.add(editing.id);\n    const childrenMap = new Map<string, string[]>();\n    categories.forEach((item) => {\n      if (!item.parent_id) {\n        return;\n      }\n      const siblings = childrenMap.get(item.parent_id) || [];\n      siblings.push(item.id);\n      childrenMap.set(item.parent_id, siblings);\n    });\n\n    const queue = [...(childrenMap.get(editing.id) || [])];\n    while (queue.length > 0) {\n      const current = queue.shift();\n      if (!current || blockedIds.has(current)) {\n        continue;\n      }\n      blockedIds.add(current);\n      queue.push(...(childrenMap.get(current) || []));\n    }\n    return blockedIds;\n  }, [categories, editing?.id]);\n\n  const loadCategories = async () => {\n    setTableLoading(true);\n    try {\n      const data = await listAllDeviceCategories();\n      setCategories(data || []);\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setTableLoading(false);\n    }\n  };\n\n  const loadReferences = async () => {\n    try {\n      const [freqs, isos] = await Promise.all([listHealthCheckFreqs(), listIsoStandards()]);\n      setHealthFreqOptions(\n        (freqs || []).map((item) => ({\n          value: item.id,\n          label: `巡检${item.patrol}m / 诊断${item.diagnosis}m / 上报${item.report}`,\n        })),\n      );\n      setIsoOptions(\n        (isos || []).map((item) => ({\n          value: item.id,\n          label: `${item.code} - ${item.name}`,\n        })),\n      );\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    }\n  };\n\n  useEffect(() => {\n    loadCategories();\n    loadReferences();\n  }, []);\n\n  const columns: ProColumns<CategoryTreeRow>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '分类名称',\n      dataIndex: 'name',\n      width: 220,\n    },\n    {\n      title: '上级分类',\n      dataIndex: 'parent_name',\n      width: 220,\n      render: (_, row) => {\n        if (!row.parent_id) {\n          return '-';\n        }\n        return categoryMap.get(row.parent_id)?.name || row.parent_id;\n      },\n    },\n    {\n      title: '巡检频率',\n      dataIndex: 'health_check_freq_id',\n      ellipsis: true,\n      render: (_, row) => {\n        const freq = row.health_check_freq;\n        if (!freq) {\n          return row.health_check_freq_id;\n        }\n        return `巡检${freq.patrol}m / 诊断${freq.diagnosis}m / 上报${freq.report}`;\n      },\n    },\n    {\n      title: 'ISO标准',\n      dataIndex: 'iso_standard_id',\n      ellipsis: true,\n      render: (_, row) => row.iso_standard_id || '-',\n    },\n    {\n      title: '备注',\n      dataIndex: 'description',\n      ellipsis: true,\n      render: (_, row) => row.description || '-',\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 240,\n      render: (_, row) => [\n        <Button\n          key=\"create-child\"\n          type=\"link\"\n          onClick={() => {\n            setEditing(null);\n            setCreateChildParent(row);\n            setModalOpen(true);\n          }}\n        >\n          新建\n        </Button>,\n        <Button\n          key=\"edit\"\n          type=\"link\"\n          onClick={() => {\n            setCreateChildParent(null);\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </Button>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该分类吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteDeviceCategory(row.id);\n              message.success('删除成功');\n              await loadCategories();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <Button danger type=\"link\">\n            删除\n          </Button>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  const filteredTreeData = useMemo(() => {\n    const hasQuery = Object.keys(query).length > 0;\n    if (!hasQuery) {\n      return treeData;\n    }\n\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    return categories\n      .filter((row) => {\n        const parentName = row.parent_id ? categoryMap.get(row.parent_id)?.name || '' : '';\n        if (query.name && !norm(row.name).includes(norm(query.name))) {\n          return false;\n        }\n        if (query.parent_name && !norm(parentName).includes(norm(query.parent_name))) {\n          return false;\n        }\n        if (\n          query.health_check_freq_id &&\n          !norm(\n            row.health_check_freq\n              ? `巡检${row.health_check_freq.patrol}m 诊断${row.health_check_freq.diagnosis}m 上报${row.health_check_freq.report}`\n              : row.health_check_freq_id,\n          ).includes(norm(query.health_check_freq_id))\n        ) {\n          return false;\n        }\n        if (query.iso_standard_id && !norm(row.iso_standard_id).includes(norm(query.iso_standard_id))) {\n          return false;\n        }\n        if (query.description && !norm(row.description).includes(norm(query.description))) {\n          return false;\n        }\n        return true;\n      })\n      .map((row) => ({ ...row }));\n  }, [categories, categoryMap, query, treeData]);\n\n  const parentPickerColumns: ColumnsType<DeviceCategory> = [\n    { title: '分类名称', dataIndex: 'name' },\n    {\n      title: '上级分类',\n      dataIndex: 'parent_id',\n      render: (_, row) => (row.parent_id ? categoryMap.get(row.parent_id)?.name || '-' : '-'),\n    },\n    {\n      title: '描述',\n      dataIndex: 'description',\n      render: (_, row) => row.description || '-',\n    },\n  ];\n\n  return (\n    <PageContainer title=\"设备分类\">\n      <ProTable<CategoryTreeRow>\n        rowKey=\"id\"\n        loading={tableLoading}\n        columns={columns}\n        dataSource={filteredTreeData}\n        pagination={false}\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        options={{ reload: loadCategories }}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setCreateChildParent(null);\n              setModalOpen(true);\n            }}\n          >\n            新建分类\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<CategoryFormValues>\n        title={\n          editing\n            ? '编辑设备分类'\n            : createChildParent\n              ? `新建子分类（上级：${createChildParent.name}）`\n              : '新建设备分类'\n        }\n        open={modalOpen}\n        modalProps={{\n          destroyOnClose: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n            setCreateChildParent(null);\n          },\n        }}\n        submitter={{\n          searchConfig: {\n            submitText: '保存',\n          },\n          submitButtonProps: {\n            loading: saving,\n          },\n        }}\n        initialValues={\n          editing\n            ? {\n                name: editing.name,\n                description: editing.description,\n                parent_id: editing.parent_id || undefined,\n                health_check_freq_id: editing.health_check_freq_id,\n                iso_standard_id: editing.iso_standard_id || undefined,\n              }\n            : createChildParent\n              ? {\n                  parent_id: createChildParent.id,\n                }\n              : undefined\n        }\n        onFinish={async (values) => {\n          const payload: DeviceCategoryPayload = {\n            name: values.name.trim(),\n            description: values.description || undefined,\n            parent_id: values.parent_id || null,\n            health_check_freq_id: values.health_check_freq_id,\n            iso_standard_id: values.iso_standard_id || null,\n          };\n          setSaving(true);\n          try {\n            if (editing) {\n              await updateDeviceCategory(editing.id, payload);\n            } else {\n              await createDeviceCategory(payload);\n            }\n            message.success('保存成功');\n            setModalOpen(false);\n            setEditing(null);\n            setCreateChildParent(null);\n            await loadCategories();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormText name=\"name\" label=\"分类名称\" rules={[{ required: true, message: '请输入分类名称' }]} />\n        <ProFormText name=\"description\" label=\"备注\" />\n        <ProFormSelect\n          name=\"health_check_freq_id\"\n          label=\"巡检频率\"\n          rules={[{ required: true, message: '请选择巡检频率' }]}\n          options={healthFreqOptions}\n        />\n        <ProFormSelect name=\"iso_standard_id\" label=\"ISO标准\" options={isoOptions} />\n        <ProForm.Item name=\"parent_id\" label=\"上级分类\">\n          <EntityPicker<DeviceCategory>\n            placeholder=\"可选，点击选择上级分类\"\n            modalTitle=\"选择上级分类\"\n            triggerText=\"选择\"\n            valueLabel={\n              editing?.parent_id\n                ? categoryMap.get(editing.parent_id)?.name\n                : createChildParent\n                  ? createChildParent.name\n                  : undefined\n            }\n            columns={parentPickerColumns}\n            getRecordLabel={(record) => record.name}\n            fetcher={async ({ current, pageSize, keyword }) => {\n              const result = await queryDeviceCategories({ current, pageSize, keyword });\n              if (blockedParentIds.size === 0) {\n                return result;\n              }\n              return {\n                ...result,\n                items: result.items.filter((item) => !blockedParentIds.has(item.id)),\n              };\n            }}\n          />\n        </ProForm.Item>\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default DeviceCategoryPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Device/Category/index.tsx"
     },
-    "5": {
+    "10": {
       "path": "/device/specs",
       "name": "设备规格",
       "file": "@/pages/Device/Spec/index.tsx",
-      "parentId": "3",
-      "id": "5",
+      "parentId": "8",
+      "id": "10",
       "absPath": "/device/specs",
-      "__content": "import BusinessPlaceholder from '@/components/BusinessPlaceholder';\n\nconst DeviceSpecPage = () => (\n  <BusinessPlaceholder\n    title=\"设备规格\"\n    description=\"定义设备规格（同类型设备共享规格参数），用于后续批量实例化。\"\n    model=\"device_spec\"\n    apiPath=\"/api/v1/device-specs\"\n  />\n);\n\nexport default DeviceSpecPage;\n",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ProForm,\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProFormDigit,\n  ProFormText,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, message } from 'antd';\nimport type { ColumnsType } from 'antd/es/table';\n\nimport EntityPicker from '@/components/EntityPicker';\nimport {\n  DeviceCategory,\n  listAllDeviceCategories,\n  queryDeviceCategories,\n} from '@/services/deviceCategory';\nimport {\n  DeviceSpec,\n  DeviceSpecPayload,\n  createDeviceSpec,\n  deleteDeviceSpec,\n  listAllDeviceSpecs,\n  updateDeviceSpec,\n} from '@/services/deviceSpec';\nimport { Supplier, listAllSuppliers, querySuppliers } from '@/services/supplier';\n\ntype DeviceSpecFormValues = {\n  name: string;\n  model: string;\n  description?: string;\n  brand: string;\n  voltage: number;\n  rpm: number;\n  supplier_id: string;\n  device_category_id: string;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst DeviceSpecPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [rows, setRows] = useState<DeviceSpec[]>([]);\n  const [editing, setEditing] = useState<DeviceSpec | null>(null);\n  const [query, setQuery] = useState<Record<string, any>>({});\n\n  const [categories, setCategories] = useState<DeviceCategory[]>([]);\n  const [suppliers, setSuppliers] = useState<Supplier[]>([]);\n\n  const categoryMap = useMemo(\n    () => new Map(categories.map((item) => [item.id, item.name])),\n    [categories],\n  );\n  const supplierMap = useMemo(\n    () => new Map(suppliers.map((item) => [item.id, item.name])),\n    [suppliers],\n  );\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      setRows(await listAllDeviceSpecs());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  const loadReferences = async () => {\n    try {\n      const [cates, sups] = await Promise.all([listAllDeviceCategories(), listAllSuppliers()]);\n      setCategories(cates || []);\n      setSuppliers(sups || []);\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n    loadReferences();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    return rows.filter((row) => {\n      if (query.name && !norm(row.name).includes(norm(query.name))) {\n        return false;\n      }\n      if (query.model && !norm(row.model).includes(norm(query.model))) {\n        return false;\n      }\n      if (query.brand && !norm(row.brand).includes(norm(query.brand))) {\n        return false;\n      }\n      if (query.supplier_id) {\n        const supplierName = supplierMap.get(row.supplier_id) || '';\n        const hit =\n          norm(supplierName).includes(norm(query.supplier_id)) ||\n          norm(row.supplier_id).includes(norm(query.supplier_id));\n        if (!hit) {\n          return false;\n        }\n      }\n      if (query.device_category_id) {\n        const categoryName = categoryMap.get(row.device_category_id) || '';\n        const hit =\n          norm(categoryName).includes(norm(query.device_category_id)) ||\n          norm(row.device_category_id).includes(norm(query.device_category_id));\n        if (!hit) {\n          return false;\n        }\n      }\n      if (query.rpm !== undefined && query.rpm !== null && String(row.rpm) !== String(query.rpm)) {\n        return false;\n      }\n      if (\n        query.voltage !== undefined &&\n        query.voltage !== null &&\n        String(row.voltage) !== String(query.voltage)\n      ) {\n        return false;\n      }\n      return true;\n    });\n  }, [categoryMap, query, rows, supplierMap]);\n\n  const supplierPickerColumns: ColumnsType<Supplier> = [\n    { title: '名称', dataIndex: 'name' },\n    { title: '品牌', dataIndex: 'brand' },\n    {\n      title: '联系方式',\n      dataIndex: 'contact_info',\n      render: (_, row) => row.contact_info || '-',\n    },\n    {\n      title: '状态',\n      dataIndex: 'active',\n      width: 80,\n      render: (_, row) => (row.active ? '启用' : '停用'),\n    },\n  ];\n\n  const categoryPickerColumns: ColumnsType<DeviceCategory> = [\n    { title: '分类名称', dataIndex: 'name' },\n    {\n      title: '描述',\n      dataIndex: 'description',\n      render: (_, row) => row.description || '-',\n    },\n  ];\n\n  const columns: ProColumns<DeviceSpec>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '规格名称',\n      dataIndex: 'name',\n      width: 180,\n    },\n    {\n      title: '型号',\n      dataIndex: 'model',\n      width: 160,\n    },\n    {\n      title: '品牌',\n      dataIndex: 'brand',\n      width: 140,\n    },\n    {\n      title: '电压(V)',\n      dataIndex: 'voltage',\n      width: 120,\n      valueType: 'digit',\n    },\n    {\n      title: '转速(RPM)',\n      dataIndex: 'rpm',\n      width: 130,\n      valueType: 'digit',\n    },\n    {\n      title: '供应商',\n      dataIndex: 'supplier_id',\n      width: 180,\n      render: (_, row) => supplierMap.get(row.supplier_id) || row.supplier_id,\n    },\n    {\n      title: '设备分类',\n      dataIndex: 'device_category_id',\n      width: 180,\n      render: (_, row) => categoryMap.get(row.device_category_id) || row.device_category_id,\n    },\n    {\n      title: '备注',\n      dataIndex: 'description',\n      ellipsis: true,\n      render: (_, row) => row.description || '-',\n      hideInSearch: true,\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 170,\n      render: (_, row) => [\n        <Button\n          key=\"edit\"\n          type=\"link\"\n          onClick={() => {\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </Button>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该设备规格吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteDeviceSpec(row.id);\n              message.success('删除成功');\n              await loadRows();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <Button danger type=\"link\">\n            删除\n          </Button>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  return (\n    <PageContainer title=\"设备规格\">\n      <ProTable<DeviceSpec>\n        rowKey=\"id\"\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        options={{ reload: loadRows }}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建设备规格\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<DeviceSpecFormValues>\n        title={editing ? '编辑设备规格' : '新建设备规格'}\n        open={modalOpen}\n        modalProps={{\n          destroyOnClose: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        initialValues={\n          editing\n            ? {\n                name: editing.name,\n                model: editing.model,\n                description: editing.description,\n                brand: editing.brand,\n                voltage: editing.voltage,\n                rpm: editing.rpm,\n                supplier_id: editing.supplier_id,\n                device_category_id: editing.device_category_id,\n              }\n            : { voltage: 0, rpm: 0 }\n        }\n        onFinish={async (values) => {\n          const payload: DeviceSpecPayload = {\n            name: values.name.trim(),\n            model: values.model.trim(),\n            description: values.description || undefined,\n            brand: values.brand.trim(),\n            voltage: values.voltage,\n            rpm: values.rpm,\n            supplier_id: values.supplier_id,\n            device_category_id: values.device_category_id,\n          };\n          setSaving(true);\n          try {\n            if (editing) {\n              await updateDeviceSpec(editing.id, payload);\n            } else {\n              await createDeviceSpec(payload);\n            }\n            message.success('保存成功');\n            setModalOpen(false);\n            setEditing(null);\n            await loadRows();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormText name=\"name\" label=\"规格名称\" rules={[{ required: true, message: '请输入规格名称' }]} />\n        <ProFormText name=\"model\" label=\"型号\" rules={[{ required: true, message: '请输入型号' }]} />\n        <ProFormText name=\"brand\" label=\"品牌\" rules={[{ required: true, message: '请输入品牌' }]} />\n        <ProFormDigit\n          name=\"voltage\"\n          label=\"电压(V)\"\n          min={0}\n          fieldProps={{ precision: 2 }}\n          rules={[{ required: true, message: '请输入电压' }]}\n        />\n        <ProFormDigit\n          name=\"rpm\"\n          label=\"转速(RPM)\"\n          min={0}\n          fieldProps={{ precision: 0 }}\n          rules={[{ required: true, message: '请输入转速' }]}\n        />\n        <ProForm.Item name=\"supplier_id\" label=\"供应商\" rules={[{ required: true, message: '请选择供应商' }]}>\n          <EntityPicker<Supplier>\n            placeholder=\"请点击选择供应商\"\n            modalTitle=\"选择供应商\"\n            triggerText=\"选择\"\n            valueLabel={editing ? supplierMap.get(editing.supplier_id) : undefined}\n            columns={supplierPickerColumns}\n            getRecordLabel={(record) => record.name}\n            fetcher={({ current, pageSize, keyword }) =>\n              querySuppliers({ current, pageSize, keyword })\n            }\n          />\n        </ProForm.Item>\n        <ProForm.Item\n          name=\"device_category_id\"\n          label=\"设备分类\"\n          rules={[{ required: true, message: '请选择设备分类' }]}\n        >\n          <EntityPicker<DeviceCategory>\n            placeholder=\"请点击选择设备分类\"\n            modalTitle=\"选择设备分类\"\n            triggerText=\"选择\"\n            valueLabel={editing ? categoryMap.get(editing.device_category_id) : undefined}\n            columns={categoryPickerColumns}\n            getRecordLabel={(record) => record.name}\n            fetcher={({ current, pageSize, keyword }) =>\n              queryDeviceCategories({ current, pageSize, keyword })\n            }\n          />\n        </ProForm.Item>\n        <ProFormText name=\"description\" label=\"备注\" />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default DeviceSpecPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Device/Spec/index.tsx"
     },
-    "6": {
+    "11": {
       "path": "/device/list",
-      "name": "设备列表",
+      "name": "实例列表",
       "file": "@/pages/Device/List/index.tsx",
-      "parentId": "3",
-      "id": "6",
+      "parentId": "8",
+      "id": "11",
       "absPath": "/device/list",
-      "__content": "import BusinessPlaceholder from '@/components/BusinessPlaceholder';\n\nconst DeviceListPage = () => (\n  <BusinessPlaceholder\n    title=\"设备列表\"\n    description=\"管理设备实例（唯一编码、SN、状态等），来源于设备规格。\"\n    model=\"device_inst\"\n    apiPath=\"/api/v1/device-insts\"\n  />\n);\n\nexport default DeviceListPage;\n",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProForm,\n  ProFormDatePicker,\n  ProFormDigit,\n  ProFormSelect,\n  ProFormText,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, message } from 'antd';\nimport type { ColumnsType } from 'antd/es/table';\nimport dayjs, { type Dayjs } from 'dayjs';\n\nimport EntityPicker from '@/components/EntityPicker';\nimport {\n  createDeviceInst,\n  deleteDeviceInst,\n  DeviceInst,\n  DeviceInstPayload,\n  listAllDeviceInsts,\n  updateDeviceInst,\n} from '@/services/deviceInst';\nimport { DeviceSpec, listAllDeviceSpecs, queryDeviceSpecs } from '@/services/deviceSpec';\n\ntype DeviceInstFormValues = {\n  code: string;\n  device_spec_id: string;\n  sn: string;\n  purchase_date: string | Dayjs;\n  life_span: number;\n  desc: string;\n  status: number;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst toApiDate = (value: string | Dayjs): string => {\n  if (typeof value === 'string') {\n    return value.trim();\n  }\n  return value.format('YYYY-MM-DD');\n};\n\nconst DeviceListPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [rows, setRows] = useState<DeviceInst[]>([]);\n  const [query, setQuery] = useState<Record<string, any>>({});\n  const [editing, setEditing] = useState<DeviceInst | null>(null);\n  const [specs, setSpecs] = useState<DeviceSpec[]>([]);\n\n  const specMap = useMemo(\n    () =>\n      new Map(\n        specs.map((item) => [\n          item.id,\n          `${item.name} / ${item.model}${item.brand ? ` / ${item.brand}` : ''}`,\n        ]),\n      ),\n    [specs],\n  );\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      setRows(await listAllDeviceInsts());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  const loadSpecs = async () => {\n    try {\n      setSpecs(await listAllDeviceSpecs());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n    loadSpecs();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    return rows.filter((row) => {\n      if (query.code && !norm(row.code).includes(norm(query.code))) {\n        return false;\n      }\n      if (query.sn && !norm(row.sn).includes(norm(query.sn))) {\n        return false;\n      }\n      if (query.purchase_date && !norm(row.purchase_date).includes(norm(query.purchase_date))) {\n        return false;\n      }\n      if (query.desc && !norm(row.desc).includes(norm(query.desc))) {\n        return false;\n      }\n      if (\n        query.life_span !== undefined &&\n        query.life_span !== null &&\n        String(row.life_span) !== String(query.life_span)\n      ) {\n        return false;\n      }\n      if (\n        query.status !== undefined &&\n        query.status !== null &&\n        String(row.status) !== String(query.status)\n      ) {\n        return false;\n      }\n      if (query.device_spec_id) {\n        const specText = specMap.get(row.device_spec_id) || '';\n        const hit =\n          norm(specText).includes(norm(query.device_spec_id)) ||\n          norm(row.device_spec_id).includes(norm(query.device_spec_id));\n        if (!hit) {\n          return false;\n        }\n      }\n      return true;\n    });\n  }, [query, rows, specMap]);\n\n  const specPickerColumns: ColumnsType<DeviceSpec> = [\n    { title: '规格名称', dataIndex: 'name' },\n    { title: '型号', dataIndex: 'model' },\n    { title: '品牌', dataIndex: 'brand' },\n    {\n      title: '电压(V)',\n      dataIndex: 'voltage',\n    },\n    {\n      title: '转速(RPM)',\n      dataIndex: 'rpm',\n    },\n  ];\n\n  const columns: ProColumns<DeviceInst>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '实例编码',\n      dataIndex: 'code',\n      width: 140,\n    },\n    {\n      title: '设备SN',\n      dataIndex: 'sn',\n      width: 180,\n    },\n    {\n      title: '设备规格',\n      dataIndex: 'device_spec_id',\n      width: 260,\n      render: (_, row) => specMap.get(row.device_spec_id) || row.device_spec_id,\n    },\n    {\n      title: '采购日期',\n      dataIndex: 'purchase_date',\n      width: 140,\n      valueType: 'date',\n    },\n    {\n      title: '寿命(月)',\n      dataIndex: 'life_span',\n      width: 110,\n      valueType: 'digit',\n    },\n    {\n      title: '描述',\n      dataIndex: 'desc',\n      ellipsis: true,\n      render: (_, row) => row.desc || '-',\n    },\n    {\n      title: '状态',\n      dataIndex: 'status',\n      width: 100,\n      valueType: 'select',\n      valueEnum: {\n        1: { text: '启用' },\n        0: { text: '停用' },\n      },\n      render: (_, row) => (Number(row.status) === 1 ? '启用' : '停用'),\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 180,\n      render: (_, row) => [\n        <Button\n          key=\"edit\"\n          type=\"link\"\n          onClick={() => {\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </Button>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该设备实例吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteDeviceInst(row.id);\n              message.success('删除成功');\n              await loadRows();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <Button danger type=\"link\">\n            删除\n          </Button>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  return (\n    <PageContainer title=\"设备列表\">\n      <ProTable<DeviceInst>\n        rowKey=\"id\"\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        options={{ reload: loadRows }}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建设备实例\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<DeviceInstFormValues>\n        title={editing ? '编辑设备实例' : '新建设备实例'}\n        open={modalOpen}\n        modalProps={{\n          destroyOnClose: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        initialValues={\n          editing\n            ? {\n                code: editing.code,\n                device_spec_id: editing.device_spec_id,\n                sn: editing.sn,\n                purchase_date: dayjs(editing.purchase_date),\n                life_span: editing.life_span,\n                desc: editing.desc,\n                status: Number(editing.status),\n              }\n            : {\n                life_span: 0,\n                status: 1,\n              }\n        }\n        onFinish={async (values) => {\n          setSaving(true);\n          try {\n            const payload: DeviceInstPayload = {\n              code: values.code.trim(),\n              device_spec_id: values.device_spec_id,\n              sn: values.sn.trim(),\n              purchase_date: toApiDate(values.purchase_date),\n              life_span: Number(values.life_span ?? 0),\n              desc: values.desc.trim(),\n              status: Number(values.status ?? 1),\n            };\n\n            if (editing) {\n              await updateDeviceInst(editing.id, payload);\n              message.success('更新成功');\n            } else {\n              await createDeviceInst(payload);\n              message.success('创建成功');\n            }\n            setModalOpen(false);\n            setEditing(null);\n            await loadRows();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormText\n          name=\"code\"\n          label=\"实例编码\"\n          rules={[\n            { required: true, message: '请输入实例编码' },\n            { max: 16, message: '实例编码最多16个字符' },\n          ]}\n        />\n        <ProFormText\n          name=\"sn\"\n          label=\"设备SN\"\n          rules={[\n            { required: true, message: '请输入设备SN' },\n            { max: 64, message: '设备SN最多64个字符' },\n          ]}\n        />\n        <ProForm.Item\n          name=\"device_spec_id\"\n          label=\"设备规格\"\n          rules={[{ required: true, message: '请选择设备规格' }]}\n        >\n          <EntityPicker<DeviceSpec>\n            modalTitle=\"选择设备规格\"\n            triggerText=\"选择规格\"\n            placeholder=\"请选择设备规格\"\n            valueLabel={\n              editing?.device_spec_id ? specMap.get(editing.device_spec_id) || editing.device_spec_id : undefined\n            }\n            fetcher={queryDeviceSpecs}\n            columns={specPickerColumns}\n            getRecordLabel={(row) => `${row.name} / ${row.model} / ${row.brand}`}\n          />\n        </ProForm.Item>\n        <ProFormDatePicker\n          name=\"purchase_date\"\n          label=\"采购日期\"\n          fieldProps={{ format: 'YYYY-MM-DD' }}\n          rules={[{ required: true, message: '请选择采购日期' }]}\n        />\n        <ProFormDigit\n          name=\"life_span\"\n          label=\"寿命(月)\"\n          min={0}\n          fieldProps={{ precision: 0 }}\n          rules={[{ required: true, message: '请输入寿命(月)' }]}\n        />\n        <ProFormText\n          name=\"desc\"\n          label=\"描述\"\n          rules={[\n            { required: true, message: '请输入描述' },\n            { max: 128, message: '描述最多128个字符' },\n          ]}\n        />\n        <ProFormSelect\n          name=\"status\"\n          label=\"状态\"\n          options={[\n            { label: '启用', value: 1 },\n            { label: '停用', value: 0 },\n          ]}\n          rules={[{ required: true, message: '请选择状态' }]}\n        />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default DeviceListPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Device/List/index.tsx"
     },
-    "7": {
+    "12": {
       "path": "/device",
       "redirect": "/device/categories",
-      "parentId": "3",
-      "id": "7",
+      "parentId": "8",
+      "id": "12",
       "absPath": "/device"
     },
-    "8": {
+    "13": {
       "path": "/process",
       "name": "生产工艺",
       "icon": "ClusterOutlined",
       "parentId": "ant-design-pro-layout",
-      "id": "8",
+      "id": "13",
       "absPath": "/process"
     },
-    "9": {
+    "14": {
       "path": "/process/templates",
       "name": "工段模板",
       "file": "@/pages/Process/Template/index.tsx",
-      "parentId": "8",
-      "id": "9",
+      "parentId": "13",
+      "id": "14",
       "absPath": "/process/templates",
       "__content": "import BusinessPlaceholder from '@/components/BusinessPlaceholder';\n\nconst ProcessTemplatePage = () => (\n  <BusinessPlaceholder\n    title=\"工段模板\"\n    description=\"定义工段模板及其包含的设备组合，不直接对应具体现场实例。\"\n    model=\"device_combo_spec + device_combo_spec_item\"\n    apiPath=\"/api/v1/device-combo-specs\"\n  />\n);\n\nexport default ProcessTemplatePage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Process/Template/index.tsx"
     },
-    "10": {
+    "15": {
       "path": "/process/manage",
       "name": "工段管理",
       "file": "@/pages/Process/Manage/index.tsx",
-      "parentId": "8",
-      "id": "10",
+      "parentId": "13",
+      "id": "15",
       "absPath": "/process/manage",
       "__content": "import BusinessPlaceholder from '@/components/BusinessPlaceholder';\n\nconst ProcessManagePage = () => (\n  <BusinessPlaceholder\n    title=\"工段管理\"\n    description=\"管理工段实例化数据，基于工段模板创建并维护现场工段实例。\"\n    model=\"device_combo_inst + device_combo_inst_item\"\n    apiPath=\"/api/v1/device-combo-insts\"\n  />\n);\n\nexport default ProcessManagePage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Process/Manage/index.tsx"
     },
-    "11": {
+    "16": {
       "path": "/process",
       "redirect": "/process/templates",
-      "parentId": "8",
-      "id": "11",
+      "parentId": "13",
+      "id": "16",
       "absPath": "/process"
     },
-    "12": {
+    "17": {
       "path": "/monitoring",
       "name": "监测管理",
       "icon": "RadarChartOutlined",
       "parentId": "ant-design-pro-layout",
-      "id": "12",
+      "id": "17",
       "absPath": "/monitoring"
     },
-    "13": {
+    "18": {
       "path": "/monitoring/sensors",
       "name": "传感器",
       "file": "@/pages/Monitoring/Sensors/index.tsx",
-      "parentId": "12",
-      "id": "13",
+      "parentId": "17",
+      "id": "18",
       "absPath": "/monitoring/sensors",
       "__content": "import BusinessPlaceholder from '@/components/BusinessPlaceholder';\n\nconst MonitoringSensorsPage = () => (\n  <BusinessPlaceholder\n    title=\"传感器\"\n    description=\"仅展示当前租户已分配的传感器数据，不管理传感器型号。\"\n    model=\"tenant_sensor\"\n    apiPath=\"/api/v1/tenant-sensors\"\n  />\n);\n\nexport default MonitoringSensorsPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Monitoring/Sensors/index.tsx"
     },
-    "14": {
+    "19": {
       "path": "/monitoring/points",
       "name": "测点设置",
       "file": "@/pages/Monitoring/Points/index.tsx",
-      "parentId": "12",
-      "id": "14",
+      "parentId": "17",
+      "id": "19",
       "absPath": "/monitoring/points",
       "__content": "import BusinessPlaceholder from '@/components/BusinessPlaceholder';\n\nconst MonitoringPointsPage = () => (\n  <BusinessPlaceholder\n    title=\"测点设置\"\n    description=\"将传感器绑定至工段实例中的具体设备测点。\"\n    model=\"device_inst_tag\"\n    apiPath=\"/api/v1/device-inst-tags\"\n  />\n);\n\nexport default MonitoringPointsPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Monitoring/Points/index.tsx"
     },
-    "15": {
+    "20": {
       "path": "/monitoring",
       "redirect": "/monitoring/sensors",
-      "parentId": "12",
-      "id": "15",
+      "parentId": "17",
+      "id": "20",
       "absPath": "/monitoring"
     },
-    "16": {
+    "21": {
       "path": "/welcome",
       "name": "Welcome",
       "hideInMenu": true,
       "file": "@/pages/Welcome/index.tsx",
       "parentId": "ant-design-pro-layout",
-      "id": "16",
+      "id": "21",
       "absPath": "/welcome",
       "__content": "import { PageContainer, ProCard } from '@ant-design/pro-components';\nimport { Typography } from 'antd';\n\nconst WelcomePage = () => {\n  return (\n    <PageContainer title=\"Welcome\" subTitle=\"主应用结构页（占位）\">\n      <ProCard bordered>\n        <Typography.Title level={4} style={{ marginTop: 0 }}>\n          Welcome\n        </Typography.Title>\n        <Typography.Paragraph type=\"secondary\">\n          你已进入主应用。后续业务页面将从这里开始扩展。\n        </Typography.Paragraph>\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default WelcomePage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Welcome/index.tsx"
     },
-    "17": {
+    "22": {
       "path": "/profile",
       "hideInMenu": true,
       "file": "@/pages/Profile/index.tsx",
       "parentId": "ant-design-pro-layout",
-      "id": "17",
+      "id": "22",
       "absPath": "/profile",
-      "__content": "import { PageContainer, ProCard } from '@ant-design/pro-components';\nimport { Descriptions, Empty, Typography } from 'antd';\n\nimport { getSession } from '@/utils/session';\n\nconst ProfilePage = () => {\n  const session = getSession();\n\n  return (\n    <PageContainer title=\"个人信息\" subTitle=\"当前登录用户信息\">\n      <ProCard>\n        {session ? (\n          <Descriptions column={1} bordered>\n            <Descriptions.Item label=\"联系人姓名\">\n              {session.contact_name || '-'}\n            </Descriptions.Item>\n            <Descriptions.Item label=\"登录用户名\">{session.username}</Descriptions.Item>\n            <Descriptions.Item label=\"租户公司\">{session.tenant_name || '-'}</Descriptions.Item>\n            <Descriptions.Item label=\"租户ID\">{session.tenant_id}</Descriptions.Item>\n            <Descriptions.Item label=\"账号ID\">{session.account_id}</Descriptions.Item>\n            <Descriptions.Item label=\"用户名类型\">\n              {session.flag === 1 ? '邮箱' : '手机号'}\n            </Descriptions.Item>\n          </Descriptions>\n        ) : (\n          <Empty description=\"未登录\" />\n        )}\n        <Typography.Paragraph type=\"secondary\" style={{ marginTop: 16 }}>\n          如需修改密码，请使用右上角菜单中的“更改密码”。\n        </Typography.Paragraph>\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default ProfilePage;\n",
+      "__content": "import { PageContainer, ProCard } from '@ant-design/pro-components';\nimport { Descriptions, Empty, Typography } from 'antd';\n\nimport { getSession } from '@/utils/session';\n\nconst ProfilePage = () => {\n  const session = getSession();\n\n  return (\n    <PageContainer title=\"个人信息\" subTitle=\"当前登录用户信息\">\n      <ProCard>\n        {session ? (\n          <Descriptions column={1} bordered>\n            <Descriptions.Item label=\"联系人姓名\">\n              {session.contact_name || '-'}\n            </Descriptions.Item>\n            <Descriptions.Item label=\"登录用户名\">{session.username}</Descriptions.Item>\n            <Descriptions.Item label=\"租户公司\">{session.tenant_name || '-'}</Descriptions.Item>\n            <Descriptions.Item label=\"账号ID\">{session.account_id}</Descriptions.Item>\n            <Descriptions.Item label=\"用户名类型\">\n              {session.flag === 1 ? '邮箱' : '手机号'}\n            </Descriptions.Item>\n          </Descriptions>\n        ) : (\n          <Empty description=\"未登录\" />\n        )}\n        <Typography.Paragraph type=\"secondary\" style={{ marginTop: 16 }}>\n          如需修改密码，请使用右上角菜单中的“更改密码”。\n        </Typography.Paragraph>\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default ProfilePage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Profile/index.tsx"
     },
-    "18": {
+    "23": {
       "path": "/change-password",
       "hideInMenu": true,
       "file": "@/pages/ChangePassword/index.tsx",
       "parentId": "ant-design-pro-layout",
-      "id": "18",
+      "id": "23",
       "absPath": "/change-password",
-      "__content": "import { history } from '@umijs/max';\nimport { PageContainer, ProCard, ProForm, ProFormText } from '@ant-design/pro-components';\nimport { message } from 'antd';\n\nimport { changePassword } from '@/services/auth';\nimport { getSession } from '@/utils/session';\n\ntype PasswordFormValues = {\n  current_password: string;\n  new_password: string;\n  confirm_password: string;\n};\n\nconst ChangePasswordPage = () => {\n  return (\n    <PageContainer title=\"更改密码\">\n      <ProCard colSpan={12} style={{ maxWidth: 560, margin: '0 auto' }}>\n        <ProForm<PasswordFormValues>\n          submitter={{\n            searchConfig: {\n              submitText: '保存新密码',\n            },\n          }}\n          onFinish={async (values) => {\n            const session = getSession();\n            if (!session) {\n              message.error('登录已失效，请重新登录');\n              history.push('/login');\n              return false;\n            }\n            if (values.new_password !== values.confirm_password) {\n              message.error('两次输入的新密码不一致');\n              return false;\n            }\n            await changePassword({\n              account_id: session.account_id,\n              current_password: values.current_password,\n              new_password: values.new_password,\n            });\n            message.success('密码修改成功，请使用新密码登录');\n            history.push('/profile');\n            return true;\n          }}\n        >\n          <ProFormText.Password\n            name=\"current_password\"\n            label=\"当前密码\"\n            rules={[{ required: true, message: '请输入当前密码' }]}\n          />\n          <ProFormText.Password\n            name=\"new_password\"\n            label=\"新密码\"\n            rules={[\n              { required: true, message: '请输入新密码' },\n              { min: 6, message: '新密码至少 6 位' },\n            ]}\n          />\n          <ProFormText.Password\n            name=\"confirm_password\"\n            label=\"确认新密码\"\n            rules={[{ required: true, message: '请再次输入新密码' }]}\n          />\n        </ProForm>\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default ChangePasswordPage;\n",
+      "__content": "import { history } from '@umijs/max';\nimport { PageContainer, ProCard, ProForm, ProFormText } from '@ant-design/pro-components';\nimport { message } from 'antd';\n\nimport { changePassword } from '@/services/auth';\nimport { getSession } from '@/utils/session';\n\ntype PasswordFormValues = {\n  current_password: string;\n  new_password: string;\n  confirm_password: string;\n};\n\nconst ChangePasswordPage = () => {\n  return (\n    <PageContainer title=\"更改密码\">\n      <ProCard colSpan={12} style={{ maxWidth: 560, margin: '0 auto' }}>\n        <ProForm<PasswordFormValues>\n          submitter={{\n            searchConfig: {\n              submitText: '保存新密码',\n            },\n          }}\n          onFinish={async (values) => {\n            const session = getSession();\n            if (!session) {\n              message.error('登录已失效，请重新登录');\n              history.push('/login');\n              return false;\n            }\n            if (values.new_password !== values.confirm_password) {\n              message.error('两次输入的新密码不一致');\n              return false;\n            }\n            await changePassword({\n              current_password: values.current_password,\n              new_password: values.new_password,\n            });\n            message.success('密码修改成功，请使用新密码登录');\n            history.push('/profile');\n            return true;\n          }}\n        >\n          <ProFormText.Password\n            name=\"current_password\"\n            label=\"当前密码\"\n            rules={[{ required: true, message: '请输入当前密码' }]}\n          />\n          <ProFormText.Password\n            name=\"new_password\"\n            label=\"新密码\"\n            rules={[\n              { required: true, message: '请输入新密码' },\n              { min: 6, message: '新密码至少 6 位' },\n            ]}\n          />\n          <ProFormText.Password\n            name=\"confirm_password\"\n            label=\"确认新密码\"\n            rules={[{ required: true, message: '请再次输入新密码' }]}\n          />\n        </ProForm>\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default ChangePasswordPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/ChangePassword/index.tsx"
     },
-    "19": {
+    "24": {
       "path": "/",
       "redirect": "/device/categories",
       "parentId": "ant-design-pro-layout",
-      "id": "19",
+      "id": "24",
       "absPath": "/"
     },
     "ant-design-pro-layout": {
@@ -3971,7 +5102,9 @@
     ]
   },
   "mfsuBundleStatus": {
-    "done": true
+    "done": true,
+    "percent": 1,
+    "status": ""
   },
   "react": {
     "version": "18.3.1",
@@ -5132,7 +6265,7 @@
             "format": "esm"
           },
           "src/utils/session.ts": {
-            "bytes": 935,
+            "bytes": 1132,
             "imports": [],
             "format": "esm"
           },
@@ -5168,7 +6301,7 @@
             "format": "esm"
           },
           "src/app.ts": {
-            "bytes": 1532,
+            "bytes": 1932,
             "imports": [
               {
                 "path": "react",
@@ -5489,7 +6622,7 @@
             "format": "esm"
           },
           "src/services/auth.ts": {
-            "bytes": 735,
+            "bytes": 781,
             "imports": [
               {
                 "path": "src/.umi/exports.ts",
@@ -5500,7 +6633,7 @@
             "format": "esm"
           },
           "src/pages/Login/index.tsx": {
-            "bytes": 3223,
+            "bytes": 3125,
             "imports": [
               {
                 "path": "src/.umi/exports.ts",
@@ -5613,11 +6746,95 @@
             ],
             "format": "esm"
           },
-          "src/components/BusinessPlaceholder/index.tsx": {
-            "bytes": 807,
+          "src/services/supplier.ts": {
+            "bytes": 2024,
             "imports": [
               {
+                "path": "src/.umi/exports.ts",
+                "kind": "import-statement",
+                "original": "@umijs/max"
+              }
+            ],
+            "format": "esm"
+          },
+          "src/pages/Device/Supplier/index.tsx": {
+            "bytes": 6376,
+            "imports": [
+              {
+                "path": "react",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
                 "path": "@ant-design/pro-components",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "antd",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "src/services/supplier.ts",
+                "kind": "import-statement",
+                "original": "@/services/supplier"
+              },
+              {
+                "path": "react/jsx-runtime",
+                "kind": "import-statement",
+                "external": true
+              }
+            ],
+            "format": "esm"
+          },
+          "src/services/healthCheckFreq.ts": {
+            "bytes": 1309,
+            "imports": [
+              {
+                "path": "src/.umi/exports.ts",
+                "kind": "import-statement",
+                "original": "@umijs/max"
+              }
+            ],
+            "format": "esm"
+          },
+          "src/pages/Monitoring/Frequency/index.tsx": {
+            "bytes": 7035,
+            "imports": [
+              {
+                "path": "react",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@ant-design/pro-components",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "antd",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "src/services/healthCheckFreq.ts",
+                "kind": "import-statement",
+                "original": "@/services/healthCheckFreq"
+              },
+              {
+                "path": "react/jsx-runtime",
+                "kind": "import-statement",
+                "external": true
+              }
+            ],
+            "format": "esm"
+          },
+          "src/components/EntityPicker/index.tsx": {
+            "bytes": 5780,
+            "imports": [
+              {
+                "path": "react",
                 "kind": "import-statement",
                 "external": true
               },
@@ -5634,29 +6851,106 @@
             ],
             "format": "esm"
           },
-          "src/pages/Device/Category/index.tsx": {
-            "bytes": 363,
+          "src/services/deviceCategory.ts": {
+            "bytes": 3334,
             "imports": [
               {
-                "path": "src/components/BusinessPlaceholder/index.tsx",
+                "path": "src/.umi/exports.ts",
                 "kind": "import-statement",
-                "original": "@/components/BusinessPlaceholder"
+                "original": "@umijs/max"
+              }
+            ],
+            "format": "esm"
+          },
+          "src/pages/Device/Category/index.tsx": {
+            "bytes": 13282,
+            "imports": [
+              {
+                "path": "react",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@ant-design/pro-components",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "antd",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "src/components/EntityPicker/index.tsx",
+                "kind": "import-statement",
+                "original": "@/components/EntityPicker"
+              },
+              {
+                "path": "src/services/deviceCategory.ts",
+                "kind": "import-statement",
+                "original": "@/services/deviceCategory"
               },
               {
                 "path": "react/jsx-runtime",
                 "kind": "import-statement",
                 "external": true
+              }
+            ],
+            "format": "esm"
+          },
+          "src/services/deviceSpec.ts": {
+            "bytes": 2406,
+            "imports": [
+              {
+                "path": "src/.umi/exports.ts",
+                "kind": "import-statement",
+                "original": "@umijs/max"
+              },
+              {
+                "path": "src/services/supplier.ts",
+                "kind": "import-statement",
+                "original": "@/services/supplier"
               }
             ],
             "format": "esm"
           },
           "src/pages/Device/Spec/index.tsx": {
-            "bytes": 356,
+            "bytes": 11483,
             "imports": [
               {
-                "path": "src/components/BusinessPlaceholder/index.tsx",
+                "path": "react",
                 "kind": "import-statement",
-                "original": "@/components/BusinessPlaceholder"
+                "external": true
+              },
+              {
+                "path": "@ant-design/pro-components",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "antd",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "src/components/EntityPicker/index.tsx",
+                "kind": "import-statement",
+                "original": "@/components/EntityPicker"
+              },
+              {
+                "path": "src/services/deviceCategory.ts",
+                "kind": "import-statement",
+                "original": "@/services/deviceCategory"
+              },
+              {
+                "path": "src/services/deviceSpec.ts",
+                "kind": "import-statement",
+                "original": "@/services/deviceSpec"
+              },
+              {
+                "path": "src/services/supplier.ts",
+                "kind": "import-statement",
+                "original": "@/services/supplier"
               },
               {
                 "path": "react/jsx-runtime",
@@ -5666,13 +6960,75 @@
             ],
             "format": "esm"
           },
-          "src/pages/Device/List/index.tsx": {
-            "bytes": 346,
+          "src/services/deviceInst.ts": {
+            "bytes": 1317,
             "imports": [
               {
-                "path": "src/components/BusinessPlaceholder/index.tsx",
+                "path": "src/.umi/exports.ts",
                 "kind": "import-statement",
-                "original": "@/components/BusinessPlaceholder"
+                "original": "@umijs/max"
+              }
+            ],
+            "format": "esm"
+          },
+          "src/pages/Device/List/index.tsx": {
+            "bytes": 11149,
+            "imports": [
+              {
+                "path": "react",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@ant-design/pro-components",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "antd",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "dayjs",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "src/components/EntityPicker/index.tsx",
+                "kind": "import-statement",
+                "original": "@/components/EntityPicker"
+              },
+              {
+                "path": "src/services/deviceInst.ts",
+                "kind": "import-statement",
+                "original": "@/services/deviceInst"
+              },
+              {
+                "path": "src/services/deviceSpec.ts",
+                "kind": "import-statement",
+                "original": "@/services/deviceSpec"
+              },
+              {
+                "path": "react/jsx-runtime",
+                "kind": "import-statement",
+                "external": true
+              }
+            ],
+            "format": "esm"
+          },
+          "src/components/BusinessPlaceholder/index.tsx": {
+            "bytes": 807,
+            "imports": [
+              {
+                "path": "@ant-design/pro-components",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "antd",
+                "kind": "import-statement",
+                "external": true
               },
               {
                 "path": "react/jsx-runtime",
@@ -5768,7 +7124,7 @@
             "format": "esm"
           },
           "src/pages/Profile/index.tsx": {
-            "bytes": 1417,
+            "bytes": 1329,
             "imports": [
               {
                 "path": "@ant-design/pro-components",
@@ -5794,7 +7150,7 @@
             "format": "esm"
           },
           "src/pages/ChangePassword/index.tsx": {
-            "bytes": 2243,
+            "bytes": 2197,
             "imports": [
               {
                 "path": "src/.umi/exports.ts",
@@ -5944,7 +7300,7 @@
             "format": "esm"
           },
           "src/.umi/core/route.tsx": {
-            "bytes": 3855,
+            "bytes": 4762,
             "imports": [
               {
                 "path": "react",
@@ -5960,6 +7316,31 @@
                 "path": "src/pages/Register/index.tsx",
                 "kind": "dynamic-import",
                 "original": "@/pages/Register/index.tsx"
+              },
+              {
+                "path": "src/.umi/core/EmptyRoute.tsx",
+                "kind": "dynamic-import",
+                "original": "./EmptyRoute"
+              },
+              {
+                "path": "src/pages/Device/Supplier/index.tsx",
+                "kind": "dynamic-import",
+                "original": "@/pages/Device/Supplier/index.tsx"
+              },
+              {
+                "path": "src/pages/Monitoring/Frequency/index.tsx",
+                "kind": "dynamic-import",
+                "original": "@/pages/Monitoring/Frequency/index.tsx"
+              },
+              {
+                "path": "src/pages/Monitoring/Frequency/index.tsx",
+                "kind": "dynamic-import",
+                "original": "@/pages/Monitoring/Frequency/index.tsx"
+              },
+              {
+                "path": "src/.umi/core/EmptyRoute.tsx",
+                "kind": "dynamic-import",
+                "original": "./EmptyRoute"
               },
               {
                 "path": "src/.umi/core/EmptyRoute.tsx",
@@ -6290,6 +7671,11 @@
                 "external": true
               },
               {
+                "path": "react",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
                 "path": "@ant-design/pro-components",
                 "kind": "import-statement",
                 "external": true
@@ -6305,12 +7691,112 @@
                 "external": true
               },
               {
-                "path": "react/jsx-runtime",
+                "path": "react",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@ant-design/pro-components",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "antd",
                 "kind": "import-statement",
                 "external": true
               },
               {
                 "path": "react/jsx-runtime",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "react",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "antd",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "react/jsx-runtime",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "react",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@ant-design/pro-components",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "antd",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "react/jsx-runtime",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "react",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@ant-design/pro-components",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "antd",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "react/jsx-runtime",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "react",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@ant-design/pro-components",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "antd",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "dayjs",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "react/jsx-runtime",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@ant-design/pro-components",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "antd",
                 "kind": "import-statement",
                 "external": true
               },
@@ -7540,13 +9026,13 @@
                 "bytesInOutput": 3355
               },
               "src/utils/session.ts": {
-                "bytesInOutput": 730
+                "bytesInOutput": 859
               },
               "src/components/HeaderUserMenu.tsx": {
                 "bytesInOutput": 1824
               },
               "src/app.ts": {
-                "bytesInOutput": 1743
+                "bytesInOutput": 2208
               },
               "src/.umi/core/helmetContext.ts": {
                 "bytesInOutput": 129
@@ -7579,7 +9065,7 @@
                 "bytesInOutput": 1337
               },
               "src/.umi/core/terminal.ts": {
-                "bytesInOutput": 1530
+                "bytesInOutput": 1533
               },
               "src/.umi/testBrowser.tsx": {
                 "bytesInOutput": 2353
@@ -7591,7 +9077,7 @@
                 "bytesInOutput": 358
               },
               "src/pages/Login/index.tsx": {
-                "bytesInOutput": 4202
+                "bytesInOutput": 4033
               },
               "src/services/register.ts": {
                 "bytesInOutput": 239
@@ -7602,17 +9088,41 @@
               "src/.umi/core/EmptyRoute.tsx": {
                 "bytesInOutput": 381
               },
-              "src/components/BusinessPlaceholder/index.tsx": {
-                "bytesInOutput": 1090
+              "src/services/supplier.ts": {
+                "bytesInOutput": 1388
+              },
+              "src/pages/Device/Supplier/index.tsx": {
+                "bytesInOutput": 7810
+              },
+              "src/services/healthCheckFreq.ts": {
+                "bytesInOutput": 905
+              },
+              "src/pages/Monitoring/Frequency/index.tsx": {
+                "bytesInOutput": 8707
+              },
+              "src/components/EntityPicker/index.tsx": {
+                "bytesInOutput": 5822
+              },
+              "src/services/deviceCategory.ts": {
+                "bytesInOutput": 1777
               },
               "src/pages/Device/Category/index.tsx": {
-                "bytesInOutput": 771
+                "bytesInOutput": 14852
+              },
+              "src/services/deviceSpec.ts": {
+                "bytesInOutput": 1440
               },
               "src/pages/Device/Spec/index.tsx": {
-                "bytesInOutput": 749
+                "bytesInOutput": 13552
+              },
+              "src/services/deviceInst.ts": {
+                "bytesInOutput": 851
               },
               "src/pages/Device/List/index.tsx": {
-                "bytesInOutput": 727
+                "bytesInOutput": 13600
+              },
+              "src/components/BusinessPlaceholder/index.tsx": {
+                "bytesInOutput": 1097
               },
               "src/pages/Process/Template/index.tsx": {
                 "bytesInOutput": 818
@@ -7627,16 +9137,16 @@
                 "bytesInOutput": 733
               },
               "src/pages/Welcome/index.tsx": {
-                "bytesInOutput": 1066
+                "bytesInOutput": 1068
               },
               "src/pages/Profile/index.tsx": {
-                "bytesInOutput": 2010
+                "bytesInOutput": 1905
               },
               "src/pages/ChangePassword/index.tsx": {
-                "bytesInOutput": 3060
+                "bytesInOutput": 3018
               },
               "src/.umi/plugin-layout/Logo.tsx": {
-                "bytesInOutput": 5504
+                "bytesInOutput": 5514
               },
               "src/.umi/plugin-layout/Exception.tsx": {
                 "bytesInOutput": 1117
@@ -7645,10 +9155,10 @@
                 "bytesInOutput": 2890
               },
               "src/.umi/plugin-layout/Layout.tsx": {
-                "bytesInOutput": 6114
+                "bytesInOutput": 6127
               },
               "src/.umi/core/route.tsx": {
-                "bytesInOutput": 4242
+                "bytesInOutput": 5274
               },
               "src/.umi/core/polyfill.ts": {
                 "bytesInOutput": 27201
@@ -7657,7 +9167,7 @@
                 "bytesInOutput": 1955
               }
             },
-            "bytes": 103590
+            "bytes": 173681
           }
         }
       }
@@ -10957,6 +12467,104 @@
           "type": "ImportDeclaration"
         }
       ],
+      "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/components/EntityPicker/index.tsx": [
+        {
+          "end": 75,
+          "importKind": "value",
+          "source": "react",
+          "specifiers": [
+            {
+              "imported": "useCallback",
+              "local": "useCallback",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "useEffect",
+              "local": "useEffect",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "useMemo",
+              "local": "useMemo",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "useRef",
+              "local": "useRef",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "useState",
+              "local": "useState",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 1,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 109,
+          "importKind": "type",
+          "source": "react",
+          "specifiers": [
+            {
+              "imported": "Key",
+              "local": "Key",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 76,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 168,
+          "importKind": "value",
+          "source": "antd",
+          "specifiers": [
+            {
+              "imported": "Button",
+              "local": "Button",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "Input",
+              "local": "Input",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "Modal",
+              "local": "Modal",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "Space",
+              "local": "Space",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "Table",
+              "local": "Table",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 110,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 218,
+          "importKind": "type",
+          "source": "antd/es/table",
+          "specifiers": [
+            {
+              "imported": "ColumnsType",
+              "local": "ColumnsType",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 169,
+          "type": "ImportDeclaration"
+        }
+      ],
       "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/components/HeaderUserMenu.tsx": [
         {
           "end": 38,
@@ -11139,46 +12747,729 @@
       ],
       "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Device/Category/index.tsx": [
         {
-          "end": 68,
+          "end": 54,
           "importKind": "value",
-          "source": "@/components/BusinessPlaceholder",
+          "source": "react",
           "specifiers": [
             {
-              "local": "BusinessPlaceholder",
-              "type": "ImportDefaultSpecifier"
+              "imported": "useEffect",
+              "local": "useEffect",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "useMemo",
+              "local": "useMemo",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "useState",
+              "local": "useState",
+              "type": "ImportSpecifier"
             }
           ],
           "start": 1,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 199,
+          "importKind": "value",
+          "source": "@ant-design/pro-components",
+          "specifiers": [
+            {
+              "imported": "ModalForm",
+              "local": "ModalForm",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "PageContainer",
+              "local": "PageContainer",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProForm",
+              "local": "ProForm",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProColumns",
+              "local": "ProColumns",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProFormSelect",
+              "local": "ProFormSelect",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProFormText",
+              "local": "ProFormText",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProTable",
+              "local": "ProTable",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 55,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 251,
+          "importKind": "value",
+          "source": "antd",
+          "specifiers": [
+            {
+              "imported": "Button",
+              "local": "Button",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "Popconfirm",
+              "local": "Popconfirm",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "message",
+              "local": "message",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 200,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 301,
+          "importKind": "type",
+          "source": "antd/es/table",
+          "specifiers": [
+            {
+              "imported": "ColumnsType",
+              "local": "ColumnsType",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 252,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 355,
+          "importKind": "value",
+          "source": "@/components/EntityPicker",
+          "specifiers": [
+            {
+              "local": "EntityPicker",
+              "type": "ImportDefaultSpecifier"
+            }
+          ],
+          "start": 302,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 612,
+          "importKind": "value",
+          "source": "@/services/deviceCategory",
+          "specifiers": [
+            {
+              "imported": "DeviceCategory",
+              "local": "DeviceCategory",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "DeviceCategoryPayload",
+              "local": "DeviceCategoryPayload",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "createDeviceCategory",
+              "local": "createDeviceCategory",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "deleteDeviceCategory",
+              "local": "deleteDeviceCategory",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "listAllDeviceCategories",
+              "local": "listAllDeviceCategories",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "listHealthCheckFreqs",
+              "local": "listHealthCheckFreqs",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "listIsoStandards",
+              "local": "listIsoStandards",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "queryDeviceCategories",
+              "local": "queryDeviceCategories",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "updateDeviceCategory",
+              "local": "updateDeviceCategory",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 357,
           "type": "ImportDeclaration"
         }
       ],
       "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Device/List/index.tsx": [
         {
-          "end": 68,
+          "end": 54,
           "importKind": "value",
-          "source": "@/components/BusinessPlaceholder",
+          "source": "react",
           "specifiers": [
             {
-              "local": "BusinessPlaceholder",
-              "type": "ImportDefaultSpecifier"
+              "imported": "useEffect",
+              "local": "useEffect",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "useMemo",
+              "local": "useMemo",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "useState",
+              "local": "useState",
+              "type": "ImportSpecifier"
             }
           ],
           "start": 1,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 236,
+          "importKind": "value",
+          "source": "@ant-design/pro-components",
+          "specifiers": [
+            {
+              "imported": "ModalForm",
+              "local": "ModalForm",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "PageContainer",
+              "local": "PageContainer",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProColumns",
+              "local": "ProColumns",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProForm",
+              "local": "ProForm",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProFormDatePicker",
+              "local": "ProFormDatePicker",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProFormDigit",
+              "local": "ProFormDigit",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProFormSelect",
+              "local": "ProFormSelect",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProFormText",
+              "local": "ProFormText",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProTable",
+              "local": "ProTable",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 55,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 288,
+          "importKind": "value",
+          "source": "antd",
+          "specifiers": [
+            {
+              "imported": "Button",
+              "local": "Button",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "Popconfirm",
+              "local": "Popconfirm",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "message",
+              "local": "message",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 237,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 338,
+          "importKind": "type",
+          "source": "antd/es/table",
+          "specifiers": [
+            {
+              "imported": "ColumnsType",
+              "local": "ColumnsType",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 289,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 381,
+          "importKind": "value",
+          "source": "dayjs",
+          "specifiers": [
+            {
+              "local": "dayjs",
+              "type": "ImportDefaultSpecifier"
+            },
+            {
+              "imported": "Dayjs",
+              "local": "Dayjs",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 339,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 436,
+          "importKind": "value",
+          "source": "@/components/EntityPicker",
+          "specifiers": [
+            {
+              "local": "EntityPicker",
+              "type": "ImportDefaultSpecifier"
+            }
+          ],
+          "start": 383,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 594,
+          "importKind": "value",
+          "source": "@/services/deviceInst",
+          "specifiers": [
+            {
+              "imported": "createDeviceInst",
+              "local": "createDeviceInst",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "deleteDeviceInst",
+              "local": "deleteDeviceInst",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "DeviceInst",
+              "local": "DeviceInst",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "DeviceInstPayload",
+              "local": "DeviceInstPayload",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "listAllDeviceInsts",
+              "local": "listAllDeviceInsts",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "updateDeviceInst",
+              "local": "updateDeviceInst",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 437,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 684,
+          "importKind": "value",
+          "source": "@/services/deviceSpec",
+          "specifiers": [
+            {
+              "imported": "DeviceSpec",
+              "local": "DeviceSpec",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "listAllDeviceSpecs",
+              "local": "listAllDeviceSpecs",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "queryDeviceSpecs",
+              "local": "queryDeviceSpecs",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 595,
           "type": "ImportDeclaration"
         }
       ],
       "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Device/Spec/index.tsx": [
         {
-          "end": 68,
+          "end": 54,
           "importKind": "value",
-          "source": "@/components/BusinessPlaceholder",
+          "source": "react",
           "specifiers": [
             {
-              "local": "BusinessPlaceholder",
-              "type": "ImportDefaultSpecifier"
+              "imported": "useEffect",
+              "local": "useEffect",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "useMemo",
+              "local": "useMemo",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "useState",
+              "local": "useState",
+              "type": "ImportSpecifier"
             }
           ],
           "start": 1,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 198,
+          "importKind": "value",
+          "source": "@ant-design/pro-components",
+          "specifiers": [
+            {
+              "imported": "ProForm",
+              "local": "ProForm",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ModalForm",
+              "local": "ModalForm",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "PageContainer",
+              "local": "PageContainer",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProColumns",
+              "local": "ProColumns",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProFormDigit",
+              "local": "ProFormDigit",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProFormText",
+              "local": "ProFormText",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProTable",
+              "local": "ProTable",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 55,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 250,
+          "importKind": "value",
+          "source": "antd",
+          "specifiers": [
+            {
+              "imported": "Button",
+              "local": "Button",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "Popconfirm",
+              "local": "Popconfirm",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "message",
+              "local": "message",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 199,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 300,
+          "importKind": "type",
+          "source": "antd/es/table",
+          "specifiers": [
+            {
+              "imported": "ColumnsType",
+              "local": "ColumnsType",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 251,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 355,
+          "importKind": "value",
+          "source": "@/components/EntityPicker",
+          "specifiers": [
+            {
+              "local": "EntityPicker",
+              "type": "ImportDefaultSpecifier"
+            }
+          ],
+          "start": 302,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 470,
+          "importKind": "value",
+          "source": "@/services/deviceCategory",
+          "specifiers": [
+            {
+              "imported": "DeviceCategory",
+              "local": "DeviceCategory",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "listAllDeviceCategories",
+              "local": "listAllDeviceCategories",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "queryDeviceCategories",
+              "local": "queryDeviceCategories",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 356,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 628,
+          "importKind": "value",
+          "source": "@/services/deviceSpec",
+          "specifiers": [
+            {
+              "imported": "DeviceSpec",
+              "local": "DeviceSpec",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "DeviceSpecPayload",
+              "local": "DeviceSpecPayload",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "createDeviceSpec",
+              "local": "createDeviceSpec",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "deleteDeviceSpec",
+              "local": "deleteDeviceSpec",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "listAllDeviceSpecs",
+              "local": "listAllDeviceSpecs",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "updateDeviceSpec",
+              "local": "updateDeviceSpec",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 471,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 710,
+          "importKind": "value",
+          "source": "@/services/supplier",
+          "specifiers": [
+            {
+              "imported": "Supplier",
+              "local": "Supplier",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "listAllSuppliers",
+              "local": "listAllSuppliers",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "querySuppliers",
+              "local": "querySuppliers",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 629,
+          "type": "ImportDeclaration"
+        }
+      ],
+      "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Device/Supplier/index.tsx": [
+        {
+          "end": 54,
+          "importKind": "value",
+          "source": "react",
+          "specifiers": [
+            {
+              "imported": "useEffect",
+              "local": "useEffect",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "useMemo",
+              "local": "useMemo",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "useState",
+              "local": "useState",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 1,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 188,
+          "importKind": "value",
+          "source": "@ant-design/pro-components",
+          "specifiers": [
+            {
+              "imported": "ModalForm",
+              "local": "ModalForm",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "PageContainer",
+              "local": "PageContainer",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProColumns",
+              "local": "ProColumns",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProFormSwitch",
+              "local": "ProFormSwitch",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProFormText",
+              "local": "ProFormText",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProTable",
+              "local": "ProTable",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 55,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 245,
+          "importKind": "value",
+          "source": "antd",
+          "specifiers": [
+            {
+              "imported": "Button",
+              "local": "Button",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "Popconfirm",
+              "local": "Popconfirm",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "Tag",
+              "local": "Tag",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "message",
+              "local": "message",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 189,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 390,
+          "importKind": "value",
+          "source": "@/services/supplier",
+          "specifiers": [
+            {
+              "imported": "Supplier",
+              "local": "Supplier",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "SupplierPayload",
+              "local": "SupplierPayload",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "createSupplier",
+              "local": "createSupplier",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "deleteSupplier",
+              "local": "deleteSupplier",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "listAllSuppliers",
+              "local": "listAllSuppliers",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "updateSupplier",
+              "local": "updateSupplier",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 247,
           "type": "ImportDeclaration"
         }
       ],
@@ -11325,6 +13616,139 @@
             }
           ],
           "start": 311,
+          "type": "ImportDeclaration"
+        }
+      ],
+      "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Monitoring/Frequency/index.tsx": [
+        {
+          "end": 54,
+          "importKind": "value",
+          "source": "react",
+          "specifiers": [
+            {
+              "imported": "useEffect",
+              "local": "useEffect",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "useMemo",
+              "local": "useMemo",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "useState",
+              "local": "useState",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 1,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 189,
+          "importKind": "value",
+          "source": "@ant-design/pro-components",
+          "specifiers": [
+            {
+              "imported": "ModalForm",
+              "local": "ModalForm",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "PageContainer",
+              "local": "PageContainer",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProColumns",
+              "local": "ProColumns",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProFormDigit",
+              "local": "ProFormDigit",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProFormSwitch",
+              "local": "ProFormSwitch",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProTable",
+              "local": "ProTable",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 55,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 246,
+          "importKind": "value",
+          "source": "antd",
+          "specifiers": [
+            {
+              "imported": "Button",
+              "local": "Button",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "Popconfirm",
+              "local": "Popconfirm",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "Tag",
+              "local": "Tag",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "message",
+              "local": "message",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 190,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 440,
+          "importKind": "value",
+          "source": "@/services/healthCheckFreq",
+          "specifiers": [
+            {
+              "imported": "HealthCheckFreq",
+              "local": "HealthCheckFreq",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "HealthCheckFreqPayload",
+              "local": "HealthCheckFreqPayload",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "createHealthCheckFreq",
+              "local": "createHealthCheckFreq",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "deleteHealthCheckFreq",
+              "local": "deleteHealthCheckFreq",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "listAllHealthCheckFreqs",
+              "local": "listAllHealthCheckFreqs",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "updateHealthCheckFreq",
+              "local": "updateHealthCheckFreq",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 248,
           "type": "ImportDeclaration"
         }
       ],
@@ -11613,7 +14037,115 @@
           "type": "ImportDeclaration"
         }
       ],
+      "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/services/deviceCategory.ts": [
+        {
+          "end": 38,
+          "importKind": "value",
+          "source": "@umijs/max",
+          "specifiers": [
+            {
+              "imported": "request",
+              "local": "request",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 1,
+          "type": "ImportDeclaration"
+        }
+      ],
+      "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/services/deviceInst.ts": [
+        {
+          "end": 38,
+          "importKind": "value",
+          "source": "@umijs/max",
+          "specifiers": [
+            {
+              "imported": "request",
+              "local": "request",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 1,
+          "type": "ImportDeclaration"
+        }
+      ],
+      "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/services/deviceSpec.ts": [
+        {
+          "end": 38,
+          "importKind": "value",
+          "source": "@umijs/max",
+          "specifiers": [
+            {
+              "imported": "request",
+              "local": "request",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 1,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 94,
+          "importKind": "value",
+          "source": "@/services/supplier",
+          "specifiers": [
+            {
+              "imported": "listAllSuppliers",
+              "local": "listAllSuppliers",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 39,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 147,
+          "importKind": "type",
+          "source": "@/services/supplier",
+          "specifiers": [
+            {
+              "imported": "Supplier",
+              "local": "Supplier",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 95,
+          "type": "ImportDeclaration"
+        }
+      ],
+      "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/services/healthCheckFreq.ts": [
+        {
+          "end": 38,
+          "importKind": "value",
+          "source": "@umijs/max",
+          "specifiers": [
+            {
+              "imported": "request",
+              "local": "request",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 1,
+          "type": "ImportDeclaration"
+        }
+      ],
       "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/services/register.ts": [
+        {
+          "end": 38,
+          "importKind": "value",
+          "source": "@umijs/max",
+          "specifiers": [
+            {
+              "imported": "request",
+              "local": "request",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 1,
+          "type": "ImportDeclaration"
+        }
+      ],
+      "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/services/supplier.ts": [
         {
           "end": 38,
           "importKind": "value",

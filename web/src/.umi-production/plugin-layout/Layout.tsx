@@ -16,7 +16,7 @@ import './Layout.css';
 import Logo from './Logo';
 import Exception from './Exception';
 import { getRightRenderContent } from './rightRender';
-import { useModel } from '@@/plugin-model';
+const useModel = null;
 const useAccessMarkedRoutes = (r) => r;
 
 
@@ -80,7 +80,15 @@ export default (props: any) => {
   };
   const { initialState, loading, setInitialState } = initialInfo;
   const userConfig = {
-  "title": "Portal"
+  "title": "Portal",
+  "logo": "https://preview.pro.ant.design/static/logo.f0355d39.svg",
+  "layout": "mix",
+  "splitMenus": false,
+  "navTheme": "dark",
+  "headerTheme": "light",
+  "fixedHeader": true,
+  "fixSiderbar": true,
+  "contentWidth": "Fluid"
 };
 const formatMessage = undefined;
   const runtimeConfig = pluginManager.applyPlugins({

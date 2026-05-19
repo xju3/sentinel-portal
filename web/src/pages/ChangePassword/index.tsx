@@ -33,7 +33,6 @@ const ChangePasswordPage = () => {
               return false;
             }
             await changePassword({
-              account_id: session.account_id,
               current_password: values.current_password,
               new_password: values.new_password,
             });

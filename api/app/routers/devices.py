@@ -3,12 +3,14 @@ Device related management endpoints
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from datetime import date
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 from pydantic import BaseModel, ConfigDict
 from uuid import UUID
 
 from app.database import db_manager
+from app.models.customer import Account as AccountModel
 from app.services.device_service import (
     IsoStandardService,
     DeviceCategoryService,
@@ -20,6 +22,7 @@ from app.services.device_service import (
     DeviceComboInstItemService,
     DeviceInstTagService,
 )
+from app.utils.auth import get_current_account
 
 router = APIRouter(tags=["devices"])
 
@@ -115,6 +118,7 @@ async def delete_iso_standard(
 class DeviceCategoryCreate(BaseModel):
     name: str
     description: Optional[str] = None
+    parent_id: Optional[UUID] = None
     health_check_freq_id: UUID
     tenant_id: Optional[UUID] = None
     iso_standard_id: Optional[UUID] = None
@@ -123,72 +127,209 @@ class DeviceCategoryCreate(BaseModel):
 class DeviceCategoryUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
+    parent_id: Optional[UUID] = None
     health_check_freq_id: Optional[UUID] = None
     tenant_id: Optional[UUID] = None
     iso_standard_id: Optional[UUID] = None
+
+
+class HealthCheckFreqBrief(BaseModel):
+    id: UUID
+    patrol: int
+    diagnosis: int
+    report: int
+    status: bool
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class DeviceCategoryResponse(BaseModel):
     id: UUID
     name: str
     description: Optional[str] = None
+    parent_id: Optional[UUID] = None
     health_check_freq_id: UUID
     tenant_id: Optional[UUID] = None
     iso_standard_id: Optional[UUID] = None
+    health_check_freq: Optional[HealthCheckFreqBrief] = None
 
     model_config = ConfigDict(from_attributes=True)
+
+
+class PagedCountResponse(BaseModel):
+    total: int
+
+
+def _serialize_device_category(
+    item,
+    freq_obj=None,
+) -> dict:
+    return {
+        "id": item.id,
+        "name": item.name,
+        "description": item.description,
+        "parent_id": item.parent_id,
+        "health_check_freq_id": item.health_check_freq_id,
+        "tenant_id": item.tenant_id,
+        "iso_standard_id": item.iso_standard_id,
+        "health_check_freq": (
+            {
+                "id": freq_obj.id,
+                "patrol": freq_obj.patrol,
+                "diagnosis": freq_obj.diagnosis,
+                "report": freq_obj.report,
+                "status": freq_obj.status,
+            }
+            if freq_obj is not None
+            else None
+        ),
+    }
+
+
+async def _validate_device_category_parent(
+    session: AsyncSession,
+    tenant_id: UUID,
+    parent_id: Optional[UUID],
+    current_id: Optional[UUID] = None,
+) -> None:
+    if parent_id is None:
+        return
+
+    if current_id is not None and parent_id == current_id:
+        raise HTTPException(status_code=400, detail="parent_id cannot be self")
+
+    cursor = parent_id
+    visited = set()
+    while cursor is not None:
+        if cursor in visited:
+            raise HTTPException(status_code=400, detail="Cycle detected in category hierarchy")
+        visited.add(cursor)
+
+        parent = await DeviceCategoryService.get_by_id(session, tenant_id, cursor)
+        if not parent:
+            raise HTTPException(status_code=400, detail="Parent category not found")
+
+        if current_id is not None and parent.id == current_id:
+            raise HTTPException(status_code=400, detail="Cycle detected in category hierarchy")
+
+        cursor = parent.parent_id
 
 
 @router.get("/device-categories", response_model=List[DeviceCategoryResponse])
 async def list_device_categories(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    keyword: Optional[str] = Query(None),
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    return await DeviceCategoryService.get_all(session, skip, limit)
+    tenant_id = current_account.tenant_id
+    rows = await DeviceCategoryService.get_all(session, tenant_id, skip, limit, keyword)
+    freq_map = await DeviceCategoryService.get_health_check_freq_map(
+        session,
+        tenant_id,
+        [row.health_check_freq_id for row in rows],
+    )
+    return [
+        _serialize_device_category(row, freq_map.get(row.health_check_freq_id))
+        for row in rows
+    ]
+
+
+@router.get("/device-categories/count", response_model=PagedCountResponse)
+async def count_device_categories(
+    keyword: Optional[str] = Query(None),
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    tenant_id = current_account.tenant_id
+    total = await DeviceCategoryService.count_all(session, tenant_id, keyword)
+    return {"total": total}
 
 
 @router.get("/device-categories/{obj_id}", response_model=DeviceCategoryResponse)
 async def get_device_category(
     obj_id: UUID,
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    obj = await DeviceCategoryService.get_by_id(session, obj_id)
+    tenant_id = current_account.tenant_id
+    obj = await DeviceCategoryService.get_by_id(session, tenant_id, obj_id)
     if not obj:
         raise HTTPException(status_code=404, detail="DeviceCategory not found")
-    return obj
+    freq_map = await DeviceCategoryService.get_health_check_freq_map(
+        session,
+        tenant_id,
+        [obj.health_check_freq_id],
+    )
+    return _serialize_device_category(obj, freq_map.get(obj.health_check_freq_id))
 
 
 @router.post("/device-categories", response_model=DeviceCategoryResponse)
 async def create_device_category(
     item: DeviceCategoryCreate,
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    return await DeviceCategoryService.create(session, item.model_dump())
+    tenant_id = current_account.tenant_id
+    payload = item.model_dump(exclude_unset=True)
+    if "tenant_id" in payload and payload["tenant_id"] is not None and payload["tenant_id"] != tenant_id:
+        raise HTTPException(status_code=400, detail="tenant_id mismatch")
+    payload["tenant_id"] = tenant_id
+    await _validate_device_category_parent(session, tenant_id, payload.get("parent_id"))
+    created = await DeviceCategoryService.create(session, payload)
+    freq_map = await DeviceCategoryService.get_health_check_freq_map(
+        session,
+        tenant_id,
+        [created.health_check_freq_id],
+    )
+    return _serialize_device_category(created, freq_map.get(created.health_check_freq_id))
 
 
 @router.put("/device-categories/{obj_id}", response_model=DeviceCategoryResponse)
 async def update_device_category(
     obj_id: UUID,
     item: DeviceCategoryUpdate,
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    db_obj = await DeviceCategoryService.get_by_id(session, obj_id)
+    tenant_id = current_account.tenant_id
+    db_obj = await DeviceCategoryService.get_by_id(session, tenant_id, obj_id)
     if not db_obj:
         raise HTTPException(status_code=404, detail="DeviceCategory not found")
 
     update_data = item.model_dump(exclude_unset=True)
-    return await DeviceCategoryService.update(session, db_obj, update_data)
+    if "tenant_id" in update_data and update_data["tenant_id"] != tenant_id:
+        raise HTTPException(status_code=400, detail="tenant_id cannot be changed")
+    update_data.pop("tenant_id", None)
+    if "parent_id" in update_data:
+        await _validate_device_category_parent(session, tenant_id, update_data.get("parent_id"), obj_id)
+    updated = await DeviceCategoryService.update(session, db_obj, update_data)
+    freq_map = await DeviceCategoryService.get_health_check_freq_map(
+        session,
+        tenant_id,
+        [updated.health_check_freq_id],
+    )
+    return _serialize_device_category(updated, freq_map.get(updated.health_check_freq_id))
 
 
 @router.delete("/device-categories/{obj_id}")
 async def delete_device_category(
     obj_id: UUID,
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    db_obj = await DeviceCategoryService.get_by_id(session, obj_id)
+    tenant_id = current_account.tenant_id
+    db_obj = await DeviceCategoryService.get_by_id(session, tenant_id, obj_id)
     if not db_obj:
         raise HTTPException(status_code=404, detail="DeviceCategory not found")
+
+    has_children = await DeviceCategoryService.has_children(session, tenant_id, obj_id)
+    if has_children:
+        raise HTTPException(
+            status_code=400,
+            detail="Cannot delete category with child categories",
+        )
 
     await DeviceCategoryService.delete(session, db_obj)
     return {"message": "DeviceCategory deleted successfully"}
@@ -295,6 +436,9 @@ class DeviceInstCreate(BaseModel):
     code: str
     device_spec_id: UUID
     sn: str
+    purchase_date: date
+    life_span: Optional[int] = 0
+    desc: str
     status: Optional[int] = 1
 
 
@@ -302,6 +446,9 @@ class DeviceInstUpdate(BaseModel):
     code: Optional[str] = None
     device_spec_id: Optional[UUID] = None
     sn: Optional[str] = None
+    purchase_date: Optional[date] = None
+    life_span: Optional[int] = None
+    desc: Optional[str] = None
     status: Optional[int] = None
 
 
@@ -310,6 +457,9 @@ class DeviceInstResponse(BaseModel):
     code: str
     device_spec_id: UUID
     sn: str
+    purchase_date: date
+    life_span: int
+    desc: str
     status: int
 
     model_config = ConfigDict(from_attributes=True)

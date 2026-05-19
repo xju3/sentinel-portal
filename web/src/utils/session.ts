@@ -1,6 +1,9 @@
 export const SESSION_KEY = 'portal_session';
 
 export type PortalSession = {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
   account_id: string;
   username: string;
   tenant_id: string;
@@ -20,7 +23,12 @@ export function getSession(): PortalSession | null {
     if (!raw) {
       return null;
     }
-    return JSON.parse(raw) as PortalSession;
+    const parsed = JSON.parse(raw) as PortalSession;
+    if (!parsed?.access_token) {
+      localStorage.removeItem(SESSION_KEY);
+      return null;
+    }
+    return parsed;
   } catch {
     try {
       localStorage.removeItem(SESSION_KEY);

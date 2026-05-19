@@ -6,6 +6,9 @@ export type LoginPayload = {
 };
 
 export type LoginResult = {
+  access_token: string;
+  token_type: string;
+  expires_in: number;
   account_id: string;
   username: string;
   tenant_id: string;
@@ -16,7 +19,6 @@ export type LoginResult = {
 };
 
 export type ChangePasswordPayload = {
-  account_id: string;
   current_password: string;
   new_password: string;
 };

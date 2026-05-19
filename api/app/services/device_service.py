@@ -6,6 +6,7 @@ from uuid import UUID
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import func, or_
 
 from app.models.device import (
     IsoStandard,
@@ -18,6 +19,7 @@ from app.models.device import (
     DeviceComboInstItem,
     DeviceInstTag,
 )
+from app.models.customer import HealthCheckFreq
 
 
 class IsoStandardService:
@@ -57,16 +59,85 @@ class IsoStandardService:
 
 class DeviceCategoryService:
     @staticmethod
-    async def get_all(session: AsyncSession, skip: int, limit: int) -> List[DeviceCategory]:
-        stmt = select(DeviceCategory).offset(skip).limit(limit)
+    async def get_all(
+        session: AsyncSession,
+        tenant_id: UUID,
+        skip: int,
+        limit: int,
+        keyword: Optional[str] = None,
+    ) -> List[DeviceCategory]:
+        stmt = select(DeviceCategory).where(DeviceCategory.tenant_id == tenant_id)
+        if keyword:
+            like_kw = f"%{keyword.strip()}%"
+            stmt = stmt.where(
+                or_(
+                    DeviceCategory.name.ilike(like_kw),
+                    DeviceCategory.description.ilike(like_kw),
+                )
+            )
+        stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return result.scalars().all()
 
     @staticmethod
-    async def get_by_id(session: AsyncSession, obj_id: UUID) -> Optional[DeviceCategory]:
-        stmt = select(DeviceCategory).where(DeviceCategory.id == obj_id)
+    async def count_all(
+        session: AsyncSession,
+        tenant_id: UUID,
+        keyword: Optional[str] = None,
+    ) -> int:
+        stmt = select(func.count(DeviceCategory.id)).where(DeviceCategory.tenant_id == tenant_id)
+        if keyword:
+            like_kw = f"%{keyword.strip()}%"
+            stmt = stmt.where(
+                or_(
+                    DeviceCategory.name.ilike(like_kw),
+                    DeviceCategory.description.ilike(like_kw),
+                )
+            )
+        result = await session.execute(stmt)
+        return int(result.scalar_one() or 0)
+
+    @staticmethod
+    async def has_children(session: AsyncSession, tenant_id: UUID, obj_id: UUID) -> bool:
+        stmt = (
+            select(DeviceCategory.id)
+            .where(
+                DeviceCategory.parent_id == obj_id,
+                DeviceCategory.tenant_id == tenant_id,
+            )
+            .limit(1)
+        )
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none() is not None
+
+    @staticmethod
+    async def get_by_id(
+        session: AsyncSession,
+        tenant_id: UUID,
+        obj_id: UUID,
+    ) -> Optional[DeviceCategory]:
+        stmt = select(DeviceCategory).where(
+            DeviceCategory.id == obj_id,
+            DeviceCategory.tenant_id == tenant_id,
+        )
         result = await session.execute(stmt)
         return result.scalar_one_or_none()
+
+    @staticmethod
+    async def get_health_check_freq_map(
+        session: AsyncSession,
+        tenant_id: UUID,
+        freq_ids: List[UUID],
+    ) -> dict[UUID, HealthCheckFreq]:
+        if not freq_ids:
+            return {}
+        stmt = select(HealthCheckFreq).where(
+            HealthCheckFreq.tenant_id == tenant_id,
+            HealthCheckFreq.id.in_(freq_ids),
+        )
+        result = await session.execute(stmt)
+        rows = result.scalars().all()
+        return {row.id: row for row in rows}
 
     @staticmethod
     async def create(session: AsyncSession, data: dict) -> DeviceCategory:

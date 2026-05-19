@@ -13,8 +13,11 @@ from pydantic import BaseModel, ConfigDict, field_validator
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from app.config import settings
 from app.database import db_manager
 from app.models.customer import Account, Contact, Tenant
+from app.utils.auth import get_current_account
+from app.utils.jwt_token import create_access_token
 
 router = APIRouter(tags=["auth"])
 
@@ -79,6 +82,9 @@ class LoginRequest(BaseModel):
 
 
 class LoginResponse(BaseModel):
+    access_token: str
+    token_type: str
+    expires_in: int
     account_id: UUID
     username: str
     tenant_id: UUID
@@ -91,7 +97,6 @@ class LoginResponse(BaseModel):
 
 
 class ChangePasswordRequest(BaseModel):
-    account_id: UUID
     current_password: str
     new_password: str
 
@@ -239,7 +244,17 @@ async def login(
         if contact is not None:
             contact_name = contact.name
 
+    expires_in = settings.jwt_access_token_expires_minutes * 60
+    access_token = create_access_token(
+        subject=str(account.id),
+        tenant_id=str(account.tenant_id),
+        username=account.username,
+    )
+
     return LoginResponse(
+        access_token=access_token,
+        token_type="Bearer",
+        expires_in=expires_in,
         account_id=account.id,
         username=account.username,
         tenant_id=account.tenant_id,
@@ -253,19 +268,14 @@ async def login(
 @router.post("/auth/change-password")
 async def change_password(
     payload: ChangePasswordRequest,
+    current_account: Account = Depends(get_current_account),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    result = await session.execute(
-        select(Account).where(Account.id == payload.account_id, Account.active == True)  # noqa: E712
-    )
-    account = result.scalar_one_or_none()
-    if account is None:
-        raise HTTPException(status_code=404, detail="account not found")
-    if account.password != payload.current_password:
+    if current_account.password != payload.current_password:
         raise HTTPException(status_code=400, detail="current password is incorrect")
     if payload.current_password == payload.new_password:
         raise HTTPException(status_code=400, detail="new password must be different")
 
-    account.password = payload.new_password
+    current_account.password = payload.new_password
     await session.commit()
     return {"message": "password updated"}

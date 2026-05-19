@@ -7,6 +7,25 @@ import { getSession } from '@/utils/session';
 
 export const request: RequestConfig = {
   timeout: 10000,
+  requestInterceptors: [
+    (url, options) => {
+      const session = getSession();
+      if (!session?.access_token) {
+        return { url, options };
+      }
+
+      return {
+        url,
+        options: {
+          ...options,
+          headers: {
+            ...(options?.headers || {}),
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        },
+      };
+    },
+  ],
 };
 
 const PUBLIC_PATHS = ['/login', '/register'];

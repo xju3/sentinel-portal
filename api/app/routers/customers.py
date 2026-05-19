@@ -9,6 +9,7 @@ from pydantic import BaseModel, ConfigDict
 from uuid import UUID
 
 from app.database import db_manager
+from app.models.customer import Account as AccountModel
 from app.services.customer_service import (
     TenantService,
     TenantSensorService,
@@ -17,6 +18,7 @@ from app.services.customer_service import (
     AreaService,
     HealthCheckFreqService,
 )
+from app.utils.auth import get_current_account
 
 router = APIRouter(tags=["customers"])
 
@@ -188,7 +190,7 @@ class SupplierCreate(BaseModel):
     brand: str
     contact_info: Optional[str] = None
     active: Optional[bool] = True
-    tenant_id: UUID
+    tenant_id: Optional[UUID] = None
 
 
 class SupplierUpdate(BaseModel):
@@ -209,21 +211,41 @@ class SupplierResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class PagedCountResponse(BaseModel):
+    total: int
+
+
 @router.get("/suppliers", response_model=List[SupplierResponse])
 async def list_suppliers(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    keyword: Optional[str] = Query(None),
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    return await SupplierService.get_suppliers(session, skip, limit)
+    tenant_id = current_account.tenant_id
+    return await SupplierService.get_suppliers(session, tenant_id, skip, limit, keyword)
+
+
+@router.get("/suppliers/count", response_model=PagedCountResponse)
+async def count_suppliers(
+    keyword: Optional[str] = Query(None),
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    tenant_id = current_account.tenant_id
+    total = await SupplierService.count_suppliers(session, tenant_id, keyword)
+    return {"total": total}
 
 
 @router.get("/suppliers/{supplier_id}", response_model=SupplierResponse)
 async def get_supplier(
     supplier_id: UUID,
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    supplier = await SupplierService.get_supplier(session, supplier_id)
+    tenant_id = current_account.tenant_id
+    supplier = await SupplierService.get_supplier(session, tenant_id, supplier_id)
     if not supplier:
         raise HTTPException(status_code=404, detail="Supplier not found")
     return supplier
@@ -232,18 +254,26 @@ async def get_supplier(
 @router.post("/suppliers", response_model=SupplierResponse)
 async def create_supplier(
     supplier: SupplierCreate,
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    return await SupplierService.create_supplier(session, supplier.model_dump())
+    tenant_id = current_account.tenant_id
+    payload = supplier.model_dump(exclude_unset=True)
+    if "tenant_id" in payload and payload["tenant_id"] is not None and payload["tenant_id"] != tenant_id:
+        raise HTTPException(status_code=400, detail="tenant_id mismatch")
+    payload["tenant_id"] = tenant_id
+    return await SupplierService.create_supplier(session, payload)
 
 
 @router.put("/suppliers/{supplier_id}", response_model=SupplierResponse)
 async def update_supplier(
     supplier_id: UUID,
     supplier: SupplierUpdate,
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    db_supplier = await SupplierService.get_supplier(session, supplier_id)
+    tenant_id = current_account.tenant_id
+    db_supplier = await SupplierService.get_supplier(session, tenant_id, supplier_id)
     if not db_supplier:
         raise HTTPException(status_code=404, detail="Supplier not found")
 
@@ -254,9 +284,11 @@ async def update_supplier(
 @router.delete("/suppliers/{supplier_id}")
 async def delete_supplier(
     supplier_id: UUID,
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    db_supplier = await SupplierService.get_supplier(session, supplier_id)
+    tenant_id = current_account.tenant_id
+    db_supplier = await SupplierService.get_supplier(session, tenant_id, supplier_id)
     if not db_supplier:
         raise HTTPException(status_code=404, detail="Supplier not found")
 
@@ -429,7 +461,15 @@ class HealthCheckFreqCreate(BaseModel):
     diagnosis: Optional[int] = 1440
     report: Optional[int] = 1
     status: Optional[bool] = True
-    tenant_id: UUID
+    tenant_id: Optional[UUID] = None
+
+
+class HealthCheckFreqUpdate(BaseModel):
+    patrol: Optional[int] = None
+    diagnosis: Optional[int] = None
+    report: Optional[int] = None
+    status: Optional[bool] = None
+    tenant_id: Optional[UUID] = None
 
 
 class HealthCheckFreqResponse(BaseModel):
@@ -447,14 +487,54 @@ class HealthCheckFreqResponse(BaseModel):
 async def list_health_check_freqs(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    return await HealthCheckFreqService.get_health_check_freqs(session, skip, limit)
+    tenant_id = current_account.tenant_id
+    return await HealthCheckFreqService.get_health_check_freqs(session, tenant_id, skip, limit)
 
 
 @router.post("/health-check-freqs", response_model=HealthCheckFreqResponse)
 async def create_health_check_freq(
     freq: HealthCheckFreqCreate,
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    return await HealthCheckFreqService.create_health_check_freq(session, freq.model_dump())
+    tenant_id = current_account.tenant_id
+    payload = freq.model_dump(exclude_unset=True)
+    payload["tenant_id"] = tenant_id
+    return await HealthCheckFreqService.create_health_check_freq(session, payload)
+
+
+@router.put("/health-check-freqs/{freq_id}", response_model=HealthCheckFreqResponse)
+async def update_health_check_freq(
+    freq_id: UUID,
+    freq: HealthCheckFreqUpdate,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    tenant_id = current_account.tenant_id
+    db_freq = await HealthCheckFreqService.get_health_check_freq(session, tenant_id, freq_id)
+    if not db_freq:
+        raise HTTPException(status_code=404, detail="HealthCheckFreq not found")
+
+    update_data = freq.model_dump(exclude_unset=True)
+    if "tenant_id" in update_data and update_data["tenant_id"] != tenant_id:
+        raise HTTPException(status_code=400, detail="tenant_id cannot be changed")
+    update_data.pop("tenant_id", None)
+    return await HealthCheckFreqService.update_health_check_freq(session, db_freq, update_data)
+
+
+@router.delete("/health-check-freqs/{freq_id}")
+async def delete_health_check_freq(
+    freq_id: UUID,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    tenant_id = current_account.tenant_id
+    db_freq = await HealthCheckFreqService.get_health_check_freq(session, tenant_id, freq_id)
+    if not db_freq:
+        raise HTTPException(status_code=404, detail="HealthCheckFreq not found")
+
+    await HealthCheckFreqService.delete_health_check_freq(session, db_freq)
+    return {"message": "HealthCheckFreq deleted successfully"}

@@ -38,7 +38,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 5
       },
       "enableBy": "register"
     },
@@ -51,7 +51,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -68,7 +68,7 @@
             0
           ]
         },
-        "register": 3
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -82,7 +82,7 @@
       "time": {
         "hooks": {
           "onStart": [
-            1
+            2
           ]
         },
         "register": 2
@@ -102,7 +102,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -115,7 +115,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -129,10 +129,10 @@
       "time": {
         "hooks": {
           "modifyAppData": [
-            16
+            15
           ]
         },
-        "register": 15
+        "register": 14
       },
       "enableBy": "register"
     },
@@ -145,7 +145,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -165,7 +165,7 @@
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -182,7 +182,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -195,7 +195,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1064,7 +1064,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1081,7 +1081,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1107,7 +1107,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 53
+        "register": 51
       },
       "enableBy": "register"
     },
@@ -1120,7 +1120,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 28
+        "register": 19
       },
       "enableBy": "config"
     },
@@ -1133,7 +1133,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 8
+        "register": 9
       },
       "enableBy": "config"
     },
@@ -1150,7 +1150,7 @@
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1163,7 +1163,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1189,7 +1189,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 22
+        "register": 25
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/mpa/mpa": {
@@ -1253,7 +1253,7 @@
       "time": {
         "hooks": {
           "modifyConfig": [
-            1
+            0
           ]
         },
         "register": 1
@@ -1333,7 +1333,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 4
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -1359,7 +1359,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/ssr/ssr": {
@@ -1371,7 +1371,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1397,7 +1397,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1436,7 +1436,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 2
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/monorepo/redirect": {
@@ -1448,7 +1448,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 13
+        "register": 15
       },
       "enableBy": "config"
     },
@@ -1461,7 +1461,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/clickToComponent/clickToComponent": {
@@ -1473,7 +1473,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/legacy/legacy": {
@@ -1485,7 +1485,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1498,7 +1498,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1511,7 +1511,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/swc/swc": {
@@ -1527,7 +1527,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1540,7 +1540,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/mako/mako": {
@@ -1565,7 +1565,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/hmrGuardian/hmrGuardian": {
@@ -1577,7 +1577,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 2
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/routePreloadOnLoad/routePreloadOnLoad": {
@@ -1589,7 +1589,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 18
+        "register": 17
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/forget/forget": {
@@ -1665,7 +1665,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1691,7 +1691,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1704,7 +1704,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1717,7 +1717,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1743,7 +1743,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1834,7 +1834,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1847,7 +1847,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1873,7 +1873,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1886,7 +1886,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1899,7 +1899,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 14
+        "register": 13
       },
       "enableBy": "register"
     },
@@ -1925,7 +1925,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1966,7 +1966,7 @@
       "time": {
         "hooks": {
           "modifyConfig": [
-            1
+            3
           ],
           "modifyAppData": [
             0
@@ -1975,7 +1975,7 @@
             0
           ]
         },
-        "register": 5
+        "register": 6
       }
     },
     "./node_modules/@umijs/plugins/dist/dva": {
@@ -1987,7 +1987,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 8
+        "register": 4
       },
       "enableBy": "config"
     },
@@ -2022,7 +2022,7 @@
             0
           ],
           "modifyAppData": [
-            1
+            0
           ]
         },
         "register": 2
@@ -2077,7 +2077,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2090,7 +2090,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -2115,7 +2115,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       }
     },
     "./node_modules/@umijs/plugins/dist/react-query": {
@@ -2166,7 +2166,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2179,7 +2179,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2193,7 +2193,7 @@
       "time": {
         "hooks": {
           "modifyConfig": [
-            0
+            1
           ]
         },
         "register": 0
@@ -2213,7 +2213,7 @@
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -2227,7 +2227,7 @@
       "time": {
         "hooks": {
           "onCheckPkgJSON": [
-            1
+            0
           ]
         },
         "register": 0
@@ -2243,7 +2243,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     }
@@ -2256,9 +2256,22 @@
   "userConfig": {
     "npmClient": "npm",
     "antd": {},
-    "initialState": {},
+    "proxy": {
+      "/api": {
+        "target": "http://127.0.0.1:8000",
+        "changeOrigin": true
+      }
+    },
     "layout": {
-      "title": "Portal"
+      "title": "Portal",
+      "logo": "https://preview.pro.ant.design/static/logo.f0355d39.svg",
+      "layout": "mix",
+      "splitMenus": false,
+      "navTheme": "dark",
+      "headerTheme": "light",
+      "fixedHeader": true,
+      "fixSiderbar": true,
+      "contentWidth": "Fluid"
     },
     "model": {},
     "request": {},
@@ -2274,10 +2287,30 @@
         "layout": false
       },
       {
-        "path": "/welcome",
-        "name": "Welcome",
-        "hideInMenu": true,
-        "component": "@/pages/Welcome"
+        "path": "/data",
+        "name": "基础数据",
+        "icon": "AppstoreOutlined",
+        "routes": [
+          {
+            "path": "/data/suppliers",
+            "name": "供应商",
+            "component": "@/pages/Device/Supplier"
+          },
+          {
+            "path": "/data/frequency",
+            "name": "故障测点",
+            "component": "@/pages/Monitoring/Frequency"
+          },
+          {
+            "path": "/data/frequency",
+            "name": "监测频率",
+            "component": "@/pages/Monitoring/Frequency"
+          },
+          {
+            "path": "/data",
+            "redirect": "/data/suppliers"
+          }
+        ]
       },
       {
         "path": "/device",
@@ -2296,7 +2329,7 @@
           },
           {
             "path": "/device/list",
-            "name": "设备列表",
+            "name": "实例列表",
             "component": "@/pages/Device/List"
           },
           {
@@ -2348,20 +2381,24 @@
         ]
       },
       {
+        "path": "/welcome",
+        "name": "Welcome",
+        "hideInMenu": true,
+        "component": "@/pages/Welcome"
+      },
+      {
         "path": "/profile",
-        "name": "Profile",
         "hideInMenu": true,
         "component": "@/pages/Profile"
       },
       {
         "path": "/change-password",
-        "name": "Change Password",
         "hideInMenu": true,
         "component": "@/pages/ChangePassword"
       },
       {
         "path": "/",
-        "redirect": "/login"
+        "redirect": "/device/categories"
       }
     ]
   },
@@ -2397,9 +2434,22 @@
     },
     "npmClient": "npm",
     "antd": {},
-    "initialState": {},
+    "proxy": {
+      "/api": {
+        "target": "http://127.0.0.1:8000",
+        "changeOrigin": true
+      }
+    },
     "layout": {
-      "title": "Portal"
+      "title": "Portal",
+      "logo": "https://preview.pro.ant.design/static/logo.f0355d39.svg",
+      "layout": "mix",
+      "splitMenus": false,
+      "navTheme": "dark",
+      "headerTheme": "light",
+      "fixedHeader": true,
+      "fixSiderbar": true,
+      "contentWidth": "Fluid"
     },
     "model": {},
     "request": {},
@@ -2415,10 +2465,30 @@
         "layout": false
       },
       {
-        "path": "/welcome",
-        "name": "Welcome",
-        "hideInMenu": true,
-        "component": "@/pages/Welcome"
+        "path": "/data",
+        "name": "基础数据",
+        "icon": "AppstoreOutlined",
+        "routes": [
+          {
+            "path": "/data/suppliers",
+            "name": "供应商",
+            "component": "@/pages/Device/Supplier"
+          },
+          {
+            "path": "/data/frequency",
+            "name": "故障测点",
+            "component": "@/pages/Monitoring/Frequency"
+          },
+          {
+            "path": "/data/frequency",
+            "name": "监测频率",
+            "component": "@/pages/Monitoring/Frequency"
+          },
+          {
+            "path": "/data",
+            "redirect": "/data/suppliers"
+          }
+        ]
       },
       {
         "path": "/device",
@@ -2437,7 +2507,7 @@
           },
           {
             "path": "/device/list",
-            "name": "设备列表",
+            "name": "实例列表",
             "component": "@/pages/Device/List"
           },
           {
@@ -2489,20 +2559,24 @@
         ]
       },
       {
+        "path": "/welcome",
+        "name": "Welcome",
+        "hideInMenu": true,
+        "component": "@/pages/Welcome"
+      },
+      {
         "path": "/profile",
-        "name": "Profile",
         "hideInMenu": true,
         "component": "@/pages/Profile"
       },
       {
         "path": "/change-password",
-        "name": "Change Password",
         "hideInMenu": true,
         "component": "@/pages/ChangePassword"
       },
       {
         "path": "/",
-        "redirect": "/login"
+        "redirect": "/device/categories"
       }
     ],
     "targets": {
@@ -3429,7 +3503,7 @@
       "file": "@/pages/Login/index.tsx",
       "id": "1",
       "absPath": "/login",
-      "__content": "import { Link, useNavigate } from '@umijs/max';\nimport { PageContainer, ProCard, ProForm, ProFormText } from '@ant-design/pro-components';\nimport { Alert, Button, Space, Typography, message } from 'antd';\nimport { useEffect, useState } from 'react';\n\nimport { login, type LoginResult } from '@/services/auth';\nimport { clearSession, getSession, saveSession } from '@/utils/session';\n\ntype LoginFormValues = {\n  username: string;\n  password: string;\n};\n\nconst LoginPage = () => {\n  const navigate = useNavigate();\n  const [session, setSession] = useState<LoginResult | null>(null);\n\n  useEffect(() => {\n    const parsed = getSession();\n    if (parsed) setSession(parsed);\n  }, []);\n\n  const handleLogout = () => {\n    clearSession();\n    setSession(null);\n    message.success('已退出登录');\n  };\n\n  return (\n    <PageContainer title=\"账号登录\" content=\"使用用户名和密码登录平台。\" ghost>\n      <ProCard colSpan={12} style={{ maxWidth: 560, margin: '0 auto' }}>\n        {session ? (\n          <Alert\n            type=\"success\"\n            showIcon\n            message=\"当前已登录\"\n            description={\n              <Space direction=\"vertical\" size={4}>\n                <Typography.Text>用户名: {session.username}</Typography.Text>\n                <Typography.Text type=\"secondary\">租户ID: {session.tenant_id}</Typography.Text>\n                <Space>\n                  <Button type=\"primary\" onClick={() => navigate('/device/categories')}>\n                    进入主应用\n                  </Button>\n                  <Button onClick={handleLogout}>退出登录</Button>\n                </Space>\n              </Space>\n            }\n          />\n        ) : (\n          <>\n            <ProForm<LoginFormValues>\n              submitter={{\n                searchConfig: {\n                  submitText: '登录',\n                },\n              }}\n              onFinish={async (values) => {\n                const res = await login({\n                  username: values.username,\n                  password: values.password,\n                });\n                saveSession(res);\n                setSession(res);\n                message.success('登录成功');\n                navigate('/device/categories');\n                return true;\n              }}\n            >\n              <ProFormText\n                name=\"username\"\n                label=\"用户名\"\n                placeholder=\"请输入用户名\"\n                rules={[{ required: true, message: '请输入用户名' }]}\n              />\n\n              <ProFormText.Password\n                name=\"password\"\n                label=\"密码\"\n                placeholder=\"请输入密码\"\n                rules={[{ required: true, message: '请输入密码' }]}\n              />\n            </ProForm>\n\n            <Alert\n              type=\"info\"\n              showIcon\n              message=\"还没有账号？\"\n              description={\n                <Typography.Text>\n                  请先前往 <Link to=\"/register\">注册页</Link> 创建账号。\n                </Typography.Text>\n              }\n            />\n          </>\n        )}\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default LoginPage;\n",
+      "__content": "import { Link, useNavigate } from '@umijs/max';\nimport { PageContainer, ProCard, ProForm, ProFormText } from '@ant-design/pro-components';\nimport { Alert, Button, Space, Typography, message } from 'antd';\nimport { useEffect, useState } from 'react';\n\nimport { login, type LoginResult } from '@/services/auth';\nimport { clearSession, getSession, saveSession } from '@/utils/session';\n\ntype LoginFormValues = {\n  username: string;\n  password: string;\n};\n\nconst LoginPage = () => {\n  const navigate = useNavigate();\n  const [session, setSession] = useState<LoginResult | null>(null);\n\n  useEffect(() => {\n    const parsed = getSession();\n    if (parsed) setSession(parsed);\n  }, []);\n\n  const handleLogout = () => {\n    clearSession();\n    setSession(null);\n    message.success('已退出登录');\n  };\n\n  return (\n    <PageContainer title=\"账号登录\" content=\"使用用户名和密码登录平台。\" ghost>\n      <ProCard colSpan={12} style={{ maxWidth: 560, margin: '0 auto' }}>\n        {session ? (\n          <Alert\n            type=\"success\"\n            showIcon\n            message=\"当前已登录\"\n            description={\n              <Space direction=\"vertical\" size={4}>\n                <Typography.Text>用户名: {session.username}</Typography.Text>\n                <Space>\n                  <Button type=\"primary\" onClick={() => navigate('/device/categories')}>\n                    进入主应用\n                  </Button>\n                  <Button onClick={handleLogout}>退出登录</Button>\n                </Space>\n              </Space>\n            }\n          />\n        ) : (\n          <>\n            <ProForm<LoginFormValues>\n              submitter={{\n                searchConfig: {\n                  submitText: '登录',\n                },\n              }}\n              onFinish={async (values) => {\n                const res = await login({\n                  username: values.username,\n                  password: values.password,\n                });\n                saveSession(res);\n                setSession(res);\n                message.success('登录成功');\n                navigate('/device/categories');\n                return true;\n              }}\n            >\n              <ProFormText\n                name=\"username\"\n                label=\"用户名\"\n                placeholder=\"请输入用户名\"\n                rules={[{ required: true, message: '请输入用户名' }]}\n              />\n\n              <ProFormText.Password\n                name=\"password\"\n                label=\"密码\"\n                placeholder=\"请输入密码\"\n                rules={[{ required: true, message: '请输入密码' }]}\n              />\n            </ProForm>\n\n            <Alert\n              type=\"info\"\n              showIcon\n              message=\"还没有账号？\"\n              description={\n                <Typography.Text>\n                  请先前往 <Link to=\"/register\">注册页</Link> 创建账号。\n                </Typography.Text>\n              }\n            />\n          </>\n        )}\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default LoginPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Login/index.tsx"
     },
@@ -3444,168 +3518,214 @@
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Register/index.tsx"
     },
     "3": {
-      "path": "/welcome",
-      "name": "Welcome",
-      "hideInMenu": true,
-      "file": "@/pages/Welcome/index.tsx",
+      "path": "/data",
+      "name": "基础数据",
+      "icon": "AppstoreOutlined",
       "parentId": "ant-design-pro-layout",
       "id": "3",
-      "absPath": "/welcome",
-      "__content": "import { PageContainer, ProCard } from '@ant-design/pro-components';\nimport { Typography } from 'antd';\n\nconst WelcomePage = () => {\n  return (\n    <PageContainer title=\"Welcome\" subTitle=\"主应用结构页（占位）\">\n      <ProCard bordered>\n        <Typography.Title level={4} style={{ marginTop: 0 }}>\n          Welcome\n        </Typography.Title>\n        <Typography.Paragraph type=\"secondary\">\n          你已进入主应用。后续业务页面将从这里开始扩展。\n        </Typography.Paragraph>\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default WelcomePage;\n",
-      "__isJSFile": true,
-      "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Welcome/index.tsx"
+      "absPath": "/data"
     },
     "4": {
+      "path": "/data/suppliers",
+      "name": "供应商",
+      "file": "@/pages/Device/Supplier/index.tsx",
+      "parentId": "3",
+      "id": "4",
+      "absPath": "/data/suppliers",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProFormSwitch,\n  ProFormText,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, Tag, message } from 'antd';\n\nimport {\n  Supplier,\n  SupplierPayload,\n  createSupplier,\n  deleteSupplier,\n  listAllSuppliers,\n  updateSupplier,\n} from '@/services/supplier';\n\ntype SupplierFormValues = {\n  name: string;\n  brand: string;\n  contact_info?: string;\n  active: boolean;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst DeviceSupplierPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [rows, setRows] = useState<Supplier[]>([]);\n  const [editing, setEditing] = useState<Supplier | null>(null);\n  const [query, setQuery] = useState<Record<string, any>>({});\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      setRows(await listAllSuppliers());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    return rows.filter((row) => {\n      if (query.name && !norm(row.name).includes(norm(query.name))) {\n        return false;\n      }\n      if (query.brand && !norm(row.brand).includes(norm(query.brand))) {\n        return false;\n      }\n      if (query.contact_info && !norm(row.contact_info).includes(norm(query.contact_info))) {\n        return false;\n      }\n      if (query.active !== undefined && query.active !== null && row.active !== query.active) {\n        return false;\n      }\n      return true;\n    });\n  }, [query, rows]);\n\n  const columns: ProColumns<Supplier>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '供应商名称',\n      dataIndex: 'name',\n      width: 180,\n    },\n    {\n      title: '品牌',\n      dataIndex: 'brand',\n      width: 160,\n    },\n    {\n      title: '联系方式',\n      dataIndex: 'contact_info',\n      ellipsis: true,\n      render: (_, row) => row.contact_info || '-',\n    },\n    {\n      title: '状态',\n      dataIndex: 'active',\n      width: 100,\n      valueEnum: {\n        true: { text: '启用' },\n        false: { text: '停用' },\n      },\n      render: (_, row) => (row.active ? <Tag color=\"success\">启用</Tag> : <Tag>停用</Tag>),\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 170,\n      render: (_, row) => [\n        <Button\n          key=\"edit\"\n          type=\"link\"\n          onClick={() => {\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </Button>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该供应商吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteSupplier(row.id);\n              message.success('删除成功');\n              await loadRows();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <Button danger type=\"link\">\n            删除\n          </Button>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  return (\n    <PageContainer title=\"供应商\">\n      <ProTable<Supplier>\n        rowKey=\"id\"\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        options={{ reload: loadRows }}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建供应商\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<SupplierFormValues>\n        title={editing ? '编辑供应商' : '新建供应商'}\n        open={modalOpen}\n        modalProps={{\n          destroyOnClose: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        initialValues={\n          editing\n            ? {\n                name: editing.name,\n                brand: editing.brand,\n                contact_info: editing.contact_info,\n                active: editing.active,\n              }\n            : {\n                active: true,\n              }\n        }\n        onFinish={async (values) => {\n          const payload: SupplierPayload = {\n            name: values.name.trim(),\n            brand: values.brand.trim(),\n            contact_info: values.contact_info || undefined,\n            active: values.active ?? true,\n          };\n          setSaving(true);\n          try {\n            if (editing) {\n              await updateSupplier(editing.id, payload);\n            } else {\n              await createSupplier(payload);\n            }\n            message.success('保存成功');\n            setModalOpen(false);\n            setEditing(null);\n            await loadRows();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormText\n          name=\"name\"\n          label=\"供应商名称\"\n          rules={[{ required: true, message: '请输入供应商名称' }]}\n        />\n        <ProFormText name=\"brand\" label=\"品牌\" rules={[{ required: true, message: '请输入品牌' }]} />\n        <ProFormText name=\"contact_info\" label=\"联系方式\" />\n        <ProFormSwitch name=\"active\" label=\"启用状态\" />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default DeviceSupplierPage;\n",
+      "__isJSFile": true,
+      "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Device/Supplier/index.tsx"
+    },
+    "5": {
+      "path": "/data/frequency",
+      "name": "故障测点",
+      "file": "@/pages/Monitoring/Frequency/index.tsx",
+      "parentId": "3",
+      "id": "5",
+      "absPath": "/data/frequency",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProFormDigit,\n  ProFormSwitch,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, Tag, message } from 'antd';\n\nimport {\n  HealthCheckFreq,\n  HealthCheckFreqPayload,\n  createHealthCheckFreq,\n  deleteHealthCheckFreq,\n  listAllHealthCheckFreqs,\n  updateHealthCheckFreq,\n} from '@/services/healthCheckFreq';\n\ntype HealthCheckFreqFormValues = {\n  patrol: number;\n  diagnosis: number;\n  report: number;\n  status: boolean;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst MonitoringFrequencyPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [rows, setRows] = useState<HealthCheckFreq[]>([]);\n  const [editing, setEditing] = useState<HealthCheckFreq | null>(null);\n  const [query, setQuery] = useState<Record<string, any>>({});\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      setRows(await listAllHealthCheckFreqs());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    return rows.filter((row) => {\n      if (query.patrol !== undefined && query.patrol !== null && String(row.patrol) !== String(query.patrol)) {\n        return false;\n      }\n      if (\n        query.diagnosis !== undefined &&\n        query.diagnosis !== null &&\n        String(row.diagnosis) !== String(query.diagnosis)\n      ) {\n        return false;\n      }\n      if (query.report !== undefined && query.report !== null && String(row.report) !== String(query.report)) {\n        return false;\n      }\n      if (query.status !== undefined && query.status !== null && row.status !== query.status) {\n        return false;\n      }\n      return true;\n    });\n  }, [query, rows]);\n\n  const columns: ProColumns<HealthCheckFreq>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '巡检频率(分钟)',\n      dataIndex: 'patrol',\n      width: 140,\n      valueType: 'digit',\n    },\n    {\n      title: '诊断频率(分钟)',\n      dataIndex: 'diagnosis',\n      width: 140,\n      valueType: 'digit',\n    },\n    {\n      title: '上报批次',\n      dataIndex: 'report',\n      width: 120,\n      valueType: 'digit',\n    },\n    {\n      title: '状态',\n      dataIndex: 'status',\n      width: 100,\n      valueEnum: {\n        true: { text: '启用' },\n        false: { text: '停用' },\n      },\n      render: (_, row) => (row.status ? <Tag color=\"success\">启用</Tag> : <Tag>停用</Tag>),\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 180,\n      render: (_, row) => [\n        <Button\n          key=\"edit\"\n          type=\"link\"\n          onClick={() => {\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </Button>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该监测频率吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteHealthCheckFreq(row.id);\n              message.success('删除成功');\n              await loadRows();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <Button danger type=\"link\">\n            删除\n          </Button>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  return (\n    <PageContainer title=\"监测频率\">\n      <ProTable<HealthCheckFreq>\n        rowKey=\"id\"\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        options={{ reload: loadRows }}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建频率\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<HealthCheckFreqFormValues>\n        title={editing ? '编辑监测频率' : '新建监测频率'}\n        open={modalOpen}\n        initialValues={\n          editing\n            ? {\n                patrol: editing.patrol,\n                diagnosis: editing.diagnosis,\n                report: editing.report,\n                status: editing.status,\n              }\n            : {\n                patrol: 60,\n                diagnosis: 1440,\n                report: 1,\n                status: true,\n              }\n        }\n        modalProps={{\n          destroyOnClose: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        onFinish={async (values) => {\n          const payload: HealthCheckFreqPayload = {\n            patrol: values.patrol,\n            diagnosis: values.diagnosis,\n            report: values.report,\n            status: values.status ?? true,\n          };\n\n          setSaving(true);\n          try {\n            if (editing) {\n              await updateHealthCheckFreq(editing.id, payload);\n            } else {\n              await createHealthCheckFreq(payload);\n            }\n            message.success('保存成功');\n            setModalOpen(false);\n            setEditing(null);\n            await loadRows();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormDigit\n          name=\"patrol\"\n          label=\"巡检频率(分钟)\"\n          min={1}\n          fieldProps={{ precision: 0 }}\n          rules={[{ required: true, message: '请输入巡检频率' }]}\n        />\n        <ProFormDigit\n          name=\"diagnosis\"\n          label=\"诊断频率(分钟)\"\n          min={1}\n          fieldProps={{ precision: 0 }}\n          rules={[{ required: true, message: '请输入诊断频率' }]}\n        />\n        <ProFormDigit\n          name=\"report\"\n          label=\"上报批次\"\n          min={1}\n          fieldProps={{ precision: 0 }}\n          rules={[{ required: true, message: '请输入上报批次' }]}\n        />\n        <ProFormSwitch name=\"status\" label=\"启用状态\" />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default MonitoringFrequencyPage;\n",
+      "__isJSFile": true,
+      "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Monitoring/Frequency/index.tsx"
+    },
+    "6": {
+      "path": "/data/frequency",
+      "name": "监测频率",
+      "file": "@/pages/Monitoring/Frequency/index.tsx",
+      "parentId": "3",
+      "id": "6",
+      "absPath": "/data/frequency",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProFormDigit,\n  ProFormSwitch,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, Tag, message } from 'antd';\n\nimport {\n  HealthCheckFreq,\n  HealthCheckFreqPayload,\n  createHealthCheckFreq,\n  deleteHealthCheckFreq,\n  listAllHealthCheckFreqs,\n  updateHealthCheckFreq,\n} from '@/services/healthCheckFreq';\n\ntype HealthCheckFreqFormValues = {\n  patrol: number;\n  diagnosis: number;\n  report: number;\n  status: boolean;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst MonitoringFrequencyPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [rows, setRows] = useState<HealthCheckFreq[]>([]);\n  const [editing, setEditing] = useState<HealthCheckFreq | null>(null);\n  const [query, setQuery] = useState<Record<string, any>>({});\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      setRows(await listAllHealthCheckFreqs());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    return rows.filter((row) => {\n      if (query.patrol !== undefined && query.patrol !== null && String(row.patrol) !== String(query.patrol)) {\n        return false;\n      }\n      if (\n        query.diagnosis !== undefined &&\n        query.diagnosis !== null &&\n        String(row.diagnosis) !== String(query.diagnosis)\n      ) {\n        return false;\n      }\n      if (query.report !== undefined && query.report !== null && String(row.report) !== String(query.report)) {\n        return false;\n      }\n      if (query.status !== undefined && query.status !== null && row.status !== query.status) {\n        return false;\n      }\n      return true;\n    });\n  }, [query, rows]);\n\n  const columns: ProColumns<HealthCheckFreq>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '巡检频率(分钟)',\n      dataIndex: 'patrol',\n      width: 140,\n      valueType: 'digit',\n    },\n    {\n      title: '诊断频率(分钟)',\n      dataIndex: 'diagnosis',\n      width: 140,\n      valueType: 'digit',\n    },\n    {\n      title: '上报批次',\n      dataIndex: 'report',\n      width: 120,\n      valueType: 'digit',\n    },\n    {\n      title: '状态',\n      dataIndex: 'status',\n      width: 100,\n      valueEnum: {\n        true: { text: '启用' },\n        false: { text: '停用' },\n      },\n      render: (_, row) => (row.status ? <Tag color=\"success\">启用</Tag> : <Tag>停用</Tag>),\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 180,\n      render: (_, row) => [\n        <Button\n          key=\"edit\"\n          type=\"link\"\n          onClick={() => {\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </Button>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该监测频率吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteHealthCheckFreq(row.id);\n              message.success('删除成功');\n              await loadRows();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <Button danger type=\"link\">\n            删除\n          </Button>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  return (\n    <PageContainer title=\"监测频率\">\n      <ProTable<HealthCheckFreq>\n        rowKey=\"id\"\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        options={{ reload: loadRows }}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建频率\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<HealthCheckFreqFormValues>\n        title={editing ? '编辑监测频率' : '新建监测频率'}\n        open={modalOpen}\n        initialValues={\n          editing\n            ? {\n                patrol: editing.patrol,\n                diagnosis: editing.diagnosis,\n                report: editing.report,\n                status: editing.status,\n              }\n            : {\n                patrol: 60,\n                diagnosis: 1440,\n                report: 1,\n                status: true,\n              }\n        }\n        modalProps={{\n          destroyOnClose: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        onFinish={async (values) => {\n          const payload: HealthCheckFreqPayload = {\n            patrol: values.patrol,\n            diagnosis: values.diagnosis,\n            report: values.report,\n            status: values.status ?? true,\n          };\n\n          setSaving(true);\n          try {\n            if (editing) {\n              await updateHealthCheckFreq(editing.id, payload);\n            } else {\n              await createHealthCheckFreq(payload);\n            }\n            message.success('保存成功');\n            setModalOpen(false);\n            setEditing(null);\n            await loadRows();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormDigit\n          name=\"patrol\"\n          label=\"巡检频率(分钟)\"\n          min={1}\n          fieldProps={{ precision: 0 }}\n          rules={[{ required: true, message: '请输入巡检频率' }]}\n        />\n        <ProFormDigit\n          name=\"diagnosis\"\n          label=\"诊断频率(分钟)\"\n          min={1}\n          fieldProps={{ precision: 0 }}\n          rules={[{ required: true, message: '请输入诊断频率' }]}\n        />\n        <ProFormDigit\n          name=\"report\"\n          label=\"上报批次\"\n          min={1}\n          fieldProps={{ precision: 0 }}\n          rules={[{ required: true, message: '请输入上报批次' }]}\n        />\n        <ProFormSwitch name=\"status\" label=\"启用状态\" />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default MonitoringFrequencyPage;\n",
+      "__isJSFile": true,
+      "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Monitoring/Frequency/index.tsx"
+    },
+    "7": {
+      "path": "/data",
+      "redirect": "/data/suppliers",
+      "parentId": "3",
+      "id": "7",
+      "absPath": "/data"
+    },
+    "8": {
       "path": "/device",
       "name": "设备管理",
       "icon": "AppstoreOutlined",
       "parentId": "ant-design-pro-layout",
-      "id": "4",
-      "absPath": "/device"
-    },
-    "5": {
-      "path": "/device/categories",
-      "name": "设备分类",
-      "file": "@/pages/Device/Category/index.tsx",
-      "parentId": "4",
-      "id": "5",
-      "absPath": "/device/categories",
-      "__content": "import BusinessPlaceholder from '@/components/BusinessPlaceholder';\n\nconst DeviceCategoryPage = () => (\n  <BusinessPlaceholder\n    title=\"设备分类\"\n    description=\"管理设备分类，并可在分类中选择对应 ISO 标准作为可选项。\"\n    model=\"device_category\"\n    apiPath=\"/api/v1/device-categories\"\n  />\n);\n\nexport default DeviceCategoryPage;\n",
-      "__isJSFile": true,
-      "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Device/Category/index.tsx"
-    },
-    "6": {
-      "path": "/device/specs",
-      "name": "设备规格",
-      "file": "@/pages/Device/Spec/index.tsx",
-      "parentId": "4",
-      "id": "6",
-      "absPath": "/device/specs",
-      "__content": "import BusinessPlaceholder from '@/components/BusinessPlaceholder';\n\nconst DeviceSpecPage = () => (\n  <BusinessPlaceholder\n    title=\"设备规格\"\n    description=\"定义设备规格（同类型设备共享规格参数），用于后续批量实例化。\"\n    model=\"device_spec\"\n    apiPath=\"/api/v1/device-specs\"\n  />\n);\n\nexport default DeviceSpecPage;\n",
-      "__isJSFile": true,
-      "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Device/Spec/index.tsx"
-    },
-    "7": {
-      "path": "/device/list",
-      "name": "设备列表",
-      "file": "@/pages/Device/List/index.tsx",
-      "parentId": "4",
-      "id": "7",
-      "absPath": "/device/list",
-      "__content": "import BusinessPlaceholder from '@/components/BusinessPlaceholder';\n\nconst DeviceListPage = () => (\n  <BusinessPlaceholder\n    title=\"设备列表\"\n    description=\"管理设备实例（唯一编码、SN、状态等），来源于设备规格。\"\n    model=\"device_inst\"\n    apiPath=\"/api/v1/device-insts\"\n  />\n);\n\nexport default DeviceListPage;\n",
-      "__isJSFile": true,
-      "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Device/List/index.tsx"
-    },
-    "8": {
-      "path": "/device",
-      "redirect": "/device/categories",
-      "parentId": "4",
       "id": "8",
       "absPath": "/device"
     },
     "9": {
+      "path": "/device/categories",
+      "name": "设备分类",
+      "file": "@/pages/Device/Category/index.tsx",
+      "parentId": "8",
+      "id": "9",
+      "absPath": "/device/categories",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProForm,\n  ProColumns,\n  ProFormSelect,\n  ProFormText,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, message } from 'antd';\nimport type { ColumnsType } from 'antd/es/table';\nimport EntityPicker from '@/components/EntityPicker';\n\nimport {\n  DeviceCategory,\n  DeviceCategoryPayload,\n  createDeviceCategory,\n  deleteDeviceCategory,\n  listAllDeviceCategories,\n  listHealthCheckFreqs,\n  listIsoStandards,\n  queryDeviceCategories,\n  updateDeviceCategory,\n} from '@/services/deviceCategory';\n\ntype CategoryTreeRow = DeviceCategory & {\n  children?: CategoryTreeRow[];\n};\n\ntype CategoryFormValues = {\n  name: string;\n  description?: string;\n  parent_id?: string;\n  health_check_freq_id: string;\n  iso_standard_id?: string;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return (\n    e?.data?.detail ||\n    e?.info?.errorMessage ||\n    e?.message ||\n    '请求失败，请稍后重试'\n  );\n};\n\nconst buildCategoryTree = (rows: DeviceCategory[]): CategoryTreeRow[] => {\n  const nodeMap = new Map<string, CategoryTreeRow>();\n  rows.forEach((item) => nodeMap.set(item.id, { ...item, children: [] }));\n\n  const roots: CategoryTreeRow[] = [];\n  rows.forEach((item) => {\n    const node = nodeMap.get(item.id);\n    if (!node) {\n      return;\n    }\n    const pid = item.parent_id || undefined;\n    if (pid && nodeMap.has(pid)) {\n      const parent = nodeMap.get(pid);\n      if (parent) {\n        parent.children = parent.children || [];\n        parent.children.push(node);\n      }\n      return;\n    }\n    roots.push(node);\n  });\n\n  const sortTree = (nodes: CategoryTreeRow[]) => {\n    nodes.sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));\n    nodes.forEach((item) => {\n      if (item.children && item.children.length > 0) {\n        sortTree(item.children);\n      }\n    });\n  };\n  sortTree(roots);\n  return roots;\n};\n\nconst DeviceCategoryPage = () => {\n  const [tableLoading, setTableLoading] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [editing, setEditing] = useState<DeviceCategory | null>(null);\n  const [createChildParent, setCreateChildParent] = useState<DeviceCategory | null>(null);\n\n  const [categories, setCategories] = useState<DeviceCategory[]>([]);\n  const [query, setQuery] = useState<Record<string, any>>({});\n  const [healthFreqOptions, setHealthFreqOptions] = useState<\n    { label: string; value: string }[]\n  >([]);\n  const [isoOptions, setIsoOptions] = useState<{ label: string; value: string }[]>([]);\n\n  const treeData = useMemo(() => buildCategoryTree(categories), [categories]);\n  const categoryMap = useMemo(\n    () => new Map(categories.map((item) => [item.id, item])),\n    [categories],\n  );\n\n  const blockedParentIds = useMemo(() => {\n    const blockedIds = new Set<string>();\n    if (!editing?.id) {\n      return blockedIds;\n    }\n\n    blockedIds.add(editing.id);\n    const childrenMap = new Map<string, string[]>();\n    categories.forEach((item) => {\n      if (!item.parent_id) {\n        return;\n      }\n      const siblings = childrenMap.get(item.parent_id) || [];\n      siblings.push(item.id);\n      childrenMap.set(item.parent_id, siblings);\n    });\n\n    const queue = [...(childrenMap.get(editing.id) || [])];\n    while (queue.length > 0) {\n      const current = queue.shift();\n      if (!current || blockedIds.has(current)) {\n        continue;\n      }\n      blockedIds.add(current);\n      queue.push(...(childrenMap.get(current) || []));\n    }\n    return blockedIds;\n  }, [categories, editing?.id]);\n\n  const loadCategories = async () => {\n    setTableLoading(true);\n    try {\n      const data = await listAllDeviceCategories();\n      setCategories(data || []);\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setTableLoading(false);\n    }\n  };\n\n  const loadReferences = async () => {\n    try {\n      const [freqs, isos] = await Promise.all([listHealthCheckFreqs(), listIsoStandards()]);\n      setHealthFreqOptions(\n        (freqs || []).map((item) => ({\n          value: item.id,\n          label: `巡检${item.patrol}m / 诊断${item.diagnosis}m / 上报${item.report}`,\n        })),\n      );\n      setIsoOptions(\n        (isos || []).map((item) => ({\n          value: item.id,\n          label: `${item.code} - ${item.name}`,\n        })),\n      );\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    }\n  };\n\n  useEffect(() => {\n    loadCategories();\n    loadReferences();\n  }, []);\n\n  const columns: ProColumns<CategoryTreeRow>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '分类名称',\n      dataIndex: 'name',\n      width: 220,\n    },\n    {\n      title: '上级分类',\n      dataIndex: 'parent_name',\n      width: 220,\n      render: (_, row) => {\n        if (!row.parent_id) {\n          return '-';\n        }\n        return categoryMap.get(row.parent_id)?.name || row.parent_id;\n      },\n    },\n    {\n      title: '巡检频率',\n      dataIndex: 'health_check_freq_id',\n      ellipsis: true,\n      render: (_, row) => {\n        const freq = row.health_check_freq;\n        if (!freq) {\n          return row.health_check_freq_id;\n        }\n        return `巡检${freq.patrol}m / 诊断${freq.diagnosis}m / 上报${freq.report}`;\n      },\n    },\n    {\n      title: 'ISO标准',\n      dataIndex: 'iso_standard_id',\n      ellipsis: true,\n      render: (_, row) => row.iso_standard_id || '-',\n    },\n    {\n      title: '备注',\n      dataIndex: 'description',\n      ellipsis: true,\n      render: (_, row) => row.description || '-',\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 240,\n      render: (_, row) => [\n        <Button\n          key=\"create-child\"\n          type=\"link\"\n          onClick={() => {\n            setEditing(null);\n            setCreateChildParent(row);\n            setModalOpen(true);\n          }}\n        >\n          新建\n        </Button>,\n        <Button\n          key=\"edit\"\n          type=\"link\"\n          onClick={() => {\n            setCreateChildParent(null);\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </Button>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该分类吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteDeviceCategory(row.id);\n              message.success('删除成功');\n              await loadCategories();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <Button danger type=\"link\">\n            删除\n          </Button>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  const filteredTreeData = useMemo(() => {\n    const hasQuery = Object.keys(query).length > 0;\n    if (!hasQuery) {\n      return treeData;\n    }\n\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    return categories\n      .filter((row) => {\n        const parentName = row.parent_id ? categoryMap.get(row.parent_id)?.name || '' : '';\n        if (query.name && !norm(row.name).includes(norm(query.name))) {\n          return false;\n        }\n        if (query.parent_name && !norm(parentName).includes(norm(query.parent_name))) {\n          return false;\n        }\n        if (\n          query.health_check_freq_id &&\n          !norm(\n            row.health_check_freq\n              ? `巡检${row.health_check_freq.patrol}m 诊断${row.health_check_freq.diagnosis}m 上报${row.health_check_freq.report}`\n              : row.health_check_freq_id,\n          ).includes(norm(query.health_check_freq_id))\n        ) {\n          return false;\n        }\n        if (query.iso_standard_id && !norm(row.iso_standard_id).includes(norm(query.iso_standard_id))) {\n          return false;\n        }\n        if (query.description && !norm(row.description).includes(norm(query.description))) {\n          return false;\n        }\n        return true;\n      })\n      .map((row) => ({ ...row }));\n  }, [categories, categoryMap, query, treeData]);\n\n  const parentPickerColumns: ColumnsType<DeviceCategory> = [\n    { title: '分类名称', dataIndex: 'name' },\n    {\n      title: '上级分类',\n      dataIndex: 'parent_id',\n      render: (_, row) => (row.parent_id ? categoryMap.get(row.parent_id)?.name || '-' : '-'),\n    },\n    {\n      title: '描述',\n      dataIndex: 'description',\n      render: (_, row) => row.description || '-',\n    },\n  ];\n\n  return (\n    <PageContainer title=\"设备分类\">\n      <ProTable<CategoryTreeRow>\n        rowKey=\"id\"\n        loading={tableLoading}\n        columns={columns}\n        dataSource={filteredTreeData}\n        pagination={false}\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        options={{ reload: loadCategories }}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setCreateChildParent(null);\n              setModalOpen(true);\n            }}\n          >\n            新建分类\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<CategoryFormValues>\n        title={\n          editing\n            ? '编辑设备分类'\n            : createChildParent\n              ? `新建子分类（上级：${createChildParent.name}）`\n              : '新建设备分类'\n        }\n        open={modalOpen}\n        modalProps={{\n          destroyOnClose: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n            setCreateChildParent(null);\n          },\n        }}\n        submitter={{\n          searchConfig: {\n            submitText: '保存',\n          },\n          submitButtonProps: {\n            loading: saving,\n          },\n        }}\n        initialValues={\n          editing\n            ? {\n                name: editing.name,\n                description: editing.description,\n                parent_id: editing.parent_id || undefined,\n                health_check_freq_id: editing.health_check_freq_id,\n                iso_standard_id: editing.iso_standard_id || undefined,\n              }\n            : createChildParent\n              ? {\n                  parent_id: createChildParent.id,\n                }\n              : undefined\n        }\n        onFinish={async (values) => {\n          const payload: DeviceCategoryPayload = {\n            name: values.name.trim(),\n            description: values.description || undefined,\n            parent_id: values.parent_id || null,\n            health_check_freq_id: values.health_check_freq_id,\n            iso_standard_id: values.iso_standard_id || null,\n          };\n          setSaving(true);\n          try {\n            if (editing) {\n              await updateDeviceCategory(editing.id, payload);\n            } else {\n              await createDeviceCategory(payload);\n            }\n            message.success('保存成功');\n            setModalOpen(false);\n            setEditing(null);\n            setCreateChildParent(null);\n            await loadCategories();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormText name=\"name\" label=\"分类名称\" rules={[{ required: true, message: '请输入分类名称' }]} />\n        <ProFormText name=\"description\" label=\"备注\" />\n        <ProFormSelect\n          name=\"health_check_freq_id\"\n          label=\"巡检频率\"\n          rules={[{ required: true, message: '请选择巡检频率' }]}\n          options={healthFreqOptions}\n        />\n        <ProFormSelect name=\"iso_standard_id\" label=\"ISO标准\" options={isoOptions} />\n        <ProForm.Item name=\"parent_id\" label=\"上级分类\">\n          <EntityPicker<DeviceCategory>\n            placeholder=\"可选，点击选择上级分类\"\n            modalTitle=\"选择上级分类\"\n            triggerText=\"选择\"\n            valueLabel={\n              editing?.parent_id\n                ? categoryMap.get(editing.parent_id)?.name\n                : createChildParent\n                  ? createChildParent.name\n                  : undefined\n            }\n            columns={parentPickerColumns}\n            getRecordLabel={(record) => record.name}\n            fetcher={async ({ current, pageSize, keyword }) => {\n              const result = await queryDeviceCategories({ current, pageSize, keyword });\n              if (blockedParentIds.size === 0) {\n                return result;\n              }\n              return {\n                ...result,\n                items: result.items.filter((item) => !blockedParentIds.has(item.id)),\n              };\n            }}\n          />\n        </ProForm.Item>\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default DeviceCategoryPage;\n",
+      "__isJSFile": true,
+      "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Device/Category/index.tsx"
+    },
+    "10": {
+      "path": "/device/specs",
+      "name": "设备规格",
+      "file": "@/pages/Device/Spec/index.tsx",
+      "parentId": "8",
+      "id": "10",
+      "absPath": "/device/specs",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ProForm,\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProFormDigit,\n  ProFormText,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, message } from 'antd';\nimport type { ColumnsType } from 'antd/es/table';\n\nimport EntityPicker from '@/components/EntityPicker';\nimport {\n  DeviceCategory,\n  listAllDeviceCategories,\n  queryDeviceCategories,\n} from '@/services/deviceCategory';\nimport {\n  DeviceSpec,\n  DeviceSpecPayload,\n  createDeviceSpec,\n  deleteDeviceSpec,\n  listAllDeviceSpecs,\n  updateDeviceSpec,\n} from '@/services/deviceSpec';\nimport { Supplier, listAllSuppliers, querySuppliers } from '@/services/supplier';\n\ntype DeviceSpecFormValues = {\n  name: string;\n  model: string;\n  description?: string;\n  brand: string;\n  voltage: number;\n  rpm: number;\n  supplier_id: string;\n  device_category_id: string;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst DeviceSpecPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [rows, setRows] = useState<DeviceSpec[]>([]);\n  const [editing, setEditing] = useState<DeviceSpec | null>(null);\n  const [query, setQuery] = useState<Record<string, any>>({});\n\n  const [categories, setCategories] = useState<DeviceCategory[]>([]);\n  const [suppliers, setSuppliers] = useState<Supplier[]>([]);\n\n  const categoryMap = useMemo(\n    () => new Map(categories.map((item) => [item.id, item.name])),\n    [categories],\n  );\n  const supplierMap = useMemo(\n    () => new Map(suppliers.map((item) => [item.id, item.name])),\n    [suppliers],\n  );\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      setRows(await listAllDeviceSpecs());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  const loadReferences = async () => {\n    try {\n      const [cates, sups] = await Promise.all([listAllDeviceCategories(), listAllSuppliers()]);\n      setCategories(cates || []);\n      setSuppliers(sups || []);\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n    loadReferences();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    return rows.filter((row) => {\n      if (query.name && !norm(row.name).includes(norm(query.name))) {\n        return false;\n      }\n      if (query.model && !norm(row.model).includes(norm(query.model))) {\n        return false;\n      }\n      if (query.brand && !norm(row.brand).includes(norm(query.brand))) {\n        return false;\n      }\n      if (query.supplier_id) {\n        const supplierName = supplierMap.get(row.supplier_id) || '';\n        const hit =\n          norm(supplierName).includes(norm(query.supplier_id)) ||\n          norm(row.supplier_id).includes(norm(query.supplier_id));\n        if (!hit) {\n          return false;\n        }\n      }\n      if (query.device_category_id) {\n        const categoryName = categoryMap.get(row.device_category_id) || '';\n        const hit =\n          norm(categoryName).includes(norm(query.device_category_id)) ||\n          norm(row.device_category_id).includes(norm(query.device_category_id));\n        if (!hit) {\n          return false;\n        }\n      }\n      if (query.rpm !== undefined && query.rpm !== null && String(row.rpm) !== String(query.rpm)) {\n        return false;\n      }\n      if (\n        query.voltage !== undefined &&\n        query.voltage !== null &&\n        String(row.voltage) !== String(query.voltage)\n      ) {\n        return false;\n      }\n      return true;\n    });\n  }, [categoryMap, query, rows, supplierMap]);\n\n  const supplierPickerColumns: ColumnsType<Supplier> = [\n    { title: '名称', dataIndex: 'name' },\n    { title: '品牌', dataIndex: 'brand' },\n    {\n      title: '联系方式',\n      dataIndex: 'contact_info',\n      render: (_, row) => row.contact_info || '-',\n    },\n    {\n      title: '状态',\n      dataIndex: 'active',\n      width: 80,\n      render: (_, row) => (row.active ? '启用' : '停用'),\n    },\n  ];\n\n  const categoryPickerColumns: ColumnsType<DeviceCategory> = [\n    { title: '分类名称', dataIndex: 'name' },\n    {\n      title: '描述',\n      dataIndex: 'description',\n      render: (_, row) => row.description || '-',\n    },\n  ];\n\n  const columns: ProColumns<DeviceSpec>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '规格名称',\n      dataIndex: 'name',\n      width: 180,\n    },\n    {\n      title: '型号',\n      dataIndex: 'model',\n      width: 160,\n    },\n    {\n      title: '品牌',\n      dataIndex: 'brand',\n      width: 140,\n    },\n    {\n      title: '电压(V)',\n      dataIndex: 'voltage',\n      width: 120,\n      valueType: 'digit',\n    },\n    {\n      title: '转速(RPM)',\n      dataIndex: 'rpm',\n      width: 130,\n      valueType: 'digit',\n    },\n    {\n      title: '供应商',\n      dataIndex: 'supplier_id',\n      width: 180,\n      render: (_, row) => supplierMap.get(row.supplier_id) || row.supplier_id,\n    },\n    {\n      title: '设备分类',\n      dataIndex: 'device_category_id',\n      width: 180,\n      render: (_, row) => categoryMap.get(row.device_category_id) || row.device_category_id,\n    },\n    {\n      title: '备注',\n      dataIndex: 'description',\n      ellipsis: true,\n      render: (_, row) => row.description || '-',\n      hideInSearch: true,\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 170,\n      render: (_, row) => [\n        <Button\n          key=\"edit\"\n          type=\"link\"\n          onClick={() => {\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </Button>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该设备规格吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteDeviceSpec(row.id);\n              message.success('删除成功');\n              await loadRows();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <Button danger type=\"link\">\n            删除\n          </Button>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  return (\n    <PageContainer title=\"设备规格\">\n      <ProTable<DeviceSpec>\n        rowKey=\"id\"\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        options={{ reload: loadRows }}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建设备规格\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<DeviceSpecFormValues>\n        title={editing ? '编辑设备规格' : '新建设备规格'}\n        open={modalOpen}\n        modalProps={{\n          destroyOnClose: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        initialValues={\n          editing\n            ? {\n                name: editing.name,\n                model: editing.model,\n                description: editing.description,\n                brand: editing.brand,\n                voltage: editing.voltage,\n                rpm: editing.rpm,\n                supplier_id: editing.supplier_id,\n                device_category_id: editing.device_category_id,\n              }\n            : { voltage: 0, rpm: 0 }\n        }\n        onFinish={async (values) => {\n          const payload: DeviceSpecPayload = {\n            name: values.name.trim(),\n            model: values.model.trim(),\n            description: values.description || undefined,\n            brand: values.brand.trim(),\n            voltage: values.voltage,\n            rpm: values.rpm,\n            supplier_id: values.supplier_id,\n            device_category_id: values.device_category_id,\n          };\n          setSaving(true);\n          try {\n            if (editing) {\n              await updateDeviceSpec(editing.id, payload);\n            } else {\n              await createDeviceSpec(payload);\n            }\n            message.success('保存成功');\n            setModalOpen(false);\n            setEditing(null);\n            await loadRows();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormText name=\"name\" label=\"规格名称\" rules={[{ required: true, message: '请输入规格名称' }]} />\n        <ProFormText name=\"model\" label=\"型号\" rules={[{ required: true, message: '请输入型号' }]} />\n        <ProFormText name=\"brand\" label=\"品牌\" rules={[{ required: true, message: '请输入品牌' }]} />\n        <ProFormDigit\n          name=\"voltage\"\n          label=\"电压(V)\"\n          min={0}\n          fieldProps={{ precision: 2 }}\n          rules={[{ required: true, message: '请输入电压' }]}\n        />\n        <ProFormDigit\n          name=\"rpm\"\n          label=\"转速(RPM)\"\n          min={0}\n          fieldProps={{ precision: 0 }}\n          rules={[{ required: true, message: '请输入转速' }]}\n        />\n        <ProForm.Item name=\"supplier_id\" label=\"供应商\" rules={[{ required: true, message: '请选择供应商' }]}>\n          <EntityPicker<Supplier>\n            placeholder=\"请点击选择供应商\"\n            modalTitle=\"选择供应商\"\n            triggerText=\"选择\"\n            valueLabel={editing ? supplierMap.get(editing.supplier_id) : undefined}\n            columns={supplierPickerColumns}\n            getRecordLabel={(record) => record.name}\n            fetcher={({ current, pageSize, keyword }) =>\n              querySuppliers({ current, pageSize, keyword })\n            }\n          />\n        </ProForm.Item>\n        <ProForm.Item\n          name=\"device_category_id\"\n          label=\"设备分类\"\n          rules={[{ required: true, message: '请选择设备分类' }]}\n        >\n          <EntityPicker<DeviceCategory>\n            placeholder=\"请点击选择设备分类\"\n            modalTitle=\"选择设备分类\"\n            triggerText=\"选择\"\n            valueLabel={editing ? categoryMap.get(editing.device_category_id) : undefined}\n            columns={categoryPickerColumns}\n            getRecordLabel={(record) => record.name}\n            fetcher={({ current, pageSize, keyword }) =>\n              queryDeviceCategories({ current, pageSize, keyword })\n            }\n          />\n        </ProForm.Item>\n        <ProFormText name=\"description\" label=\"备注\" />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default DeviceSpecPage;\n",
+      "__isJSFile": true,
+      "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Device/Spec/index.tsx"
+    },
+    "11": {
+      "path": "/device/list",
+      "name": "实例列表",
+      "file": "@/pages/Device/List/index.tsx",
+      "parentId": "8",
+      "id": "11",
+      "absPath": "/device/list",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProForm,\n  ProFormDatePicker,\n  ProFormDigit,\n  ProFormSelect,\n  ProFormText,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, message } from 'antd';\nimport type { ColumnsType } from 'antd/es/table';\nimport dayjs, { type Dayjs } from 'dayjs';\n\nimport EntityPicker from '@/components/EntityPicker';\nimport {\n  createDeviceInst,\n  deleteDeviceInst,\n  DeviceInst,\n  DeviceInstPayload,\n  listAllDeviceInsts,\n  updateDeviceInst,\n} from '@/services/deviceInst';\nimport { DeviceSpec, listAllDeviceSpecs, queryDeviceSpecs } from '@/services/deviceSpec';\n\ntype DeviceInstFormValues = {\n  code: string;\n  device_spec_id: string;\n  sn: string;\n  purchase_date: string | Dayjs;\n  life_span: number;\n  desc: string;\n  status: number;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst toApiDate = (value: string | Dayjs): string => {\n  if (typeof value === 'string') {\n    return value.trim();\n  }\n  return value.format('YYYY-MM-DD');\n};\n\nconst DeviceListPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [rows, setRows] = useState<DeviceInst[]>([]);\n  const [query, setQuery] = useState<Record<string, any>>({});\n  const [editing, setEditing] = useState<DeviceInst | null>(null);\n  const [specs, setSpecs] = useState<DeviceSpec[]>([]);\n\n  const specMap = useMemo(\n    () =>\n      new Map(\n        specs.map((item) => [\n          item.id,\n          `${item.name} / ${item.model}${item.brand ? ` / ${item.brand}` : ''}`,\n        ]),\n      ),\n    [specs],\n  );\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      setRows(await listAllDeviceInsts());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  const loadSpecs = async () => {\n    try {\n      setSpecs(await listAllDeviceSpecs());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n    loadSpecs();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    const purchaseDateQuery =\n      query.purchase_date === undefined || query.purchase_date === null || query.purchase_date === ''\n        ? ''\n        : dayjs.isDayjs(query.purchase_date)\n          ? query.purchase_date.format('YYYY-MM-DD').toLowerCase()\n          : norm(query.purchase_date);\n    return rows.filter((row) => {\n      if (query.code && !norm(row.code).includes(norm(query.code))) {\n        return false;\n      }\n      if (query.sn && !norm(row.sn).includes(norm(query.sn))) {\n        return false;\n      }\n      if (purchaseDateQuery && !norm(row.purchase_date).includes(purchaseDateQuery)) {\n        return false;\n      }\n      if (query.desc && !norm(row.desc).includes(norm(query.desc))) {\n        return false;\n      }\n      if (\n        query.life_span !== undefined &&\n        query.life_span !== null &&\n        String(row.life_span) !== String(query.life_span)\n      ) {\n        return false;\n      }\n      if (\n        query.status !== undefined &&\n        query.status !== null &&\n        String(row.status) !== String(query.status)\n      ) {\n        return false;\n      }\n      if (query.device_spec_id) {\n        const specText = specMap.get(row.device_spec_id) || '';\n        const hit =\n          norm(specText).includes(norm(query.device_spec_id)) ||\n          norm(row.device_spec_id).includes(norm(query.device_spec_id));\n        if (!hit) {\n          return false;\n        }\n      }\n      return true;\n    });\n  }, [query, rows, specMap]);\n\n  const specPickerColumns: ColumnsType<DeviceSpec> = [\n    { title: '规格名称', dataIndex: 'name' },\n    { title: '型号', dataIndex: 'model' },\n    { title: '品牌', dataIndex: 'brand' },\n    {\n      title: '电压(V)',\n      dataIndex: 'voltage',\n    },\n    {\n      title: '转速(RPM)',\n      dataIndex: 'rpm',\n    },\n  ];\n\n  const columns: ProColumns<DeviceInst>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '实例编码',\n      dataIndex: 'code',\n      width: 140,\n    },\n    {\n      title: '设备SN',\n      dataIndex: 'sn',\n      width: 180,\n    },\n    {\n      title: '设备规格',\n      dataIndex: 'device_spec_id',\n      width: 260,\n      render: (_, row) => specMap.get(row.device_spec_id) || row.device_spec_id,\n    },\n    {\n      title: '采购日期',\n      dataIndex: 'purchase_date',\n      width: 140,\n      valueType: 'date',\n    },\n    {\n      title: '寿命(月)',\n      dataIndex: 'life_span',\n      width: 110,\n      valueType: 'digit',\n    },\n    {\n      title: '描述',\n      dataIndex: 'desc',\n      ellipsis: true,\n      render: (_, row) => row.desc || '-',\n    },\n    {\n      title: '状态',\n      dataIndex: 'status',\n      width: 100,\n      valueType: 'select',\n      valueEnum: {\n        1: { text: '启用' },\n        0: { text: '停用' },\n      },\n      render: (_, row) => (Number(row.status) === 1 ? '启用' : '停用'),\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 180,\n      render: (_, row) => [\n        <Button\n          key=\"edit\"\n          type=\"link\"\n          onClick={() => {\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </Button>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该设备实例吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteDeviceInst(row.id);\n              message.success('删除成功');\n              await loadRows();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <Button danger type=\"link\">\n            删除\n          </Button>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  return (\n    <PageContainer title=\"设备列表\">\n      <ProTable<DeviceInst>\n        rowKey=\"id\"\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        options={{ reload: loadRows }}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建设备实例\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<DeviceInstFormValues>\n        title={editing ? '编辑设备实例' : '新建设备实例'}\n        open={modalOpen}\n        modalProps={{\n          destroyOnClose: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        initialValues={\n          editing\n            ? {\n                code: editing.code,\n                device_spec_id: editing.device_spec_id,\n                sn: editing.sn,\n                purchase_date: dayjs(editing.purchase_date),\n                life_span: editing.life_span,\n                desc: editing.desc,\n                status: Number(editing.status),\n              }\n            : {\n                life_span: 0,\n                status: 1,\n              }\n        }\n        onFinish={async (values) => {\n          setSaving(true);\n          try {\n            const payload: DeviceInstPayload = {\n              code: values.code.trim(),\n              device_spec_id: values.device_spec_id,\n              sn: values.sn.trim(),\n              purchase_date: toApiDate(values.purchase_date),\n              life_span: Number(values.life_span ?? 0),\n              desc: values.desc.trim(),\n              status: Number(values.status ?? 1),\n            };\n\n            if (editing) {\n              await updateDeviceInst(editing.id, payload);\n              message.success('更新成功');\n            } else {\n              await createDeviceInst(payload);\n              message.success('创建成功');\n            }\n            setModalOpen(false);\n            setEditing(null);\n            await loadRows();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormText\n          name=\"code\"\n          label=\"实例编码\"\n          rules={[\n            { required: true, message: '请输入实例编码' },\n            { max: 16, message: '实例编码最多16个字符' },\n          ]}\n        />\n        <ProFormText\n          name=\"sn\"\n          label=\"设备SN\"\n          rules={[\n            { required: true, message: '请输入设备SN' },\n            { max: 64, message: '设备SN最多64个字符' },\n          ]}\n        />\n        <ProForm.Item\n          name=\"device_spec_id\"\n          label=\"设备规格\"\n          rules={[{ required: true, message: '请选择设备规格' }]}\n        >\n          <EntityPicker<DeviceSpec>\n            modalTitle=\"选择设备规格\"\n            triggerText=\"选择规格\"\n            placeholder=\"请选择设备规格\"\n            valueLabel={\n              editing?.device_spec_id ? specMap.get(editing.device_spec_id) || editing.device_spec_id : undefined\n            }\n            fetcher={queryDeviceSpecs}\n            columns={specPickerColumns}\n            getRecordLabel={(row) => `${row.name} / ${row.model} / ${row.brand}`}\n          />\n        </ProForm.Item>\n        <ProFormDatePicker\n          name=\"purchase_date\"\n          label=\"采购日期\"\n          fieldProps={{ format: 'YYYY-MM-DD' }}\n          rules={[{ required: true, message: '请选择采购日期' }]}\n        />\n        <ProFormDigit\n          name=\"life_span\"\n          label=\"寿命(月)\"\n          min={0}\n          fieldProps={{ precision: 0 }}\n          rules={[{ required: true, message: '请输入寿命(月)' }]}\n        />\n        <ProFormText\n          name=\"desc\"\n          label=\"描述\"\n          rules={[\n            { required: true, message: '请输入描述' },\n            { max: 128, message: '描述最多128个字符' },\n          ]}\n        />\n        <ProFormSelect\n          name=\"status\"\n          label=\"状态\"\n          options={[\n            { label: '启用', value: 1 },\n            { label: '停用', value: 0 },\n          ]}\n          rules={[{ required: true, message: '请选择状态' }]}\n        />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default DeviceListPage;\n",
+      "__isJSFile": true,
+      "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Device/List/index.tsx"
+    },
+    "12": {
+      "path": "/device",
+      "redirect": "/device/categories",
+      "parentId": "8",
+      "id": "12",
+      "absPath": "/device"
+    },
+    "13": {
       "path": "/process",
       "name": "生产工艺",
       "icon": "ClusterOutlined",
       "parentId": "ant-design-pro-layout",
-      "id": "9",
+      "id": "13",
       "absPath": "/process"
     },
-    "10": {
+    "14": {
       "path": "/process/templates",
       "name": "工段模板",
       "file": "@/pages/Process/Template/index.tsx",
-      "parentId": "9",
-      "id": "10",
+      "parentId": "13",
+      "id": "14",
       "absPath": "/process/templates",
       "__content": "import BusinessPlaceholder from '@/components/BusinessPlaceholder';\n\nconst ProcessTemplatePage = () => (\n  <BusinessPlaceholder\n    title=\"工段模板\"\n    description=\"定义工段模板及其包含的设备组合，不直接对应具体现场实例。\"\n    model=\"device_combo_spec + device_combo_spec_item\"\n    apiPath=\"/api/v1/device-combo-specs\"\n  />\n);\n\nexport default ProcessTemplatePage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Process/Template/index.tsx"
     },
-    "11": {
+    "15": {
       "path": "/process/manage",
       "name": "工段管理",
       "file": "@/pages/Process/Manage/index.tsx",
-      "parentId": "9",
-      "id": "11",
+      "parentId": "13",
+      "id": "15",
       "absPath": "/process/manage",
       "__content": "import BusinessPlaceholder from '@/components/BusinessPlaceholder';\n\nconst ProcessManagePage = () => (\n  <BusinessPlaceholder\n    title=\"工段管理\"\n    description=\"管理工段实例化数据，基于工段模板创建并维护现场工段实例。\"\n    model=\"device_combo_inst + device_combo_inst_item\"\n    apiPath=\"/api/v1/device-combo-insts\"\n  />\n);\n\nexport default ProcessManagePage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Process/Manage/index.tsx"
     },
-    "12": {
+    "16": {
       "path": "/process",
       "redirect": "/process/templates",
-      "parentId": "9",
-      "id": "12",
+      "parentId": "13",
+      "id": "16",
       "absPath": "/process"
     },
-    "13": {
+    "17": {
       "path": "/monitoring",
       "name": "监测管理",
       "icon": "RadarChartOutlined",
       "parentId": "ant-design-pro-layout",
-      "id": "13",
+      "id": "17",
       "absPath": "/monitoring"
     },
-    "14": {
+    "18": {
       "path": "/monitoring/sensors",
       "name": "传感器",
       "file": "@/pages/Monitoring/Sensors/index.tsx",
-      "parentId": "13",
-      "id": "14",
+      "parentId": "17",
+      "id": "18",
       "absPath": "/monitoring/sensors",
       "__content": "import BusinessPlaceholder from '@/components/BusinessPlaceholder';\n\nconst MonitoringSensorsPage = () => (\n  <BusinessPlaceholder\n    title=\"传感器\"\n    description=\"仅展示当前租户已分配的传感器数据，不管理传感器型号。\"\n    model=\"tenant_sensor\"\n    apiPath=\"/api/v1/tenant-sensors\"\n  />\n);\n\nexport default MonitoringSensorsPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Monitoring/Sensors/index.tsx"
     },
-    "15": {
+    "19": {
       "path": "/monitoring/points",
       "name": "测点设置",
       "file": "@/pages/Monitoring/Points/index.tsx",
-      "parentId": "13",
-      "id": "15",
+      "parentId": "17",
+      "id": "19",
       "absPath": "/monitoring/points",
       "__content": "import BusinessPlaceholder from '@/components/BusinessPlaceholder';\n\nconst MonitoringPointsPage = () => (\n  <BusinessPlaceholder\n    title=\"测点设置\"\n    description=\"将传感器绑定至工段实例中的具体设备测点。\"\n    model=\"device_inst_tag\"\n    apiPath=\"/api/v1/device-inst-tags\"\n  />\n);\n\nexport default MonitoringPointsPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Monitoring/Points/index.tsx"
     },
-    "16": {
+    "20": {
       "path": "/monitoring",
       "redirect": "/monitoring/sensors",
-      "parentId": "13",
-      "id": "16",
+      "parentId": "17",
+      "id": "20",
       "absPath": "/monitoring"
     },
-    "17": {
+    "21": {
+      "path": "/welcome",
+      "name": "Welcome",
+      "hideInMenu": true,
+      "file": "@/pages/Welcome/index.tsx",
+      "parentId": "ant-design-pro-layout",
+      "id": "21",
+      "absPath": "/welcome",
+      "__content": "import { PageContainer, ProCard } from '@ant-design/pro-components';\nimport { Typography } from 'antd';\n\nconst WelcomePage = () => {\n  return (\n    <PageContainer title=\"Welcome\" subTitle=\"主应用结构页（占位）\">\n      <ProCard bordered>\n        <Typography.Title level={4} style={{ marginTop: 0 }}>\n          Welcome\n        </Typography.Title>\n        <Typography.Paragraph type=\"secondary\">\n          你已进入主应用。后续业务页面将从这里开始扩展。\n        </Typography.Paragraph>\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default WelcomePage;\n",
+      "__isJSFile": true,
+      "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Welcome/index.tsx"
+    },
+    "22": {
       "path": "/profile",
-      "name": "Profile",
       "hideInMenu": true,
       "file": "@/pages/Profile/index.tsx",
       "parentId": "ant-design-pro-layout",
-      "id": "17",
+      "id": "22",
       "absPath": "/profile",
-      "__content": "import { PageContainer, ProCard } from '@ant-design/pro-components';\nimport { Descriptions, Empty, Typography } from 'antd';\n\nimport { getSession } from '@/utils/session';\n\nconst ProfilePage = () => {\n  const session = getSession();\n\n  return (\n    <PageContainer title=\"个人信息\" subTitle=\"当前登录用户信息\">\n      <ProCard>\n        {session ? (\n          <Descriptions column={1} bordered>\n            <Descriptions.Item label=\"联系人姓名\">\n              {session.contact_name || '-'}\n            </Descriptions.Item>\n            <Descriptions.Item label=\"登录用户名\">{session.username}</Descriptions.Item>\n            <Descriptions.Item label=\"租户公司\">{session.tenant_name || '-'}</Descriptions.Item>\n            <Descriptions.Item label=\"租户ID\">{session.tenant_id}</Descriptions.Item>\n            <Descriptions.Item label=\"账号ID\">{session.account_id}</Descriptions.Item>\n            <Descriptions.Item label=\"用户名类型\">\n              {session.flag === 1 ? '邮箱' : '手机号'}\n            </Descriptions.Item>\n          </Descriptions>\n        ) : (\n          <Empty description=\"未登录\" />\n        )}\n        <Typography.Paragraph type=\"secondary\" style={{ marginTop: 16 }}>\n          如需修改密码，请使用右上角菜单中的“更改密码”。\n        </Typography.Paragraph>\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default ProfilePage;\n",
+      "__content": "import { PageContainer, ProCard } from '@ant-design/pro-components';\nimport { Descriptions, Empty, Typography } from 'antd';\n\nimport { getSession } from '@/utils/session';\n\nconst ProfilePage = () => {\n  const session = getSession();\n\n  return (\n    <PageContainer title=\"个人信息\" subTitle=\"当前登录用户信息\">\n      <ProCard>\n        {session ? (\n          <Descriptions column={1} bordered>\n            <Descriptions.Item label=\"联系人姓名\">\n              {session.contact_name || '-'}\n            </Descriptions.Item>\n            <Descriptions.Item label=\"登录用户名\">{session.username}</Descriptions.Item>\n            <Descriptions.Item label=\"租户公司\">{session.tenant_name || '-'}</Descriptions.Item>\n            <Descriptions.Item label=\"账号ID\">{session.account_id}</Descriptions.Item>\n            <Descriptions.Item label=\"用户名类型\">\n              {session.flag === 1 ? '邮箱' : '手机号'}\n            </Descriptions.Item>\n          </Descriptions>\n        ) : (\n          <Empty description=\"未登录\" />\n        )}\n        <Typography.Paragraph type=\"secondary\" style={{ marginTop: 16 }}>\n          如需修改密码，请使用右上角菜单中的“更改密码”。\n        </Typography.Paragraph>\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default ProfilePage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Profile/index.tsx"
     },
-    "18": {
+    "23": {
       "path": "/change-password",
-      "name": "Change Password",
       "hideInMenu": true,
       "file": "@/pages/ChangePassword/index.tsx",
       "parentId": "ant-design-pro-layout",
-      "id": "18",
+      "id": "23",
       "absPath": "/change-password",
-      "__content": "import { history } from '@umijs/max';\nimport { PageContainer, ProCard, ProForm, ProFormText } from '@ant-design/pro-components';\nimport { message } from 'antd';\n\nimport { changePassword } from '@/services/auth';\nimport { getSession } from '@/utils/session';\n\ntype PasswordFormValues = {\n  current_password: string;\n  new_password: string;\n  confirm_password: string;\n};\n\nconst ChangePasswordPage = () => {\n  return (\n    <PageContainer title=\"更改密码\">\n      <ProCard colSpan={12} style={{ maxWidth: 560, margin: '0 auto' }}>\n        <ProForm<PasswordFormValues>\n          submitter={{\n            searchConfig: {\n              submitText: '保存新密码',\n            },\n          }}\n          onFinish={async (values) => {\n            const session = getSession();\n            if (!session) {\n              message.error('登录已失效，请重新登录');\n              history.push('/login');\n              return false;\n            }\n            if (values.new_password !== values.confirm_password) {\n              message.error('两次输入的新密码不一致');\n              return false;\n            }\n            await changePassword({\n              account_id: session.account_id,\n              current_password: values.current_password,\n              new_password: values.new_password,\n            });\n            message.success('密码修改成功，请使用新密码登录');\n            history.push('/profile');\n            return true;\n          }}\n        >\n          <ProFormText.Password\n            name=\"current_password\"\n            label=\"当前密码\"\n            rules={[{ required: true, message: '请输入当前密码' }]}\n          />\n          <ProFormText.Password\n            name=\"new_password\"\n            label=\"新密码\"\n            rules={[\n              { required: true, message: '请输入新密码' },\n              { min: 6, message: '新密码至少 6 位' },\n            ]}\n          />\n          <ProFormText.Password\n            name=\"confirm_password\"\n            label=\"确认新密码\"\n            rules={[{ required: true, message: '请再次输入新密码' }]}\n          />\n        </ProForm>\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default ChangePasswordPage;\n",
+      "__content": "import { history } from '@umijs/max';\nimport { PageContainer, ProCard, ProForm, ProFormText } from '@ant-design/pro-components';\nimport { message } from 'antd';\n\nimport { changePassword } from '@/services/auth';\nimport { getSession } from '@/utils/session';\n\ntype PasswordFormValues = {\n  current_password: string;\n  new_password: string;\n  confirm_password: string;\n};\n\nconst ChangePasswordPage = () => {\n  return (\n    <PageContainer title=\"更改密码\">\n      <ProCard colSpan={12} style={{ maxWidth: 560, margin: '0 auto' }}>\n        <ProForm<PasswordFormValues>\n          submitter={{\n            searchConfig: {\n              submitText: '保存新密码',\n            },\n          }}\n          onFinish={async (values) => {\n            const session = getSession();\n            if (!session) {\n              message.error('登录已失效，请重新登录');\n              history.push('/login');\n              return false;\n            }\n            if (values.new_password !== values.confirm_password) {\n              message.error('两次输入的新密码不一致');\n              return false;\n            }\n            await changePassword({\n              current_password: values.current_password,\n              new_password: values.new_password,\n            });\n            message.success('密码修改成功，请使用新密码登录');\n            history.push('/profile');\n            return true;\n          }}\n        >\n          <ProFormText.Password\n            name=\"current_password\"\n            label=\"当前密码\"\n            rules={[{ required: true, message: '请输入当前密码' }]}\n          />\n          <ProFormText.Password\n            name=\"new_password\"\n            label=\"新密码\"\n            rules={[\n              { required: true, message: '请输入新密码' },\n              { min: 6, message: '新密码至少 6 位' },\n            ]}\n          />\n          <ProFormText.Password\n            name=\"confirm_password\"\n            label=\"确认新密码\"\n            rules={[{ required: true, message: '请再次输入新密码' }]}\n          />\n        </ProForm>\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default ChangePasswordPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/ChangePassword/index.tsx"
     },
-    "19": {
+    "24": {
       "path": "/",
-      "redirect": "/login",
+      "redirect": "/device/categories",
       "parentId": "ant-design-pro-layout",
-      "id": "19",
+      "id": "24",
       "absPath": "/"
     },
     "ant-design-pro-layout": {
@@ -3644,7 +3764,6 @@
     "path": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/app.ts",
     "exports": [
       "request",
-      "onRouteChange",
       "layout"
     ]
   },

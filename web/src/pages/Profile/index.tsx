@@ -16,7 +16,6 @@ const ProfilePage = () => {
             </Descriptions.Item>
             <Descriptions.Item label="登录用户名">{session.username}</Descriptions.Item>
             <Descriptions.Item label="租户公司">{session.tenant_name || '-'}</Descriptions.Item>
-            <Descriptions.Item label="租户ID">{session.tenant_id}</Descriptions.Item>
             <Descriptions.Item label="账号ID">{session.account_id}</Descriptions.Item>
             <Descriptions.Item label="用户名类型">
               {session.flag === 1 ? '邮箱' : '手机号'}

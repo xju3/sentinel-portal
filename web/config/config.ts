@@ -34,6 +34,32 @@ export default defineConfig({
       layout: false,
     },
     {
+      path: '/data',
+      name: '基础数据',
+      icon: 'AppstoreOutlined',
+      routes: [
+        {
+          path: '/data/suppliers',
+          name: '供应商',
+          component: '@/pages/Device/Supplier',
+        },
+        {
+          path: '/data/frequency',
+          name: '故障测点',
+          component: '@/pages/Monitoring/Frequency',
+        },
+            {
+          path: '/data/frequency',
+          name: '监测频率',
+          component: '@/pages/Monitoring/Frequency',
+        },
+        {
+          path: '/data',
+          redirect: '/data/suppliers',
+        },
+      ],
+    },
+    {
       path: '/device',
       name: '设备管理',
       icon: 'AppstoreOutlined',
@@ -50,7 +76,7 @@ export default defineConfig({
         },
         {
           path: '/device/list',
-          name: '设备列表',
+          name: '实例列表',
           component: '@/pages/Device/List',
         },
         {
@@ -80,6 +106,7 @@ export default defineConfig({
         },
       ],
     },
+
     {
       path: '/monitoring',
       name: '监测管理',
@@ -95,12 +122,14 @@ export default defineConfig({
           name: '测点设置',
           component: '@/pages/Monitoring/Points',
         },
+    
         {
           path: '/monitoring',
           redirect: '/monitoring/sensors',
         },
       ],
     },
+  
     {
       path: '/welcome',
       name: 'Welcome',
