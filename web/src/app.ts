@@ -1,4 +1,5 @@
 import React from 'react';
+import { AppstoreOutlined } from '@ant-design/icons';
 import { history, RequestConfig, RunTimeLayoutConfig } from '@umijs/max';
 import { Divider, Space, Typography } from 'antd';
 
@@ -43,11 +44,7 @@ export const layout: RunTimeLayoutConfig = () => {
       return React.createElement(
         Space,
         { size: 10 },
-        React.createElement(
-          Typography.Text,
-          { strong: true, style: { fontSize: 16 } },
-          'Portal',
-        ),
+        React.createElement(AppstoreOutlined, { style: { fontSize: 18, color: '#1677ff' } }),
         React.createElement(Divider, { type: 'vertical', style: { margin: 0, height: 18 } }),
         React.createElement(
           Typography.Text,
