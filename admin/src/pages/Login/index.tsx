@@ -1,7 +1,7 @@
 import { history } from '@umijs/max';
 import { PageContainer, ProCard, ProForm, ProFormText } from '@ant-design/pro-components';
 import { message } from 'antd';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { login, type LoginResult } from '@/services/auth';
 import { clearSession, getSession, saveSession } from '@/utils/session';
@@ -14,34 +14,20 @@ type LoginFormValues = {
 const LoginPage = () => {
   const [session, setSession] = useState<LoginResult | null>(() => getSession());
 
-  const handleLogout = () => {
-    clearSession();
-    setSession(null);
-    message.success('已退出登录');
-  };
+  useEffect(() => {
+    if (session) {
+      history.push('/tenant');
+    }
+  }, [session]);
+
+  if (session) {
+    return null;
+  }
 
   return (
     <PageContainer title="管理员登录" content="使用管理员账号登录后台管理系统。" ghost>
       <ProCard style={{ maxWidth: 480, margin: '0 auto' }}>
-        {session ? (
-          <div style={{ textAlign: 'center', padding: '24px 0' }}>
-            <div style={{ fontSize: 16, marginBottom: 16 }}>
-              当前已登录: <strong>{session.username}</strong>
-            </div>
-            <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-              <a
-                style={{ fontSize: 14 }}
-                onClick={() => history.push('/tenant')}
-              >
-                进入管理后台
-              </a>
-              <a style={{ fontSize: 14, color: '#ff4d4f' }} onClick={handleLogout}>
-                退出登录
-              </a>
-            </div>
-          </div>
-        ) : (
-          <ProForm<LoginFormValues>
+        <ProForm<LoginFormValues>
             submitter={{
               searchConfig: {
                 submitText: '登录',
@@ -80,7 +66,6 @@ const LoginPage = () => {
               rules={[{ required: true, message: '请输入密码' }]}
             />
           </ProForm>
-        )}
       </ProCard>
     </PageContainer>
   );
