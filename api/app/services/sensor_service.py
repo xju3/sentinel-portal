@@ -57,7 +57,7 @@ class SensorTypeService:
 class SensorDbService:
     @staticmethod
     async def get_all(session: AsyncSession, skip: int, limit: int) -> List[Sensor]:
-        stmt = select(Sensor).offset(skip).limit(limit)
+        stmt = select(Sensor).offset(skip).order_by(Sensor.sn).limit(limit)
         result = await session.execute(stmt)
         return result.scalars().all()
 
@@ -149,6 +149,20 @@ class SensorBatchService:
 
     @staticmethod
     async def update(session: AsyncSession, db_obj: SensorBatch, data: dict) -> SensorBatch:
+        # Status 只能向前递增，不能回退
+        if "status" in data:
+            if data["status"] < db_obj.status:
+                raise ValueError(
+                    f"Status cannot be decreased from {db_obj.status} to {data['status']}"
+                )
+
+            # 当 status 从 1（生产中）→ 2（交付中）时，自动生成该批次的传感器数据
+            if db_obj.status == 1 and data["status"] == 2:
+                existing_sensors = await SensorDbService.get_by_batch_id(session, db_obj.id)
+                if not existing_sensors:
+                    await SensorBatchService.generate_sensors_for_batch(session, db_obj)
+                    logger.info(f"Generated sensors for batch {db_obj.code} (id={db_obj.id})")
+
         for key, value in data.items():
             setattr(db_obj, key, value)
         await session.commit()
@@ -163,7 +177,7 @@ class SensorBatchService:
     @staticmethod
     async def generate_sensors_for_batch(session: AsyncSession, batch: SensorBatch) -> List[Sensor]:
         """
-        当批次状态变为 3（交付中）时，生成该批次对应的传感器数据。
+        当批次状态变为 2（交付中）时，生成该批次对应的传感器数据。
         
         规则：
         - sensor_batch_id = 当前批次的 ID
@@ -173,7 +187,6 @@ class SensorBatchService:
         """
         sn_prefix = batch.sn
         qty = batch.qty
-        sensor_type_id = batch.sensor_type_id
 
         items = []
         for i in range(1, qty + 1):
@@ -182,7 +195,6 @@ class SensorBatchService:
                 "sn": sn,
                 "active": False,
                 "active_at": None,
-                "sensor_type_id": sensor_type_id,
                 "sensor_batch_id": batch.id,
             })
 

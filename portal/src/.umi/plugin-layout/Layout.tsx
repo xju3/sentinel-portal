@@ -11,7 +11,7 @@ import {
 import React, { useMemo } from 'react';
 import {
   ProLayout,
-} from "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/node_modules/@ant-design/pro-components";
+} from "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/node_modules/@ant-design/pro-components";
 import './Layout.css';
 import Logo from './Logo';
 import Exception from './Exception';

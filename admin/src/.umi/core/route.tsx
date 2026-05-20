@@ -16,7 +16,7 @@ export async function getRoutes() {
 '6': React.lazy(() => import(/* webpackChunkName: "p__Sensor__Product__index" */'@/pages/Sensor/Product/index.tsx')),
 '7': React.lazy(() => import('./EmptyRoute')),
 '8': React.lazy(() => import('./EmptyRoute')),
-'ant-design-pro-layout': React.lazy(() => import(/* webpackChunkName: "umi__plugin-layout__Layout" */'/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/admin/src/.umi/plugin-layout/Layout.tsx')),
+'ant-design-pro-layout': React.lazy(() => import(/* webpackChunkName: "umi__plugin-layout__Layout" */'/Users/tju/Workspace/PDI/Sentinel/Codes/platform/admin/src/.umi/plugin-layout/Layout.tsx')),
 },
   };
 }

@@ -188,15 +188,10 @@ async def update_sensor_batch(
 
     update_data = item.model_dump(exclude_unset=True)
 
-    # 当批次状态变为 3（交付中）时，自动生成该批次的传感器数据
-    if "status" in update_data and update_data["status"] == 3:
-        # 检查是否已经生成过传感器数据（避免重复生成）
-        existing_sensors = await SensorDbService.get_by_batch_id(session, obj_id)
-        if not existing_sensors:
-            await SensorBatchService.generate_sensors_for_batch(session, db_obj)
-            logger.info(f"Generated sensors for batch {db_obj.code} (id={obj_id})")
-
-    return await SensorBatchService.update(session, db_obj, update_data)
+    try:
+        return await SensorBatchService.update(session, db_obj, update_data)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))
 
 
 
@@ -221,14 +216,12 @@ class SensorCreate(BaseModel):
     sn: str
     description: Optional[str] = None
     active: Optional[bool] = True
-    sensor_type_id: UUID
 
 
 class SensorUpdate(BaseModel):
     sn: Optional[str] = None
     description: Optional[str] = None
     active: Optional[bool] = None
-    sensor_type_id: Optional[UUID] = None
 
 
 class SensorResponse(BaseModel):
@@ -239,7 +232,6 @@ class SensorResponse(BaseModel):
     active_at: datetime
     created_at: datetime
     updated_at: datetime
-    sensor_type_id: UUID
 
     model_config = ConfigDict(from_attributes=True)
 

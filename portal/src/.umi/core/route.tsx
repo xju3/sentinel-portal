@@ -37,7 +37,7 @@ export async function getRoutes() {
 '27': React.lazy(() => import(/* webpackChunkName: "p__Profile__index" */'@/pages/Profile/index.tsx')),
 '28': React.lazy(() => import(/* webpackChunkName: "p__ChangePassword__index" */'@/pages/ChangePassword/index.tsx')),
 '29': React.lazy(() => import('./EmptyRoute')),
-'ant-design-pro-layout': React.lazy(() => import(/* webpackChunkName: "umi__plugin-layout__Layout" */'/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/.umi/plugin-layout/Layout.tsx')),
+'ant-design-pro-layout': React.lazy(() => import(/* webpackChunkName: "umi__plugin-layout__Layout" */'/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/src/.umi/plugin-layout/Layout.tsx')),
 },
   };
 }
