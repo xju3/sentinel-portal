@@ -24,4 +24,18 @@ services:
     depends_on:
       - api
     ports:
-      - "3000:80"
+      - "3010:80"
+
+  admin:
+    build:
+      context: ./admin  
+      dockerfile: Dockerfile
+      args:
+        NODE_IMAGE: ${NODE_IMAGE:-node:22-alpine}
+        NGINX_IMAGE: ${NGINX_IMAGE:-nginx:1.27-alpine}
+    container_name: portal
+    restart: unless-stopped
+    depends_on:
+      - api
+    ports:
+      - "3011:80"
