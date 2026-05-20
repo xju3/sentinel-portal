@@ -34,6 +34,33 @@ export default defineConfig({
       layout: false,
     },
     {
+      path: '/dashboard',
+      name: '仪表盘',
+      icon: 'DashboardOutlined',
+      routes: [
+        {
+          path: '/dashboard/welcome',
+          name: '欢迎',
+          hideInMenu: false,
+          component: '@/pages/Dashboard/Welcome',
+        },
+        {
+          path: '/dashboard/overview',
+          name: '概览',
+          component: '@/pages/Dashboard/Overview',
+        },
+        {
+          path: '/dashboard/monitoring',
+          name: '监控',
+          component: '@/pages/Dashboard/Monitoring',
+        },
+        {
+          path: '/dashboard',
+          redirect: '/dashboard/welcome',
+        },
+      ],
+    },
+    {
       path: '/data',
       name: '基础数据',
       icon: 'AppstoreOutlined',
@@ -127,20 +154,15 @@ export default defineConfig({
           name: '测点设置',
           component: '@/pages/Monitoring/Points',
         },
-    
+
         {
           path: '/monitoring',
           redirect: '/monitoring/sensors',
         },
       ],
     },
-  
-    {
-      path: '/welcome',
-      name: 'Welcome',
-      hideInMenu: true,
-      component: '@/pages/Welcome',
-    },
+
+
     {
       path: '/profile',
       hideInMenu: true,

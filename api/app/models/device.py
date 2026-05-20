@@ -64,6 +64,8 @@ class DeviceInst(Base):
     life_span = Column(Integer, nullable=False, default=0)  # Expected lifespan in months
     desc = Column(String(128), nullable=False) # description for device instance, e.g. installation location or specific notes
     status = Column(SmallInteger, default=1, comment="tiny(1) status")
+    active = Column(SmallInteger, default=1, comment="设备是否运行") 
+    available = Column(SmallInteger, default=1, comment="设备是否可用, 如未分配或正在维修则不可用")
     device_spec_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to device_specs
 
 

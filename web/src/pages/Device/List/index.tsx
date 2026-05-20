@@ -34,15 +34,17 @@ type DeviceInstFormValues = {
   life_span: number;
   desc: string;
   status: number;
+  active: number;
+  available: number;
 };
 
 const toErrorMessage = (error: unknown): string => {
   const e = error as
     | {
-        data?: { detail?: string };
-        info?: { errorMessage?: string };
-        message?: string;
-      }
+      data?: { detail?: string };
+      info?: { errorMessage?: string };
+      message?: string;
+    }
     | undefined;
   return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';
 };
@@ -169,12 +171,12 @@ const DeviceListPage = () => {
       fixed: 'left',
     },
     {
-      title: '实例编码',
+      title: '编码',
       dataIndex: 'code',
       width: 140,
     },
     {
-      title: '设备SN',
+      title: '序列号',
       dataIndex: 'sn',
       width: 180,
     },
@@ -185,13 +187,13 @@ const DeviceListPage = () => {
       render: (_, row) => specMap.get(row.device_spec_id) || row.device_spec_id,
     },
     {
-      title: '采购日期',
+      title: '服役日期',
       dataIndex: 'purchase_date',
       width: 140,
       valueType: 'date',
     },
     {
-      title: '寿命(月)',
+      title: '可用年限(月)',
       dataIndex: 'life_span',
       width: 110,
       valueType: 'digit',
@@ -201,6 +203,28 @@ const DeviceListPage = () => {
       dataIndex: 'desc',
       ellipsis: true,
       render: (_, row) => row.desc || '-',
+    },
+    {
+      title: '运行状态',
+      dataIndex: 'active',
+      width: 100,
+      valueType: 'select',
+      valueEnum: {
+        1: { text: '运行中', status: 'Success' },
+        0: { text: '已停止', status: 'Default' },
+      },
+      render: (_, row) => (Number(row.active) === 1 ? '运行中' : '已停止'),
+    },
+    {
+      title: '服役状态',
+      dataIndex: 'available',
+      width: 100,
+      valueType: 'select',
+      valueEnum: {
+        1: { text: '服役中', status: 'Success' },
+        0: { text: '不可用', status: 'Error' },
+      },
+      render: (_, row) => (Number(row.available) === 1 ? '服役中' : '不可用'),
     },
     {
       title: '状态',
@@ -256,6 +280,7 @@ const DeviceListPage = () => {
         loading={loading}
         columns={columns}
         dataSource={filteredRows}
+        scroll={{ x: 1400 }}
         search={{ labelWidth: 'auto' }}
         onSubmit={(values) => setQuery(values)}
         onReset={() => setQuery({})}
@@ -292,18 +317,22 @@ const DeviceListPage = () => {
         initialValues={
           editing
             ? {
-                code: editing.code,
-                device_spec_id: editing.device_spec_id,
-                sn: editing.sn,
-                purchase_date: dayjs(editing.purchase_date),
-                life_span: editing.life_span,
-                desc: editing.desc,
-                status: Number(editing.status),
-              }
+              code: editing.code,
+              device_spec_id: editing.device_spec_id,
+              sn: editing.sn,
+              purchase_date: dayjs(editing.purchase_date),
+              life_span: editing.life_span,
+              desc: editing.desc,
+              status: Number(editing.status),
+              active: Number(editing.active),
+              available: Number(editing.available),
+            }
             : {
-                life_span: 0,
-                status: 1,
-              }
+              life_span: 0,
+              status: 1,
+              active: 1,
+              available: 1,
+            }
         }
         onFinish={async (values) => {
           setSaving(true);
@@ -316,6 +345,8 @@ const DeviceListPage = () => {
               life_span: Number(values.life_span ?? 0),
               desc: values.desc.trim(),
               status: Number(values.status ?? 1),
+              active: Number(values.active ?? 1),
+              available: Number(values.available ?? 1),
             };
 
             if (editing) {
@@ -339,19 +370,15 @@ const DeviceListPage = () => {
       >
         <ProFormText
           name="code"
-          label="实例编码"
+          label="编码"
           rules={[
-            { required: true, message: '请输入实例编码' },
-            { max: 16, message: '实例编码最多16个字符' },
+            { required: true, message: '请输入设备编码' },
+            { max: 16, message: '设备编码最多16个字符' },
           ]}
         />
         <ProFormText
           name="sn"
-          label="设备SN"
-          rules={[
-            { required: true, message: '请输入设备SN' },
-            { max: 64, message: '设备SN最多64个字符' },
-          ]}
+          label="序列号"
         />
         <ProForm.Item
           name="device_spec_id"
@@ -372,24 +399,14 @@ const DeviceListPage = () => {
         </ProForm.Item>
         <ProFormDatePicker
           name="purchase_date"
-          label="采购日期"
+          label="服役日期"
           fieldProps={{ format: 'YYYY-MM-DD' }}
-          rules={[{ required: true, message: '请选择采购日期' }]}
         />
         <ProFormDigit
           name="life_span"
-          label="寿命(月)"
+          label="可用年限(月)"
           min={0}
           fieldProps={{ precision: 0 }}
-          rules={[{ required: true, message: '请输入寿命(月)' }]}
-        />
-        <ProFormText
-          name="desc"
-          label="描述"
-          rules={[
-            { required: true, message: '请输入描述' },
-            { max: 128, message: '描述最多128个字符' },
-          ]}
         />
         <ProFormSelect
           name="status"
@@ -399,6 +416,13 @@ const DeviceListPage = () => {
             { label: '停用', value: 0 },
           ]}
           rules={[{ required: true, message: '请选择状态' }]}
+        />
+        <ProFormText
+          name="desc"
+          label="描述"
+          rules={[
+            { max: 128, message: '描述最多128个字符' },
+          ]}
         />
       </ModalForm>
     </PageContainer>

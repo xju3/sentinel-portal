@@ -37,6 +37,10 @@ class Settings(BaseSettings):
     minio_secure: bool = False
     minio_bucket: str = "fft"
 
-    model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8")
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding="utf-8",
+        extra="ignore",
+    )
 
 settings = Settings()

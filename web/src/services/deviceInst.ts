@@ -9,6 +9,8 @@ export type DeviceInst = {
   life_span: number;
   desc: string;
   status: number;
+  active: number;
+  available: number;
 };
 
 export type DeviceInstPayload = {
@@ -19,6 +21,8 @@ export type DeviceInstPayload = {
   life_span: number;
   desc: string;
   status: number;
+  active: number;
+  available: number;
 };
 
 export async function listAllDeviceInsts() {
