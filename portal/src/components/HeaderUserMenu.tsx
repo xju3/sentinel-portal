@@ -1,5 +1,5 @@
 import { history } from '@umijs/max';
-import { LockOutlined, LogoutOutlined, UserOutlined } from '@ant-design/icons';
+import { LockOutlined, LogoutOutlined, ShopOutlined, UserOutlined } from '@ant-design/icons';
 import { Button, Dropdown, MenuProps, Space, message } from 'antd';
 import { useRef } from 'react';
 
@@ -19,6 +19,10 @@ const HeaderUserMenu = () => {
       history.push('/change-password');
       return;
     }
+    if (key === 'tenant') {
+      history.push('/tenant');
+      return;
+    }
     if (key === 'logout') {
       clearSession();
       message.success('已退出登录');
@@ -36,6 +40,17 @@ const HeaderUserMenu = () => {
       key: 'password',
       icon: <LockOutlined />,
       label: '更改密码',
+    },
+    {
+      type: 'divider',
+    },
+    {
+      key: 'tenant',
+      icon: <ShopOutlined />,
+      label: '公司信息',
+    },
+    {
+      type: 'divider',
     },
     {
       key: 'logout',

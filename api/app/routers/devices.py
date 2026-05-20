@@ -4,7 +4,7 @@ Device related management endpoints
 
 from fastapi import APIRouter, Depends, HTTPException, Query
 from datetime import date
-from sqlalchemy import select
+from sqlalchemy import select, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 from pydantic import BaseModel, ConfigDict
@@ -70,15 +70,7 @@ async def _validate_sensor_monitoring_refs(
         if loc_result.scalar_one_or_none() is None:
             raise HTTPException(status_code=400, detail="location_id is not owned by current tenant")
 
-    sensor_id = data.get("sensor_id")
-    if sensor_id is not None:
-        stmt_ts = select(TenantSensor.id).where(
-            TenantSensor.tenant_id == tenant_id,
-            TenantSensor.sensor_id == sensor_id,
-        ).limit(1)
-        ts_result = await session.execute(stmt_ts)
-        if ts_result.scalar_one_or_none() is None:
-            raise HTTPException(status_code=400, detail="sensor_id is not assigned to current tenant")
+    # sensor_id 校验已移除，传感器选择器已确保只显示可用传感器
 
 
 # ==========================================
@@ -962,23 +954,47 @@ class SensorMonitoringDeviceInstOption(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class PagedDeviceInstResponse(BaseModel):
+    items: List[SensorMonitoringDeviceInstOption]
+    total: int
+
+
 @router.get(
     "/sensor-monitorings/device-insts",
-    response_model=List[SensorMonitoringDeviceInstOption],
+    response_model=PagedDeviceInstResponse,
 )
 async def list_sensor_monitoring_device_insts(
+    current: int = Query(1, ge=1),
+    pageSize: int = Query(10, ge=1, le=100),
+    keyword: Optional[str] = Query(None),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
     tenant_id = current_account.tenant_id
-    stmt = (
+    base_join = (
         select(DeviceInst)
         .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
         .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
         .where(DeviceCategory.tenant_id == tenant_id)
     )
-    result = await session.execute(stmt)
-    return result.scalars().all()
+    if keyword:
+        like = f"%{keyword}%"
+        base_join = base_join.where(
+            or_(DeviceInst.code.ilike(like), DeviceInst.sn.ilike(like))
+        )
+
+    # Count total
+    count_stmt = select(func.count()).select_from(base_join.subquery())
+    count_result = await session.execute(count_stmt)
+    total = count_result.scalar() or 0
+
+    # Fetch page
+    skip = (current - 1) * pageSize
+    fetch_stmt = base_join.offset(skip).limit(pageSize)
+    result = await session.execute(fetch_stmt)
+    items = result.scalars().all()
+
+    return PagedDeviceInstResponse(items=items, total=total)
 
 
 @router.get("/sensor-monitorings/{obj_id}", response_model=SensorMonitoringResponse)

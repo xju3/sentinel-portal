@@ -3,13 +3,14 @@ Customer related management endpoints
 """
 
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 from pydantic import BaseModel, ConfigDict
 from uuid import UUID
 
 from app.database import db_manager
-from app.models.customer import Account as AccountModel
+from app.models.customer import Account as AccountModel, Location, Tenant
 from app.services.customer_service import (
     TenantService,
     TenantSensorService,
@@ -49,6 +50,39 @@ class TenantResponse(BaseModel):
     active: bool
 
     model_config = ConfigDict(from_attributes=True)
+
+
+# ==========================================
+# 1b. Current Tenant (authenticated) - MUST be defined before /tenants/{tenant_id}
+# ==========================================
+class CurrentTenantUpdate(BaseModel):
+    name: Optional[str] = None
+    host: Optional[str] = None
+
+
+@router.get("/tenants/current", response_model=TenantResponse)
+async def get_current_tenant(
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    tenant = await TenantService.get_tenant(session, current_account.tenant_id)
+    if not tenant:
+        raise HTTPException(status_code=404, detail="Tenant not found")
+    return tenant
+
+
+@router.put("/tenants/current", response_model=TenantResponse)
+async def update_current_tenant(
+    payload: CurrentTenantUpdate,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    tenant = await TenantService.get_tenant(session, current_account.tenant_id)
+    if not tenant:
+        raise HTTPException(status_code=404, detail="Tenant not found")
+
+    update_data = payload.model_dump(exclude_unset=True)
+    return await TenantService.update_tenant(session, tenant, update_data)
 
 
 @router.get("/tenants", response_model=List[TenantResponse])
@@ -303,8 +337,6 @@ async def delete_supplier(
 class AccountCreate(BaseModel):
     username: str
     password: str
-    email: Optional[str] = None
-    mobile: Optional[str] = None
     flag: Optional[int] = 2
     active: Optional[bool] = True
     contact_id: Optional[UUID] = None
@@ -314,8 +346,6 @@ class AccountCreate(BaseModel):
 class AccountUpdate(BaseModel):
     username: Optional[str] = None
     password: Optional[str] = None
-    email: Optional[str] = None
-    mobile: Optional[str] = None
     flag: Optional[int] = None
     active: Optional[bool] = None
     contact_id: Optional[UUID] = None
@@ -324,15 +354,167 @@ class AccountUpdate(BaseModel):
 class AccountResponse(BaseModel):
     id: UUID
     username: str
-    email: Optional[str] = None
-    mobile: Optional[str] = None
     flag: int
     active: bool
+    admin: Optional[bool] = False
     contact_id: Optional[UUID] = None
+    contact_name: Optional[str] = None
     tenant_id: UUID
     # 响应中不包含 password 字段
 
     model_config = ConfigDict(from_attributes=True)
+
+
+# ==========================================
+# 4b. Tenant-scoped Account (authenticated) - MUST be defined before /accounts/{account_id}
+# ==========================================
+class TenantAccountCreate(BaseModel):
+    contact_name: str
+    username: str
+    password: str
+    flag: Optional[int] = 2
+    active: Optional[bool] = True
+
+
+@router.get("/accounts/by-tenant", response_model=List[AccountResponse])
+async def list_tenant_accounts(
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    """List all accounts belonging to the current tenant"""
+    from app.models.customer import Contact as ContactModel
+
+    stmt = select(AccountModel).where(AccountModel.tenant_id == current_account.tenant_id)
+    result = await session.execute(stmt)
+    accounts = result.scalars().all()
+
+    # 获取所有关联的 contact_id 并批量查询 contact_name
+    contact_ids = [a.contact_id for a in accounts if a.contact_id]
+    contact_map = {}
+    if contact_ids:
+        contact_stmt = select(ContactModel).where(ContactModel.id.in_(contact_ids))
+        contact_result = await session.execute(contact_stmt)
+        for c in contact_result.scalars().all():
+            contact_map[c.id] = c.name
+
+    # 构建响应，填充 contact_name
+    response = []
+    for a in accounts:
+        resp = AccountResponse(
+            id=a.id,
+            username=a.username,
+            flag=a.flag,
+            active=a.active,
+            admin=a.admin,
+            contact_id=a.contact_id,
+            contact_name=contact_map.get(a.contact_id) if a.contact_id else None,
+            tenant_id=a.tenant_id,
+        )
+        response.append(resp)
+    return response
+
+
+@router.post("/accounts/by-tenant", response_model=AccountResponse)
+async def create_tenant_account(
+    payload: TenantAccountCreate,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    """Create a new account under the current tenant"""
+    from app.models.customer import Contact as ContactModel
+    from app.services.customer_service import ContactService
+
+    # 1. 先创建 Contact
+    contact_data = {
+        "name": payload.contact_name,
+        "tenant_id": current_account.tenant_id,
+    }
+    contact = await ContactService.create_contact(session, contact_data)
+
+    # 2. 再创建 Account，关联 contact_id
+    data = payload.model_dump(exclude={"contact_name"})
+    data["tenant_id"] = current_account.tenant_id
+    data["contact_id"] = contact.id
+    account = await AccountService.create_account(session, data)
+
+    # 3. 返回完整响应
+    return AccountResponse(
+        id=account.id,
+        username=account.username,
+        flag=account.flag,
+        active=account.active,
+        admin=account.admin,
+        contact_id=account.contact_id,
+        contact_name=contact.name,
+        tenant_id=account.tenant_id,
+    )
+
+
+@router.put("/accounts/by-tenant/{account_id}", response_model=AccountResponse)
+async def update_tenant_account(
+    account_id: UUID,
+    payload: AccountUpdate,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    """Update an account belonging to the current tenant (e.g. toggle active)"""
+    stmt = select(AccountModel).where(
+        AccountModel.id == account_id,
+        AccountModel.tenant_id == current_account.tenant_id,
+    )
+    result = await session.execute(stmt)
+    db_account = result.scalar_one_or_none()
+    if not db_account:
+        raise HTTPException(status_code=404, detail="Account not found")
+
+    update_data = payload.model_dump(exclude_unset=True)
+    # 不允许通过此接口修改 tenant_id
+    update_data.pop("tenant_id", None)
+    return await AccountService.update_account(session, db_account, update_data)
+
+
+@router.put("/accounts/by-tenant/{account_id}/password")
+async def update_tenant_account_password(
+    account_id: UUID,
+    payload: AccountUpdate,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    """Update password for an account belonging to the current tenant"""
+    stmt = select(AccountModel).where(
+        AccountModel.id == account_id,
+        AccountModel.tenant_id == current_account.tenant_id,
+    )
+    result = await session.execute(stmt)
+    db_account = result.scalar_one_or_none()
+    if not db_account:
+        raise HTTPException(status_code=404, detail="Account not found")
+
+    update_data = payload.model_dump(exclude_unset=True)
+    if "password" not in update_data or not update_data["password"]:
+        raise HTTPException(status_code=400, detail="Password is required")
+
+    return await AccountService.update_account(session, db_account, update_data)
+
+
+@router.delete("/accounts/by-tenant/{account_id}")
+async def delete_tenant_account(
+    account_id: UUID,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    """Delete an account belonging to the current tenant"""
+    stmt = select(AccountModel).where(
+        AccountModel.id == account_id,
+        AccountModel.tenant_id == current_account.tenant_id,
+    )
+    result = await session.execute(stmt)
+    db_account = result.scalar_one_or_none()
+    if not db_account:
+        raise HTTPException(status_code=404, detail="Account not found")
+
+    await AccountService.delete_account(session, db_account)
+    return {"message": "Account deleted successfully"}
 
 
 @router.get("/accounts", response_model=List[AccountResponse])
@@ -511,15 +693,35 @@ class LocationResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-@router.get("/locations", response_model=List[LocationResponse])
+class PagedLocationResponse(BaseModel):
+    items: List[LocationResponse]
+    total: int
+
+
+@router.get("/locations", response_model=PagedLocationResponse)
 async def list_locations(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
+    current: int = Query(1, ge=1),
+    pageSize: int = Query(10, ge=1, le=100),
+    keyword: Optional[str] = Query(None),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
     tenant_id = current_account.tenant_id
-    return await LocationService.get_locations(session, tenant_id, skip, limit)
+    base_stmt = select(Location).where(Location.tenant_id == tenant_id)
+    if keyword:
+        like = f"%{keyword}%"
+        base_stmt = base_stmt.where(Location.name.ilike(like))
+
+    count_stmt = select(func.count()).select_from(base_stmt.subquery())
+    count_result = await session.execute(count_stmt)
+    total = count_result.scalar() or 0
+
+    skip = (current - 1) * pageSize
+    fetch_stmt = base_stmt.offset(skip).limit(pageSize)
+    result = await session.execute(fetch_stmt)
+    items = result.scalars().all()
+
+    return PagedLocationResponse(items=items, total=total)
 
 
 @router.post("/locations", response_model=LocationResponse)
