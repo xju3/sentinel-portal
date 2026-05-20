@@ -11,7 +11,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import db_manager, redis_manager, influxdb_manager, minio_manager
 from app.utils.logger import setup_logging
-from app.routers import auth, health, sensors, devices, customers
+from app.routers import auth, health, sensors, devices, customers, admin
 
 # Setup logging
 setup_logging()
@@ -74,6 +74,7 @@ app.include_router(sensors.router, prefix=settings.api_prefix)
 app.include_router(customers.router, prefix=settings.api_prefix)
 app.include_router(devices.router, prefix=settings.api_prefix)
 app.include_router(auth.router, prefix=settings.api_prefix)
+app.include_router(admin.router, prefix=settings.api_prefix)
 
 
 # Root endpoint

@@ -22,7 +22,7 @@ export type SensorBatchPayload = {
 };
 
 export async function listSensorBatches(skip = 0, limit = 100) {
-  return request<SensorBatch[]>('/api/v1/sensors/batches', {
+  return request<SensorBatch[]>('/api/v1/admin/sensor-batches', {
     method: 'GET',
     params: { skip, limit },
   });

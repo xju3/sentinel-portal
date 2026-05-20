@@ -37,7 +37,8 @@ const SensorProductPage = () => {
   const loadRows = async () => {
     setLoading(true);
     try {
-      setRows(await listSensors());
+      const result = await listSensors();
+      setRows(result.items);
     } catch (error) {
       message.error(toErrorMessage(error));
     } finally {

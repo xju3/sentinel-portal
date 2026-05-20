@@ -18,10 +18,15 @@ export type SensorPayload = {
   sensor_type_id: string;
 };
 
-export async function listSensors(skip = 0, limit = 100) {
-  return request<Sensor[]>('/api/v1/sensors', {
+export type PagedSensorResponse = {
+  items: Sensor[];
+  total: number;
+};
+
+export async function listSensors(current = 1, pageSize = 100) {
+  return request<PagedSensorResponse>('/api/v1/sensors', {
     method: 'GET',
-    params: { skip, limit },
+    params: { current, pageSize },
   });
 }
 

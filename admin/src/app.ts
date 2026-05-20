@@ -3,6 +3,7 @@ import { AppstoreOutlined } from '@ant-design/icons';
 import { history, RequestConfig, RunTimeLayoutConfig } from '@umijs/max';
 import { Divider, Space, Typography } from 'antd';
 
+import HeaderUserMenu from '@/components/HeaderUserMenu';
 import { getSession } from '@/utils/session';
 
 export const request: RequestConfig = {
@@ -38,8 +39,6 @@ export const layout: RunTimeLayoutConfig = () => {
   return {
     layout: 'mix',
     headerTitleRender: () => {
-      const session = getSession();
-      const tenantName = session?.tenant_name || '未识别租户';
       return React.createElement(
         Space,
         { size: 10 },
@@ -48,10 +47,11 @@ export const layout: RunTimeLayoutConfig = () => {
         React.createElement(
           Typography.Text,
           { strong: true, style: { fontSize: 14 } },
-          tenantName,
+          '设备管理系统',
         ),
       );
     },
+    rightContentRender: () => React.createElement(HeaderUserMenu),
     onPageChange: () => {
       const pathname = history.location?.pathname || '/';
       const loggedIn = hasSession();

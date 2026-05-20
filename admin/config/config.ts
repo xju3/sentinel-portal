@@ -35,6 +35,12 @@ export default defineConfig({
       component: '@/pages/Tenant',
     },
     {
+      path: '/account',
+      name: '用户管理',
+      icon: 'UserOutlined',
+      component: '@/pages/Account',
+    },
+    {
       path: '/sensor',
       name: '传感器',
       icon: 'RadarChartOutlined',

@@ -9,18 +9,22 @@ import {
   Popconfirm,
   Select,
   Space,
+  Switch,
   Table,
   Tag,
+  Tooltip,
   Typography,
 } from 'antd';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
   createTenantAccount,
   deleteTenantAccount,
   listTenantAccounts,
+  updateTenantAccount,
   type AccountInfo,
 } from '@/services/tenant';
+import { getSession } from '@/utils/session';
 
 const USER_FLAG_MAP: Record<number, string> = {
   1: '邮箱',
@@ -33,6 +37,8 @@ const TenantUsersPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [form] = Form.useForm();
+
+  const currentAccountId = useMemo(() => getSession()?.account_id, []);
 
   const fetchAccounts = async () => {
     setLoading(true);
@@ -90,6 +96,17 @@ const TenantUsersPage = () => {
     }
   };
 
+  const handleToggleActive = async (record: AccountInfo, checked: boolean) => {
+    try {
+      await updateTenantAccount(record.id, { active: checked });
+      message.success('更新成功');
+      fetchAccounts();
+    } catch (error: any) {
+      const detail = error?.data?.detail || '更新失败';
+      message.error(String(detail));
+    }
+  };
+
   const columns = [
     {
       title: '用户名',
@@ -126,30 +143,47 @@ const TenantUsersPage = () => {
       title: '状态',
       dataIndex: 'active',
       key: 'active',
-      width: 100,
-      render: (active: boolean) => (
-        <Tag color={active ? 'success' : 'error'}>
-          {active ? '启用' : '禁用'}
-        </Tag>
-      ),
+      width: 120,
+      render: (active: boolean, record: AccountInfo) => {
+        const isSelf = record.id === currentAccountId;
+        const isLast = accounts.length <= 1;
+        const disabled = isSelf || isLast;
+        const tooltipTitle = isSelf ? '不能停用自己的账号' : isLast ? '至少保留一个启用账号' : undefined;
+
+        return (
+          <Tooltip title={tooltipTitle}>
+            <Switch
+              checked={active}
+              checkedChildren="启用"
+              unCheckedChildren="停用"
+              disabled={disabled}
+              onChange={(checked) => handleToggleActive(record, checked)}
+            />
+          </Tooltip>
+        );
+      },
     },
     {
       title: '操作',
       key: 'action',
       width: 100,
-      render: (_: any, record: AccountInfo) => (
-        <Popconfirm
-          title="确认删除"
-          description={`确定要删除用户 "${record.username}" 吗？`}
-          onConfirm={() => handleDelete(record)}
-          okText="确认"
-          cancelText="取消"
-        >
-          <Button type="link" danger>
-            删除
-          </Button>
-        </Popconfirm>
-      ),
+      render: (_: any, record: AccountInfo) => {
+        const isSelf = record.id === currentAccountId;
+        if (isSelf) return null;
+        return (
+          <Popconfirm
+            title="确认删除"
+            description={`确定要删除用户 "${record.username}" 吗？`}
+            onConfirm={() => handleDelete(record)}
+            okText="确认"
+            cancelText="取消"
+          >
+            <Button type="link" danger>
+              删除
+            </Button>
+          </Popconfirm>
+        );
+      },
     },
   ];
 

@@ -376,6 +376,164 @@ class TenantAccountCreate(BaseModel):
     active: Optional[bool] = True
 
 
+@router.get("/accounts/by-admin", response_model=List[AccountResponse])
+async def list_admin_accounts(
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    """List all admin accounts (admin=True)"""
+    from app.models.customer import Contact as ContactModel
+
+    stmt = select(AccountModel).where(AccountModel.admin == True)  # noqa: E712
+    result = await session.execute(stmt)
+    accounts = result.scalars().all()
+
+    # 获取所有关联的 contact_id 并批量查询 contact_name
+    contact_ids = [a.contact_id for a in accounts if a.contact_id]
+    contact_map = {}
+    if contact_ids:
+        contact_stmt = select(ContactModel).where(ContactModel.id.in_(contact_ids))
+        contact_result = await session.execute(contact_stmt)
+        for c in contact_result.scalars().all():
+            contact_map[c.id] = c.name
+
+    # 构建响应，填充 contact_name
+    response = []
+    for a in accounts:
+        resp = AccountResponse(
+            id=a.id,
+            username=a.username,
+            flag=a.flag,
+            active=a.active,
+            admin=a.admin,
+            contact_id=a.contact_id,
+            contact_name=contact_map.get(a.contact_id) if a.contact_id else None,
+            tenant_id=a.tenant_id,
+        )
+        response.append(resp)
+    return response
+
+
+class AdminAccountCreate(BaseModel):
+    contact_name: str
+    username: str
+    password: str
+
+
+@router.post("/accounts/by-admin", response_model=AccountResponse)
+async def create_admin_account(
+    payload: AdminAccountCreate,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    """Create a new admin account (admin=True)"""
+    import re
+    from app.models.customer import Contact as ContactModel
+    from app.services.customer_service import ContactService
+
+    # 判断 username 是邮箱还是手机号，逻辑与 portal 一致
+    username = payload.username.strip()
+    is_email = re.match(r'^[^@]+@[^@]+\.[^@]+$', username)
+    flag = 1 if is_email else 2
+
+    # 1. 先创建 Contact
+    contact_data = {
+        "name": payload.contact_name,
+    }
+    if is_email:
+        contact_data["email"] = username
+    else:
+        contact_data["mobile"] = username
+    contact = await ContactService.create_contact(session, contact_data)
+
+    # 2. 再创建 Account，关联 contact_id，设置 admin=True
+    data = {
+        "username": username,
+        "password": payload.password,
+        "flag": flag,
+        "active": True,
+        "contact_id": contact.id,
+        "admin": True,
+    }
+    account = await AccountService.create_account(session, data)
+
+    # 3. 返回完整响应
+    return AccountResponse(
+        id=account.id,
+        username=account.username,
+        flag=account.flag,
+        active=account.active,
+        admin=account.admin,
+        contact_id=account.contact_id,
+        contact_name=contact.name,
+        tenant_id=account.tenant_id,
+    )
+
+
+@router.put("/accounts/by-admin/{account_id}", response_model=AccountResponse)
+async def update_admin_account(
+    account_id: UUID,
+    payload: AccountUpdate,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    """Update an admin account"""
+    stmt = select(AccountModel).where(
+        AccountModel.id == account_id,
+        AccountModel.admin == True,  # noqa: E712
+    )
+    result = await session.execute(stmt)
+    db_account = result.scalar_one_or_none()
+    if not db_account:
+        raise HTTPException(status_code=404, detail="Account not found")
+
+    update_data = payload.model_dump(exclude_unset=True)
+    update_data.pop("tenant_id", None)
+    return await AccountService.update_account(session, db_account, update_data)
+
+
+@router.put("/accounts/by-admin/{account_id}/password")
+async def update_admin_account_password(
+    account_id: UUID,
+    payload: AccountUpdate,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    """Update password for an admin account"""
+    stmt = select(AccountModel).where(
+        AccountModel.id == account_id,
+        AccountModel.admin == True,  # noqa: E712
+    )
+    result = await session.execute(stmt)
+    db_account = result.scalar_one_or_none()
+    if not db_account:
+        raise HTTPException(status_code=404, detail="Account not found")
+
+    update_data = payload.model_dump(exclude_unset=True)
+    if "password" not in update_data or not update_data["password"]:
+        raise HTTPException(status_code=400, detail="Password is required")
+
+    return await AccountService.update_account(session, db_account, update_data)
+
+
+@router.delete("/accounts/by-admin/{account_id}")
+async def delete_admin_account(
+    account_id: UUID,
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    """Delete an admin account"""
+    stmt = select(AccountModel).where(
+        AccountModel.id == account_id,
+        AccountModel.admin == True,  # noqa: E712
+    )
+    result = await session.execute(stmt)
+    db_account = result.scalar_one_or_none()
+    if not db_account:
+        raise HTTPException(status_code=404, detail="Account not found")
+
+    await AccountService.delete_account(session, db_account)
+    return {"message": "Account deleted successfully"}
+
+
+# ==========================================
+# 4c. Tenant-scoped Account (authenticated) - for portal
+# ==========================================
 @router.get("/accounts/by-tenant", response_model=List[AccountResponse])
 async def list_tenant_accounts(
     current_account: AccountModel = Depends(get_current_account),
