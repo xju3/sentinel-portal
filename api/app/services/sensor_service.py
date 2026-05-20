@@ -14,7 +14,7 @@ from influxdb_client.client.query_api import QueryApi
 
 from app.database import influxdb_manager
 from app.config import settings
-from app.models.sensor import SensorType, Sensor
+from app.models.sensor import SensorType, Sensor, SensorBatch
 
 logger = logging.getLogger(__name__)
 
@@ -85,6 +85,61 @@ class SensorDbService:
 
     @staticmethod
     async def delete(session: AsyncSession, db_obj: Sensor) -> None:
+        await session.delete(db_obj)
+        await session.commit()
+
+
+class SensorBatchService:
+    @staticmethod
+    async def get_all(session: AsyncSession, skip: int, limit: int) -> List[SensorBatch]:
+        stmt = select(SensorBatch).offset(skip).limit(limit)
+        result = await session.execute(stmt)
+        return result.scalars().all()
+
+    @staticmethod
+    async def get_by_id(session: AsyncSession, obj_id: UUID) -> Optional[SensorBatch]:
+        stmt = select(SensorBatch).where(SensorBatch.id == obj_id)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def get_by_tenant(session: AsyncSession, tenant_id: UUID, skip: int, limit: int) -> List[SensorBatch]:
+        stmt = (
+            select(SensorBatch)
+            .where(SensorBatch.tenant_id == tenant_id)
+            .offset(skip)
+            .limit(limit)
+        )
+        result = await session.execute(stmt)
+        return result.scalars().all()
+
+    @staticmethod
+    async def get_by_id_and_tenant(session: AsyncSession, obj_id: UUID, tenant_id: UUID) -> Optional[SensorBatch]:
+        stmt = select(SensorBatch).where(
+            SensorBatch.id == obj_id,
+            SensorBatch.tenant_id == tenant_id,
+        )
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def create(session: AsyncSession, data: dict) -> SensorBatch:
+        db_obj = SensorBatch(**data)
+        session.add(db_obj)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def update(session: AsyncSession, db_obj: SensorBatch, data: dict) -> SensorBatch:
+        for key, value in data.items():
+            setattr(db_obj, key, value)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def delete(session: AsyncSession, db_obj: SensorBatch) -> None:
         await session.delete(db_obj)
         await session.commit()
 

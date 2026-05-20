@@ -9,7 +9,6 @@ type SensorViewRow = TenantSensor & {
   sensor_sn: string;
   sensor_type_id: string;
   description?: string;
-  battery?: number;
   active?: boolean;
   active_at?: string;
 };
@@ -42,7 +41,6 @@ const MonitoringSensorsPage = () => {
           sensor_sn: sensor?.sn || '-',
           sensor_type_id: sensor?.sensor_type_id || '-',
           description: sensor?.description,
-          battery: sensor?.battery,
           active: sensor?.active,
           active_at: sensor?.active_at,
         };
@@ -100,13 +98,6 @@ const MonitoringSensorsPage = () => {
       title: '传感器SN',
       dataIndex: 'sensor_sn',
       width: 180,
-    },
-    {
-      title: '电量(%)',
-      dataIndex: 'battery',
-      width: 100,
-      hideInSearch: true,
-      render: (_, row) => (row.battery === undefined ? '-' : Number(row.battery).toFixed(1)),
     },
     {
       title: '可用状态',

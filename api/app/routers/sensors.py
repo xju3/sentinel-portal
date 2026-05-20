@@ -11,7 +11,9 @@ from pydantic import BaseModel, ConfigDict
 from uuid import UUID
 
 from app.database import db_manager
-from app.services.sensor_service import SensorTypeService, SensorDbService
+from app.services.sensor_service import SensorTypeService, SensorDbService, SensorBatchService
+from app.models.customer import Account
+from app.utils.auth import get_current_account
 
 router = APIRouter(prefix="/sensors", tags=["sensors"])
 
@@ -21,7 +23,7 @@ router = APIRouter(prefix="/sensors", tags=["sensors"])
 # ==========================================
 class SensorTypeCreate(BaseModel):
     name: str
-    battery_capacity: Optional[int] = 0
+    battery: Optional[int] = 0
     network: Optional[int] = 1
     bluetooth: Optional[bool] = False
     description: Optional[str] = None
@@ -29,7 +31,7 @@ class SensorTypeCreate(BaseModel):
 
 class SensorTypeUpdate(BaseModel):
     name: Optional[str] = None
-    battery_capacity: Optional[int] = None
+    battery: Optional[int] = None
     network: Optional[int] = None
     bluetooth: Optional[bool] = None
     description: Optional[str] = None
@@ -38,7 +40,7 @@ class SensorTypeUpdate(BaseModel):
 class SensorTypeResponse(BaseModel):
     id: UUID
     name: str
-    battery_capacity: int
+    battery: int
     network: int
     bluetooth: bool
     description: Optional[str] = None
@@ -102,12 +104,108 @@ async def delete_sensor_type(
 
 
 # ==========================================
-# 2. Sensor
+# 2. SensorBatch (defined before Sensor to avoid path conflict with /{obj_id})
+# ==========================================
+class SensorBatchCreate(BaseModel):
+    code: str
+    qty: int
+    sn: int
+    status: int = 0
+    description: Optional[str] = None
+    sensor_type_id: UUID
+
+
+class SensorBatchUpdate(BaseModel):
+    code: Optional[str] = None
+    qty: Optional[int] = None
+    sn: Optional[int] = None
+    status: Optional[int] = None
+    description: Optional[str] = None
+    sensor_type_id: Optional[UUID] = None
+
+
+class SensorBatchResponse(BaseModel):
+    id: UUID
+    code: str
+    qty: int
+    sn: int
+    status: int
+    description: Optional[str] = None
+    sensor_type_id: UUID
+    tenant_id: UUID
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+@router.get("/batches", response_model=List[SensorBatchResponse])
+async def list_sensor_batches(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100),
+    session: AsyncSession = Depends(db_manager.get_session),
+    current_account: Account = Depends(get_current_account),
+):
+    return await SensorBatchService.get_by_tenant(session, current_account.tenant_id, skip, limit)
+
+
+@router.get("/batches/{obj_id}", response_model=SensorBatchResponse)
+async def get_sensor_batch(
+    obj_id: UUID,
+    session: AsyncSession = Depends(db_manager.get_session),
+    current_account: Account = Depends(get_current_account),
+):
+    obj = await SensorBatchService.get_by_id_and_tenant(session, obj_id, current_account.tenant_id)
+    if not obj:
+        raise HTTPException(status_code=404, detail="SensorBatch not found")
+    return obj
+
+
+@router.post("/batches", response_model=SensorBatchResponse)
+async def create_sensor_batch(
+    item: SensorBatchCreate,
+    session: AsyncSession = Depends(db_manager.get_session),
+    current_account: Account = Depends(get_current_account),
+):
+    data = item.model_dump()
+    data["tenant_id"] = current_account.tenant_id
+    return await SensorBatchService.create(session, data)
+
+
+@router.put("/batches/{obj_id}", response_model=SensorBatchResponse)
+async def update_sensor_batch(
+    obj_id: UUID,
+    item: SensorBatchUpdate,
+    session: AsyncSession = Depends(db_manager.get_session),
+    current_account: Account = Depends(get_current_account),
+):
+    db_obj = await SensorBatchService.get_by_id_and_tenant(session, obj_id, current_account.tenant_id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="SensorBatch not found")
+
+    update_data = item.model_dump(exclude_unset=True)
+    return await SensorBatchService.update(session, db_obj, update_data)
+
+
+@router.delete("/batches/{obj_id}")
+async def delete_sensor_batch(
+    obj_id: UUID,
+    session: AsyncSession = Depends(db_manager.get_session),
+    current_account: Account = Depends(get_current_account),
+):
+    db_obj = await SensorBatchService.get_by_id_and_tenant(session, obj_id, current_account.tenant_id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="SensorBatch not found")
+
+    await SensorBatchService.delete(session, db_obj)
+    return {"message": "SensorBatch deleted successfully"}
+
+
+# ==========================================
+# 3. Sensor
 # ==========================================
 class SensorCreate(BaseModel):
     sn: str
     description: Optional[str] = None
-    battery: Optional[float] = 100.0
     active: Optional[bool] = True
     sensor_type_id: UUID
 
@@ -115,7 +213,6 @@ class SensorCreate(BaseModel):
 class SensorUpdate(BaseModel):
     sn: Optional[str] = None
     description: Optional[str] = None
-    battery: Optional[float] = None
     active: Optional[bool] = None
     sensor_type_id: Optional[UUID] = None
 
@@ -124,7 +221,6 @@ class SensorResponse(BaseModel):
     id: UUID
     sn: str
     description: Optional[str] = None
-    battery: float
     active: bool
     active_at: datetime
     created_at: datetime

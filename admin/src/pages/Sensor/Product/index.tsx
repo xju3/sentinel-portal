@@ -3,13 +3,12 @@ import {
   ModalForm,
   PageContainer,
   ProColumns,
-  ProFormDigit,
   ProFormSelect,
   ProFormText,
   ProFormTextArea,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Popconfirm, Switch, Tag, message } from 'antd';
+import { Button, Popconfirm, Switch, message } from 'antd';
 
 import {
   Sensor,
@@ -27,7 +26,7 @@ const toErrorMessage = (error: unknown): string => {
   return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';
 };
 
-const SensorPage = () => {
+const SensorProductPage = () => {
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -72,18 +71,6 @@ const SensorPage = () => {
       title: '序列号',
       dataIndex: 'sn',
       width: 200,
-    },
-    {
-      title: '电量(%)',
-      dataIndex: 'battery',
-      width: 100,
-      valueType: 'digit',
-      hideInSearch: true,
-      render: (_, row) => {
-        const val = Number(row.battery);
-        const color = val > 50 ? 'green' : val > 20 ? 'orange' : 'red';
-        return <Tag color={color}>{val}%</Tag>;
-      },
     },
     {
       title: '状态',
@@ -170,15 +157,15 @@ const SensorPage = () => {
 
   return (
     <PageContainer
-      title="传感器管理"
-      subTitle="管理所有传感器设备"
+      title="传感器产品管理"
+      subTitle="管理所有传感器产品"
     >
       <ProTable<Sensor>
         rowKey="id"
         loading={loading}
         columns={columns}
         dataSource={filteredRows}
-        scroll={{ x: 1100 }}
+        scroll={{ x: 900 }}
         search={{ labelWidth: 'auto' }}
         onSubmit={(values) => setQuery(values)}
         onReset={() => setQuery({})}
@@ -216,11 +203,10 @@ const SensorPage = () => {
             ? {
                 sn: editing.sn,
                 description: editing.description,
-                battery: editing.battery,
                 active: editing.active,
                 sensor_type_id: editing.sensor_type_id,
               }
-            : { battery: 100, active: true }
+            : { active: true }
         }
         onFinish={async (values) => {
           setSaving(true);
@@ -228,7 +214,6 @@ const SensorPage = () => {
             const payload: SensorPayload = {
               sn: values.sn.trim(),
               description: values.description?.trim(),
-              battery: Number(values.battery ?? 100),
               active: values.active,
               sensor_type_id: values.sensor_type_id,
             };
@@ -264,13 +249,6 @@ const SensorPage = () => {
           name="description"
           label="描述"
         />
-        <ProFormDigit
-          name="battery"
-          label="电量(%)"
-          min={0}
-          max={100}
-          fieldProps={{ precision: 1 }}
-        />
         <ProFormSelect
           name="active"
           label="状态"
@@ -285,4 +263,4 @@ const SensorPage = () => {
   );
 };
 
-export default SensorPage;
+export default SensorProductPage;

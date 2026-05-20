@@ -11,7 +11,6 @@ export type Sensor = {
   id: string;
   sn: string;
   description?: string;
-  battery: number;
   active: boolean;
   active_at: string;
   created_at: string;

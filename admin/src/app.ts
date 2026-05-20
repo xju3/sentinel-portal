@@ -28,7 +28,7 @@ export const request: RequestConfig = {
   ],
 };
 
-const PUBLIC_PATHS = ['/login', '/register'];
+const PUBLIC_PATHS = ['/login'];
 
 function hasSession() {
   return Boolean(getSession());

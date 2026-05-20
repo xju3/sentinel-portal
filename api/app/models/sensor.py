@@ -13,7 +13,7 @@ class SensorType(Base):
 
     __tablename__ = "sensor_type"
 
-    id = Column(Uuid(as_uuid=True), primary_key=True, index=True)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     name = Column(String(100), nullable=False, unique=True)
     battery = Column(Integer, nullable=False, default=0)  
     network = Column(Integer, nullable=False, default=1)  # Network range in meters
@@ -25,10 +25,9 @@ class Sensor(Base):
 
     __tablename__ = "sensors"
 
-    id = Column(Uuid(as_uuid=True), primary_key=True, index=True)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     sn = Column(String(255), nullable=False, index=True)
     description = Column(Text)
-    battery = Column(Float, default=100.0)
     active = Column(Boolean, default=True)
     active_at = Column(DateTime, default=datetime.utcnow)
     created_at = Column(DateTime, default=datetime.utcnow)
@@ -38,12 +37,27 @@ class Sensor(Base):
     def __repr__(self):
         return f"<Sensor {self.id}: {self.sn}>"
 
+class SensorBatch(Base):
+    """Sensor batch entity model"""
+
+    __tablename__ = "sensor_batch"
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    code = Column(String(255), nullable=False, unique=True)
+    qty = Column(Integer, nullable=False)
+    description = Column(Text)
+    sn = Column(Integer, nullable=False, index=True)  # Common SN prefix for the batch
+    status = Column(SmallInteger, default=1, comment="tiny(1) status")
+    sensor_type_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to sensor_types
+    tenant_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to tenant for multi-tenant support
+    created_at = Column(DateTime, default=datetime.utcnow)
+
 class SensorStatus(Base):
     """Sensor status entity model"""
 
     __tablename__ = "sensor_status"
 
-    id = Column(Uuid(as_uuid=True), primary_key=True, index=True)
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     sensor_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to sensors
     timestamp = Column(DateTime, default=datetime.utcnow)
     temperature = Column(Float, nullable=True)

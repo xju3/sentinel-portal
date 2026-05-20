@@ -42,7 +42,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 20
       },
       "enableBy": "register"
     },
@@ -55,7 +55,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 4
       },
       "enableBy": "register"
     },
@@ -89,7 +89,7 @@
             2
           ]
         },
-        "register": 1
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -103,25 +103,6 @@
       "time": {
         "hooks": {
           "modifyRoutes": [
-            1,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0
@@ -141,30 +122,10 @@
       "time": {
         "hooks": {
           "onDevCompileDone": [
-            11,
-            3,
-            2,
+            10,
             3,
             3,
-            2,
             4,
-            4,
-            2,
-            3,
-            3,
-            2,
-            3,
-            3,
-            2,
-            4,
-            2,
-            3,
-            3,
-            3,
-            2,
-            2,
-            3,
-            2,
             2,
             3
           ]
@@ -183,34 +144,15 @@
       "time": {
         "hooks": {
           "modifyAppData": [
-            32
+            30
           ],
           "onGenerateFiles": [
-            2,
-            8,
-            10,
-            10,
-            10,
-            20,
-            22,
-            21,
-            21,
-            21,
-            21,
-            22,
-            31,
-            21,
-            21,
-            22,
-            34,
-            29,
-            23,
-            26,
-            26,
-            20
+            1,
+            24,
+            13
           ]
         },
-        "register": 14
+        "register": 17
       },
       "enableBy": "register"
     },
@@ -226,29 +168,10 @@
           "addEntryCode": [
             0,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -262,34 +185,12 @@
       "time": {
         "hooks": {
           "onCheckConfig": [
-            0,
-            1,
-            0,
-            1,
-            0,
             0
           ],
           "onCheck": [
             0
           ],
           "onPrepareBuildSuccess": [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,
@@ -363,30 +264,10 @@
             0,
             0,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -403,7 +284,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -416,7 +297,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -430,15 +311,10 @@
       "time": {
         "hooks": {
           "modifyConfig": [
-            0,
-            0,
-            0,
-            1,
-            0,
             0
           ]
         },
-        "register": 4
+        "register": 7
       },
       "enableBy": "register"
     },
@@ -1290,7 +1166,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1307,7 +1183,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1324,7 +1200,7 @@
             5
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1337,7 +1213,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 49
+        "register": 54
       },
       "enableBy": "register"
     },
@@ -1350,7 +1226,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 15
+        "register": 38
       },
       "enableBy": "config"
     },
@@ -1363,7 +1239,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 13
+        "register": 16
       },
       "enableBy": "config"
     },
@@ -1377,24 +1253,12 @@
       "time": {
         "hooks": {
           "modifyAppData": [
-            0
+            1
           ],
           "addBeforeMiddlewares": [
             0
           ],
           "modifyHTMLFavicon": [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0
           ]
         },
@@ -1414,47 +1278,9 @@
           "onGenerateFiles": [
             1,
             1,
-            1,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-            1,
-            0,
-            1,
-            0,
-            0,
-            1,
-            0,
-            1,
-            0,
             1
           ],
           "addRuntimePlugin": [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0
@@ -1473,7 +1299,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1493,7 +1319,7 @@
             1
           ]
         },
-        "register": 23
+        "register": 24
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/mpa/mpa": {
@@ -1505,7 +1331,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1533,66 +1359,9 @@
           "onGenerateFiles": [
             0,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0
           ],
           "addEntryImports": [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,
@@ -1628,76 +1397,14 @@
       "time": {
         "hooks": {
           "modifyConfig": [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
+            1
           ],
           "onGenerateFiles": [
-            45,
-            11,
-            18,
+            44,
             14,
-            11,
-            9,
-            11,
-            11,
-            17,
-            8,
-            7,
-            9,
-            16,
-            15,
-            10,
-            11,
-            14,
-            14,
-            9,
-            10,
-            10,
-            9
+            18
           ],
           "addPolyfillImports": [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,
@@ -1724,44 +1431,6 @@
             0,
             0,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0
           ]
         },
@@ -1779,26 +1448,7 @@
       "time": {
         "hooks": {
           "onGenerateFiles": [
-            61,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1,
+            65,
             0,
             0
           ]
@@ -1845,26 +1495,7 @@
           "onGenerateFiles": [
             0,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1
+            0
           ],
           "addBeforeMiddlewares": [
             0
@@ -1884,53 +1515,15 @@
       "time": {
         "hooks": {
           "onGenerateFiles": [
-            7,
-            4,
-            9,
-            2,
-            9,
-            3,
-            11,
-            3,
             10,
-            2,
-            8,
-            2,
+            5,
             10,
-            2,
-            11,
-            2,
-            11,
-            2,
-            8,
             3,
-            7,
-            2,
-            9,
-            2,
-            10,
-            2,
-            12,
-            2,
-            9,
-            2,
-            12,
-            2,
             13,
-            2,
-            12,
-            3,
-            12,
-            1,
-            10,
-            2,
-            10,
-            3,
-            12,
-            2
+            4
           ]
         },
-        "register": 2
+        "register": 3
       },
       "enableBy": "register"
     },
@@ -1968,7 +1561,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "config"
     },
@@ -1982,31 +1575,12 @@
       "time": {
         "hooks": {
           "onGenerateFiles": [
-            269,
-            6,
-            7,
-            9,
-            6,
-            11,
-            7,
-            8,
-            7,
-            6,
-            7,
-            7,
-            7,
-            10,
-            6,
-            8,
-            8,
-            7,
-            7,
-            7,
-            7,
-            6
+            262,
+            12,
+            7
           ]
         },
-        "register": 1
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -2023,7 +1597,7 @@
             0
           ]
         },
-        "register": 2
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -2036,7 +1610,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "config"
     },
@@ -2049,7 +1623,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2062,7 +1636,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 3
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/monorepo/redirect": {
@@ -2074,7 +1648,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 14
+        "register": 16
       },
       "enableBy": "config"
     },
@@ -2088,31 +1662,12 @@
       "time": {
         "hooks": {
           "onGenerateFiles": [
+            2,
             1,
-            0,
-            0,
-            1,
-            1,
-            0,
-            0,
-            1,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-            1,
-            0,
-            0,
-            1,
-            0,
             1
           ]
         },
-        "register": 1
+        "register": 0
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/clickToComponent/clickToComponent": {
@@ -2124,7 +1679,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2137,7 +1692,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2150,7 +1705,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2163,7 +1718,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/swc/swc": {
@@ -2179,7 +1734,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -2204,7 +1759,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2217,7 +1772,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/hmrGuardian/hmrGuardian": {
@@ -2242,22 +1797,10 @@
       "time": {
         "hooks": {
           "addHTMLHeadScripts": [
-            9,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1,
-            0
+            1
           ]
         },
-        "register": 17
+        "register": 19
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/forget/forget": {
@@ -2283,10 +1826,10 @@
       "time": {
         "hooks": {
           "modifyUniBundler": [
-            246
+            375
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -2299,7 +1842,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -2312,7 +1855,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 22
+        "register": 26
       },
       "enableBy": "register"
     },
@@ -2329,7 +1872,7 @@
             10
           ]
         },
-        "register": 20
+        "register": 28
       }
     },
     "./node_modules/@umijs/preset-umi/dist/commands/help": {
@@ -2393,7 +1936,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -2406,7 +1949,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -2484,7 +2027,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -2497,7 +2040,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -2575,7 +2118,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 13
+        "register": 14
       },
       "enableBy": "register"
     },
@@ -2642,12 +2185,7 @@
       "time": {
         "hooks": {
           "modifyConfig": [
-            3,
-            0,
-            2,
-            0,
-            1,
-            1
+            3
           ],
           "modifyAppData": [
             0
@@ -2657,46 +2195,8 @@
           ],
           "addEntryImportsAhead": [
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
+            1,
+            1,
             0,
             0,
             0
@@ -2704,72 +2204,15 @@
           "addRuntimePlugin": [
             0,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0
           ],
           "addRuntimePluginKey": [
             0,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0
           ],
           "onGenerateFiles": [
-            1,
-            1,
-            1,
-            0,
-            0,
-            1,
-            0,
-            0,
-            1,
-            0,
-            0,
-            1,
-            1,
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-            0,
+            2,
             1,
             0
           ],
@@ -2780,7 +2223,7 @@
             0
           ]
         },
-        "register": 6
+        "register": 7
       }
     },
     "./node_modules/@umijs/plugins/dist/dva": {
@@ -2792,7 +2235,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 4
       },
       "enableBy": "config"
     },
@@ -2805,7 +2248,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2821,60 +2264,17 @@
       "time": {
         "hooks": {
           "modifyConfig": [
-            0,
-            0,
-            0,
-            0,
-            0,
             0
           ],
           "addLayouts": [
             0,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0
           ],
           "modifyAppData": [
-            0
+            1
           ],
           "addRuntimePlugin": [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0
@@ -2882,53 +2282,15 @@
           "addRuntimePluginKey": [
             0,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0
           ],
           "onGenerateFiles": [
+            3,
             2,
-            1,
-            2,
-            1,
-            1,
-            2,
-            2,
-            2,
-            1,
-            2,
-            1,
-            1,
-            1,
-            1,
-            1,
-            2,
-            2,
-            1,
-            2,
-            1,
-            1,
-            1
+            2
           ]
         },
-        "register": 2
+        "register": 3
       },
       "enableBy": "config"
     },
@@ -2941,7 +2303,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "config"
     },
@@ -2954,7 +2316,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "config"
     },
@@ -2970,50 +2332,12 @@
           "addRuntimePlugin": [
             0,
             0,
-            0,
-            1,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0
           ],
           "onGenerateFiles": [
             11,
-            12,
-            12,
             11,
-            12,
-            12,
-            15,
-            13,
-            12,
-            12,
-            10,
-            12,
-            12,
-            13,
-            14,
-            13,
-            13,
-            13,
-            13,
-            14,
-            13,
-            13
+            12
           ],
           "addTmpGenerateWatcherPaths": [
             0
@@ -3046,25 +2370,6 @@
       "time": {
         "hooks": {
           "addRuntimePluginKey": [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0
@@ -3123,49 +2428,11 @@
           "addRuntimePluginKey": [
             0,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0
           ],
           "onGenerateFiles": [
             2,
             1,
-            0,
-            0,
-            0,
-            1,
-            1,
-            0,
-            0,
-            0,
-            0,
-            1,
-            1,
-            0,
-            0,
-            1,
-            0,
-            0,
-            1,
-            0,
-            0,
             0
           ]
         },
@@ -3195,7 +2462,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -3222,15 +2489,10 @@
       "time": {
         "hooks": {
           "modifyConfig": [
-            0,
-            0,
-            0,
-            0,
-            0,
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -3264,7 +2526,7 @@
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -3322,24 +2584,24 @@
       },
       {
         "path": "/dashboard",
-        "name": "Dashboard",
+        "name": "仪表盘",
         "icon": "DashboardOutlined",
         "routes": [
           {
+            "path": "/dashboard/welcome",
+            "name": "欢迎",
+            "hideInMenu": false,
+            "component": "@/pages/Dashboard/Welcome"
+          },
+          {
             "path": "/dashboard/overview",
-            "name": "Overview",
+            "name": "概览",
             "component": "@/pages/Dashboard/Overview"
           },
           {
             "path": "/dashboard/monitoring",
-            "name": "Monitoring",
+            "name": "监控",
             "component": "@/pages/Dashboard/Monitoring"
-          },
-          {
-            "path": "/dashboard/welcome",
-            "name": "Welcome",
-            "hideInMenu": false,
-            "component": "@/pages/Dashboard/Welcome"
           },
           {
             "path": "/dashboard",
@@ -3526,24 +2788,24 @@
       },
       {
         "path": "/dashboard",
-        "name": "Dashboard",
+        "name": "仪表盘",
         "icon": "DashboardOutlined",
         "routes": [
           {
+            "path": "/dashboard/welcome",
+            "name": "欢迎",
+            "hideInMenu": false,
+            "component": "@/pages/Dashboard/Welcome"
+          },
+          {
             "path": "/dashboard/overview",
-            "name": "Overview",
+            "name": "概览",
             "component": "@/pages/Dashboard/Overview"
           },
           {
             "path": "/dashboard/monitoring",
-            "name": "Monitoring",
+            "name": "监控",
             "component": "@/pages/Dashboard/Monitoring"
-          },
-          {
-            "path": "/dashboard/welcome",
-            "name": "Welcome",
-            "hideInMenu": false,
-            "component": "@/pages/Dashboard/Welcome"
           },
           {
             "path": "/dashboard",
@@ -4748,7 +4010,7 @@
       "parentId": "14",
       "id": "17",
       "absPath": "/device/list",
-      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProForm,\n  ProFormDatePicker,\n  ProFormDigit,\n  ProFormSelect,\n  ProFormText,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, message } from 'antd';\nimport type { ColumnsType } from 'antd/es/table';\nimport dayjs, { type Dayjs } from 'dayjs';\n\nimport EntityPicker from '@/components/EntityPicker';\nimport {\n  createDeviceInst,\n  deleteDeviceInst,\n  DeviceInst,\n  DeviceInstPayload,\n  listAllDeviceInsts,\n  updateDeviceInst,\n} from '@/services/deviceInst';\nimport { DeviceSpec, listAllDeviceSpecs, queryDeviceSpecs } from '@/services/deviceSpec';\n\nimport { renderRefSafeTableOptions } from '@/utils/proTableOptions';\ntype DeviceInstFormValues = {\n  code: string;\n  device_spec_id: string;\n  sn: string;\n  purchase_date: string | Dayjs;\n  life_span: number;\n  desc: string;\n  status: number;\n  active: number;\n  available: number;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n      data?: { detail?: string };\n      info?: { errorMessage?: string };\n      message?: string;\n    }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst toApiDate = (value: string | Dayjs): string => {\n  if (typeof value === 'string') {\n    return value.trim();\n  }\n  return value.format('YYYY-MM-DD');\n};\n\nconst DeviceListPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [rows, setRows] = useState<DeviceInst[]>([]);\n  const [query, setQuery] = useState<Record<string, any>>({});\n  const [editing, setEditing] = useState<DeviceInst | null>(null);\n  const [specs, setSpecs] = useState<DeviceSpec[]>([]);\n\n  const specMap = useMemo(\n    () =>\n      new Map(\n        specs.map((item) => [\n          item.id,\n          `${item.name} / ${item.model}${item.brand ? ` / ${item.brand}` : ''}`,\n        ]),\n      ),\n    [specs],\n  );\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      setRows(await listAllDeviceInsts());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  const loadSpecs = async () => {\n    try {\n      setSpecs(await listAllDeviceSpecs());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n    loadSpecs();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    const purchaseDateQuery =\n      query.purchase_date === undefined || query.purchase_date === null || query.purchase_date === ''\n        ? ''\n        : dayjs.isDayjs(query.purchase_date)\n          ? query.purchase_date.format('YYYY-MM-DD').toLowerCase()\n          : norm(query.purchase_date);\n    return rows.filter((row) => {\n      if (query.code && !norm(row.code).includes(norm(query.code))) {\n        return false;\n      }\n      if (query.sn && !norm(row.sn).includes(norm(query.sn))) {\n        return false;\n      }\n      if (purchaseDateQuery && !norm(row.purchase_date).includes(purchaseDateQuery)) {\n        return false;\n      }\n      if (query.desc && !norm(row.desc).includes(norm(query.desc))) {\n        return false;\n      }\n      if (\n        query.life_span !== undefined &&\n        query.life_span !== null &&\n        String(row.life_span) !== String(query.life_span)\n      ) {\n        return false;\n      }\n      if (\n        query.status !== undefined &&\n        query.status !== null &&\n        String(row.status) !== String(query.status)\n      ) {\n        return false;\n      }\n      if (query.device_spec_id) {\n        const specText = specMap.get(row.device_spec_id) || '';\n        const hit =\n          norm(specText).includes(norm(query.device_spec_id)) ||\n          norm(row.device_spec_id).includes(norm(query.device_spec_id));\n        if (!hit) {\n          return false;\n        }\n      }\n      return true;\n    });\n  }, [query, rows, specMap]);\n\n  const specPickerColumns: ColumnsType<DeviceSpec> = [\n    { title: '规格名称', dataIndex: 'name' },\n    { title: '型号', dataIndex: 'model' },\n    { title: '品牌', dataIndex: 'brand' },\n    {\n      title: '电压(V)',\n      dataIndex: 'voltage',\n    },\n    {\n      title: '转速(RPM)',\n      dataIndex: 'rpm',\n    },\n  ];\n\n  const columns: ProColumns<DeviceInst>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '编码',\n      dataIndex: 'code',\n      width: 140,\n    },\n    {\n      title: '序列号',\n      dataIndex: 'sn',\n      width: 180,\n    },\n    {\n      title: '设备规格',\n      dataIndex: 'device_spec_id',\n      width: 260,\n      render: (_, row) => specMap.get(row.device_spec_id) || row.device_spec_id,\n    },\n    {\n      title: '服役日期',\n      dataIndex: 'purchase_date',\n      width: 140,\n      valueType: 'date',\n    },\n    {\n      title: '可用年限(月)',\n      dataIndex: 'life_span',\n      width: 110,\n      valueType: 'digit',\n    },\n    {\n      title: '描述',\n      dataIndex: 'desc',\n      ellipsis: true,\n      render: (_, row) => row.desc || '-',\n    },\n    {\n      title: '运行状态',\n      dataIndex: 'active',\n      width: 100,\n      valueType: 'select',\n      valueEnum: {\n        1: { text: '运行中', status: 'Success' },\n        0: { text: '已停止', status: 'Default' },\n      },\n      render: (_, row) => (Number(row.active) === 1 ? '运行中' : '已停止'),\n    },\n    {\n      title: '服役状态',\n      dataIndex: 'available',\n      width: 100,\n      valueType: 'select',\n      valueEnum: {\n        1: { text: '服役中', status: 'Success' },\n        0: { text: '不可用', status: 'Error' },\n      },\n      render: (_, row) => (Number(row.available) === 1 ? '服役中' : '不可用'),\n    },\n    {\n      title: '状态',\n      dataIndex: 'status',\n      width: 100,\n      valueType: 'select',\n      valueEnum: {\n        1: { text: '启用' },\n        0: { text: '停用' },\n      },\n      render: (_, row) => (Number(row.status) === 1 ? '启用' : '停用'),\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 180,\n      render: (_, row) => [\n        <Button\n          key=\"edit\"\n          type=\"link\"\n          onClick={() => {\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </Button>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该设备实例吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteDeviceInst(row.id);\n              message.success('删除成功');\n              await loadRows();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <Button danger type=\"link\">\n            删除\n          </Button>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  return (\n    <PageContainer title=\"设备列表\">\n      <ProTable<DeviceInst>\n        rowKey=\"id\"\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        options={{ reload: loadRows }}\n        optionsRender={renderRefSafeTableOptions}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建设备实例\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<DeviceInstFormValues>\n        title={editing ? '编辑设备实例' : '新建设备实例'}\n        open={modalOpen}\n        modalProps={{\n          destroyOnHidden: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        initialValues={\n          editing\n            ? {\n              code: editing.code,\n              device_spec_id: editing.device_spec_id,\n              sn: editing.sn,\n              purchase_date: dayjs(editing.purchase_date),\n              life_span: editing.life_span,\n              desc: editing.desc,\n              status: Number(editing.status),\n              active: Number(editing.active),\n              available: Number(editing.available),\n            }\n            : {\n              life_span: 0,\n              status: 1,\n              active: 1,\n              available: 1,\n            }\n        }\n        onFinish={async (values) => {\n          setSaving(true);\n          try {\n            const payload: DeviceInstPayload = {\n              code: values.code.trim(),\n              device_spec_id: values.device_spec_id,\n              sn: values.sn.trim(),\n              purchase_date: toApiDate(values.purchase_date),\n              life_span: Number(values.life_span ?? 0),\n              desc: values.desc.trim(),\n              status: Number(values.status ?? 1),\n              active: Number(values.active ?? 1),\n              available: Number(values.available ?? 1),\n            };\n\n            if (editing) {\n              await updateDeviceInst(editing.id, payload);\n              message.success('更新成功');\n            } else {\n              await createDeviceInst(payload);\n              message.success('创建成功');\n            }\n            setModalOpen(false);\n            setEditing(null);\n            await loadRows();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormText\n          name=\"code\"\n          label=\"编码\"\n          rules={[\n            { required: true, message: '请输入设备编码' },\n            { max: 16, message: '设备编码最多16个字符' },\n          ]}\n        />\n        <ProFormText\n          name=\"sn\"\n          label=\"序列号\"\n        />\n        <ProForm.Item\n          name=\"device_spec_id\"\n          label=\"设备规格\"\n          rules={[{ required: true, message: '请选择设备规格' }]}\n        >\n          <EntityPicker<DeviceSpec>\n            modalTitle=\"选择设备规格\"\n            triggerText=\"选择规格\"\n            placeholder=\"请选择设备规格\"\n            valueLabel={\n              editing?.device_spec_id ? specMap.get(editing.device_spec_id) || editing.device_spec_id : undefined\n            }\n            fetcher={queryDeviceSpecs}\n            columns={specPickerColumns}\n            getRecordLabel={(row) => `${row.name} / ${row.model} / ${row.brand}`}\n          />\n        </ProForm.Item>\n        <ProFormDatePicker\n          name=\"purchase_date\"\n          label=\"服役日期\"\n          fieldProps={{ format: 'YYYY-MM-DD' }}\n        />\n        <ProFormDigit\n          name=\"life_span\"\n          label=\"可用年限(月)\"\n          min={0}\n          fieldProps={{ precision: 0 }}\n        />\n        <ProFormSelect\n          name=\"status\"\n          label=\"状态\"\n          options={[\n            { label: '启用', value: 1 },\n            { label: '停用', value: 0 },\n          ]}\n          rules={[{ required: true, message: '请选择状态' }]}\n        />\n        <ProFormText\n          name=\"desc\"\n          label=\"描述\"\n          rules={[\n            { max: 128, message: '描述最多128个字符' },\n          ]}\n        />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default DeviceListPage;\n",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProForm,\n  ProFormDatePicker,\n  ProFormDigit,\n  ProFormSelect,\n  ProFormText,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, message } from 'antd';\nimport type { ColumnsType } from 'antd/es/table';\nimport dayjs, { type Dayjs } from 'dayjs';\n\nimport EntityPicker from '@/components/EntityPicker';\nimport {\n  createDeviceInst,\n  deleteDeviceInst,\n  DeviceInst,\n  DeviceInstPayload,\n  listAllDeviceInsts,\n  updateDeviceInst,\n} from '@/services/deviceInst';\nimport { DeviceSpec, listAllDeviceSpecs, queryDeviceSpecs } from '@/services/deviceSpec';\n\nimport { renderRefSafeTableOptions } from '@/utils/proTableOptions';\ntype DeviceInstFormValues = {\n  code: string;\n  device_spec_id: string;\n  sn: string;\n  purchase_date: string | Dayjs;\n  life_span: number;\n  desc: string;\n  status: number;\n  active: number;\n  available: number;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n      data?: { detail?: string };\n      info?: { errorMessage?: string };\n      message?: string;\n    }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst toApiDate = (value: string | Dayjs): string => {\n  if (typeof value === 'string') {\n    return value.trim();\n  }\n  return value.format('YYYY-MM-DD');\n};\n\nconst DeviceListPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [rows, setRows] = useState<DeviceInst[]>([]);\n  const [query, setQuery] = useState<Record<string, any>>({});\n  const [editing, setEditing] = useState<DeviceInst | null>(null);\n  const [specs, setSpecs] = useState<DeviceSpec[]>([]);\n\n  const specMap = useMemo(\n    () =>\n      new Map(\n        specs.map((item) => [\n          item.id,\n          `${item.name} / ${item.model}${item.brand ? ` / ${item.brand}` : ''}`,\n        ]),\n      ),\n    [specs],\n  );\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      setRows(await listAllDeviceInsts());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  const loadSpecs = async () => {\n    try {\n      setSpecs(await listAllDeviceSpecs());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n    loadSpecs();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    const purchaseDateQuery =\n      query.purchase_date === undefined || query.purchase_date === null || query.purchase_date === ''\n        ? ''\n        : dayjs.isDayjs(query.purchase_date)\n          ? query.purchase_date.format('YYYY-MM-DD').toLowerCase()\n          : norm(query.purchase_date);\n    return rows.filter((row) => {\n      if (query.code && !norm(row.code).includes(norm(query.code))) {\n        return false;\n      }\n      if (query.sn && !norm(row.sn).includes(norm(query.sn))) {\n        return false;\n      }\n      if (purchaseDateQuery && !norm(row.purchase_date).includes(purchaseDateQuery)) {\n        return false;\n      }\n      if (query.desc && !norm(row.desc).includes(norm(query.desc))) {\n        return false;\n      }\n      if (\n        query.life_span !== undefined &&\n        query.life_span !== null &&\n        String(row.life_span) !== String(query.life_span)\n      ) {\n        return false;\n      }\n      if (\n        query.status !== undefined &&\n        query.status !== null &&\n        String(row.status) !== String(query.status)\n      ) {\n        return false;\n      }\n      if (query.device_spec_id) {\n        const specText = specMap.get(row.device_spec_id) || '';\n        const hit =\n          norm(specText).includes(norm(query.device_spec_id)) ||\n          norm(row.device_spec_id).includes(norm(query.device_spec_id));\n        if (!hit) {\n          return false;\n        }\n      }\n      return true;\n    });\n  }, [query, rows, specMap]);\n\n  const specPickerColumns: ColumnsType<DeviceSpec> = [\n    { title: '规格名称', dataIndex: 'name' },\n    { title: '型号', dataIndex: 'model' },\n    { title: '品牌', dataIndex: 'brand' },\n    {\n      title: '电压(V)',\n      dataIndex: 'voltage',\n    },\n    {\n      title: '转速(RPM)',\n      dataIndex: 'rpm',\n    },\n  ];\n\n  const columns: ProColumns<DeviceInst>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '编码',\n      dataIndex: 'code',\n      width: 140,\n    },\n    {\n      title: '序列号',\n      dataIndex: 'sn',\n      width: 180,\n    },\n    {\n      title: '设备规格',\n      dataIndex: 'device_spec_id',\n      width: 260,\n      render: (_, row) => specMap.get(row.device_spec_id) || row.device_spec_id,\n    },\n    {\n      title: '服役日期',\n      dataIndex: 'purchase_date',\n      width: 140,\n      valueType: 'date',\n    },\n    {\n      title: '可用年限(月)',\n      dataIndex: 'life_span',\n      width: 110,\n      valueType: 'digit',\n    },\n    {\n      title: '描述',\n      dataIndex: 'desc',\n      ellipsis: true,\n      render: (_, row) => row.desc || '-',\n    },\n    {\n      title: '运行状态',\n      dataIndex: 'active',\n      width: 100,\n      valueType: 'select',\n      valueEnum: {\n        1: { text: '运行中', status: 'Success' },\n        0: { text: '已停止', status: 'Default' },\n      },\n      render: (_, row) => (Number(row.active) === 1 ? '运行中' : '已停止'),\n    },\n    {\n      title: '服役状态',\n      dataIndex: 'available',\n      width: 100,\n      valueType: 'select',\n      valueEnum: {\n        1: { text: '服役中', status: 'Success' },\n        0: { text: '不可用', status: 'Error' },\n      },\n      render: (_, row) => (Number(row.available) === 1 ? '服役中' : '不可用'),\n    },\n    {\n      title: '状态',\n      dataIndex: 'status',\n      width: 100,\n      valueType: 'select',\n      valueEnum: {\n        1: { text: '启用' },\n        0: { text: '停用' },\n      },\n      render: (_, row) => (Number(row.status) === 1 ? '启用' : '停用'),\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 180,\n      render: (_, row) => [\n        <Button\n          key=\"edit\"\n          type=\"link\"\n          onClick={() => {\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </Button>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该设备实例吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteDeviceInst(row.id);\n              message.success('删除成功');\n              await loadRows();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <Button danger type=\"link\">\n            删除\n          </Button>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  return (\n    <PageContainer title=\"设备列表\">\n      <ProTable<DeviceInst>\n        rowKey=\"id\"\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        scroll={{ x: 1400 }}\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        options={{ reload: loadRows }}\n        optionsRender={renderRefSafeTableOptions}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建设备实例\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<DeviceInstFormValues>\n        title={editing ? '编辑设备实例' : '新建设备实例'}\n        open={modalOpen}\n        modalProps={{\n          destroyOnHidden: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        initialValues={\n          editing\n            ? {\n              code: editing.code,\n              device_spec_id: editing.device_spec_id,\n              sn: editing.sn,\n              purchase_date: dayjs(editing.purchase_date),\n              life_span: editing.life_span,\n              desc: editing.desc,\n              status: Number(editing.status),\n              active: Number(editing.active),\n              available: Number(editing.available),\n            }\n            : {\n              life_span: 0,\n              status: 1,\n              active: 1,\n              available: 1,\n            }\n        }\n        onFinish={async (values) => {\n          setSaving(true);\n          try {\n            const payload: DeviceInstPayload = {\n              code: values.code.trim(),\n              device_spec_id: values.device_spec_id,\n              sn: values.sn.trim(),\n              purchase_date: toApiDate(values.purchase_date),\n              life_span: Number(values.life_span ?? 0),\n              desc: values.desc.trim(),\n              status: Number(values.status ?? 1),\n              active: Number(values.active ?? 1),\n              available: Number(values.available ?? 1),\n            };\n\n            if (editing) {\n              await updateDeviceInst(editing.id, payload);\n              message.success('更新成功');\n            } else {\n              await createDeviceInst(payload);\n              message.success('创建成功');\n            }\n            setModalOpen(false);\n            setEditing(null);\n            await loadRows();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormText\n          name=\"code\"\n          label=\"编码\"\n          rules={[\n            { required: true, message: '请输入设备编码' },\n            { max: 16, message: '设备编码最多16个字符' },\n          ]}\n        />\n        <ProFormText\n          name=\"sn\"\n          label=\"序列号\"\n        />\n        <ProForm.Item\n          name=\"device_spec_id\"\n          label=\"设备规格\"\n          rules={[{ required: true, message: '请选择设备规格' }]}\n        >\n          <EntityPicker<DeviceSpec>\n            modalTitle=\"选择设备规格\"\n            triggerText=\"选择规格\"\n            placeholder=\"请选择设备规格\"\n            valueLabel={\n              editing?.device_spec_id ? specMap.get(editing.device_spec_id) || editing.device_spec_id : undefined\n            }\n            fetcher={queryDeviceSpecs}\n            columns={specPickerColumns}\n            getRecordLabel={(row) => `${row.name} / ${row.model} / ${row.brand}`}\n          />\n        </ProForm.Item>\n        <ProFormDatePicker\n          name=\"purchase_date\"\n          label=\"服役日期\"\n          fieldProps={{ format: 'YYYY-MM-DD' }}\n        />\n        <ProFormDigit\n          name=\"life_span\"\n          label=\"可用年限(月)\"\n          min={0}\n          fieldProps={{ precision: 0 }}\n        />\n        <ProFormSelect\n          name=\"status\"\n          label=\"状态\"\n          options={[\n            { label: '启用', value: 1 },\n            { label: '停用', value: 0 },\n          ]}\n          rules={[{ required: true, message: '请选择状态' }]}\n        />\n        <ProFormText\n          name=\"desc\"\n          label=\"描述\"\n          rules={[\n            { max: 128, message: '描述最多128个字符' },\n          ]}\n        />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default DeviceListPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Device/List/index.tsx"
     },
@@ -4811,7 +4073,7 @@
       "parentId": "23",
       "id": "24",
       "absPath": "/monitoring/sensors",
-      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport { PageContainer, ProColumns, ProTable } from '@ant-design/pro-components';\nimport { Tag, message } from 'antd';\n\nimport { listAllSensors, listAllTenantSensors, Sensor, TenantSensor } from '@/services/tenantSensor';\n\nimport { renderRefSafeTableOptions } from '@/utils/proTableOptions';\ntype SensorViewRow = TenantSensor & {\n  sensor_sn: string;\n  sensor_type_id: string;\n  description?: string;\n  battery?: number;\n  active?: boolean;\n  active_at?: string;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst MonitoringSensorsPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [rows, setRows] = useState<SensorViewRow[]>([]);\n  const [query, setQuery] = useState<Record<string, any>>({});\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      const [tenantSensors, sensors] = await Promise.all([listAllTenantSensors(), listAllSensors()]);\n      const sensorMap = new Map<string, Sensor>(sensors.map((item) => [item.id, item]));\n      const merged: SensorViewRow[] = tenantSensors.map((item) => {\n        const sensor = sensorMap.get(item.sensor_id);\n        return {\n          ...item,\n          sensor_sn: sensor?.sn || '-',\n          sensor_type_id: sensor?.sensor_type_id || '-',\n          description: sensor?.description,\n          battery: sensor?.battery,\n          active: sensor?.active,\n          active_at: sensor?.active_at,\n        };\n      });\n      setRows(merged);\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    return rows.filter((row) => {\n      if (query.sensor_sn && !norm(row.sensor_sn).includes(norm(query.sensor_sn))) {\n        return false;\n      }\n      if (query.sensor_id && !norm(row.sensor_id).includes(norm(query.sensor_id))) {\n        return false;\n      }\n      if (query.sensor_type_id && !norm(row.sensor_type_id).includes(norm(query.sensor_type_id))) {\n        return false;\n      }\n      if (query.tenant_id && !norm(row.tenant_id).includes(norm(query.tenant_id))) {\n        return false;\n      }\n      if (query.available !== undefined && query.available !== null && query.available !== '') {\n        if (String(row.available) !== String(query.available)) {\n          return false;\n        }\n      }\n      if (query.active !== undefined && query.active !== null && query.active !== '') {\n        if (String(row.active) !== String(query.active)) {\n          return false;\n        }\n      }\n      return true;\n    });\n  }, [query, rows]);\n\n  const columns: ProColumns<SensorViewRow>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '传感器SN',\n      dataIndex: 'sensor_sn',\n      width: 180,\n    },\n    {\n      title: '电量(%)',\n      dataIndex: 'battery',\n      width: 100,\n      hideInSearch: true,\n      render: (_, row) => (row.battery === undefined ? '-' : Number(row.battery).toFixed(1)),\n    },\n    {\n      title: '可用状态',\n      dataIndex: 'available',\n      width: 110,\n      valueType: 'select',\n      valueEnum: {\n        true: { text: '可用' },\n        false: { text: '不可用' },\n      },\n      render: (_, row) => (row.available ? <Tag color=\"green\">可用</Tag> : <Tag>不可用</Tag>),\n    },\n    {\n      title: '设备状态',\n      dataIndex: 'active',\n      width: 110,\n      valueType: 'select',\n      valueEnum: {\n        true: { text: '在线' },\n        false: { text: '离线' },\n      },\n      render: (_, row) =>\n        row.active === undefined ? '-' : row.active ? <Tag color=\"green\">在线</Tag> : <Tag>离线</Tag>,\n    },\n    {\n      title: '最近活跃',\n      dataIndex: 'active_at',\n      width: 180,\n      valueType: 'dateTime',\n      hideInSearch: true,\n      render: (_, row) => row.active_at || '-',\n    },\n    {\n      title: '备注',\n      dataIndex: 'description',\n      hideInSearch: true,\n      ellipsis: true,\n      render: (_, row) => row.description || '-',\n    },\n  ];\n\n  return (\n    <PageContainer title=\"传感器\">\n      <ProTable<SensorViewRow>\n        rowKey=\"id\"\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        options={{ reload: loadRows }}\n        optionsRender={renderRefSafeTableOptions}\n        toolBarRender={false}\n      />\n    </PageContainer>\n  );\n};\n\nexport default MonitoringSensorsPage;\n",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport { PageContainer, ProColumns, ProTable } from '@ant-design/pro-components';\nimport { Tag, message } from 'antd';\n\nimport { listAllSensors, listAllTenantSensors, Sensor, TenantSensor } from '@/services/tenantSensor';\n\nimport { renderRefSafeTableOptions } from '@/utils/proTableOptions';\ntype SensorViewRow = TenantSensor & {\n  sensor_sn: string;\n  sensor_type_id: string;\n  description?: string;\n  active?: boolean;\n  active_at?: string;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst MonitoringSensorsPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [rows, setRows] = useState<SensorViewRow[]>([]);\n  const [query, setQuery] = useState<Record<string, any>>({});\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      const [tenantSensors, sensors] = await Promise.all([listAllTenantSensors(), listAllSensors()]);\n      const sensorMap = new Map<string, Sensor>(sensors.map((item) => [item.id, item]));\n      const merged: SensorViewRow[] = tenantSensors.map((item) => {\n        const sensor = sensorMap.get(item.sensor_id);\n        return {\n          ...item,\n          sensor_sn: sensor?.sn || '-',\n          sensor_type_id: sensor?.sensor_type_id || '-',\n          description: sensor?.description,\n          active: sensor?.active,\n          active_at: sensor?.active_at,\n        };\n      });\n      setRows(merged);\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    return rows.filter((row) => {\n      if (query.sensor_sn && !norm(row.sensor_sn).includes(norm(query.sensor_sn))) {\n        return false;\n      }\n      if (query.sensor_id && !norm(row.sensor_id).includes(norm(query.sensor_id))) {\n        return false;\n      }\n      if (query.sensor_type_id && !norm(row.sensor_type_id).includes(norm(query.sensor_type_id))) {\n        return false;\n      }\n      if (query.tenant_id && !norm(row.tenant_id).includes(norm(query.tenant_id))) {\n        return false;\n      }\n      if (query.available !== undefined && query.available !== null && query.available !== '') {\n        if (String(row.available) !== String(query.available)) {\n          return false;\n        }\n      }\n      if (query.active !== undefined && query.active !== null && query.active !== '') {\n        if (String(row.active) !== String(query.active)) {\n          return false;\n        }\n      }\n      return true;\n    });\n  }, [query, rows]);\n\n  const columns: ProColumns<SensorViewRow>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '传感器SN',\n      dataIndex: 'sensor_sn',\n      width: 180,\n    },\n    {\n      title: '电量(%)',\n      dataIndex: 'battery',\n      width: 100,\n      hideInSearch: true,\n      render: (_, row) => (row.battery === undefined ? '-' : Number(row.battery).toFixed(1)),\n    },\n    {\n      title: '可用状态',\n      dataIndex: 'available',\n      width: 110,\n      valueType: 'select',\n      valueEnum: {\n        true: { text: '可用' },\n        false: { text: '不可用' },\n      },\n      render: (_, row) => (row.available ? <Tag color=\"green\">可用</Tag> : <Tag>不可用</Tag>),\n    },\n    {\n      title: '设备状态',\n      dataIndex: 'active',\n      width: 110,\n      valueType: 'select',\n      valueEnum: {\n        true: { text: '在线' },\n        false: { text: '离线' },\n      },\n      render: (_, row) =>\n        row.active === undefined ? '-' : row.active ? <Tag color=\"green\">在线</Tag> : <Tag>离线</Tag>,\n    },\n    {\n      title: '最近活跃',\n      dataIndex: 'active_at',\n      width: 180,\n      valueType: 'dateTime',\n      hideInSearch: true,\n      render: (_, row) => row.active_at || '-',\n    },\n    {\n      title: '备注',\n      dataIndex: 'description',\n      hideInSearch: true,\n      ellipsis: true,\n      render: (_, row) => row.description || '-',\n    },\n  ];\n\n  return (\n    <PageContainer title=\"传感器\">\n      <ProTable<SensorViewRow>\n        rowKey=\"id\"\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        options={{ reload: loadRows }}\n        optionsRender={renderRefSafeTableOptions}\n        toolBarRender={false}\n      />\n    </PageContainer>\n  );\n};\n\nexport default MonitoringSensorsPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/src/pages/Monitoring/Sensors/index.tsx"
     },
@@ -7126,7 +6388,7 @@
             "format": "esm"
           },
           "src/services/tenantSensor.ts": {
-            "bytes": 1148,
+            "bytes": 1129,
             "imports": [
               {
                 "path": "src/.umi/exports.ts",
@@ -7137,7 +6399,7 @@
             "format": "esm"
           },
           "src/pages/Monitoring/Sensors/index.tsx": {
-            "bytes": 4989,
+            "bytes": 4728,
             "imports": [
               {
                 "path": "react",
@@ -9429,7 +8691,7 @@
                 "bytesInOutput": 806
               },
               "src/pages/Monitoring/Sensors/index.tsx": {
-                "bytesInOutput": 5616
+                "bytesInOutput": 5343
               },
               "src/services/sensorMonitoring.ts": {
                 "bytesInOutput": 1057
@@ -9465,7 +8727,7 @@
                 "bytesInOutput": 1955
               }
             },
-            "bytes": 259286
+            "bytes": 259013
           }
         }
       }

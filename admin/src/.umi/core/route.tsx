@@ -4,16 +4,18 @@
 import React from 'react';
 
 export async function getRoutes() {
-  const routes = {"1":{"path":"/tenant","name":"租户","icon":"TeamOutlined","parentId":"ant-design-pro-layout","id":"1"},"2":{"path":"/device","name":"设备","icon":"AppstoreOutlined","parentId":"ant-design-pro-layout","id":"2"},"3":{"path":"/device/spec","name":"型号","parentId":"2","id":"3"},"4":{"path":"/device","redirect":"/device/spec","parentId":"2","id":"4"},"5":{"path":"/sensor","name":"传感器","icon":"RadarChartOutlined","parentId":"ant-design-pro-layout","id":"5"},"6":{"path":"/","redirect":"/tenant","parentId":"ant-design-pro-layout","id":"6"},"ant-design-pro-layout":{"id":"ant-design-pro-layout","path":"/","isLayout":true}} as const;
+  const routes = {"1":{"path":"/login","layout":false,"id":"1"},"2":{"path":"/tenant","name":"租户","icon":"TeamOutlined","parentId":"ant-design-pro-layout","id":"2"},"3":{"path":"/sensor","name":"传感器","icon":"RadarChartOutlined","parentId":"ant-design-pro-layout","id":"3"},"4":{"path":"/sensor/type","name":"型号","parentId":"3","id":"4"},"5":{"path":"/sensor/batch","name":"批次","parentId":"3","id":"5"},"6":{"path":"/sensor/product","name":"产品","parentId":"3","id":"6"},"7":{"path":"/sensor","redirect":"/sensor/type","parentId":"3","id":"7"},"8":{"path":"/","redirect":"/login","parentId":"ant-design-pro-layout","id":"8"},"ant-design-pro-layout":{"id":"ant-design-pro-layout","path":"/","isLayout":true}} as const;
   return {
     routes,
     routeComponents: {
-'1': React.lazy(() => import(/* webpackChunkName: "p__Tenant__index" */'@/pages/Tenant/index.tsx')),
-'2': React.lazy(() => import('./EmptyRoute')),
-'3': React.lazy(() => import(/* webpackChunkName: "p__Device__Spec__index" */'@/pages/Device/Spec/index.tsx')),
-'4': React.lazy(() => import('./EmptyRoute')),
-'5': React.lazy(() => import(/* webpackChunkName: "p__Sensor__index" */'@/pages/Sensor/index.tsx')),
-'6': React.lazy(() => import('./EmptyRoute')),
+'1': React.lazy(() => import(/* webpackChunkName: "p__Login__index" */'@/pages/Login/index.tsx')),
+'2': React.lazy(() => import(/* webpackChunkName: "p__Tenant__index" */'@/pages/Tenant/index.tsx')),
+'3': React.lazy(() => import('./EmptyRoute')),
+'4': React.lazy(() => import(/* webpackChunkName: "p__Sensor__Type__index" */'@/pages/Sensor/Type/index.tsx')),
+'5': React.lazy(() => import(/* webpackChunkName: "p__Sensor__Batch__index" */'@/pages/Sensor/Batch/index.tsx')),
+'6': React.lazy(() => import(/* webpackChunkName: "p__Sensor__Product__index" */'@/pages/Sensor/Product/index.tsx')),
+'7': React.lazy(() => import('./EmptyRoute')),
+'8': React.lazy(() => import('./EmptyRoute')),
 'ant-design-pro-layout': React.lazy(() => import(/* webpackChunkName: "umi__plugin-layout__Layout" */'/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/admin/src/.umi/plugin-layout/Layout.tsx')),
 },
   };

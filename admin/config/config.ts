@@ -24,36 +24,45 @@ export default defineConfig({
   request: {},
   routes: [
     {
+      path: '/login',
+      component: '@/pages/Login',
+      layout: false,
+    },
+    {
       path: '/tenant',
       name: '租户',
       icon: 'TeamOutlined',
       component: '@/pages/Tenant',
     },
     {
-      path: '/device',
-      name: '设备',
-      icon: 'AppstoreOutlined',
+      path: '/sensor',
+      name: '传感器',
+      icon: 'RadarChartOutlined',
       routes: [
         {
-          path: '/device/spec',
+          path: '/sensor/type',
           name: '型号',
-          component: '@/pages/Device/Spec',
+          component: '@/pages/Sensor/Type',
         },
         {
-          path: '/device',
-          redirect: '/device/spec',
+          path: '/sensor/batch',
+          name: '批次',
+          component: '@/pages/Sensor/Batch',
+        },
+        {
+          path: '/sensor/product',
+          name: '产品',
+          component: '@/pages/Sensor/Product',
+        },
+        {
+          path: '/sensor',
+          redirect: '/sensor/type',
         },
       ],
     },
     {
-      path: '/sensor',
-      name: '传感器',
-      icon: 'RadarChartOutlined',
-      component: '@/pages/Sensor',
-    },
-    {
       path: '/',
-      redirect: '/tenant',
+      redirect: '/login',
     },
   ],
 });

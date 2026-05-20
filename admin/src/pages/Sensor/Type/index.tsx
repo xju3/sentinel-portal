@@ -4,19 +4,22 @@ import {
   PageContainer,
   ProColumns,
   ProFormDigit,
+  ProFormSelect,
+  ProFormSwitch,
   ProFormText,
+  ProFormTextArea,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Popconfirm, message } from 'antd';
+import { Button, Popconfirm, Switch, Tag, message } from 'antd';
 
 import {
-  DeviceSpec,
-  DeviceSpecPayload,
-  createDeviceSpec,
-  deleteDeviceSpec,
-  listDeviceSpecs,
-  updateDeviceSpec,
-} from '@/services/deviceSpec';
+  SensorType,
+  SensorTypePayload,
+  createSensorType,
+  deleteSensorType,
+  listSensorTypes,
+  updateSensorType,
+} from '@/services/sensorType';
 
 const toErrorMessage = (error: unknown): string => {
   const e = error as
@@ -25,18 +28,18 @@ const toErrorMessage = (error: unknown): string => {
   return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';
 };
 
-const DeviceSpecPage = () => {
+const SensorTypePage = () => {
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [rows, setRows] = useState<DeviceSpec[]>([]);
+  const [rows, setRows] = useState<SensorType[]>([]);
   const [query, setQuery] = useState<Record<string, any>>({});
-  const [editing, setEditing] = useState<DeviceSpec | null>(null);
+  const [editing, setEditing] = useState<SensorType | null>(null);
 
   const loadRows = async () => {
     setLoading(true);
     try {
-      setRows(await listDeviceSpecs());
+      setRows(await listSensorTypes());
     } catch (error) {
       message.error(toErrorMessage(error));
     } finally {
@@ -54,17 +57,11 @@ const DeviceSpecPage = () => {
       if (query.name && !norm(row.name).includes(norm(query.name))) {
         return false;
       }
-      if (query.model && !norm(row.model).includes(norm(query.model))) {
-        return false;
-      }
-      if (query.brand && !norm(row.brand).includes(norm(query.brand))) {
-        return false;
-      }
       return true;
     });
   }, [query, rows]);
 
-  const columns: ProColumns<DeviceSpec>[] = [
+  const columns: ProColumns<SensorType>[] = [
     {
       title: '序号',
       valueType: 'indexBorder',
@@ -73,33 +70,38 @@ const DeviceSpecPage = () => {
       fixed: 'left',
     },
     {
-      title: '规格名称',
+      title: '名称',
       dataIndex: 'name',
       width: 160,
     },
     {
-      title: '型号',
-      dataIndex: 'model',
-      width: 140,
-    },
-    {
-      title: '品牌',
-      dataIndex: 'brand',
-      width: 140,
-    },
-    {
-      title: '电压(V)',
-      dataIndex: 'voltage',
+      title: '电池容量',
+      dataIndex: 'battery',
       width: 100,
-      valueType: 'digit',
       hideInSearch: true,
+      render: (_, row) => `${row.battery}`,
     },
     {
-      title: '转速(RPM)',
-      dataIndex: 'rpm',
-      width: 110,
-      valueType: 'digit',
+      title: '网络类型',
+      dataIndex: 'network',
+      width: 100,
       hideInSearch: true,
+      render: (_, row) => {
+        const map: Record<number, { text: string; color: string }> = {
+          1: { text: '4G', color: 'blue' },
+          2: { text: 'WiFi', color: 'green' },
+        };
+        const info = map[row.network] || { text: `${row.network}`, color: 'default' };
+        return <Tag color={info.color}>{info.text}</Tag>;
+      },
+    },
+    {
+      title: '蓝牙',
+      dataIndex: 'bluetooth',
+      width: 80,
+      hideInSearch: true,
+      render: (_, row) =>
+        row.bluetooth ? <Tag color="blue">支持</Tag> : <Tag>不支持</Tag>,
     },
     {
       title: '描述',
@@ -125,10 +127,10 @@ const DeviceSpecPage = () => {
         </Button>,
         <Popconfirm
           key="delete"
-          title="确认删除该设备型号吗？"
+          title="确认删除该传感器型号吗？"
           onConfirm={async () => {
             try {
-              await deleteDeviceSpec(row.id);
+              await deleteSensorType(row.id);
               message.success('删除成功');
               await loadRows();
             } catch (error) {
@@ -146,10 +148,10 @@ const DeviceSpecPage = () => {
 
   return (
     <PageContainer
-      title="设备型号管理"
-      subTitle="管理所有设备型号规格"
+      title="传感器型号管理"
+      subTitle="管理所有传感器型号规格"
     >
-      <ProTable<DeviceSpec>
+      <ProTable<SensorType>
         rowKey="id"
         loading={loading}
         columns={columns}
@@ -173,8 +175,8 @@ const DeviceSpecPage = () => {
         ]}
       />
 
-      <ModalForm<DeviceSpecPayload>
-        title={editing ? '编辑设备型号' : '新建设备型号'}
+      <ModalForm<SensorTypePayload>
+        title={editing ? '编辑传感器型号' : '新建传感器型号'}
         open={modalOpen}
         modalProps={{
           destroyOnHidden: true,
@@ -191,38 +193,33 @@ const DeviceSpecPage = () => {
           editing
             ? {
                 name: editing.name,
-                model: editing.model,
-                brand: editing.brand,
+                battery: editing.battery,
+                network: editing.network,
+                bluetooth: editing.bluetooth,
                 description: editing.description,
-                voltage: editing.voltage,
-                rpm: editing.rpm,
-                supplier_id: editing.supplier_id,
-                device_category_id: editing.device_category_id,
               }
             : {
-                voltage: 0,
-                rpm: 0,
+                battery: 0,
+                network: 1,
+                bluetooth: false,
               }
         }
         onFinish={async (values) => {
           setSaving(true);
           try {
-            const payload: DeviceSpecPayload = {
+            const payload: SensorTypePayload = {
               name: values.name.trim(),
-              model: values.model.trim(),
-              brand: values.brand.trim(),
+              battery: Number(values.battery ?? 0),
+              network: Number(values.network ?? 1),
+              bluetooth: values.bluetooth ?? false,
               description: values.description?.trim(),
-              voltage: Number(values.voltage ?? 0),
-              rpm: Number(values.rpm ?? 0),
-              supplier_id: values.supplier_id,
-              device_category_id: values.device_category_id,
             };
 
             if (editing) {
-              await updateDeviceSpec(editing.id, payload);
+              await updateSensorType(editing.id, payload);
               message.success('更新成功');
             } else {
-              await createDeviceSpec(payload);
+              await createSensorType(payload);
               message.success('创建成功');
             }
             setModalOpen(false);
@@ -239,48 +236,35 @@ const DeviceSpecPage = () => {
       >
         <ProFormText
           name="name"
-          label="规格名称"
+          label="名称"
           rules={[
-            { required: true, message: '请输入规格名称' },
-            { max: 64, message: '名称最多64个字符' },
+            { required: true, message: '请输入传感器型号名称' },
+            { max: 100, message: '名称最多100个字符' },
           ]}
-        />
-        <ProFormText
-          name="model"
-          label="型号"
-          rules={[
-            { required: true, message: '请输入型号' },
-            { max: 32, message: '型号最多32个字符' },
-          ]}
-        />
-        <ProFormText
-          name="brand"
-          label="品牌"
-          rules={[
-            { required: true, message: '请输入品牌' },
-            { max: 64, message: '品牌最多64个字符' },
-          ]}
-        />
-        <ProFormText
-          name="description"
-          label="描述"
-          rules={[{ max: 255, message: '描述最多255个字符' }]}
         />
         <ProFormDigit
-          name="voltage"
-          label="电压(V)"
-          min={0}
-          fieldProps={{ precision: 1 }}
-        />
-        <ProFormDigit
-          name="rpm"
-          label="转速(RPM)"
+          name="battery"
+          label="电池容量"
           min={0}
           fieldProps={{ precision: 0 }}
+        />
+        <ProFormSelect
+          name="network"
+          label="网络类型"
+          options={[
+            { label: '4G', value: 1 },
+            { label: 'WiFi', value: 2 },
+          ]}
+          rules={[{ required: true, message: '请选择网络类型' }]}
+        />
+        <ProFormSwitch name="bluetooth" label="蓝牙支持" />
+        <ProFormTextArea
+          name="description"
+          label="描述"
         />
       </ModalForm>
     </PageContainer>
   );
 };
 
-export default DeviceSpecPage;
+export default SensorTypePage;
