@@ -2,6 +2,7 @@
 Sensor management endpoints
 """
 
+import logging
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
@@ -9,6 +10,9 @@ from datetime import datetime, timedelta
 from typing import List, Optional
 from pydantic import BaseModel, ConfigDict
 from uuid import UUID
+
+logger = logging.getLogger(__name__)
+
 
 from app.database import db_manager
 from app.services.sensor_service import SensorTypeService, SensorDbService, SensorBatchService
@@ -183,7 +187,17 @@ async def update_sensor_batch(
         raise HTTPException(status_code=404, detail="SensorBatch not found")
 
     update_data = item.model_dump(exclude_unset=True)
+
+    # 当批次状态变为 3（交付中）时，自动生成该批次的传感器数据
+    if "status" in update_data and update_data["status"] == 3:
+        # 检查是否已经生成过传感器数据（避免重复生成）
+        existing_sensors = await SensorDbService.get_by_batch_id(session, obj_id)
+        if not existing_sensors:
+            await SensorBatchService.generate_sensors_for_batch(session, db_obj)
+            logger.info(f"Generated sensors for batch {db_obj.code} (id={obj_id})")
+
     return await SensorBatchService.update(session, db_obj, update_data)
+
 
 
 @router.delete("/batches/{obj_id}")

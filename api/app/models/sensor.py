@@ -33,6 +33,7 @@ class Sensor(Base):
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     sensor_type_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to sensor_types
+    sensor_batch_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Optional link to sensor_batch for batch tracking
 
     def __repr__(self):
         return f"<Sensor {self.id}: {self.sn}>"

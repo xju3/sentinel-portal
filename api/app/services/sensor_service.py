@@ -68,12 +68,28 @@ class SensorDbService:
         return result.scalar_one_or_none()
 
     @staticmethod
+    async def get_by_batch_id(session: AsyncSession, batch_id: UUID) -> List[Sensor]:
+        stmt = select(Sensor).where(Sensor.sensor_batch_id == batch_id)
+        result = await session.execute(stmt)
+        return result.scalars().all()
+
+    @staticmethod
     async def create(session: AsyncSession, data: dict) -> Sensor:
         db_obj = Sensor(**data)
         session.add(db_obj)
         await session.commit()
         await session.refresh(db_obj)
         return db_obj
+
+    @staticmethod
+    async def create_batch(session: AsyncSession, items: List[dict]) -> List[Sensor]:
+        """批量创建 Sensor 记录"""
+        db_objs = [Sensor(**item) for item in items]
+        session.add_all(db_objs)
+        await session.commit()
+        for obj in db_objs:
+            await session.refresh(obj)
+        return db_objs
 
     @staticmethod
     async def update(session: AsyncSession, db_obj: Sensor, data: dict) -> Sensor:
@@ -87,6 +103,7 @@ class SensorDbService:
     async def delete(session: AsyncSession, db_obj: Sensor) -> None:
         await session.delete(db_obj)
         await session.commit()
+
 
 
 class SensorBatchService:
@@ -142,6 +159,35 @@ class SensorBatchService:
     async def delete(session: AsyncSession, db_obj: SensorBatch) -> None:
         await session.delete(db_obj)
         await session.commit()
+
+    @staticmethod
+    async def generate_sensors_for_batch(session: AsyncSession, batch: SensorBatch) -> List[Sensor]:
+        """
+        当批次状态变为 3（交付中）时，生成该批次对应的传感器数据。
+        
+        规则：
+        - sensor_batch_id = 当前批次的 ID
+        - sn = 批次 sn 值 + 下三位流水号（从 001 开始，至 qty 数量为止）
+        - active = False (0)
+        - active_at = None
+        """
+        sn_prefix = batch.sn
+        qty = batch.qty
+        sensor_type_id = batch.sensor_type_id
+
+        items = []
+        for i in range(1, qty + 1):
+            sn = f"{sn_prefix}{i:03d}"
+            items.append({
+                "sn": sn,
+                "active": False,
+                "active_at": None,
+                "sensor_type_id": sensor_type_id,
+                "sensor_batch_id": batch.id,
+            })
+
+        return await SensorDbService.create_batch(session, items)
+
 
 
 class SensorService:

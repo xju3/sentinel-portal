@@ -3,7 +3,7 @@ requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [project]
-name = "sensor-portal-api"
+name = "api"
 version = "0.1.0"
 description = "Sensor Portal API - FastAPI backend for sensor data management"
 readme = "README.md"
