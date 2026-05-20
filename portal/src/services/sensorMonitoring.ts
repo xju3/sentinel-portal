@@ -45,9 +45,25 @@ export async function listAllSensorMonitorings() {
   return all;
 }
 
+export type PagedDeviceInstResult = {
+  items: SensorMonitoringDeviceInstOption[];
+  total: number;
+};
+
 export async function listSensorMonitoringDeviceInstOptions() {
   return request<SensorMonitoringDeviceInstOption[]>('/api/v1/sensor-monitorings/device-insts', {
     method: 'GET',
+  });
+}
+
+export async function querySensorMonitoringDeviceInsts(
+  current: number,
+  pageSize: number,
+  keyword?: string,
+) {
+  return request<PagedDeviceInstResult>('/api/v1/sensor-monitorings/device-insts', {
+    method: 'GET',
+    params: { current, pageSize, keyword },
   });
 }
 

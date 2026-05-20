@@ -195,6 +195,7 @@ async def register(
             mobile=normalized_phone,
             flag=account_flag,
             active=True,
+            admin=False,
             contact_id=contact.id,
             tenant_id=tenant.id,
         )

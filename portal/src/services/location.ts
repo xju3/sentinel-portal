@@ -14,25 +14,40 @@ export type LocationPayload = {
   status: number;
 };
 
+export type PagedLocationResult = {
+  items: Location[];
+  total: number;
+};
+
 export async function listAllLocations() {
-  const limit = 100;
-  let skip = 0;
+  const pageSize = 100;
+  let current = 1;
   const all: Location[] = [];
 
   while (true) {
-    const batch =
-      (await request<Location[]>('/api/v1/locations', {
-        method: 'GET',
-        params: { skip, limit },
-      })) || [];
-    all.push(...batch);
-    if (batch.length < limit) {
+    const result = await request<PagedLocationResult>('/api/v1/locations', {
+      method: 'GET',
+      params: { current, pageSize },
+    });
+    all.push(...result.items);
+    if (result.items.length < pageSize) {
       break;
     }
-    skip += limit;
+    current++;
   }
 
   return all;
+}
+
+export async function queryLocations(
+  current: number,
+  pageSize: number,
+  keyword?: string,
+) {
+  return request<PagedLocationResult>('/api/v1/locations', {
+    method: 'GET',
+    params: { current, pageSize, keyword },
+  });
 }
 
 export async function createLocation(payload: LocationPayload) {

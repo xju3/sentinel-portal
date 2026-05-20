@@ -78,12 +78,11 @@ class Account(Base):
     __tablename__ = "account"
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    username = Column(String(64), nullable=False, unique=True)
-    email = Column(String(255), nullable=True, unique=True)
-    mobile = Column(String(20), nullable=True, unique=True)
+    username = Column(String(255), nullable=False, unique=True, comment="Can be email or mobile phone number")
     flag = Column(SmallInteger, nullable=False, default=2, comment="tinyint: 1=email, 2=mobile")
     password = Column(String(255), nullable=False)
     active = Column(Boolean, default=True)
+    admin = Column(Boolean, default=False, comment="Whether the account is an admin")
     contact_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Optional link to contacts
     tenant_id = Column(Uuid(as_uuid=True), nullable=False, default=uuid.uuid4, index=False) # link to tenant for multi-tenant support
 

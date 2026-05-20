@@ -150,6 +150,11 @@ export default defineConfig({
           component: '@/pages/Monitoring/Sensors',
         },
         {
+          path: '/monitoring/sensors/batch-devices/:batchId',
+          component: '@/pages/Monitoring/Sensors/BatchDevices',
+          hideInMenu: true,
+        },
+        {
           path: '/monitoring/points',
           name: '测点设置',
           component: '@/pages/Monitoring/Points',
@@ -162,6 +167,13 @@ export default defineConfig({
       ],
     },
 
+    {
+      path: '/tenant',
+      name: '公司信息',
+      icon: 'TeamOutlined',
+      hideInMenu: true,
+      component: '@/pages/Tenant',
+    },
 
     {
       path: '/profile',

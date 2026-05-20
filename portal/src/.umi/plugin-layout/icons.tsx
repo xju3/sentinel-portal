@@ -5,4 +5,5 @@ import DashboardOutlined from '/Users/tju/Workspace/PDI/Sentinel/Codes/platform/
 import AppstoreOutlined from '/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/node_modules/@umijs/plugins/node_modules/@ant-design/icons/es/icons/AppstoreOutlined';
 import ClusterOutlined from '/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/node_modules/@umijs/plugins/node_modules/@ant-design/icons/es/icons/ClusterOutlined';
 import RadarChartOutlined from '/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/node_modules/@umijs/plugins/node_modules/@ant-design/icons/es/icons/RadarChartOutlined';
-export default { DashboardOutlined, AppstoreOutlined, ClusterOutlined, RadarChartOutlined };
+import TeamOutlined from '/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/node_modules/@umijs/plugins/node_modules/@ant-design/icons/es/icons/TeamOutlined';
+export default { DashboardOutlined, AppstoreOutlined, ClusterOutlined, RadarChartOutlined, TeamOutlined };

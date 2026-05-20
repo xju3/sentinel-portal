@@ -3,23 +3,26 @@ import {
   ModalForm,
   PageContainer,
   ProColumns,
+  ProForm,
   ProFormSelect,
   ProTable,
 } from '@ant-design/pro-components';
 import { Button, Popconfirm, message } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
 
-import { listAllLocations, Location } from '@/services/location';
+import EntityPicker from '@/components/EntityPicker';
+import { listAllLocations, Location, queryLocations } from '@/services/location';
 import {
   createSensorMonitoring,
   deleteSensorMonitoring,
   listAllSensorMonitorings,
-  listSensorMonitoringDeviceInstOptions,
+  querySensorMonitoringDeviceInsts,
   SensorMonitoring,
   SensorMonitoringDeviceInstOption,
   SensorMonitoringPayload,
   updateSensorMonitoring,
 } from '@/services/sensorMonitoring';
-import { listAllSensors, listAllTenantSensors, Sensor, TenantSensor } from '@/services/tenantSensor';
+import { listAllSensors, querySensors, Sensor } from '@/services/tenantSensor';
 
 import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
 type SensorMonitoringFormValues = {
@@ -60,21 +63,34 @@ const MonitoringPointsPage = () => {
   const locationMap = useMemo(() => new Map(locations.map((item) => [item.id, item.name])), [locations]);
   const sensorMap = useMemo(() => new Map(sensors.map((item) => [item.id, item.sn])), [sensors]);
 
+  const loadDeviceInstOptions = async () => {
+    const all: SensorMonitoringDeviceInstOption[] = [];
+    let current = 1;
+    const pageSize = 100;
+    while (true) {
+      const result = await querySensorMonitoringDeviceInsts(current, pageSize);
+      all.push(...result.items);
+      if (result.items.length < pageSize) {
+        break;
+      }
+      current++;
+    }
+    return all;
+  };
+
   const loadData = async () => {
     setLoading(true);
     try {
-      const [monitorings, instOptions, locationRows, tenantSensors, sensorRows] = await Promise.all([
+      const [monitorings, instOptions, locationRows, sensorRows] = await Promise.all([
         listAllSensorMonitorings(),
-        listSensorMonitoringDeviceInstOptions(),
+        loadDeviceInstOptions(),
         listAllLocations(),
-        listAllTenantSensors(),
         listAllSensors(),
       ]);
-      const ownedSensorIds = new Set((tenantSensors || []).map((item: TenantSensor) => item.sensor_id));
       setRows(monitorings || []);
       setDeviceInstOptions(instOptions || []);
       setLocations(locationRows || []);
-      setSensors((sensorRows || []).filter((item) => ownedSensorIds.has(item.id)));
+      setSensors(sensorRows || []);
     } catch (error) {
       message.error(toErrorMessage(error));
     } finally {
@@ -163,7 +179,14 @@ const MonitoringPointsPage = () => {
         vertical: { text: '垂直' },
         axial: { text: '轴向' },
       },
-      render: (_, row) => row.direction || '-',
+      render: (_, row) => {
+        const map: Record<string, string> = {
+          horizontal: '水平',
+          vertical: '垂直',
+          axial: '轴向',
+        };
+        return row.direction ? map[row.direction] || row.direction : '-';
+      },
     },
     {
       title: '状态',
@@ -294,31 +317,77 @@ const MonitoringPointsPage = () => {
           }
         }}
       >
-        <ProFormSelect
+        <ProForm.Item
           name="device_inst_id"
           label="设备实例"
-          options={deviceInstOptions.map((item) => ({
-            label: `${item.code} / ${item.sn}`,
-            value: item.id,
-          }))}
           rules={[{ required: true, message: '请选择设备实例' }]}
-        />
-        <ProFormSelect
+        >
+          <EntityPicker<SensorMonitoringDeviceInstOption>
+            modalTitle="选择设备实例"
+            triggerText="选择设备"
+            placeholder="请选择设备实例"
+            valueLabel={
+              editing?.device_inst_id
+                ? deviceInstMap.get(editing.device_inst_id) || editing.device_inst_id
+                : undefined
+            }
+            fetcher={async ({ current, pageSize, keyword }) => {
+              const result = await querySensorMonitoringDeviceInsts(current, pageSize, keyword);
+              return { items: result.items, total: result.total };
+            }}
+            columns={[
+              { title: '编码', dataIndex: 'code', width: 160 },
+              { title: '序列号', dataIndex: 'sn', width: 160 },
+            ]}
+            getRecordLabel={(row) => `${row.code} / ${row.sn}`}
+          />
+        </ProForm.Item>
+        <ProForm.Item
           name="location_id"
           label="故障测点"
-          options={locations.map((item) => ({
-            label: item.name,
-            value: item.id,
-          }))}
-        />
-        <ProFormSelect
+        >
+          <EntityPicker<Location>
+            modalTitle="选择故障测点"
+            triggerText="选择测点"
+            placeholder="请选择故障测点"
+            valueLabel={
+              editing?.location_id
+                ? locationMap.get(editing.location_id) || editing.location_id
+                : undefined
+            }
+            fetcher={async ({ current, pageSize, keyword }) => {
+              const result = await queryLocations(current, pageSize, keyword);
+              return { items: result.items, total: result.total };
+            }}
+            columns={[
+              { title: '名称', dataIndex: 'name', width: 200 },
+            ]}
+            getRecordLabel={(row) => row.name}
+          />
+        </ProForm.Item>
+        <ProForm.Item
           name="sensor_id"
           label="传感器"
-          options={sensors.map((item) => ({
-            label: item.sn,
-            value: item.id,
-          }))}
-        />
+        >
+          <EntityPicker<Sensor>
+            modalTitle="选择传感器"
+            triggerText="选择传感器"
+            placeholder="请选择传感器"
+            valueLabel={
+              editing?.sensor_id
+                ? sensorMap.get(editing.sensor_id) || editing.sensor_id
+                : undefined
+            }
+            fetcher={async ({ current, pageSize, keyword }) => {
+              const result = await querySensors(current, pageSize, keyword);
+              return { items: result.items, total: result.total };
+            }}
+            columns={[
+              { title: '序列号', dataIndex: 'sn', width: 200 },
+            ]}
+            getRecordLabel={(row) => row.sn}
+          />
+        </ProForm.Item>
         <ProFormSelect
           name="direction"
           label="方向"

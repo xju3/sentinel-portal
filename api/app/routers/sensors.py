@@ -4,8 +4,8 @@ Sensor management endpoints
 
 import logging
 from fastapi import APIRouter, Depends, HTTPException, Query
+from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.future import select
 from datetime import datetime, timedelta
 from typing import List, Optional
 from pydantic import BaseModel, ConfigDict
@@ -17,6 +17,7 @@ logger = logging.getLogger(__name__)
 from app.database import db_manager
 from app.services.sensor_service import SensorTypeService, SensorDbService, SensorBatchService
 from app.models.customer import Account
+from app.models.sensor import Sensor
 from app.utils.auth import get_current_account
 
 router = APIRouter(prefix="/sensors", tags=["sensors"])
@@ -236,13 +237,48 @@ class SensorResponse(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
-@router.get("", response_model=List[SensorResponse])
+class PagedSensorResponse(BaseModel):
+    items: List[SensorResponse]
+    total: int
+
+
+@router.get("", response_model=PagedSensorResponse)
 async def list_sensors(
+    current: int = Query(1, ge=1),
+    pageSize: int = Query(10, ge=1, le=100),
+    keyword: Optional[str] = Query(None),
+    session: AsyncSession = Depends(db_manager.get_session),
+):
+    base_stmt = select(Sensor).order_by(Sensor.sn)
+    if keyword:
+        like = f"%{keyword}%"
+        base_stmt = base_stmt.where(Sensor.sn.ilike(like))
+
+    count_stmt = select(func.count()).select_from(base_stmt.subquery())
+    count_result = await session.execute(count_stmt)
+    total = count_result.scalar() or 0
+
+    skip = (current - 1) * pageSize
+    fetch_stmt = base_stmt.offset(skip).limit(pageSize)
+    result = await session.execute(fetch_stmt)
+    items = result.scalars().all()
+
+    return PagedSensorResponse(items=items, total=total)
+
+
+@router.get("/by-batch/{batch_id}", response_model=List[SensorResponse])
+async def list_sensors_by_batch(
+    batch_id: UUID,
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     session: AsyncSession = Depends(db_manager.get_session),
+    current_account: Account = Depends(get_current_account),
 ):
-    return await SensorDbService.get_all(session, skip, limit)
+    # Verify the batch belongs to the current tenant
+    batch = await SensorBatchService.get_by_id_and_tenant(session, batch_id, current_account.tenant_id)
+    if not batch:
+        raise HTTPException(status_code=404, detail="SensorBatch not found")
+    return await SensorDbService.get_by_batch_id(session, batch_id, skip, limit)
 
 
 @router.get("/{obj_id}", response_model=SensorResponse)

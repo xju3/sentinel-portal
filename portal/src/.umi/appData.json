@@ -153,6 +153,8 @@
             0,
             0,
             0,
+            0,
+            0,
             0
           ]
         },
@@ -231,7 +233,8 @@
             3,
             2,
             3,
-            4
+            4,
+            5
           ]
         },
         "register": 0
@@ -301,6 +304,8 @@
             23,
             16,
             15,
+            6,
+            6,
             6
           ]
         },
@@ -318,6 +323,8 @@
       "time": {
         "hooks": {
           "addEntryCode": [
+            0,
+            0,
             0,
             0,
             0,
@@ -391,12 +398,14 @@
             1,
             0,
             0,
+            0,
             0
           ],
           "onCheck": [
             0
           ],
           "onPrepareBuildSuccess": [
+            0,
             0,
             0,
             0,
@@ -625,6 +634,19 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ]
         },
@@ -672,6 +694,7 @@
       "time": {
         "hooks": {
           "modifyConfig": [
+            0,
             0,
             0,
             0,
@@ -1761,7 +1784,9 @@
             1,
             0,
             0,
-            1
+            1,
+            0,
+            0
           ],
           "addRuntimePlugin": [
             0,
@@ -1802,6 +1827,8 @@
             0,
             0,
             1,
+            0,
+            0,
             0,
             0,
             0,
@@ -1888,6 +1915,8 @@
       "time": {
         "hooks": {
           "onGenerateFiles": [
+            0,
+            0,
             0,
             0,
             0,
@@ -2042,6 +2071,10 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
             0
           ]
         },
@@ -2072,6 +2105,7 @@
       "time": {
         "hooks": {
           "modifyConfig": [
+            0,
             0,
             0,
             0,
@@ -2131,7 +2165,9 @@
             10,
             9,
             17,
-            5
+            5,
+            6,
+            6
           ],
           "addPolyfillImports": [
             0,
@@ -2144,6 +2180,10 @@
             0,
             0,
             1,
+            0,
+            0,
+            0,
+            0,
             0,
             0,
             0,
@@ -2352,6 +2392,10 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
             0
           ]
         },
@@ -2392,6 +2436,8 @@
             0,
             0,
             1,
+            0,
+            0,
             0,
             0,
             0,
@@ -2508,6 +2554,8 @@
             0,
             0,
             1,
+            0,
+            0,
             0,
             0,
             0,
@@ -2633,7 +2681,11 @@
             7,
             1,
             8,
-            3
+            3,
+            8,
+            2,
+            8,
+            2
           ]
         },
         "register": 3
@@ -2738,7 +2790,9 @@
             7,
             4,
             4,
-            10
+            10,
+            3,
+            4
           ]
         },
         "register": 2
@@ -2873,7 +2927,9 @@
             0,
             0,
             0,
-            0
+            0,
+            0,
+            1
           ]
         },
         "register": 0
@@ -3468,7 +3524,8 @@
             2,
             1,
             0,
-            1
+            1,
+            0
           ],
           "modifyAppData": [
             0
@@ -3578,9 +3635,15 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "addRuntimePlugin": [
+            0,
+            0,
             0,
             0,
             0,
@@ -3684,6 +3747,8 @@
             0,
             0,
             0,
+            0,
+            0,
             0
           ],
           "onGenerateFiles": [
@@ -3737,7 +3802,9 @@
             0,
             0,
             1,
-            1
+            1,
+            1,
+            0
           ],
           "addExtraBabelPlugins": [
             0
@@ -3793,9 +3860,12 @@
             0,
             0,
             0,
+            0,
             0
           ],
           "addLayouts": [
+            0,
+            0,
             0,
             0,
             0,
@@ -3902,9 +3972,13 @@
             0,
             0,
             0,
+            0,
+            0,
             0
           ],
           "addRuntimePluginKey": [
+            0,
+            0,
             0,
             0,
             0,
@@ -4008,7 +4082,9 @@
             2,
             2,
             1,
-            2
+            2,
+            1,
+            1
           ]
         },
         "register": 1
@@ -4051,6 +4127,8 @@
       "time": {
         "hooks": {
           "addRuntimePlugin": [
+            0,
+            0,
             0,
             0,
             0,
@@ -4154,7 +4232,9 @@
             16,
             13,
             10,
-            18
+            18,
+            9,
+            17
           ],
           "addTmpGenerateWatcherPaths": [
             0
@@ -4187,6 +4267,8 @@
       "time": {
         "hooks": {
           "addRuntimePluginKey": [
+            0,
+            0,
             0,
             0,
             0,
@@ -4341,6 +4423,8 @@
             0,
             0,
             0,
+            0,
+            0,
             0
           ],
           "onGenerateFiles": [
@@ -4394,7 +4478,9 @@
             0,
             0,
             1,
-            0
+            0,
+            0,
+            1
           ]
         },
         "register": 1
@@ -4450,6 +4536,7 @@
       "time": {
         "hooks": {
           "modifyConfig": [
+            0,
             0,
             0,
             0,
@@ -6040,55 +6127,79 @@
       "parentId": "23",
       "id": "24",
       "absPath": "/monitoring/sensors",
-      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport { PageContainer, ProColumns, ProTable } from '@ant-design/pro-components';\nimport { Tag, message } from 'antd';\n\nimport { listAllSensors, listAllTenantSensors, Sensor, TenantSensor } from '@/services/tenantSensor';\n\nimport { renderRefSafeTableOptions } from '@/utils/proTableOptions';\ntype SensorViewRow = TenantSensor & {\n  sensor_sn: string;\n  sensor_type_id: string;\n  description?: string;\n  active?: boolean;\n  active_at?: string;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst MonitoringSensorsPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [rows, setRows] = useState<SensorViewRow[]>([]);\n  const [query, setQuery] = useState<Record<string, any>>({});\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      const [tenantSensors, sensors] = await Promise.all([listAllTenantSensors(), listAllSensors()]);\n      const sensorMap = new Map<string, Sensor>(sensors.map((item) => [item.id, item]));\n      const merged: SensorViewRow[] = tenantSensors.map((item) => {\n        const sensor = sensorMap.get(item.sensor_id);\n        return {\n          ...item,\n          sensor_sn: sensor?.sn || '-',\n          sensor_type_id: sensor?.sensor_type_id || '-',\n          description: sensor?.description,\n          active: sensor?.active,\n          active_at: sensor?.active_at,\n        };\n      });\n      setRows(merged);\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    return rows.filter((row) => {\n      if (query.sensor_sn && !norm(row.sensor_sn).includes(norm(query.sensor_sn))) {\n        return false;\n      }\n      if (query.sensor_id && !norm(row.sensor_id).includes(norm(query.sensor_id))) {\n        return false;\n      }\n      if (query.sensor_type_id && !norm(row.sensor_type_id).includes(norm(query.sensor_type_id))) {\n        return false;\n      }\n      if (query.tenant_id && !norm(row.tenant_id).includes(norm(query.tenant_id))) {\n        return false;\n      }\n      if (query.available !== undefined && query.available !== null && query.available !== '') {\n        if (String(row.available) !== String(query.available)) {\n          return false;\n        }\n      }\n      if (query.active !== undefined && query.active !== null && query.active !== '') {\n        if (String(row.active) !== String(query.active)) {\n          return false;\n        }\n      }\n      return true;\n    });\n  }, [query, rows]);\n\n  const columns: ProColumns<SensorViewRow>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '传感器SN',\n      dataIndex: 'sensor_sn',\n      width: 180,\n    },\n    {\n      title: '可用状态',\n      dataIndex: 'available',\n      width: 110,\n      valueType: 'select',\n      valueEnum: {\n        true: { text: '可用' },\n        false: { text: '不可用' },\n      },\n      render: (_, row) => (row.available ? <Tag color=\"green\">可用</Tag> : <Tag>不可用</Tag>),\n    },\n    {\n      title: '设备状态',\n      dataIndex: 'active',\n      width: 110,\n      valueType: 'select',\n      valueEnum: {\n        true: { text: '在线' },\n        false: { text: '离线' },\n      },\n      render: (_, row) =>\n        row.active === undefined ? '-' : row.active ? <Tag color=\"green\">在线</Tag> : <Tag>离线</Tag>,\n    },\n    {\n      title: '最近活跃',\n      dataIndex: 'active_at',\n      width: 180,\n      valueType: 'dateTime',\n      hideInSearch: true,\n      render: (_, row) => row.active_at || '-',\n    },\n    {\n      title: '备注',\n      dataIndex: 'description',\n      hideInSearch: true,\n      ellipsis: true,\n      render: (_, row) => row.description || '-',\n    },\n  ];\n\n  return (\n    <PageContainer title=\"传感器\">\n      <ProTable<SensorViewRow>\n        rowKey=\"id\"\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        options={{ reload: loadRows }}\n        optionsRender={renderRefSafeTableOptions}\n        toolBarRender={false}\n      />\n    </PageContainer>\n  );\n};\n\nexport default MonitoringSensorsPage;\n",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport { PageContainer, ProColumns, ProTable } from '@ant-design/pro-components';\nimport { Button, Tag, message } from 'antd';\nimport { useNavigate } from '@umijs/max';\n\nimport {\n  SensorBatch,\n  listSensorBatches,\n} from '@/services/sensorBatch';\nimport { listSensorTypes, SensorType } from '@/services/sensorType';\n\nimport { renderRefSafeTableOptions } from '@/utils/proTableOptions';\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | { data?: { detail?: string }; info?: { errorMessage?: string }; message?: string }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst STATUS_MAP: Record<number, { text: string; color: string }> = {\n  0: { text: '计划中', color: 'default' },\n  1: { text: '生产中', color: 'processing' },\n  2: { text: '交付中', color: 'warning' },\n  3: { text: '已交付', color: 'success' },\n};\n\nconst MonitoringSensorsPage = () => {\n  const navigate = useNavigate();\n  const [loading, setLoading] = useState(false);\n  const [rows, setRows] = useState<SensorBatch[]>([]);\n  const [query, setQuery] = useState<Record<string, any>>({});\n  const [sensorTypes, setSensorTypes] = useState<SensorType[]>([]);\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      setRows(await listSensorBatches());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  const loadSensorTypes = async () => {\n    try {\n      setSensorTypes(await listSensorTypes());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n    loadSensorTypes();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    return rows.filter((row) => {\n      if (query.code && !norm(row.code).includes(norm(query.code))) {\n        return false;\n      }\n      return true;\n    });\n  }, [query, rows]);\n\n  const getSensorTypeName = (id: string) => {\n    const found = sensorTypes.find((t) => t.id === id);\n    return found ? found.name : id;\n  };\n\n  const columns: ProColumns<SensorBatch>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '批次编码',\n      dataIndex: 'code',\n      width: 180,\n    },\n    {\n      title: '序列号前缀',\n      dataIndex: 'sn',\n      width: 120,\n      hideInSearch: true,\n      render: (_, row) => <Tag>{row.sn}</Tag>,\n    },\n    {\n      title: '数量',\n      dataIndex: 'qty',\n      width: 80,\n      hideInSearch: true,\n      render: (_, row) => <Tag color=\"blue\">{row.qty}</Tag>,\n    },\n    {\n      title: '传感器型号',\n      dataIndex: 'sensor_type_id',\n      width: 120,\n      hideInSearch: true,\n      render: (_, row) => getSensorTypeName(row.sensor_type_id),\n    },\n    {\n      title: '状态',\n      dataIndex: 'status',\n      width: 100,\n      valueType: 'select',\n      valueEnum: {\n        0: { text: '计划中', status: 'Default' },\n        1: { text: '生产中', status: 'Processing' },\n        2: { text: '交付中', status: 'Warning' },\n        3: { text: '已交付', status: 'Success' },\n      },\n      render: (_, row) => {\n        const info = STATUS_MAP[row.status] || { text: `${row.status}`, color: 'default' };\n        return <Tag color={info.color}>{info.text}</Tag>;\n      },\n    },\n    {\n      title: '描述',\n      dataIndex: 'description',\n      ellipsis: true,\n      hideInSearch: true,\n      render: (_, row) => row.description || '-',\n    },\n    {\n      title: '创建时间',\n      dataIndex: 'created_at',\n      width: 180,\n      valueType: 'dateTime',\n      hideInSearch: true,\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 100,\n      render: (_, row) => [\n        <Button\n          key=\"devices\"\n          type=\"link\"\n          onClick={() => navigate(`/monitoring/sensors/batch-devices/${row.id}`)}\n        >\n          设备\n        </Button>,\n      ],\n    },\n  ];\n\n  return (\n    <PageContainer title=\"传感器\">\n      <ProTable<SensorBatch>\n        rowKey=\"id\"\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        options={{ reload: loadRows }}\n        optionsRender={renderRefSafeTableOptions}\n        cardProps={{ bodyStyle: { paddingInline: 24 } }}\n        toolBarRender={false}\n      />\n    </PageContainer>\n  );\n};\n\nexport default MonitoringSensorsPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/src/pages/Monitoring/Sensors/index.tsx"
     },
     "25": {
+      "path": "/monitoring/sensors/batch-devices/:batchId",
+      "hideInMenu": true,
+      "file": "@/pages/Monitoring/Sensors/BatchDevices/index.tsx",
+      "parentId": "23",
+      "id": "25",
+      "absPath": "/monitoring/sensors/batch-devices/:batchId",
+      "__content": "import { useEffect, useState } from 'react';\nimport { PageContainer, ProColumns, ProTable } from '@ant-design/pro-components';\nimport { Tag, message } from 'antd';\nimport { useParams, useNavigate } from '@umijs/max';\n\nimport { Sensor, listSensorsByBatch } from '@/services/sensorBatch';\nimport { renderRefSafeTableOptions } from '@/utils/proTableOptions';\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | { data?: { detail?: string }; info?: { errorMessage?: string }; message?: string }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst BatchDevicesPage = () => {\n  const { batchId } = useParams<{ batchId: string }>();\n  const navigate = useNavigate();\n\n  const [loading, setLoading] = useState(false);\n  const [rows, setRows] = useState<Sensor[]>([]);\n  const [total, setTotal] = useState(0);\n  const [current, setCurrent] = useState(1);\n  const [pageSize, setPageSize] = useState(10);\n  const [querySn, setQuerySn] = useState('');\n\n  const loadRows = async (page: number, size: number, sn?: string) => {\n    if (!batchId) return;\n    setLoading(true);\n    try {\n      const skip = (page - 1) * size;\n      const sensors = await listSensorsByBatch(batchId, skip, size);\n      setRows(sensors);\n      // If the result count is less than pageSize, we know we've reached the end\n      // For a more accurate total, we'd need a count endpoint, but this is sufficient\n      if (sensors.length < size) {\n        setTotal(skip + sensors.length);\n      } else {\n        setTotal(skip + size + 1); // approximate, allows next page to load\n      }\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    if (batchId) {\n      loadRows(current, pageSize, querySn);\n    }\n  }, [batchId]);\n\n  const handleSearch = (values: Record<string, any>) => {\n    const sn = values?.sn || '';\n    setQuerySn(sn);\n    setCurrent(1);\n    loadRows(1, pageSize, sn);\n  };\n\n  const handleReset = () => {\n    setQuerySn('');\n    setCurrent(1);\n    loadRows(1, pageSize, '');\n  };\n\n  const handleTableChange = (pagination: any) => {\n    const { current: page, pageSize: size } = pagination;\n    setCurrent(page);\n    setPageSize(size);\n    loadRows(page, size, querySn);\n  };\n\n  const columns: ProColumns<Sensor>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n    },\n    {\n      title: '传感器SN',\n      dataIndex: 'sn',\n      width: 180,\n    },\n    {\n      title: '设备状态',\n      dataIndex: 'active',\n      width: 100,\n      hideInSearch: true,\n      render: (_, row) =>\n        row.active === undefined ? '-' : row.active ? <Tag color=\"green\">在线</Tag> : <Tag>离线</Tag>,\n    },\n    {\n      title: '最近活跃',\n      dataIndex: 'active_at',\n      width: 180,\n      valueType: 'dateTime',\n      hideInSearch: true,\n      render: (_, row) => row.active_at || '-',\n    },\n    {\n      title: '备注',\n      dataIndex: 'description',\n      ellipsis: true,\n      hideInSearch: true,\n      render: (_, row) => row.description || '-',\n    },\n  ];\n\n  return (\n    <PageContainer\n      title=\"批次设备列表\"\n      onBack={() => navigate('/monitoring/sensors')}\n    >\n      <ProTable<Sensor>\n        rowKey=\"id\"\n        loading={loading}\n        columns={columns}\n        dataSource={rows}\n        search={{\n          labelWidth: 'auto',\n          defaultCollapsed: false,\n        }}\n        onSubmit={handleSearch}\n        onReset={handleReset}\n        options={{ reload: () => loadRows(current, pageSize, querySn) }}\n        optionsRender={renderRefSafeTableOptions}\n        cardProps={{ bodyStyle: { paddingInline: 24 } }}\n        toolBarRender={false}\n        pagination={{\n          current,\n          pageSize,\n          total,\n          showSizeChanger: true,\n          showTotal: (t) => `共 ${t} 条`,\n          onChange: (page, size) => {\n            setCurrent(page);\n            setPageSize(size);\n            loadRows(page, size, querySn);\n          },\n        }}\n      />\n    </PageContainer>\n  );\n};\n\nexport default BatchDevicesPage;\n",
+      "__isJSFile": true,
+      "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/src/pages/Monitoring/Sensors/BatchDevices/index.tsx"
+    },
+    "26": {
       "path": "/monitoring/points",
       "name": "测点设置",
       "file": "@/pages/Monitoring/Points/index.tsx",
       "parentId": "23",
-      "id": "25",
+      "id": "26",
       "absPath": "/monitoring/points",
-      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProFormSelect,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, message } from 'antd';\n\nimport { listAllLocations, Location } from '@/services/location';\nimport {\n  createSensorMonitoring,\n  deleteSensorMonitoring,\n  listAllSensorMonitorings,\n  listSensorMonitoringDeviceInstOptions,\n  SensorMonitoring,\n  SensorMonitoringDeviceInstOption,\n  SensorMonitoringPayload,\n  updateSensorMonitoring,\n} from '@/services/sensorMonitoring';\nimport { listAllSensors, listAllTenantSensors, Sensor, TenantSensor } from '@/services/tenantSensor';\n\nimport { renderRefSafeTableOptions } from '@/utils/proTableOptions';\ntype SensorMonitoringFormValues = {\n  device_inst_id: string;\n  location_id?: string;\n  sensor_id?: string;\n  direction?: string;\n  status: number;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst MonitoringPointsPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [rows, setRows] = useState<SensorMonitoring[]>([]);\n  const [editing, setEditing] = useState<SensorMonitoring | null>(null);\n  const [query, setQuery] = useState<Record<string, any>>({});\n\n  const [deviceInstOptions, setDeviceInstOptions] = useState<SensorMonitoringDeviceInstOption[]>([]);\n  const [locations, setLocations] = useState<Location[]>([]);\n  const [sensors, setSensors] = useState<Sensor[]>([]);\n\n  const deviceInstMap = useMemo(\n    () => new Map(deviceInstOptions.map((item) => [item.id, `${item.code} / ${item.sn}`])),\n    [deviceInstOptions],\n  );\n  const locationMap = useMemo(() => new Map(locations.map((item) => [item.id, item.name])), [locations]);\n  const sensorMap = useMemo(() => new Map(sensors.map((item) => [item.id, item.sn])), [sensors]);\n\n  const loadData = async () => {\n    setLoading(true);\n    try {\n      const [monitorings, instOptions, locationRows, tenantSensors, sensorRows] = await Promise.all([\n        listAllSensorMonitorings(),\n        listSensorMonitoringDeviceInstOptions(),\n        listAllLocations(),\n        listAllTenantSensors(),\n        listAllSensors(),\n      ]);\n      const ownedSensorIds = new Set((tenantSensors || []).map((item: TenantSensor) => item.sensor_id));\n      setRows(monitorings || []);\n      setDeviceInstOptions(instOptions || []);\n      setLocations(locationRows || []);\n      setSensors((sensorRows || []).filter((item) => ownedSensorIds.has(item.id)));\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    loadData();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    return rows.filter((row) => {\n      if (query.device_inst_id) {\n        const display = deviceInstMap.get(row.device_inst_id) || row.device_inst_id;\n        const hit =\n          norm(display).includes(norm(query.device_inst_id)) ||\n          norm(row.device_inst_id).includes(norm(query.device_inst_id));\n        if (!hit) {\n          return false;\n        }\n      }\n      if (query.location_id) {\n        const display = row.location_id ? locationMap.get(row.location_id) || row.location_id : '';\n        const hit = norm(display).includes(norm(query.location_id));\n        if (!hit) {\n          return false;\n        }\n      }\n      if (query.sensor_id) {\n        const display = row.sensor_id ? sensorMap.get(row.sensor_id) || row.sensor_id : '';\n        const hit = norm(display).includes(norm(query.sensor_id));\n        if (!hit) {\n          return false;\n        }\n      }\n      if (query.direction && !norm(row.direction).includes(norm(query.direction))) {\n        return false;\n      }\n      if (\n        query.status !== undefined &&\n        query.status !== null &&\n        query.status !== '' &&\n        String(row.status) !== String(query.status)\n      ) {\n        return false;\n      }\n      return true;\n    });\n  }, [deviceInstMap, locationMap, query, rows, sensorMap]);\n\n  const columns: ProColumns<SensorMonitoring>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '设备实例',\n      dataIndex: 'device_inst_id',\n      width: 220,\n      render: (_, row) => deviceInstMap.get(row.device_inst_id) || row.device_inst_id,\n    },\n    {\n      title: '故障测点',\n      dataIndex: 'location_id',\n      width: 180,\n      render: (_, row) => (row.location_id ? locationMap.get(row.location_id) || row.location_id : '-'),\n    },\n    {\n      title: '传感器',\n      dataIndex: 'sensor_id',\n      width: 180,\n      render: (_, row) => (row.sensor_id ? sensorMap.get(row.sensor_id) || row.sensor_id : '-'),\n    },\n    {\n      title: '方向',\n      dataIndex: 'direction',\n      width: 120,\n      valueType: 'select',\n      valueEnum: {\n        horizontal: { text: '水平' },\n        vertical: { text: '垂直' },\n        axial: { text: '轴向' },\n      },\n      render: (_, row) => row.direction || '-',\n    },\n    {\n      title: '状态',\n      dataIndex: 'status',\n      width: 100,\n      valueType: 'select',\n      valueEnum: {\n        1: { text: '启用' },\n        0: { text: '停用' },\n      },\n      render: (_, row) => (Number(row.status) === 1 ? '启用' : '停用'),\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 180,\n      render: (_, row) => [\n        <Button\n          key=\"edit\"\n          type=\"link\"\n          onClick={() => {\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </Button>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该测点绑定吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteSensorMonitoring(row.id);\n              message.success('删除成功');\n              await loadData();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <Button danger type=\"link\">\n            删除\n          </Button>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  return (\n    <PageContainer title=\"测点设置\">\n      <ProTable<SensorMonitoring>\n        rowKey=\"id\"\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        options={{ reload: loadData }}\n        optionsRender={renderRefSafeTableOptions}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建绑定\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<SensorMonitoringFormValues>\n        title={editing ? '编辑测点绑定' : '新建测点绑定'}\n        open={modalOpen}\n        initialValues={\n          editing\n            ? {\n                device_inst_id: editing.device_inst_id,\n                location_id: editing.location_id || undefined,\n                sensor_id: editing.sensor_id || undefined,\n                direction: editing.direction || undefined,\n                status: Number(editing.status),\n              }\n            : {\n                status: 1,\n              }\n        }\n        modalProps={{\n          destroyOnHidden: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        onFinish={async (values) => {\n          const payload: SensorMonitoringPayload = {\n            device_inst_id: values.device_inst_id,\n            location_id: values.location_id || null,\n            sensor_id: values.sensor_id || null,\n            direction: values.direction || null,\n            status: Number(values.status ?? 1),\n          };\n\n          setSaving(true);\n          try {\n            if (editing) {\n              await updateSensorMonitoring(editing.id, payload);\n            } else {\n              await createSensorMonitoring(payload);\n            }\n            message.success('保存成功');\n            setModalOpen(false);\n            setEditing(null);\n            await loadData();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormSelect\n          name=\"device_inst_id\"\n          label=\"设备实例\"\n          options={deviceInstOptions.map((item) => ({\n            label: `${item.code} / ${item.sn}`,\n            value: item.id,\n          }))}\n          rules={[{ required: true, message: '请选择设备实例' }]}\n        />\n        <ProFormSelect\n          name=\"location_id\"\n          label=\"故障测点\"\n          options={locations.map((item) => ({\n            label: item.name,\n            value: item.id,\n          }))}\n        />\n        <ProFormSelect\n          name=\"sensor_id\"\n          label=\"传感器\"\n          options={sensors.map((item) => ({\n            label: item.sn,\n            value: item.id,\n          }))}\n        />\n        <ProFormSelect\n          name=\"direction\"\n          label=\"方向\"\n          options={[\n            { label: '水平', value: 'horizontal' },\n            { label: '垂直', value: 'vertical' },\n            { label: '轴向', value: 'axial' },\n          ]}\n        />\n        <ProFormSelect\n          name=\"status\"\n          label=\"状态\"\n          options={[\n            { label: '启用', value: 1 },\n            { label: '停用', value: 0 },\n          ]}\n          rules={[{ required: true, message: '请选择状态' }]}\n        />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default MonitoringPointsPage;\n",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProForm,\n  ProFormSelect,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, message } from 'antd';\nimport type { ColumnsType } from 'antd/es/table';\n\nimport EntityPicker from '@/components/EntityPicker';\nimport { listAllLocations, Location, queryLocations } from '@/services/location';\nimport {\n  createSensorMonitoring,\n  deleteSensorMonitoring,\n  listAllSensorMonitorings,\n  querySensorMonitoringDeviceInsts,\n  SensorMonitoring,\n  SensorMonitoringDeviceInstOption,\n  SensorMonitoringPayload,\n  updateSensorMonitoring,\n} from '@/services/sensorMonitoring';\nimport { listAllSensors, querySensors, Sensor } from '@/services/tenantSensor';\n\nimport { renderRefSafeTableOptions } from '@/utils/proTableOptions';\ntype SensorMonitoringFormValues = {\n  device_inst_id: string;\n  location_id?: string;\n  sensor_id?: string;\n  direction?: string;\n  status: number;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst MonitoringPointsPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [rows, setRows] = useState<SensorMonitoring[]>([]);\n  const [editing, setEditing] = useState<SensorMonitoring | null>(null);\n  const [query, setQuery] = useState<Record<string, any>>({});\n\n  const [deviceInstOptions, setDeviceInstOptions] = useState<SensorMonitoringDeviceInstOption[]>([]);\n  const [locations, setLocations] = useState<Location[]>([]);\n  const [sensors, setSensors] = useState<Sensor[]>([]);\n\n  const deviceInstMap = useMemo(\n    () => new Map(deviceInstOptions.map((item) => [item.id, `${item.code} / ${item.sn}`])),\n    [deviceInstOptions],\n  );\n  const locationMap = useMemo(() => new Map(locations.map((item) => [item.id, item.name])), [locations]);\n  const sensorMap = useMemo(() => new Map(sensors.map((item) => [item.id, item.sn])), [sensors]);\n\n  const loadDeviceInstOptions = async () => {\n    const all: SensorMonitoringDeviceInstOption[] = [];\n    let current = 1;\n    const pageSize = 100;\n    while (true) {\n      const result = await querySensorMonitoringDeviceInsts(current, pageSize);\n      all.push(...result.items);\n      if (result.items.length < pageSize) {\n        break;\n      }\n      current++;\n    }\n    return all;\n  };\n\n  const loadData = async () => {\n    setLoading(true);\n    try {\n      const [monitorings, instOptions, locationRows, sensorRows] = await Promise.all([\n        listAllSensorMonitorings(),\n        loadDeviceInstOptions(),\n        listAllLocations(),\n        listAllSensors(),\n      ]);\n      setRows(monitorings || []);\n      setDeviceInstOptions(instOptions || []);\n      setLocations(locationRows || []);\n      setSensors(sensorRows || []);\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    loadData();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    return rows.filter((row) => {\n      if (query.device_inst_id) {\n        const display = deviceInstMap.get(row.device_inst_id) || row.device_inst_id;\n        const hit =\n          norm(display).includes(norm(query.device_inst_id)) ||\n          norm(row.device_inst_id).includes(norm(query.device_inst_id));\n        if (!hit) {\n          return false;\n        }\n      }\n      if (query.location_id) {\n        const display = row.location_id ? locationMap.get(row.location_id) || row.location_id : '';\n        const hit = norm(display).includes(norm(query.location_id));\n        if (!hit) {\n          return false;\n        }\n      }\n      if (query.sensor_id) {\n        const display = row.sensor_id ? sensorMap.get(row.sensor_id) || row.sensor_id : '';\n        const hit = norm(display).includes(norm(query.sensor_id));\n        if (!hit) {\n          return false;\n        }\n      }\n      if (query.direction && !norm(row.direction).includes(norm(query.direction))) {\n        return false;\n      }\n      if (\n        query.status !== undefined &&\n        query.status !== null &&\n        query.status !== '' &&\n        String(row.status) !== String(query.status)\n      ) {\n        return false;\n      }\n      return true;\n    });\n  }, [deviceInstMap, locationMap, query, rows, sensorMap]);\n\n  const columns: ProColumns<SensorMonitoring>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '设备实例',\n      dataIndex: 'device_inst_id',\n      width: 220,\n      render: (_, row) => deviceInstMap.get(row.device_inst_id) || row.device_inst_id,\n    },\n    {\n      title: '故障测点',\n      dataIndex: 'location_id',\n      width: 180,\n      render: (_, row) => (row.location_id ? locationMap.get(row.location_id) || row.location_id : '-'),\n    },\n    {\n      title: '传感器',\n      dataIndex: 'sensor_id',\n      width: 180,\n      render: (_, row) => (row.sensor_id ? sensorMap.get(row.sensor_id) || row.sensor_id : '-'),\n    },\n    {\n      title: '方向',\n      dataIndex: 'direction',\n      width: 120,\n      valueType: 'select',\n      valueEnum: {\n        horizontal: { text: '水平' },\n        vertical: { text: '垂直' },\n        axial: { text: '轴向' },\n      },\n      render: (_, row) => {\n        const map: Record<string, string> = {\n          horizontal: '水平',\n          vertical: '垂直',\n          axial: '轴向',\n        };\n        return row.direction ? map[row.direction] || row.direction : '-';\n      },\n    },\n    {\n      title: '状态',\n      dataIndex: 'status',\n      width: 100,\n      valueType: 'select',\n      valueEnum: {\n        1: { text: '启用' },\n        0: { text: '停用' },\n      },\n      render: (_, row) => (Number(row.status) === 1 ? '启用' : '停用'),\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 180,\n      render: (_, row) => [\n        <Button\n          key=\"edit\"\n          type=\"link\"\n          onClick={() => {\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </Button>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该测点绑定吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteSensorMonitoring(row.id);\n              message.success('删除成功');\n              await loadData();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <Button danger type=\"link\">\n            删除\n          </Button>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  return (\n    <PageContainer title=\"测点设置\">\n      <ProTable<SensorMonitoring>\n        rowKey=\"id\"\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        options={{ reload: loadData }}\n        optionsRender={renderRefSafeTableOptions}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建绑定\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<SensorMonitoringFormValues>\n        title={editing ? '编辑测点绑定' : '新建测点绑定'}\n        open={modalOpen}\n        initialValues={\n          editing\n            ? {\n                device_inst_id: editing.device_inst_id,\n                location_id: editing.location_id || undefined,\n                sensor_id: editing.sensor_id || undefined,\n                direction: editing.direction || undefined,\n                status: Number(editing.status),\n              }\n            : {\n                status: 1,\n              }\n        }\n        modalProps={{\n          destroyOnHidden: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        onFinish={async (values) => {\n          const payload: SensorMonitoringPayload = {\n            device_inst_id: values.device_inst_id,\n            location_id: values.location_id || null,\n            sensor_id: values.sensor_id || null,\n            direction: values.direction || null,\n            status: Number(values.status ?? 1),\n          };\n\n          setSaving(true);\n          try {\n            if (editing) {\n              await updateSensorMonitoring(editing.id, payload);\n            } else {\n              await createSensorMonitoring(payload);\n            }\n            message.success('保存成功');\n            setModalOpen(false);\n            setEditing(null);\n            await loadData();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProForm.Item\n          name=\"device_inst_id\"\n          label=\"设备实例\"\n          rules={[{ required: true, message: '请选择设备实例' }]}\n        >\n          <EntityPicker<SensorMonitoringDeviceInstOption>\n            modalTitle=\"选择设备实例\"\n            triggerText=\"选择设备\"\n            placeholder=\"请选择设备实例\"\n            valueLabel={\n              editing?.device_inst_id\n                ? deviceInstMap.get(editing.device_inst_id) || editing.device_inst_id\n                : undefined\n            }\n            fetcher={async ({ current, pageSize, keyword }) => {\n              const result = await querySensorMonitoringDeviceInsts(current, pageSize, keyword);\n              return { items: result.items, total: result.total };\n            }}\n            columns={[\n              { title: '编码', dataIndex: 'code', width: 160 },\n              { title: '序列号', dataIndex: 'sn', width: 160 },\n            ]}\n            getRecordLabel={(row) => `${row.code} / ${row.sn}`}\n          />\n        </ProForm.Item>\n        <ProForm.Item\n          name=\"location_id\"\n          label=\"故障测点\"\n        >\n          <EntityPicker<Location>\n            modalTitle=\"选择故障测点\"\n            triggerText=\"选择测点\"\n            placeholder=\"请选择故障测点\"\n            valueLabel={\n              editing?.location_id\n                ? locationMap.get(editing.location_id) || editing.location_id\n                : undefined\n            }\n            fetcher={async ({ current, pageSize, keyword }) => {\n              const result = await queryLocations(current, pageSize, keyword);\n              return { items: result.items, total: result.total };\n            }}\n            columns={[\n              { title: '名称', dataIndex: 'name', width: 200 },\n            ]}\n            getRecordLabel={(row) => row.name}\n          />\n        </ProForm.Item>\n        <ProForm.Item\n          name=\"sensor_id\"\n          label=\"传感器\"\n        >\n          <EntityPicker<Sensor>\n            modalTitle=\"选择传感器\"\n            triggerText=\"选择传感器\"\n            placeholder=\"请选择传感器\"\n            valueLabel={\n              editing?.sensor_id\n                ? sensorMap.get(editing.sensor_id) || editing.sensor_id\n                : undefined\n            }\n            fetcher={async ({ current, pageSize, keyword }) => {\n              const result = await querySensors(current, pageSize, keyword);\n              return { items: result.items, total: result.total };\n            }}\n            columns={[\n              { title: '序列号', dataIndex: 'sn', width: 200 },\n            ]}\n            getRecordLabel={(row) => row.sn}\n          />\n        </ProForm.Item>\n        <ProFormSelect\n          name=\"direction\"\n          label=\"方向\"\n          options={[\n            { label: '水平', value: 'horizontal' },\n            { label: '垂直', value: 'vertical' },\n            { label: '轴向', value: 'axial' },\n          ]}\n        />\n        <ProFormSelect\n          name=\"status\"\n          label=\"状态\"\n          options={[\n            { label: '启用', value: 1 },\n            { label: '停用', value: 0 },\n          ]}\n          rules={[{ required: true, message: '请选择状态' }]}\n        />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default MonitoringPointsPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/src/pages/Monitoring/Points/index.tsx"
     },
-    "26": {
+    "27": {
       "path": "/monitoring",
       "redirect": "/monitoring/sensors",
       "parentId": "23",
-      "id": "26",
+      "id": "27",
       "absPath": "/monitoring"
     },
-    "27": {
+    "28": {
+      "path": "/tenant",
+      "name": "公司信息",
+      "icon": "TeamOutlined",
+      "hideInMenu": true,
+      "file": "@/pages/Tenant/index.tsx",
+      "parentId": "ant-design-pro-layout",
+      "id": "28",
+      "absPath": "/tenant",
+      "__content": "import { EditOutlined, PlusOutlined } from '@ant-design/icons';\nimport { PageContainer, ProCard } from '@ant-design/pro-components';\nimport {\n  Button,\n  Descriptions,\n  Form,\n  Input,\n  message,\n  Modal,\n  Popconfirm,\n  Space,\n  Table,\n  Tag,\n  Typography,\n} from 'antd';\nimport { useEffect, useState } from 'react';\n\nimport {\n  createTenantAccount,\n  deleteTenantAccount,\n  getCurrentTenant,\n  listTenantAccounts,\n  updateCurrentTenant,\n  updateTenantAccount,\n  updateTenantAccountPassword,\n  type AccountInfo,\n  type TenantInfo,\n} from '@/services/tenant';\n\nconst USER_FLAG_MAP: Record<number, string> = {\n  1: '邮箱',\n  2: '手机号',\n};\n\nconst TenantPage = () => {\n  // 公司信息状态\n  const [tenant, setTenant] = useState<TenantInfo | null>(null);\n  const [tenantLoading, setTenantLoading] = useState(false);\n  const [editModalOpen, setEditModalOpen] = useState(false);\n  const [editSubmitting, setEditSubmitting] = useState(false);\n  const [editForm] = Form.useForm();\n\n  // 系统用户状态\n  const [accounts, setAccounts] = useState<AccountInfo[]>([]);\n  const [accountsLoading, setAccountsLoading] = useState(false);\n  const [createModalOpen, setCreateModalOpen] = useState(false);\n  const [createSubmitting, setCreateSubmitting] = useState(false);\n  const [createForm] = Form.useForm();\n\n  // 获取公司信息\n  const fetchTenant = async () => {\n    setTenantLoading(true);\n    try {\n      const data = await getCurrentTenant();\n      setTenant(data);\n    } catch (error: any) {\n      const detail = error?.data?.detail || '获取公司信息失败';\n      message.error(String(detail));\n    } finally {\n      setTenantLoading(false);\n    }\n  };\n\n  // 获取用户列表\n  const fetchAccounts = async () => {\n    setAccountsLoading(true);\n    try {\n      const data = await listTenantAccounts();\n      setAccounts(data);\n    } catch (error: any) {\n      const detail = error?.data?.detail || '获取用户列表失败';\n      message.error(String(detail));\n    } finally {\n      setAccountsLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    fetchTenant();\n    fetchAccounts();\n  }, []);\n\n  // 编辑公司信息\n  const handleEdit = () => {\n    if (!tenant) return;\n    editForm.setFieldsValue({\n      name: tenant.name,\n      host: tenant.host,\n    });\n    setEditModalOpen(true);\n  };\n\n  const handleEditSave = async () => {\n    try {\n      const values = await editForm.validateFields();\n      setEditSubmitting(true);\n      await updateCurrentTenant({\n        name: values.name,\n        host: values.host,\n      });\n      message.success('公司信息更新成功');\n      setEditModalOpen(false);\n      await fetchTenant();\n    } catch (error: any) {\n      if (error?.errorFields) return;\n      const detail = error?.data?.detail || '更新失败，请重试';\n      message.error(String(detail));\n    } finally {\n      setEditSubmitting(false);\n    }\n  };\n\n  // 停用/启用用户\n  const handleToggleActive = async (record: AccountInfo) => {\n    try {\n      await updateTenantAccount(record.id, { active: !record.active });\n      message.success(record.active ? '用户已停用' : '用户已启用');\n      fetchAccounts();\n    } catch (error: any) {\n      const detail = error?.data?.detail || '操作失败';\n      message.error(String(detail));\n    }\n  };\n\n  // 修改密码\n  const [passwordModalOpen, setPasswordModalOpen] = useState(false);\n  const [passwordSubmitting, setPasswordSubmitting] = useState(false);\n  const [passwordTarget, setPasswordTarget] = useState<AccountInfo | null>(null);\n  const [passwordForm] = Form.useForm();\n\n  const handlePasswordOpen = (record: AccountInfo) => {\n    setPasswordTarget(record);\n    passwordForm.resetFields();\n    setPasswordModalOpen(true);\n  };\n\n  const handlePasswordSave = async () => {\n    if (!passwordTarget) return;\n    try {\n      const values = await passwordForm.validateFields();\n      setPasswordSubmitting(true);\n      await updateTenantAccountPassword(passwordTarget.id, { password: values.password });\n      message.success('密码修改成功');\n      setPasswordModalOpen(false);\n      setPasswordTarget(null);\n      passwordForm.resetFields();\n    } catch (error: any) {\n      if (error?.errorFields) return;\n      const detail = error?.data?.detail || '修改密码失败';\n      message.error(String(detail));\n    } finally {\n      setPasswordSubmitting(false);\n    }\n  };\n\n  // 删除用户\n  const handleDelete = async (record: AccountInfo) => {\n    try {\n      await deleteTenantAccount(record.id);\n      message.success('用户已删除');\n      fetchAccounts();\n    } catch (error: any) {\n      const detail = error?.data?.detail || '删除失败';\n      message.error(String(detail));\n    }\n  };\n\n  // 自动检测 username 类型：先用邮箱规则检查，不通过则视为手机号\n  const detectFlag = (username: string): number => {\n    const emailRegex = /^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/;\n    if (emailRegex.test(username)) {\n      return 1; // 邮箱\n    }\n    return 2; // 手机号\n  };\n\n  // 创建用户\n  const handleCreate = async () => {\n    try {\n      const values = await createForm.validateFields();\n      const flag = detectFlag(values.username);\n      setCreateSubmitting(true);\n      await createTenantAccount({\n        contact_name: values.contact_name,\n        username: values.username,\n        password: values.password,\n        flag,\n        active: true,\n      });\n      message.success('账号创建成功');\n      setCreateModalOpen(false);\n      createForm.resetFields();\n      fetchAccounts();\n    } catch (error: any) {\n      if (error?.errorFields) return;\n      const detail = error?.data?.detail || '创建账号失败';\n      message.error(String(detail));\n    } finally {\n      setCreateSubmitting(false);\n    }\n  };\n\n  const columns = [\n    {\n      title: '姓名',\n      dataIndex: 'contact_name',\n      key: 'contact_name',\n      width: 120,\n      render: (text: string | null) => text || '-',\n    },\n    {\n      title: '登录账号',\n      dataIndex: 'username',\n      key: 'username',\n      width: 220,\n    },\n    {\n      title: '类型',\n      dataIndex: 'flag',\n      key: 'flag',\n      width: 80,\n      render: (flag: number) => (\n        <Tag color={flag === 1 ? 'green' : 'orange'}>\n          {USER_FLAG_MAP[flag] || '未知'}\n        </Tag>\n      ),\n    },\n    {\n      title: '管理员',\n      dataIndex: 'admin',\n      key: 'admin',\n      width: 80,\n      render: (admin: boolean) => (\n        <Tag color={admin ? 'blue' : 'default'}>\n          {admin ? '是' : '否'}\n        </Tag>\n      ),\n    },\n    {\n      title: '状态',\n      dataIndex: 'active',\n      key: 'active',\n      width: 80,\n      render: (active: boolean) => (\n        <Tag color={active ? 'success' : 'error'}>\n          {active ? '启用' : '禁用'}\n        </Tag>\n      ),\n    },\n    {\n      title: '操作',\n      key: 'action',\n      width: 240,\n      render: (_: any, record: AccountInfo) => (\n        <Space>\n          <Button\n            type=\"link\"\n            size=\"small\"\n            onClick={() => handleToggleActive(record)}\n          >\n            {record.active ? '停用' : '启用'}\n          </Button>\n          <Button\n            type=\"link\"\n            size=\"small\"\n            onClick={() => handlePasswordOpen(record)}\n          >\n            修改密码\n          </Button>\n          <Popconfirm\n            title=\"确认删除\"\n            description={`确定要删除用户 \"${record.username}\" 吗？`}\n            onConfirm={() => handleDelete(record)}\n            okText=\"确认\"\n            cancelText=\"取消\"\n          >\n            <Button type=\"link\" size=\"small\" danger>\n              删除\n            </Button>\n          </Popconfirm>\n        </Space>\n      ),\n    },\n  ];\n\n  return (\n    <PageContainer title=\"公司信息\" ghost>\n      {/* 公司信息卡片 */}\n      <ProCard\n        title=\"公司信息\"\n        loading={tenantLoading}\n        extra={\n          <Button type=\"primary\" icon={<EditOutlined />} onClick={handleEdit}>\n            编辑\n          </Button>\n        }\n        style={{ marginBottom: 24 }}\n      >\n        {tenant ? (\n          <Descriptions column={1} bordered size=\"small\">\n            <Descriptions.Item label=\"公司编码\">{tenant.code}</Descriptions.Item>\n            <Descriptions.Item label=\"公司名称\">{tenant.name}</Descriptions.Item>\n            <Descriptions.Item label=\"域名\">{tenant.host}</Descriptions.Item>\n            <Descriptions.Item label=\"状态\">\n              {tenant.active ? '启用' : '禁用'}\n            </Descriptions.Item>\n          </Descriptions>\n        ) : (\n          <Typography.Text type=\"secondary\">暂无公司信息</Typography.Text>\n        )}\n      </ProCard>\n\n      {/* 系统用户卡片 */}\n      <ProCard\n        title=\"系统用户\"\n        extra={\n          <Button type=\"primary\" icon={<PlusOutlined />} onClick={() => setCreateModalOpen(true)}>\n            新增账号\n          </Button>\n        }\n        style={{}}\n      >\n        <Table\n          dataSource={accounts}\n          columns={columns}\n          rowKey=\"id\"\n          loading={accountsLoading}\n          pagination={false}\n          size=\"small\"\n        />\n      </ProCard>\n\n      {/* 编辑公司信息弹窗 */}\n      <Modal\n        title=\"编辑公司信息\"\n        open={editModalOpen}\n        onOk={handleEditSave}\n        onCancel={() => {\n          setEditModalOpen(false);\n          editForm.resetFields();\n        }}\n        confirmLoading={editSubmitting}\n        okText=\"保存\"\n        cancelText=\"取消\"\n      >\n        <Form form={editForm} layout=\"vertical\" style={{ marginTop: 16 }}>\n          <Form.Item\n            name=\"name\"\n            label=\"公司名称\"\n            rules={[{ required: true, message: '请输入公司名称' }]}\n          >\n            <Input placeholder=\"请输入公司名称\" />\n          </Form.Item>\n          <Form.Item\n            name=\"host\"\n            label=\"域名\"\n            rules={[{ required: true, message: '请输入域名' }]}\n          >\n            <Input placeholder=\"请输入域名\" />\n          </Form.Item>\n        </Form>\n      </Modal>\n\n      {/* 修改密码弹窗 */}\n      <Modal\n        title={`修改密码 - ${passwordTarget?.username || ''}`}\n        open={passwordModalOpen}\n        onOk={handlePasswordSave}\n        onCancel={() => {\n          setPasswordModalOpen(false);\n          setPasswordTarget(null);\n          passwordForm.resetFields();\n        }}\n        confirmLoading={passwordSubmitting}\n        okText=\"保存\"\n        cancelText=\"取消\"\n      >\n        <Form form={passwordForm} layout=\"vertical\" style={{ marginTop: 16 }}>\n          <Form.Item\n            name=\"password\"\n            label=\"新密码\"\n            rules={[\n              { required: true, message: '请输入新密码' },\n              { min: 6, message: '密码长度不能少于6位' },\n            ]}\n          >\n            <Input.Password placeholder=\"请输入新密码\" />\n          </Form.Item>\n          <Form.Item\n            name=\"confirmPassword\"\n            label=\"确认密码\"\n            dependencies={['password']}\n            rules={[\n              { required: true, message: '请确认新密码' },\n              ({ getFieldValue }) => ({\n                validator(_, value) {\n                  if (!value || getFieldValue('password') === value) {\n                    return Promise.resolve();\n                  }\n                  return Promise.reject(new Error('两次输入的密码不一致'));\n                },\n              }),\n            ]}\n          >\n            <Input.Password placeholder=\"请再次输入新密码\" />\n          </Form.Item>\n        </Form>\n      </Modal>\n\n      {/* 新增账号弹窗 */}\n      <Modal\n        title=\"新增账号\"\n        open={createModalOpen}\n        onOk={handleCreate}\n        onCancel={() => {\n          setCreateModalOpen(false);\n          createForm.resetFields();\n        }}\n        confirmLoading={createSubmitting}\n        okText=\"创建\"\n        cancelText=\"取消\"\n      >\n        <Form form={createForm} layout=\"vertical\" style={{ marginTop: 16 }}>\n          <Form.Item\n            name=\"contact_name\"\n            label=\"姓名\"\n            rules={[{ required: true, message: '请输入姓名' }]}\n          >\n            <Input placeholder=\"请输入姓名\" />\n          </Form.Item>\n\n          <Form.Item\n            name=\"username\"\n            label=\"用户名\"\n            rules={[{ required: true, message: '请输入用户名' }]}\n            help=\"支持邮箱或手机号，系统会自动识别类型\"\n          >\n            <Input placeholder=\"请输入邮箱或手机号\" />\n          </Form.Item>\n\n          <Form.Item\n            name=\"password\"\n            label=\"密码\"\n            rules={[\n              { required: true, message: '请输入密码' },\n              { min: 6, message: '密码长度不能少于6位' },\n            ]}\n          >\n            <Input.Password placeholder=\"请输入密码\" />\n          </Form.Item>\n        </Form>\n      </Modal>\n    </PageContainer>\n  );\n};\n\nexport default TenantPage;\n",
+      "__isJSFile": true,
+      "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/src/pages/Tenant/index.tsx"
+    },
+    "29": {
       "path": "/profile",
       "hideInMenu": true,
       "file": "@/pages/Profile/index.tsx",
       "parentId": "ant-design-pro-layout",
-      "id": "27",
+      "id": "29",
       "absPath": "/profile",
       "__content": "import { PageContainer, ProCard } from '@ant-design/pro-components';\nimport { Descriptions, Empty, Typography } from 'antd';\n\nimport { getSession } from '@/utils/session';\n\nconst ProfilePage = () => {\n  const session = getSession();\n\n  return (\n    <PageContainer title=\"个人信息\" subTitle=\"当前登录用户信息\">\n      <ProCard>\n        {session ? (\n          <Descriptions column={1} bordered>\n            <Descriptions.Item label=\"联系人姓名\">\n              {session.contact_name || '-'}\n            </Descriptions.Item>\n            <Descriptions.Item label=\"登录用户名\">{session.username}</Descriptions.Item>\n            <Descriptions.Item label=\"租户公司\">{session.tenant_name || '-'}</Descriptions.Item>\n            <Descriptions.Item label=\"账号ID\">{session.account_id}</Descriptions.Item>\n            <Descriptions.Item label=\"用户名类型\">\n              {session.flag === 1 ? '邮箱' : '手机号'}\n            </Descriptions.Item>\n          </Descriptions>\n        ) : (\n          <Empty description=\"未登录\" />\n        )}\n        <Typography.Paragraph type=\"secondary\" style={{ marginTop: 16 }}>\n          如需修改密码，请使用右上角菜单中的“更改密码”。\n        </Typography.Paragraph>\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default ProfilePage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/src/pages/Profile/index.tsx"
     },
-    "28": {
+    "30": {
       "path": "/change-password",
       "hideInMenu": true,
       "file": "@/pages/ChangePassword/index.tsx",
       "parentId": "ant-design-pro-layout",
-      "id": "28",
+      "id": "30",
       "absPath": "/change-password",
       "__content": "import { history } from '@umijs/max';\nimport { PageContainer, ProCard, ProForm, ProFormText } from '@ant-design/pro-components';\nimport { message } from 'antd';\n\nimport { changePassword } from '@/services/auth';\nimport { getSession } from '@/utils/session';\n\ntype PasswordFormValues = {\n  current_password: string;\n  new_password: string;\n  confirm_password: string;\n};\n\nconst ChangePasswordPage = () => {\n  return (\n    <PageContainer title=\"更改密码\">\n      <ProCard colSpan={12} style={{ maxWidth: 560, margin: '0 auto' }}>\n        <ProForm<PasswordFormValues>\n          submitter={{\n            searchConfig: {\n              submitText: '保存新密码',\n            },\n          }}\n          onFinish={async (values) => {\n            const session = getSession();\n            if (!session) {\n              message.error('登录已失效，请重新登录');\n              history.push('/login');\n              return false;\n            }\n            if (values.new_password !== values.confirm_password) {\n              message.error('两次输入的新密码不一致');\n              return false;\n            }\n            await changePassword({\n              current_password: values.current_password,\n              new_password: values.new_password,\n            });\n            message.success('密码修改成功，请使用新密码登录');\n            history.push('/profile');\n            return true;\n          }}\n        >\n          <ProFormText.Password\n            name=\"current_password\"\n            label=\"当前密码\"\n            rules={[{ required: true, message: '请输入当前密码' }]}\n          />\n          <ProFormText.Password\n            name=\"new_password\"\n            label=\"新密码\"\n            rules={[\n              { required: true, message: '请输入新密码' },\n              { min: 6, message: '新密码至少 6 位' },\n            ]}\n          />\n          <ProFormText.Password\n            name=\"confirm_password\"\n            label=\"确认新密码\"\n            rules={[{ required: true, message: '请再次输入新密码' }]}\n          />\n        </ProForm>\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default ChangePasswordPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/src/pages/ChangePassword/index.tsx"
     },
-    "29": {
+    "31": {
       "path": "/",
       "redirect": "/device/categories",
       "parentId": "ant-design-pro-layout",
-      "id": "29",
+      "id": "31",
       "absPath": "/"
     },
     "ant-design-pro-layout": {
@@ -6121,7 +6232,7 @@
   },
   "mfsuBundleStatus": {
     "done": true,
-    "percent": 0.375,
+    "percent": 0.3749999999999999,
     "status": "building"
   },
   "react": {
@@ -7288,7 +7399,7 @@
             "format": "esm"
           },
           "src/components/HeaderUserMenu.tsx": {
-            "bytes": 1558,
+            "bytes": 1816,
             "imports": [
               {
                 "path": "src/.umi/exports.ts",
@@ -7386,7 +7497,7 @@
             "format": "esm"
           },
           "src/.umi/plugin-layout/icons.tsx": {
-            "bytes": 881,
+            "bytes": 1060,
             "imports": [
               {
                 "path": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/node_modules/@umijs/plugins/node_modules/@ant-design/icons/es/icons/DashboardOutlined",
@@ -7405,6 +7516,11 @@
               },
               {
                 "path": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/node_modules/@umijs/plugins/node_modules/@ant-design/icons/es/icons/RadarChartOutlined",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/node_modules/@umijs/plugins/node_modules/@ant-design/icons/es/icons/TeamOutlined",
                 "kind": "import-statement",
                 "external": true
               }
@@ -7906,7 +8022,7 @@
             "format": "esm"
           },
           "src/services/location.ts": {
-            "bytes": 1146,
+            "bytes": 1473,
             "imports": [
               {
                 "path": "src/.umi/exports.ts",
@@ -8356,8 +8472,19 @@
             ],
             "format": "esm"
           },
-          "src/services/tenantSensor.ts": {
-            "bytes": 1129,
+          "src/services/sensorBatch.ts": {
+            "bytes": 793,
+            "imports": [
+              {
+                "path": "src/.umi/exports.ts",
+                "kind": "import-statement",
+                "original": "@umijs/max"
+              }
+            ],
+            "format": "esm"
+          },
+          "src/services/sensorType.ts": {
+            "bytes": 581,
             "imports": [
               {
                 "path": "src/.umi/exports.ts",
@@ -8368,7 +8495,7 @@
             "format": "esm"
           },
           "src/pages/Monitoring/Sensors/index.tsx": {
-            "bytes": 4728,
+            "bytes": 4706,
             "imports": [
               {
                 "path": "react",
@@ -8386,9 +8513,60 @@
                 "external": true
               },
               {
-                "path": "src/services/tenantSensor.ts",
+                "path": "src/.umi/exports.ts",
                 "kind": "import-statement",
-                "original": "@/services/tenantSensor"
+                "original": "@umijs/max"
+              },
+              {
+                "path": "src/services/sensorBatch.ts",
+                "kind": "import-statement",
+                "original": "@/services/sensorBatch"
+              },
+              {
+                "path": "src/services/sensorType.ts",
+                "kind": "import-statement",
+                "original": "@/services/sensorType"
+              },
+              {
+                "path": "src/utils/proTableOptions.tsx",
+                "kind": "import-statement",
+                "original": "@/utils/proTableOptions"
+              },
+              {
+                "path": "react/jsx-runtime",
+                "kind": "import-statement",
+                "external": true
+              }
+            ],
+            "format": "esm"
+          },
+          "src/pages/Monitoring/Sensors/BatchDevices/index.tsx": {
+            "bytes": 4194,
+            "imports": [
+              {
+                "path": "react",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@ant-design/pro-components",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "antd",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "src/.umi/exports.ts",
+                "kind": "import-statement",
+                "original": "@umijs/max"
+              },
+              {
+                "path": "src/services/sensorBatch.ts",
+                "kind": "import-statement",
+                "original": "@/services/sensorBatch"
               },
               {
                 "path": "src/utils/proTableOptions.tsx",
@@ -8404,7 +8582,18 @@
             "format": "esm"
           },
           "src/services/sensorMonitoring.ts": {
-            "bytes": 1727,
+            "bytes": 2107,
+            "imports": [
+              {
+                "path": "src/.umi/exports.ts",
+                "kind": "import-statement",
+                "original": "@umijs/max"
+              }
+            ],
+            "format": "esm"
+          },
+          "src/services/tenantSensor.ts": {
+            "bytes": 1446,
             "imports": [
               {
                 "path": "src/.umi/exports.ts",
@@ -8415,7 +8604,7 @@
             "format": "esm"
           },
           "src/pages/Monitoring/Points/index.tsx": {
-            "bytes": 10405,
+            "bytes": 12908,
             "imports": [
               {
                 "path": "react",
@@ -8431,6 +8620,11 @@
                 "path": "antd",
                 "kind": "import-statement",
                 "external": true
+              },
+              {
+                "path": "src/components/EntityPicker/index.tsx",
+                "kind": "import-statement",
+                "original": "@/components/EntityPicker"
               },
               {
                 "path": "src/services/location.ts",
@@ -8451,6 +8645,53 @@
                 "path": "src/utils/proTableOptions.tsx",
                 "kind": "import-statement",
                 "original": "@/utils/proTableOptions"
+              },
+              {
+                "path": "react/jsx-runtime",
+                "kind": "import-statement",
+                "external": true
+              }
+            ],
+            "format": "esm"
+          },
+          "src/services/tenant.ts": {
+            "bytes": 2008,
+            "imports": [
+              {
+                "path": "src/.umi/exports.ts",
+                "kind": "import-statement",
+                "original": "@umijs/max"
+              }
+            ],
+            "format": "esm"
+          },
+          "src/pages/Tenant/index.tsx": {
+            "bytes": 13108,
+            "imports": [
+              {
+                "path": "@ant-design/icons",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@ant-design/pro-components",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "antd",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "react",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "src/services/tenant.ts",
+                "kind": "import-statement",
+                "original": "@/services/tenant"
               },
               {
                 "path": "react/jsx-runtime",
@@ -8637,7 +8878,7 @@
             "format": "esm"
           },
           "src/.umi/core/route.tsx": {
-            "bytes": 5679,
+            "bytes": 6169,
             "imports": [
               {
                 "path": "react",
@@ -8765,6 +9006,11 @@
                 "original": "@/pages/Monitoring/Sensors/index.tsx"
               },
               {
+                "path": "src/pages/Monitoring/Sensors/BatchDevices/index.tsx",
+                "kind": "dynamic-import",
+                "original": "@/pages/Monitoring/Sensors/BatchDevices/index.tsx"
+              },
+              {
                 "path": "src/pages/Monitoring/Points/index.tsx",
                 "kind": "dynamic-import",
                 "original": "@/pages/Monitoring/Points/index.tsx"
@@ -8773,6 +9019,11 @@
                 "path": "src/.umi/core/EmptyRoute.tsx",
                 "kind": "dynamic-import",
                 "original": "./EmptyRoute"
+              },
+              {
+                "path": "src/pages/Tenant/index.tsx",
+                "kind": "dynamic-import",
+                "original": "@/pages/Tenant/index.tsx"
               },
               {
                 "path": "src/pages/Profile/index.tsx",
@@ -8919,6 +9170,11 @@
               },
               {
                 "path": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/node_modules/@umijs/plugins/node_modules/@ant-design/icons/es/icons/RadarChartOutlined",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/node_modules/@umijs/plugins/node_modules/@ant-design/icons/es/icons/TeamOutlined",
                 "kind": "import-statement",
                 "external": true
               },
@@ -9334,6 +9590,51 @@
               },
               {
                 "path": "antd",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "react/jsx-runtime",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "react",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@ant-design/pro-components",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "antd",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "react/jsx-runtime",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@ant-design/icons",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "@ant-design/pro-components",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "antd",
+                "kind": "import-statement",
+                "external": true
+              },
+              {
+                "path": "react",
                 "kind": "import-statement",
                 "external": true
               },
@@ -10531,7 +10832,7 @@
                 "bytesInOutput": 859
               },
               "src/components/HeaderUserMenu.tsx": {
-                "bytesInOutput": 2003
+                "bytesInOutput": 2352
               },
               "src/app.ts": {
                 "bytesInOutput": 2201
@@ -10543,7 +10844,7 @@
                 "bytesInOutput": 494
               },
               "src/.umi/plugin-layout/icons.tsx": {
-                "bytesInOutput": 925
+                "bytesInOutput": 1104
               },
               "src/.umi/plugin-layout/runtime.tsx": {
                 "bytesInOutput": 810
@@ -10609,7 +10910,7 @@
                 "bytesInOutput": 7915
               },
               "src/services/location.ts": {
-                "bytesInOutput": 827
+                "bytesInOutput": 1018
               },
               "src/pages/Monitoring/Location/index.tsx": {
                 "bytesInOutput": 8272
@@ -10656,20 +10957,35 @@
               "src/pages/Process/Manage/index.tsx": {
                 "bytesInOutput": 20134
               },
-              "src/services/tenantSensor.ts": {
-                "bytesInOutput": 806
+              "src/services/sensorBatch.ts": {
+                "bytesInOutput": 454
+              },
+              "src/services/sensorType.ts": {
+                "bytesInOutput": 457
               },
               "src/pages/Monitoring/Sensors/index.tsx": {
-                "bytesInOutput": 5343
+                "bytesInOutput": 5601
+              },
+              "src/pages/Monitoring/Sensors/BatchDevices/index.tsx": {
+                "bytesInOutput": 4820
               },
               "src/services/sensorMonitoring.ts": {
-                "bytesInOutput": 1057
+                "bytesInOutput": 1122
+              },
+              "src/services/tenantSensor.ts": {
+                "bytesInOutput": 641
               },
               "src/pages/Monitoring/Points/index.tsx": {
-                "bytesInOutput": 12122
+                "bytesInOutput": 15137
+              },
+              "src/services/tenant.ts": {
+                "bytesInOutput": 1093
+              },
+              "src/pages/Tenant/index.tsx": {
+                "bytesInOutput": 16517
               },
               "src/pages/Profile/index.tsx": {
-                "bytesInOutput": 1905
+                "bytesInOutput": 1928
               },
               "src/pages/ChangePassword/index.tsx": {
                 "bytesInOutput": 3026
@@ -10687,7 +11003,7 @@
                 "bytesInOutput": 6125
               },
               "src/.umi/core/route.tsx": {
-                "bytesInOutput": 6289
+                "bytesInOutput": 6761
               },
               "src/.umi/core/polyfill.ts": {
                 "bytesInOutput": 26337
@@ -10696,7 +11012,7 @@
                 "bytesInOutput": 1951
               }
             },
-            "bytes": 258065
+            "bytes": 285970
           }
         }
       }
@@ -13284,6 +13600,19 @@
           ],
           "start": 612,
           "type": "ImportDeclaration"
+        },
+        {
+          "end": 953,
+          "importKind": "value",
+          "source": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/node_modules/@umijs/plugins/node_modules/@ant-design/icons/es/icons/TeamOutlined",
+          "specifiers": [
+            {
+              "local": "TeamOutlined",
+              "type": "ImportDefaultSpecifier"
+            }
+          ],
+          "start": 789,
+          "type": "ImportDeclaration"
         }
       ],
       "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/src/.umi/plugin-layout/rightRender.tsx": [
@@ -14102,7 +14431,7 @@
           "type": "ImportDeclaration"
         },
         {
-          "end": 118,
+          "end": 132,
           "importKind": "value",
           "source": "@ant-design/icons",
           "specifiers": [
@@ -14117,6 +14446,11 @@
               "type": "ImportSpecifier"
             },
             {
+              "imported": "ShopOutlined",
+              "local": "ShopOutlined",
+              "type": "ImportSpecifier"
+            },
+            {
               "imported": "UserOutlined",
               "local": "UserOutlined",
               "type": "ImportSpecifier"
@@ -14126,7 +14460,7 @@
           "type": "ImportDeclaration"
         },
         {
-          "end": 186,
+          "end": 200,
           "importKind": "value",
           "source": "antd",
           "specifiers": [
@@ -14156,11 +14490,11 @@
               "type": "ImportSpecifier"
             }
           ],
-          "start": 119,
+          "start": 133,
           "type": "ImportDeclaration"
         },
         {
-          "end": 218,
+          "end": 232,
           "importKind": "value",
           "source": "react",
           "specifiers": [
@@ -14170,11 +14504,11 @@
               "type": "ImportSpecifier"
             }
           ],
-          "start": 187,
+          "start": 201,
           "type": "ImportDeclaration"
         },
         {
-          "end": 279,
+          "end": 293,
           "importKind": "value",
           "source": "@/utils/session",
           "specifiers": [
@@ -14189,7 +14523,7 @@
               "type": "ImportSpecifier"
             }
           ],
-          "start": 220,
+          "start": 234,
           "type": "ImportDeclaration"
         }
       ],
@@ -15773,7 +16107,7 @@
           "type": "ImportDeclaration"
         },
         {
-          "end": 173,
+          "end": 184,
           "importKind": "value",
           "source": "@ant-design/pro-components",
           "specifiers": [
@@ -15793,6 +16127,11 @@
               "type": "ImportSpecifier"
             },
             {
+              "imported": "ProForm",
+              "local": "ProForm",
+              "type": "ImportSpecifier"
+            },
+            {
               "imported": "ProFormSelect",
               "local": "ProFormSelect",
               "type": "ImportSpecifier"
@@ -15807,7 +16146,7 @@
           "type": "ImportDeclaration"
         },
         {
-          "end": 225,
+          "end": 236,
           "importKind": "value",
           "source": "antd",
           "specifiers": [
@@ -15827,11 +16166,38 @@
               "type": "ImportSpecifier"
             }
           ],
-          "start": 174,
+          "start": 185,
           "type": "ImportDeclaration"
         },
         {
-          "end": 292,
+          "end": 286,
+          "importKind": "type",
+          "source": "antd/es/table",
+          "specifiers": [
+            {
+              "imported": "ColumnsType",
+              "local": "ColumnsType",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 237,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 341,
+          "importKind": "value",
+          "source": "@/components/EntityPicker",
+          "specifiers": [
+            {
+              "local": "EntityPicker",
+              "type": "ImportDefaultSpecifier"
+            }
+          ],
+          "start": 288,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 423,
           "importKind": "value",
           "source": "@/services/location",
           "specifiers": [
@@ -15844,13 +16210,18 @@
               "imported": "Location",
               "local": "Location",
               "type": "ImportSpecifier"
+            },
+            {
+              "imported": "queryLocations",
+              "local": "queryLocations",
+              "type": "ImportSpecifier"
             }
           ],
-          "start": 227,
+          "start": 342,
           "type": "ImportDeclaration"
         },
         {
-          "end": 569,
+          "end": 695,
           "importKind": "value",
           "source": "@/services/sensorMonitoring",
           "specifiers": [
@@ -15870,8 +16241,8 @@
               "type": "ImportSpecifier"
             },
             {
-              "imported": "listSensorMonitoringDeviceInstOptions",
-              "local": "listSensorMonitoringDeviceInstOptions",
+              "imported": "querySensorMonitoringDeviceInsts",
+              "local": "querySensorMonitoringDeviceInsts",
               "type": "ImportSpecifier"
             },
             {
@@ -15895,11 +16266,11 @@
               "type": "ImportSpecifier"
             }
           ],
-          "start": 293,
+          "start": 424,
           "type": "ImportDeclaration"
         },
         {
-          "end": 671,
+          "end": 775,
           "importKind": "value",
           "source": "@/services/tenantSensor",
           "specifiers": [
@@ -15909,26 +16280,21 @@
               "type": "ImportSpecifier"
             },
             {
-              "imported": "listAllTenantSensors",
-              "local": "listAllTenantSensors",
+              "imported": "querySensors",
+              "local": "querySensors",
               "type": "ImportSpecifier"
             },
             {
               "imported": "Sensor",
               "local": "Sensor",
               "type": "ImportSpecifier"
-            },
-            {
-              "imported": "TenantSensor",
-              "local": "TenantSensor",
-              "type": "ImportSpecifier"
             }
           ],
-          "start": 570,
+          "start": 696,
           "type": "ImportDeclaration"
         },
         {
-          "end": 741,
+          "end": 845,
           "importKind": "value",
           "source": "@/utils/proTableOptions",
           "specifiers": [
@@ -15938,7 +16304,123 @@
               "type": "ImportSpecifier"
             }
           ],
-          "start": 673,
+          "start": 777,
+          "type": "ImportDeclaration"
+        }
+      ],
+      "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/src/pages/Monitoring/Sensors/BatchDevices/index.tsx": [
+        {
+          "end": 45,
+          "importKind": "value",
+          "source": "react",
+          "specifiers": [
+            {
+              "imported": "useEffect",
+              "local": "useEffect",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "useState",
+              "local": "useState",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 1,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 127,
+          "importKind": "value",
+          "source": "@ant-design/pro-components",
+          "specifiers": [
+            {
+              "imported": "PageContainer",
+              "local": "PageContainer",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProColumns",
+              "local": "ProColumns",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProTable",
+              "local": "ProTable",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 46,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 164,
+          "importKind": "value",
+          "source": "antd",
+          "specifiers": [
+            {
+              "imported": "Tag",
+              "local": "Tag",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "message",
+              "local": "message",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 128,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 217,
+          "importKind": "value",
+          "source": "@umijs/max",
+          "specifiers": [
+            {
+              "imported": "useParams",
+              "local": "useParams",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "useNavigate",
+              "local": "useNavigate",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 165,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 287,
+          "importKind": "value",
+          "source": "@/services/sensorBatch",
+          "specifiers": [
+            {
+              "imported": "Sensor",
+              "local": "Sensor",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "listSensorsByBatch",
+              "local": "listSensorsByBatch",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 219,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 356,
+          "importKind": "value",
+          "source": "@/utils/proTableOptions",
+          "specifiers": [
+            {
+              "imported": "renderRefSafeTableOptions",
+              "local": "renderRefSafeTableOptions",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 288,
           "type": "ImportDeclaration"
         }
       ],
@@ -15992,10 +16474,15 @@
           "type": "ImportDeclaration"
         },
         {
-          "end": 173,
+          "end": 181,
           "importKind": "value",
           "source": "antd",
           "specifiers": [
+            {
+              "imported": "Button",
+              "local": "Button",
+              "type": "ImportSpecifier"
+            },
             {
               "imported": "Tag",
               "local": "Tag",
@@ -16011,36 +16498,59 @@
           "type": "ImportDeclaration"
         },
         {
-          "end": 276,
+          "end": 223,
           "importKind": "value",
-          "source": "@/services/tenantSensor",
+          "source": "@umijs/max",
           "specifiers": [
             {
-              "imported": "listAllSensors",
-              "local": "listAllSensors",
-              "type": "ImportSpecifier"
-            },
-            {
-              "imported": "listAllTenantSensors",
-              "local": "listAllTenantSensors",
-              "type": "ImportSpecifier"
-            },
-            {
-              "imported": "Sensor",
-              "local": "Sensor",
-              "type": "ImportSpecifier"
-            },
-            {
-              "imported": "TenantSensor",
-              "local": "TenantSensor",
+              "imported": "useNavigate",
+              "local": "useNavigate",
               "type": "ImportSpecifier"
             }
           ],
-          "start": 175,
+          "start": 182,
           "type": "ImportDeclaration"
         },
         {
-          "end": 346,
+          "end": 302,
+          "importKind": "value",
+          "source": "@/services/sensorBatch",
+          "specifiers": [
+            {
+              "imported": "SensorBatch",
+              "local": "SensorBatch",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "listSensorBatches",
+              "local": "listSensorBatches",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 225,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 371,
+          "importKind": "value",
+          "source": "@/services/sensorType",
+          "specifiers": [
+            {
+              "imported": "listSensorTypes",
+              "local": "listSensorTypes",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "SensorType",
+              "local": "SensorType",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 303,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 441,
           "importKind": "value",
           "source": "@/utils/proTableOptions",
           "specifiers": [
@@ -16050,7 +16560,7 @@
               "type": "ImportSpecifier"
             }
           ],
-          "start": 278,
+          "start": 373,
           "type": "ImportDeclaration"
         }
       ],
@@ -16710,6 +17220,183 @@
           "type": "ImportDeclaration"
         }
       ],
+      "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/src/pages/Tenant/index.tsx": [
+        {
+          "end": 64,
+          "importKind": "value",
+          "source": "@ant-design/icons",
+          "specifiers": [
+            {
+              "imported": "EditOutlined",
+              "local": "EditOutlined",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "PlusOutlined",
+              "local": "PlusOutlined",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 1,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 133,
+          "importKind": "value",
+          "source": "@ant-design/pro-components",
+          "specifiers": [
+            {
+              "imported": "PageContainer",
+              "local": "PageContainer",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "ProCard",
+              "local": "ProCard",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 65,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 273,
+          "importKind": "value",
+          "source": "antd",
+          "specifiers": [
+            {
+              "imported": "Button",
+              "local": "Button",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "Descriptions",
+              "local": "Descriptions",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "Form",
+              "local": "Form",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "Input",
+              "local": "Input",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "message",
+              "local": "message",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "Modal",
+              "local": "Modal",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "Popconfirm",
+              "local": "Popconfirm",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "Space",
+              "local": "Space",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "Table",
+              "local": "Table",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "Tag",
+              "local": "Tag",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "Typography",
+              "local": "Typography",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 134,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 318,
+          "importKind": "value",
+          "source": "react",
+          "specifiers": [
+            {
+              "imported": "useEffect",
+              "local": "useEffect",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "useState",
+              "local": "useState",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 274,
+          "type": "ImportDeclaration"
+        },
+        {
+          "end": 560,
+          "importKind": "value",
+          "source": "@/services/tenant",
+          "specifiers": [
+            {
+              "imported": "createTenantAccount",
+              "local": "createTenantAccount",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "deleteTenantAccount",
+              "local": "deleteTenantAccount",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "getCurrentTenant",
+              "local": "getCurrentTenant",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "listTenantAccounts",
+              "local": "listTenantAccounts",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "updateCurrentTenant",
+              "local": "updateCurrentTenant",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "updateTenantAccount",
+              "local": "updateTenantAccount",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "updateTenantAccountPassword",
+              "local": "updateTenantAccountPassword",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "AccountInfo",
+              "local": "AccountInfo",
+              "type": "ImportSpecifier"
+            },
+            {
+              "imported": "TenantInfo",
+              "local": "TenantInfo",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 320,
+          "type": "ImportDeclaration"
+        }
+      ],
       "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/src/services/area.ts": [
         {
           "end": 38,
@@ -16882,6 +17569,22 @@
           "type": "ImportDeclaration"
         }
       ],
+      "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/src/services/sensorBatch.ts": [
+        {
+          "end": 38,
+          "importKind": "value",
+          "source": "@umijs/max",
+          "specifiers": [
+            {
+              "imported": "request",
+              "local": "request",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 1,
+          "type": "ImportDeclaration"
+        }
+      ],
       "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/src/services/sensorMonitoring.ts": [
         {
           "end": 38,
@@ -16898,7 +17601,39 @@
           "type": "ImportDeclaration"
         }
       ],
+      "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/src/services/sensorType.ts": [
+        {
+          "end": 38,
+          "importKind": "value",
+          "source": "@umijs/max",
+          "specifiers": [
+            {
+              "imported": "request",
+              "local": "request",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 1,
+          "type": "ImportDeclaration"
+        }
+      ],
       "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/src/services/supplier.ts": [
+        {
+          "end": 38,
+          "importKind": "value",
+          "source": "@umijs/max",
+          "specifiers": [
+            {
+              "imported": "request",
+              "local": "request",
+              "type": "ImportSpecifier"
+            }
+          ],
+          "start": 1,
+          "type": "ImportDeclaration"
+        }
+      ],
+      "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/src/services/tenant.ts": [
         {
           "end": 38,
           "importKind": "value",

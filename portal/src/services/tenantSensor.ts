@@ -39,23 +39,38 @@ export async function listAllTenantSensors() {
   return all;
 }
 
+export type PagedSensorResult = {
+  items: Sensor[];
+  total: number;
+};
+
 export async function listAllSensors() {
-  const limit = 100;
-  let skip = 0;
+  const pageSize = 100;
+  let current = 1;
   const all: Sensor[] = [];
 
   while (true) {
-    const batch =
-      (await request<Sensor[]>('/api/v1/sensors', {
-        method: 'GET',
-        params: { skip, limit },
-      })) || [];
-    all.push(...batch);
-    if (batch.length < limit) {
+    const result = await request<PagedSensorResult>('/api/v1/sensors', {
+      method: 'GET',
+      params: { current, pageSize },
+    });
+    all.push(...result.items);
+    if (result.items.length < pageSize) {
       break;
     }
-    skip += limit;
+    current++;
   }
 
   return all;
+}
+
+export async function querySensors(
+  current: number,
+  pageSize: number,
+  keyword?: string,
+) {
+  return request<PagedSensorResult>('/api/v1/sensors', {
+    method: 'GET',
+    params: { current, pageSize, keyword },
+  });
 }
