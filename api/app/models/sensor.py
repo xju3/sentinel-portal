@@ -15,7 +15,7 @@ class SensorType(Base):
 
     id = Column(Uuid(as_uuid=True), primary_key=True, index=True)
     name = Column(String(100), nullable=False, unique=True)
-    battery_capacity = Column(Integer, nullable=False, default=0)  
+    battery = Column(Integer, nullable=False, default=0)  
     network = Column(Integer, nullable=False, default=1)  # Network range in meters
     bluetooth = Column(Boolean, default=False)  # Bluetooth support
     description = Column(Text)
@@ -38,6 +38,19 @@ class Sensor(Base):
     def __repr__(self):
         return f"<Sensor {self.id}: {self.sn}>"
 
+class SensorStatus(Base):
+    """Sensor status entity model"""
+
+    __tablename__ = "sensor_status"
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, index=True)
+    sensor_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to sensors
+    timestamp = Column(DateTime, default=datetime.utcnow)
+    temperature = Column(Float, nullable=True)
+    humidity = Column(Float, nullable=True)
+    vibration = Column(Float, nullable=True)
+    battery = Column(Float, nullable=True)
+    active = Column(Boolean, default=True)
 
 class SensorMonitoring(Base):
     """Sensor monitoring entity model"""

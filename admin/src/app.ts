@@ -1,0 +1,67 @@
+import React from 'react';
+import { AppstoreOutlined } from '@ant-design/icons';
+import { history, RequestConfig, RunTimeLayoutConfig } from '@umijs/max';
+import { Divider, Space, Typography } from 'antd';
+
+import { getSession } from '@/utils/session';
+
+export const request: RequestConfig = {
+  timeout: 10000,
+  requestInterceptors: [
+    (url, options) => {
+      const session = getSession();
+      if (!session?.access_token) {
+        return { url, options };
+      }
+
+      return {
+        url,
+        options: {
+          ...options,
+          headers: {
+            ...(options?.headers || {}),
+            Authorization: `Bearer ${session.access_token}`,
+          },
+        },
+      };
+    },
+  ],
+};
+
+const PUBLIC_PATHS = ['/login', '/register'];
+
+function hasSession() {
+  return Boolean(getSession());
+}
+
+export const layout: RunTimeLayoutConfig = () => {
+  return {
+    layout: 'mix',
+    headerTitleRender: () => {
+      const session = getSession();
+      const tenantName = session?.tenant_name || '未识别租户';
+      return React.createElement(
+        Space,
+        { size: 10 },
+        React.createElement(AppstoreOutlined, { style: { fontSize: 18, color: '#1677ff' } }),
+        React.createElement(Divider, { type: 'vertical', style: { margin: 0, height: 18 } }),
+        React.createElement(
+          Typography.Text,
+          { strong: true, style: { fontSize: 14 } },
+          tenantName,
+        ),
+      );
+    },
+    onPageChange: () => {
+      const pathname = history.location?.pathname || '/';
+      const loggedIn = hasSession();
+      if (!loggedIn && !PUBLIC_PATHS.includes(pathname)) {
+        history.push('/login');
+        return;
+      }
+      if (loggedIn && PUBLIC_PATHS.includes(pathname)) {
+        history.push('/tenant');
+      }
+    },
+  };
+};
