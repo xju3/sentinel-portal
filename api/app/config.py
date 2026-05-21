@@ -47,6 +47,9 @@ class Settings(BaseSettings):
     mqtt_client_id_unique: bool = True
     mqtt_protocol_version: str = "3.1.1"
 
+    # Queue Configuration
+    patrol_queue_length: int = 72
+
     model_config = SettingsConfigDict(
         env_file=".env",
         env_file_encoding="utf-8",

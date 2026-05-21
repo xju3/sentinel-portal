@@ -8,11 +8,7 @@ from typing import Optional
 import paho.mqtt.client as mqtt
 
 from app.config import settings
-
-try:
-    from app.models.message_pb2 import MsgRmsReport
-except ImportError:
-    MsgRmsReport = None
+from app.clients.handler import patrol_msg_handler
 
 logger = logging.getLogger(__name__)
 
@@ -69,13 +65,7 @@ class MQTTManager:
     def on_message(self, client, userdata, msg):
         """Callback for when a PUBLISH message is received from the server."""
         try:
-            if MsgRmsReport:
-                report = MsgRmsReport()
-                report.ParseFromString(msg.payload)
-                # 打印解析后的 Protobuf 数据内容，会自动以可读的格式输出各个字段
-                logger.info(f"[MQTT Message] Topic: {msg.topic} | Parsed Protobuf:\n{report}")
-            else:
-                logger.warning(f"[MQTT Message] Topic: {msg.topic} | message_pb2 not found. Please compile message.proto.")
+            patrol_msg_handler.handle_message(msg.topic, msg.payload)
         except Exception as e:
             logger.error(f"Error processing MQTT message on topic {msg.topic}: {e}")
 
