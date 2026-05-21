@@ -33,7 +33,7 @@ services:
       args:
         NODE_IMAGE: ${NODE_IMAGE:-node:22-alpine}
         NGINX_IMAGE: ${NGINX_IMAGE:-nginx:1.27-alpine}
-    container_name: portal
+    container_name: admin
     restart: unless-stopped
     depends_on:
       - api
