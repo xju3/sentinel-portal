@@ -5,11 +5,12 @@ Main FastAPI application
 import logging
 from contextlib import asynccontextmanager
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import db_manager, redis_manager, influxdb_manager, minio_manager
+from app.mqtt import mqtt_manager
 from app.utils.logger import setup_logging
 from app.routers import auth, health, sensors, devices, customers, admin
 
@@ -31,6 +32,7 @@ async def lifespan(app: FastAPI):
         redis_manager.init()
         influxdb_manager.init()
         minio_manager.init()
+        mqtt_manager.init()
         logger.info("All services initialized successfully")
     except Exception as e:
         logger.error(f"Startup failed: {e}")
@@ -40,14 +42,33 @@ async def lifespan(app: FastAPI):
 
     # Shutdown
     logger.info("Shutting down application")
+    
     try:
         await db_manager.close()
-        redis_manager.close()
-        influxdb_manager.close()
-        minio_manager.close()
-        logger.info("All services shut down successfully")
     except Exception as e:
-        logger.error(f"Shutdown error: {e}")
+        logger.error(f"Error shutting down DB: {e}")
+        
+    try:
+        redis_manager.close()
+    except Exception as e:
+        logger.error(f"Error shutting down Redis: {e}")
+        
+    try:
+        influxdb_manager.close()
+    except Exception as e:
+        logger.error(f"Error shutting down InfluxDB: {e}")
+        
+    try:
+        minio_manager.close()
+    except Exception as e:
+        logger.error(f"Error shutting down MinIO: {e}")
+        
+    try:
+        mqtt_manager.close()
+    except Exception as e:
+        logger.error(f"Error shutting down MQTT: {e}")
+        
+    logger.info("Shutdown sequence completed")
 
 
 # Create FastAPI application
@@ -79,13 +100,13 @@ app.include_router(admin.router, prefix=settings.api_prefix)
 
 # Root endpoint
 @app.get("/")
-async def root():
+async def root(request: Request):
     """API root endpoint"""
     return {
         "name": settings.app_name,
         "version": settings.app_version,
         "environment": settings.environment,
-        "docs": f"http://{settings.host}:{settings.port}/docs",
+        "docs": f"{request.base_url}docs",
     }
 
 

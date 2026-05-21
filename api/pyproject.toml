@@ -7,7 +7,7 @@ name = "api"
 version = "0.1.0"
 description = "Sensor Portal API - FastAPI backend for sensor data management"
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.14"
 license = {text = "MIT"}
 authors = [
     {name = "Portal Team"},
@@ -17,12 +17,12 @@ keywords = ["sensor", "api", "fastapi", "influxdb", "mysql", "redis", "minio"]
 dependencies = [
     "fastapi==0.104.1",
     "uvicorn[standard]==0.24.0",
-    "sqlalchemy==2.0.23",
+    "sqlalchemy>=2.0.36",
     "pymysql[rsa]==1.1.0",
     "redis==5.0.1",
     "influxdb-client==1.18.0",
     "minio==7.2.0",
-    "pydantic==2.5.0",
+    "pydantic>=2.11.0",
     "pydantic-settings==2.1.0",
     "python-dotenv==1.0.0",
     "python-multipart==0.0.6",
@@ -33,6 +33,9 @@ dependencies = [
     "aiomysql>=0.3.2",
     "greenlet>=3.5.0",
     "cryptography>=48.0.0",
+    "protobuf>=6.33.6",
+    "grpcio-tools>=1.80.0",
+    "paho-mqtt>=2.1.0",
 ]
 
 [project.optional-dependencies]
@@ -49,15 +52,15 @@ package = false
 
 [tool.black]
 line-length = 100
-target-version = ["py311"]
+target-version = ["py314"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py314"
 select = ["E", "F", "W", "I"]
 
 [tool.mypy]
-python_version = "3.11"
+python_version = "3.14"
 warn_return_any = true
 warn_unused_configs = true
 disallow_untyped_defs = false
