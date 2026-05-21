@@ -6,6 +6,8 @@ export type SensorMonitoring = {
   location_id?: string | null;
   sensor_id?: string | null;
   direction?: string | null;
+  anomaly: number;
+  ts?: number | null;
   status: number;
 };
 

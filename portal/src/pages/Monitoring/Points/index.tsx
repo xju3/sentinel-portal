@@ -189,6 +189,32 @@ const MonitoringPointsPage = () => {
       },
     },
     {
+      title: '故障',
+      dataIndex: 'anomaly',
+      width: 100,
+      hideInSearch: true,
+      render: (_, row) => {
+        const map: Record<number, string> = {
+          0: '-',
+          1: '振动',
+          2: '温度',
+          3: '振动+温度',
+        };
+        return map[Number(row.anomaly)] || '正常';
+      },
+    },
+    {
+      title: '时间',
+      dataIndex: 'ts',
+      width: 180,
+      hideInSearch: true,
+      render: (_, row) => {
+        if (!row.ts) return '-';
+        const d = new Date(Number(row.ts));
+        return d.toLocaleString('zh-CN', { hour12: false });
+      },
+    },
+    {
       title: '状态',
       dataIndex: 'status',
       width: 100,

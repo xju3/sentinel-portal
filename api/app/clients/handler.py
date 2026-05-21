@@ -80,7 +80,15 @@ class PatrolMsgHandler:
             temp_report = patrol_diagnostic_engine.run_diagnostics(sn, "temperature")
             rms_report = patrol_diagnostic_engine.run_diagnostics(sn, "rms_m")
 
-            # 3. 诊断结果通过 service 层异步写入数据库
+            # 3. 计算异常状态码
+            #    0=正常, 1=仅rms异常, 2=仅温度异常, 3=rms与温度都异常
+            anomaly_code = 0
+            if rms_report["health_status"] != 0:
+                anomaly_code += 1
+            if temp_report["health_status"] != 0:
+                anomaly_code += 2
+
+            # 4. 诊断结果通过 service 层异步写入数据库
             if self._loop is not None and not self._loop.is_closed():
                 asyncio.run_coroutine_threadsafe(
                     PatrolDiagnosisRecordService.save_record(temp_report), self._loop
@@ -88,10 +96,14 @@ class PatrolMsgHandler:
                 asyncio.run_coroutine_threadsafe(
                     PatrolDiagnosisRecordService.save_record(rms_report), self._loop
                 )
+                asyncio.run_coroutine_threadsafe(
+                    PatrolDiagnosisRecordService.update_sensor_status(sn, anomaly_code),
+                    self._loop,
+                )
             else:
                 logger.warning("Event loop not available, skipping DB write")
 
-            # 4. 如果有报警，输出 JSON 日志
+            # 5. 如果有报警，输出 JSON 日志
             if temp_report["health_status"] != 0:
                 logger.warning(
                     f"【温度报警】\n{json.dumps(temp_report, ensure_ascii=False, indent=2)}"

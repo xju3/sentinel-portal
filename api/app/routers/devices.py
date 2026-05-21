@@ -919,6 +919,8 @@ class SensorMonitoringResponse(BaseModel):
     location_id: Optional[UUID] = None
     sensor_id: Optional[UUID] = None
     direction: Optional[str] = None
+    anomaly: int = 0
+    ts: Optional[int] = None
     status: int
 
     model_config = ConfigDict(from_attributes=True)
