@@ -10,7 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
 from app.database import db_manager, redis_manager, influxdb_manager, minio_manager
-from app.mqtt import mqtt_manager
+from app.mqtt.client import mqtt_manager
 from app.utils.logger import setup_logging
 from app.routers import auth, health, sensors, devices, customers, admin
 
