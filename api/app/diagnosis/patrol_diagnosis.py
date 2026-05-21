@@ -65,11 +65,7 @@ class PatrolDiagnosticEngine:
             "metric": target_field,
             "health_status": 0,
             "comprehensive_conclusion": "设备当前运行平稳",
-            "diagnostic_details": {
-                "real_time": {},
-                "short_term": [],
-                "medium_term": []
-            }
+            "diagnostic_details": []
         }
 
         # 数据极度不足，无法进行任何诊断
@@ -86,10 +82,10 @@ class PatrolDiagnosticEngine:
         # 1. 实时诊断 (Real-time: 1h / 2点)
         # ==========================================
         if queue_len < 2:
-            report["diagnostic_details"]["real_time"] = {
+            report["diagnostic_details"].append({
                 "window": "1h", "status": self.STATUS_MAP["INSUFFICIENT_DATA"],
                 "metric": "N/A", "desc": f"数据不足 (需≥2点，当前{queue_len}点)"
-            }
+            })
         else:
             delta = latest_val - values[1]
             rt_status = self.STATUS_MAP["NORMAL"]
@@ -99,19 +95,19 @@ class PatrolDiagnosticEngine:
                 rt_desc = "明显抬升"
                 report["health_status"] = max(report["health_status"], rt_status)
                 
-            report["diagnostic_details"]["real_time"] = {
+            report["diagnostic_details"].append({
                 "window": "1h",
                 "status": rt_status,
                 "metric": f"Delta = {delta:.2f}",
                 "desc": rt_desc
-            }
+            })
 
         # ==========================================
         # 2. 短期诊断 (Short-term: 2, 4, 8, 16, 24h)
         # ==========================================
         for w in self.short_windows:
             if queue_len < w:
-                report["diagnostic_details"]["short_term"].append({
+                report["diagnostic_details"].append({
                     "window": f"{w}h", "status": self.STATUS_MAP["INSUFFICIENT_DATA"],
                     "metric": "N/A", "desc": f"数据不足 (需≥{w}点，当前{queue_len}点)"
                 })
@@ -125,7 +121,7 @@ class PatrolDiagnosticEngine:
             elif slope > self.config["short_term"]["max_slope"] and latest_val > dynamic_baseline:
                 w_status = self.STATUS_MAP["WARNING"]
                 
-            report["diagnostic_details"]["short_term"].append({
+            report["diagnostic_details"].append({
                 "window": f"{w}h", "status": w_status, 
                 "metric": f"Slope={slope:.2f}, Amp={amp:.2f}",
                 "desc": "大幅波动" if w_status == self.STATUS_MAP["CRITICAL"] else ("持续上升" if w_status == self.STATUS_MAP["WARNING"] else "平稳")
@@ -140,7 +136,7 @@ class PatrolDiagnosticEngine:
         day_labels = {24: "1d", 48: "2d", 72: "3d"}
         for w in self.medium_windows:
             if queue_len < w:
-                report["diagnostic_details"]["medium_term"].append({
+                report["diagnostic_details"].append({
                     "window": day_labels[w], "status": self.STATUS_MAP["INSUFFICIENT_DATA"],
                     "metric": "N/A", "desc": f"数据不足 (需≥{w}点，当前{queue_len}点)"
                 })
@@ -154,7 +150,7 @@ class PatrolDiagnosticEngine:
             elif slope > self.config["medium_term"]["max_slope"] and latest_val > dynamic_baseline:
                 w_status = self.STATUS_MAP["WARNING"]
                 
-            report["diagnostic_details"]["medium_term"].append({
+            report["diagnostic_details"].append({
                 "window": day_labels[w], "status": w_status, 
                 "metric": f"Slope={slope:.2f}, Amp={amp:.2f}",
                 "desc": "大幅波动" if w_status == self.STATUS_MAP["CRITICAL"] else ("持续上升" if w_status == self.STATUS_MAP["WARNING"] else "基线平稳")
@@ -168,21 +164,9 @@ class PatrolDiagnosticEngine:
         # ==========================================
         # 收集各诊断阶段出现的异常 (status > 0 即为异常)
         abnormal_stages = []
-        
-        # 实时诊断
-        rt = report["diagnostic_details"]["real_time"]
-        if rt.get("status", 0) > 0:
-            abnormal_stages.append(f"实时诊断(1h): {rt['desc']} ({rt['metric']})")
-        
-        # 短期诊断 (只收集 status > 0 的异常项)
-        for item in report["diagnostic_details"]["short_term"]:
+        for item in report["diagnostic_details"]:
             if item["status"] > 0:
-                abnormal_stages.append(f"短期诊断({item['window']}): {item['desc']} ({item['metric']})")
-        
-        # 中期诊断 (只收集 status > 0 的异常项)
-        for item in report["diagnostic_details"]["medium_term"]:
-            if item["status"] > 0:
-                abnormal_stages.append(f"中期诊断({item['window']}): {item['desc']} ({item['metric']})")
+                abnormal_stages.append(f"{item['window']}: {item['desc']} ({item['metric']})")
 
         # 组装简洁结论
         if report["health_status"] == self.STATUS_MAP["CRITICAL"]:

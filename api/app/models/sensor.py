@@ -6,7 +6,23 @@ import uuid
 from datetime import datetime
 from sqlalchemy import Uuid, Column, SmallInteger, Integer, String, Float, DateTime, Boolean, Text
 
+from sqlalchemy.dialects.mysql import JSON as MySQLJSON
+
 from app.models import Base
+
+class PatrolDiagnosticRecord(Base):
+    """Patrol diagnostic result record"""
+
+    __tablename__ = "patrol_diagnostic_record"
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    sn = Column(String(255), nullable=False, index=True)
+    metric = Column(String(64), nullable=False, default="temperature")
+    health_status = Column(SmallInteger, nullable=False, default=0, comment="0=正常, 1=需关注, 2=严重异常")
+    conclusion = Column(Text, nullable=True)
+    details = Column(MySQLJSON, nullable=True, comment="诊断详情列表: [{window, status, metric, desc}, ...]")
+    ts = Column(DateTime, nullable=False, comment="诊断产生时的时间戳")
+    created_at = Column(DateTime, default=datetime.utcnow)
 
 class SensorType(Base):
     """Sensor type entity model"""

@@ -2,6 +2,7 @@
 Main FastAPI application
 """
 
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -11,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.database import db_manager, redis_manager, influxdb_manager, minio_manager
 from app.clients.mqtt import mqtt_manager
+from app.clients.handler import patrol_msg_handler
 from app.utils.logger import setup_logging
 from app.routers import auth, health, sensors, devices, customers, admin
 
@@ -33,6 +35,11 @@ async def lifespan(app: FastAPI):
         influxdb_manager.init()
         minio_manager.init()
         mqtt_manager.init()
+
+        # Inject the running event loop into patrol_msg_handler
+        # so it can schedule async DB writes from the sync MQTT callback thread.
+        patrol_msg_handler._set_loop(asyncio.get_running_loop())
+
         logger.info("All services initialized successfully")
     except Exception as e:
         logger.error(f"Startup failed: {e}")
@@ -42,32 +49,32 @@ async def lifespan(app: FastAPI):
 
     # Shutdown
     logger.info("Shutting down application")
-    
+
     try:
         await db_manager.close()
     except Exception as e:
         logger.error(f"Error shutting down DB: {e}")
-        
+
     try:
         redis_manager.close()
     except Exception as e:
         logger.error(f"Error shutting down Redis: {e}")
-        
+
     try:
         influxdb_manager.close()
     except Exception as e:
         logger.error(f"Error shutting down InfluxDB: {e}")
-        
+
     try:
         minio_manager.close()
     except Exception as e:
         logger.error(f"Error shutting down MinIO: {e}")
-        
+
     try:
         mqtt_manager.close()
     except Exception as e:
         logger.error(f"Error shutting down MQTT: {e}")
-        
+
     logger.info("Shutdown sequence completed")
 
 
