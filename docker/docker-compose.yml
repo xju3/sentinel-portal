@@ -1,8 +1,8 @@
 services:
   api:
     build:
-      context: ./api
-      dockerfile: Dockerfile
+      context: ../
+      dockerfile: docker/api/Dockerfile
       args:
         PYTHON_IMAGE: ${PYTHON_IMAGE:-python:3.11-slim}
     container_name: api
@@ -10,12 +10,12 @@ services:
     extra_hosts:
           - "host.docker.internal:host-gateway"
     env_file:
-      - ./api/.env
+      - ../api/.env
 
   portal:
     build:
-      context: ./portal
-      dockerfile: Dockerfile
+      context: ../
+      dockerfile: docker/portal/Dockerfile
       args:
         NODE_IMAGE: ${NODE_IMAGE:-node:22-alpine}
         NGINX_IMAGE: ${NGINX_IMAGE:-nginx:1.27-alpine}
@@ -28,8 +28,8 @@ services:
 
   admin:
     build:
-      context: ./admin  
-      dockerfile: Dockerfile
+      context: ../
+      dockerfile: docker/admin/Dockerfile
       args:
         NODE_IMAGE: ${NODE_IMAGE:-node:22-alpine}
         NGINX_IMAGE: ${NGINX_IMAGE:-nginx:1.27-alpine}
