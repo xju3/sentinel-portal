@@ -10,7 +10,7 @@ import { Button, Popconfirm, Space, message } from 'antd';
 
 import { Area, AreaPayload, createArea, deleteArea, listAllAreas, updateArea } from '@/services/area';
 
-import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
+import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';
 type AreaFormValues = {
   name: string;
   description?: string;
@@ -111,8 +111,9 @@ const MonitoringAreaPage = () => {
     {
       title: '操作',
       valueType: 'option',
-      width: 180,
+      width: OPERATION_COL_WIDTH,
       fixed: 'right',
+      align: 'center',
       render: (_, row) => (
         <Space size="middle">
           <Button

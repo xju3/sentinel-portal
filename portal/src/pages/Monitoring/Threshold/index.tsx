@@ -175,6 +175,7 @@ const MonitoringThresholdPage = () => {
       valueType: 'option',
       width: OPERATION_COL_WIDTH,
       fixed: 'right',
+      align: 'center',
       render: (_, row) => (
         <Space size="middle">
           <a

@@ -24,7 +24,7 @@ import {
 } from '@/services/sensorMonitoring';
 import { listAllSensors, querySensors, Sensor } from '@/services/tenantSensor';
 
-import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
+import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';
 type SensorMonitoringFormValues = {
   device_inst_id: string;
   location_id?: string;
@@ -227,8 +227,9 @@ const MonitoringPointsPage = () => {
     {
       title: '操作',
       valueType: 'option',
-      width: 180,
+      width: OPERATION_COL_WIDTH,
       fixed: 'right',
+      align: 'center',
       render: (_, row) => (
         <Space size="middle">
           <Button

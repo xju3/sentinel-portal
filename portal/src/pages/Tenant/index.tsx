@@ -251,6 +251,8 @@ const TenantPage = () => {
       title: '操作',
       key: 'action',
       width: 240,
+      fixed: 'right' as const,
+      align: 'center' as const,
       render: (_: any, record: AccountInfo) => (
         <Space>
           <Button

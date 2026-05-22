@@ -25,7 +25,7 @@ import {
 } from '@/services/deviceInst';
 import { DeviceSpec, listAllDeviceSpecs, queryDeviceSpecs } from '@/services/deviceSpec';
 
-import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
+import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';
 type DeviceInstFormValues = {
   code: string;
   device_spec_id: string;
@@ -240,8 +240,9 @@ const DeviceListPage = () => {
     {
       title: '操作',
       valueType: 'option',
-      width: 180,
+      width: OPERATION_COL_WIDTH,
       fixed: 'right',
+      align: 'center',
       render: (_, row) => (
         <Space size="middle">
           <Button
