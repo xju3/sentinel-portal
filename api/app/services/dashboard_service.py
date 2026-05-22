@@ -94,8 +94,8 @@ class DashboardService:
             } for row in recent_result.all()
         ]
 
-        # 6. 按设备分类树聚合异常设备数量
-        devices_by_category_tree = await DashboardService._get_anomaly_category_tree(
+        # 6. 按设备分类树聚合设备总数和异常设备数
+        devices_by_category_tree = await DashboardService._get_category_device_tree(
             session, tenant_id
         )
 
@@ -112,12 +112,13 @@ class DashboardService:
         }
 
     @staticmethod
-    async def _get_anomaly_category_tree(
+    async def _get_category_device_tree(
         session: AsyncSession, tenant_id: UUID
     ) -> list:
         """
-        获取按设备分类树聚合的异常设备数量。
-        统计每个最底层分类下 anomaly > 0 的设备数，然后按树形结构向上汇总。
+        按设备分类树聚合设备总数和异常设备数。
+        先确定分类树结构，再统计每个分类下的设备总数和异常设备数。
+        返回树形结构: [{name, total, anomaly, children: [...]}]
         """
         # 1. 获取该租户下所有 DeviceCategory
         stmt_cats = (
@@ -144,57 +145,78 @@ class DashboardService:
             else:
                 root_ids.append(cat_id)
 
-        # 2. 统计每个最底层分类下 anomaly > 0 的设备数
-        # 查询: 按 device_category_id 分组统计异常设备数
+        # 2. 统计每个分类下的设备总数
+        stmt_total = (
+            select(
+                DeviceCategory.id.label("category_id"),
+                func.count(DeviceInst.id).label("cnt")
+            )
+            .select_from(DeviceCategory)
+            .outerjoin(DeviceSpec, DeviceSpec.device_category_id == DeviceCategory.id)
+            .outerjoin(DeviceInst, DeviceInst.device_spec_id == DeviceSpec.id)
+            .where(DeviceCategory.tenant_id == tenant_id)
+            .group_by(DeviceCategory.id)
+        )
+        total_rows = (await session.execute(stmt_total)).all()
+        total_counts: dict[UUID, int] = {}
+        for row in total_rows:
+            total_counts[row.category_id] = row.cnt
+
+        # 3. 统计每个分类下 anomaly > 0 的异常设备数
         stmt_anomaly = (
             select(
                 DeviceCategory.id.label("category_id"),
                 func.count(func.distinct(SensorMonitoring.device_inst_id)).label("cnt")
             )
-            .select_from(SensorMonitoring)
-            .join(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
-            .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
-            .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
-            .where(
-                DeviceCategory.tenant_id == tenant_id,
-                SensorMonitoring.anomaly > 0
+            .select_from(DeviceCategory)
+            .outerjoin(DeviceSpec, DeviceSpec.device_category_id == DeviceCategory.id)
+            .outerjoin(DeviceInst, DeviceInst.device_spec_id == DeviceSpec.id)
+            .outerjoin(
+                SensorMonitoring,
+                (SensorMonitoring.device_inst_id == DeviceInst.id) &
+                (SensorMonitoring.anomaly > 0)
             )
+            .where(DeviceCategory.tenant_id == tenant_id)
             .group_by(DeviceCategory.id)
         )
         anomaly_rows = (await session.execute(stmt_anomaly)).all()
-        leaf_counts: dict[UUID, int] = {}
+        anomaly_counts: dict[UUID, int] = {}
         for row in anomaly_rows:
-            leaf_counts[row.category_id] = row.cnt
+            anomaly_counts[row.category_id] = row.cnt
 
-        # 3. 递归构建树，从叶子节点向上汇总
+        # 4. 递归构建树，从叶子节点向上汇总
         def _build_subtree(node_id: UUID) -> dict:
             info = cat_map[node_id]
             children = info["children_ids"]
             if not children:
-                # 叶子节点
+                # 叶子节点：直接取该分类下的统计值
                 return {
                     "name": info["name"],
-                    "value": leaf_counts.get(node_id, 0),
+                    "total": total_counts.get(node_id, 0),
+                    "anomaly": anomaly_counts.get(node_id, 0),
                 }
-            # 非叶子节点：递归构建子节点
+            # 非叶子节点：递归构建子节点，汇总 total 和 anomaly
             child_nodes = []
-            total = 0
+            total_sum = 0
+            anomaly_sum = 0
             for child_id in children:
                 child_node = _build_subtree(child_id)
                 child_nodes.append(child_node)
-                total += child_node["value"]
-            # 过滤掉 value 为 0 的子节点
-            child_nodes = [c for c in child_nodes if c["value"] > 0]
+                total_sum += child_node["total"]
+                anomaly_sum += child_node["anomaly"]
+            # 过滤掉 total 为 0 的子节点
+            child_nodes = [c for c in child_nodes if c["total"] > 0]
             return {
                 "name": info["name"],
-                "value": total,
+                "total": total_sum,
+                "anomaly": anomaly_sum,
                 "children": child_nodes if child_nodes else None,
             }
 
         tree = []
         for rid in root_ids:
             node = _build_subtree(rid)
-            if node["value"] > 0:
+            if node["total"] > 0:
                 tree.append(node)
 
         return tree

@@ -9,7 +9,8 @@ const { Statistic } = StatisticCard;
 // 设备分类树节点类型（递归结构）
 type CategoryTreeNode = {
   name: string;
-  value: number;
+  total: number;   // 该分类下的设备总数
+  anomaly: number;  // 该分类下的异常设备数
   children?: CategoryTreeNode[];
 };
 
@@ -79,41 +80,61 @@ const DashboardOverview = () => {
   }, []);
 
   // 将分类树展平为层级数据，用于多层环形图
-  // 返回 { innerData: 一级分类数据, outerData: 二级分类数据, parentChildMap: 父子映射 }
+  // 内圈：一级分类的设备总数
+  // 外圈：二级分类的设备总数
+  // 每个扇区通过颜色深浅或内嵌小扇区表示异常占比
   const flattenCategoryTree = (tree: CategoryTreeNode[] | undefined) => {
     const innerData: { name: string; value: number; itemStyle?: any }[] = [];
     const outerData: { name: string; value: number; itemStyle?: any }[] = [];
+    const anomalyData: { name: string; value: number; itemStyle?: any }[] = [];
     const parentChildMap: Record<string, string[]> = {};
 
-    if (!tree || tree.length === 0) return { innerData, outerData, parentChildMap };
+    if (!tree || tree.length === 0) return { innerData, outerData, anomalyData, parentChildMap };
 
-    // 预定义颜色调色板
+    // 预定义颜色调色板（用于正常设备）
     const colorPalette = [
       '#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de',
       '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc', '#f47920',
     ];
 
     tree.forEach((root, idx) => {
-      const color = colorPalette[idx % colorPalette.length];
+      const baseColor = colorPalette[idx % colorPalette.length];
+      // 内圈：一级分类的设备总数
       innerData.push({
         name: root.name,
-        value: root.value,
-        itemStyle: { color },
+        value: root.total,
+        itemStyle: { color: baseColor },
       });
+      // 内圈异常部分（叠加在正常扇区上，用更深的颜色）
+      if (root.anomaly > 0) {
+        anomalyData.push({
+          name: `${root.name} (异常)`,
+          value: root.anomaly,
+          itemStyle: { color: baseColor, opacity: 0.3 },
+        });
+      }
 
       if (root.children && root.children.length > 0) {
         parentChildMap[root.name] = root.children.map((c) => c.name);
         root.children.forEach((child) => {
           outerData.push({
             name: child.name,
-            value: child.value,
-            itemStyle: { color },
+            value: child.total,
+            itemStyle: { color: baseColor },
           });
+          // 外圈异常部分
+          if (child.anomaly > 0) {
+            anomalyData.push({
+              name: `${child.name} (异常)`,
+              value: child.anomaly,
+              itemStyle: { color: baseColor, opacity: 0.3 },
+            });
+          }
         });
       }
     });
 
-    return { innerData, outerData, parentChildMap };
+    return { innerData, outerData, anomalyData, parentChildMap };
   };
 
   // 初始化和更新 Echarts 饼图及多层环形图
@@ -165,10 +186,10 @@ const DashboardOverview = () => {
       pieChart.setOption(pieOption);
     }
 
-    // 2. 渲染设备分类异常分布多层环形图
+    // 2. 渲染设备分类多层环形图（展示设备总数 + 异常占比）
     if (categoryChartRef.current) {
       nestedPieChart = echarts.init(categoryChartRef.current);
-      const { innerData, outerData, parentChildMap } = flattenCategoryTree(data.devicesByCategoryTree);
+      const { innerData, outerData, anomalyData, parentChildMap } = flattenCategoryTree(data.devicesByCategoryTree);
 
       // 如果没有数据，显示空状态
       if (innerData.length === 0) {
@@ -186,7 +207,13 @@ const DashboardOverview = () => {
             trigger: 'item',
             formatter: (params: any) => {
               const { name, value, seriesName } = params;
-              return `${seriesName}<br/>${name}: ${value} 台异常`;
+              // 查找该分类的异常数
+              const anomalyItem = anomalyData.find(
+                (a) => a.name === `${name} (异常)`
+              );
+              const anomalyCount = anomalyItem ? anomalyItem.value : 0;
+              const normalCount = value - anomalyCount;
+              return `${seriesName}<br/>${name}: 共 ${value} 台<br/>正常: ${normalCount} 台 | 异常: ${anomalyCount} 台`;
             },
           },
           legend: {
@@ -196,8 +223,8 @@ const DashboardOverview = () => {
           },
           series: [
             {
-              // 内圈：一级分类
-              name: '设备分类异常分布',
+              // 内圈：一级分类的设备总数
+              name: '设备分类分布',
               type: 'pie',
               selectedMode: 'single',
               radius: ['0%', '45%'],
@@ -207,10 +234,14 @@ const DashboardOverview = () => {
                 formatter: (params: any) => {
                   const name = params.name;
                   const children = parentChildMap[name];
+                  const anomalyItem = anomalyData.find(
+                    (a) => a.name === `${name} (异常)`
+                  );
+                  const anomalyCount = anomalyItem ? anomalyItem.value : 0;
                   if (children && children.length > 0) {
-                    return `${name}\n${params.value}台`;
+                    return `${name}\n${params.value}台\n异常${anomalyCount}台`;
                   }
-                  return `${name}\n${params.value}台`;
+                  return `${name}\n${params.value}台\n异常${anomalyCount}台`;
                 },
                 fontSize: 11,
                 fontWeight: 'bold',
@@ -227,8 +258,8 @@ const DashboardOverview = () => {
               data: innerData,
             },
             {
-              // 外圈：二级分类
-              name: '子分类异常分布',
+              // 外圈：二级分类的设备总数
+              name: '子分类分布',
               type: 'pie',
               radius: ['55%', '80%'],
               avoidLabelOverlap: false,
@@ -343,7 +374,7 @@ const DashboardOverview = () => {
       </ProCard>
 
       <ProCard style={{ marginTop: 16 }} gutter={16} ghost>
-        <ProCard title="设备分类统计" bordered headerBordered loading={loading}>
+        <ProCard title="设备分类异常分布" bordered headerBordered loading={loading}>
           <StatisticCard
             chart={
               <div

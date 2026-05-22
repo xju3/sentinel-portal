@@ -20,9 +20,10 @@ class CategoryCountResponse(BaseModel):
 
 
 class CategoryTreeNodeResponse(BaseModel):
-    """Recursive tree node for device category anomaly distribution"""
+    """Recursive tree node for device category device distribution"""
     name: str
-    value: int
+    total: int
+    anomaly: int
     children: Optional[List["CategoryTreeNodeResponse"]] = None
 
 
