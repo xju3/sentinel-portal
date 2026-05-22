@@ -39,12 +39,6 @@ export default defineConfig({
       icon: 'DashboardOutlined',
       routes: [
         {
-          path: '/dashboard/welcome',
-          name: '欢迎',
-          hideInMenu: false,
-          component: '@/pages/Dashboard/Welcome',
-        },
-        {
           path: '/dashboard/overview',
           name: '概览',
           component: '@/pages/Dashboard/Overview',
@@ -67,7 +61,7 @@ export default defineConfig({
       routes: [
         {
           path: '/data/suppliers',
-          name: '供应商',
+          name: '合作厂商',
           component: '@/pages/Device/Supplier',
         },
         {
@@ -80,11 +74,7 @@ export default defineConfig({
           name: '工作区域',
           component: '@/pages/Monitoring/Area',
         },
-        {
-          path: '/data/frequency',
-          name: '监测频率',
-          component: '@/pages/Monitoring/Frequency',
-        },
+
         {
           path: '/data',
           redirect: '/data/suppliers',
@@ -141,14 +131,9 @@ export default defineConfig({
 
     {
       path: '/monitoring',
-      name: '监测管理',
+      name: '监测设定',
       icon: 'RadarChartOutlined',
       routes: [
-        {
-          path: '/monitoring/sensors',
-          name: '传感器',
-          component: '@/pages/Monitoring/Sensors',
-        },
         {
           path: '/monitoring/sensors/batch-devices/:batchId',
           component: '@/pages/Monitoring/Sensors/BatchDevices',
@@ -159,7 +144,16 @@ export default defineConfig({
           name: '测点设置',
           component: '@/pages/Monitoring/Points',
         },
-
+        {
+          path: '/monitoring/frequency',
+          name: '监测频率',
+          component: '@/pages/Monitoring/Frequency',
+        },
+        {
+          path: '/monitoring/sensors',
+          name: '设备批次',
+          component: '@/pages/Monitoring/Sensors',
+        },
         {
           path: '/monitoring',
           redirect: '/monitoring/sensors',

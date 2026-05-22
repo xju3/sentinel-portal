@@ -4,7 +4,7 @@ import { history, RequestConfig, RunTimeLayoutConfig } from '@umijs/max';
 import { Divider, Space, Typography } from 'antd';
 
 import HeaderUserMenu from '@/components/HeaderUserMenu';
-import { getSession } from '@/utils/session';
+import { clearSession, getSession } from '@/utils/session';
 
 export const request: RequestConfig = {
   timeout: 10000,
@@ -25,6 +25,16 @@ export const request: RequestConfig = {
           },
         },
       };
+    },
+  ],
+  responseInterceptors: [
+    (response) => {
+      if (response.status === 401) {
+        clearSession();
+        history.push('/login');
+        throw new Error('Unauthorized');
+      }
+      return response;
     },
   ],
 };
