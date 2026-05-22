@@ -34,3 +34,6 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_MSGRMSREPORT']._serialized_start=18
   _globals['_MSGRMSREPORT']._serialized_end=202
 # @@protoc_insertion_point(module_scope)
+
+# Type alias for Pylance static analysis support
+MsgRmsReport = _globals['MsgRmsReport']

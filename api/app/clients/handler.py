@@ -5,7 +5,7 @@ MQTT message handler
 import asyncio
 import logging
 import json
-from typing import Optional
+from typing import Any, Optional
 
 from app.models.message_pb2 import MsgRmsReport
 from app.clients.redis import redis_client
@@ -47,6 +47,21 @@ class PatrolMsgHandler:
             logger.error(f"Failed to parse protobuf payload: {e}")
             return None
 
+    def _run_async(self, coro) -> Any:
+        """Run an async coroutine from a sync context and return its result.
+
+        Args:
+            coro: The coroutine to execute.
+
+        Returns:
+            The result of the coroutine, or None if the event loop is unavailable.
+        """
+        if self._loop is not None and not self._loop.is_closed():
+            future = asyncio.run_coroutine_threadsafe(coro, self._loop)
+            return future.result()
+        logger.warning("Event loop not available, skipping async operation")
+        return None
+
     def handle_message(self, topic: str, payload: bytes) -> None:
         """Handle an incoming MQTT message.
 
@@ -70,15 +85,27 @@ class PatrolMsgHandler:
             f"Parsed message: SN={sn}, rms_m={report.rms_m}, temperature={report.temperature}"
         )
 
-        # 1. 最新数据进 Redis 72位队列
-        success = self._redis_client.push_rms_data(
-            sn, rms_m=report.rms_m, temperature=report.temperature
+        # 1. 最新数据进 Redis 队列（队列长度由 HealthCheckFreq 动态决定）
+        success = self._run_async(
+            self._redis_client.push_rms_data(
+                sn, rms_m=report.rms_m, temperature=report.temperature
+            )
         )
+        if success is None:
+            success = False
 
         # 2. 队列更新成功后，触发极速诊断
         if success:
-            temp_report = patrol_diagnostic_engine.run_diagnostics(sn, "temperature")
-            rms_report = patrol_diagnostic_engine.run_diagnostics(sn, "rms_m")
+            temp_report = self._run_async(
+                patrol_diagnostic_engine.run_diagnostics(sn, "temperature")
+            )
+            rms_report = self._run_async(
+                patrol_diagnostic_engine.run_diagnostics(sn, "rms_m")
+            )
+
+            if temp_report is None or rms_report is None:
+                logger.warning("Diagnostics failed, skipping anomaly detection")
+                return
 
             # 3. 计算异常状态码
             #    0=正常, 1=仅rms异常, 2=仅温度异常, 3=rms与温度都异常

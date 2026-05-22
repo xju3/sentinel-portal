@@ -8,12 +8,13 @@ Queue element structure: {sn, sequence, ts, rms_m, temperature}
 import json
 import logging
 import time
-from typing import Any, Optional
+from typing import Any, Optional, cast
 
 import redis
 
 from app.config import settings
-from app.database import redis_manager
+from app.database import redis_manager, db_manager
+from app.services.customer_service import HealthCheckFreqService
 
 logger = logging.getLogger(__name__)
 
@@ -21,6 +22,8 @@ logger = logging.getLogger(__name__)
 QUEUE_KEY_PREFIX = "mqtt:queue:"
 # Redis key prefix for the sequence counter
 SEQ_KEY_PREFIX = "mqtt:seq:"
+# Redis key prefix for the queue max length cache
+QUEUE_MAX_LEN_KEY_PREFIX = "mqtt:maxlen:"
 
 
 class RedisClient:
@@ -47,8 +50,53 @@ class RedisClient:
                 return False
         return True
 
-    def _get_queue_max_len(self) -> int:
-        """Get the configured maximum queue length."""
+    async def get_queue_max_len(self, sn: str) -> int:
+        """Get the maximum queue length for the given sensor SN.
+
+        First tries to read from Redis cache. If not found, looks up the
+        HealthCheckFreq configured for the sensor's device category and
+        caches the result in Redis. Falls back to the global default.
+
+        Args:
+            sn: The device serial number.
+
+        Returns:
+            The queue max length (patrol frequency in data points).
+        """
+        cache_key = f"{QUEUE_MAX_LEN_KEY_PREFIX}{sn}"
+
+        # 1. Try to get from Redis cache first
+        if self._ensure_redis():
+            try:
+                cached = cast(Optional[str], self._client.get(cache_key))  # type: ignore[union-attr]
+                if cached is not None:
+                    return int(cached)
+            except Exception as e:
+                logger.debug(f"Failed to get cached max_len for SN={sn}: {e}")
+
+        # 2. Cache miss — query the database
+        try:
+            async for session in db_manager.get_session():
+                health_check = await HealthCheckFreqService.get_health_check_by_sensor_sn(
+                    session, sn
+                )
+                if health_check is not None and health_check.patrol is not None:
+                    patrol_value = cast(int, health_check.patrol)
+                    result = int(patrol_value * settings.patrol_queue_length / 60)
+                    # Cache the result in Redis with 1-hour TTL
+                    if self._ensure_redis():
+                        try:
+                            self._client.setex(cache_key, 0, result)  # type: ignore[union-attr]
+                        except Exception as e:
+                            logger.debug(f"Failed to cache max_len for SN={sn}: {e}")
+                    return result
+        except Exception as e:
+            logger.warning(
+                f"Failed to fetch HealthCheckFreq for SN={sn}, "
+                f"falling back to default: {e}"
+            )
+
+        # 3. Fall back to the global default
         return settings.patrol_queue_length
 
     def _get_next_sequence(self, sn: str) -> int:
@@ -57,7 +105,7 @@ class RedisClient:
         # INCR returns the new value after increment; starts at 1 on first call
         return self._client.incr(seq_key)  # type: ignore[union-attr]
 
-    def push_rms_data(self, sn: str, rms_m: float, temperature: float) -> bool:
+    async def push_rms_data(self, sn: str, rms_m: float, temperature: float) -> bool:
         """Push rms_m and temperature data into the fixed-length Redis queue for the given SN.
 
         Constructs a queue element with an auto-incrementing sequence number,
@@ -79,7 +127,7 @@ class RedisClient:
         try:
             sequence = self._get_next_sequence(sn)
             ts = time.time()
-            queue_max_len = self._get_queue_max_len()
+            queue_max_len = await self.get_queue_max_len(sn)
 
             queue_key = f"{QUEUE_KEY_PREFIX}{sn}"
 
@@ -107,7 +155,7 @@ class RedisClient:
             logger.error(f"Failed to queue message for SN={sn}: {e}")
             return False
 
-    def get_queue(self, sn: str, start: int = 0, end: Optional[int] = None) -> list:
+    async def get_queue(self, sn: str, start: int = 0, end: Optional[int] = None) -> list:
         """Retrieve elements from the Redis queue for the given SN.
 
         Args:
@@ -123,11 +171,12 @@ class RedisClient:
             return []
 
         if end is None:
-            end = self._get_queue_max_len() - 1
+            queue_max_len = await self.get_queue_max_len(sn)
+            end = queue_max_len - 1
 
         try:
             queue_key = f"{QUEUE_KEY_PREFIX}{sn}"
-            elements = self._client.lrange(queue_key, start, end)  # type: ignore[union-attr]
+            elements = cast(list, self._client.lrange(queue_key, start, end))  # type: ignore[union-attr]
             return [json.loads(elem) for elem in elements]
         except Exception as e:
             logger.error(f"Failed to get queue for SN={sn}: {e}")

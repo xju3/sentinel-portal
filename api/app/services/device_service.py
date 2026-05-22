@@ -336,6 +336,12 @@ class SensorMonitoringService:
         return result.scalars().all()
 
     @staticmethod
+    async def get_by_sn(session: AsyncSession, sn: str):
+        stmt = select(SensorMonitoring).where(SensorMonitoring.sn == sn and SensorMonitoring.status == 1)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none() 
+
+    @staticmethod
     async def get_by_id(session: AsyncSession, obj_id: UUID):
         stmt = select(SensorMonitoring).where(SensorMonitoring.id == obj_id)
         result = await session.execute(stmt)

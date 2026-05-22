@@ -37,6 +37,22 @@ const toErrorMessage = (error: unknown): string => {
   return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';
 };
 
+const validateMinuteValue = (_: any, value: number | undefined) => {
+  if (value === undefined || value === null || value === 0) {
+    return Promise.reject(new Error('请输入大于0的数值'));
+  }
+  if (value < 60) {
+    if (60 % value !== 0) {
+      return Promise.reject(new Error('小于60分钟时，必须为60的约数（如1,2,3,4,5,6,10,12,15,20,30）'));
+    }
+  } else {
+    if (value % 60 !== 0) {
+      return Promise.reject(new Error('大于等于60分钟时，必须为60的整数倍'));
+    }
+  }
+  return Promise.resolve();
+};
+
 const MonitoringFrequencyPage = () => {
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -242,14 +258,20 @@ const MonitoringFrequencyPage = () => {
           label="巡检频率(分钟)"
           min={1}
           fieldProps={{ precision: 0 }}
-          rules={[{ required: true, message: '请输入巡检频率' }]}
+          rules={[
+            { required: true, message: '请输入巡检频率' },
+            { validator: validateMinuteValue },
+          ]}
         />
         <ProFormDigit
           name="diagnosis"
           label="诊断频率(分钟)"
           min={1}
           fieldProps={{ precision: 0 }}
-          rules={[{ required: true, message: '请输入诊断频率' }]}
+          rules={[
+            { required: true, message: '请输入诊断频率' },
+            { validator: validateMinuteValue },
+          ]}
         />
         <ProFormDigit
           name="report"

@@ -19,6 +19,8 @@ from app.models.customer import (
     HealthCheckFreq,
 )
 
+from app.models.sensor import SensorMonitoring, Sensor
+from app.models.device import DeviceCategory, DeviceSpec, DeviceInst
 
 class TenantService:
     @staticmethod
@@ -525,6 +527,27 @@ class AuthService:
 
 
 class HealthCheckFreqService:
+
+    @staticmethod
+    async def get_health_check_by_sensor_sn(
+        session: AsyncSession,
+        sn: str,
+    ) -> Optional[HealthCheckFreq]:
+        
+        stmt = (
+            select(HealthCheckFreq)
+            .join(DeviceCategory, DeviceCategory.health_check_freq_id == HealthCheckFreq.id)
+            .join(DeviceSpec, DeviceSpec.device_category_id == DeviceCategory.id)
+            .join(DeviceInst, DeviceInst.device_spec_id == DeviceSpec.id)
+            .join(SensorMonitoring, SensorMonitoring.device_inst_id == DeviceInst.id and SensorMonitoring.status == 1)  # 只考虑状态为1的监测
+            .join(Sensor, Sensor.id == SensorMonitoring.sensor_id)
+            .where(Sensor.sn == sn)
+        )
+        
+        result = await session.execute(stmt)
+        # 同样使用第一问提到的 scalars().first() 或 scalar_one_or_none()
+        return result.scalars().first()
+
     @staticmethod
     async def get_health_check_freqs(
         session: AsyncSession,

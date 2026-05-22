@@ -107,6 +107,9 @@
             0,
             1,
             0,
+            0,
+            0,
+            0,
             0
           ]
         },
@@ -128,7 +131,11 @@
             3,
             4,
             3,
-            2
+            2,
+            3,
+            2,
+            3,
+            3
           ]
         },
         "register": 1
@@ -151,7 +158,10 @@
             2,
             11,
             12,
-            14
+            14,
+            8,
+            24,
+            28
           ]
         },
         "register": 16
@@ -168,6 +178,9 @@
       "time": {
         "hooks": {
           "addEntryCode": [
+            0,
+            0,
+            0,
             0,
             0,
             0,
@@ -203,6 +216,10 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "onCheckCode": [
@@ -233,6 +250,10 @@
             0,
             0,
             1,
+            0,
+            0,
+            0,
+            0,
             0,
             0,
             0,
@@ -1289,6 +1310,15 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ]
         },
@@ -1309,9 +1339,15 @@
             1,
             0,
             0,
-            0
+            0,
+            0,
+            0,
+            1
           ],
           "addRuntimePlugin": [
+            0,
+            0,
+            0,
             0,
             0,
             0,
@@ -1392,9 +1428,18 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
             0
           ],
           "addEntryImports": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0,
             0,
             0,
@@ -1443,9 +1488,18 @@
             45,
             19,
             17,
-            19
+            19,
+            11,
+            11,
+            17
           ],
           "addPolyfillImports": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0,
             0,
             0,
@@ -1476,6 +1530,12 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ]
         },
@@ -1494,6 +1554,9 @@
         "hooks": {
           "onGenerateFiles": [
             60,
+            0,
+            0,
+            0,
             0,
             0,
             0
@@ -1542,6 +1605,9 @@
             0,
             0,
             0,
+            0,
+            0,
+            1,
             0
           ],
           "addBeforeMiddlewares": [
@@ -1569,6 +1635,12 @@
             11,
             2,
             10,
+            2,
+            7,
+            2,
+            8,
+            3,
+            11,
             2
           ]
         },
@@ -1627,7 +1699,10 @@
             275,
             6,
             6,
-            7
+            7,
+            5,
+            4,
+            6
           ]
         },
         "register": 2
@@ -1715,7 +1790,10 @@
             1,
             1,
             0,
-            0
+            0,
+            0,
+            1,
+            1
           ]
         },
         "register": 1
@@ -1850,6 +1928,15 @@
           "addHTMLHeadScripts": [
             9,
             2,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0,
             0,
             0,
@@ -2272,9 +2359,18 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "addRuntimePlugin": [
+            0,
+            0,
+            0,
             0,
             0,
             0,
@@ -2284,13 +2380,19 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
             0
           ],
           "onGenerateFiles": [
             1,
             1,
             0,
-            1
+            1,
+            1,
+            1,
+            0
           ],
           "addExtraBabelPlugins": [
             0
@@ -2351,6 +2453,9 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
             0
           ],
           "modifyAppData": [
@@ -2360,9 +2465,15 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
             0
           ],
           "addRuntimePluginKey": [
+            0,
+            0,
+            0,
             0,
             0,
             0,
@@ -2370,6 +2481,9 @@
           ],
           "onGenerateFiles": [
             2,
+            1,
+            2,
+            1,
             1,
             2,
             1
@@ -2418,13 +2532,19 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
             0
           ],
           "onGenerateFiles": [
             13,
             13,
             13,
-            13
+            13,
+            11,
+            12,
+            14
           ],
           "addTmpGenerateWatcherPaths": [
             0
@@ -2457,6 +2577,9 @@
       "time": {
         "hooks": {
           "addRuntimePluginKey": [
+            0,
+            0,
+            0,
             0,
             0,
             0,
@@ -2517,10 +2640,16 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
             0
           ],
           "onGenerateFiles": [
             2,
+            0,
+            0,
+            0,
             0,
             0,
             0
@@ -4019,7 +4148,7 @@
     },
     "8": {
       "path": "/data/suppliers",
-      "name": "供应商",
+      "name": "合作厂商",
       "file": "@/pages/Device/Supplier/index.tsx",
       "parentId": "7",
       "id": "8",
@@ -4179,7 +4308,7 @@
       "parentId": "21",
       "id": "24",
       "absPath": "/monitoring/frequency",
-      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProFormDigit,\n  ProFormSwitch,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, Tag, message } from 'antd';\n\nimport {\n  HealthCheckFreq,\n  HealthCheckFreqPayload,\n  createHealthCheckFreq,\n  deleteHealthCheckFreq,\n  listAllHealthCheckFreqs,\n  updateHealthCheckFreq,\n} from '@/services/healthCheckFreq';\n\nimport { renderRefSafeTableOptions } from '@/utils/proTableOptions';\ntype HealthCheckFreqFormValues = {\n  patrol: number;\n  diagnosis: number;\n  report: number;\n  status: boolean;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst MonitoringFrequencyPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [rows, setRows] = useState<HealthCheckFreq[]>([]);\n  const [editing, setEditing] = useState<HealthCheckFreq | null>(null);\n  const [query, setQuery] = useState<Record<string, any>>({});\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      setRows(await listAllHealthCheckFreqs());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    return rows.filter((row) => {\n      if (query.patrol !== undefined && query.patrol !== null && String(row.patrol) !== String(query.patrol)) {\n        return false;\n      }\n      if (\n        query.diagnosis !== undefined &&\n        query.diagnosis !== null &&\n        String(row.diagnosis) !== String(query.diagnosis)\n      ) {\n        return false;\n      }\n      if (query.report !== undefined && query.report !== null && String(row.report) !== String(query.report)) {\n        return false;\n      }\n      if (query.status !== undefined && query.status !== null && row.status !== query.status) {\n        return false;\n      }\n      return true;\n    });\n  }, [query, rows]);\n\n  const columns: ProColumns<HealthCheckFreq>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '巡检频率(分钟)',\n      dataIndex: 'patrol',\n      width: 140,\n      valueType: 'digit',\n    },\n    {\n      title: '诊断频率(分钟)',\n      dataIndex: 'diagnosis',\n      width: 140,\n      valueType: 'digit',\n    },\n    {\n      title: '上报批次',\n      dataIndex: 'report',\n      width: 120,\n      valueType: 'digit',\n    },\n    {\n      title: '状态',\n      dataIndex: 'status',\n      width: 100,\n      valueEnum: {\n        true: { text: '启用' },\n        false: { text: '停用' },\n      },\n      render: (_, row) => (row.status ? <Tag color=\"success\">启用</Tag> : <Tag>停用</Tag>),\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 180,\n      render: (_, row) => [\n        <Button\n          key=\"edit\"\n          type=\"link\"\n          onClick={() => {\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </Button>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该监测频率吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteHealthCheckFreq(row.id);\n              message.success('删除成功');\n              await loadRows();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <Button danger type=\"link\">\n            删除\n          </Button>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  return (\n    <PageContainer title=\"监测频率\">\n      <ProTable<HealthCheckFreq>\n        rowKey=\"id\"\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        options={{ reload: loadRows }}\n        optionsRender={renderRefSafeTableOptions}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建频率\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<HealthCheckFreqFormValues>\n        title={editing ? '编辑监测频率' : '新建监测频率'}\n        open={modalOpen}\n        initialValues={\n          editing\n            ? {\n                patrol: editing.patrol,\n                diagnosis: editing.diagnosis,\n                report: editing.report,\n                status: editing.status,\n              }\n            : {\n                patrol: 60,\n                diagnosis: 1440,\n                report: 1,\n                status: true,\n              }\n        }\n        modalProps={{\n          destroyOnHidden: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        onFinish={async (values) => {\n          const payload: HealthCheckFreqPayload = {\n            patrol: values.patrol,\n            diagnosis: values.diagnosis,\n            report: values.report,\n            status: values.status ?? true,\n          };\n\n          setSaving(true);\n          try {\n            if (editing) {\n              await updateHealthCheckFreq(editing.id, payload);\n            } else {\n              await createHealthCheckFreq(payload);\n            }\n            message.success('保存成功');\n            setModalOpen(false);\n            setEditing(null);\n            await loadRows();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormDigit\n          name=\"patrol\"\n          label=\"巡检频率(分钟)\"\n          min={1}\n          fieldProps={{ precision: 0 }}\n          rules={[{ required: true, message: '请输入巡检频率' }]}\n        />\n        <ProFormDigit\n          name=\"diagnosis\"\n          label=\"诊断频率(分钟)\"\n          min={1}\n          fieldProps={{ precision: 0 }}\n          rules={[{ required: true, message: '请输入诊断频率' }]}\n        />\n        <ProFormDigit\n          name=\"report\"\n          label=\"上报批次\"\n          min={1}\n          fieldProps={{ precision: 0 }}\n          rules={[{ required: true, message: '请输入上报批次' }]}\n        />\n        <ProFormSwitch name=\"status\" label=\"启用状态\" />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default MonitoringFrequencyPage;\n",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProFormDigit,\n  ProFormSwitch,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, Tag, message } from 'antd';\n\nimport {\n  HealthCheckFreq,\n  HealthCheckFreqPayload,\n  createHealthCheckFreq,\n  deleteHealthCheckFreq,\n  listAllHealthCheckFreqs,\n  updateHealthCheckFreq,\n} from '@/services/healthCheckFreq';\n\nimport { renderRefSafeTableOptions } from '@/utils/proTableOptions';\ntype HealthCheckFreqFormValues = {\n  patrol: number;\n  diagnosis: number;\n  report: number;\n  status: boolean;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n        data?: { detail?: string };\n        info?: { errorMessage?: string };\n        message?: string;\n      }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst validateMinuteValue = (_: any, value: number | undefined) => {\n  if (value === undefined || value === null) {\n    return Promise.reject(new Error('请输入数值'));\n  }\n  if (value < 60) {\n    if (60 % value !== 0) {\n      return Promise.reject(new Error('小于60分钟时，必须为60的约数（如1,2,3,4,5,6,10,12,15,20,30）'));\n    }\n  } else {\n    if (value % 60 !== 0) {\n      return Promise.reject(new Error('大于等于60分钟时，必须为60的整数倍'));\n    }\n  }\n  return Promise.resolve();\n};\n\nconst MonitoringFrequencyPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [rows, setRows] = useState<HealthCheckFreq[]>([]);\n  const [editing, setEditing] = useState<HealthCheckFreq | null>(null);\n  const [query, setQuery] = useState<Record<string, any>>({});\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      setRows(await listAllHealthCheckFreqs());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    return rows.filter((row) => {\n      if (query.patrol !== undefined && query.patrol !== null && String(row.patrol) !== String(query.patrol)) {\n        return false;\n      }\n      if (\n        query.diagnosis !== undefined &&\n        query.diagnosis !== null &&\n        String(row.diagnosis) !== String(query.diagnosis)\n      ) {\n        return false;\n      }\n      if (query.report !== undefined && query.report !== null && String(row.report) !== String(query.report)) {\n        return false;\n      }\n      if (query.status !== undefined && query.status !== null && row.status !== query.status) {\n        return false;\n      }\n      return true;\n    });\n  }, [query, rows]);\n\n  const columns: ProColumns<HealthCheckFreq>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '巡检频率(分钟)',\n      dataIndex: 'patrol',\n      width: 140,\n      valueType: 'digit',\n    },\n    {\n      title: '诊断频率(分钟)',\n      dataIndex: 'diagnosis',\n      width: 140,\n      valueType: 'digit',\n    },\n    {\n      title: '上报批次',\n      dataIndex: 'report',\n      width: 120,\n      valueType: 'digit',\n    },\n    {\n      title: '状态',\n      dataIndex: 'status',\n      width: 100,\n      valueEnum: {\n        true: { text: '启用' },\n        false: { text: '停用' },\n      },\n      render: (_, row) => (row.status ? <Tag color=\"success\">启用</Tag> : <Tag>停用</Tag>),\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 180,\n      render: (_, row) => [\n        <Button\n          key=\"edit\"\n          type=\"link\"\n          onClick={() => {\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </Button>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该监测频率吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteHealthCheckFreq(row.id);\n              message.success('删除成功');\n              await loadRows();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <Button danger type=\"link\">\n            删除\n          </Button>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  return (\n    <PageContainer title=\"监测频率\">\n      <ProTable<HealthCheckFreq>\n        rowKey=\"id\"\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        options={{ reload: loadRows }}\n        optionsRender={renderRefSafeTableOptions}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建频率\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<HealthCheckFreqFormValues>\n        title={editing ? '编辑监测频率' : '新建监测频率'}\n        open={modalOpen}\n        initialValues={\n          editing\n            ? {\n                patrol: editing.patrol,\n                diagnosis: editing.diagnosis,\n                report: editing.report,\n                status: editing.status,\n              }\n            : {\n                patrol: 60,\n                diagnosis: 1440,\n                report: 1,\n                status: true,\n              }\n        }\n        modalProps={{\n          destroyOnHidden: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        onFinish={async (values) => {\n          const payload: HealthCheckFreqPayload = {\n            patrol: values.patrol,\n            diagnosis: values.diagnosis,\n            report: values.report,\n            status: values.status ?? true,\n          };\n\n          setSaving(true);\n          try {\n            if (editing) {\n              await updateHealthCheckFreq(editing.id, payload);\n            } else {\n              await createHealthCheckFreq(payload);\n            }\n            message.success('保存成功');\n            setModalOpen(false);\n            setEditing(null);\n            await loadRows();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormDigit\n          name=\"patrol\"\n          label=\"巡检频率(分钟)\"\n          min={1}\n          fieldProps={{ precision: 0 }}\n          rules={[\n            { required: true, message: '请输入巡检频率' },\n            { validator: validateMinuteValue },\n          ]}\n        />\n        <ProFormDigit\n          name=\"diagnosis\"\n          label=\"诊断频率(分钟)\"\n          min={1}\n          fieldProps={{ precision: 0 }}\n          rules={[\n            { required: true, message: '请输入诊断频率' },\n            { validator: validateMinuteValue },\n          ]}\n        />\n        <ProFormDigit\n          name=\"report\"\n          label=\"上报批次\"\n          min={1}\n          fieldProps={{ precision: 0 }}\n          rules={[{ required: true, message: '请输入上报批次' }]}\n        />\n        <ProFormSwitch name=\"status\" label=\"启用状态\" />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default MonitoringFrequencyPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/src/pages/Monitoring/Frequency/index.tsx"
     },
@@ -6600,7 +6729,7 @@
             "format": "esm"
           },
           "src/pages/Monitoring/Frequency/index.tsx": {
-            "bytes": 7155,
+            "bytes": 7850,
             "imports": [
               {
                 "path": "react",
@@ -6916,7 +7045,7 @@
             "format": "esm"
           },
           "src/.umi/core/route.tsx": {
-            "bytes": 5959,
+            "bytes": 5962,
             "imports": [
               {
                 "path": "react",
@@ -9000,7 +9129,7 @@
                 "bytesInOutput": 905
               },
               "src/pages/Monitoring/Frequency/index.tsx": {
-                "bytesInOutput": 8859
+                "bytesInOutput": 9760
               },
               "src/services/sensorType.ts": {
                 "bytesInOutput": 457
@@ -9033,7 +9162,7 @@
                 "bytesInOutput": 6125
               },
               "src/.umi/core/route.tsx": {
-                "bytesInOutput": 6564
+                "bytesInOutput": 6570
               },
               "src/.umi/core/polyfill.ts": {
                 "bytesInOutput": 26337
@@ -9042,7 +9171,7 @@
                 "bytesInOutput": 1951
               }
             },
-            "bytes": 291960
+            "bytes": 292867
           }
         }
       }

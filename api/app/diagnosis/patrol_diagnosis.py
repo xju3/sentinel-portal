@@ -52,12 +52,71 @@ class PatrolDiagnosticEngine:
         "INSUFFICIENT_DATA": -1,
     }
 
-    def run_diagnostics(self, sn: str, target_field: str = "temperature") -> Dict[str, Any]:
+    def _diagnose_windows(
+        self,
+        values: List[float],
+        queue_len: int,
+        freq: float,
+        windows: List[int],
+        config_key: str,
+        label_map: dict,
+        latest_val: float,
+        dynamic_baseline: float,
+    ) -> List[dict]:
+        """通用多窗口诊断逻辑（短期/中期共用）
+
+        Args:
+            values: 目标字段值列表（时间倒序）
+            queue_len: 队列实际长度
+            freq: 数据密度系数
+            windows: 窗口定义列表（如 [2,4,8,16] 或 [24,48,72]）
+            config_key: 配置键名（"short_term" 或 "medium_term"）
+            label_map: 窗口值到显示标签的映射
+            latest_val: 最新值
+            dynamic_baseline: 动态基准线
+
+        Returns:
+            诊断详情列表
+        """
+        details = []
+        for w in windows:
+            need_points = int(w * freq)
+            if queue_len < need_points:
+                details.append({
+                    "window": label_map.get(w, f"{w}h"),
+                    "status": self.STATUS_MAP["INSUFFICIENT_DATA"],
+                    "metric": "N/A",
+                    "desc": f"数据不足 (需≥{need_points}点，当前{queue_len}点)"
+                })
+                continue
+
+            slope, amp = self._calc_trend(values[:need_points])
+            w_status = self.STATUS_MAP["NORMAL"]
+
+            if amp > self.config[config_key]["max_amplitude"]:
+                w_status = self.STATUS_MAP["CRITICAL"]
+            elif slope > self.config[config_key]["max_slope"] and latest_val > dynamic_baseline:
+                w_status = self.STATUS_MAP["WARNING"]
+
+            is_medium = config_key == "medium_term"
+            details.append({
+                "window": label_map.get(w, f"{w}h"),
+                "status": w_status,
+                "metric": f"Slope={slope:.2f}, Amp={amp:.2f}",
+                "desc": "大幅波动" if w_status == self.STATUS_MAP["CRITICAL"]
+                        else ("持续上升" if w_status == self.STATUS_MAP["WARNING"]
+                        else ("基线平稳" if is_medium else "平稳"))
+            })
+        return details
+
+    async def run_diagnostics(self, sn: str, target_field: str = "temperature") -> Dict[str, Any]:
         """
         执行 1+5+3 瀑布式多尺度诊断
         """
-        queue = redis_client.get_queue(sn)
+        
+        queue = await redis_client.get_queue(sn)
         queue_len = len(queue)
+        freq = queue_len / 72
         
         # 初始化报告基础结构
         report = {
@@ -103,61 +162,32 @@ class PatrolDiagnosticEngine:
             })
 
         # ==========================================
-        # 2. 短期诊断 (Short-term: 2, 4, 8, 16, 24h)
+        # 2. 短期诊断 (Short-term: 2, 4, 8, 16h)
         # ==========================================
-        for w in self.short_windows:
-            if queue_len < w:
-                report["diagnostic_details"].append({
-                    "window": f"{w}h", "status": self.STATUS_MAP["INSUFFICIENT_DATA"],
-                    "metric": "N/A", "desc": f"数据不足 (需≥{w}点，当前{queue_len}点)"
-                })
-                continue
-                
-            slope, amp = self._calc_trend(values[:w])
-            w_status = self.STATUS_MAP["NORMAL"]
-            
-            if amp > self.config["short_term"]["max_amplitude"]:
-                w_status = self.STATUS_MAP["CRITICAL"]
-            elif slope > self.config["short_term"]["max_slope"] and latest_val > dynamic_baseline:
-                w_status = self.STATUS_MAP["WARNING"]
-                
-            report["diagnostic_details"].append({
-                "window": f"{w}h", "status": w_status, 
-                "metric": f"Slope={slope:.2f}, Amp={amp:.2f}",
-                "desc": "大幅波动" if w_status == self.STATUS_MAP["CRITICAL"] else ("持续上升" if w_status == self.STATUS_MAP["WARNING"] else "平稳")
-            })
-            
-            # 状态向上冒泡 (取最高等级)
-            report["health_status"] = max(report["health_status"], w_status)
+        short_details = self._diagnose_windows(
+            values, queue_len, freq,
+            self.short_windows, "short_term",
+            {w: f"{w}h" for w in self.short_windows},
+            latest_val, dynamic_baseline
+        )
+        report["diagnostic_details"].extend(short_details)
+        for item in short_details:
+            if item["status"] > 0:
+                report["health_status"] = max(report["health_status"], item["status"])
 
         # ==========================================
         # 3. 中期诊断 (Medium-term: 24h/1d, 48h/2d, 72h/3d)
         # ==========================================
-        day_labels = {24: "1d", 48: "2d", 72: "3d"}
-        for w in self.medium_windows:
-            if queue_len < w:
-                report["diagnostic_details"].append({
-                    "window": day_labels[w], "status": self.STATUS_MAP["INSUFFICIENT_DATA"],
-                    "metric": "N/A", "desc": f"数据不足 (需≥{w}点，当前{queue_len}点)"
-                })
-                continue
-                
-            slope, amp = self._calc_trend(values[:w])
-            w_status = self.STATUS_MAP["NORMAL"]
-            
-            if amp > self.config["medium_term"]["max_amplitude"]:
-                w_status = self.STATUS_MAP["CRITICAL"]
-            elif slope > self.config["medium_term"]["max_slope"] and latest_val > dynamic_baseline:
-                w_status = self.STATUS_MAP["WARNING"]
-                
-            report["diagnostic_details"].append({
-                "window": day_labels[w], "status": w_status, 
-                "metric": f"Slope={slope:.2f}, Amp={amp:.2f}",
-                "desc": "大幅波动" if w_status == self.STATUS_MAP["CRITICAL"] else ("持续上升" if w_status == self.STATUS_MAP["WARNING"] else "基线平稳")
-            })
-            
-            # 状态向上冒泡 (取最高等级)
-            report["health_status"] = max(report["health_status"], w_status)
+        medium_details = self._diagnose_windows(
+            values, queue_len, freq,
+            self.medium_windows, "medium_term",
+            {24: "1d", 48: "2d", 72: "3d"},
+            latest_val, dynamic_baseline
+        )
+        report["diagnostic_details"].extend(medium_details)
+        for item in medium_details:
+            if item["status"] > 0:
+                report["health_status"] = max(report["health_status"], item["status"])
 
         # ==========================================
         # 4. 汇总结论生成
