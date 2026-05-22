@@ -10,7 +10,7 @@ from uuid import UUID
 
 logger = logging.getLogger(__name__)
 
-from app.database import db_manager
+from app.services.dependencies import get_session
 from app.services.sensor_service import SensorBatchService
 from app.models.customer import Account
 from app.utils.auth import get_current_account
@@ -23,7 +23,7 @@ router = APIRouter(prefix="/admin", tags=["admin"])
 async def list_all_sensor_batches(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
     """List all sensor batches across all tenants (admin only)"""
@@ -33,7 +33,7 @@ async def list_all_sensor_batches(
 @router.get("/sensor-batches/{obj_id}", response_model=SensorBatchResponse)
 async def get_sensor_batch(
     obj_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
     """Get a sensor batch by id (admin only, no tenant check)"""

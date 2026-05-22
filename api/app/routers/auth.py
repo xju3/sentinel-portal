@@ -11,7 +11,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
-from app.database import db_manager
+from app.services.dependencies import get_session
 from app.models.customer import Account
 from app.services.customer_service import AuthService
 from app.utils.auth import get_current_account
@@ -57,7 +57,7 @@ async def _generate_unique_tenant_code(session: AsyncSession) -> str:
 @router.post("/auth/register", response_model=RegisterResponse)
 async def register(
     payload: RegisterRequest,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     normalized_phone = _normalize_phone(payload.phone)
     if not normalized_phone:
@@ -135,7 +135,7 @@ async def register(
 @router.post("/auth/login", response_model=LoginResponse)
 async def login(
     payload: LoginRequest,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     account = await AuthService.get_account_by_credentials(
         session, payload.username, payload.password
@@ -180,7 +180,7 @@ async def login(
 async def change_password(
     payload: ChangePasswordRequest,
     current_account: Account = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     if current_account.password != payload.current_password:
         raise HTTPException(status_code=400, detail="current password is incorrect")

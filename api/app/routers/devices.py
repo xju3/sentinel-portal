@@ -9,10 +9,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 from uuid import UUID
 
-from app.database import db_manager
-from app.models.customer import Account as AccountModel, Location, TenantSensor
+from app.services.dependencies import get_session
+from app.models.customer import Account as AccountModel, TenantSensor
 from app.models.device import DeviceCategory, DeviceInst, DeviceSpec
-from app.models.sensor import SensorMonitoring
+from app.services.customer_service import LocationService
+
+
 from app.services.device_service import (
     IsoStandardService,
     DeviceCategoryService,
@@ -75,13 +77,10 @@ async def _validate_sensor_monitoring_refs(
 
     location_id = data.get("location_id")
     if location_id is not None:
-        stmt_loc = select(Location.id).where(
-            Location.id == location_id,
-            Location.tenant_id == tenant_id,
-        ).limit(1)
-        loc_result = await session.execute(stmt_loc)
-        if loc_result.scalar_one_or_none() is None:
+        ok = await LocationService.is_tenant_location(session, tenant_id, location_id)
+        if not ok:
             raise HTTPException(status_code=400, detail="location_id is not owned by current tenant")
+
 
     # sensor_id 校验已移除，传感器选择器已确保只显示可用传感器
 
@@ -93,7 +92,7 @@ async def _validate_sensor_monitoring_refs(
 async def list_iso_standards(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     return await IsoStandardService.get_all(session, skip, limit)
 
@@ -101,7 +100,7 @@ async def list_iso_standards(
 @router.get("/iso-standards/{obj_id}", response_model=IsoStandardResponse)
 async def get_iso_standard(
     obj_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     obj = await IsoStandardService.get_by_id(session, obj_id)
     if not obj:
@@ -112,7 +111,7 @@ async def get_iso_standard(
 @router.post("/iso-standards", response_model=IsoStandardResponse)
 async def create_iso_standard(
     item: IsoStandardCreate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     return await IsoStandardService.create(session, item.model_dump())
 
@@ -121,7 +120,7 @@ async def create_iso_standard(
 async def update_iso_standard(
     obj_id: UUID,
     item: IsoStandardUpdate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_obj = await IsoStandardService.get_by_id(session, obj_id)
     if not db_obj:
@@ -134,7 +133,7 @@ async def update_iso_standard(
 @router.delete("/iso-standards/{obj_id}")
 async def delete_iso_standard(
     obj_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_obj = await IsoStandardService.get_by_id(session, obj_id)
     if not db_obj:
@@ -208,7 +207,7 @@ async def list_device_categories(
     limit: int = Query(10, ge=1, le=100),
     keyword: Optional[str] = Query(None),
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     rows = await DeviceCategoryService.get_all(session, tenant_id, skip, limit, keyword)
@@ -227,7 +226,7 @@ async def list_device_categories(
 async def count_device_categories(
     keyword: Optional[str] = Query(None),
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     total = await DeviceCategoryService.count_all(session, tenant_id, keyword)
@@ -238,7 +237,7 @@ async def count_device_categories(
 async def get_device_category(
     obj_id: UUID,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     obj = await DeviceCategoryService.get_by_id(session, tenant_id, obj_id)
@@ -256,7 +255,7 @@ async def get_device_category(
 async def create_device_category(
     item: DeviceCategoryCreate,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     payload = item.model_dump(exclude_unset=True)
@@ -278,7 +277,7 @@ async def update_device_category(
     obj_id: UUID,
     item: DeviceCategoryUpdate,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     db_obj = await DeviceCategoryService.get_by_id(session, tenant_id, obj_id)
@@ -304,7 +303,7 @@ async def update_device_category(
 async def delete_device_category(
     obj_id: UUID,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     db_obj = await DeviceCategoryService.get_by_id(session, tenant_id, obj_id)
@@ -329,7 +328,7 @@ async def delete_device_category(
 async def list_device_specs(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     return await DeviceSpecService.get_all(session, skip, limit)
 
@@ -337,7 +336,7 @@ async def list_device_specs(
 @router.get("/device-specs/{obj_id}", response_model=DeviceSpecResponse)
 async def get_device_spec(
     obj_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     obj = await DeviceSpecService.get_by_id(session, obj_id)
     if not obj:
@@ -348,7 +347,7 @@ async def get_device_spec(
 @router.post("/device-specs", response_model=DeviceSpecResponse)
 async def create_device_spec(
     item: DeviceSpecCreate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     return await DeviceSpecService.create(session, item.model_dump())
 
@@ -357,7 +356,7 @@ async def create_device_spec(
 async def update_device_spec(
     obj_id: UUID,
     item: DeviceSpecUpdate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_obj = await DeviceSpecService.get_by_id(session, obj_id)
     if not db_obj:
@@ -370,7 +369,7 @@ async def update_device_spec(
 @router.delete("/device-specs/{obj_id}")
 async def delete_device_spec(
     obj_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_obj = await DeviceSpecService.get_by_id(session, obj_id)
     if not db_obj:
@@ -387,7 +386,7 @@ async def delete_device_spec(
 async def list_device_insts(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     return await DeviceInstService.get_all(session, skip, limit)
 
@@ -395,7 +394,7 @@ async def list_device_insts(
 @router.get("/device-insts/{obj_id}", response_model=DeviceInstResponse)
 async def get_device_inst(
     obj_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     obj = await DeviceInstService.get_by_id(session, obj_id)
     if not obj:
@@ -406,7 +405,7 @@ async def get_device_inst(
 @router.post("/device-insts", response_model=DeviceInstResponse)
 async def create_device_inst(
     item: DeviceInstCreate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     return await DeviceInstService.create(session, item.model_dump())
 
@@ -415,7 +414,7 @@ async def create_device_inst(
 async def update_device_inst(
     obj_id: UUID,
     item: DeviceInstUpdate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_obj = await DeviceInstService.get_by_id(session, obj_id)
     if not db_obj:
@@ -428,7 +427,7 @@ async def update_device_inst(
 @router.delete("/device-insts/{obj_id}")
 async def delete_device_inst(
     obj_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_obj = await DeviceInstService.get_by_id(session, obj_id)
     if not db_obj:
@@ -445,7 +444,7 @@ async def delete_device_inst(
 async def list_processes(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     return await ProcessService.get_all(session, skip, limit)
 
@@ -453,7 +452,7 @@ async def list_processes(
 @router.get("/processes/{obj_id}", response_model=ProcessResponse)
 async def get_process(
     obj_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     obj = await ProcessService.get_by_id(session, obj_id)
     if not obj:
@@ -464,7 +463,7 @@ async def get_process(
 @router.post("/processes", response_model=ProcessResponse)
 async def create_process(
     item: ProcessCreate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     return await ProcessService.create(session, item.model_dump())
 
@@ -473,7 +472,7 @@ async def create_process(
 async def update_process(
     obj_id: UUID,
     item: ProcessUpdate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_obj = await ProcessService.get_by_id(session, obj_id)
     if not db_obj:
@@ -486,7 +485,7 @@ async def update_process(
 @router.delete("/processes/{obj_id}")
 async def delete_process(
     obj_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_obj = await ProcessService.get_by_id(session, obj_id)
     if not db_obj:
@@ -503,7 +502,7 @@ async def delete_process(
 async def list_process_items(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     return await ProcessItemService.get_all(session, skip, limit)
 
@@ -511,7 +510,7 @@ async def list_process_items(
 @router.get("/process-items/{obj_id}", response_model=ProcessItemResponse)
 async def get_process_item(
     obj_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     obj = await ProcessItemService.get_by_id(session, obj_id)
     if not obj:
@@ -522,7 +521,7 @@ async def get_process_item(
 @router.post("/process-items", response_model=ProcessItemResponse)
 async def create_process_item(
     item: ProcessItemCreate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     return await ProcessItemService.create(session, item.model_dump())
 
@@ -531,7 +530,7 @@ async def create_process_item(
 async def update_process_item(
     obj_id: UUID,
     item: ProcessItemUpdate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_obj = await ProcessItemService.get_by_id(session, obj_id)
     if not db_obj:
@@ -544,7 +543,7 @@ async def update_process_item(
 @router.delete("/process-items/{obj_id}")
 async def delete_process_item(
     obj_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_obj = await ProcessItemService.get_by_id(session, obj_id)
     if not db_obj:
@@ -561,7 +560,7 @@ async def delete_process_item(
 async def list_process_devices(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     return await ProcessDeviceService.get_all(session, skip, limit)
 
@@ -569,7 +568,7 @@ async def list_process_devices(
 @router.get("/process-devices/{obj_id}", response_model=ProcessDeviceResponse)
 async def get_process_device(
     obj_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     obj = await ProcessDeviceService.get_by_id(session, obj_id)
     if not obj:
@@ -580,7 +579,7 @@ async def get_process_device(
 @router.post("/process-devices", response_model=ProcessDeviceResponse)
 async def create_process_device(
     item: ProcessDeviceCreate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     return await ProcessDeviceService.create(session, item.model_dump())
 
@@ -589,7 +588,7 @@ async def create_process_device(
 async def update_process_device(
     obj_id: UUID,
     item: ProcessDeviceUpdate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_obj = await ProcessDeviceService.get_by_id(session, obj_id)
     if not db_obj:
@@ -602,7 +601,7 @@ async def update_process_device(
 @router.delete("/process-devices/{obj_id}")
 async def delete_process_device(
     obj_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_obj = await ProcessDeviceService.get_by_id(session, obj_id)
     if not db_obj:
@@ -619,7 +618,7 @@ async def delete_process_device(
 async def list_process_device_items(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     return await ProcessDeviceItemService.get_all(session, skip, limit)
 
@@ -627,7 +626,7 @@ async def list_process_device_items(
 @router.get("/process-device-items/{obj_id}", response_model=ProcessDeviceItemResponse)
 async def get_process_device_item(
     obj_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     obj = await ProcessDeviceItemService.get_by_id(session, obj_id)
     if not obj:
@@ -638,7 +637,7 @@ async def get_process_device_item(
 @router.post("/process-device-items", response_model=ProcessDeviceItemResponse)
 async def create_process_device_item(
     item: ProcessDeviceItemCreate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     return await ProcessDeviceItemService.create(session, item.model_dump())
 
@@ -647,7 +646,7 @@ async def create_process_device_item(
 async def update_process_device_item(
     obj_id: UUID,
     item: ProcessDeviceItemUpdate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_obj = await ProcessDeviceItemService.get_by_id(session, obj_id)
     if not db_obj:
@@ -660,7 +659,7 @@ async def update_process_device_item(
 @router.delete("/process-device-items/{obj_id}")
 async def delete_process_device_item(
     obj_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_obj = await ProcessDeviceItemService.get_by_id(session, obj_id)
     if not db_obj:
@@ -678,20 +677,11 @@ async def list_sensor_monitorings(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
-    stmt = (
-        select(SensorMonitoring)
-        .join(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
-        .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
-        .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
-        .where(DeviceCategory.tenant_id == tenant_id)
-        .offset(skip)
-        .limit(limit)
-    )
-    result = await session.execute(stmt)
-    return result.scalars().all()
+    return await SensorMonitoringService.get_all_by_tenant(session, tenant_id, skip, limit)
+
 
 
 @router.get(
@@ -703,7 +693,7 @@ async def list_sensor_monitoring_device_insts(
     pageSize: int = Query(10, ge=1, le=100),
     keyword: Optional[str] = Query(None),
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     items, total = await DeviceInstService.get_tenant_device_insts_paged(
@@ -716,32 +706,21 @@ async def list_sensor_monitoring_device_insts(
 async def get_sensor_monitoring(
     obj_id: UUID,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
-    stmt = (
-        select(SensorMonitoring)
-        .join(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
-        .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
-        .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
-        .where(
-            SensorMonitoring.id == obj_id,
-            DeviceCategory.tenant_id == tenant_id,
-        )
-        .limit(1)
-    )
-    result = await session.execute(stmt)
-    obj = result.scalar_one_or_none()
+    obj = await SensorMonitoringService.get_by_id_and_tenant(session, obj_id, tenant_id)
     if not obj:
         raise HTTPException(status_code=404, detail="SensorMonitoring not found")
     return obj
+
 
 
 @router.post("/sensor-monitorings", response_model=SensorMonitoringResponse)
 async def create_sensor_monitoring(
     item: SensorMonitoringCreate,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     payload = item.model_dump()
@@ -754,22 +733,10 @@ async def update_sensor_monitoring(
     obj_id: UUID,
     item: SensorMonitoringUpdate,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
-    stmt = (
-        select(SensorMonitoring)
-        .join(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
-        .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
-        .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
-        .where(
-            SensorMonitoring.id == obj_id,
-            DeviceCategory.tenant_id == tenant_id,
-        )
-        .limit(1)
-    )
-    result = await session.execute(stmt)
-    db_obj = result.scalar_one_or_none()
+    db_obj = await SensorMonitoringService.get_by_id_and_tenant(session, obj_id, tenant_id)
     if not db_obj:
         raise HTTPException(status_code=404, detail="SensorMonitoring not found")
 
@@ -778,28 +745,18 @@ async def update_sensor_monitoring(
     return await SensorMonitoringService.update(session, db_obj, update_data)
 
 
+
 @router.delete("/sensor-monitorings/{obj_id}")
 async def delete_sensor_monitoring(
     obj_id: UUID,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
-    stmt = (
-        select(SensorMonitoring)
-        .join(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
-        .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
-        .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
-        .where(
-            SensorMonitoring.id == obj_id,
-            DeviceCategory.tenant_id == tenant_id,
-        )
-        .limit(1)
-    )
-    result = await session.execute(stmt)
-    db_obj = result.scalar_one_or_none()
+    db_obj = await SensorMonitoringService.get_by_id_and_tenant(session, obj_id, tenant_id)
     if not db_obj:
         raise HTTPException(status_code=404, detail="SensorMonitoring not found")
 
     await SensorMonitoringService.delete(session, db_obj)
     return {"message": "SensorMonitoring deleted successfully"}
+

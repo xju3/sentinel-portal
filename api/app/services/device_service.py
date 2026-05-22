@@ -326,11 +326,92 @@ def generate_standard_service(model_class):
 # 使用工厂模式来创建剩余的模型 Service 以减少代码冗余
 # 如果这些模型后续需要扩展复杂的特定业务逻辑，可以随时像上面那样独立定义类
 
+class SensorMonitoringService:
+    """Service for SensorMonitoring with tenant-scoped queries."""
+
+    @staticmethod
+    async def get_all(session: AsyncSession, skip: int, limit: int):
+        stmt = select(SensorMonitoring).offset(skip).limit(limit)
+        result = await session.execute(stmt)
+        return result.scalars().all()
+
+    @staticmethod
+    async def get_by_id(session: AsyncSession, obj_id: UUID):
+        stmt = select(SensorMonitoring).where(SensorMonitoring.id == obj_id)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def get_all_by_tenant(
+        session: AsyncSession,
+        tenant_id: UUID,
+        skip: int,
+        limit: int,
+    ):
+        """Get SensorMonitoring records scoped to a tenant."""
+        from app.models.device import DeviceInst, DeviceSpec, DeviceCategory
+
+        stmt = (
+            select(SensorMonitoring)
+            .join(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
+            .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
+            .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+            .where(DeviceCategory.tenant_id == tenant_id)
+            .offset(skip)
+            .limit(limit)
+        )
+        result = await session.execute(stmt)
+        return result.scalars().all()
+
+    @staticmethod
+    async def get_by_id_and_tenant(
+        session: AsyncSession,
+        obj_id: UUID,
+        tenant_id: UUID,
+    ):
+        """Get a SensorMonitoring record by id, scoped to a tenant."""
+        from app.models.device import DeviceInst, DeviceSpec, DeviceCategory
+
+        stmt = (
+            select(SensorMonitoring)
+            .join(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
+            .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
+            .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+            .where(
+                SensorMonitoring.id == obj_id,
+                DeviceCategory.tenant_id == tenant_id,
+            )
+            .limit(1)
+        )
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def create(session: AsyncSession, data: dict):
+        db_obj = SensorMonitoring(**data)
+        session.add(db_obj)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def update(session: AsyncSession, db_obj, data: dict):
+        for key, value in data.items():
+            setattr(db_obj, key, value)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def delete(session: AsyncSession, db_obj) -> None:
+        await session.delete(db_obj)
+        await session.commit()
+
+
 ProcessService = generate_standard_service(Process)
 ProcessItemService = generate_standard_service(ProcessItem)
 ProcessDeviceService = generate_standard_service(ProcessDevice)
 ProcessDeviceItemService = generate_standard_service(ProcessDeviceItem)
-SensorMonitoringService = generate_standard_service(SensorMonitoring)
 
 # Backward-compatible aliases for legacy router names.
 DeviceComboSpecService = ProcessService

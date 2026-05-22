@@ -344,6 +344,20 @@ class LocationService:
         return result.scalar_one_or_none()
 
     @staticmethod
+    async def is_tenant_location(
+        session: AsyncSession,
+        tenant_id: UUID,
+        location_id: UUID,
+    ) -> bool:
+        """Check if a location belongs to the given tenant."""
+        stmt = select(Location.id).where(
+            Location.id == location_id,
+            Location.tenant_id == tenant_id,
+        ).limit(1)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none() is not None
+
+    @staticmethod
     async def get_paged_locations(
         session: AsyncSession,
         tenant_id: UUID,

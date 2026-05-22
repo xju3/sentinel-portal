@@ -7,7 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
 from uuid import UUID
 
-from app.database import db_manager
+from app.services.dependencies import get_session
 from app.models.customer import Account as AccountModel
 from app.services.customer_service import (
     TenantService,
@@ -60,7 +60,7 @@ router = APIRouter(tags=["customers"])
 @router.get("/tenants/current", response_model=TenantResponse)
 async def get_current_tenant(
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant = await TenantService.get_tenant(session, current_account.tenant_id)
     if not tenant:
@@ -72,7 +72,7 @@ async def get_current_tenant(
 async def update_current_tenant(
     payload: CurrentTenantUpdate,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant = await TenantService.get_tenant(session, current_account.tenant_id)
     if not tenant:
@@ -86,7 +86,7 @@ async def update_current_tenant(
 async def list_tenants(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     return await TenantService.get_tenants(session, skip, limit)
 
@@ -94,7 +94,7 @@ async def list_tenants(
 @router.get("/tenants/{tenant_id}", response_model=TenantResponse)
 async def get_tenant(
     tenant_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant = await TenantService.get_tenant(session, tenant_id)
     if not tenant:
@@ -105,7 +105,7 @@ async def get_tenant(
 @router.post("/tenants", response_model=TenantResponse)
 async def create_tenant(
     tenant: TenantCreate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     return await TenantService.create_tenant(session, tenant.model_dump())
 
@@ -114,7 +114,7 @@ async def create_tenant(
 async def update_tenant(
     tenant_id: UUID,
     tenant: TenantUpdate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_tenant = await TenantService.get_tenant(session, tenant_id)
     if not db_tenant:
@@ -127,7 +127,7 @@ async def update_tenant(
 @router.delete("/tenants/{tenant_id}")
 async def delete_tenant(
     tenant_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_tenant = await TenantService.get_tenant(session, tenant_id)
     if not db_tenant:
@@ -144,7 +144,7 @@ async def delete_tenant(
 async def list_tenant_sensors(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     return await TenantSensorService.get_tenant_sensors(session, skip, limit)
 
@@ -152,7 +152,7 @@ async def list_tenant_sensors(
 @router.get("/tenant-sensors/{ts_id}", response_model=TenantSensorResponse)
 async def get_tenant_sensor(
     ts_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     ts = await TenantSensorService.get_tenant_sensor(session, ts_id)
     if not ts:
@@ -163,7 +163,7 @@ async def get_tenant_sensor(
 @router.post("/tenant-sensors", response_model=TenantSensorResponse)
 async def create_tenant_sensor(
     ts: TenantSensorCreate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     return await TenantSensorService.create_tenant_sensor(session, ts.model_dump())
 
@@ -172,7 +172,7 @@ async def create_tenant_sensor(
 async def update_tenant_sensor(
     ts_id: UUID,
     ts: TenantSensorUpdate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_ts = await TenantSensorService.get_tenant_sensor(session, ts_id)
     if not db_ts:
@@ -185,7 +185,7 @@ async def update_tenant_sensor(
 @router.delete("/tenant-sensors/{ts_id}")
 async def delete_tenant_sensor(
     ts_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_ts = await TenantSensorService.get_tenant_sensor(session, ts_id)
     if not db_ts:
@@ -204,7 +204,7 @@ async def list_suppliers(
     limit: int = Query(10, ge=1, le=100),
     keyword: Optional[str] = Query(None),
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     return await SupplierService.get_suppliers(session, tenant_id, skip, limit, keyword)
@@ -214,7 +214,7 @@ async def list_suppliers(
 async def count_suppliers(
     keyword: Optional[str] = Query(None),
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     total = await SupplierService.count_suppliers(session, tenant_id, keyword)
@@ -225,7 +225,7 @@ async def count_suppliers(
 async def get_supplier(
     supplier_id: UUID,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     supplier = await SupplierService.get_supplier(session, tenant_id, supplier_id)
@@ -238,7 +238,7 @@ async def get_supplier(
 async def create_supplier(
     supplier: SupplierCreate,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     payload = supplier.model_dump(exclude_unset=True)
@@ -253,7 +253,7 @@ async def update_supplier(
     supplier_id: UUID,
     supplier: SupplierUpdate,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     db_supplier = await SupplierService.get_supplier(session, tenant_id, supplier_id)
@@ -268,7 +268,7 @@ async def update_supplier(
 async def delete_supplier(
     supplier_id: UUID,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     db_supplier = await SupplierService.get_supplier(session, tenant_id, supplier_id)
@@ -284,7 +284,7 @@ async def delete_supplier(
 # ==========================================
 @router.get("/accounts/by-admin", response_model=List[AccountResponse])
 async def list_admin_accounts(
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     """List all admin accounts (admin=True)"""
     accounts = await AccountService.get_admin_accounts(session)
@@ -310,7 +310,7 @@ async def list_admin_accounts(
 @router.post("/accounts/by-admin", response_model=AccountResponse)
 async def create_admin_account(
     payload: AdminAccountCreate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     """Create a new admin account (admin=True)"""
     import re
@@ -358,7 +358,7 @@ async def create_admin_account(
 async def update_admin_account(
     account_id: UUID,
     payload: AccountUpdate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     """Update an admin account"""
     db_account = await AccountService.get_admin_account(session, account_id)
@@ -374,7 +374,7 @@ async def update_admin_account(
 async def update_admin_account_password(
     account_id: UUID,
     payload: AccountUpdate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     """Update password for an admin account"""
     db_account = await AccountService.get_admin_account(session, account_id)
@@ -391,7 +391,7 @@ async def update_admin_account_password(
 @router.delete("/accounts/by-admin/{account_id}")
 async def delete_admin_account(
     account_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     """Delete an admin account"""
     db_account = await AccountService.get_admin_account(session, account_id)
@@ -408,7 +408,7 @@ async def delete_admin_account(
 @router.get("/accounts/by-tenant", response_model=List[AccountResponse])
 async def list_tenant_accounts(
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     """List all accounts belonging to the current tenant"""
     accounts = await AccountService.get_tenant_accounts(session, current_account.tenant_id)
@@ -435,7 +435,7 @@ async def list_tenant_accounts(
 async def create_tenant_account(
     payload: TenantAccountCreate,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     """Create a new account under the current tenant"""
     # 1. 先创建 Contact
@@ -469,7 +469,7 @@ async def update_tenant_account(
     account_id: UUID,
     payload: AccountUpdate,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     """Update an account belonging to the current tenant (e.g. toggle active)"""
     db_account = await AccountService.get_tenant_account(session, account_id, current_account.tenant_id)
@@ -487,7 +487,7 @@ async def update_tenant_account_password(
     account_id: UUID,
     payload: AccountUpdate,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     """Update password for an account belonging to the current tenant"""
     db_account = await AccountService.get_tenant_account(session, account_id, current_account.tenant_id)
@@ -505,7 +505,7 @@ async def update_tenant_account_password(
 async def delete_tenant_account(
     account_id: UUID,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     """Delete an account belonging to the current tenant"""
     db_account = await AccountService.get_tenant_account(session, account_id, current_account.tenant_id)
@@ -520,7 +520,7 @@ async def delete_tenant_account(
 async def list_accounts(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     return await AccountService.get_accounts(session, skip, limit)
 
@@ -528,7 +528,7 @@ async def list_accounts(
 @router.get("/accounts/{account_id}", response_model=AccountResponse)
 async def get_account(
     account_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     account = await AccountService.get_account(session, account_id)
     if not account:
@@ -539,7 +539,7 @@ async def get_account(
 @router.post("/accounts", response_model=AccountResponse)
 async def create_account(
     account: AccountCreate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     # 在实际应用中, 此处通常需对 password 进行哈希处理
     return await AccountService.create_account(session, account.model_dump())
@@ -549,7 +549,7 @@ async def create_account(
 async def update_account(
     account_id: UUID,
     account: AccountUpdate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_account = await AccountService.get_account(session, account_id)
     if not db_account:
@@ -563,7 +563,7 @@ async def update_account(
 @router.delete("/accounts/{account_id}")
 async def delete_account(
     account_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_account = await AccountService.get_account(session, account_id)
     if not db_account:
@@ -581,7 +581,7 @@ async def list_areas(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     return await AreaService.get_areas(session, tenant_id, skip, limit)
@@ -591,7 +591,7 @@ async def list_areas(
 async def create_area(
     area: AreaCreate,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     payload = area.model_dump(exclude_unset=True)
@@ -606,7 +606,7 @@ async def update_area(
     area_id: UUID,
     area: AreaUpdate,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     db_area = await AreaService.get_area(session, tenant_id, area_id)
@@ -624,7 +624,7 @@ async def update_area(
 async def delete_area(
     area_id: UUID,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     db_area = await AreaService.get_area(session, tenant_id, area_id)
@@ -644,7 +644,7 @@ async def list_locations(
     pageSize: int = Query(10, ge=1, le=100),
     keyword: Optional[str] = Query(None),
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     items, total = await LocationService.get_paged_locations(
@@ -657,7 +657,7 @@ async def list_locations(
 async def create_location(
     location: LocationCreate,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     payload = location.model_dump(exclude_unset=True)
@@ -672,7 +672,7 @@ async def update_location(
     location_id: UUID,
     location: LocationUpdate,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     db_obj = await LocationService.get_location(session, tenant_id, location_id)
@@ -690,7 +690,7 @@ async def update_location(
 async def delete_location(
     location_id: UUID,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     db_obj = await LocationService.get_location(session, tenant_id, location_id)
@@ -709,7 +709,7 @@ async def list_health_check_freqs(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     return await HealthCheckFreqService.get_health_check_freqs(session, tenant_id, skip, limit)
@@ -719,7 +719,7 @@ async def list_health_check_freqs(
 async def create_health_check_freq(
     freq: HealthCheckFreqCreate,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     payload = freq.model_dump(exclude_unset=True)
@@ -732,7 +732,7 @@ async def update_health_check_freq(
     freq_id: UUID,
     freq: HealthCheckFreqUpdate,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     db_freq = await HealthCheckFreqService.get_health_check_freq(session, tenant_id, freq_id)
@@ -750,7 +750,7 @@ async def update_health_check_freq(
 async def delete_health_check_freq(
     freq_id: UUID,
     current_account: AccountModel = Depends(get_current_account),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
     db_freq = await HealthCheckFreqService.get_health_check_freq(session, tenant_id, freq_id)

@@ -12,7 +12,7 @@ from uuid import UUID
 logger = logging.getLogger(__name__)
 
 
-from app.database import db_manager
+from app.services.dependencies import get_session
 from app.services.sensor_service import SensorTypeService, SensorDbService, SensorBatchService
 from app.models.customer import Account
 from app.models.sensor import Sensor
@@ -37,7 +37,7 @@ router = APIRouter(prefix="/sensors", tags=["sensors"])
 async def list_sensor_types(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     return await SensorTypeService.get_all(session, skip, limit)
 
@@ -45,7 +45,7 @@ async def list_sensor_types(
 @router.get("/types/{obj_id}", response_model=SensorTypeResponse)
 async def get_sensor_type(
     obj_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     obj = await SensorTypeService.get_by_id(session, obj_id)
     if not obj:
@@ -56,7 +56,7 @@ async def get_sensor_type(
 @router.post("/types", response_model=SensorTypeResponse)
 async def create_sensor_type(
     item: SensorTypeCreate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     return await SensorTypeService.create(session, item.model_dump())
 
@@ -65,7 +65,7 @@ async def create_sensor_type(
 async def update_sensor_type(
     obj_id: UUID,
     item: SensorTypeUpdate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_obj = await SensorTypeService.get_by_id(session, obj_id)
     if not db_obj:
@@ -78,7 +78,7 @@ async def update_sensor_type(
 @router.delete("/types/{obj_id}")
 async def delete_sensor_type(
     obj_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_obj = await SensorTypeService.get_by_id(session, obj_id)
     if not db_obj:
@@ -95,7 +95,7 @@ async def delete_sensor_type(
 async def list_sensor_batches(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
     return await SensorBatchService.get_by_tenant(session, current_account.tenant_id, skip, limit)
@@ -104,7 +104,7 @@ async def list_sensor_batches(
 @router.get("/batches/{obj_id}", response_model=SensorBatchResponse)
 async def get_sensor_batch(
     obj_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
     obj = await SensorBatchService.get_by_id_and_tenant(session, obj_id, current_account.tenant_id)
@@ -116,7 +116,7 @@ async def get_sensor_batch(
 @router.post("/batches", response_model=SensorBatchResponse)
 async def create_sensor_batch(
     item: SensorBatchCreate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
     data = item.model_dump()
@@ -128,7 +128,7 @@ async def create_sensor_batch(
 async def update_sensor_batch(
     obj_id: UUID,
     item: SensorBatchUpdate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
     db_obj = await SensorBatchService.get_by_id_and_tenant(session, obj_id, current_account.tenant_id)
@@ -147,7 +147,7 @@ async def update_sensor_batch(
 @router.delete("/batches/{obj_id}")
 async def delete_sensor_batch(
     obj_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
     db_obj = await SensorBatchService.get_by_id_and_tenant(session, obj_id, current_account.tenant_id)
@@ -166,7 +166,7 @@ async def list_sensors(
     current: int = Query(1, ge=1),
     pageSize: int = Query(10, ge=1, le=100),
     keyword: Optional[str] = Query(None),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     items, total = await SensorDbService.get_paged(session, current, pageSize, keyword)
     return PagedSensorResponse(items=items, total=total)
@@ -177,7 +177,7 @@ async def list_sensors_by_batch(
     batch_id: UUID,
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
     # Verify the batch belongs to the current tenant
@@ -190,7 +190,7 @@ async def list_sensors_by_batch(
 @router.get("/{obj_id}", response_model=SensorResponse)
 async def get_sensor(
     obj_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     obj = await SensorDbService.get_by_id(session, obj_id)
     if not obj:
@@ -201,7 +201,7 @@ async def get_sensor(
 @router.post("", response_model=SensorResponse)
 async def create_sensor(
     item: SensorCreate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     return await SensorDbService.create(session, item.model_dump())
 
@@ -210,7 +210,7 @@ async def create_sensor(
 async def update_sensor(
     obj_id: UUID,
     item: SensorUpdate,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_obj = await SensorDbService.get_by_id(session, obj_id)
     if not db_obj:
@@ -223,7 +223,7 @@ async def update_sensor(
 @router.delete("/{obj_id}")
 async def delete_sensor(
     obj_id: UUID,
-    session: AsyncSession = Depends(db_manager.get_session),
+    session: AsyncSession = Depends(get_session),
 ):
     db_obj = await SensorDbService.get_by_id(session, obj_id)
     if not db_obj:
