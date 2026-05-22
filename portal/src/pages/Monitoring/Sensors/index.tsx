@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import { PageContainer, ProColumns, ProTable } from '@ant-design/pro-components';
 import { Button, Space, Tag, message } from 'antd';
-import { useNavigate } from '@umijs/max';
+import { useNavigate } from 'react-router-dom';
 
 import {
   SensorBatch,
