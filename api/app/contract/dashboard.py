@@ -2,7 +2,7 @@
 Dashboard API contracts
 """
 
-from typing import List
+from typing import List, Optional
 from pydantic import BaseModel
 
 
@@ -19,6 +19,13 @@ class CategoryCountResponse(BaseModel):
     value: int
 
 
+class CategoryTreeNodeResponse(BaseModel):
+    """Recursive tree node for device category anomaly distribution"""
+    name: str
+    value: int
+    children: Optional[List["CategoryTreeNodeResponse"]] = None
+
+
 class DashboardOverviewResponse(BaseModel):
     totalDevices: int
     runningDevices: int
@@ -26,3 +33,5 @@ class DashboardOverviewResponse(BaseModel):
     newDevicesToday: int
     recentAnomalies: List[AnomalyResponse]
     devicesByCategory: List[CategoryCountResponse] = []
+    devicesByCategoryTree: List[CategoryTreeNodeResponse] = []
+

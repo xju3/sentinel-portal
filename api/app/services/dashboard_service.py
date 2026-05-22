@@ -46,6 +46,24 @@ class DashboardService:
         )
         faulty_devices = (await session.execute(stmt_faulty)).scalar() or 0
 
+        # 4a. 按异常类型分类统计 (anomaly=1 震动异常, anomaly=2 温度异常, anomaly=3 双异常)
+        async def _count_by_anomaly(anomaly_value: int) -> int:
+            stmt = (
+                select(func.count(func.distinct(SensorMonitoring.device_inst_id)))
+                .join(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
+                .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
+                .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+                .where(
+                    DeviceCategory.tenant_id == tenant_id,
+                    SensorMonitoring.anomaly == anomaly_value
+                )
+            )
+            return (await session.execute(stmt)).scalar() or 0
+
+        vibration_anomaly_count = await _count_by_anomaly(1)
+        temperature_anomaly_count = await _count_by_anomaly(2)
+        both_anomaly_count = await _count_by_anomaly(3)
+
         # 5. 最新故障预警 (获取存在异常的设备及相关信息，按时间倒序)
         stmt_recent = (
             select(
@@ -76,10 +94,108 @@ class DashboardService:
             } for row in recent_result.all()
         ]
 
+        # 6. 按设备分类树聚合异常设备数量
+        devices_by_category_tree = await DashboardService._get_anomaly_category_tree(
+            session, tenant_id
+        )
+
         return {
             "totalDevices": total_devices,
             "runningDevices": running_devices,
             "faultyDevices": faulty_devices,
             "newDevicesToday": new_devices_today,
-            "recentAnomalies": recent_anomalies
+            "vibrationAnomalyCount": vibration_anomaly_count,
+            "temperatureAnomalyCount": temperature_anomaly_count,
+            "bothAnomalyCount": both_anomaly_count,
+            "recentAnomalies": recent_anomalies,
+            "devicesByCategoryTree": devices_by_category_tree
         }
+
+    @staticmethod
+    async def _get_anomaly_category_tree(
+        session: AsyncSession, tenant_id: UUID
+    ) -> list:
+        """
+        获取按设备分类树聚合的异常设备数量。
+        统计每个最底层分类下 anomaly > 0 的设备数，然后按树形结构向上汇总。
+        """
+        # 1. 获取该租户下所有 DeviceCategory
+        stmt_cats = (
+            select(DeviceCategory)
+            .where(DeviceCategory.tenant_id == tenant_id)
+        )
+        cat_rows = (await session.execute(stmt_cats)).scalars().all()
+
+        # 构建分类映射: id -> {id, name, parent_id, children_ids}
+        cat_map = {}
+        for cat in cat_rows:
+            cat_map[cat.id] = {
+                "id": cat.id,
+                "name": cat.name,
+                "parent_id": cat.parent_id,
+                "children_ids": [],
+            }
+        # 填充 children_ids
+        root_ids = []
+        for cat_id, info in cat_map.items():
+            pid = info["parent_id"]
+            if pid and pid in cat_map:
+                cat_map[pid]["children_ids"].append(cat_id)
+            else:
+                root_ids.append(cat_id)
+
+        # 2. 统计每个最底层分类下 anomaly > 0 的设备数
+        # 查询: 按 device_category_id 分组统计异常设备数
+        stmt_anomaly = (
+            select(
+                DeviceCategory.id.label("category_id"),
+                func.count(func.distinct(SensorMonitoring.device_inst_id)).label("cnt")
+            )
+            .select_from(SensorMonitoring)
+            .join(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
+            .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
+            .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+            .where(
+                DeviceCategory.tenant_id == tenant_id,
+                SensorMonitoring.anomaly > 0
+            )
+            .group_by(DeviceCategory.id)
+        )
+        anomaly_rows = (await session.execute(stmt_anomaly)).all()
+        leaf_counts: dict[UUID, int] = {}
+        for row in anomaly_rows:
+            leaf_counts[row.category_id] = row.cnt
+
+        # 3. 递归构建树，从叶子节点向上汇总
+        def _build_subtree(node_id: UUID) -> dict:
+            info = cat_map[node_id]
+            children = info["children_ids"]
+            if not children:
+                # 叶子节点
+                return {
+                    "name": info["name"],
+                    "value": leaf_counts.get(node_id, 0),
+                }
+            # 非叶子节点：递归构建子节点
+            child_nodes = []
+            total = 0
+            for child_id in children:
+                child_node = _build_subtree(child_id)
+                child_nodes.append(child_node)
+                total += child_node["value"]
+            # 过滤掉 value 为 0 的子节点
+            child_nodes = [c for c in child_nodes if c["value"] > 0]
+            return {
+                "name": info["name"],
+                "value": total,
+                "children": child_nodes if child_nodes else None,
+            }
+
+        tree = []
+        for rid in root_ids:
+            node = _build_subtree(rid)
+            if node["value"] > 0:
+                tree.append(node)
+
+        return tree
+

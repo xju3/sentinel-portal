@@ -1,10 +1,17 @@
 import { useEffect, useRef, useState } from 'react';
 import { PageContainer, ProCard, StatisticCard } from '@ant-design/pro-components';
-import { Badge, List, Tag, Typography, message } from 'antd';
+import { Badge, List, Tag, message } from 'antd';
 import { request } from '@umijs/max';
 import * as echarts from 'echarts';
 
 const { Statistic } = StatisticCard;
+
+// 设备分类树节点类型（递归结构）
+type CategoryTreeNode = {
+  name: string;
+  value: number;
+  children?: CategoryTreeNode[];
+};
 
 // 定义 Dashboard 聚合数据类型
 type DashboardData = {
@@ -12,6 +19,9 @@ type DashboardData = {
   runningDevices: number;
   faultyDevices: number;
   newDevicesToday: number;
+  vibrationAnomalyCount: number;  // anomaly=1 震动异常
+  temperatureAnomalyCount: number; // anomaly=2 温度异常
+  bothAnomalyCount: number;        // anomaly=3 双异常
   recentAnomalies: {
     id: string;
     device_code: string;
@@ -23,6 +33,7 @@ type DashboardData = {
     name: string;
     value: number;
   }[];
+  devicesByCategoryTree?: CategoryTreeNode[];
 };
 
 // 异常状态映射 (根据后端 handler 逻辑)
@@ -39,6 +50,9 @@ const DashboardOverview = () => {
     runningDevices: 0,
     faultyDevices: 0,
     newDevicesToday: 0,
+    vibrationAnomalyCount: 0,
+    temperatureAnomalyCount: 0,
+    bothAnomalyCount: 0,
     recentAnomalies: [],
     devicesByCategory: [],
   });
@@ -64,15 +78,54 @@ const DashboardOverview = () => {
     fetchDashboardData();
   }, []);
 
-  // 初始化和更新 Echarts 饼图及柱状图
+  // 将分类树展平为层级数据，用于多层环形图
+  // 返回 { innerData: 一级分类数据, outerData: 二级分类数据, parentChildMap: 父子映射 }
+  const flattenCategoryTree = (tree: CategoryTreeNode[] | undefined) => {
+    const innerData: { name: string; value: number; itemStyle?: any }[] = [];
+    const outerData: { name: string; value: number; itemStyle?: any }[] = [];
+    const parentChildMap: Record<string, string[]> = {};
+
+    if (!tree || tree.length === 0) return { innerData, outerData, parentChildMap };
+
+    // 预定义颜色调色板
+    const colorPalette = [
+      '#5470c6', '#91cc75', '#fac858', '#ee6666', '#73c0de',
+      '#3ba272', '#fc8452', '#9a60b4', '#ea7ccc', '#f47920',
+    ];
+
+    tree.forEach((root, idx) => {
+      const color = colorPalette[idx % colorPalette.length];
+      innerData.push({
+        name: root.name,
+        value: root.value,
+        itemStyle: { color },
+      });
+
+      if (root.children && root.children.length > 0) {
+        parentChildMap[root.name] = root.children.map((c) => c.name);
+        root.children.forEach((child) => {
+          outerData.push({
+            name: child.name,
+            value: child.value,
+            itemStyle: { color },
+          });
+        });
+      }
+    });
+
+    return { innerData, outerData, parentChildMap };
+  };
+
+  // 初始化和更新 Echarts 饼图及多层环形图
   useEffect(() => {
     let pieChart: echarts.ECharts | undefined;
-    let barChart: echarts.ECharts | undefined;
+    let nestedPieChart: echarts.ECharts | undefined;
     
-    // 计算剩余的“离线/未知”设备数（防止由于统计误差出现负数）
-    const offlineDevices = Math.max(0, data.totalDevices - data.runningDevices - data.faultyDevices);
+    // 计算剩余的"离线/未知"设备数（防止由于统计误差出现负数）
+    const anomalyTotal = data.vibrationAnomalyCount + data.temperatureAnomalyCount + data.bothAnomalyCount;
+    const offlineDevices = Math.max(0, data.totalDevices - data.runningDevices - anomalyTotal);
 
-    // 1. 渲染设备健康分布饼图
+    // 1. 渲染设备健康分布饼图 (区分异常类型: 0=正常, 1=震动异常, 2=温度异常, 3=双异常)
     if (chartRef.current) {
       pieChart = echarts.init(chartRef.current);
       const pieOption = {
@@ -101,7 +154,9 @@ const DashboardOverview = () => {
           labelLine: { show: false },
           data: [
             { value: data.runningDevices, name: '正常运行', itemStyle: { color: '#52c41a' } },
-            { value: data.faultyDevices, name: '故障设备', itemStyle: { color: '#ff4d4f' } },
+            { value: data.vibrationAnomalyCount, name: '震动异常', itemStyle: { color: '#faad14' } },
+            { value: data.temperatureAnomalyCount, name: '温度异常', itemStyle: { color: '#ff4d4f' } },
+            { value: data.bothAnomalyCount, name: '震动+温度异常', itemStyle: { color: '#eb2f96' } },
             { value: offlineDevices, name: '离线/未知', itemStyle: { color: '#d9d9d9' } },
           ].filter(item => item.value > 0) // 过滤掉数值为0的项，使图表更整洁
         }
@@ -110,45 +165,98 @@ const DashboardOverview = () => {
       pieChart.setOption(pieOption);
     }
 
-    // 2. 渲染设备分类统计柱状图
+    // 2. 渲染设备分类异常分布多层环形图
     if (categoryChartRef.current) {
-      barChart = echarts.init(categoryChartRef.current);
-      const categoryData = data.devicesByCategory || [];
-      
-      const barOption = {
-        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },
-        grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },
-        xAxis: {
-          type: 'category',
-          data: categoryData.map((item) => item.name),
-          axisTick: { alignWithLabel: true },
-          axisLabel: { interval: 0, width: 80, overflow: 'truncate' } // 防止文字过长重叠
-        },
-        yAxis: { type: 'value' },
-        series: [
-          {
-            name: '设备数量',
-            type: 'bar',
-            barWidth: '40%',
-            data: categoryData.map((item) => item.value),
-            itemStyle: {
-              borderRadius: [4, 4, 0, 0], // 柱子顶部圆角
-              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: '#83bff6' },
-                { offset: 0.5, color: '#188df0' },
-                { offset: 1, color: '#188df0' }
-              ])
-            }
-          }
-        ]
-      };
-      barChart.setOption(barOption);
+      nestedPieChart = echarts.init(categoryChartRef.current);
+      const { innerData, outerData, parentChildMap } = flattenCategoryTree(data.devicesByCategoryTree);
+
+      // 如果没有数据，显示空状态
+      if (innerData.length === 0) {
+        nestedPieChart.setOption({
+          title: {
+            text: '暂无数据',
+            left: 'center',
+            top: 'center',
+            textStyle: { color: '#999', fontSize: 14 },
+          },
+        });
+      } else {
+        const nestedOption = {
+          tooltip: {
+            trigger: 'item',
+            formatter: (params: any) => {
+              const { name, value, seriesName } = params;
+              return `${seriesName}<br/>${name}: ${value} 台异常`;
+            },
+          },
+          legend: {
+            top: '5%',
+            left: 'center',
+            data: innerData.map((item) => item.name),
+          },
+          series: [
+            {
+              // 内圈：一级分类
+              name: '设备分类异常分布',
+              type: 'pie',
+              selectedMode: 'single',
+              radius: ['0%', '45%'],
+              avoidLabelOverlap: false,
+              label: {
+                show: true,
+                formatter: (params: any) => {
+                  const name = params.name;
+                  const children = parentChildMap[name];
+                  if (children && children.length > 0) {
+                    return `${name}\n${params.value}台`;
+                  }
+                  return `${name}\n${params.value}台`;
+                },
+                fontSize: 11,
+                fontWeight: 'bold',
+              },
+              emphasis: {
+                label: { show: true, fontSize: 14, fontWeight: 'bold' },
+                itemStyle: {
+                  shadowBlur: 10,
+                  shadowOffsetX: 0,
+                  shadowColor: 'rgba(0, 0, 0, 0.5)',
+                },
+              },
+              labelLine: { show: true },
+              data: innerData,
+            },
+            {
+              // 外圈：二级分类
+              name: '子分类异常分布',
+              type: 'pie',
+              radius: ['55%', '80%'],
+              avoidLabelOverlap: false,
+              label: {
+                show: true,
+                formatter: (params: any) => `${params.name}`,
+                fontSize: 10,
+              },
+              emphasis: {
+                label: { show: true, fontSize: 12, fontWeight: 'bold' },
+              },
+              labelLine: {
+                length: 10,
+                length2: 10,
+                smooth: true,
+              },
+              data: outerData,
+            },
+          ],
+        };
+        nestedPieChart.setOption(nestedOption);
+      }
     }
 
     // 监听窗口大小改变，使图表自适应响应式缩放
     const handleResize = () => {
       pieChart?.resize();
-      barChart?.resize();
+      nestedPieChart?.resize();
     };
     window.addEventListener('resize', handleResize);
 
@@ -156,7 +264,7 @@ const DashboardOverview = () => {
     return () => {
       window.removeEventListener('resize', handleResize);
       pieChart?.dispose();
-      barChart?.dispose();
+      nestedPieChart?.dispose();
     };
   }, [data]); // 当 data 数据发生变化时重新渲染图表
 
