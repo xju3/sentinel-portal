@@ -8,7 +8,7 @@ import {
   ProFormText,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Popconfirm, message } from 'antd';
+import { Button, Popconfirm, Space, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 
 import EntityPicker from '@/components/EntityPicker';
@@ -27,7 +27,7 @@ import {
 } from '@/services/deviceSpec';
 import { Supplier, listAllSuppliers, querySuppliers } from '@/services/supplier';
 
-import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
+import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';
 type DeviceSpecFormValues = {
   name: string;
   model: string;
@@ -181,23 +181,23 @@ const DeviceSpecPage = () => {
     {
       title: '型号',
       dataIndex: 'model',
-      width: 160,
+      width: 100,
     },
     {
       title: '品牌',
       dataIndex: 'brand',
-      width: 140,
+      width: 100,
     },
     {
       title: '电压(V)',
       dataIndex: 'voltage',
-      width: 120,
+      width: 100,
       valueType: 'digit',
     },
     {
       title: '转速(RPM)',
       dataIndex: 'rpm',
-      width: 130,
+      width: 100,
       valueType: 'digit',
     },
     {
@@ -207,7 +207,7 @@ const DeviceSpecPage = () => {
       render: (_, row) => supplierMap.get(row.supplier_id) || row.supplier_id,
     },
     {
-      title: '设备分类',
+      title: '分类',
       dataIndex: 'device_category_id',
       width: 180,
       render: (_, row) => categoryMap.get(row.device_category_id) || row.device_category_id,
@@ -222,36 +222,38 @@ const DeviceSpecPage = () => {
     {
       title: '操作',
       valueType: 'option',
-      width: 170,
-      render: (_, row) => [
-        <Button
-          key="edit"
-          type="link"
-          onClick={() => {
-            setEditing(row);
-            setModalOpen(true);
-          }}
-        >
-          编辑
-        </Button>,
-        <Popconfirm
-          key="delete"
-          title="确认删除该设备规格吗？"
-          onConfirm={async () => {
-            try {
-              await deleteDeviceSpec(row.id);
-              message.success('删除成功');
-              await loadRows();
-            } catch (error) {
-              message.error(toErrorMessage(error));
-            }
-          }}
-        >
-          <Button danger type="link">
-            删除
-          </Button>
-        </Popconfirm>,
-      ],
+      width: OPERATION_COL_WIDTH,
+      fixed: 'right',
+      render: (_, row) => (
+        <Space size="middle">
+          <a
+            key="edit"
+            onClick={() => {
+              setEditing(row);
+              setModalOpen(true);
+            }}
+          >
+            编辑
+          </a>
+          <Popconfirm
+            key="delete"
+            title="确认删除该设备规格吗？"
+            onConfirm={async () => {
+              try {
+                await deleteDeviceSpec(row.id);
+                message.success('删除成功');
+                await loadRows();
+              } catch (error) {
+                message.error(toErrorMessage(error));
+              }
+            }}
+          >
+            <a style={{ color: '#ff4d4f' }}>
+              删除
+            </a>
+          </Popconfirm>
+        </Space>
+      ),
     },
   ];
 

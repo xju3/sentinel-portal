@@ -7,7 +7,7 @@ import {
   ProFormSwitch,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Popconfirm, Tag, message } from 'antd';
+import { Button, Popconfirm, Space, Tag, message } from 'antd';
 
 import {
   HealthCheckFreq,
@@ -18,7 +18,7 @@ import {
   updateHealthCheckFreq,
 } from '@/services/healthCheckFreq';
 
-import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
+import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';
 type HealthCheckFreqFormValues = {
   patrol: number;
   diagnosis: number;
@@ -132,41 +132,44 @@ const MonitoringFrequencyPage = () => {
         true: { text: '启用' },
         false: { text: '停用' },
       },
-      render: (_, row) => (row.status ? <Tag color="success">启用</Tag> : <Tag>停用</Tag>),
+      render: (_: any, row: any) =>
+        row.status ? <Tag color="success">启用</Tag> : <Tag>停用</Tag>,
     },
     {
       title: '操作',
       valueType: 'option',
-      width: 180,
-      render: (_, row) => [
-        <Button
-          key="edit"
-          type="link"
-          onClick={() => {
-            setEditing(row);
-            setModalOpen(true);
-          }}
-        >
-          编辑
-        </Button>,
-        <Popconfirm
-          key="delete"
-          title="确认删除该监测频率吗？"
-          onConfirm={async () => {
-            try {
-              await deleteHealthCheckFreq(row.id);
-              message.success('删除成功');
-              await loadRows();
-            } catch (error) {
-              message.error(toErrorMessage(error));
-            }
-          }}
-        >
-          <Button danger type="link">
-            删除
-          </Button>
-        </Popconfirm>,
-      ],
+      width: OPERATION_COL_WIDTH,
+      fixed: 'right',
+      render: (_, row) => (
+        <Space size="middle">
+          <a
+            key="edit"
+            onClick={() => {
+              setEditing(row);
+              setModalOpen(true);
+            }}
+          >
+            编辑
+          </a>
+          <Popconfirm
+            key="delete"
+            title="确认删除该监测频率吗？"
+            onConfirm={async () => {
+              try {
+                await deleteHealthCheckFreq(row.id);
+                message.success('删除成功');
+                await loadRows();
+              } catch (error) {
+                message.error(toErrorMessage(error));
+              }
+            }}
+          >
+            <a style={{ color: '#ff4d4f' }}>
+              删除
+            </a>
+          </Popconfirm>
+        </Space>
+      ),
     },
   ];
 

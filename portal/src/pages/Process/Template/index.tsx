@@ -9,7 +9,7 @@ import {
   ProFormText,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Modal, Popconfirm, message } from 'antd';
+import { Button, Modal, Popconfirm, Space, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 
 import EntityPicker from '@/components/EntityPicker';
@@ -27,7 +27,7 @@ import {
   updateProcessItem,
 } from '@/services/process';
 
-import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
+import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';
 type ProcessFormValues = {
   code: string;
   name: string;
@@ -146,11 +146,11 @@ const ProcessTemplatePage = () => {
       fixed: 'left',
     },
     { title: '工段编码', dataIndex: 'code', width: 140 },
-    { title: '工段名称', dataIndex: 'name', width: 220 },
+    { title: '工段名称', dataIndex: 'name' },
     {
       title: '状态',
+      width: 120,
       dataIndex: 'status',
-      width: 100,
       valueType: 'select',
       valueEnum: {
         1: { text: '启用' },
@@ -161,47 +161,48 @@ const ProcessTemplatePage = () => {
     {
       title: '操作',
       valueType: 'option',
-      width: 260,
-      render: (_, row) => [
-        <Button
-          key="config"
-          type="link"
-          onClick={async () => {
-            setCurrentProcess(row);
-            setConfigOpen(true);
-            await loadItems();
-          }}
-        >
-          配置
-        </Button>,
-        <Button
-          key="edit"
-          type="link"
-          onClick={() => {
-            setEditing(row);
-            setModalOpen(true);
-          }}
-        >
-          编辑
-        </Button>,
-        <Popconfirm
-          key="delete"
-          title="确认删除该工段模板吗？"
-          onConfirm={async () => {
-            try {
-              await deleteProcess(row.id);
-              message.success('删除成功');
-              await loadProcesses();
-            } catch (error) {
-              message.error(toErrorMessage(error));
-            }
-          }}
-        >
-          <Button danger type="link">
-            删除
-          </Button>
-        </Popconfirm>,
-      ],
+      width: OPERATION_COL_WIDTH,
+      fixed: 'right',
+      render: (_, row) => (
+        <Space size="middle">
+          <a
+            key="config"
+            onClick={async () => {
+              setCurrentProcess(row);
+              setConfigOpen(true);
+              await loadItems();
+            }}
+          >
+            配置
+          </a>
+          <a
+            key="edit"
+            onClick={() => {
+              setEditing(row);
+              setModalOpen(true);
+            }}
+          >
+            编辑
+          </a>
+          <Popconfirm
+            key="delete"
+            title="确认删除该工段模板吗？"
+            onConfirm={async () => {
+              try {
+                await deleteProcess(row.id);
+                message.success('删除成功');
+                await loadProcesses();
+              } catch (error) {
+                message.error(toErrorMessage(error));
+              }
+            }}
+          >
+            <a style={{ color: '#ff4d4f' }}>
+              删除
+            </a>
+          </Popconfirm>
+        </Space>
+      ),
     },
   ];
 
@@ -225,36 +226,38 @@ const ProcessTemplatePage = () => {
     {
       title: '操作',
       valueType: 'option',
-      width: 180,
-      render: (_, row) => [
-        <Button
-          key="edit"
-          type="link"
-          onClick={() => {
-            setEditingItem(row);
-            setItemModalOpen(true);
-          }}
-        >
-          编辑
-        </Button>,
-        <Popconfirm
-          key="delete"
-          title="确认删除该子项吗？"
-          onConfirm={async () => {
-            try {
-              await deleteProcessItem(row.id);
-              message.success('删除成功');
-              await loadItems();
-            } catch (error) {
-              message.error(toErrorMessage(error));
-            }
-          }}
-        >
-          <Button danger type="link">
-            删除
-          </Button>
-        </Popconfirm>,
-      ],
+      width: OPERATION_COL_WIDTH,
+      fixed: 'right',
+      render: (_, row) => (
+        <Space size="middle">
+          <a
+            key="edit"
+            onClick={() => {
+              setEditingItem(row);
+              setItemModalOpen(true);
+            }}
+          >
+            编辑
+          </a>
+          <Popconfirm
+            key="delete"
+            title="确认删除该子项吗？"
+            onConfirm={async () => {
+              try {
+                await deleteProcessItem(row.id);
+                message.success('删除成功');
+                await loadItems();
+              } catch (error) {
+                message.error(toErrorMessage(error));
+              }
+            }}
+          >
+            <a style={{ color: '#ff4d4f' }}>
+              删除
+            </a>
+          </Popconfirm>
+        </Space>
+      ),
     },
   ];
 

@@ -158,6 +158,8 @@ def _serialize_device_category(
         "health_check_freq_id": item.health_check_freq_id,
         "tenant_id": item.tenant_id,
         "iso_standard_id": item.iso_standard_id,
+        "vib_threshold_id": item.vib_threshold_id,
+        "temp_threshold_id": item.temp_threshold_id,
         "health_check_freq": (
             {
                 "id": freq_obj.id,

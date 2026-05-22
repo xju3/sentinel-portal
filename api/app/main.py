@@ -14,7 +14,7 @@ from app.database import db_manager, redis_manager, influxdb_manager, minio_mana
 from app.clients.mqtt import mqtt_manager
 from app.clients.handler import patrol_msg_handler
 from app.utils.logger import setup_logging
-from app.routers import auth, health, sensors, devices, customers, admin, dashboard
+from app.routers import auth, health, sensors, devices, customers, admin, dashboard, thresholds
 
 # Setup logging
 setup_logging()
@@ -104,6 +104,7 @@ app.include_router(devices.router, prefix=settings.api_prefix)
 app.include_router(auth.router, prefix=settings.api_prefix)
 app.include_router(admin.router, prefix=settings.api_prefix)
 app.include_router(dashboard.router, prefix=settings.api_prefix)
+app.include_router(thresholds.router, prefix=settings.api_prefix)
 
 # Root endpoint
 @app.get("/")

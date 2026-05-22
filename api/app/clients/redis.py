@@ -86,7 +86,7 @@ class RedisClient:
                     # Cache the result in Redis with 1-hour TTL
                     if self._ensure_redis():
                         try:
-                            self._client.setex(cache_key, 0, result)  # type: ignore[union-attr]
+                            self._client.set(cache_key, result)  # type: ignore[union-attr]
                         except Exception as e:
                             logger.debug(f"Failed to cache max_len for SN={sn}: {e}")
                     return result

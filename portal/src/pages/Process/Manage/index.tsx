@@ -28,7 +28,7 @@ import {
   updateProcessDevice,
 } from '@/services/process';
 
-import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
+import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';
 type ProcessDeviceFormValues = {
   code: string;
   sn: string;
@@ -40,10 +40,10 @@ type ProcessDeviceFormValues = {
 const toErrorMessage = (error: unknown): string => {
   const e = error as
     | {
-        data?: { detail?: string };
-        info?: { errorMessage?: string };
-        message?: string;
-      }
+      data?: { detail?: string };
+      info?: { errorMessage?: string };
+      message?: string;
+    }
     | undefined;
   return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';
 };
@@ -195,24 +195,21 @@ const ProcessManagePage = () => {
 
   const columns: ProColumns<ProcessDevice>[] = [
     { title: '序号', valueType: 'indexBorder', width: 68, hideInSearch: true, fixed: 'left' },
-    { title: '实例编码', dataIndex: 'code', width: 140 },
-    { title: '实例SN', dataIndex: 'sn', width: 180 },
+    { title: '实例编码', dataIndex: 'code'},
+    { title: '实例SN', dataIndex: 'sn' },
     {
       title: '工段模板',
       dataIndex: 'process_id',
-      width: 220,
       render: (_, row) => processMap.get(row.process_id)?.name || row.process_id,
     },
     {
       title: '工作区域',
       dataIndex: 'area_id',
-      width: 180,
       render: (_, row) => (row.area_id ? areaMap.get(row.area_id) || row.area_id : '-'),
     },
     {
       title: '状态',
       dataIndex: 'status',
-      width: 100,
       valueType: 'select',
       valueEnum: { 1: { text: '启用' }, 0: { text: '停用' } },
       render: (_, row) => (Number(row.status) === 1 ? '启用' : '停用'),
@@ -220,47 +217,50 @@ const ProcessManagePage = () => {
     {
       title: '操作',
       valueType: 'option',
-      width: 260,
-      render: (_, row) => [
-        <Button
-          key="config"
-          type="link"
-          onClick={() => {
-            setCurrentInstance(row);
-            initializeConfigSelections(row);
-            setConfigOpen(true);
-          }}
-        >
-          配置
-        </Button>,
-        <Button
-          key="edit"
-          type="link"
-          onClick={() => {
-            setEditing(row);
-            setModalOpen(true);
-          }}
-        >
-          编辑
-        </Button>,
-        <Popconfirm
-          key="delete"
-          title="确认删除该工段实例吗？"
-          onConfirm={async () => {
-            try {
-              await deleteProcessDevice(row.id);
-              message.success('删除成功');
-              await loadAll();
-            } catch (error) {
-              message.error(toErrorMessage(error));
-            }
-          }}
-        >
-          <Button danger type="link">
-            删除
+      width: OPERATION_COL_WIDTH,
+      fixed: 'right',
+      render: (_, row) => (
+        <Space size="middle">
+          <Button
+            key="config"
+            type="link"
+            onClick={() => {
+              setCurrentInstance(row);
+              initializeConfigSelections(row);
+              setConfigOpen(true);
+            }}
+          >
+            配置
           </Button>
-        </Popconfirm>,
-      ],
+          <Button
+            key="edit"
+            type="link"
+            onClick={() => {
+              setEditing(row);
+              setModalOpen(true);
+            }}
+          >
+            编辑
+          </Button>
+          <Popconfirm
+            key="delete"
+            title="确认删除该工段实例吗？"
+            onConfirm={async () => {
+              try {
+                await deleteProcessDevice(row.id);
+                message.success('删除成功');
+                await loadAll();
+              } catch (error) {
+                message.error(toErrorMessage(error));
+              }
+            }}
+          >
+            <Button danger type="link">
+              删除
+            </Button>
+          </Popconfirm>
+        </Space>
+      ),
     },
   ];
 
@@ -316,12 +316,12 @@ const ProcessManagePage = () => {
         initialValues={
           editing
             ? {
-                code: editing.code,
-                sn: editing.sn,
-                process_id: editing.process_id,
-                area_id: editing.area_id || undefined,
-                status: Number(editing.status),
-              }
+              code: editing.code,
+              sn: editing.sn,
+              process_id: editing.process_id,
+              area_id: editing.area_id || undefined,
+              status: Number(editing.status),
+            }
             : { status: 1 }
         }
         onFinish={async (values) => {

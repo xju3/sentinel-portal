@@ -4,7 +4,7 @@ Sensor data models
 
 import uuid
 from datetime import datetime
-from sqlalchemy import Uuid, Column, SmallInteger, Integer, String, Float, DateTime, Boolean, Text, BigInteger
+from sqlalchemy import Uuid, Column, SmallInteger, Numeric, Integer, String, Float, DateTime, Boolean, Text, BigInteger
 
 from sqlalchemy.dialects.mysql import JSON as MySQLJSON
 
@@ -95,3 +95,20 @@ class SensorMonitoring(Base):
     anomaly = Column(SmallInteger, nullable=False, default=0, comment="是否有异常: 0=正常, 1=异常")
     ts = Column(BigInteger, nullable=True, comment="异常发生时间戳(Unix毫秒)")
     status = Column(SmallInteger, default=1, comment="tiny(1) status")
+
+
+class SensorThreshold(Base):
+    """Sensor threshold entity model"""
+
+    __tablename__ = "sensor_threshold"
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    code = Column(String(8), nullable=False, index=True)  # Link to sensor_types
+    metric = Column(SmallInteger, nullable=False)  # e.g. '1: temperature', '2. vibration'
+    rt_max_delta = Column(Numeric(10, 4), nullable=False)  # Real-time max delta threshold
+    st_max_slope = Column(Numeric(10, 4), nullable=False)
+    st_max_amplitude = Column(Numeric(10, 4), nullable=False)
+    mt_max_slope = Column(Numeric(10, 4), nullable=False)
+    mt_max_amplitude = Column(Numeric(10, 4), nullable=False)
+    baseline = Column(Numeric(10, 4), nullable=False)
+    tenant_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to tenant for multi-tenant support

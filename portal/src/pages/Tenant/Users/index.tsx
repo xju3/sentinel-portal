@@ -167,21 +167,24 @@ const TenantUsersPage = () => {
       title: '操作',
       key: 'action',
       width: 100,
+      fixed: 'right',
       render: (_: any, record: AccountInfo) => {
         const isSelf = record.id === currentAccountId;
         if (isSelf) return null;
         return (
-          <Popconfirm
-            title="确认删除"
-            description={`确定要删除用户 "${record.username}" 吗？`}
-            onConfirm={() => handleDelete(record)}
-            okText="确认"
-            cancelText="取消"
-          >
-            <Button type="link" danger>
-              删除
-            </Button>
-          </Popconfirm>
+          <Space>
+            <Popconfirm
+              title="确认删除"
+              description={`确定要删除用户 "${record.username}" 吗？`}
+              onConfirm={() => handleDelete(record)}
+              okText="确认"
+              cancelText="取消"
+            >
+              <Button type="link" danger>
+                删除
+              </Button>
+            </Popconfirm>
+          </Space>
         );
       },
     },

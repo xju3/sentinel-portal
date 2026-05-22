@@ -62,7 +62,7 @@ export default defineConfig({
         {
           path: '/data/suppliers',
           name: '合作厂商',
-          component: '@/pages/Device/Supplier',
+          component: '@/pages/Supplier',
         },
         {
           path: '/data/locations',
@@ -153,6 +153,11 @@ export default defineConfig({
           path: '/monitoring/sensors',
           name: '设备批次',
           component: '@/pages/Monitoring/Sensors',
+        },
+        {
+          path: '/monitoring/threshold',
+          name: '阀值定义',
+          component: '@/pages/Monitoring/Threshold',
         },
         {
           path: '/monitoring',

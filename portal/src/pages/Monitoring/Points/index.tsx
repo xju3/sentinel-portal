@@ -7,7 +7,7 @@ import {
   ProFormSelect,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Popconfirm, message } from 'antd';
+import { Button, Popconfirm, Space, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 
 import EntityPicker from '@/components/EntityPicker';
@@ -167,7 +167,6 @@ const MonitoringPointsPage = () => {
       title: '传感器',
       dataIndex: 'sensor_id',
       width: 180,
-      render: (_, row) => (row.sensor_id ? sensorMap.get(row.sensor_id) || row.sensor_id : '-'),
     },
     {
       title: '方向',
@@ -208,7 +207,7 @@ const MonitoringPointsPage = () => {
       dataIndex: 'ts',
       width: 180,
       hideInSearch: true,
-      render: (_, row) => {
+      render: (_: any, row: any) => {
         if (!row.ts) return '-';
         const d = new Date(Number(row.ts));
         return d.toLocaleString('zh-CN', { hour12: false });
@@ -229,35 +228,38 @@ const MonitoringPointsPage = () => {
       title: '操作',
       valueType: 'option',
       width: 180,
-      render: (_, row) => [
-        <Button
-          key="edit"
-          type="link"
-          onClick={() => {
-            setEditing(row);
-            setModalOpen(true);
-          }}
-        >
-          编辑
-        </Button>,
-        <Popconfirm
-          key="delete"
-          title="确认删除该测点绑定吗？"
-          onConfirm={async () => {
-            try {
-              await deleteSensorMonitoring(row.id);
-              message.success('删除成功');
-              await loadData();
-            } catch (error) {
-              message.error(toErrorMessage(error));
-            }
-          }}
-        >
-          <Button danger type="link">
-            删除
+      fixed: 'right',
+      render: (_, row) => (
+        <Space size="middle">
+          <Button
+            key="edit"
+            type="link"
+            onClick={() => {
+              setEditing(row);
+              setModalOpen(true);
+            }}
+          >
+            编辑
           </Button>
-        </Popconfirm>,
-      ],
+          <Popconfirm
+            key="delete"
+            title="确认删除该测点绑定吗？"
+            onConfirm={async () => {
+              try {
+                await deleteSensorMonitoring(row.id);
+                message.success('删除成功');
+                await loadData();
+              } catch (error) {
+                message.error(toErrorMessage(error));
+              }
+            }}
+          >
+            <Button danger type="link">
+              删除
+            </Button>
+          </Popconfirm>
+        </Space>
+      ),
     },
   ];
 

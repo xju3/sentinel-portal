@@ -48,6 +48,8 @@ class DeviceCategoryCreate(BaseModel):
     health_check_freq_id: UUID
     tenant_id: Optional[UUID] = None
     iso_standard_id: Optional[UUID] = None
+    vib_threshold_id: Optional[UUID] = None
+    temp_threshold_id: Optional[UUID] = None
 
 
 class DeviceCategoryUpdate(BaseModel):
@@ -57,6 +59,8 @@ class DeviceCategoryUpdate(BaseModel):
     health_check_freq_id: Optional[UUID] = None
     tenant_id: Optional[UUID] = None
     iso_standard_id: Optional[UUID] = None
+    vib_threshold_id: Optional[UUID] = None
+    temp_threshold_id: Optional[UUID] = None
 
 
 class HealthCheckFreqBrief(BaseModel):
@@ -77,6 +81,8 @@ class DeviceCategoryResponse(BaseModel):
     health_check_freq_id: UUID
     tenant_id: Optional[UUID] = None
     iso_standard_id: Optional[UUID] = None
+    vib_threshold_id: Optional[UUID] = None
+    temp_threshold_id: Optional[UUID] = None
     health_check_freq: Optional[HealthCheckFreqBrief] = None
 
     model_config = ConfigDict(from_attributes=True)

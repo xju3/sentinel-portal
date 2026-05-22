@@ -16,6 +16,8 @@ export type DeviceCategory = {
   health_check_freq_id: string;
   tenant_id?: string | null;
   iso_standard_id?: string | null;
+  vib_threshold_id?: string | null;
+  temp_threshold_id?: string | null;
   health_check_freq?: HealthCheckFreqRef | null;
 };
 
@@ -25,6 +27,8 @@ export type DeviceCategoryPayload = {
   parent_id?: string | null;
   health_check_freq_id: string;
   iso_standard_id?: string | null;
+  vib_threshold_id?: string | null;
+  temp_threshold_id?: string | null;
 };
 
 export type HealthCheckFreq = {

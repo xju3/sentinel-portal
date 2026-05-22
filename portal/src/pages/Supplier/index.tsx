@@ -7,7 +7,7 @@ import {
   ProFormText,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Popconfirm, Tag, message } from 'antd';
+import { Button, Popconfirm, Space, Tag, message } from 'antd';
 
 import {
   Supplier,
@@ -18,7 +18,7 @@ import {
   updateSupplier,
 } from '@/services/supplier';
 
-import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
+import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';
 type SupplierFormValues = {
   name: string;
   brand: string;
@@ -116,36 +116,38 @@ const DeviceSupplierPage = () => {
     {
       title: '操作',
       valueType: 'option',
-      width: 170,
-      render: (_, row) => [
-        <Button
-          key="edit"
-          type="link"
-          onClick={() => {
-            setEditing(row);
-            setModalOpen(true);
-          }}
-        >
-          编辑
-        </Button>,
-        <Popconfirm
-          key="delete"
-          title="确认删除该供应商吗？"
-          onConfirm={async () => {
-            try {
-              await deleteSupplier(row.id);
-              message.success('删除成功');
-              await loadRows();
-            } catch (error) {
-              message.error(toErrorMessage(error));
-            }
-          }}
-        >
-          <Button danger type="link">
-            删除
-          </Button>
-        </Popconfirm>,
-      ],
+      width: OPERATION_COL_WIDTH,
+      fixed: 'right',
+      render: (_, row) => (
+        <Space size="middle">
+          <a
+            key="edit"
+            onClick={() => {
+              setEditing(row);
+              setModalOpen(true);
+            }}
+          >
+            编辑
+          </a>
+          <Popconfirm
+            key="delete"
+            title="确认删除该供应商吗？"
+            onConfirm={async () => {
+              try {
+                await deleteSupplier(row.id);
+                message.success('删除成功');
+                await loadRows();
+              } catch (error) {
+                message.error(toErrorMessage(error));
+              }
+            }}
+          >
+            <a style={{ color: '#ff4d4f' }}>
+              删除
+            </a>
+          </Popconfirm>
+        </Space>
+      ),
     },
   ];
 

@@ -28,6 +28,8 @@ class DeviceCategory(Base):
     name = Column(String(64), nullable=False, unique=True)
     description = Column(String(255))
     parent_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Self-referential link for category hierarchy
+    vib_threshold_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Optional link to vibration threshold for default values
+    temp_threshold_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Optional link to temperature threshold for default values
     health_check_freq_id  = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to health_check_freq for default frequencies
     tenant_id = Column(Uuid(as_uuid=True), default=uuid.uuid4, index=False) # link to tenant for multi-tenant support
     iso_standard_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Optional link to ISO standard for compliance reference

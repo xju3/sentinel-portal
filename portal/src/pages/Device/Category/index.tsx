@@ -8,7 +8,7 @@ import {
   ProFormText,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Popconfirm, message } from 'antd';
+import { Button, Popconfirm, Space, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import EntityPicker from '@/components/EntityPicker';
 
@@ -23,8 +23,9 @@ import {
   queryDeviceCategories,
   updateDeviceCategory,
 } from '@/services/deviceCategory';
+import { listSensorThresholds } from '@/services/sensorThreshold';
 
-import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
+import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';
 type CategoryTreeRow = DeviceCategory & {
   children?: CategoryTreeRow[];
 };
@@ -35,15 +36,17 @@ type CategoryFormValues = {
   parent_id?: string;
   health_check_freq_id: string;
   iso_standard_id?: string;
+  vib_threshold_id?: string;
+  temp_threshold_id?: string;
 };
 
 const toErrorMessage = (error: unknown): string => {
   const e = error as
     | {
-        data?: { detail?: string };
-        info?: { errorMessage?: string };
-        message?: string;
-      }
+      data?: { detail?: string };
+      info?: { errorMessage?: string };
+      message?: string;
+    }
     | undefined;
   return (
     e?.data?.detail ||
@@ -100,6 +103,19 @@ const DeviceCategoryPage = () => {
     { label: string; value: string }[]
   >([]);
   const [isoOptions, setIsoOptions] = useState<{ label: string; value: string }[]>([]);
+  const [vibThresholdOptions, setVibThresholdOptions] = useState<
+    { label: string; value: string }[]
+  >([]);
+  const [tempThresholdOptions, setTempThresholdOptions] = useState<
+    { label: string; value: string }[]
+  >([]);
+
+  const thresholdLabelMap = useMemo(() => {
+    const map = new Map<string, string>();
+    vibThresholdOptions.forEach((opt) => map.set(opt.value, opt.label));
+    tempThresholdOptions.forEach((opt) => map.set(opt.value, opt.label));
+    return map;
+  }, [vibThresholdOptions, tempThresholdOptions]);
 
   const treeData = useMemo(() => buildCategoryTree(categories), [categories]);
   const categoryMap = useMemo(
@@ -150,7 +166,11 @@ const DeviceCategoryPage = () => {
 
   const loadReferences = async () => {
     try {
-      const [freqs, isos] = await Promise.all([listHealthCheckFreqs(), listIsoStandards()]);
+      const [freqs, isos, thresholds] = await Promise.all([
+        listHealthCheckFreqs(),
+        listIsoStandards(),
+        listSensorThresholds(),
+      ]);
       setHealthFreqOptions(
         (freqs || []).map((item) => ({
           value: item.id,
@@ -162,6 +182,22 @@ const DeviceCategoryPage = () => {
           value: item.id,
           label: `${item.code} - ${item.name}`,
         })),
+      );
+      setVibThresholdOptions(
+        (thresholds || [])
+          .filter((item) => item.metric === 1)
+          .map((item) => ({
+            value: item.id,
+            label: `${item.code} - 振动阀值`,
+          })),
+      );
+      setTempThresholdOptions(
+        (thresholds || [])
+          .filter((item) => item.metric === 2)
+          .map((item) => ({
+            value: item.id,
+            label: `${item.code} - 温度阀值`,
+          })),
       );
     } catch (error) {
       message.error(toErrorMessage(error));
@@ -182,23 +218,42 @@ const DeviceCategoryPage = () => {
       fixed: 'left',
     },
     {
-      title: '分类名称',
+      title: '名称',
       dataIndex: 'name',
-      width: 220,
+      width: 120,
+    },
+    // {
+    //   title: '上级',
+    //   dataIndex: 'parent_name',
+    //   width: 100,
+    //   render: (_, row) => {
+    //     if (!row.parent_id) {
+    //       return '-';
+    //     }
+    //     return categoryMap.get(row.parent_id)?.name || row.parent_id;
+    //   },
+    // },
+
+    {
+      title: '振动阀值',
+      dataIndex: 'vib_threshold_id',
+      ellipsis: true,
+      render: (_, row) =>
+        row.vib_threshold_id
+          ? thresholdLabelMap.get(row.vib_threshold_id) || row.vib_threshold_id
+          : '-',
     },
     {
-      title: '上级分类',
-      dataIndex: 'parent_name',
-      width: 220,
-      render: (_, row) => {
-        if (!row.parent_id) {
-          return '-';
-        }
-        return categoryMap.get(row.parent_id)?.name || row.parent_id;
-      },
+      title: '温度阀值',
+      dataIndex: 'temp_threshold_id',
+      ellipsis: true,
+      render: (_, row) =>
+        row.temp_threshold_id
+          ? thresholdLabelMap.get(row.temp_threshold_id) || row.temp_threshold_id
+          : '-',
     },
     {
-      title: '巡检频率',
+      title: '监测频率',
       dataIndex: 'health_check_freq_id',
       ellipsis: true,
       render: (_, row) => {
@@ -210,7 +265,7 @@ const DeviceCategoryPage = () => {
       },
     },
     {
-      title: 'ISO标准',
+      title: 'ISO',
       dataIndex: 'iso_standard_id',
       ellipsis: true,
       render: (_, row) => row.iso_standard_id || '-',
@@ -224,48 +279,47 @@ const DeviceCategoryPage = () => {
     {
       title: '操作',
       valueType: 'option',
-      width: 240,
-      render: (_, row) => [
-        <Button
-          key="create-child"
-          type="link"
-          onClick={() => {
-            setEditing(null);
-            setCreateChildParent(row);
-            setModalOpen(true);
-          }}
-        >
-          新建
-        </Button>,
-        <Button
-          key="edit"
-          type="link"
-          onClick={() => {
-            setCreateChildParent(null);
-            setEditing(row);
-            setModalOpen(true);
-          }}
-        >
-          编辑
-        </Button>,
-        <Popconfirm
-          key="delete"
-          title="确认删除该分类吗？"
-          onConfirm={async () => {
-            try {
-              await deleteDeviceCategory(row.id);
-              message.success('删除成功');
-              await loadCategories();
-            } catch (error) {
-              message.error(toErrorMessage(error));
-            }
-          }}
-        >
-          <Button danger type="link">
-            删除
-          </Button>
-        </Popconfirm>,
-      ],
+      width: OPERATION_COL_WIDTH,
+      fixed: 'right',
+      render: (_, row) => (
+        <Space size="middle">
+          <a
+            key="create-child"
+            onClick={() => {
+              setEditing(null);
+              setCreateChildParent(row);
+              setModalOpen(true);
+            }}
+          >
+            新建
+          </a>
+          <a
+            key="edit"
+            onClick={() => {
+              setCreateChildParent(null);
+              setEditing(row);
+              setModalOpen(true);
+            }}
+          >
+            编辑
+          </a>
+          <Popconfirm
+            key="delete"
+            title="确认删除该分类吗？"
+            onConfirm={async () => {
+              try {
+                await deleteDeviceCategory(row.id);
+                message.success('删除成功');
+                await loadCategories();
+              } catch (error) {
+                message.error(toErrorMessage(error));
+              }
+            }}
+          >
+            <a style={{ color: '#ff4d4f' }}>删除</a>
+          </Popconfirm>
+        </Space>
+      ),
     },
   ];
 
@@ -329,6 +383,11 @@ const DeviceCategoryPage = () => {
         dataSource={filteredTreeData}
         pagination={false}
         search={{ labelWidth: 'auto' }}
+        expandable={{
+          childrenColumnName: 'children',
+          defaultExpandAllRows: true,
+          rowExpandable: (record) => !!(record.children && record.children.length > 0),
+        }}
         onSubmit={(values) => setQuery(values)}
         onReset={() => setQuery({})}
         options={{ reload: loadCategories }}
@@ -376,16 +435,18 @@ const DeviceCategoryPage = () => {
         initialValues={
           editing
             ? {
-                name: editing.name,
-                description: editing.description,
-                parent_id: editing.parent_id || undefined,
-                health_check_freq_id: editing.health_check_freq_id,
-                iso_standard_id: editing.iso_standard_id || undefined,
-              }
+              name: editing.name,
+              description: editing.description,
+              parent_id: editing.parent_id || undefined,
+              health_check_freq_id: editing.health_check_freq_id,
+              iso_standard_id: editing.iso_standard_id || undefined,
+              vib_threshold_id: editing.vib_threshold_id || undefined,
+              temp_threshold_id: editing.temp_threshold_id || undefined,
+            }
             : createChildParent
               ? {
-                  parent_id: createChildParent.id,
-                }
+                parent_id: createChildParent.id,
+              }
               : undefined
         }
         onFinish={async (values) => {
@@ -395,6 +456,8 @@ const DeviceCategoryPage = () => {
             parent_id: values.parent_id || null,
             health_check_freq_id: values.health_check_freq_id,
             iso_standard_id: values.iso_standard_id || null,
+            vib_threshold_id: values.vib_threshold_id || null,
+            temp_threshold_id: values.temp_threshold_id || null,
           };
           setSaving(true);
           try {
@@ -426,6 +489,8 @@ const DeviceCategoryPage = () => {
           options={healthFreqOptions}
         />
         <ProFormSelect name="iso_standard_id" label="ISO标准" options={isoOptions} />
+        <ProFormSelect name="vib_threshold_id" label="振动阀值" options={vibThresholdOptions} />
+        <ProFormSelect name="temp_threshold_id" label="温度阀值" options={tempThresholdOptions} />
         <ProForm.Item name="parent_id" label="上级分类">
           <EntityPicker<DeviceCategory>
             placeholder="可选，点击选择上级分类"

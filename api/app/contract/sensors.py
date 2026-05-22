@@ -103,3 +103,43 @@ class SensorResponse(BaseModel):
 class PagedSensorResponse(BaseModel):
     items: List[SensorResponse]
     total: int
+
+
+# ==========================================
+# SensorThreshold
+# ==========================================
+class SensorThresholdCreate(BaseModel):
+    code: str
+    metric: int
+    rt_max_delta: float
+    st_max_slope: float
+    st_max_amplitude: float
+    mt_max_slope: float
+    mt_max_amplitude: float
+    baseline: float
+
+
+class SensorThresholdUpdate(BaseModel):
+    code: Optional[str] = None
+    metric: Optional[int] = None
+    rt_max_delta: Optional[float] = None
+    st_max_slope: Optional[float] = None
+    st_max_amplitude: Optional[float] = None
+    mt_max_slope: Optional[float] = None
+    mt_max_amplitude: Optional[float] = None
+    baseline: Optional[float] = None
+
+
+class SensorThresholdResponse(BaseModel):
+    id: UUID
+    code: str
+    metric: int
+    rt_max_delta: float
+    st_max_slope: float
+    st_max_amplitude: float
+    mt_max_slope: float
+    mt_max_amplitude: float
+    baseline: float
+    tenant_id: UUID
+
+    model_config = ConfigDict(from_attributes=True)

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { PageContainer, ProColumns, ProTable } from '@ant-design/pro-components';
-import { Button, Tag, message } from 'antd';
+import { Button, Space, Tag, message } from 'antd';
 import { useNavigate } from '@umijs/max';
 
 import {
@@ -9,7 +9,7 @@ import {
 } from '@/services/sensorBatch';
 import { listSensorTypes, SensorType } from '@/services/sensorType';
 
-import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
+import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';
 
 const toErrorMessage = (error: unknown): string => {
   const e = error as
@@ -108,7 +108,7 @@ const MonitoringSensorsPage = () => {
     {
       title: '状态',
       dataIndex: 'status',
-      width: 100,
+      width: OPERATION_COL_WIDTH,
       valueType: 'select',
       valueEnum: {
         0: { text: '计划中', status: 'Default' },
@@ -138,16 +138,18 @@ const MonitoringSensorsPage = () => {
     {
       title: '操作',
       valueType: 'option',
-      width: 100,
-      render: (_, row) => [
-        <Button
-          key="devices"
-          type="link"
-          onClick={() => navigate(`/monitoring/sensors/batch-devices/${row.id}`)}
-        >
-          设备
-        </Button>,
-      ],
+      width: OPERATION_COL_WIDTH,
+      fixed: 'right',
+      render: (_, row) => (
+        <Space size="middle">
+          <a
+            key="devices"
+            onClick={() => navigate(`/monitoring/sensors/batch-devices/${row.id}`)}
+          >
+            设备
+          </a>
+        </Space>
+      ),
     },
   ];
 
