@@ -263,6 +263,7 @@ const DeviceSpecPage = () => {
         rowKey="id"
         loading={loading}
         columns={columns}
+        scroll={{ x: 'max-content' }}
         dataSource={filteredRows}
         search={{ labelWidth: 'auto' }}
         onSubmit={(values) => setQuery(values)}

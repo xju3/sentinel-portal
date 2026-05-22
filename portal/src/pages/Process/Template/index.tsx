@@ -275,6 +275,7 @@ const ProcessTemplatePage = () => {
         rowKey="id"
         loading={loading}
         columns={columns}
+        scroll={{ x: 'max-content' }}
         dataSource={filteredRows}
         search={{ labelWidth: 'auto' }}
         onSubmit={(values) => setQuery(values)}
@@ -384,6 +385,7 @@ const ProcessTemplatePage = () => {
         <ProTable<ProcessItem>
           rowKey="id"
           columns={itemColumns}
+          scroll={{ x: 'max-content' }}
           dataSource={currentProcessItems}
           search={false}
           pagination={{ pageSize: 8 }}

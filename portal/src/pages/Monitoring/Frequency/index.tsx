@@ -182,6 +182,7 @@ const MonitoringFrequencyPage = () => {
         onReset={() => setQuery({})}
         loading={loading}
         columns={columns}
+        scroll={{ x: 'max-content' }}
         dataSource={filteredRows}
         options={{ reload: loadRows }}
         optionsRender={renderRefSafeTableOptions}

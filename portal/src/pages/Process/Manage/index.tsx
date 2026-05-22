@@ -219,6 +219,7 @@ const ProcessManagePage = () => {
       valueType: 'option',
       width: OPERATION_COL_WIDTH,
       fixed: 'right',
+      align: 'center',
       render: (_, row) => (
         <Space size="middle">
           <Button
@@ -279,6 +280,7 @@ const ProcessManagePage = () => {
         rowKey="id"
         loading={loading}
         columns={columns}
+        scroll={{ x: 'max-content' }}
         dataSource={filteredRows}
         search={{ labelWidth: 'auto' }}
         onSubmit={(values) => setQuery(values)}

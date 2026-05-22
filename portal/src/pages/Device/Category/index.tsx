@@ -380,6 +380,7 @@ const DeviceCategoryPage = () => {
         rowKey="id"
         loading={tableLoading}
         columns={columns}
+        scroll={{ x: 'max-content' }}
         dataSource={filteredTreeData}
         pagination={false}
         search={{ labelWidth: 'auto' }}

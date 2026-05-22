@@ -207,6 +207,7 @@ const TenantUsersPage = () => {
           rowKey="id"
           loading={loading}
           pagination={false}
+          scroll={{ x: 'max-content' }}
         />
       </ProCard>
 
