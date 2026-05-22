@@ -197,6 +197,45 @@ class AccountService:
         return result.scalar_one_or_none()
 
     @staticmethod
+    async def get_admin_accounts(session: AsyncSession) -> List[Account]:
+        stmt = select(Account).where(Account.admin == True)  # noqa: E712
+        result = await session.execute(stmt)
+        return result.scalars().all()
+
+    @staticmethod
+    async def get_admin_account(session: AsyncSession, account_id: UUID) -> Optional[Account]:
+        stmt = select(Account).where(
+            Account.id == account_id,
+            Account.admin == True,  # noqa: E712
+        )
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def get_tenant_accounts(session: AsyncSession, tenant_id: UUID) -> List[Account]:
+        stmt = select(Account).where(Account.tenant_id == tenant_id)
+        result = await session.execute(stmt)
+        return result.scalars().all()
+
+    @staticmethod
+    async def get_tenant_account(session: AsyncSession, account_id: UUID, tenant_id: UUID) -> Optional[Account]:
+        stmt = select(Account).where(
+            Account.id == account_id,
+            Account.tenant_id == tenant_id,
+        )
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def get_contacts_by_ids(session: AsyncSession, contact_ids: List[UUID]) -> dict:
+        """Batch fetch contacts by IDs and return a dict of {id: name}."""
+        if not contact_ids:
+            return {}
+        stmt = select(Contact).where(Contact.id.in_(contact_ids))
+        result = await session.execute(stmt)
+        return {c.id: c.name for c in result.scalars().all()}
+
+    @staticmethod
     async def create_account(session: AsyncSession, data: dict) -> Account:
         db_account = Account(**data)
         session.add(db_account)
@@ -305,6 +344,31 @@ class LocationService:
         return result.scalar_one_or_none()
 
     @staticmethod
+    async def get_paged_locations(
+        session: AsyncSession,
+        tenant_id: UUID,
+        current: int,
+        page_size: int,
+        keyword: Optional[str] = None,
+    ) -> tuple:
+        """Get paged locations with total count. Returns (items, total)."""
+        base_stmt = select(Location).where(Location.tenant_id == tenant_id)
+        if keyword:
+            like = f"%{keyword}%"
+            base_stmt = base_stmt.where(Location.name.ilike(like))
+
+        count_stmt = select(func.count()).select_from(base_stmt.subquery())
+        count_result = await session.execute(count_stmt)
+        total = count_result.scalar() or 0
+
+        skip = (current - 1) * page_size
+        fetch_stmt = base_stmt.offset(skip).limit(page_size)
+        result = await session.execute(fetch_stmt)
+        items = result.scalars().all()
+
+        return items, total
+
+    @staticmethod
     async def create_location(session: AsyncSession, data: dict) -> Location:
         db_obj = Location(**data)
         session.add(db_obj)
@@ -328,6 +392,122 @@ class LocationService:
     async def delete_location(session: AsyncSession, db_obj: Location) -> None:
         await session.delete(db_obj)
         await session.commit()
+
+
+class AuthService:
+    """Service for authentication operations."""
+
+    @staticmethod
+    async def get_account_by_username(
+        session: AsyncSession, username: str
+    ) -> Optional[Account]:
+        stmt = select(Account).where(Account.username == username)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def get_account_by_email(
+        session: AsyncSession, email: str
+    ) -> Optional[Account]:
+        stmt = select(Account).where(Account.email == email)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def get_contact_by_email(
+        session: AsyncSession, email: str
+    ) -> Optional[Contact]:
+        stmt = select(Contact).where(Contact.email == email)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def get_account_by_mobile(
+        session: AsyncSession, mobile: str
+    ) -> Optional[Account]:
+        stmt = select(Account).where(Account.mobile == mobile)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def get_contact_by_mobile(
+        session: AsyncSession, mobile: str
+    ) -> Optional[Contact]:
+        stmt = select(Contact).where(Contact.mobile == mobile)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def get_tenant_by_code(
+        session: AsyncSession, code: str
+    ) -> Optional[Tenant]:
+        stmt = select(Tenant).where(Tenant.code == code)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def get_account_by_credentials(
+        session: AsyncSession, username: str, password: str
+    ) -> Optional[Account]:
+        stmt = select(Account).where(
+            Account.username == username,
+            Account.password == password,
+            Account.active == True,  # noqa: E712
+        )
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def get_tenant_by_id(
+        session: AsyncSession, tenant_id: UUID
+    ) -> Optional[Tenant]:
+        stmt = select(Tenant).where(Tenant.id == tenant_id)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def get_contact_by_id(
+        session: AsyncSession, contact_id: UUID
+    ) -> Optional[Contact]:
+        stmt = select(Contact).where(Contact.id == contact_id)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def create_tenant(session: AsyncSession, data: dict) -> Tenant:
+        db_tenant = Tenant(**data)
+        session.add(db_tenant)
+        await session.flush()
+        return db_tenant
+
+    @staticmethod
+    async def create_contact(session: AsyncSession, data: dict) -> Contact:
+        db_contact = Contact(**data)
+        session.add(db_contact)
+        await session.flush()
+        return db_contact
+
+    @staticmethod
+    async def create_account(session: AsyncSession, data: dict) -> Account:
+        db_account = Account(**data)
+        session.add(db_account)
+        await session.flush()
+        return db_account
+
+    @staticmethod
+    async def update_account_password(
+        session: AsyncSession, account: Account, new_password: str
+    ) -> None:
+        account.password = new_password
+        await session.commit()
+
+    @staticmethod
+    async def commit(session: AsyncSession) -> None:
+        await session.commit()
+
+    @staticmethod
+    async def rollback(session: AsyncSession) -> None:
+        await session.rollback()
 
 
 class HealthCheckFreqService:

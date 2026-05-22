@@ -210,6 +210,59 @@ class DeviceInstService:
         return result.scalar_one_or_none()
 
     @staticmethod
+    async def is_tenant_device_inst(
+        session: AsyncSession,
+        tenant_id: UUID,
+        device_inst_id: UUID,
+    ) -> bool:
+        stmt = (
+            select(DeviceInst.id)
+            .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
+            .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+            .where(
+                DeviceInst.id == device_inst_id,
+                DeviceCategory.tenant_id == tenant_id,
+            )
+            .limit(1)
+        )
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none() is not None
+
+    @staticmethod
+    async def get_tenant_device_insts_paged(
+        session: AsyncSession,
+        tenant_id: UUID,
+        current: int,
+        page_size: int,
+        keyword: Optional[str] = None,
+    ) -> tuple:
+        """Get paged DeviceInsts scoped to tenant, with total count."""
+        from app.models.customer import Location as LocationModel
+
+        base_join = (
+            select(DeviceInst)
+            .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
+            .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+            .where(DeviceCategory.tenant_id == tenant_id)
+        )
+        if keyword:
+            like = f"%{keyword}%"
+            base_join = base_join.where(
+                or_(DeviceInst.code.ilike(like), DeviceInst.sn.ilike(like))
+            )
+
+        count_stmt = select(func.count()).select_from(base_join.subquery())
+        count_result = await session.execute(count_stmt)
+        total = count_result.scalar() or 0
+
+        skip = (current - 1) * page_size
+        fetch_stmt = base_join.offset(skip).limit(page_size)
+        result = await session.execute(fetch_stmt)
+        items = result.scalars().all()
+
+        return items, total
+
+    @staticmethod
     async def create(session: AsyncSession, data: dict) -> DeviceInst:
         db_obj = DeviceInst(**data)
         session.add(db_obj)

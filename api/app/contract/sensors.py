@@ -1,0 +1,105 @@
+"""
+Sensor API contracts
+"""
+
+from datetime import datetime
+from typing import List, Optional
+from uuid import UUID
+from pydantic import BaseModel, ConfigDict
+
+
+# ==========================================
+# SensorType
+# ==========================================
+class SensorTypeCreate(BaseModel):
+    name: str
+    battery: Optional[int] = 0
+    network: Optional[int] = 1
+    bluetooth: Optional[bool] = False
+    description: Optional[str] = None
+
+
+class SensorTypeUpdate(BaseModel):
+    name: Optional[str] = None
+    battery: Optional[int] = None
+    network: Optional[int] = None
+    bluetooth: Optional[bool] = None
+    description: Optional[str] = None
+
+
+class SensorTypeResponse(BaseModel):
+    id: UUID
+    name: str
+    battery: int
+    network: int
+    bluetooth: bool
+    description: Optional[str] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+# ==========================================
+# SensorBatch
+# ==========================================
+class SensorBatchCreate(BaseModel):
+    code: str
+    qty: int
+    sn: int
+    status: int = 0
+    description: Optional[str] = None
+    sensor_type_id: UUID
+
+
+class SensorBatchUpdate(BaseModel):
+    code: Optional[str] = None
+    qty: Optional[int] = None
+    sn: Optional[int] = None
+    status: Optional[int] = None
+    description: Optional[str] = None
+    sensor_type_id: Optional[UUID] = None
+
+
+class SensorBatchResponse(BaseModel):
+    id: UUID
+    code: str
+    qty: int
+    sn: int
+    status: int
+    description: Optional[str] = None
+    sensor_type_id: UUID
+    tenant_id: UUID
+    created_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+# ==========================================
+# Sensor
+# ==========================================
+class SensorCreate(BaseModel):
+    sn: str
+    description: Optional[str] = None
+    active: Optional[bool] = True
+
+
+class SensorUpdate(BaseModel):
+    sn: Optional[str] = None
+    description: Optional[str] = None
+    active: Optional[bool] = None
+
+
+class SensorResponse(BaseModel):
+    id: UUID
+    sn: str
+    description: Optional[str] = None
+    active: bool
+    active_at: datetime
+    created_at: datetime
+    updated_at: datetime
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PagedSensorResponse(BaseModel):
+    items: List[SensorResponse]
+    total: int

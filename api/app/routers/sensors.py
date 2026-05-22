@@ -6,9 +6,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import datetime, timedelta
 from typing import List, Optional
-from pydantic import BaseModel, ConfigDict
 from uuid import UUID
 
 logger = logging.getLogger(__name__)
@@ -19,38 +17,20 @@ from app.services.sensor_service import SensorTypeService, SensorDbService, Sens
 from app.models.customer import Account
 from app.models.sensor import Sensor
 from app.utils.auth import get_current_account
+from app.contract.sensors import (
+    SensorTypeCreate,
+    SensorTypeUpdate,
+    SensorTypeResponse,
+    SensorBatchCreate,
+    SensorBatchUpdate,
+    SensorBatchResponse,
+    SensorCreate,
+    SensorUpdate,
+    SensorResponse,
+    PagedSensorResponse,
+)
 
 router = APIRouter(prefix="/sensors", tags=["sensors"])
-
-
-# ==========================================
-# 1. SensorType
-# ==========================================
-class SensorTypeCreate(BaseModel):
-    name: str
-    battery: Optional[int] = 0
-    network: Optional[int] = 1
-    bluetooth: Optional[bool] = False
-    description: Optional[str] = None
-
-
-class SensorTypeUpdate(BaseModel):
-    name: Optional[str] = None
-    battery: Optional[int] = None
-    network: Optional[int] = None
-    bluetooth: Optional[bool] = None
-    description: Optional[str] = None
-
-
-class SensorTypeResponse(BaseModel):
-    id: UUID
-    name: str
-    battery: int
-    network: int
-    bluetooth: bool
-    description: Optional[str] = None
-
-    model_config = ConfigDict(from_attributes=True)
 
 
 @router.get("/types", response_model=List[SensorTypeResponse])
@@ -111,38 +91,6 @@ async def delete_sensor_type(
 # ==========================================
 # 2. SensorBatch (defined before Sensor to avoid path conflict with /{obj_id})
 # ==========================================
-class SensorBatchCreate(BaseModel):
-    code: str
-    qty: int
-    sn: int
-    status: int = 0
-    description: Optional[str] = None
-    sensor_type_id: UUID
-
-
-class SensorBatchUpdate(BaseModel):
-    code: Optional[str] = None
-    qty: Optional[int] = None
-    sn: Optional[int] = None
-    status: Optional[int] = None
-    description: Optional[str] = None
-    sensor_type_id: Optional[UUID] = None
-
-
-class SensorBatchResponse(BaseModel):
-    id: UUID
-    code: str
-    qty: int
-    sn: int
-    status: int
-    description: Optional[str] = None
-    sensor_type_id: UUID
-    tenant_id: UUID
-    created_at: datetime
-
-    model_config = ConfigDict(from_attributes=True)
-
-
 @router.get("/batches", response_model=List[SensorBatchResponse])
 async def list_sensor_batches(
     skip: int = Query(0, ge=0),
@@ -213,35 +161,6 @@ async def delete_sensor_batch(
 # ==========================================
 # 3. Sensor
 # ==========================================
-class SensorCreate(BaseModel):
-    sn: str
-    description: Optional[str] = None
-    active: Optional[bool] = True
-
-
-class SensorUpdate(BaseModel):
-    sn: Optional[str] = None
-    description: Optional[str] = None
-    active: Optional[bool] = None
-
-
-class SensorResponse(BaseModel):
-    id: UUID
-    sn: str
-    description: Optional[str] = None
-    active: bool
-    active_at: datetime
-    created_at: datetime
-    updated_at: datetime
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-class PagedSensorResponse(BaseModel):
-    items: List[SensorResponse]
-    total: int
-
-
 @router.get("", response_model=PagedSensorResponse)
 async def list_sensors(
     current: int = Query(1, ge=1),
@@ -249,20 +168,7 @@ async def list_sensors(
     keyword: Optional[str] = Query(None),
     session: AsyncSession = Depends(db_manager.get_session),
 ):
-    base_stmt = select(Sensor).order_by(Sensor.sn)
-    if keyword:
-        like = f"%{keyword}%"
-        base_stmt = base_stmt.where(Sensor.sn.ilike(like))
-
-    count_stmt = select(func.count()).select_from(base_stmt.subquery())
-    count_result = await session.execute(count_stmt)
-    total = count_result.scalar() or 0
-
-    skip = (current - 1) * pageSize
-    fetch_stmt = base_stmt.offset(skip).limit(pageSize)
-    result = await session.execute(fetch_stmt)
-    items = result.scalars().all()
-
+    items, total = await SensorDbService.get_paged(session, current, pageSize, keyword)
     return PagedSensorResponse(items=items, total=total)
 
 

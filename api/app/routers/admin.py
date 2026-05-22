@@ -5,9 +5,7 @@ Admin management endpoints - for admin backend only, no tenant filtering
 import logging
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import datetime
-from typing import List, Optional
-from pydantic import BaseModel, ConfigDict
+from typing import List
 from uuid import UUID
 
 logger = logging.getLogger(__name__)
@@ -16,25 +14,9 @@ from app.database import db_manager
 from app.services.sensor_service import SensorBatchService
 from app.models.customer import Account
 from app.utils.auth import get_current_account
+from app.contract.admin import SensorBatchResponse
 
 router = APIRouter(prefix="/admin", tags=["admin"])
-
-
-# ==========================================
-# SensorBatch - Admin (no tenant filtering)
-# ==========================================
-class SensorBatchResponse(BaseModel):
-    id: UUID
-    code: str
-    qty: int
-    sn: int
-    status: int
-    description: Optional[str] = None
-    sensor_type_id: UUID
-    tenant_id: UUID
-    created_at: datetime
-
-    model_config = ConfigDict(from_attributes=True)
 
 
 @router.get("/sensor-batches", response_model=List[SensorBatchResponse])

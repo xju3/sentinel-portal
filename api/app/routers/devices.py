@@ -7,7 +7,6 @@ from datetime import date
 from sqlalchemy import select, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional
-from pydantic import BaseModel, ConfigDict
 from uuid import UUID
 
 from app.database import db_manager
@@ -26,27 +25,41 @@ from app.services.device_service import (
     SensorMonitoringService,
 )
 from app.utils.auth import get_current_account
+from app.contract.devices import (
+    IsoStandardCreate,
+    IsoStandardUpdate,
+    IsoStandardResponse,
+    DeviceCategoryCreate,
+    DeviceCategoryUpdate,
+    HealthCheckFreqBrief,
+    DeviceCategoryResponse,
+    PagedCountResponse,
+    DeviceSpecCreate,
+    DeviceSpecUpdate,
+    DeviceSpecResponse,
+    DeviceInstCreate,
+    DeviceInstUpdate,
+    DeviceInstResponse,
+    ProcessCreate,
+    ProcessUpdate,
+    ProcessResponse,
+    ProcessItemCreate,
+    ProcessItemUpdate,
+    ProcessItemResponse,
+    ProcessDeviceCreate,
+    ProcessDeviceUpdate,
+    ProcessDeviceResponse,
+    ProcessDeviceItemCreate,
+    ProcessDeviceItemUpdate,
+    ProcessDeviceItemResponse,
+    SensorMonitoringCreate,
+    SensorMonitoringUpdate,
+    SensorMonitoringResponse,
+    SensorMonitoringDeviceInstOption,
+    PagedDeviceInstResponse,
+)
 
 router = APIRouter(tags=["devices"])
-
-
-async def _is_tenant_device_inst(
-    session: AsyncSession,
-    tenant_id: UUID,
-    device_inst_id: UUID,
-) -> bool:
-    stmt = (
-        select(DeviceInst.id)
-        .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
-        .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
-        .where(
-            DeviceInst.id == device_inst_id,
-            DeviceCategory.tenant_id == tenant_id,
-        )
-        .limit(1)
-    )
-    result = await session.execute(stmt)
-    return result.scalar_one_or_none() is not None
 
 
 async def _validate_sensor_monitoring_refs(
@@ -56,7 +69,7 @@ async def _validate_sensor_monitoring_refs(
 ) -> None:
     device_inst_id = data.get("device_inst_id")
     if device_inst_id is not None:
-        ok = await _is_tenant_device_inst(session, tenant_id, device_inst_id)
+        ok = await DeviceInstService.is_tenant_device_inst(session, tenant_id, device_inst_id)
         if not ok:
             raise HTTPException(status_code=400, detail="device_inst_id is not owned by current tenant")
 
@@ -76,33 +89,6 @@ async def _validate_sensor_monitoring_refs(
 # ==========================================
 # 1. IsoStandard
 # ==========================================
-class IsoStandardCreate(BaseModel):
-    code: str
-    name: str
-    category: str
-    foundation: str
-    description: Optional[str] = None
-
-
-class IsoStandardUpdate(BaseModel):
-    code: Optional[str] = None
-    name: Optional[str] = None
-    category: Optional[str] = None
-    foundation: Optional[str] = None
-    description: Optional[str] = None
-
-
-class IsoStandardResponse(BaseModel):
-    id: UUID
-    code: str
-    name: str
-    category: str
-    foundation: str
-    description: Optional[str] = None
-
-    model_config = ConfigDict(from_attributes=True)
-
-
 @router.get("/iso-standards", response_model=List[IsoStandardResponse])
 async def list_iso_standards(
     skip: int = Query(0, ge=0),
@@ -161,51 +147,6 @@ async def delete_iso_standard(
 # ==========================================
 # 2. DeviceCategory
 # ==========================================
-class DeviceCategoryCreate(BaseModel):
-    name: str
-    description: Optional[str] = None
-    parent_id: Optional[UUID] = None
-    health_check_freq_id: UUID
-    tenant_id: Optional[UUID] = None
-    iso_standard_id: Optional[UUID] = None
-
-
-class DeviceCategoryUpdate(BaseModel):
-    name: Optional[str] = None
-    description: Optional[str] = None
-    parent_id: Optional[UUID] = None
-    health_check_freq_id: Optional[UUID] = None
-    tenant_id: Optional[UUID] = None
-    iso_standard_id: Optional[UUID] = None
-
-
-class HealthCheckFreqBrief(BaseModel):
-    id: UUID
-    patrol: int
-    diagnosis: int
-    report: int
-    status: bool
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-class DeviceCategoryResponse(BaseModel):
-    id: UUID
-    name: str
-    description: Optional[str] = None
-    parent_id: Optional[UUID] = None
-    health_check_freq_id: UUID
-    tenant_id: Optional[UUID] = None
-    iso_standard_id: Optional[UUID] = None
-    health_check_freq: Optional[HealthCheckFreqBrief] = None
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-class PagedCountResponse(BaseModel):
-    total: int
-
-
 def _serialize_device_category(
     item,
     freq_obj=None,
@@ -384,42 +325,6 @@ async def delete_device_category(
 # ==========================================
 # 3. DeviceSpec
 # ==========================================
-class DeviceSpecCreate(BaseModel):
-    name: str
-    model: str
-    description: Optional[str] = None
-    brand: str
-    voltage: Optional[float] = 0.0
-    rpm: Optional[int] = 0
-    supplier_id: UUID
-    device_category_id: UUID
-
-
-class DeviceSpecUpdate(BaseModel):
-    name: Optional[str] = None
-    model: Optional[str] = None
-    description: Optional[str] = None
-    brand: Optional[str] = None
-    voltage: Optional[float] = None
-    rpm: Optional[int] = None
-    supplier_id: Optional[UUID] = None
-    device_category_id: Optional[UUID] = None
-
-
-class DeviceSpecResponse(BaseModel):
-    id: UUID
-    name: str
-    model: str
-    description: Optional[str] = None
-    brand: str
-    voltage: float
-    rpm: int
-    supplier_id: UUID
-    device_category_id: UUID
-
-    model_config = ConfigDict(from_attributes=True)
-
-
 @router.get("/device-specs", response_model=List[DeviceSpecResponse])
 async def list_device_specs(
     skip: int = Query(0, ge=0),
@@ -478,39 +383,6 @@ async def delete_device_spec(
 # ==========================================
 # 4. DeviceInst
 # ==========================================
-class DeviceInstCreate(BaseModel):
-    code: str
-    device_spec_id: UUID
-    sn: str
-    purchase_date: date
-    life_span: Optional[int] = 0
-    desc: str
-    status: Optional[int] = 1
-
-
-class DeviceInstUpdate(BaseModel):
-    code: Optional[str] = None
-    device_spec_id: Optional[UUID] = None
-    sn: Optional[str] = None
-    purchase_date: Optional[date] = None
-    life_span: Optional[int] = None
-    desc: Optional[str] = None
-    status: Optional[int] = None
-
-
-class DeviceInstResponse(BaseModel):
-    id: UUID
-    code: str
-    device_spec_id: UUID
-    sn: str
-    purchase_date: date
-    life_span: int
-    desc: str
-    status: int
-
-    model_config = ConfigDict(from_attributes=True)
-
-
 @router.get("/device-insts", response_model=List[DeviceInstResponse])
 async def list_device_insts(
     skip: int = Query(0, ge=0),
@@ -569,30 +441,6 @@ async def delete_device_inst(
 # ==========================================
 # 5. Process
 # ==========================================
-class ProcessCreate(BaseModel):
-    tenant_id: Optional[UUID] = None
-    code: str
-    name: str
-    status: Optional[int] = 1
-
-
-class ProcessUpdate(BaseModel):
-    tenant_id: Optional[UUID] = None
-    code: Optional[str] = None
-    name: Optional[str] = None
-    status: Optional[int] = None
-
-
-class ProcessResponse(BaseModel):
-    id: UUID
-    tenant_id: Optional[UUID] = None
-    code: str
-    name: str
-    status: int
-
-    model_config = ConfigDict(from_attributes=True)
-
-
 @router.get("/processes", response_model=List[ProcessResponse])
 async def list_processes(
     skip: int = Query(0, ge=0),
@@ -651,27 +499,6 @@ async def delete_process(
 # ==========================================
 # 6. ProcessItem
 # ==========================================
-class ProcessItemCreate(BaseModel):
-    process_id: UUID
-    device_spec_id: UUID
-    qty: Optional[int] = 1
-
-
-class ProcessItemUpdate(BaseModel):
-    process_id: Optional[UUID] = None
-    device_spec_id: Optional[UUID] = None
-    qty: Optional[int] = None
-
-
-class ProcessItemResponse(BaseModel):
-    id: UUID
-    process_id: UUID
-    device_spec_id: UUID
-    qty: int
-
-    model_config = ConfigDict(from_attributes=True)
-
-
 @router.get("/process-items", response_model=List[ProcessItemResponse])
 async def list_process_items(
     skip: int = Query(0, ge=0),
@@ -730,33 +557,6 @@ async def delete_process_item(
 # ==========================================
 # 7. ProcessDevice
 # ==========================================
-class ProcessDeviceCreate(BaseModel):
-    code: str
-    process_id: UUID
-    sn: str
-    area_id: Optional[UUID] = None
-    status: Optional[int] = 1
-
-
-class ProcessDeviceUpdate(BaseModel):
-    code: Optional[str] = None
-    process_id: Optional[UUID] = None
-    sn: Optional[str] = None
-    area_id: Optional[UUID] = None
-    status: Optional[int] = None
-
-
-class ProcessDeviceResponse(BaseModel):
-    id: UUID
-    code: str
-    process_id: UUID
-    sn: str
-    area_id: Optional[UUID] = None
-    status: int
-
-    model_config = ConfigDict(from_attributes=True)
-
-
 @router.get("/process-devices", response_model=List[ProcessDeviceResponse])
 async def list_process_devices(
     skip: int = Query(0, ge=0),
@@ -815,30 +615,6 @@ async def delete_process_device(
 # ==========================================
 # 8. ProcessDeviceItem
 # ==========================================
-class ProcessDeviceItemCreate(BaseModel):
-    code: str
-    desc: str
-    device_inst_id: UUID
-    process_device_id: UUID
-
-
-class ProcessDeviceItemUpdate(BaseModel):
-    code: Optional[str] = None
-    desc: Optional[str] = None
-    device_inst_id: Optional[UUID] = None
-    process_device_id: Optional[UUID] = None
-
-
-class ProcessDeviceItemResponse(BaseModel):
-    id: UUID
-    code: str
-    desc: str
-    device_inst_id: UUID
-    process_device_id: UUID
-
-    model_config = ConfigDict(from_attributes=True)
-
-
 @router.get("/process-device-items", response_model=List[ProcessDeviceItemResponse])
 async def list_process_device_items(
     skip: int = Query(0, ge=0),
@@ -897,35 +673,6 @@ async def delete_process_device_item(
 # ==========================================
 # 9. SensorMonitoring
 # ==========================================
-class SensorMonitoringCreate(BaseModel):
-    device_inst_id: UUID
-    location_id: Optional[UUID] = None
-    sensor_id: Optional[UUID] = None
-    direction: Optional[str] = None
-    status: Optional[int] = 1
-
-
-class SensorMonitoringUpdate(BaseModel):
-    device_inst_id: Optional[UUID] = None
-    location_id: Optional[UUID] = None
-    sensor_id: Optional[UUID] = None
-    direction: Optional[str] = None
-    status: Optional[int] = None
-
-
-class SensorMonitoringResponse(BaseModel):
-    id: UUID
-    device_inst_id: UUID
-    location_id: Optional[UUID] = None
-    sensor_id: Optional[UUID] = None
-    direction: Optional[str] = None
-    anomaly: int = 0
-    ts: Optional[int] = None
-    status: int
-
-    model_config = ConfigDict(from_attributes=True)
-
-
 @router.get("/sensor-monitorings", response_model=List[SensorMonitoringResponse])
 async def list_sensor_monitorings(
     skip: int = Query(0, ge=0),
@@ -947,20 +694,6 @@ async def list_sensor_monitorings(
     return result.scalars().all()
 
 
-class SensorMonitoringDeviceInstOption(BaseModel):
-    id: UUID
-    code: str
-    sn: str
-    device_spec_id: UUID
-
-    model_config = ConfigDict(from_attributes=True)
-
-
-class PagedDeviceInstResponse(BaseModel):
-    items: List[SensorMonitoringDeviceInstOption]
-    total: int
-
-
 @router.get(
     "/sensor-monitorings/device-insts",
     response_model=PagedDeviceInstResponse,
@@ -973,29 +706,9 @@ async def list_sensor_monitoring_device_insts(
     session: AsyncSession = Depends(db_manager.get_session),
 ):
     tenant_id = current_account.tenant_id
-    base_join = (
-        select(DeviceInst)
-        .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
-        .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
-        .where(DeviceCategory.tenant_id == tenant_id)
+    items, total = await DeviceInstService.get_tenant_device_insts_paged(
+        session, tenant_id, current, pageSize, keyword
     )
-    if keyword:
-        like = f"%{keyword}%"
-        base_join = base_join.where(
-            or_(DeviceInst.code.ilike(like), DeviceInst.sn.ilike(like))
-        )
-
-    # Count total
-    count_stmt = select(func.count()).select_from(base_join.subquery())
-    count_result = await session.execute(count_stmt)
-    total = count_result.scalar() or 0
-
-    # Fetch page
-    skip = (current - 1) * pageSize
-    fetch_stmt = base_join.offset(skip).limit(pageSize)
-    result = await session.execute(fetch_stmt)
-    items = result.scalars().all()
-
     return PagedDeviceInstResponse(items=items, total=total)
 
 

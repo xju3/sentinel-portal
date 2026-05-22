@@ -79,6 +79,32 @@ class SensorDbService:
         return result.scalars().all()
 
     @staticmethod
+    async def get_paged(
+        session: AsyncSession,
+        current: int,
+        page_size: int,
+        keyword: Optional[str] = None,
+    ) -> tuple:
+        """Get paged sensors with total count. Returns (items, total)."""
+        from sqlalchemy import func
+
+        base_stmt = select(Sensor).order_by(Sensor.sn)
+        if keyword:
+            like = f"%{keyword}%"
+            base_stmt = base_stmt.where(Sensor.sn.ilike(like))
+
+        count_stmt = select(func.count()).select_from(base_stmt.subquery())
+        count_result = await session.execute(count_stmt)
+        total = count_result.scalar() or 0
+
+        skip = (current - 1) * page_size
+        fetch_stmt = base_stmt.offset(skip).limit(page_size)
+        result = await session.execute(fetch_stmt)
+        items = result.scalars().all()
+
+        return items, total
+
+    @staticmethod
     async def create(session: AsyncSession, data: dict) -> Sensor:
         db_obj = Sensor(**data)
         session.add(db_obj)

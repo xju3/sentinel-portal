@@ -3,19 +3,11 @@ Health check endpoints
 """
 
 from fastapi import APIRouter, Depends, Response
-from pydantic import BaseModel
 
 from app.database import db_manager, redis_manager, influxdb_manager, minio_manager
+from app.contract.health import HealthResponse
 
 router = APIRouter(prefix="/health", tags=["health"])
-
-
-class HealthResponse(BaseModel):
-    """Health check response model"""
-
-    status: str
-    message: str
-    services: dict
 
 
 @router.get("", response_model=HealthResponse)
