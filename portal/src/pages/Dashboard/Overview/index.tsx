@@ -223,7 +223,7 @@ const DashboardOverview = () => {
           },
           series: [
             {
-              // 内圈：一级分类的设备总数
+              // 内圈：一级分类的设备总数（主色）
               name: '设备分类分布',
               type: 'pie',
               selectedMode: 'single',
@@ -233,14 +233,10 @@ const DashboardOverview = () => {
                 show: true,
                 formatter: (params: any) => {
                   const name = params.name;
-                  const children = parentChildMap[name];
                   const anomalyItem = anomalyData.find(
                     (a) => a.name === `${name} (异常)`
                   );
                   const anomalyCount = anomalyItem ? anomalyItem.value : 0;
-                  if (children && children.length > 0) {
-                    return `${name}\n${params.value}台\n异常${anomalyCount}台`;
-                  }
                   return `${name}\n${params.value}台\n异常${anomalyCount}台`;
                 },
                 fontSize: 11,
@@ -256,6 +252,23 @@ const DashboardOverview = () => {
               },
               labelLine: { show: true },
               data: innerData,
+            },
+            {
+              // 内圈异常叠加层：用半透明深色覆盖异常部分
+              name: '异常设备',
+              type: 'pie',
+              radius: ['0%', '45%'],
+              silent: true,
+              label: { show: false },
+              labelLine: { show: false },
+              emphasis: { scale: false },
+              itemStyle: {
+                borderColor: 'transparent',
+                borderWidth: 0,
+              },
+              data: anomalyData.filter((a) =>
+                innerData.some((i) => a.name === `${i.name} (异常)`)
+              ),
             },
             {
               // 外圈：二级分类的设备总数
@@ -277,6 +290,23 @@ const DashboardOverview = () => {
                 smooth: true,
               },
               data: outerData,
+            },
+            {
+              // 外圈异常叠加层
+              name: '子分类异常设备',
+              type: 'pie',
+              radius: ['55%', '80%'],
+              silent: true,
+              label: { show: false },
+              labelLine: { show: false },
+              emphasis: { scale: false },
+              itemStyle: {
+                borderColor: 'transparent',
+                borderWidth: 0,
+              },
+              data: anomalyData.filter((a) =>
+                outerData.some((o) => a.name === `${o.name} (异常)`)
+              ),
             },
           ],
         };
