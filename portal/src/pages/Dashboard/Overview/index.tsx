@@ -136,7 +136,7 @@ const DashboardOverview = () => {
                   { value: data.faultyDevices, name: '故障设备', itemStyle: { color: '#ff4d4f' } },
                 );
               }
-              return items;
+              return items.filter(item => item.value > 0);
             })(),
           },
         ],
