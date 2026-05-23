@@ -4,12 +4,6 @@ import { Badge, List, Tag, message } from 'antd';
 import { request } from '@umijs/max';
 import * as echarts from 'echarts';
 
-import { listAllDeviceCategories } from '@/services/deviceCategory';
-import { listAllDeviceSpecs } from '@/services/deviceSpec';
-import { listAllDeviceInsts } from '@/services/deviceInst';
-import { listAllSensors } from '@/services/tenantSensor';
-import { listAllSensorMonitorings } from '@/services/sensorMonitoring';
-
 const { Statistic } = StatisticCard;
 
 // 定义 Dashboard 聚合数据类型
@@ -28,6 +22,7 @@ type DashboardData = {
     anomaly: number; // 1=振动异常, 2=温度异常, 3=双异常
     ts: number;
   }[];
+  devicesByCategoryTree?: any[];
 };
 
 // 异常状态映射 (根据后端 handler 逻辑)
@@ -50,12 +45,6 @@ const DashboardOverview = () => {
     recentAnomalies: [],
   });
 
-  const [categories, setCategories] = useState<any[]>([]);
-  const [specs, setSpecs] = useState<any[]>([]);
-  const [insts, setInsts] = useState<any[]>([]);
-  const [monitorings, setMonitorings] = useState<any[]>([]);
-  const [sensors, setSensors] = useState<any[]>([]);
-
   const chartRef = useRef<HTMLDivElement>(null);
   const categoryChartRef = useRef<HTMLDivElement>(null);
 
@@ -63,20 +52,8 @@ const DashboardOverview = () => {
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const [res, cats, spcs, ins, mons, sens] = await Promise.all([
-        request<DashboardData>('/api/v1/dashboard/overview').catch(() => null),
-        listAllDeviceCategories().catch(() => []),
-        listAllDeviceSpecs().catch(() => []),
-        listAllDeviceInsts().catch(() => []),
-        listAllSensorMonitorings().catch(() => []),
-        listAllSensors().catch(() => [])
-      ]);
+      const res = await request<DashboardData>('/api/v1/dashboard/overview');
       if (res) setData(res);
-      setCategories(cats || []);
-      setSpecs(spcs || []);
-      setInsts(ins || []);
-      setMonitorings(mons || []);
-      setSensors(sens || []);
     } catch (error) {
       message.error('获取仪表盘数据失败');
     } finally {
@@ -144,73 +121,21 @@ const DashboardOverview = () => {
     if (categoryChartRef.current) {
       nestedPieChart = echarts.init(categoryChartRef.current);
       
-      // --- 在前端动态关联计算多层数据结构 ---
-      const catMap = new Map<string, any>();
-      categories.forEach(c => catMap.set(c.id, { ...c, total: 0, anomaly: 0, childrenMap: new Map() }));
+      const treeData = data.devicesByCategoryTree || [];
 
-      const specMap = new Map<string, any>();
-      specs.forEach(s => specMap.set(s.id, s));
-
-      const sensorMap = new Map<string, any>();
-      sensors.forEach(s => sensorMap.set(s.id, s));
-
-      // 找出所有有异常的设备实例 (Sensor -> SensorMonitoring -> DeviceInst)
-      const anomalousDevices = new Set<string>();
-      monitorings.forEach(mon => {
-        if (!mon.sensor_id || !mon.device_inst_id) return;
-        const sensor = sensorMap.get(mon.sensor_id);
-        if (sensor && sensor.anomaly > 0) {
-          anomalousDevices.add(mon.device_inst_id);
-        }
-      });
-
-      // 将设备实例统计累加到分类树 (自底向上，汇聚到顶层)
-      insts.forEach(inst => {
-        const spec = specMap.get(inst.device_spec_id);
-        if (!spec) return;
-        const leafCatId = spec.device_category_id;
-        const isAnomaly = anomalousDevices.has(inst.id) ? 1 : 0;
-
-        let currId = leafCatId;
-        while (currId) {
-          const cat = catMap.get(currId);
-          if (!cat) break;
-          cat.total += 1;
-          cat.anomaly += isAnomaly;
-          currId = cat.parent_id;
-        }
-      });
-
-      // 组装父子层级结构
-      const roots: any[] = [];
-      catMap.forEach(cat => {
-        if (cat.parent_id && catMap.has(cat.parent_id)) {
-          const parent = catMap.get(cat.parent_id);
-          if (parent) {
-            parent.childrenMap.set(cat.id, cat);
-          }
-        } else {
-          roots.push(cat);
-        }
-      });
-
-      // 递归生成旭日图数据格式 (包含即使总数为0的分类，保证结构完整显示)
+      // 递归生成旭日图数据格式
       const convertToSunburst = (nodes: any[]): any[] => {
         return nodes.map(n => {
           const hasAnomaly = n.anomaly > 0;
-          const children = convertToSunburst(Array.from(n.childrenMap.values()));
+          const children = n.children ? convertToSunburst(n.children) : [];
           
-          let childrenValueSum = 0;
-          children.forEach(c => { childrenValueSum += c.value; });
-
-          // 叶子节点赋予基础占位权重1以保证空类目也能渲染；父节点取 n.total 与子节点权重和的最大值
-          const nodeValue = children.length > 0 
-            ? Math.max(n.total, childrenValueSum)
-            : Math.max(n.total, 1);
-
           let color = undefined;
           if (hasAnomaly) {
-            color = '#ff4d4f'; // 异常状态使用红色
+            if (children.length === 0) {
+              color = '#ff4d4f'; // 仅底层（最细分类）有故障时显著标红
+            } else {
+              color = undefined; // 顶层和中间层保留 ECharts 自带的默认颜色区分度
+            }
           } else if (n.total === 0) {
             color = '#e8e8e8'; // 空分类置灰处理
           }
@@ -219,7 +144,7 @@ const DashboardOverview = () => {
             name: n.name,
             realTotal: n.total,
             anomaly: n.anomaly,
-            value: nodeValue,
+            value: n.total,
             itemStyle: { color: color },
             label: {
               color: n.total === 0 ? '#999' : '#fff',
@@ -231,7 +156,7 @@ const DashboardOverview = () => {
         });
       };
 
-      const sunburstData = convertToSunburst(roots);
+      const sunburstData = convertToSunburst(treeData);
 
       // 如果没有数据，显示空状态
       if (sunburstData.length === 0) {
@@ -257,7 +182,23 @@ const DashboardOverview = () => {
             sort: undefined, // 保持原始分类自然顺序
             emphasis: { focus: 'ancestor' },
             itemStyle: { borderRadius: 4, borderWidth: 2, borderColor: '#fff' },
-            label: { show: true, formatter: (params: any) => `${params.name}\n${params.data.realTotal}台` }
+            label: { 
+              show: true, 
+              formatter: (params: any) => {
+                const { name, data } = params;
+                if (!data) return '';
+                const isLeaf = !data.children || data.children.length === 0;
+                if (isLeaf && data.anomaly > 0) {
+                  return `{name|${name}}\n{total|${data.realTotal} 台}\n{anomaly|异常 ${data.anomaly} 台}`;
+                }
+                return `{name|${name}}\n{total|${data.realTotal} 台}`;
+              },
+              rich: {
+                name: { color: 'inherit', fontSize: 13, align: 'center', lineHeight: 18 },
+                total: { color: 'inherit', fontSize: 12, align: 'center', lineHeight: 16 },
+                anomaly: { color: '#fff', backgroundColor: '#ff4d4f', padding: [2, 4], borderRadius: 2, fontSize: 11, align: 'center', lineHeight: 16 }
+              }
+            }
           }
         });
       }
@@ -276,7 +217,7 @@ const DashboardOverview = () => {
       pieChart?.dispose();
       nestedPieChart?.dispose();
     };
-  }, [data, categories, specs, insts, monitorings, sensors]); 
+  }, [data]); 
 
   return (
     <PageContainer title="Dashboard Overview" subTitle="仪表盘概览">

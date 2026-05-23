@@ -2,6 +2,7 @@
 Dashboard service - business logic for dashboard aggregations
 """
 
+import json
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import date
@@ -127,97 +128,68 @@ class DashboardService:
         )
         cat_rows = (await session.execute(stmt_cats)).scalars().all()
 
-        # 构建分类映射: id -> {id, name, parent_id, children_ids}
+        # 构建分类字典，包含基础统计字段 (统一转为 str 确保查找匹配)
         cat_map = {}
         for cat in cat_rows:
-            cat_map[cat.id] = {
-                "id": cat.id,
+            cat_map[str(cat.id)] = {
+                "id": str(cat.id),
                 "name": cat.name,
-                "parent_id": cat.parent_id,
-                "children_ids": [],
+                "parent_id": str(cat.parent_id) if cat.parent_id else None,
+                "total": 0,
+                "anomaly": 0,
+                "children": [],
             }
-        # 填充 children_ids
-        root_ids = []
-        for cat_id, info in cat_map.items():
+
+        # 2. 完全按建议算法：将设备实例、规格、分类、异常测点提取合并为一个平铺组合数据
+        stmt_devices = (
+            select(
+                DeviceInst.id.label("inst_id"),
+                DeviceInst.code.label("instance_name"),
+                DeviceSpec.id.label("spec_id"),
+                DeviceCategory.id.label("category_id"),
+                func.max(SensorMonitoring.anomaly).label("anomaly")
+            )
+            .select_from(DeviceInst)
+            .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
+            .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+            .outerjoin(SensorMonitoring, SensorMonitoring.device_inst_id == DeviceInst.id)
+            .where(DeviceCategory.tenant_id == tenant_id)
+            .group_by(DeviceInst.id, DeviceInst.code, DeviceSpec.id, DeviceCategory.id)
+        )
+        device_rows = (await session.execute(stmt_devices)).all()
+
+        # 3. 对组合数据进行在内存中的精确累加 (从叶子向所有祖级传递)
+        for row in device_rows:
+            cid = str(row.category_id) if row.category_id else None
+            if not cid or cid not in cat_map:
+                continue
+                
+            is_anomaly = 1 if (row.anomaly and row.anomaly > 0) else 0
+            
+            # 将当前实例的数据累加到自身直接分类，并不断向上追溯累加到全部上级父分类
+            curr_cid = cid
+            visited = set()
+            while curr_cid and curr_cid in cat_map:
+                if curr_cid in visited:
+                    break  # 防止数据中的死循环环状关联
+                visited.add(curr_cid)
+                
+                cat_map[curr_cid]["total"] += 1
+                cat_map[curr_cid]["anomaly"] += is_anomaly
+                
+                curr_cid = cat_map[curr_cid]["parent_id"]
+
+        # 4. 组装父子树形结构提供给前端
+        tree = []
+        for cid, info in cat_map.items():
             pid = info["parent_id"]
             if pid and pid in cat_map:
-                cat_map[pid]["children_ids"].append(cat_id)
+                cat_map[pid]["children"].append(info)
             else:
-                root_ids.append(cat_id)
+                # 无父节点的即为最顶层根节点
+                tree.append(info)
 
-        # 2. 统计每个分类下的设备总数
-        stmt_total = (
-            select(
-                DeviceCategory.id.label("category_id"),
-                func.count(DeviceInst.id).label("cnt")
-            )
-            .select_from(DeviceCategory)
-            .outerjoin(DeviceSpec, DeviceSpec.device_category_id == DeviceCategory.id)
-            .outerjoin(DeviceInst, DeviceInst.device_spec_id == DeviceSpec.id)
-            .where(DeviceCategory.tenant_id == tenant_id)
-            .group_by(DeviceCategory.id)
-        )
-        total_rows = (await session.execute(stmt_total)).all()
-        total_counts: dict[UUID, int] = {}
-        for row in total_rows:
-            total_counts[row.category_id] = row.cnt
-
-        # 3. 统计每个分类下 anomaly > 0 的异常设备数
-        stmt_anomaly = (
-            select(
-                DeviceCategory.id.label("category_id"),
-                func.count(func.distinct(SensorMonitoring.device_inst_id)).label("cnt")
-            )
-            .select_from(DeviceCategory)
-            .outerjoin(DeviceSpec, DeviceSpec.device_category_id == DeviceCategory.id)
-            .outerjoin(DeviceInst, DeviceInst.device_spec_id == DeviceSpec.id)
-            .outerjoin(
-                SensorMonitoring,
-                (SensorMonitoring.device_inst_id == DeviceInst.id) &
-                (SensorMonitoring.anomaly > 0)
-            )
-            .where(DeviceCategory.tenant_id == tenant_id)
-            .group_by(DeviceCategory.id)
-        )
-        anomaly_rows = (await session.execute(stmt_anomaly)).all()
-        anomaly_counts: dict[UUID, int] = {}
-        for row in anomaly_rows:
-            anomaly_counts[row.category_id] = row.cnt
-
-        # 4. 递归构建树，从叶子节点向上汇总
-        def _build_subtree(node_id: UUID) -> dict:
-            info = cat_map[node_id]
-            children = info["children_ids"]
-            if not children:
-                # 叶子节点：直接取该分类下的统计值
-                return {
-                    "name": info["name"],
-                    "total": total_counts.get(node_id, 0),
-                    "anomaly": anomaly_counts.get(node_id, 0),
-                }
-            # 非叶子节点：递归构建子节点，汇总 total 和 anomaly
-            child_nodes = []
-            total_sum = 0
-            anomaly_sum = 0
-            for child_id in children:
-                child_node = _build_subtree(child_id)
-                child_nodes.append(child_node)
-                total_sum += child_node["total"]
-                anomaly_sum += child_node["anomaly"]
-            # 过滤掉 total 为 0 的子节点
-            child_nodes = [c for c in child_nodes if c["total"] > 0]
-            return {
-                "name": info["name"],
-                "total": total_sum,
-                "anomaly": anomaly_sum,
-                "children": child_nodes if child_nodes else None,
-            }
-
-        tree = []
-        for rid in root_ids:
-            node = _build_subtree(rid)
-            if node["total"] > 0:
-                tree.append(node)
+        print("=== NestedPieChart Tree Data ===")
+        print(json.dumps(tree, ensure_ascii=False, indent=2))
 
         return tree
-

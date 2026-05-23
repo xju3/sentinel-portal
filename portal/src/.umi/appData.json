@@ -112,6 +112,10 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
             0
           ]
         },
@@ -139,7 +143,11 @@
             3,
             4,
             2,
-            6
+            6,
+            3,
+            3,
+            3,
+            3
           ]
         },
         "register": 1
@@ -167,7 +175,11 @@
             14,
             24,
             18,
-            26
+            26,
+            11,
+            33,
+            24,
+            19
           ]
         },
         "register": 20
@@ -184,6 +196,10 @@
       "time": {
         "hooks": {
           "addEntryCode": [
+            0,
+            0,
+            0,
+            0,
             0,
             0,
             0,
@@ -225,6 +241,10 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "onCheckCode": [
@@ -249,6 +269,10 @@
             0,
             0,
             1,
+            0,
+            0,
+            0,
+            0,
             0,
             0,
             0,
@@ -1270,6 +1294,58 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ]
         },
@@ -1295,6 +1371,10 @@
             0,
             0,
             0,
+            0,
+            0,
+            1,
+            1,
             0
           ],
           "addRuntimePlugin": [
@@ -1306,6 +1386,10 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            1,
             0
           ]
         },
@@ -1388,9 +1472,21 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "addEntryImports": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0,
             0,
             0,
@@ -1449,9 +1545,21 @@
             19,
             11,
             11,
+            10,
+            14,
+            9,
+            17,
             10
           ],
           "addPolyfillImports": [
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0,
             0,
             0,
@@ -1502,6 +1610,14 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ]
         },
@@ -1520,6 +1636,10 @@
         "hooks": {
           "onGenerateFiles": [
             93,
+            0,
+            0,
+            0,
+            0,
             0,
             0,
             0,
@@ -1578,6 +1698,10 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "addBeforeMiddlewares": [
@@ -1615,6 +1739,14 @@
             10,
             3,
             9,
+            2,
+            12,
+            2,
+            9,
+            2,
+            15,
+            3,
+            8,
             2
           ]
         },
@@ -1678,7 +1810,11 @@
             4,
             5,
             6,
-            8
+            8,
+            9,
+            9,
+            11,
+            5
           ]
         },
         "register": 2
@@ -1770,6 +1906,10 @@
             0,
             1,
             1,
+            1,
+            0,
+            1,
+            0,
             1,
             0
           ]
@@ -1911,6 +2051,58 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            1,
             0,
             0,
             0,
@@ -2330,9 +2522,21 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "addRuntimePlugin": [
+            0,
+            0,
+            0,
+            0,
             0,
             0,
             0,
@@ -2352,6 +2556,10 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "onGenerateFiles": [
@@ -2363,6 +2571,10 @@
             0,
             0,
             0,
+            1,
+            0,
+            1,
+            2,
             1
           ],
           "addExtraBabelPlugins": [
@@ -2424,12 +2636,20 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "modifyAppData": [
             0
           ],
           "addRuntimePlugin": [
+            0,
+            0,
+            0,
+            0,
             0,
             0,
             0,
@@ -2449,6 +2669,10 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "onGenerateFiles": [
@@ -2460,6 +2684,10 @@
             1,
             1,
             1,
+            1,
+            2,
+            2,
+            3,
             1
           ]
         },
@@ -2511,6 +2739,10 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "onGenerateFiles": [
@@ -2522,7 +2754,11 @@
             11,
             13,
             14,
-            17
+            17,
+            15,
+            18,
+            14,
+            14
           ],
           "addTmpGenerateWatcherPaths": [
             0
@@ -2555,6 +2791,10 @@
       "time": {
         "hooks": {
           "addRuntimePluginKey": [
+            0,
+            0,
+            0,
+            0,
             0,
             0,
             0,
@@ -2625,6 +2865,10 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
             0
           ],
           "onGenerateFiles": [
@@ -2636,7 +2880,11 @@
             1,
             1,
             0,
-            1
+            1,
+            0,
+            1,
+            1,
+            0
           ]
         },
         "register": 0
@@ -4105,7 +4353,7 @@
       "parentId": "3",
       "id": "4",
       "absPath": "/dashboard/overview",
-      "__content": "import { useEffect, useRef, useState } from 'react';\nimport { PageContainer, ProCard, StatisticCard } from '@ant-design/pro-components';\nimport { Badge, List, Tag, message } from 'antd';\nimport { request } from '@umijs/max';\nimport * as echarts from 'echarts';\n\nimport { listAllDeviceCategories } from '@/services/deviceCategory';\nimport { listAllDeviceSpecs } from '@/services/deviceSpec';\nimport { listAllDeviceInsts } from '@/services/deviceInst';\nimport { listAllSensors } from '@/services/tenantSensor';\nimport { listAllSensorMonitorings } from '@/services/sensorMonitoring';\n\nconst { Statistic } = StatisticCard;\n\n// 定义 Dashboard 聚合数据类型\ntype DashboardData = {\n  totalDevices: number;\n  runningDevices: number;\n  faultyDevices: number;\n  newDevicesToday: number;\n  vibrationAnomalyCount: number;  // anomaly=1 震动异常\n  temperatureAnomalyCount: number; // anomaly=2 温度异常\n  bothAnomalyCount: number;        // anomaly=3 双异常\n  recentAnomalies: {\n    id: string;\n    device_code: string;\n    device_sn: string;\n    anomaly: number; // 1=振动异常, 2=温度异常, 3=双异常\n    ts: number;\n  }[];\n};\n\n// 异常状态映射 (根据后端 handler 逻辑)\nconst ANOMALY_MAP: Record<number, { text: string; color: string }> = {\n  1: { text: '振动异常', color: 'warning' },\n  2: { text: '温度异常', color: 'error' },\n  3: { text: '振动+温度异常', color: 'magenta' },\n};\n\nconst DashboardOverview = () => {\n  const [loading, setLoading] = useState(true);\n  const [data, setData] = useState<DashboardData>({\n    totalDevices: 0,\n    runningDevices: 0,\n    faultyDevices: 0,\n    newDevicesToday: 0,\n    vibrationAnomalyCount: 0,\n    temperatureAnomalyCount: 0,\n    bothAnomalyCount: 0,\n    recentAnomalies: [],\n  });\n\n  const [categories, setCategories] = useState<any[]>([]);\n  const [specs, setSpecs] = useState<any[]>([]);\n  const [insts, setInsts] = useState<any[]>([]);\n  const [monitorings, setMonitorings] = useState<any[]>([]);\n  const [sensors, setSensors] = useState<any[]>([]);\n\n  const chartRef = useRef<HTMLDivElement>(null);\n  const categoryChartRef = useRef<HTMLDivElement>(null);\n\n  // 从后端获取 Dashboard 聚合数据\n  const fetchDashboardData = async () => {\n    setLoading(true);\n    try {\n      const [res, cats, spcs, ins, mons, sens] = await Promise.all([\n        request<DashboardData>('/api/v1/dashboard/overview').catch(() => null),\n        listAllDeviceCategories().catch(() => []),\n        listAllDeviceSpecs().catch(() => []),\n        listAllDeviceInsts().catch(() => []),\n        listAllSensorMonitorings().catch(() => []),\n        listAllSensors().catch(() => [])\n      ]);\n      if (res) setData(res);\n      setCategories(cats || []);\n      setSpecs(spcs || []);\n      setInsts(ins || []);\n      setMonitorings(mons || []);\n      setSensors(sens || []);\n    } catch (error) {\n      message.error('获取仪表盘数据失败');\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    fetchDashboardData();\n  }, []);\n\n  // 初始化和更新 Echarts 饼图及多层环形图\n  useEffect(() => {\n    let pieChart: echarts.ECharts | undefined;\n    let nestedPieChart: echarts.ECharts | undefined;\n\n    // 计算剩余的\"离线/未知\"设备数（防止由于统计误差出现负数）\n    const anomalyTotal = data.vibrationAnomalyCount + data.temperatureAnomalyCount + data.bothAnomalyCount;\n    const offlineDevices = Math.max(0, data.totalDevices - data.runningDevices - anomalyTotal);\n\n    // 1. 渲染设备健康分布饼图 (区分异常类型: 0=正常, 1=震动异常, 2=温度异常, 3=双异常)\n    if (chartRef.current) {\n      pieChart = echarts.init(chartRef.current);\n      const pieOption = {\n        tooltip: {\n          trigger: 'item',\n          formatter: (params: any) => {\n            return `${params.name}: ${params.value} 台 (${params.percent}%)`;\n          },\n        },\n        legend: {\n          top: '5%',\n          left: 'center',\n        },\n        series: [\n          {\n            name: '设备健康分布',\n            type: 'pie',\n            radius: ['40%', '70%'], // 环形图内外半径\n            avoidLabelOverlap: false,\n            itemStyle: {\n              borderRadius: 8,\n              borderColor: '#fff',\n              borderWidth: 2,\n            },\n            label: { show: false, position: 'center' },\n            emphasis: {\n              label: { show: true, fontSize: 18, fontWeight: 'bold' },\n            },\n            labelLine: { show: false },\n            data: [\n              { value: data.runningDevices, name: '正常运行', itemStyle: { color: '#52c41a' } },\n              { value: data.vibrationAnomalyCount, name: '震动异常', itemStyle: { color: '#faad14' } },\n              { value: data.temperatureAnomalyCount, name: '温度异常', itemStyle: { color: '#ff4d4f' } },\n              { value: data.bothAnomalyCount, name: '震动+温度异常', itemStyle: { color: '#eb2f96' } },\n              { value: offlineDevices, name: '离线/未知', itemStyle: { color: '#d9d9d9' } },\n            ].filter((item) => item.value > 0), // 过滤掉数值为0的项，使图表更整洁\n          },\n        ],\n      };\n      pieChart.setOption(pieOption);\n    }\n\n    // 2. 构建并渲染设备分类多层环形图 (旭日图 Sunburst)\n    if (categoryChartRef.current) {\n      nestedPieChart = echarts.init(categoryChartRef.current);\n      \n      // --- 在前端动态关联计算多层数据结构 ---\n      const catMap = new Map<string, any>();\n      categories.forEach(c => catMap.set(c.id, { ...c, total: 0, anomaly: 0, childrenMap: new Map() }));\n\n      const specMap = new Map<string, any>();\n      specs.forEach(s => specMap.set(s.id, s));\n\n      const sensorMap = new Map<string, any>();\n      sensors.forEach(s => sensorMap.set(s.id, s));\n\n      // 找出所有有异常的设备实例 (Sensor -> SensorMonitoring -> DeviceInst)\n      const anomalousDevices = new Set<string>();\n      monitorings.forEach(mon => {\n        if (!mon.sensor_id || !mon.device_inst_id) return;\n        const sensor = sensorMap.get(mon.sensor_id);\n        if (sensor && sensor.anomaly > 0) {\n          anomalousDevices.add(mon.device_inst_id);\n        }\n      });\n\n      // 将设备实例统计累加到分类树 (自底向上，汇聚到顶层)\n      insts.forEach(inst => {\n        const spec = specMap.get(inst.device_spec_id);\n        if (!spec) return;\n        const leafCatId = spec.device_category_id;\n        const isAnomaly = anomalousDevices.has(inst.id) ? 1 : 0;\n\n        let currId = leafCatId;\n        while (currId) {\n          const cat = catMap.get(currId);\n          if (!cat) break;\n          cat.total += 1;\n          cat.anomaly += isAnomaly;\n          currId = cat.parent_id;\n        }\n      });\n\n      // 组装父子层级结构\n      const roots: any[] = [];\n      catMap.forEach(cat => {\n        if (cat.parent_id && catMap.has(cat.parent_id)) {\n          const parent = catMap.get(cat.parent_id);\n          if (parent) {\n            parent.childrenMap.set(cat.id, cat);\n          }\n        } else {\n          roots.push(cat);\n        }\n      });\n\n      // 递归生成旭日图数据格式\n      const convertToSunburst = (nodes: any[]): any[] => {\n        return nodes\n          .filter(n => n.total > 0)\n          .map(n => {\n            const hasAnomaly = n.anomaly > 0;\n            const children = convertToSunburst(Array.from(n.childrenMap.values()));\n            return {\n              name: n.name,\n              value: n.total,\n              anomaly: n.anomaly,\n              itemStyle: {\n                // 如有异常覆盖默认色，将分类显示为醒目的红色\n                color: hasAnomaly ? '#ff4d4f' : undefined,\n              },\n              children: children.length > 0 ? children : undefined\n            };\n          });\n      };\n\n      const sunburstData = convertToSunburst(roots);\n\n      // 如果没有数据，显示空状态\n      if (sunburstData.length === 0) {\n        nestedPieChart.setOption({\n          title: { text: '暂无数据', left: 'center', top: 'center', textStyle: { color: '#999', fontSize: 14 } },\n          series: []\n        });\n      } else {\n        nestedPieChart.setOption({\n          tooltip: {\n            formatter: (params: any) => {\n              const { name, value, data } = params;\n              if (!data) return '';\n              const normal = value - (data.anomaly || 0);\n              return `${name}<br/>总计: ${value} 台<br/>正常: ${normal} 台 | 异常: <span style=\"color:#ff4d4f\">${data.anomaly || 0}</span> 台`;\n            }\n          },\n          series: {\n            type: 'sunburst',\n            data: sunburstData,\n            radius: [0, '95%'],\n            sort: undefined, // 保持原始分类自然顺序\n            emphasis: { focus: 'ancestor' },\n            itemStyle: { borderRadius: 4, borderWidth: 2, borderColor: '#fff' },\n            label: { show: true, formatter: '{b}\\n{c}台' }\n          }\n        });\n      }\n    }\n\n    // 监听窗口大小改变，使图表自适应响应式缩放\n    const handleResize = () => {\n      pieChart?.resize();\n      nestedPieChart?.resize();\n    };\n    window.addEventListener('resize', handleResize);\n\n    // 清理副作用\n    return () => {\n      window.removeEventListener('resize', handleResize);\n      pieChart?.dispose();\n      nestedPieChart?.dispose();\n    };\n  }, [data, categories, specs, insts, monitorings, sensors]); \n\n  return (\n    <PageContainer title=\"Dashboard Overview\" subTitle=\"仪表盘概览\">\n      <StatisticCard.Group direction=\"row\" gutter={16} loading={loading}>\n        <StatisticCard\n          statistic={{\n            title: '设备总数',\n            value: data.totalDevices,\n            suffix: '台',\n          }}\n        />\n        <StatisticCard\n          statistic={{\n            title: '在线设备',\n            value: data.runningDevices,\n            suffix: '台',\n            status: 'success',\n          }}\n        />\n        <StatisticCard\n          statistic={{\n            title: '故障设备',\n            value: data.faultyDevices,\n            suffix: '台',\n            status: 'error',\n          }}\n        />\n        <StatisticCard\n          statistic={{\n            title: '今日新增',\n            value: data.newDevicesToday,\n            suffix: '台',\n          }}\n        />\n      </StatisticCard.Group>\n\n      <ProCard style={{ marginTop: 16 }} gutter={16} ghost>\n        <ProCard title=\"设备健康分布\" colSpan={14} bordered headerBordered loading={loading}>\n          <StatisticCard\n            chart={\n              <div\n                ref={chartRef}\n                style={{\n                  height: 250,\n                  width: '100%',\n                }}\n              />\n            }\n          />\n        </ProCard>\n\n        <ProCard title=\"最新故障预警\" colSpan={10} bordered headerBordered loading={loading}>\n          <List\n            itemLayout=\"horizontal\"\n            dataSource={data.recentAnomalies}\n            renderItem={(item) => (\n              <List.Item>\n                <List.Item.Meta\n                  title={\n                    <span>\n                      <Badge status=\"error\" style={{ marginRight: 8 }} />\n                      {item.device_code}\n                    </span>\n                  }\n                  description={`SN: ${item.device_sn} | 时间: ${new Date(item.ts).toLocaleString()}`}\n                />\n                <Tag color={ANOMALY_MAP[item.anomaly]?.color || 'default'}>\n                  {ANOMALY_MAP[item.anomaly]?.text || '未知异常'}\n                </Tag>\n              </List.Item>\n            )}\n          />\n        </ProCard>\n      </ProCard>\n\n      <ProCard style={{ marginTop: 16 }} gutter={16} ghost>\n        <ProCard title=\"设备分类统计与异常分布\" bordered headerBordered loading={loading}>\n          <StatisticCard\n            chart={\n              <div\n                ref={categoryChartRef}\n                style={{\n                  height: 350,\n                  width: '100%',\n                }}\n              />\n            }\n          />\n        </ProCard>\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default DashboardOverview;\n",
+      "__content": "import { useEffect, useRef, useState } from 'react';\nimport { PageContainer, ProCard, StatisticCard } from '@ant-design/pro-components';\nimport { Badge, List, Tag, message } from 'antd';\nimport { request } from '@umijs/max';\nimport * as echarts from 'echarts';\n\nconst { Statistic } = StatisticCard;\n\n// 定义 Dashboard 聚合数据类型\ntype DashboardData = {\n  totalDevices: number;\n  runningDevices: number;\n  faultyDevices: number;\n  newDevicesToday: number;\n  vibrationAnomalyCount: number;  // anomaly=1 震动异常\n  temperatureAnomalyCount: number; // anomaly=2 温度异常\n  bothAnomalyCount: number;        // anomaly=3 双异常\n  recentAnomalies: {\n    id: string;\n    device_code: string;\n    device_sn: string;\n    anomaly: number; // 1=振动异常, 2=温度异常, 3=双异常\n    ts: number;\n  }[];\n  devicesByCategoryTree?: any[];\n};\n\n// 异常状态映射 (根据后端 handler 逻辑)\nconst ANOMALY_MAP: Record<number, { text: string; color: string }> = {\n  1: { text: '振动异常', color: 'warning' },\n  2: { text: '温度异常', color: 'error' },\n  3: { text: '振动+温度异常', color: 'magenta' },\n};\n\nconst DashboardOverview = () => {\n  const [loading, setLoading] = useState(true);\n  const [data, setData] = useState<DashboardData>({\n    totalDevices: 0,\n    runningDevices: 0,\n    faultyDevices: 0,\n    newDevicesToday: 0,\n    vibrationAnomalyCount: 0,\n    temperatureAnomalyCount: 0,\n    bothAnomalyCount: 0,\n    recentAnomalies: [],\n  });\n\n  const chartRef = useRef<HTMLDivElement>(null);\n  const categoryChartRef = useRef<HTMLDivElement>(null);\n\n  // 从后端获取 Dashboard 聚合数据\n  const fetchDashboardData = async () => {\n    setLoading(true);\n    try {\n      const res = await request<DashboardData>('/api/v1/dashboard/overview');\n      if (res) setData(res);\n    } catch (error) {\n      message.error('获取仪表盘数据失败');\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    fetchDashboardData();\n  }, []);\n\n  // 初始化和更新 Echarts 饼图及多层环形图\n  useEffect(() => {\n    let pieChart: echarts.ECharts | undefined;\n    let nestedPieChart: echarts.ECharts | undefined;\n\n    // 计算剩余的\"离线/未知\"设备数（防止由于统计误差出现负数）\n    const anomalyTotal = data.vibrationAnomalyCount + data.temperatureAnomalyCount + data.bothAnomalyCount;\n    const offlineDevices = Math.max(0, data.totalDevices - data.runningDevices - anomalyTotal);\n\n    // 1. 渲染设备健康分布饼图 (区分异常类型: 0=正常, 1=震动异常, 2=温度异常, 3=双异常)\n    if (chartRef.current) {\n      pieChart = echarts.init(chartRef.current);\n      const pieOption = {\n        tooltip: {\n          trigger: 'item',\n          formatter: (params: any) => {\n            return `${params.name}: ${params.value} 台 (${params.percent}%)`;\n          },\n        },\n        legend: {\n          top: '5%',\n          left: 'center',\n        },\n        series: [\n          {\n            name: '设备健康分布',\n            type: 'pie',\n            radius: ['40%', '70%'], // 环形图内外半径\n            avoidLabelOverlap: false,\n            itemStyle: {\n              borderRadius: 8,\n              borderColor: '#fff',\n              borderWidth: 2,\n            },\n            label: { show: false, position: 'center' },\n            emphasis: {\n              label: { show: true, fontSize: 18, fontWeight: 'bold' },\n            },\n            labelLine: { show: false },\n            data: [\n              { value: data.runningDevices, name: '正常运行', itemStyle: { color: '#52c41a' } },\n              { value: data.vibrationAnomalyCount, name: '震动异常', itemStyle: { color: '#faad14' } },\n              { value: data.temperatureAnomalyCount, name: '温度异常', itemStyle: { color: '#ff4d4f' } },\n              { value: data.bothAnomalyCount, name: '震动+温度异常', itemStyle: { color: '#eb2f96' } },\n              { value: offlineDevices, name: '离线/未知', itemStyle: { color: '#d9d9d9' } },\n            ].filter((item) => item.value > 0), // 过滤掉数值为0的项，使图表更整洁\n          },\n        ],\n      };\n      pieChart.setOption(pieOption);\n    }\n\n    // 2. 构建并渲染设备分类多层环形图 (旭日图 Sunburst)\n    if (categoryChartRef.current) {\n      nestedPieChart = echarts.init(categoryChartRef.current);\n      \n      const treeData = data.devicesByCategoryTree || [];\n\n      // 递归生成旭日图数据格式 (包含即使总数为0的分类，保证结构完整显示)\n      const convertToSunburst = (nodes: any[]): any[] => {\n        return nodes.map(n => {\n          const hasAnomaly = n.anomaly > 0;\n          const children = n.children ? convertToSunburst(n.children) : [];\n          \n          let childrenValueSum = 0;\n          children.forEach(c => { childrenValueSum += c.value; });\n\n          // 叶子节点赋予基础占位权重1以保证空类目也能渲染；父节点取 n.total 与子节点权重和的最大值\n          const nodeValue = children.length > 0 \n            ? Math.max(n.total, childrenValueSum)\n            : Math.max(n.total, 1);\n\n          let color = undefined;\n          if (hasAnomaly) {\n            if (children.length === 0) {\n              color = '#ff4d4f'; // 仅底层（最细分类）有故障时显著标红\n            } else {\n              color = undefined; // 顶层和中间层保留 ECharts 自带的默认颜色区分度\n            }\n          } else if (n.total === 0) {\n            color = '#e8e8e8'; // 空分类置灰处理\n          }\n\n          return {\n            name: n.name,\n            realTotal: n.total,\n            anomaly: n.anomaly,\n            value: nodeValue,\n            itemStyle: { color: color },\n            label: {\n              color: n.total === 0 ? '#999' : '#fff',\n              textBorderColor: n.total === 0 ? 'transparent' : 'rgba(0,0,0,0.4)',\n              textBorderWidth: n.total === 0 ? 0 : 1,\n            },\n            children: children.length > 0 ? children : undefined\n          };\n        });\n      };\n\n      const sunburstData = convertToSunburst(treeData);\n\n      // 如果没有数据，显示空状态\n      if (sunburstData.length === 0) {\n        nestedPieChart.setOption({\n          title: { text: '暂无数据', left: 'center', top: 'center', textStyle: { color: '#999', fontSize: 14 } },\n          series: []\n        });\n      } else {\n        nestedPieChart.setOption({\n          tooltip: {\n            formatter: (params: any) => {\n              const { name, data } = params;\n              if (!data) return '';\n              const realTotal = data.realTotal || 0;\n              const normal = Math.max(0, realTotal - (data.anomaly || 0));\n              return `${name}<br/>总计: ${realTotal} 台<br/>正常: ${normal} 台 | 异常: <span style=\"color:#ff4d4f\">${data.anomaly || 0}</span> 台`;\n            }\n          },\n          series: {\n            type: 'sunburst',\n            data: sunburstData,\n            radius: [0, '95%'],\n            sort: undefined, // 保持原始分类自然顺序\n            emphasis: { focus: 'ancestor' },\n            itemStyle: { borderRadius: 4, borderWidth: 2, borderColor: '#fff' },\n            label: { show: true, formatter: (params: any) => `${params.name}\\n${params.data.realTotal}台` }\n          }\n        });\n      }\n    }\n\n    // 监听窗口大小改变，使图表自适应响应式缩放\n    const handleResize = () => {\n      pieChart?.resize();\n      nestedPieChart?.resize();\n    };\n    window.addEventListener('resize', handleResize);\n\n    // 清理副作用\n    return () => {\n      window.removeEventListener('resize', handleResize);\n      pieChart?.dispose();\n      nestedPieChart?.dispose();\n    };\n  }, [data]); \n\n  return (\n    <PageContainer title=\"Dashboard Overview\" subTitle=\"仪表盘概览\">\n      <StatisticCard.Group direction=\"row\" gutter={16} loading={loading}>\n        <StatisticCard\n          statistic={{\n            title: '设备总数',\n            value: data.totalDevices,\n            suffix: '台',\n          }}\n        />\n        <StatisticCard\n          statistic={{\n            title: '在线设备',\n            value: data.runningDevices,\n            suffix: '台',\n            status: 'success',\n          }}\n        />\n        <StatisticCard\n          statistic={{\n            title: '故障设备',\n            value: data.faultyDevices,\n            suffix: '台',\n            status: 'error',\n          }}\n        />\n        <StatisticCard\n          statistic={{\n            title: '今日新增',\n            value: data.newDevicesToday,\n            suffix: '台',\n          }}\n        />\n      </StatisticCard.Group>\n\n      <ProCard style={{ marginTop: 16 }} gutter={16} ghost>\n        <ProCard title=\"设备健康分布\" colSpan={14} bordered headerBordered loading={loading}>\n          <StatisticCard\n            chart={\n              <div\n                ref={chartRef}\n                style={{\n                  height: 250,\n                  width: '100%',\n                }}\n              />\n            }\n          />\n        </ProCard>\n\n        <ProCard title=\"最新故障预警\" colSpan={10} bordered headerBordered loading={loading}>\n          <List\n            itemLayout=\"horizontal\"\n            dataSource={data.recentAnomalies}\n            renderItem={(item) => (\n              <List.Item>\n                <List.Item.Meta\n                  title={\n                    <span>\n                      <Badge status=\"error\" style={{ marginRight: 8 }} />\n                      {item.device_code}\n                    </span>\n                  }\n                  description={`SN: ${item.device_sn} | 时间: ${new Date(item.ts).toLocaleString()}`}\n                />\n                <Tag color={ANOMALY_MAP[item.anomaly]?.color || 'default'}>\n                  {ANOMALY_MAP[item.anomaly]?.text || '未知异常'}\n                </Tag>\n              </List.Item>\n            )}\n          />\n        </ProCard>\n      </ProCard>\n\n      <ProCard style={{ marginTop: 16 }} gutter={16} ghost>\n        <ProCard title=\"设备分类统计与异常分布\" bordered headerBordered loading={loading}>\n          <StatisticCard\n            chart={\n              <div\n                ref={categoryChartRef}\n                style={{\n                  height: 350,\n                  width: '100%',\n                }}\n              />\n            }\n          />\n        </ProCard>\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default DashboardOverview;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/src/pages/Dashboard/Overview/index.tsx"
     },
@@ -6063,79 +6311,8 @@
             ],
             "format": "esm"
           },
-          "src/services/deviceCategory.ts": {
-            "bytes": 3480,
-            "imports": [
-              {
-                "path": "src/.umi/exports.ts",
-                "kind": "import-statement",
-                "original": "@umijs/max"
-              }
-            ],
-            "format": "esm"
-          },
-          "src/services/supplier.ts": {
-            "bytes": 2024,
-            "imports": [
-              {
-                "path": "src/.umi/exports.ts",
-                "kind": "import-statement",
-                "original": "@umijs/max"
-              }
-            ],
-            "format": "esm"
-          },
-          "src/services/deviceSpec.ts": {
-            "bytes": 2406,
-            "imports": [
-              {
-                "path": "src/.umi/exports.ts",
-                "kind": "import-statement",
-                "original": "@umijs/max"
-              },
-              {
-                "path": "src/services/supplier.ts",
-                "kind": "import-statement",
-                "original": "@/services/supplier"
-              }
-            ],
-            "format": "esm"
-          },
-          "src/services/deviceInst.ts": {
-            "bytes": 1395,
-            "imports": [
-              {
-                "path": "src/.umi/exports.ts",
-                "kind": "import-statement",
-                "original": "@umijs/max"
-              }
-            ],
-            "format": "esm"
-          },
-          "src/services/tenantSensor.ts": {
-            "bytes": 1446,
-            "imports": [
-              {
-                "path": "src/.umi/exports.ts",
-                "kind": "import-statement",
-                "original": "@umijs/max"
-              }
-            ],
-            "format": "esm"
-          },
-          "src/services/sensorMonitoring.ts": {
-            "bytes": 2148,
-            "imports": [
-              {
-                "path": "src/.umi/exports.ts",
-                "kind": "import-statement",
-                "original": "@umijs/max"
-              }
-            ],
-            "format": "esm"
-          },
           "src/pages/Dashboard/Overview/index.tsx": {
-            "bytes": 13086,
+            "bytes": 10909,
             "imports": [
               {
                 "path": "react",
@@ -6163,31 +6340,6 @@
                 "external": true
               },
               {
-                "path": "src/services/deviceCategory.ts",
-                "kind": "import-statement",
-                "original": "@/services/deviceCategory"
-              },
-              {
-                "path": "src/services/deviceSpec.ts",
-                "kind": "import-statement",
-                "original": "@/services/deviceSpec"
-              },
-              {
-                "path": "src/services/deviceInst.ts",
-                "kind": "import-statement",
-                "original": "@/services/deviceInst"
-              },
-              {
-                "path": "src/services/tenantSensor.ts",
-                "kind": "import-statement",
-                "original": "@/services/tenantSensor"
-              },
-              {
-                "path": "src/services/sensorMonitoring.ts",
-                "kind": "import-statement",
-                "original": "@/services/sensorMonitoring"
-              },
-              {
                 "path": "react/jsx-runtime",
                 "kind": "import-statement",
                 "external": true
@@ -6212,6 +6364,17 @@
                 "path": "react/jsx-runtime",
                 "kind": "import-statement",
                 "external": true
+              }
+            ],
+            "format": "esm"
+          },
+          "src/services/supplier.ts": {
+            "bytes": 2024,
+            "imports": [
+              {
+                "path": "src/.umi/exports.ts",
+                "kind": "import-statement",
+                "original": "@umijs/max"
               }
             ],
             "format": "esm"
@@ -6388,6 +6551,17 @@
             ],
             "format": "esm"
           },
+          "src/services/deviceCategory.ts": {
+            "bytes": 3480,
+            "imports": [
+              {
+                "path": "src/.umi/exports.ts",
+                "kind": "import-statement",
+                "original": "@umijs/max"
+              }
+            ],
+            "format": "esm"
+          },
           "src/services/sensorThreshold.ts": {
             "bytes": 1486,
             "imports": [
@@ -6445,6 +6619,22 @@
             ],
             "format": "esm"
           },
+          "src/services/deviceSpec.ts": {
+            "bytes": 2406,
+            "imports": [
+              {
+                "path": "src/.umi/exports.ts",
+                "kind": "import-statement",
+                "original": "@umijs/max"
+              },
+              {
+                "path": "src/services/supplier.ts",
+                "kind": "import-statement",
+                "original": "@/services/supplier"
+              }
+            ],
+            "format": "esm"
+          },
           "src/pages/Device/Spec/index.tsx": {
             "bytes": 11789,
             "imports": [
@@ -6492,6 +6682,17 @@
                 "path": "react/jsx-runtime",
                 "kind": "import-statement",
                 "external": true
+              }
+            ],
+            "format": "esm"
+          },
+          "src/services/deviceInst.ts": {
+            "bytes": 1395,
+            "imports": [
+              {
+                "path": "src/.umi/exports.ts",
+                "kind": "import-statement",
+                "original": "@umijs/max"
               }
             ],
             "format": "esm"
@@ -6703,6 +6904,28 @@
                 "path": "react/jsx-runtime",
                 "kind": "import-statement",
                 "external": true
+              }
+            ],
+            "format": "esm"
+          },
+          "src/services/sensorMonitoring.ts": {
+            "bytes": 2148,
+            "imports": [
+              {
+                "path": "src/.umi/exports.ts",
+                "kind": "import-statement",
+                "original": "@umijs/max"
+              }
+            ],
+            "format": "esm"
+          },
+          "src/services/tenantSensor.ts": {
+            "bytes": 1446,
+            "imports": [
+              {
+                "path": "src/.umi/exports.ts",
+                "kind": "import-statement",
+                "original": "@umijs/max"
               }
             ],
             "format": "esm"
@@ -9165,29 +9388,14 @@
               "src/.umi/core/EmptyRoute.tsx": {
                 "bytesInOutput": 381
               },
-              "src/services/deviceCategory.ts": {
-                "bytesInOutput": 1777
-              },
-              "src/services/supplier.ts": {
-                "bytesInOutput": 1388
-              },
-              "src/services/deviceSpec.ts": {
-                "bytesInOutput": 1440
-              },
-              "src/services/deviceInst.ts": {
-                "bytesInOutput": 851
-              },
-              "src/services/tenantSensor.ts": {
-                "bytesInOutput": 641
-              },
-              "src/services/sensorMonitoring.ts": {
-                "bytesInOutput": 1122
-              },
               "src/pages/Dashboard/Overview/index.tsx": {
-                "bytesInOutput": 13466
+                "bytesInOutput": 11683
               },
               "src/pages/Dashboard/Monitoring/index.tsx": {
                 "bytesInOutput": 3928
+              },
+              "src/services/supplier.ts": {
+                "bytesInOutput": 1388
               },
               "src/utils/proTableOptions.tsx": {
                 "bytesInOutput": 1459
@@ -9210,14 +9418,23 @@
               "src/components/EntityPicker/index.tsx": {
                 "bytesInOutput": 5827
               },
+              "src/services/deviceCategory.ts": {
+                "bytesInOutput": 1777
+              },
               "src/services/sensorThreshold.ts": {
                 "bytesInOutput": 870
               },
               "src/pages/Device/Category/index.tsx": {
                 "bytesInOutput": 17468
               },
+              "src/services/deviceSpec.ts": {
+                "bytesInOutput": 1440
+              },
               "src/pages/Device/Spec/index.tsx": {
                 "bytesInOutput": 13773
+              },
+              "src/services/deviceInst.ts": {
+                "bytesInOutput": 851
               },
               "src/pages/Device/List/index.tsx": {
                 "bytesInOutput": 14484
@@ -9236,6 +9453,12 @@
               },
               "src/pages/Monitoring/Sensors/BatchDevices/index.tsx": {
                 "bytesInOutput": 4815
+              },
+              "src/services/sensorMonitoring.ts": {
+                "bytesInOutput": 1122
+              },
+              "src/services/tenantSensor.ts": {
+                "bytesInOutput": 641
               },
               "src/pages/Monitoring/Points/index.tsx": {
                 "bytesInOutput": 15972
@@ -9289,7 +9512,7 @@
                 "bytesInOutput": 1951
               }
             },
-            "bytes": 315904
+            "bytes": 314121
           }
         }
       }
@@ -13044,76 +13267,6 @@
             }
           ],
           "start": 226,
-          "type": "ImportDeclaration"
-        },
-        {
-          "end": 331,
-          "importKind": "value",
-          "source": "@/services/deviceCategory",
-          "specifiers": [
-            {
-              "imported": "listAllDeviceCategories",
-              "local": "listAllDeviceCategories",
-              "type": "ImportSpecifier"
-            }
-          ],
-          "start": 263,
-          "type": "ImportDeclaration"
-        },
-        {
-          "end": 391,
-          "importKind": "value",
-          "source": "@/services/deviceSpec",
-          "specifiers": [
-            {
-              "imported": "listAllDeviceSpecs",
-              "local": "listAllDeviceSpecs",
-              "type": "ImportSpecifier"
-            }
-          ],
-          "start": 332,
-          "type": "ImportDeclaration"
-        },
-        {
-          "end": 451,
-          "importKind": "value",
-          "source": "@/services/deviceInst",
-          "specifiers": [
-            {
-              "imported": "listAllDeviceInsts",
-              "local": "listAllDeviceInsts",
-              "type": "ImportSpecifier"
-            }
-          ],
-          "start": 392,
-          "type": "ImportDeclaration"
-        },
-        {
-          "end": 509,
-          "importKind": "value",
-          "source": "@/services/tenantSensor",
-          "specifiers": [
-            {
-              "imported": "listAllSensors",
-              "local": "listAllSensors",
-              "type": "ImportSpecifier"
-            }
-          ],
-          "start": 452,
-          "type": "ImportDeclaration"
-        },
-        {
-          "end": 581,
-          "importKind": "value",
-          "source": "@/services/sensorMonitoring",
-          "specifiers": [
-            {
-              "imported": "listAllSensorMonitorings",
-              "local": "listAllSensorMonitorings",
-              "type": "ImportSpecifier"
-            }
-          ],
-          "start": 510,
           "type": "ImportDeclaration"
         }
       ],
