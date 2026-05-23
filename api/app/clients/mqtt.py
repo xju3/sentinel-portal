@@ -65,7 +65,8 @@ class MQTTManager:
     def on_message(self, client, userdata, msg):
         """Callback for when a PUBLISH message is received from the server."""
         try:
-            patrol_msg_handler.handle_message(msg.topic, msg.payload)
+            # patrol_msg_handler.handle_message(msg.topic, msg.payload)
+            pass
         except Exception as e:
             logger.error(f"Error processing MQTT message on topic {msg.topic}: {e}")
 
