@@ -93,3 +93,5 @@ yarn-error.log*
 pnpm-debug.log*
 .omx
 .omx/
+.umi/
+.umi
