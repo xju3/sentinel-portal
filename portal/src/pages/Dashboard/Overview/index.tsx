@@ -23,6 +23,7 @@ type DashboardData = {
     ts: number;
   }[];
   devicesByCategoryTree?: any[];
+  devicesByAreaTree?: any[];
 };
 
 // 异常状态映射 (根据后端 handler 逻辑)
@@ -47,6 +48,7 @@ const DashboardOverview = () => {
 
   const chartRef = useRef<HTMLDivElement>(null);
   const categoryChartRef = useRef<HTMLDivElement>(null);
+  const areaChartRef = useRef<HTMLDivElement>(null);
 
   // 从后端获取 Dashboard 聚合数据
   const fetchDashboardData = async () => {
@@ -69,6 +71,7 @@ const DashboardOverview = () => {
   useEffect(() => {
     let pieChart: echarts.ECharts | undefined;
     let nestedPieChart: echarts.ECharts | undefined;
+    let areaChart: echarts.ECharts | undefined;
 
     // 计算各分类设备数
     // runningDevices 是 active==1 的设备数，可能包含故障设备
@@ -295,10 +298,156 @@ const DashboardOverview = () => {
       }
     }
 
+    // 3. 构建并渲染区域维度旭日图 (Sunburst)
+    if (areaChartRef.current) {
+      areaChart = echarts.init(areaChartRef.current);
+
+      const areaTreeData = data.devicesByAreaTree || [];
+
+      // 区域图使用蓝色系色阶，与分类图的红色系区分
+      const AREA_COLORS = [
+        '#e3f2fd', // 第1层（最内层父区域）- 极浅蓝
+        '#bbdefb', // 第2层 - 浅蓝
+        '#90caf9', // 第3层 - 中浅蓝
+        '#64b5f6', // 第4层 - 中蓝
+        '#42a5f5', // 第5层 - 中深蓝
+        '#1e88e5', // 第6层（最外层异常子节点）- 深蓝
+      ];
+
+      // 递归生成旭日图数据格式（复用分类图的 convertToSunburst 逻辑，使用蓝色系）
+      const convertAreaToSunburst = (nodes: any[], anomalyDepth: number = 0): any[] => {
+        return nodes.map(n => {
+          const hasAnomaly = n.anomaly > 0;
+          let children = n.children ? convertAreaToSunburst(n.children, hasAnomaly ? anomalyDepth + 1 : anomalyDepth) : [];
+
+          // 如果该底层区域有异常，则在外部再增加一圈（子节点）专门显示健康状态
+          if (children.length === 0 && hasAnomaly) {
+            const normalCount = Math.max(0, n.total - n.anomaly);
+            if (normalCount > 0) {
+              children.push({
+                name: '正常',
+                realTotal: normalCount,
+                anomaly: 0,
+                value: normalCount,
+                itemStyle: { color: '#e8f5e9' },
+                label: { show: true, formatter: '{c}', color: '#81c784', fontSize: 10, textBorderWidth: 0 },
+                tooltip: { show: true },
+              });
+            }
+            const outerColorIndex = Math.min(anomalyDepth + 1, AREA_COLORS.length - 1);
+            children.push({
+              name: '异常',
+              realTotal: n.anomaly,
+              anomaly: n.anomaly,
+              value: n.anomaly,
+              itemStyle: { color: AREA_COLORS[outerColorIndex] },
+              label: { show: true, formatter: '{c}', color: '#fff', textBorderWidth: 0 },
+            });
+          }
+
+          let color = undefined;
+          if (n.total === 0) {
+            color = '#e8e8e8';
+          } else if (n.anomaly === 0) {
+            color = '#e0e0e0';
+          } else {
+            const colorIndex = Math.min(anomalyDepth, AREA_COLORS.length - 1);
+            color = AREA_COLORS[colorIndex];
+          }
+
+          return {
+            name: n.name,
+            realTotal: n.total,
+            anomaly: n.anomaly,
+            value: children.length > 0 ? undefined : Math.max(n.total, 1),
+            itemStyle: { color: color },
+            label: {
+              color: n.total === 0 ? '#999' : (n.anomaly > 0 ? '#1565c0' : '#666'),
+              textBorderColor: n.total === 0 ? 'transparent' : 'rgba(255,255,255,0.8)',
+              textBorderWidth: n.total === 0 ? 0 : 1,
+            },
+            children: children.length > 0 ? children : undefined,
+          };
+        });
+      };
+
+      const areaSunburstData = convertAreaToSunburst(areaTreeData);
+
+      // 计算最大层级
+      const getMaxDepth = (nodes: any[]): number => {
+        if (!nodes || nodes.length === 0) return 0;
+        let max = 0;
+        for (const node of nodes) {
+          max = Math.max(max, node.children ? getMaxDepth(node.children) : 0);
+        }
+        return max + 1;
+      };
+
+      const areaDepth = getMaxDepth(areaSunburstData);
+      const areaSunburstLevels = [{}];
+      if (areaDepth > 0) {
+        const innerRadius = 15;
+        const outerRadius = 95;
+        const thicknessUnit = (outerRadius - innerRadius) / (areaDepth - 0.5);
+        let currentRadius = innerRadius;
+        for (let i = 1; i <= areaDepth; i++) {
+          const thickness = i === areaDepth ? thicknessUnit / 2 : thicknessUnit;
+          areaSunburstLevels.push({
+            r0: `${currentRadius}%`,
+            r: `${currentRadius + thickness}%`,
+          });
+          currentRadius += thickness;
+        }
+      }
+
+      if (areaSunburstData.length === 0) {
+        areaChart.setOption({
+          title: { text: '暂无数据', left: 'center', top: 'center', textStyle: { color: '#999', fontSize: 14 } },
+          series: [],
+        });
+      } else {
+        areaChart.setOption({
+          tooltip: {
+            formatter: (params: any) => {
+              const { name, data } = params;
+              if (!data) return '';
+              const realTotal = data.realTotal ?? data.value ?? 0;
+              const anomaly = data.anomaly ?? 0;
+              const normal = Math.max(0, realTotal - anomaly);
+              return `${name}<br/>总计: ${realTotal} 台<br/>正常: ${normal} 台 | 异常: <span style="color:#1565c0">${anomaly}</span> 台`;
+            },
+          },
+          series: {
+            type: 'sunburst',
+            data: areaSunburstData,
+            radius: ['15%', '95%'],
+            levels: areaDepth > 0 ? areaSunburstLevels : undefined,
+            sort: undefined,
+            emphasis: { focus: 'ancestor' },
+            itemStyle: { borderRadius: 4, borderWidth: 2, borderColor: '#fff' },
+            label: {
+              show: true,
+              formatter: (params: any) => {
+                const { name, data } = params;
+                if (!data) return '';
+                const realTotal = data.realTotal ?? data.value ?? 0;
+                return ` ${name}\n${realTotal} 台`;
+              },
+              rich: {
+                name: { color: 'inherit', fontSize: 10, align: 'center', lineHeight: 18 },
+                total: { color: 'inherit', fontSize: 12, align: 'center', lineHeight: 16 },
+              },
+            },
+          },
+        });
+      }
+    }
+
     // 监听窗口大小改变，使图表自适应响应式缩放
     const handleResize = () => {
       pieChart?.resize();
       nestedPieChart?.resize();
+      areaChart?.resize();
     };
     window.addEventListener('resize', handleResize);
 
@@ -307,6 +456,7 @@ const DashboardOverview = () => {
       window.removeEventListener('resize', handleResize);
       pieChart?.dispose();
       nestedPieChart?.dispose();
+      areaChart?.dispose();
     };
   }, [data]); 
 
@@ -372,9 +522,22 @@ const DashboardOverview = () => {
                 类别视图（{data.faultyDevices}台）
               </div>
             </div>
+            <div style={{ flex: 1, minWidth: 0, textAlign: 'center' }}>
+              <div
+                ref={areaChartRef}
+                style={{
+                  height: 250,
+                  width: '100%',
+                }}
+              />
+              <div style={{ marginTop: 8, fontSize: 14, fontWeight: 500, color: '#333' }}>
+                区域视图（{data.faultyDevices}台）
+              </div>
+            </div>
           </div>
         </ProCard>
       </ProCard>
+
 
       <ProCard style={{ marginTop: 16 }} ghost>
         <ProCard title="最新故障预警" bordered headerBordered loading={loading}>

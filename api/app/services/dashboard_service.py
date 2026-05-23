@@ -8,8 +8,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from datetime import date
 from uuid import UUID
 
-from app.models.device import DeviceInst, DeviceSpec, DeviceCategory
+from app.models.device import DeviceInst, DeviceSpec, DeviceCategory, ProcessDevice, ProcessDeviceItem
 from app.models.sensor import SensorMonitoring
+from app.models.customer import Area
 
 
 class DashboardService:
@@ -100,6 +101,11 @@ class DashboardService:
             session, tenant_id
         )
 
+        # 7. 按区域树聚合设备总数和异常设备数
+        devices_by_area_tree = await DashboardService._get_area_device_tree(
+            session, tenant_id
+        )
+
         return {
             "totalDevices": total_devices,
             "runningDevices": running_devices,
@@ -109,7 +115,8 @@ class DashboardService:
             "temperatureAnomalyCount": temperature_anomaly_count,
             "bothAnomalyCount": both_anomaly_count,
             "recentAnomalies": recent_anomalies,
-            "devicesByCategoryTree": devices_by_category_tree
+            "devicesByCategoryTree": devices_by_category_tree,
+            "devicesByAreaTree": devices_by_area_tree,
         }
 
     @staticmethod
@@ -190,6 +197,90 @@ class DashboardService:
                 tree.append(info)
 
         print("=== NestedPieChart Tree Data ===")
+        print(json.dumps(tree, ensure_ascii=False, indent=2))
+
+        return tree
+
+    @staticmethod
+    async def _get_area_device_tree(
+        session: AsyncSession, tenant_id: UUID
+    ) -> list:
+        """
+        按区域树聚合设备总数和异常设备数。
+        关联路径: DeviceInst → ProcessDeviceItem → ProcessDevice → Area
+        返回树形结构: [{name, total, anomaly, children: [...]}]
+        """
+        # 1. 获取该租户下所有 Area
+        stmt_areas = (
+            select(Area)
+            .where(Area.tenant_id == tenant_id)
+        )
+        area_rows = (await session.execute(stmt_areas)).scalars().all()
+
+        # 构建区域字典
+        area_map = {}
+        for area in area_rows:
+            area_map[str(area.id)] = {
+                "id": str(area.id),
+                "name": area.name,
+                "parent_id": str(area.parent_id) if area.parent_id else None,
+                "total": 0,
+                "anomaly": 0,
+                "children": [],
+            }
+
+        # 2. 查询设备实例 → ProcessDeviceItem → ProcessDevice → Area 的关联
+        #    同时 LEFT JOIN SensorMonitoring 获取异常信息
+        stmt_devices = (
+            select(
+                DeviceInst.id.label("inst_id"),
+                DeviceInst.code.label("instance_name"),
+                ProcessDevice.area_id.label("area_id"),
+                func.max(SensorMonitoring.anomaly).label("anomaly"),
+            )
+            .select_from(DeviceInst)
+            .join(ProcessDeviceItem, ProcessDeviceItem.device_inst_id == DeviceInst.id)
+            .join(ProcessDevice, ProcessDevice.id == ProcessDeviceItem.process_device_id)
+            .outerjoin(SensorMonitoring, SensorMonitoring.device_inst_id == DeviceInst.id)
+            .where(
+                ProcessDevice.area_id.isnot(None),
+            )
+            .group_by(DeviceInst.id, DeviceInst.code, ProcessDevice.area_id)
+        )
+        device_rows = (await session.execute(stmt_devices)).all()
+
+        # 3. 对组合数据进行在内存中的精确累加 (从叶子向所有祖级传递)
+        for row in device_rows:
+            aid = str(row.area_id) if row.area_id else None
+            if not aid or aid not in area_map:
+                continue
+
+            is_anomaly = 1 if (row.anomaly and row.anomaly > 0) else 0
+
+            # 将当前实例的数据累加到自身直接区域，并不断向上追溯累加到全部上级父区域
+            curr_aid = aid
+            visited = set()
+            while curr_aid and curr_aid in area_map:
+                if curr_aid in visited:
+                    break  # 防止数据中的死循环环状关联
+                visited.add(curr_aid)
+
+                area_map[curr_aid]["total"] += 1
+                area_map[curr_aid]["anomaly"] += is_anomaly
+
+                curr_aid = area_map[curr_aid]["parent_id"]
+
+        # 4. 组装父子树形结构提供给前端
+        tree = []
+        for aid, info in area_map.items():
+            pid = info["parent_id"]
+            if pid and pid in area_map:
+                area_map[pid]["children"].append(info)
+            else:
+                # 无父节点的即为最顶层根节点
+                tree.append(info)
+
+        print("=== Area Tree Data ===")
         print(json.dumps(tree, ensure_ascii=False, indent=2))
 
         return tree

@@ -35,4 +35,5 @@ class DashboardOverviewResponse(BaseModel):
     recentAnomalies: List[AnomalyResponse]
     devicesByCategory: List[CategoryCountResponse] = []
     devicesByCategoryTree: List[CategoryTreeNodeResponse] = []
+    devicesByAreaTree: List[CategoryTreeNodeResponse] = []
 
