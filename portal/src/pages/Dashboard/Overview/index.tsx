@@ -70,11 +70,16 @@ const DashboardOverview = () => {
     let pieChart: echarts.ECharts | undefined;
     let nestedPieChart: echarts.ECharts | undefined;
 
-    // 计算剩余的"离线/未知"设备数（防止由于统计误差出现负数）
-    const anomalyTotal = data.vibrationAnomalyCount + data.temperatureAnomalyCount + data.bothAnomalyCount;
-    const offlineDevices = Math.max(0, data.totalDevices - data.runningDevices - anomalyTotal);
+    // 计算各分类设备数
+    // runningDevices 是 active==1 的设备数，可能包含故障设备
+    // faultyDevices 是 anomaly>0 的去重设备数
+    // 正常运行 = 运行中设备 - 故障设备（排除运行中的故障设备）
+    const normalRunning = Math.max(0, data.runningDevices - data.faultyDevices);
+    // 离线/未知 = 总数 - 运行中 - (故障 - 运行中且故障的部分)
+    // 简化：离线 = 总数 - 正常运行 - 故障设备数
+    const offlineDevices = Math.max(0, data.totalDevices - normalRunning - data.faultyDevices);
 
-    // 1. 渲染设备健康分布饼图 (区分异常类型: 0=正常, 1=震动异常, 2=温度异常, 3=双异常)
+    // 1. 渲染温震故障分布饼图
     if (chartRef.current) {
       pieChart = echarts.init(chartRef.current);
       const pieOption = {
@@ -84,13 +89,9 @@ const DashboardOverview = () => {
             return `${params.name}: ${params.value} 台 (${params.percent}%)`;
           },
         },
-        legend: {
-          top: '5%',
-          left: 'center',
-        },
         series: [
           {
-            name: '设备健康分布',
+            name: '温震故障分布',
             type: 'pie',
             radius: ['40%', '70%'], // 环形图内外半径
             avoidLabelOverlap: false,
@@ -99,18 +100,44 @@ const DashboardOverview = () => {
               borderColor: '#fff',
               borderWidth: 2,
             },
-            label: { show: false, position: 'center' },
-            emphasis: {
-              label: { show: true, fontSize: 18, fontWeight: 'bold' },
+            label: {
+              show: true,
+              formatter: (params: any) => {
+                return `${params.name}\n${params.value}台`;
+              },
+              fontSize: 11,
+              color: '#333',
+              lineHeight: 16,
             },
-            labelLine: { show: false },
-            data: [
-              { value: data.runningDevices, name: '正常运行', itemStyle: { color: '#52c41a' } },
-              { value: data.vibrationAnomalyCount, name: '震动异常', itemStyle: { color: '#faad14' } },
-              { value: data.temperatureAnomalyCount, name: '温度异常', itemStyle: { color: '#ff4d4f' } },
-              { value: data.bothAnomalyCount, name: '震动+温度异常', itemStyle: { color: '#eb2f96' } },
-              { value: offlineDevices, name: '离线/未知', itemStyle: { color: '#d9d9d9' } },
-            ].filter((item) => item.value > 0), // 过滤掉数值为0的项，使图表更整洁
+            emphasis: {
+              label: { show: true, fontSize: 14, fontWeight: 'bold' },
+            },
+            labelLine: {
+              show: true,
+              length: 8,
+              length2: 12,
+              smooth: true,
+            },
+            data: (() => {
+              const items = [
+                { value: normalRunning, name: '正常运行', itemStyle: { color: '#52c41a' } },
+                { value: offlineDevices, name: '离线/未知', itemStyle: { color: '#d9d9d9' } },
+              ];
+              // 故障设备：优先使用细分类型，如果细分类型都为0则使用 faultyDevices 总数
+              const hasDetail = data.vibrationAnomalyCount > 0 || data.temperatureAnomalyCount > 0 || data.bothAnomalyCount > 0;
+              if (hasDetail) {
+                items.splice(1, 0,
+                  { value: data.vibrationAnomalyCount, name: '震动异常', itemStyle: { color: '#faad14' } },
+                  { value: data.temperatureAnomalyCount, name: '温度异常', itemStyle: { color: '#ff4d4f' } },
+                  { value: data.bothAnomalyCount, name: '震动+温度异常', itemStyle: { color: '#eb2f96' } },
+                );
+              } else if (data.faultyDevices > 0) {
+                items.splice(1, 0,
+                  { value: data.faultyDevices, name: '故障设备', itemStyle: { color: '#ff4d4f' } },
+                );
+              }
+              return items;
+            })(),
           },
         ],
       };
@@ -148,7 +175,7 @@ const DashboardOverview = () => {
               realTotal: n.anomaly,
               anomaly: n.anomaly,
               value: n.anomaly,
-              itemStyle: { color: '#ff4d4f' }, // 异常设备显示红色
+              itemStyle: { color: '#9b2e2e' }, // 异常设备显示红色
               label: { show: true, formatter: '{c}', color: '#fff', textBorderWidth: 0 }, // 异常部分文字只显示数字
             });
           }
@@ -215,9 +242,12 @@ const DashboardOverview = () => {
             formatter: (params: any) => {
               const { name, data } = params;
               if (!data) return '';
-              const realTotal = data.realTotal || 0;
-              const normal = Math.max(0, realTotal - (data.anomaly || 0));
-              return `${name}<br/>总计: ${realTotal} 台<br/>正常: ${normal} 台 | 异常: <span style="color:#ff4d4f">${data.anomaly || 0}</span> 台`;
+              // 对于有 children 的分类节点，realTotal 和 anomaly 在 treeData 中定义，
+              // 但 ECharts 旭日图内部可能不保留自定义属性，需要从 treeData 中查找
+              const realTotal = data.realTotal ?? data.value ?? 0;
+              const anomaly = data.anomaly ?? 0;
+              const normal = Math.max(0, realTotal - anomaly);
+              return `${name}<br/>总计: ${realTotal} 台<br/>正常: ${normal} 台 | 异常: <span style="color:#9b2e2e">${anomaly}</span> 台`;
             }
           },
           series: {
@@ -233,10 +263,11 @@ const DashboardOverview = () => {
               formatter: (params: any) => {
                 const { name, data } = params;
                 if (!data) return '';
-                return `{name|${name}}\n{total|${data.realTotal} 台}`;
+                const realTotal = data.realTotal ?? data.value ?? 0;
+                return ` ${name}\n${realTotal} 台`;
               },
               rich: {
-                name: { color: 'inherit', fontSize: 13, align: 'center', lineHeight: 18 },
+                name: { color: 'inherit', fontSize: 10, align: 'center', lineHeight: 18 },
                 total: { color: 'inherit', fontSize: 12, align: 'center', lineHeight: 16 },
               }
             }
@@ -296,9 +327,9 @@ const DashboardOverview = () => {
       </StatisticCard.Group>
 
       <ProCard style={{ marginTop: 16 }} gutter={16} ghost>
-        <ProCard title="设备健康分布" colSpan={14} bordered headerBordered loading={loading}>
-          <StatisticCard
-            chart={
+        <ProCard title="设备健康分布" bordered headerBordered loading={loading}>
+          <div style={{ display: 'flex', gap: 16 }}>
+            <div style={{ flex: 1, minWidth: 0, textAlign: 'center' }}>
               <div
                 ref={chartRef}
                 style={{
@@ -306,11 +337,28 @@ const DashboardOverview = () => {
                   width: '100%',
                 }}
               />
-            }
-          />
+              <div style={{ marginTop: 8, fontSize: 14, fontWeight: 500, color: '#333' }}>
+                温震故障分布（{data.totalDevices}台）
+              </div>
+            </div>
+            <div style={{ flex: 1, minWidth: 0, textAlign: 'center' }}>
+              <div
+                ref={categoryChartRef}
+                style={{
+                  height: 250,
+                  width: '100%',
+                }}
+              />
+              <div style={{ marginTop: 8, fontSize: 14, fontWeight: 500, color: '#333' }}>
+                设备类别故障（{data.faultyDevices}台）
+              </div>
+            </div>
+          </div>
         </ProCard>
+      </ProCard>
 
-        <ProCard title="最新故障预警" colSpan={10} bordered headerBordered loading={loading}>
+      <ProCard style={{ marginTop: 16 }} gutter={16} ghost>
+        <ProCard title="最新故障预警" bordered headerBordered loading={loading}>
           <List
             itemLayout="horizontal"
             dataSource={data.recentAnomalies}
@@ -330,22 +378,6 @@ const DashboardOverview = () => {
                 </Tag>
               </List.Item>
             )}
-          />
-        </ProCard>
-      </ProCard>
-
-      <ProCard style={{ marginTop: 16 }} gutter={16} ghost>
-        <ProCard title="设备分类统计与异常分布" bordered headerBordered loading={loading}>
-          <StatisticCard
-            chart={
-              <div
-                ref={categoryChartRef}
-                style={{
-                  height: 350,
-                  width: '100%',
-                }}
-              />
-            }
           />
         </ProCard>
       </ProCard>
