@@ -91,7 +91,7 @@ const DashboardOverview = () => {
         },
         series: [
           {
-            name: '温震故障分布',
+            name: '故障概览',
             type: 'pie',
             radius: ['40%', '70%'], // 环形图内外半径
             avoidLabelOverlap: false,
@@ -150,11 +150,21 @@ const DashboardOverview = () => {
       
       const treeData = data.devicesByCategoryTree || [];
 
-      // 递归生成旭日图数据格式
-      const convertToSunburst = (nodes: any[]): any[] => {
+      // 异常层级渐进色阶：从浅红到深红，按层级深度递增
+      const ANOMALY_COLORS = [
+        '#ffebee', // 第1层（最内层父分类）- 极浅红
+        '#ffcdd2', // 第2层 - 浅红
+        '#ef9a9a', // 第3层 - 中浅红
+        '#e57373', // 第4层 - 中红
+        '#ef5350', // 第5层 - 中深红
+        '#e53935', // 第6层（最外层异常子节点）- 深红
+      ];
+
+      // 递归生成旭日图数据格式，depth 表示当前节点在异常路径中的层级深度（从0开始）
+      const convertToSunburst = (nodes: any[], anomalyDepth: number = 0): any[] => {
         return nodes.map(n => {
           const hasAnomaly = n.anomaly > 0;
-          let children = n.children ? convertToSunburst(n.children) : [];
+          let children = n.children ? convertToSunburst(n.children, hasAnomaly ? anomalyDepth + 1 : anomalyDepth) : [];
           
           // 如果该底层分类有异常，则在外部再增加一圈（子节点）专门显示健康状态
           if (children.length === 0 && hasAnomaly) {
@@ -165,24 +175,33 @@ const DashboardOverview = () => {
                 realTotal: normalCount,
                 anomaly: 0,
                 value: normalCount,
-            itemStyle: { color: 'transparent', borderColor: 'transparent' }, // 正常设备透明不显示，仅作空白占位
-                label: { show: false }, // 正常不需要显示，但保留占位
-            tooltip: { show: false }, // 空白部分不显示悬浮提示框
+                itemStyle: { color: '#e8f5e9' }, // 浅绿色，不醒目但可见
+                label: { show: true, formatter: '{c}', color: '#81c784', fontSize: 10, textBorderWidth: 0 },
+                tooltip: { show: true },
               });
             }
+            // 最外层异常子节点使用最深红色
+            const outerColorIndex = Math.min(anomalyDepth + 1, ANOMALY_COLORS.length - 1);
             children.push({
               name: '异常',
               realTotal: n.anomaly,
               anomaly: n.anomaly,
               value: n.anomaly,
-              itemStyle: { color: '#9b2e2e' }, // 异常设备显示红色
+              itemStyle: { color: ANOMALY_COLORS[outerColorIndex] }, // 渐进最深红色
               label: { show: true, formatter: '{c}', color: '#fff', textBorderWidth: 0 }, // 异常部分文字只显示数字
             });
           }
 
+          // 分类节点颜色：根据异常层级深度渐进变化
           let color = undefined;
           if (n.total === 0) {
             color = '#e8e8e8'; // 空分类置灰处理
+          } else if (n.anomaly === 0) {
+            color = '#e0e0e0'; // 无异常的分类使用浅灰色，不醒目
+          } else {
+            // 有异常的分类，按层级深度取对应色阶
+            const colorIndex = Math.min(anomalyDepth, ANOMALY_COLORS.length - 1);
+            color = ANOMALY_COLORS[colorIndex];
           }
 
           return {
@@ -192,8 +211,8 @@ const DashboardOverview = () => {
             value: children.length > 0 ? undefined : Math.max(n.total, 1),
             itemStyle: { color: color },
             label: {
-              color: n.total === 0 ? '#999' : '#fff',
-              textBorderColor: n.total === 0 ? 'transparent' : 'rgba(0,0,0,0.4)',
+              color: n.total === 0 ? '#999' : (n.anomaly > 0 ? '#c62828' : '#666'),
+              textBorderColor: n.total === 0 ? 'transparent' : 'rgba(255,255,255,0.8)',
               textBorderWidth: n.total === 0 ? 0 : 1,
             },
             children: children.length > 0 ? children : undefined
@@ -292,7 +311,7 @@ const DashboardOverview = () => {
   }, [data]); 
 
   return (
-    <PageContainer title="Dashboard Overview" subTitle="仪表盘概览">
+    <PageContainer title="仪表盘" subTitle="概览">
       <StatisticCard.Group direction="row" gutter={16} loading={loading}>
         <StatisticCard
           statistic={{
@@ -326,8 +345,8 @@ const DashboardOverview = () => {
         />
       </StatisticCard.Group>
 
-      <ProCard style={{ marginTop: 16 }} gutter={16} ghost>
-        <ProCard title="设备健康分布" bordered headerBordered loading={loading}>
+      <ProCard style={{ marginTop: 16 }} ghost>
+        <ProCard title="故障视图" bordered headerBordered loading={loading}>
           <div style={{ display: 'flex', gap: 16 }}>
             <div style={{ flex: 1, minWidth: 0, textAlign: 'center' }}>
               <div
@@ -338,7 +357,7 @@ const DashboardOverview = () => {
                 }}
               />
               <div style={{ marginTop: 8, fontSize: 14, fontWeight: 500, color: '#333' }}>
-                温震故障分布（{data.totalDevices}台）
+                故障总览（{data.faultyDevices}台）
               </div>
             </div>
             <div style={{ flex: 1, minWidth: 0, textAlign: 'center' }}>
@@ -350,14 +369,14 @@ const DashboardOverview = () => {
                 }}
               />
               <div style={{ marginTop: 8, fontSize: 14, fontWeight: 500, color: '#333' }}>
-                设备类别故障（{data.faultyDevices}台）
+                类别视图（{data.faultyDevices}台）
               </div>
             </div>
           </div>
         </ProCard>
       </ProCard>
 
-      <ProCard style={{ marginTop: 16 }} gutter={16} ghost>
+      <ProCard style={{ marginTop: 16 }} ghost>
         <ProCard title="最新故障预警" bordered headerBordered loading={loading}>
           <List
             itemLayout="horizontal"

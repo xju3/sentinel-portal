@@ -11,6 +11,11 @@ import { Button, Popconfirm, Space, message } from 'antd';
 import { Area, AreaPayload, createArea, deleteArea, listAllAreas, updateArea } from '@/services/area';
 
 import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';
+
+type AreaTreeRow = Area & {
+  children?: AreaTreeRow[];
+};
+
 type AreaFormValues = {
   name: string;
   description?: string;
@@ -30,15 +35,51 @@ const toErrorMessage = (error: unknown): string => {
   return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';
 };
 
+const buildAreaTree = (rows: Area[]): AreaTreeRow[] => {
+  const nodeMap = new Map<string, AreaTreeRow>();
+  rows.forEach((item) => nodeMap.set(item.id, { ...item, children: [] }));
+
+  const roots: AreaTreeRow[] = [];
+  rows.forEach((item) => {
+    const node = nodeMap.get(item.id);
+    if (!node) {
+      return;
+    }
+    const pid = item.parent_id || undefined;
+    if (pid && nodeMap.has(pid)) {
+      const parent = nodeMap.get(pid);
+      if (parent) {
+        parent.children = parent.children || [];
+        parent.children.push(node);
+      }
+      return;
+    }
+    roots.push(node);
+  });
+
+  const sortTree = (nodes: AreaTreeRow[]) => {
+    nodes.sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
+    nodes.forEach((item) => {
+      if (item.children && item.children.length > 0) {
+        sortTree(item.children);
+      }
+    });
+  };
+  sortTree(roots);
+  return roots;
+};
+
 const MonitoringAreaPage = () => {
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [rows, setRows] = useState<Area[]>([]);
   const [editing, setEditing] = useState<Area | null>(null);
+  const [createChildParent, setCreateChildParent] = useState<Area | null>(null);
   const [query, setQuery] = useState<Record<string, any>>({});
 
   const areaMap = useMemo(() => new Map(rows.map((item) => [item.id, item.name])), [rows]);
+  const treeData = useMemo(() => buildAreaTree(rows), [rows]);
 
   const loadRows = async () => {
     setLoading(true);
@@ -55,32 +96,39 @@ const MonitoringAreaPage = () => {
     loadRows();
   }, []);
 
-  const filteredRows = useMemo(() => {
+  const filteredTreeData = useMemo(() => {
+    const hasQuery = Object.keys(query).length > 0;
+    if (!hasQuery) {
+      return treeData;
+    }
+
     const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();
-    return rows.filter((row) => {
-      if (query.name && !norm(row.name).includes(norm(query.name))) {
-        return false;
-      }
-      if (query.description && !norm(row.description).includes(norm(query.description))) {
-        return false;
-      }
-      if (query.ssid && !norm(row.ssid).includes(norm(query.ssid))) {
-        return false;
-      }
-      if (query.parent_id) {
-        const parentName = row.parent_id ? areaMap.get(row.parent_id) || '' : '';
-        const hit =
-          norm(parentName).includes(norm(query.parent_id)) ||
-          norm(row.parent_id).includes(norm(query.parent_id));
-        if (!hit) {
+    return rows
+      .filter((row) => {
+        if (query.name && !norm(row.name).includes(norm(query.name))) {
           return false;
         }
-      }
-      return true;
-    });
-  }, [areaMap, query, rows]);
+        if (query.description && !norm(row.description).includes(norm(query.description))) {
+          return false;
+        }
+        if (query.ssid && !norm(row.ssid).includes(norm(query.ssid))) {
+          return false;
+        }
+        if (query.parent_id) {
+          const parentName = row.parent_id ? areaMap.get(row.parent_id) || '' : '';
+          const hit =
+            norm(parentName).includes(norm(query.parent_id)) ||
+            norm(row.parent_id).includes(norm(query.parent_id));
+          if (!hit) {
+            return false;
+          }
+        }
+        return true;
+      })
+      .map((row) => ({ ...row }));
+  }, [areaMap, query, rows, treeData]);
 
-  const columns: ProColumns<Area>[] = [
+  const columns: ProColumns<AreaTreeRow>[] = [
     {
       title: '序号',
       valueType: 'indexBorder',
@@ -116,16 +164,26 @@ const MonitoringAreaPage = () => {
       align: 'center',
       render: (_, row) => (
         <Space size="middle">
-          <Button
-            key="edit"
-            type="link"
+          <a
+            key="create-child"
             onClick={() => {
+              setEditing(null);
+              setCreateChildParent(row);
+              setModalOpen(true);
+            }}
+          >
+            新建
+          </a>
+          <a
+            key="edit"
+            onClick={() => {
+              setCreateChildParent(null);
               setEditing(row);
               setModalOpen(true);
             }}
           >
             编辑
-          </Button>
+          </a>
           <Popconfirm
             key="delete"
             title="确认删除该工作区域吗？"
@@ -139,9 +197,7 @@ const MonitoringAreaPage = () => {
               }
             }}
           >
-            <Button danger type="link">
-              删除
-            </Button>
+            <a style={{ color: '#ff4d4f' }}>删除</a>
           </Popconfirm>
         </Space>
       ),
@@ -150,14 +206,20 @@ const MonitoringAreaPage = () => {
 
   return (
     <PageContainer title="工作区域">
-      <ProTable<Area>
+      <ProTable<AreaTreeRow>
         rowKey="id"
         search={{ labelWidth: 'auto' }}
         onSubmit={(values) => setQuery(values)}
         onReset={() => setQuery({})}
         loading={loading}
         columns={columns}
-        dataSource={filteredRows}
+        dataSource={filteredTreeData}
+        pagination={false}
+        expandable={{
+          childrenColumnName: 'children',
+          defaultExpandAllRows: true,
+          rowExpandable: (record) => !!(record.children && record.children.length > 0),
+        }}
         options={{ reload: loadRows }}
         optionsRender={renderRefSafeTableOptions}
         toolBarRender={() => [
@@ -166,6 +228,7 @@ const MonitoringAreaPage = () => {
             type="primary"
             onClick={() => {
               setEditing(null);
+              setCreateChildParent(null);
               setModalOpen(true);
             }}
           >
@@ -175,7 +238,13 @@ const MonitoringAreaPage = () => {
       />
 
       <ModalForm<AreaFormValues>
-        title={editing ? '编辑工作区域' : '新建工作区域'}
+        title={
+          editing
+            ? '编辑工作区域'
+            : createChildParent
+              ? `新建子区域（上级：${createChildParent.name}）`
+              : '新建工作区域'
+        }
         open={modalOpen}
         initialValues={
           editing
@@ -186,13 +255,18 @@ const MonitoringAreaPage = () => {
                 passwd: editing.passwd,
                 parent_id: editing.parent_id || undefined,
               }
-            : {}
+            : createChildParent
+              ? {
+                parent_id: createChildParent.id,
+              }
+              : {}
         }
         modalProps={{
           destroyOnHidden: true,
           onCancel: () => {
             setModalOpen(false);
             setEditing(null);
+            setCreateChildParent(null);
           },
         }}
         submitter={{
@@ -218,6 +292,7 @@ const MonitoringAreaPage = () => {
             message.success('保存成功');
             setModalOpen(false);
             setEditing(null);
+            setCreateChildParent(null);
             await loadRows();
             return true;
           } catch (error) {
