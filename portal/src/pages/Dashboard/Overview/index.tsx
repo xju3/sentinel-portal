@@ -127,16 +127,34 @@ const DashboardOverview = () => {
       const convertToSunburst = (nodes: any[]): any[] => {
         return nodes.map(n => {
           const hasAnomaly = n.anomaly > 0;
-          const children = n.children ? convertToSunburst(n.children) : [];
+          let children = n.children ? convertToSunburst(n.children) : [];
           
-          let color = undefined;
-          if (hasAnomaly) {
-            if (children.length === 0) {
-              color = '#ff4d4f'; // 仅底层（最细分类）有故障时显著标红
-            } else {
-              color = undefined; // 顶层和中间层保留 ECharts 自带的默认颜色区分度
+          // 如果该底层分类有异常，则在外部再增加一圈（子节点）专门显示健康状态
+          if (children.length === 0 && hasAnomaly) {
+            const normalCount = Math.max(0, n.total - n.anomaly);
+            if (normalCount > 0) {
+              children.push({
+                name: '正常',
+                realTotal: normalCount,
+                anomaly: 0,
+                value: normalCount,
+            itemStyle: { color: 'transparent', borderColor: 'transparent' }, // 正常设备透明不显示，仅作空白占位
+                label: { show: false }, // 正常不需要显示，但保留占位
+            tooltip: { show: false }, // 空白部分不显示悬浮提示框
+              });
             }
-          } else if (n.total === 0) {
+            children.push({
+              name: '异常',
+              realTotal: n.anomaly,
+              anomaly: n.anomaly,
+              value: n.anomaly,
+              itemStyle: { color: '#ff4d4f' }, // 异常设备显示红色
+              label: { show: true, formatter: '{c}', color: '#fff', textBorderWidth: 0 }, // 异常部分文字只显示数字
+            });
+          }
+
+          let color = undefined;
+          if (n.total === 0) {
             color = '#e8e8e8'; // 空分类置灰处理
           }
 
@@ -144,7 +162,7 @@ const DashboardOverview = () => {
             name: n.name,
             realTotal: n.total,
             anomaly: n.anomaly,
-            value: n.total,
+            value: children.length > 0 ? undefined : Math.max(n.total, 1),
             itemStyle: { color: color },
             label: {
               color: n.total === 0 ? '#999' : '#fff',
@@ -157,6 +175,33 @@ const DashboardOverview = () => {
       };
 
       const sunburstData = convertToSunburst(treeData);
+
+      // 计算最大层级，用于将最后一层(状态外圈)的厚度减半
+      const getMaxDepth = (nodes: any[]): number => {
+        if (!nodes || nodes.length === 0) return 0;
+        let max = 0;
+        for (const node of nodes) {
+          max = Math.max(max, node.children ? getMaxDepth(node.children) : 0);
+        }
+        return max + 1;
+      };
+
+      const depth = getMaxDepth(sunburstData);
+      const sunburstLevels = [{}]; // 第 0 层是 ECharts 默认隐藏的根节点
+      if (depth > 0) {
+        const innerRadius = 15; // 增加中心留白（15%），将图表变成多层空心环，大幅减轻视觉压迫感
+        const outerRadius = 95;
+        const thicknessUnit = (outerRadius - innerRadius) / (depth - 0.5); // 将剩余半径厚度按比例分配
+        let currentRadius = innerRadius;
+        for (let i = 1; i <= depth; i++) {
+          const thickness = i === depth ? thicknessUnit / 2 : thicknessUnit;
+          sunburstLevels.push({
+            r0: `${currentRadius}%`,
+            r: `${currentRadius + thickness}%`,
+          });
+          currentRadius += thickness;
+        }
+      }
 
       // 如果没有数据，显示空状态
       if (sunburstData.length === 0) {
@@ -178,7 +223,8 @@ const DashboardOverview = () => {
           series: {
             type: 'sunburst',
             data: sunburstData,
-            radius: [0, '95%'],
+            radius: ['15%', '95%'], // 配合自定义 levels 留出 15% 的中心内孔
+            levels: depth > 0 ? sunburstLevels : undefined, // 注入自定义各层级厚度
             sort: undefined, // 保持原始分类自然顺序
             emphasis: { focus: 'ancestor' },
             itemStyle: { borderRadius: 4, borderWidth: 2, borderColor: '#fff' },
@@ -187,16 +233,11 @@ const DashboardOverview = () => {
               formatter: (params: any) => {
                 const { name, data } = params;
                 if (!data) return '';
-                const isLeaf = !data.children || data.children.length === 0;
-                if (isLeaf && data.anomaly > 0) {
-                  return `{name|${name}}\n{total|${data.realTotal} 台}\n{anomaly|异常 ${data.anomaly} 台}`;
-                }
                 return `{name|${name}}\n{total|${data.realTotal} 台}`;
               },
               rich: {
                 name: { color: 'inherit', fontSize: 13, align: 'center', lineHeight: 18 },
                 total: { color: 'inherit', fontSize: 12, align: 'center', lineHeight: 16 },
-                anomaly: { color: '#fff', backgroundColor: '#ff4d4f', padding: [2, 4], borderRadius: 2, fontSize: 11, align: 'center', lineHeight: 16 }
               }
             }
           }
