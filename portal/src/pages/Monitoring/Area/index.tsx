@@ -3,10 +3,13 @@ import {
   ModalForm,
   PageContainer,
   ProColumns,
+  ProForm,
   ProFormText,
   ProTable,
 } from '@ant-design/pro-components';
 import { Button, Popconfirm, Space, message } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
+import EntityPicker from '@/components/EntityPicker';
 
 import { Area, AreaPayload, createArea, deleteArea, listAllAreas, updateArea } from '@/services/area';
 
@@ -80,6 +83,51 @@ const MonitoringAreaPage = () => {
 
   const areaMap = useMemo(() => new Map(rows.map((item) => [item.id, item.name])), [rows]);
   const treeData = useMemo(() => buildAreaTree(rows), [rows]);
+
+  // 计算编辑时不能选择的节点（自己和所有子孙节点）
+  const blockedAreaIds = useMemo(() => {
+    const blockedIds = new Set<string>();
+    if (!editing?.id) {
+      return blockedIds;
+    }
+
+    blockedIds.add(editing.id);
+    const childrenMap = new Map<string, string[]>();
+    rows.forEach((item) => {
+      if (!item.parent_id) {
+        return;
+      }
+      const siblings = childrenMap.get(item.parent_id) || [];
+      siblings.push(item.id);
+      childrenMap.set(item.parent_id, siblings);
+    });
+
+    const queue = [...(childrenMap.get(editing.id) || [])];
+    while (queue.length > 0) {
+      const current = queue.shift();
+      if (!current || blockedIds.has(current)) {
+        continue;
+      }
+      blockedIds.add(current);
+      queue.push(...(childrenMap.get(current) || []));
+    }
+    return blockedIds;
+  }, [rows, editing?.id]);
+
+  // 过滤掉被禁用的节点（自己和子孙），用于树形选择器
+  const filterBlockedFromTree = (nodes: AreaTreeRow[]): AreaTreeRow[] => {
+    return nodes
+      .filter((n) => !blockedAreaIds.has(n.id))
+      .map((n) => ({
+        ...n,
+        children: n.children ? filterBlockedFromTree(n.children) : [],
+      }));
+  };
+
+  const pickerTreeData = useMemo(() => {
+    if (blockedAreaIds.size === 0) return treeData;
+    return filterBlockedFromTree(treeData);
+  }, [treeData, blockedAreaIds]);
 
   const loadRows = async () => {
     setLoading(true);
@@ -311,7 +359,50 @@ const MonitoringAreaPage = () => {
             { max: 64, message: '区域名称最多64个字符' },
           ]}
         />
-        <ProFormText name="parent_id" label="上级区域ID" />
+        <ProForm.Item name="parent_id" label="上级区域">
+          <EntityPicker<Area>
+            placeholder="可选，点击选择上级区域"
+            modalTitle="选择上级区域"
+            triggerText="选择"
+            valueLabel={
+              editing?.parent_id
+                ? areaMap.get(editing.parent_id)
+                : createChildParent
+                  ? createChildParent.name
+                  : undefined
+            }
+            columns={[
+              { title: '区域名称', dataIndex: 'name' },
+              {
+                title: '上级区域',
+                dataIndex: 'parent_id',
+                render: (_, row) => (row.parent_id ? areaMap.get(row.parent_id) || '-' : '-'),
+              },
+              { title: '描述', dataIndex: 'description', render: (_, row) => row.description || '-' },
+            ]}
+            treeData={pickerTreeData}
+            treeColumns={[
+              { title: '区域名称', dataIndex: 'name' },
+              { title: '描述', dataIndex: 'description', render: (_, row) => row.description || '-' },
+            ]}
+            getRecordLabel={(record) => record.name}
+            fetcher={async ({ current, pageSize, keyword }) => {
+              const limit = pageSize;
+              const skip = (current - 1) * limit;
+              const items = (await import('@/services/area').then((m) =>
+                m.listAllAreas(),
+              )).filter((item) => {
+                if (!keyword) return true;
+                const kw = keyword.toLowerCase();
+                return (
+                  item.name.toLowerCase().includes(kw) ||
+                  (item.description || '').toLowerCase().includes(kw)
+                );
+              });
+              return { items, total: items.length };
+            }}
+          />
+        </ProForm.Item>
         <ProFormText name="ssid" label="Wi-Fi SSID" />
         <ProFormText name="passwd" label="Wi-Fi 密码" />
         <ProFormText

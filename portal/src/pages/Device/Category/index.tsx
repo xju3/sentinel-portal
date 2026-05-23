@@ -375,6 +375,21 @@ const DeviceCategoryPage = () => {
     },
   ];
 
+  // 过滤掉被禁用的节点（自己和子孙），用于树形选择器
+  const filterBlockedFromTree = (nodes: CategoryTreeRow[]): CategoryTreeRow[] => {
+    return nodes
+      .filter((n: CategoryTreeRow) => !blockedParentIds.has(n.id))
+      .map((n: CategoryTreeRow) => ({
+        ...n,
+        children: n.children ? filterBlockedFromTree(n.children) : [],
+      }));
+  };
+
+  const pickerTreeData = useMemo(() => {
+    if (blockedParentIds.size === 0) return treeData;
+    return filterBlockedFromTree(treeData);
+  }, [treeData, blockedParentIds]);
+
   return (
     <PageContainer title="设备分类">
       <ProTable<CategoryTreeRow>
@@ -506,6 +521,11 @@ const DeviceCategoryPage = () => {
                   : undefined
             }
             columns={parentPickerColumns}
+            treeData={pickerTreeData}
+            treeColumns={[
+              { title: '分类名称', dataIndex: 'name' },
+              { title: '描述', dataIndex: 'description', render: (_, row) => row.description || '-' },
+            ]}
             getRecordLabel={(record) => record.name}
             fetcher={async ({ current, pageSize, keyword }) => {
               const result = await queryDeviceCategories({ current, pageSize, keyword });

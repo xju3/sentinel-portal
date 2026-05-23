@@ -29,6 +29,10 @@ type EntityPickerProps<T extends EntityRow> = {
   columns: ColumnsType<T>;
   getRecordLabel: (record: T) => string;
   disabled?: boolean;
+  /** 树形数据源（启用树形模式时使用，此时 fetcher 仅用于搜索） */
+  treeData?: (T & { children?: any[] })[];
+  /** 树形模式下的列定义（不传则使用 columns） */
+  treeColumns?: ColumnsType<T>;
 };
 
 function EntityPicker<T extends EntityRow>({
@@ -42,7 +46,10 @@ function EntityPicker<T extends EntityRow>({
   columns,
   getRecordLabel,
   disabled,
+  treeData,
+  treeColumns,
 }: EntityPickerProps<T>) {
+  const isTreeMode = !!treeData;
   const requestSeqRef = useRef(0);
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -94,13 +101,26 @@ function EntityPicker<T extends EntityRow>({
   const openModal = async () => {
     setOpen(true);
     setCurrent(1);
-    await runQuery(1, pageSize, keyword);
+    if (isTreeMode && !keyword) {
+      // 树形模式无搜索时直接展示树，无需请求
+      setRows([]);
+      setTotal(0);
+      setLoading(false);
+    } else {
+      await runQuery(1, pageSize, keyword);
+    }
   };
 
   const handleKeywordSearch = async (nextKeyword: string) => {
     setKeyword(nextKeyword);
     setCurrent(1);
-    await runQuery(1, pageSize, nextKeyword);
+    if (isTreeMode && !nextKeyword) {
+      // 清空搜索时回到树形展示
+      setRows([]);
+      setTotal(0);
+    } else {
+      await runQuery(1, pageSize, nextKeyword);
+    }
   };
 
   const displayValue = useMemo(() => {
@@ -114,6 +134,18 @@ function EntityPicker<T extends EntityRow>({
   }, [selectedLabel, value, valueLabel]);
 
   const selectedKeys = useMemo<Key[]>(() => (selectedId ? [selectedId] : []), [selectedId]);
+
+  // 树形模式下，无搜索关键字时使用 treeData，否则使用搜索结果的扁平 rows
+  const displayDataSource = useMemo(() => {
+    if (!isTreeMode) return rows;
+    if (keyword) return rows;
+    return treeData || [];
+  }, [isTreeMode, keyword, rows, treeData]);
+
+  const displayColumns = useMemo(() => {
+    if (!isTreeMode) return columns;
+    return treeColumns || columns;
+  }, [isTreeMode, columns, treeColumns]);
 
   return (
     <>
@@ -143,7 +175,18 @@ function EntityPicker<T extends EntityRow>({
           if (!selectedId) {
             return;
           }
-          const selectedRow = rows.find((item) => item.id === selectedId);
+          const allItems = isTreeMode && !keyword ? treeData || [] : rows;
+          const findInTree = (nodes: any[]): any => {
+            for (const node of nodes) {
+              if (node.id === selectedId) return node;
+              if (node.children) {
+                const found = findInTree(node.children);
+                if (found) return found;
+              }
+            }
+            return null;
+          };
+          const selectedRow = isTreeMode && !keyword ? findInTree(treeData || []) : rows.find((item) => item.id === selectedId);
           if (selectedRow) {
             setSelectedLabel(getRecordLabel(selectedRow));
           }
@@ -164,10 +207,10 @@ function EntityPicker<T extends EntityRow>({
         <Table<T>
           rowKey="id"
           loading={loading}
-          dataSource={rows}
-          columns={columns}
+          dataSource={displayDataSource}
+          columns={displayColumns}
           size="small"
-          pagination={{
+          pagination={isTreeMode && !keyword ? false : {
             current,
             pageSize,
             total,
