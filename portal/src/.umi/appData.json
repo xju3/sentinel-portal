@@ -43,7 +43,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 6
+        "register": 7
       },
       "enableBy": "register"
     },
@@ -56,7 +56,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 5
       },
       "enableBy": "register"
     },
@@ -73,7 +73,7 @@
             0
           ]
         },
-        "register": 2
+        "register": 3
       },
       "enableBy": "register"
     },
@@ -90,7 +90,7 @@
             2
           ]
         },
-        "register": 2
+        "register": 3
       },
       "enableBy": "register"
     },
@@ -104,24 +104,6 @@
       "time": {
         "hooks": {
           "modifyRoutes": [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,
@@ -152,43 +134,22 @@
       "time": {
         "hooks": {
           "onDevCompileDone": [
-            12,
+            11,
+            3,
+            3,
+            4,
+            4,
             4,
             3,
+            3,
             4,
-            3,
-            3,
-            5,
-            3,
             2,
-            2,
-            3,
-            3,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            2,
-            3,
-            2,
-            2,
-            3,
-            2,
-            2,
-            3,
-            2,
-            2,
-            2,
-            2,
-            2,
+            6,
             3,
             3,
             3,
             3,
-            3,
-            3
+            4
           ]
         },
         "register": 1
@@ -205,44 +166,26 @@
       "time": {
         "hooks": {
           "modifyAppData": [
-            34
+            35
           ],
           "onGenerateFiles": [
-            3,
-            23,
-            5,
-            28,
-            24,
-            26,
-            27,
-            21,
-            25,
-            32,
-            21,
-            30,
-            31,
-            8,
-            25,
-            26,
-            24,
-            25,
-            22,
+            2,
+            16,
             23,
             11,
+            25,
+            14,
             24,
-            7,
+            18,
             26,
+            11,
+            33,
             24,
-            27,
-            27,
-            26,
-            21,
-            23,
-            34,
+            19,
             24
           ]
         },
-        "register": 15
+        "register": 20
       },
       "enableBy": "register"
     },
@@ -256,24 +199,6 @@
       "time": {
         "hooks": {
           "addEntryCode": [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,
@@ -310,25 +235,6 @@
             0
           ],
           "onPrepareBuildSuccess": [
-            1,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,
@@ -367,37 +273,7 @@
             0,
             0,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             1,
-            1,
-            0,
-            0,
-            0,
             0,
             0,
             0,
@@ -450,7 +326,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -467,7 +343,7 @@
             0
           ]
         },
-        "register": 5
+        "register": 6
       },
       "enableBy": "register"
     },
@@ -1220,7 +1096,7 @@
       "enableBy": "register",
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       }
     },
     "virtual: config-checkDepCssModules": {
@@ -1319,7 +1195,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1336,7 +1212,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1350,7 +1226,7 @@
       "time": {
         "hooks": {
           "addBeforeMiddlewares": [
-            5
+            9
           ]
         },
         "register": 0
@@ -1366,7 +1242,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 54
+        "register": 59
       },
       "enableBy": "register"
     },
@@ -1379,7 +1255,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 27
+        "register": 32
       },
       "enableBy": "config"
     },
@@ -1392,7 +1268,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 14
+        "register": 16
       },
       "enableBy": "config"
     },
@@ -1420,6 +1296,68 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ]
         },
@@ -1437,37 +1375,19 @@
       "time": {
         "hooks": {
           "onGenerateFiles": [
+            2,
             0,
-            0,
-            0,
-            0,
-            1,
-            1,
-            1,
-            0,
-            0,
-            0,
-            1,
-            1,
-            0,
-            1,
-            0,
-            1,
             1,
             0,
             1,
             0,
             0,
-            1,
+            0,
+            0,
             0,
             1,
             1,
             0,
-            0,
-            1,
-            1,
-            1,
-            1,
             0
           ],
           "addRuntimePlugin": [
@@ -1480,32 +1400,14 @@
             0,
             0,
             0,
+            0,
+            0,
             1,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1532,13 +1434,13 @@
       "time": {
         "hooks": {
           "onStart": [
-            1
+            0
           ],
           "addBeforeMiddlewares": [
             0
           ]
         },
-        "register": 24
+        "register": 26
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/mpa/mpa": {
@@ -1563,7 +1465,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/overrides/overrides": {
@@ -1576,27 +1478,9 @@
       "time": {
         "hooks": {
           "onGenerateFiles": [
-            1,
             0,
             0,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1,
             0,
             0,
             0,
@@ -1610,42 +1494,6 @@
             0
           ],
           "addEntryImports": [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,
@@ -1703,41 +1551,23 @@
       "time": {
         "hooks": {
           "modifyConfig": [
-            1
+            0
           ],
           "onGenerateFiles": [
-            45,
-            17,
-            9,
-            18,
-            17,
-            14,
+            46,
+            12,
+            21,
             15,
-            9,
-            13,
-            14,
-            14,
-            12,
-            14,
-            7,
-            13,
-            14,
-            12,
-            14,
-            9,
+            8,
+            19,
             11,
-            8,
-            13,
-            12,
+            11,
+            10,
             14,
-            12,
-            14,
-            12,
-            8,
-            13,
-            6,
-            6,
-            11
+            9,
+            17,
+            10,
+            10
           ],
           "addPolyfillImports": [
             0,
@@ -1751,42 +1581,6 @@
             0,
             0,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1,
             0,
             0,
             0,
@@ -1846,42 +1640,6 @@
             0,
             0,
             0,
-            0,
-            0,
-            1,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0
           ]
         },
@@ -1899,25 +1657,7 @@
       "time": {
         "hooks": {
           "onGenerateFiles": [
-            68,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
+            93,
             0,
             0,
             0,
@@ -1946,7 +1686,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1959,7 +1699,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1981,24 +1721,6 @@
             0,
             0,
             0,
-            1,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            1,
-            0,
             0,
             0,
             0,
@@ -2007,10 +1729,10 @@
             0
           ],
           "addBeforeMiddlewares": [
-            0
+            1
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -2025,72 +1747,36 @@
         "hooks": {
           "onGenerateFiles": [
             9,
-            4,
-            11,
-            3,
-            6,
-            2,
-            14,
-            2,
-            11,
-            2,
-            12,
-            2,
-            14,
-            2,
-            8,
-            1,
-            14,
+            5,
+            10,
             2,
             13,
-            2,
-            13,
-            2,
-            15,
-            2,
-            14,
-            2,
-            9,
-            2,
-            12,
-            2,
-            12,
-            1,
-            15,
-            2,
-            13,
-            1,
-            8,
-            2,
-            12,
             3,
             9,
-            2,
-            12,
             2,
             7,
-            3,
-            16,
             2,
-            14,
+            7,
             1,
-            12,
+            7,
+            2,
+            10,
             3,
-            16,
+            9,
+            2,
+            12,
             2,
             9,
-            1,
-            16,
             2,
-            13,
-            2,
-            8,
+            15,
             3,
+            8,
+            2,
             9,
             2
           ]
         },
-        "register": 3
+        "register": 4
       },
       "enableBy": "register"
     },
@@ -2116,7 +1802,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/ssr/ssr": {
@@ -2142,41 +1828,23 @@
       "time": {
         "hooks": {
           "onGenerateFiles": [
-            281,
-            14,
-            6,
-            8,
-            6,
-            7,
-            7,
-            6,
-            7,
-            8,
-            7,
-            10,
-            8,
+            287,
+            5,
             5,
             6,
-            7,
+            5,
+            4,
+            5,
             6,
+            8,
+            9,
+            9,
             11,
             5,
-            5,
-            5,
-            7,
-            7,
-            5,
-            10,
-            7,
-            7,
-            7,
-            7,
-            10,
-            9,
             5
           ]
         },
-        "register": 1
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -2193,7 +1861,7 @@
             0
           ]
         },
-        "register": 2
+        "register": 3
       },
       "enableBy": "register"
     },
@@ -2219,7 +1887,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2232,7 +1900,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 4
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/monorepo/redirect": {
@@ -2244,7 +1912,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 15
+        "register": 17
       },
       "enableBy": "config"
     },
@@ -2260,39 +1928,21 @@
           "onGenerateFiles": [
             1,
             1,
-            0,
-            1,
-            1,
-            0,
-            0,
-            0,
             1,
             1,
             0,
             1,
-            0,
-            0,
-            1,
-            0,
-            0,
-            1,
-            0,
-            0,
             1,
             1,
             0,
             1,
             0,
-            0,
-            0,
-            0,
             1,
             0,
-            0,
-            0
+            1
           ]
         },
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/clickToComponent/clickToComponent": {
@@ -2304,7 +1954,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2330,7 +1980,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2372,7 +2022,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 3
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/mako/mako": {
@@ -2409,7 +2059,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/routePreloadOnLoad/routePreloadOnLoad": {
@@ -2430,10 +2080,72 @@
             0,
             0,
             0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            3,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            1,
+            1,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
             0
           ]
         },
-        "register": 19
+        "register": 20
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/forget/forget": {
@@ -2445,7 +2157,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "config"
     },
@@ -2459,7 +2171,7 @@
       "time": {
         "hooks": {
           "modifyUniBundler": [
-            344
+            365
           ]
         },
         "register": 1
@@ -2475,7 +2187,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 3
       },
       "enableBy": "register"
     },
@@ -2488,7 +2200,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 24
+        "register": 26
       },
       "enableBy": "register"
     },
@@ -2502,10 +2214,10 @@
       "time": {
         "hooks": {
           "modifyAppData": [
-            14
+            13
           ]
         },
-        "register": 23
+        "register": 32
       }
     },
     "./node_modules/@umijs/preset-umi/dist/commands/help": {
@@ -2517,7 +2229,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -2569,7 +2281,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -2582,7 +2294,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -2595,7 +2307,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -2621,7 +2333,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -2634,7 +2346,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -2686,7 +2398,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -2699,7 +2411,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -2725,7 +2437,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -2738,7 +2450,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -2751,7 +2463,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 14
+        "register": 16
       },
       "enableBy": "register"
     },
@@ -2777,7 +2489,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 3
       },
       "enableBy": "register"
     },
@@ -2805,7 +2517,7 @@
       },
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/plugins/dist/antd": {
@@ -2854,63 +2566,9 @@
             0,
             0,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0
           ],
           "addRuntimePlugin": [
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,
@@ -2940,58 +2598,22 @@
             0,
             0,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0
           ],
           "onGenerateFiles": [
-            1,
-            0,
-            1,
+            2,
             0,
             0,
-            1,
-            1,
-            1,
             0,
-            0,
-            1,
-            0,
-            1,
-            1,
-            0,
-            1,
-            1,
-            0,
-            0,
-            1,
             0,
             0,
             0,
             0,
             1,
+            0,
             1,
+            2,
             1,
-            0,
-            0,
-            0,
-            0,
             0
           ],
           "addExtraBabelPlugins": [
@@ -3001,7 +2623,7 @@
             0
           ]
         },
-        "register": 7
+        "register": 6
       }
     },
     "./node_modules/@umijs/plugins/dist/dva": {
@@ -3013,7 +2635,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 4
       },
       "enableBy": "config"
     },
@@ -3058,24 +2680,6 @@
             0,
             0,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0
           ],
           "modifyAppData": [
@@ -3083,7 +2687,6 @@
           ],
           "addRuntimePlugin": [
             0,
-            1,
             0,
             0,
             0,
@@ -3094,23 +2697,6 @@
             0,
             0,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            3,
             0,
             0,
             0
@@ -3129,59 +2715,23 @@
             0,
             0,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0
           ],
           "onGenerateFiles": [
+            2,
+            1,
+            1,
+            1,
+            2,
+            1,
+            1,
+            1,
+            1,
+            2,
+            2,
             3,
-            2,
             1,
-            2,
-            2,
-            1,
-            1,
-            1,
-            2,
-            2,
-            1,
-            1,
-            2,
-            1,
-            1,
-            2,
-            1,
-            1,
-            1,
-            1,
-            1,
-            1,
-            1,
-            1,
-            1,
-            1,
-            1,
-            1,
-            2,
-            2,
-            2,
-            1
+            2
           ]
         },
         "register": 2
@@ -3197,7 +2747,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "config"
     },
@@ -3237,59 +2787,23 @@
             0,
             0,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0
           ],
           "onGenerateFiles": [
-            13,
+            16,
             15,
-            10,
-            15,
+            16,
             14,
-            16,
-            15,
-            13,
-            15,
-            15,
-            16,
-            15,
-            16,
             12,
-            15,
-            15,
-            14,
-            15,
-            12,
-            17,
-            16,
-            16,
+            11,
             13,
-            15,
-            15,
-            17,
             14,
-            13,
+            17,
             15,
-            17,
-            17,
-            20
+            18,
+            14,
+            14,
+            11
           ],
           "addTmpGenerateWatcherPaths": [
             0
@@ -3335,24 +2849,6 @@
             0,
             0,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0
           ]
         },
@@ -3381,7 +2877,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/plugins/dist/react-query": {
@@ -3420,57 +2916,21 @@
             0,
             0,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
             0
           ],
           "onGenerateFiles": [
             2,
-            0,
             1,
-            0,
-            0,
-            1,
-            0,
-            1,
-            0,
-            0,
-            0,
-            0,
-            0,
             0,
             0,
             0,
             1,
             1,
             0,
-            0,
-            0,
-            0,
-            0,
-            0,
             1,
             0,
-            0,
-            0,
-            0,
-            0,
+            1,
+            1,
             0,
             0
           ]
@@ -3565,7 +3025,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -3578,7 +3038,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     }
@@ -4941,7 +4401,7 @@
       "parentId": "3",
       "id": "4",
       "absPath": "/dashboard/overview",
-      "__content": "import { useEffect, useRef, useState } from 'react';\nimport { PageContainer, ProCard, StatisticCard } from '@ant-design/pro-components';\nimport { Badge, List, Tag, Typography, message } from 'antd';\nimport { request } from '@umijs/max';\nimport * as echarts from 'echarts';\n\nconst { Statistic } = StatisticCard;\n\n// 定义 Dashboard 聚合数据类型\ntype DashboardData = {\n  totalDevices: number;\n  runningDevices: number;\n  faultyDevices: number;\n  newDevicesToday: number;\n  recentAnomalies: {\n    id: string;\n    device_code: string;\n    device_sn: string;\n    anomaly: number; // 1=振动异常, 2=温度异常, 3=双异常\n    ts: number;\n  }[];\n  devicesByCategory?: {\n    name: string;\n    value: number;\n  }[];\n};\n\n// 异常状态映射 (根据后端 handler 逻辑)\nconst ANOMALY_MAP: Record<number, { text: string; color: string }> = {\n  1: { text: '振动异常', color: 'warning' },\n  2: { text: '温度异常', color: 'error' },\n  3: { text: '振动+温度异常', color: 'magenta' },\n};\n\nconst DashboardOverview = () => {\n  const [loading, setLoading] = useState(true);\n  const [data, setData] = useState<DashboardData>({\n    totalDevices: 0,\n    runningDevices: 0,\n    faultyDevices: 0,\n    newDevicesToday: 0,\n    recentAnomalies: [],\n    devicesByCategory: [],\n  });\n  const chartRef = useRef<HTMLDivElement>(null);\n  const categoryChartRef = useRef<HTMLDivElement>(null);\n\n  // 从后端获取 Dashboard 聚合数据\n  const fetchDashboardData = async () => {\n    setLoading(true);\n    try {\n      const res = await request<DashboardData>('/api/v1/dashboard/overview');\n      if (res) {\n        setData(res);\n      }\n    } catch (error) {\n      message.error('获取仪表盘数据失败');\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    fetchDashboardData();\n  }, []);\n\n  // 初始化和更新 Echarts 饼图及柱状图\n  useEffect(() => {\n    let pieChart: echarts.ECharts | undefined;\n    let barChart: echarts.ECharts | undefined;\n    \n    // 计算剩余的“离线/未知”设备数（防止由于统计误差出现负数）\n    const offlineDevices = Math.max(0, data.totalDevices - data.runningDevices - data.faultyDevices);\n\n    // 1. 渲染设备健康分布饼图\n    if (chartRef.current) {\n      pieChart = echarts.init(chartRef.current);\n      const pieOption = {\n      tooltip: {\n        trigger: 'item'\n      },\n      legend: {\n        top: '5%',\n        left: 'center'\n      },\n      series: [\n        {\n          name: '设备健康分布',\n          type: 'pie',\n          radius: ['40%', '70%'], // 环形图内外半径\n          avoidLabelOverlap: false,\n          itemStyle: {\n            borderRadius: 8,\n            borderColor: '#fff',\n            borderWidth: 2\n          },\n          label: { show: false, position: 'center' },\n          emphasis: {\n            label: { show: true, fontSize: 18, fontWeight: 'bold' }\n          },\n          labelLine: { show: false },\n          data: [\n            { value: data.runningDevices, name: '正常运行', itemStyle: { color: '#52c41a' } },\n            { value: data.faultyDevices, name: '故障设备', itemStyle: { color: '#ff4d4f' } },\n            { value: offlineDevices, name: '离线/未知', itemStyle: { color: '#d9d9d9' } },\n          ].filter(item => item.value > 0) // 过滤掉数值为0的项，使图表更整洁\n        }\n      ]\n    };\n      pieChart.setOption(pieOption);\n    }\n\n    // 2. 渲染设备分类统计柱状图\n    if (categoryChartRef.current) {\n      barChart = echarts.init(categoryChartRef.current);\n      const categoryData = data.devicesByCategory || [];\n      \n      const barOption = {\n        tooltip: { trigger: 'axis', axisPointer: { type: 'shadow' } },\n        grid: { left: '3%', right: '4%', bottom: '3%', containLabel: true },\n        xAxis: {\n          type: 'category',\n          data: categoryData.map((item) => item.name),\n          axisTick: { alignWithLabel: true },\n          axisLabel: { interval: 0, width: 80, overflow: 'truncate' } // 防止文字过长重叠\n        },\n        yAxis: { type: 'value' },\n        series: [\n          {\n            name: '设备数量',\n            type: 'bar',\n            barWidth: '40%',\n            data: categoryData.map((item) => item.value),\n            itemStyle: {\n              borderRadius: [4, 4, 0, 0], // 柱子顶部圆角\n              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [\n                { offset: 0, color: '#83bff6' },\n                { offset: 0.5, color: '#188df0' },\n                { offset: 1, color: '#188df0' }\n              ])\n            }\n          }\n        ]\n      };\n      barChart.setOption(barOption);\n    }\n\n    // 监听窗口大小改变，使图表自适应响应式缩放\n    const handleResize = () => {\n      pieChart?.resize();\n      barChart?.resize();\n    };\n    window.addEventListener('resize', handleResize);\n\n    // 清理副作用\n    return () => {\n      window.removeEventListener('resize', handleResize);\n      pieChart?.dispose();\n      barChart?.dispose();\n    };\n  }, [data]); // 当 data 数据发生变化时重新渲染图表\n\n  return (\n    <PageContainer title=\"Dashboard Overview\" subTitle=\"仪表盘概览\">\n      <StatisticCard.Group direction=\"row\" gutter={16} loading={loading}>\n        <StatisticCard\n          statistic={{\n            title: '设备总数',\n            value: data.totalDevices,\n            suffix: '台',\n          }}\n        />\n        <StatisticCard\n          statistic={{\n            title: '在线设备',\n            value: data.runningDevices,\n            suffix: '台',\n            status: 'success',\n          }}\n        />\n        <StatisticCard\n          statistic={{\n            title: '故障设备',\n            value: data.faultyDevices,\n            suffix: '台',\n            status: 'error',\n          }}\n        />\n        <StatisticCard\n          statistic={{\n            title: '今日新增',\n            value: data.newDevicesToday,\n            suffix: '台',\n          }}\n        />\n      </StatisticCard.Group>\n\n      <ProCard style={{ marginTop: 16 }} gutter={16} ghost>\n        <ProCard title=\"设备健康分布\" colSpan={14} bordered headerBordered loading={loading}>\n          <StatisticCard\n            chart={\n              <div\n                ref={chartRef}\n                style={{\n                  height: 250,\n                  width: '100%',\n                }}\n              />\n            }\n          />\n        </ProCard>\n\n        <ProCard title=\"最新故障预警\" colSpan={10} bordered headerBordered loading={loading}>\n          <List\n            itemLayout=\"horizontal\"\n            dataSource={data.recentAnomalies}\n            renderItem={(item) => (\n              <List.Item>\n                <List.Item.Meta\n                  title={\n                    <span>\n                      <Badge status=\"error\" style={{ marginRight: 8 }} />\n                      {item.device_code}\n                    </span>\n                  }\n                  description={`SN: ${item.device_sn} | 时间: ${new Date(item.ts).toLocaleString()}`}\n                />\n                <Tag color={ANOMALY_MAP[item.anomaly]?.color || 'default'}>\n                  {ANOMALY_MAP[item.anomaly]?.text || '未知异常'}\n                </Tag>\n              </List.Item>\n            )}\n          />\n        </ProCard>\n      </ProCard>\n\n      <ProCard style={{ marginTop: 16 }} gutter={16} ghost>\n        <ProCard title=\"设备分类统计\" bordered headerBordered loading={loading}>\n          <StatisticCard\n            chart={\n              <div\n                ref={categoryChartRef}\n                style={{\n                  height: 300,\n                  width: '100%',\n                }}\n              />\n            }\n          />\n        </ProCard>\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default DashboardOverview;\n",
+      "__content": "import { useEffect, useRef, useState } from 'react';\nimport { PageContainer, ProCard, StatisticCard } from '@ant-design/pro-components';\nimport { Badge, List, Tag, message } from 'antd';\nimport { request } from '@umijs/max';\nimport * as echarts from 'echarts';\n\nconst { Statistic } = StatisticCard;\n\n// 定义 Dashboard 聚合数据类型\ntype DashboardData = {\n  totalDevices: number;\n  runningDevices: number;\n  faultyDevices: number;\n  newDevicesToday: number;\n  vibrationAnomalyCount: number;  // anomaly=1 震动异常\n  temperatureAnomalyCount: number; // anomaly=2 温度异常\n  bothAnomalyCount: number;        // anomaly=3 双异常\n  recentAnomalies: {\n    id: string;\n    device_code: string;\n    device_sn: string;\n    anomaly: number; // 1=振动异常, 2=温度异常, 3=双异常\n    ts: number;\n  }[];\n  devicesByCategoryTree?: any[];\n};\n\n// 异常状态映射 (根据后端 handler 逻辑)\nconst ANOMALY_MAP: Record<number, { text: string; color: string }> = {\n  1: { text: '振动异常', color: 'warning' },\n  2: { text: '温度异常', color: 'error' },\n  3: { text: '振动+温度异常', color: 'magenta' },\n};\n\nconst DashboardOverview = () => {\n  const [loading, setLoading] = useState(true);\n  const [data, setData] = useState<DashboardData>({\n    totalDevices: 0,\n    runningDevices: 0,\n    faultyDevices: 0,\n    newDevicesToday: 0,\n    vibrationAnomalyCount: 0,\n    temperatureAnomalyCount: 0,\n    bothAnomalyCount: 0,\n    recentAnomalies: [],\n  });\n\n  const chartRef = useRef<HTMLDivElement>(null);\n  const categoryChartRef = useRef<HTMLDivElement>(null);\n\n  // 从后端获取 Dashboard 聚合数据\n  const fetchDashboardData = async () => {\n    setLoading(true);\n    try {\n      const res = await request<DashboardData>('/api/v1/dashboard/overview');\n      if (res) setData(res);\n    } catch (error) {\n      message.error('获取仪表盘数据失败');\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    fetchDashboardData();\n  }, []);\n\n  // 初始化和更新 Echarts 饼图及多层环形图\n  useEffect(() => {\n    let pieChart: echarts.ECharts | undefined;\n    let nestedPieChart: echarts.ECharts | undefined;\n\n    // 计算剩余的\"离线/未知\"设备数（防止由于统计误差出现负数）\n    const anomalyTotal = data.vibrationAnomalyCount + data.temperatureAnomalyCount + data.bothAnomalyCount;\n    const offlineDevices = Math.max(0, data.totalDevices - data.runningDevices - anomalyTotal);\n\n    // 1. 渲染设备健康分布饼图 (区分异常类型: 0=正常, 1=震动异常, 2=温度异常, 3=双异常)\n    if (chartRef.current) {\n      pieChart = echarts.init(chartRef.current);\n      const pieOption = {\n        tooltip: {\n          trigger: 'item',\n          formatter: (params: any) => {\n            return `${params.name}: ${params.value} 台 (${params.percent}%)`;\n          },\n        },\n        legend: {\n          top: '5%',\n          left: 'center',\n        },\n        series: [\n          {\n            name: '设备健康分布',\n            type: 'pie',\n            radius: ['40%', '70%'], // 环形图内外半径\n            avoidLabelOverlap: false,\n            itemStyle: {\n              borderRadius: 8,\n              borderColor: '#fff',\n              borderWidth: 2,\n            },\n            label: { show: false, position: 'center' },\n            emphasis: {\n              label: { show: true, fontSize: 18, fontWeight: 'bold' },\n            },\n            labelLine: { show: false },\n            data: [\n              { value: data.runningDevices, name: '正常运行', itemStyle: { color: '#52c41a' } },\n              { value: data.vibrationAnomalyCount, name: '震动异常', itemStyle: { color: '#faad14' } },\n              { value: data.temperatureAnomalyCount, name: '温度异常', itemStyle: { color: '#ff4d4f' } },\n              { value: data.bothAnomalyCount, name: '震动+温度异常', itemStyle: { color: '#eb2f96' } },\n              { value: offlineDevices, name: '离线/未知', itemStyle: { color: '#d9d9d9' } },\n            ].filter((item) => item.value > 0), // 过滤掉数值为0的项，使图表更整洁\n          },\n        ],\n      };\n      pieChart.setOption(pieOption);\n    }\n\n    // 2. 构建并渲染设备分类多层环形图 (旭日图 Sunburst)\n    if (categoryChartRef.current) {\n      nestedPieChart = echarts.init(categoryChartRef.current);\n      \n      const treeData = data.devicesByCategoryTree || [];\n\n      // 递归生成旭日图数据格式\n      const convertToSunburst = (nodes: any[]): any[] => {\n        return nodes.map(n => {\n          const hasAnomaly = n.anomaly > 0;\n          const children = n.children ? convertToSunburst(n.children) : [];\n          \n          let color = undefined;\n          if (hasAnomaly) {\n            if (children.length === 0) {\n              color = '#ff4d4f'; // 仅底层（最细分类）有故障时显著标红\n            } else {\n              color = undefined; // 顶层和中间层保留 ECharts 自带的默认颜色区分度\n            }\n          } else if (n.total === 0) {\n            color = '#e8e8e8'; // 空分类置灰处理\n          }\n\n          return {\n            name: n.name,\n            realTotal: n.total,\n            anomaly: n.anomaly,\n            value: n.total,\n            itemStyle: { color: color },\n            label: {\n              color: n.total === 0 ? '#999' : '#fff',\n              textBorderColor: n.total === 0 ? 'transparent' : 'rgba(0,0,0,0.4)',\n              textBorderWidth: n.total === 0 ? 0 : 1,\n            },\n            children: children.length > 0 ? children : undefined\n          };\n        });\n      };\n\n      const sunburstData = convertToSunburst(treeData);\n\n      // 如果没有数据，显示空状态\n      if (sunburstData.length === 0) {\n        nestedPieChart.setOption({\n          title: { text: '暂无数据', left: 'center', top: 'center', textStyle: { color: '#999', fontSize: 14 } },\n          series: []\n        });\n      } else {\n        nestedPieChart.setOption({\n          tooltip: {\n            formatter: (params: any) => {\n              const { name, data } = params;\n              if (!data) return '';\n              const realTotal = data.realTotal || 0;\n              const normal = Math.max(0, realTotal - (data.anomaly || 0));\n              return `${name}<br/>总计: ${realTotal} 台<br/>正常: ${normal} 台 | 异常: <span style=\"color:#ff4d4f\">${data.anomaly || 0}</span> 台`;\n            }\n          },\n          series: {\n            type: 'sunburst',\n            data: sunburstData,\n            radius: [0, '95%'],\n            sort: undefined, // 保持原始分类自然顺序\n            emphasis: { focus: 'ancestor' },\n            itemStyle: { borderRadius: 4, borderWidth: 2, borderColor: '#fff' },\n            label: { \n              show: true, \n              formatter: (params: any) => {\n                const { name, data } = params;\n                if (!data) return '';\n                const isLeaf = !data.children || data.children.length === 0;\n                if (isLeaf && data.anomaly > 0) {\n                  return `{name|${name}}\\n{total|${data.realTotal} 台}\\n{anomaly|异常 ${data.anomaly} 台}`;\n                }\n                return `{name|${name}}\\n{total|${data.realTotal} 台}`;\n              },\n              rich: {\n                name: { color: 'inherit', fontSize: 13, align: 'center', lineHeight: 18 },\n                total: { color: 'inherit', fontSize: 12, align: 'center', lineHeight: 16 },\n                anomaly: { color: '#fff', backgroundColor: '#ff4d4f', padding: [2, 4], borderRadius: 2, fontSize: 11, align: 'center', lineHeight: 16 }\n              }\n            }\n          }\n        });\n      }\n    }\n\n    // 监听窗口大小改变，使图表自适应响应式缩放\n    const handleResize = () => {\n      pieChart?.resize();\n      nestedPieChart?.resize();\n    };\n    window.addEventListener('resize', handleResize);\n\n    // 清理副作用\n    return () => {\n      window.removeEventListener('resize', handleResize);\n      pieChart?.dispose();\n      nestedPieChart?.dispose();\n    };\n  }, [data]); \n\n  return (\n    <PageContainer title=\"Dashboard Overview\" subTitle=\"仪表盘概览\">\n      <StatisticCard.Group direction=\"row\" gutter={16} loading={loading}>\n        <StatisticCard\n          statistic={{\n            title: '设备总数',\n            value: data.totalDevices,\n            suffix: '台',\n          }}\n        />\n        <StatisticCard\n          statistic={{\n            title: '在线设备',\n            value: data.runningDevices,\n            suffix: '台',\n            status: 'success',\n          }}\n        />\n        <StatisticCard\n          statistic={{\n            title: '故障设备',\n            value: data.faultyDevices,\n            suffix: '台',\n            status: 'error',\n          }}\n        />\n        <StatisticCard\n          statistic={{\n            title: '今日新增',\n            value: data.newDevicesToday,\n            suffix: '台',\n          }}\n        />\n      </StatisticCard.Group>\n\n      <ProCard style={{ marginTop: 16 }} gutter={16} ghost>\n        <ProCard title=\"设备健康分布\" colSpan={14} bordered headerBordered loading={loading}>\n          <StatisticCard\n            chart={\n              <div\n                ref={chartRef}\n                style={{\n                  height: 250,\n                  width: '100%',\n                }}\n              />\n            }\n          />\n        </ProCard>\n\n        <ProCard title=\"最新故障预警\" colSpan={10} bordered headerBordered loading={loading}>\n          <List\n            itemLayout=\"horizontal\"\n            dataSource={data.recentAnomalies}\n            renderItem={(item) => (\n              <List.Item>\n                <List.Item.Meta\n                  title={\n                    <span>\n                      <Badge status=\"error\" style={{ marginRight: 8 }} />\n                      {item.device_code}\n                    </span>\n                  }\n                  description={`SN: ${item.device_sn} | 时间: ${new Date(item.ts).toLocaleString()}`}\n                />\n                <Tag color={ANOMALY_MAP[item.anomaly]?.color || 'default'}>\n                  {ANOMALY_MAP[item.anomaly]?.text || '未知异常'}\n                </Tag>\n              </List.Item>\n            )}\n          />\n        </ProCard>\n      </ProCard>\n\n      <ProCard style={{ marginTop: 16 }} gutter={16} ghost>\n        <ProCard title=\"设备分类统计与异常分布\" bordered headerBordered loading={loading}>\n          <StatisticCard\n            chart={\n              <div\n                ref={categoryChartRef}\n                style={{\n                  height: 350,\n                  width: '100%',\n                }}\n              />\n            }\n          />\n        </ProCard>\n      </ProCard>\n    </PageContainer>\n  );\n};\n\nexport default DashboardOverview;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/src/pages/Dashboard/Overview/index.tsx"
     },
@@ -5155,7 +4615,7 @@
       "parentId": "21",
       "id": "26",
       "absPath": "/monitoring/threshold",
-      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProFormDigit,\n  ProFormSelect,\n  ProFormText,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, Space, Tag, message } from 'antd';\n\nimport {\n  SensorThreshold,\n  SensorThresholdPayload,\n  createSensorThreshold,\n  deleteSensorThreshold,\n  listSensorThresholds,\n  updateSensorThreshold,\n} from '@/services/sensorThreshold';\nimport { listSensorTypes, SensorType } from '@/services/sensorType';\n\nimport { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';\n\nconst METRIC_MAP: Record<number, { text: string; color: string }> = {\n  1: { text: '温度', color: 'volcano' },\n  2: { text: '振动', color: 'geekblue' },\n};\n\nconst METRIC_OPTIONS = [\n  { label: '温度', value: 1 },\n  { label: '振动', value: 2 },\n];\n\ntype ThresholdFormValues = {\n  code: string;\n  metric: number;\n  rt_max_delta: number;\n  st_max_slope: number;\n  st_max_amplitude: number;\n  mt_max_slope: number;\n  mt_max_amplitude: number;\n  baseline: number;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n      data?: { detail?: string };\n      info?: { errorMessage?: string };\n      message?: string;\n    }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst MonitoringThresholdPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [rows, setRows] = useState<SensorThreshold[]>([]);\n  const [editing, setEditing] = useState<SensorThreshold | null>(null);\n  const [query, setQuery] = useState<Record<string, any>>({});\n  const [sensorTypes, setSensorTypes] = useState<SensorType[]>([]);\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      setRows(await listSensorThresholds());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  const loadSensorTypes = async () => {\n    try {\n      setSensorTypes(await listSensorTypes());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n    loadSensorTypes();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    return rows.filter((row) => {\n      if (query.code && !norm(row.code).includes(norm(query.code))) {\n        return false;\n      }\n      if (query.metric !== undefined && query.metric !== null && row.metric !== Number(query.metric)) {\n        return false;\n      }\n      return true;\n    });\n  }, [query, rows]);\n\n  const getSensorTypeName = (code: string) => {\n    const found = sensorTypes.find((t) => t.name === code);\n    return found ? found.name : code;\n  };\n\n  const columns: ProColumns<SensorThreshold>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n      align: 'center',\n    },\n    {\n      title: '传感器型号',\n      dataIndex: 'code',\n      align: 'center',\n      width: 120,\n      render: (_, row) => <Tag>{getSensorTypeName(row.code)}</Tag>,\n    },\n    {\n      title: '监测指标',\n      dataIndex: 'metric',\n      width: 60,\n      valueType: 'select',\n      align: 'center',\n      valueEnum: {\n        1: { text: '温度', status: 'Default' },\n        2: { text: '振动', status: 'Default' },\n      },\n      render: (_, row) => {\n        const info = METRIC_MAP[row.metric] || { text: `${row.metric}`, color: 'default' };\n        return <Tag color={info.color}>{info.text}</Tag>;\n      },\n    },\n    {\n      title: '最大偏差(实时)',\n      dataIndex: 'rt_max_delta',\n      width: 100,\n      hideInSearch: true,\n      align: 'center',\n      render: (_, row) => row.rt_max_delta,\n    },\n    {\n      title: '短期(小时)',\n      hideInSearch: true,\n      children: [{\n        title: '最大斜率',\n        align: 'center',\n        dataIndex: 'st_max_slope',\n        width: 60,\n        hideInSearch: true,\n      },\n      {\n        title: '最大振幅',\n        dataIndex: 'st_max_amplitude',\n        width: 60,\n        align: 'center',\n        hideInSearch: true,\n      },]\n    },\n\n    {\n      title: '中期(3天内)',\n      hideInSearch: true,\n      children: [{\n        title: '最大斜率',\n        align: 'center',\n        dataIndex: 'mt_max_slope',\n        width: 60,\n        hideInSearch: true,\n      },\n      {\n        title: '最大振幅',\n        align: 'center',\n        dataIndex: 'mt_max_amplitude',\n        width: 60,\n        hideInSearch: true,\n      },]\n    },\n\n    {\n      title: '基线值',\n      dataIndex: 'baseline',\n      width: 60,\n      hideInSearch: true,\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: OPERATION_COL_WIDTH,\n      fixed: 'right',\n      align: 'center',\n      render: (_, row) => (\n        <Space size=\"middle\">\n          <a\n            key=\"edit\"\n            onClick={() => {\n              setEditing(row);\n              setModalOpen(true);\n            }}\n          >\n            编辑\n          </a>\n          <Popconfirm\n            key=\"delete\"\n            title=\"确认删除该阀值定义吗？\"\n            onConfirm={async () => {\n              try {\n                await deleteSensorThreshold(row.id);\n                message.success('删除成功');\n                await loadRows();\n              } catch (error) {\n                message.error(toErrorMessage(error));\n              }\n            }}\n          >\n            <a style={{ color: '#ff4d4f' }}>\n              删除\n            </a>\n          </Popconfirm>\n        </Space>\n      ),\n    },\n  ];\n\n  return (\n    <PageContainer title=\"阀值定义\">\n      <ProTable<SensorThreshold>\n        rowKey=\"id\"\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        loading={loading}\n        columns={columns}\n        bordered\n        scroll={{ x: 'max-content' }}\n        dataSource={filteredRows}\n        options={{ reload: loadRows }}\n        optionsRender={renderRefSafeTableOptions}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建阀值\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<ThresholdFormValues>\n        title={editing ? '编辑阀值定义' : '新建阀值定义'}\n        open={modalOpen}\n        initialValues={\n          editing\n            ? {\n              code: editing.code,\n              metric: editing.metric,\n              rt_max_delta: editing.rt_max_delta,\n              st_max_slope: editing.st_max_slope,\n              st_max_amplitude: editing.st_max_amplitude,\n              mt_max_slope: editing.mt_max_slope,\n              mt_max_amplitude: editing.mt_max_amplitude,\n              baseline: editing.baseline,\n            }\n            : {\n              metric: 1,\n              rt_max_delta: 0,\n              st_max_slope: 0,\n              st_max_amplitude: 0,\n              mt_max_slope: 0,\n              mt_max_amplitude: 0,\n              baseline: 0,\n            }\n        }\n        modalProps={{\n          destroyOnHidden: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        onFinish={async (values) => {\n          const payload: SensorThresholdPayload = {\n            code: values.code,\n            metric: values.metric,\n            rt_max_delta: values.rt_max_delta,\n            st_max_slope: values.st_max_slope,\n            st_max_amplitude: values.st_max_amplitude,\n            mt_max_slope: values.mt_max_slope,\n            mt_max_amplitude: values.mt_max_amplitude,\n            baseline: values.baseline,\n          };\n\n          setSaving(true);\n          try {\n            if (editing) {\n              await updateSensorThreshold(editing.id, payload);\n            } else {\n              await createSensorThreshold(payload);\n            }\n            message.success('保存成功');\n            setModalOpen(false);\n            setEditing(null);\n            await loadRows();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormText\n          name=\"code\"\n          label=\"传感器型号\"\n          rules={[{ required: true, message: '请输入传感器型号' }]}\n          placeholder=\"请输入传感器型号编码\"\n        />\n        <ProFormSelect\n          name=\"metric\"\n          label=\"监测指标\"\n          rules={[{ required: true, message: '请选择监测指标' }]}\n          options={METRIC_OPTIONS}\n        />\n        <ProFormDigit\n          name=\"rt_max_delta\"\n          label=\"实时最大偏差\"\n          rules={[{ required: true, message: '请输入实时最大偏差' }]}\n          fieldProps={{ precision: 4 }}\n        />\n        <ProFormDigit\n          name=\"st_max_slope\"\n          label=\"短时最大斜率\"\n          rules={[{ required: true, message: '请输入短时最大斜率' }]}\n          fieldProps={{ precision: 4 }}\n        />\n        <ProFormDigit\n          name=\"st_max_amplitude\"\n          label=\"短时最大振幅\"\n          rules={[{ required: true, message: '请输入短时最大振幅' }]}\n          fieldProps={{ precision: 4 }}\n        />\n        <ProFormDigit\n          name=\"mt_max_slope\"\n          label=\"中时最大斜率\"\n          rules={[{ required: true, message: '请输入中时最大斜率' }]}\n          fieldProps={{ precision: 4 }}\n        />\n        <ProFormDigit\n          name=\"mt_max_amplitude\"\n          label=\"中时最大振幅\"\n          rules={[{ required: true, message: '请输入中时最大振幅' }]}\n          fieldProps={{ precision: 4 }}\n        />\n        <ProFormDigit\n          name=\"baseline\"\n          label=\"基线值\"\n          rules={[{ required: true, message: '请输入基线值' }]}\n          fieldProps={{ precision: 4 }}\n        />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default MonitoringThresholdPage;\n",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProFormDigit,\n  ProFormSelect,\n  ProFormText,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, Space, Tag, message } from 'antd';\n\nimport {\n  SensorThreshold,\n  SensorThresholdPayload,\n  createSensorThreshold,\n  deleteSensorThreshold,\n  listSensorThresholds,\n  updateSensorThreshold,\n} from '@/services/sensorThreshold';\nimport { listSensorTypes, SensorType } from '@/services/sensorType';\n\nimport { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';\n\nconst METRIC_MAP: Record<number, { text: string; color: string }> = {\n  1: { text: '温度', color: 'volcano' },\n  2: { text: '振动', color: 'geekblue' },\n};\n\nconst METRIC_OPTIONS = [\n  { label: '温度', value: 1 },\n  { label: '振动', value: 2 },\n];\n\ntype ThresholdFormValues = {\n  code: string;\n  metric: number;\n  rt_max_delta: number;\n  st_max_slope: number;\n  st_max_amplitude: number;\n  mt_max_slope: number;\n  mt_max_amplitude: number;\n  baseline: number;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n      data?: { detail?: string };\n      info?: { errorMessage?: string };\n      message?: string;\n    }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst MonitoringThresholdPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [rows, setRows] = useState<SensorThreshold[]>([]);\n  const [editing, setEditing] = useState<SensorThreshold | null>(null);\n  const [query, setQuery] = useState<Record<string, any>>({});\n  const [sensorTypes, setSensorTypes] = useState<SensorType[]>([]);\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      setRows(await listSensorThresholds());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  const loadSensorTypes = async () => {\n    try {\n      setSensorTypes(await listSensorTypes());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n    loadSensorTypes();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    return rows.filter((row) => {\n      if (query.code && !norm(row.code).includes(norm(query.code))) {\n        return false;\n      }\n      if (query.metric !== undefined && query.metric !== null && row.metric !== Number(query.metric)) {\n        return false;\n      }\n      return true;\n    });\n  }, [query, rows]);\n\n  const getSensorTypeName = (code: string) => {\n    const found = sensorTypes.find((t) => t.name === code);\n    return found ? found.name : code;\n  };\n\n  const columns: ProColumns<SensorThreshold>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n      align: 'center',\n    },\n    {\n      title: '传感器型号',\n      dataIndex: 'code',\n      align: 'center',\n      width: 120,\n      render: (_, row) => <Tag>{getSensorTypeName(row.code)}</Tag>,\n    },\n    {\n      title: '监测指标',\n      dataIndex: 'metric',\n      width: 60,\n      valueType: 'select',\n      align: 'center',\n      valueEnum: {\n        1: { text: '温度', status: 'Default' },\n        2: { text: '振动', status: 'Default' },\n      },\n      render: (_, row) => {\n        const info = METRIC_MAP[row.metric] || { text: `${row.metric}`, color: 'default' };\n        return <Tag color={info.color}>{info.text}</Tag>;\n      },\n    },\n    {\n      title: '最大偏差(实时)',\n      dataIndex: 'rt_max_delta',\n      width: 100,\n      hideInSearch: true,\n      align: 'center',\n      render: (_, row) => row.rt_max_delta,\n    },\n    {\n      title: '短期(小时)',\n      hideInSearch: true,\n      children: [{\n        title: '最大斜率',\n        align: 'center',\n        dataIndex: 'st_max_slope',\n        width: 60,\n        hideInSearch: true,\n      },\n      {\n        title: '最大振幅',\n        dataIndex: 'st_max_amplitude',\n        width: 60,\n        align: 'center',\n        hideInSearch: true,\n      },]\n    },\n\n    {\n      title: '中期(3天内)',\n      hideInSearch: true,\n      children: [{\n        title: '最大斜率',\n        align: 'center',\n        dataIndex: 'mt_max_slope',\n        width: 60,\n        hideInSearch: true,\n      },\n      {\n        title: '最大振幅',\n        align: 'center',\n        dataIndex: 'mt_max_amplitude',\n        width: 60,\n        hideInSearch: true,\n      },]\n    },\n\n    {\n      title: '基线值',\n      dataIndex: 'baseline',\n      align: 'center',\n      width: 60,\n      hideInSearch: true,\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: OPERATION_COL_WIDTH,\n      fixed: 'right',\n      align: 'center',\n      render: (_, row) => (\n        <Space size=\"middle\">\n          <a\n            key=\"edit\"\n            onClick={() => {\n              setEditing(row);\n              setModalOpen(true);\n            }}\n          >\n            编辑\n          </a>\n          <Popconfirm\n            key=\"delete\"\n            title=\"确认删除该阀值定义吗？\"\n            onConfirm={async () => {\n              try {\n                await deleteSensorThreshold(row.id);\n                message.success('删除成功');\n                await loadRows();\n              } catch (error) {\n                message.error(toErrorMessage(error));\n              }\n            }}\n          >\n            <a style={{ color: '#ff4d4f' }}>\n              删除\n            </a>\n          </Popconfirm>\n        </Space>\n      ),\n    },\n  ];\n\n  return (\n    <PageContainer title=\"阀值定义\">\n      <ProTable<SensorThreshold>\n        rowKey=\"id\"\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        loading={loading}\n        columns={columns}\n        bordered\n        scroll={{ x: 'max-content' }}\n        dataSource={filteredRows}\n        options={{ reload: loadRows }}\n        optionsRender={renderRefSafeTableOptions}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建阀值\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<ThresholdFormValues>\n        title={editing ? '编辑阀值定义' : '新建阀值定义'}\n        open={modalOpen}\n        initialValues={\n          editing\n            ? {\n              code: editing.code,\n              metric: editing.metric,\n              rt_max_delta: editing.rt_max_delta,\n              st_max_slope: editing.st_max_slope,\n              st_max_amplitude: editing.st_max_amplitude,\n              mt_max_slope: editing.mt_max_slope,\n              mt_max_amplitude: editing.mt_max_amplitude,\n              baseline: editing.baseline,\n            }\n            : {\n              metric: 1,\n              rt_max_delta: 0,\n              st_max_slope: 0,\n              st_max_amplitude: 0,\n              mt_max_slope: 0,\n              mt_max_amplitude: 0,\n              baseline: 0,\n            }\n        }\n        modalProps={{\n          destroyOnHidden: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        onFinish={async (values) => {\n          const payload: SensorThresholdPayload = {\n            code: values.code,\n            metric: values.metric,\n            rt_max_delta: values.rt_max_delta,\n            st_max_slope: values.st_max_slope,\n            st_max_amplitude: values.st_max_amplitude,\n            mt_max_slope: values.mt_max_slope,\n            mt_max_amplitude: values.mt_max_amplitude,\n            baseline: values.baseline,\n          };\n\n          setSaving(true);\n          try {\n            if (editing) {\n              await updateSensorThreshold(editing.id, payload);\n            } else {\n              await createSensorThreshold(payload);\n            }\n            message.success('保存成功');\n            setModalOpen(false);\n            setEditing(null);\n            await loadRows();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormText\n          name=\"code\"\n          label=\"传感器型号\"\n          rules={[{ required: true, message: '请输入传感器型号' }]}\n          placeholder=\"请输入传感器型号编码\"\n        />\n        <ProFormSelect\n          name=\"metric\"\n          label=\"监测指标\"\n          rules={[{ required: true, message: '请选择监测指标' }]}\n          options={METRIC_OPTIONS}\n        />\n        <ProFormDigit\n          name=\"rt_max_delta\"\n          label=\"实时最大偏差\"\n          rules={[{ required: true, message: '请输入实时最大偏差' }]}\n          fieldProps={{ precision: 4 }}\n        />\n        <ProFormDigit\n          name=\"st_max_slope\"\n          label=\"短时最大斜率\"\n          rules={[{ required: true, message: '请输入短时最大斜率' }]}\n          fieldProps={{ precision: 4 }}\n        />\n        <ProFormDigit\n          name=\"st_max_amplitude\"\n          label=\"短时最大振幅\"\n          rules={[{ required: true, message: '请输入短时最大振幅' }]}\n          fieldProps={{ precision: 4 }}\n        />\n        <ProFormDigit\n          name=\"mt_max_slope\"\n          label=\"中时最大斜率\"\n          rules={[{ required: true, message: '请输入中时最大斜率' }]}\n          fieldProps={{ precision: 4 }}\n        />\n        <ProFormDigit\n          name=\"mt_max_amplitude\"\n          label=\"中时最大振幅\"\n          rules={[{ required: true, message: '请输入中时最大振幅' }]}\n          fieldProps={{ precision: 4 }}\n        />\n        <ProFormDigit\n          name=\"baseline\"\n          label=\"基线值\"\n          rules={[{ required: true, message: '请输入基线值' }]}\n          fieldProps={{ precision: 4 }}\n        />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default MonitoringThresholdPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/src/pages/Monitoring/Threshold/index.tsx"
     },
@@ -5237,9 +4697,7 @@
     ]
   },
   "mfsuBundleStatus": {
-    "done": true,
-    "percent": 1,
-    "status": ""
+    "done": true
   },
   "react": {
     "version": "18.3.1",
