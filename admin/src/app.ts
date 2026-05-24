@@ -1,10 +1,10 @@
 import React from 'react';
 import { AppstoreOutlined } from '@ant-design/icons';
 import { history, RequestConfig, RunTimeLayoutConfig } from '@umijs/max';
-import { Divider, Space, Typography } from 'antd';
+import { Divider, Space, Typography, message } from 'antd';
 
 import HeaderUserMenu from '@/components/HeaderUserMenu';
-import { getSession } from '@/utils/session';
+import { clearSession, getSession } from '@/utils/session';
 
 export const request: RequestConfig = {
   timeout: 10000,
@@ -27,6 +27,25 @@ export const request: RequestConfig = {
       };
     },
   ],
+  errorConfig: {
+    errorHandler: (error: any, opts: any) => {
+      if (opts?.skipErrorHandler) throw error;
+
+      // 处理 401 未授权
+      if (error?.response?.status === 401) {
+        clearSession();
+        message.warning('登录已失效，请重新登录');
+        // 使用 window.location 强制跳转更稳定，且能彻底清理所有前端缓存状态
+        window.location.href = '/login';
+        return;
+      }
+
+      // 其他业务错误处理，提取后端返回的详细错误信息
+      const errorInfo = error?.response?.data?.detail || error?.message || '请求出错，请稍后重试';
+      message.error(String(errorInfo));
+      throw error;
+    },
+  },
 };
 
 const PUBLIC_PATHS = ['/login'];

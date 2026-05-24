@@ -187,19 +187,33 @@ class DashboardService:
                 curr_cid = cat_map[curr_cid]["parent_id"]
 
         # 4. 组装父子树形结构提供给前端
-        tree = []
+        top_level_cats = []
         for cid, info in cat_map.items():
             pid = info["parent_id"]
             if pid and pid in cat_map:
                 cat_map[pid]["children"].append(info)
             else:
                 # 无父节点的即为最顶层根节点
-                tree.append(info)
+                top_level_cats.append(info)
+
+        # 5. 始终创建一个"全部"根节点，包裹所有顶层分类
+        if len(top_level_cats) > 0:
+            tree = [{
+                "id": "__root__",
+                "name": "全部",
+                "parent_id": None,
+                "total": sum(c["total"] for c in top_level_cats),
+                "anomaly": sum(c["anomaly"] for c in top_level_cats),
+                "children": top_level_cats,
+            }]
+        else:
+            tree = []
 
         print("=== NestedPieChart Tree Data ===")
         print(json.dumps(tree, ensure_ascii=False, indent=2))
 
         return tree
+
 
     @staticmethod
     async def _get_area_device_tree(
@@ -231,6 +245,7 @@ class DashboardService:
 
         # 2. 查询设备实例 → ProcessDeviceItem → ProcessDevice → Area 的关联
         #    同时 LEFT JOIN SensorMonitoring 获取异常信息
+        #    使用 LEFT JOIN 确保即使设备未关联 ProcessDevice 也能被统计到"未分配区域"
         stmt_devices = (
             select(
                 DeviceInst.id.label("inst_id"),
@@ -239,20 +254,25 @@ class DashboardService:
                 func.max(SensorMonitoring.anomaly).label("anomaly"),
             )
             .select_from(DeviceInst)
-            .join(ProcessDeviceItem, ProcessDeviceItem.device_inst_id == DeviceInst.id)
-            .join(ProcessDevice, ProcessDevice.id == ProcessDeviceItem.process_device_id)
+            .outerjoin(ProcessDeviceItem, ProcessDeviceItem.device_inst_id == DeviceInst.id)
+            .outerjoin(ProcessDevice, ProcessDevice.id == ProcessDeviceItem.process_device_id)
             .outerjoin(SensorMonitoring, SensorMonitoring.device_inst_id == DeviceInst.id)
-            .where(
-                ProcessDevice.area_id.isnot(None),
-            )
             .group_by(DeviceInst.id, DeviceInst.code, ProcessDevice.area_id)
         )
         device_rows = (await session.execute(stmt_devices)).all()
 
         # 3. 对组合数据进行在内存中的精确累加 (从叶子向所有祖级传递)
+        #    先统计"未分配区域"的设备
+        unassigned_total = 0
+        unassigned_anomaly = 0
+
         for row in device_rows:
             aid = str(row.area_id) if row.area_id else None
             if not aid or aid not in area_map:
+                # 设备未关联到任何已知区域，归入"未分配区域"
+                is_anomaly = 1 if (row.anomaly and row.anomaly > 0) else 0
+                unassigned_total += 1
+                unassigned_anomaly += is_anomaly
                 continue
 
             is_anomaly = 1 if (row.anomaly and row.anomaly > 0) else 0
@@ -270,15 +290,44 @@ class DashboardService:
 
                 curr_aid = area_map[curr_aid]["parent_id"]
 
-        # 4. 组装父子树形结构提供给前端
-        tree = []
-        for aid, info in area_map.items():
-            pid = info["parent_id"]
-            if pid and pid in area_map:
-                area_map[pid]["children"].append(info)
-            else:
-                # 无父节点的即为最顶层根节点
-                tree.append(info)
+        # 如果有未分配区域的设备，添加一个虚拟根节点包裹所有区域和未分配设备
+        if unassigned_total > 0 or len(area_map) > 0:
+            # 先组装父子关系：将子区域挂载到父区域的 children 中
+            for aid, info in area_map.items():
+                pid = info["parent_id"]
+                if pid and pid in area_map:
+                    area_map[pid]["children"].append(info)
+
+            # 提取所有顶层区域（没有父节点或父节点不在 area_map 中的）
+            top_level_areas = []
+            for aid, info in area_map.items():
+                if not info["parent_id"] or info["parent_id"] not in area_map:
+                    top_level_areas.append(info)
+
+            # 如果存在未分配设备，添加"未分配区域"节点
+            if unassigned_total > 0:
+                top_level_areas.append({
+                    "id": "__unassigned__",
+                    "name": "未分配",
+                    "parent_id": None,
+                    "total": unassigned_total,
+                    "anomaly": unassigned_anomaly,
+                    "children": [],
+                })
+
+
+            # 始终创建一个"全部"根节点，包裹所有顶层区域和未分配区域
+            tree = [{
+                "id": "__root__",
+                "name": "全部",
+                "parent_id": None,
+                "total": sum(a["total"] for a in top_level_areas),
+                "anomaly": sum(a["anomaly"] for a in top_level_areas),
+                "children": top_level_areas,
+            }]
+
+        else:
+            tree = []
 
         print("=== Area Tree Data ===")
         print(json.dumps(tree, ensure_ascii=False, indent=2))
