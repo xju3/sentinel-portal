@@ -33,7 +33,7 @@ async def get_current_account(
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token",
+            detail="authorization expired",
         ) from exc
 
     result = await session.execute(
@@ -43,7 +43,7 @@ async def get_current_account(
     if account is None or account.tenant_id != token_tenant_id:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token subject",
+            detail="authorization expired",
         )
 
     return account

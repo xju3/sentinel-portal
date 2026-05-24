@@ -1,7 +1,7 @@
 import React from 'react';
 import { AppstoreOutlined } from '@ant-design/icons';
 import { history, RequestConfig, RunTimeLayoutConfig } from '@umijs/max';
-import { Divider, Space, Typography } from 'antd';
+import { Divider, Space, Typography, message } from 'antd';
 
 import HeaderUserMenu from '@/components/HeaderUserMenu';
 import { clearSession, getSession } from '@/utils/session';
@@ -28,11 +28,37 @@ export const request: RequestConfig = {
     },
   ],
   responseInterceptors: [
-    (response) => {
-      if (response.status === 401) {
-        clearSession();
-        history.push('/login');
-        throw new Error('Unauthorized');
+    async (response) => {
+      // Parse the unified ApiResponse body from axios response.data
+      try {
+        const body = response.data;
+
+        // Check for unauthorized (code === 401)
+        if (body && body.code === 401) {
+          clearSession();
+          // Force page reload to login page, preventing any further data processing
+          window.location.href = '/login';
+          // Return a rejected promise so the caller's .catch() is triggered
+          return Promise.reject(new Error(body.message || 'Unauthorized'));
+        }
+
+        // For other error codes, show error message
+        if (body && body.code !== 0 && body.code !== undefined) {
+          message.error(body.message || `Error (code: ${body.code})`);
+        }
+
+        // Unwrap the ApiResponse: replace response.data with body.data
+        // so that request<T>() returns the data field directly
+        if (body && body.code === 0 && body.data !== undefined) {
+          response.data = body.data;
+        }
+      } catch (e) {
+        // If parsing fails, fall back to HTTP status check
+        if (response.status === 401) {
+          clearSession();
+          window.location.href = '/login';
+          return Promise.reject(new Error('Unauthorized'));
+        }
       }
       return response;
     },

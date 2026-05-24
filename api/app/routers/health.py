@@ -4,13 +4,14 @@ Health check endpoints
 
 from fastapi import APIRouter, Depends, Response
 
+from app.utils.response import success
 from app.database import db_manager, redis_manager, influxdb_manager, minio_manager
 from app.contract.health import HealthResponse
 
 router = APIRouter(prefix="/health", tags=["health"])
 
 
-@router.get("", response_model=HealthResponse)
+@router.get("")
 async def health_check():
     """
     API health check endpoint
@@ -26,17 +27,17 @@ async def health_check():
     all_healthy = all(services.values())
     status = "healthy" if all_healthy else "degraded"
 
-    return HealthResponse(
+    return success(HealthResponse(
         status=status,
         message="All services operational" if all_healthy else "Some services unavailable",
         services=services,
-    )
+    ))
 
 
 @router.get("/live")
 async def live_check():
     """Simple liveness probe"""
-    return {"status": "alive"}
+    return success({"status": "alive"})
 
 
 @router.get("/ready")
@@ -50,7 +51,7 @@ async def ready_check(response: Response):
     }
 
     if all(services.values()):
-        return {"status": "ready", "services": services}
+        return success({"status": "ready", "services": services})
     else:
         response.status_code = 503
-        return {"status": "not_ready", "services": services}
+        return success({"status": "not_ready", "services": services})

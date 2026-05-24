@@ -27,25 +27,44 @@ export const request: RequestConfig = {
       };
     },
   ],
-  errorConfig: {
-    errorHandler: (error: any, opts: any) => {
-      if (opts?.skipErrorHandler) throw error;
+  responseInterceptors: [
+    async (response) => {
+      // Parse the unified ApiResponse body from axios response.data
+      try {
+        const body = response.data;
 
-      // 处理 401 未授权
-      if (error?.response?.status === 401) {
-        clearSession();
-        message.warning('登录已失效，请重新登录');
-        // 使用 window.location 强制跳转更稳定，且能彻底清理所有前端缓存状态
-        window.location.href = '/login';
-        return;
+        // Check for unauthorized (code === 401)
+        if (body && body.code === 401) {
+          clearSession();
+          message.warning('登录已失效，请重新登录');
+          // Force page reload to login page, preventing any further data processing
+          window.location.href = '/login';
+          // Return a rejected promise so the caller's .catch() is triggered
+          return Promise.reject(new Error(body.message || 'Unauthorized'));
+        }
+
+        // For other error codes, show error message
+        if (body && body.code !== 0 && body.code !== undefined) {
+          message.error(body.message || `Error (code: ${body.code})`);
+        }
+
+        // Unwrap the ApiResponse: replace response.data with body.data
+        // so that request<T>() returns the data field directly
+        if (body && body.code === 0 && body.data !== undefined) {
+          response.data = body.data;
+        }
+      } catch (e) {
+        // If parsing fails, fall back to HTTP status check
+        if (response.status === 401) {
+          clearSession();
+          message.warning('登录已失效，请重新登录');
+          window.location.href = '/login';
+          return Promise.reject(new Error('Unauthorized'));
+        }
       }
-
-      // 其他业务错误处理，提取后端返回的详细错误信息
-      const errorInfo = error?.response?.data?.detail || error?.message || '请求出错，请稍后重试';
-      message.error(String(errorInfo));
-      throw error;
+      return response;
     },
-  },
+  ],
 };
 
 const PUBLIC_PATHS = ['/login'];

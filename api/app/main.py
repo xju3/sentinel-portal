@@ -6,10 +6,18 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 
+import json
+
 from fastapi import FastAPI, Request
+from fastapi.encoders import jsonable_encoder
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse, Response
+from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.types import Receive, Scope, Send
 
 from app.config import settings
+from app.contract.common import ApiResponse
 from app.database import db_manager, redis_manager, influxdb_manager, minio_manager
 from app.clients.mqtt import mqtt_manager
 from app.clients.handler import patrol_msg_handler
@@ -105,6 +113,62 @@ app.include_router(auth.router, prefix=settings.api_prefix)
 app.include_router(admin.router, prefix=settings.api_prefix)
 app.include_router(dashboard.router, prefix=settings.api_prefix)
 app.include_router(thresholds.router, prefix=settings.api_prefix)
+
+
+
+# ==========================================
+# Global exception handlers
+# ==========================================
+
+
+@app.exception_handler(StarletteHTTPException)
+async def http_exception_handler(request: Request, exc: StarletteHTTPException):
+    """Handle HTTP exceptions and return unified ApiResponse format
+
+    All errors are returned with HTTP 200 status code, with the actual error
+    code embedded in the response body. This ensures axios treats all responses
+    as successful HTTP requests, allowing the frontend interceptor to handle
+    business logic errors (code !== 0) uniformly.
+    """
+    logger.warning(
+        "HTTP %d on %s %s: %s",
+        exc.status_code,
+        request.method,
+        request.url.path,
+        exc.detail,
+    )
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder(
+            ApiResponse(code=exc.status_code, message=str(exc.detail), data=None)
+        ),
+    )
+
+
+@app.exception_handler(RequestValidationError)
+async def validation_exception_handler(request: Request, exc: RequestValidationError):
+    """Handle request validation errors"""
+    errors = exc.errors()
+    logger.warning("Validation error on %s %s: %s", request.method, request.url.path, errors)
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder(
+            ApiResponse(code=422, message=str(errors), data=None)
+        ),
+    )
+
+
+@app.exception_handler(Exception)
+async def general_exception_handler(request: Request, exc: Exception):
+    """Handle unexpected exceptions"""
+    logger.error("Unhandled error on %s %s: %s", request.method, request.url.path, exc, exc_info=True)
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder(
+            ApiResponse(code=500, message="Internal server error", data=None)
+        ),
+    )
+
 
 # Root endpoint
 @app.get("/")

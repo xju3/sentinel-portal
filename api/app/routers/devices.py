@@ -27,6 +27,7 @@ from app.services.device_service import (
     SensorMonitoringService,
 )
 from app.utils.auth import get_current_account
+from app.utils.response import success
 from app.contract.devices import (
     IsoStandardCreate,
     IsoStandardUpdate,
@@ -88,16 +89,16 @@ async def _validate_sensor_monitoring_refs(
 # ==========================================
 # 1. IsoStandard
 # ==========================================
-@router.get("/iso-standards", response_model=List[IsoStandardResponse])
+@router.get("/iso-standards")
 async def list_iso_standards(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     session: AsyncSession = Depends(get_session),
 ):
-    return await IsoStandardService.get_all(session, skip, limit)
+    return success(await IsoStandardService.get_all(session, skip, limit))
 
 
-@router.get("/iso-standards/{obj_id}", response_model=IsoStandardResponse)
+@router.get("/iso-standards/{obj_id}")
 async def get_iso_standard(
     obj_id: UUID,
     session: AsyncSession = Depends(get_session),
@@ -105,18 +106,18 @@ async def get_iso_standard(
     obj = await IsoStandardService.get_by_id(session, obj_id)
     if not obj:
         raise HTTPException(status_code=404, detail="IsoStandard not found")
-    return obj
+    return success(obj)
 
 
-@router.post("/iso-standards", response_model=IsoStandardResponse)
+@router.post("/iso-standards")
 async def create_iso_standard(
     item: IsoStandardCreate,
     session: AsyncSession = Depends(get_session),
 ):
-    return await IsoStandardService.create(session, item.model_dump())
+    return success(await IsoStandardService.create(session, item.model_dump()))
 
 
-@router.put("/iso-standards/{obj_id}", response_model=IsoStandardResponse)
+@router.put("/iso-standards/{obj_id}")
 async def update_iso_standard(
     obj_id: UUID,
     item: IsoStandardUpdate,
@@ -127,7 +128,7 @@ async def update_iso_standard(
         raise HTTPException(status_code=404, detail="IsoStandard not found")
 
     update_data = item.model_dump(exclude_unset=True)
-    return await IsoStandardService.update(session, db_obj, update_data)
+    return success(await IsoStandardService.update(session, db_obj, update_data))
 
 
 @router.delete("/iso-standards/{obj_id}")
@@ -140,7 +141,7 @@ async def delete_iso_standard(
         raise HTTPException(status_code=404, detail="IsoStandard not found")
 
     await IsoStandardService.delete(session, db_obj)
-    return {"message": "IsoStandard deleted successfully"}
+    return success({"message": "IsoStandard deleted successfully"})
 
 
 # ==========================================
@@ -203,7 +204,7 @@ async def _validate_device_category_parent(
         cursor = parent.parent_id
 
 
-@router.get("/device-categories", response_model=List[DeviceCategoryResponse])
+@router.get("/device-categories")
 async def list_device_categories(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
@@ -218,13 +219,13 @@ async def list_device_categories(
         tenant_id,
         [row.health_check_freq_id for row in rows],
     )
-    return [
+    return success([
         _serialize_device_category(row, freq_map.get(row.health_check_freq_id))
         for row in rows
-    ]
+    ])
 
 
-@router.get("/device-categories/count", response_model=PagedCountResponse)
+@router.get("/device-categories/count")
 async def count_device_categories(
     keyword: Optional[str] = Query(None),
     current_account: AccountModel = Depends(get_current_account),
@@ -232,10 +233,10 @@ async def count_device_categories(
 ):
     tenant_id = current_account.tenant_id
     total = await DeviceCategoryService.count_all(session, tenant_id, keyword)
-    return {"total": total}
+    return success({"total": total})
 
 
-@router.get("/device-categories/{obj_id}", response_model=DeviceCategoryResponse)
+@router.get("/device-categories/{obj_id}")
 async def get_device_category(
     obj_id: UUID,
     current_account: AccountModel = Depends(get_current_account),
@@ -250,10 +251,10 @@ async def get_device_category(
         tenant_id,
         [obj.health_check_freq_id],
     )
-    return _serialize_device_category(obj, freq_map.get(obj.health_check_freq_id))
+    return success(_serialize_device_category(obj, freq_map.get(obj.health_check_freq_id)))
 
 
-@router.post("/device-categories", response_model=DeviceCategoryResponse)
+@router.post("/device-categories")
 async def create_device_category(
     item: DeviceCategoryCreate,
     current_account: AccountModel = Depends(get_current_account),
@@ -271,10 +272,10 @@ async def create_device_category(
         tenant_id,
         [created.health_check_freq_id],
     )
-    return _serialize_device_category(created, freq_map.get(created.health_check_freq_id))
+    return success(_serialize_device_category(created, freq_map.get(created.health_check_freq_id)))
 
 
-@router.put("/device-categories/{obj_id}", response_model=DeviceCategoryResponse)
+@router.put("/device-categories/{obj_id}")
 async def update_device_category(
     obj_id: UUID,
     item: DeviceCategoryUpdate,
@@ -298,7 +299,7 @@ async def update_device_category(
         tenant_id,
         [updated.health_check_freq_id],
     )
-    return _serialize_device_category(updated, freq_map.get(updated.health_check_freq_id))
+    return success(_serialize_device_category(updated, freq_map.get(updated.health_check_freq_id)))
 
 
 @router.delete("/device-categories/{obj_id}")
@@ -320,22 +321,22 @@ async def delete_device_category(
         )
 
     await DeviceCategoryService.delete(session, db_obj)
-    return {"message": "DeviceCategory deleted successfully"}
+    return success({"message": "DeviceCategory deleted successfully"})
 
 
 # ==========================================
 # 3. DeviceSpec
 # ==========================================
-@router.get("/device-specs", response_model=List[DeviceSpecResponse])
+@router.get("/device-specs")
 async def list_device_specs(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     session: AsyncSession = Depends(get_session),
 ):
-    return await DeviceSpecService.get_all(session, skip, limit)
+    return success(await DeviceSpecService.get_all(session, skip, limit))
 
 
-@router.get("/device-specs/{obj_id}", response_model=DeviceSpecResponse)
+@router.get("/device-specs/{obj_id}")
 async def get_device_spec(
     obj_id: UUID,
     session: AsyncSession = Depends(get_session),
@@ -343,18 +344,18 @@ async def get_device_spec(
     obj = await DeviceSpecService.get_by_id(session, obj_id)
     if not obj:
         raise HTTPException(status_code=404, detail="DeviceSpec not found")
-    return obj
+    return success(obj)
 
 
-@router.post("/device-specs", response_model=DeviceSpecResponse)
+@router.post("/device-specs")
 async def create_device_spec(
     item: DeviceSpecCreate,
     session: AsyncSession = Depends(get_session),
 ):
-    return await DeviceSpecService.create(session, item.model_dump())
+    return success(await DeviceSpecService.create(session, item.model_dump()))
 
 
-@router.put("/device-specs/{obj_id}", response_model=DeviceSpecResponse)
+@router.put("/device-specs/{obj_id}")
 async def update_device_spec(
     obj_id: UUID,
     item: DeviceSpecUpdate,
@@ -365,7 +366,7 @@ async def update_device_spec(
         raise HTTPException(status_code=404, detail="DeviceSpec not found")
 
     update_data = item.model_dump(exclude_unset=True)
-    return await DeviceSpecService.update(session, db_obj, update_data)
+    return success(await DeviceSpecService.update(session, db_obj, update_data))
 
 
 @router.delete("/device-specs/{obj_id}")
@@ -378,22 +379,22 @@ async def delete_device_spec(
         raise HTTPException(status_code=404, detail="DeviceSpec not found")
 
     await DeviceSpecService.delete(session, db_obj)
-    return {"message": "DeviceSpec deleted successfully"}
+    return success({"message": "DeviceSpec deleted successfully"})
 
 
 # ==========================================
 # 4. DeviceInst
 # ==========================================
-@router.get("/device-insts", response_model=List[DeviceInstResponse])
+@router.get("/device-insts")
 async def list_device_insts(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     session: AsyncSession = Depends(get_session),
 ):
-    return await DeviceInstService.get_all(session, skip, limit)
+    return success(await DeviceInstService.get_all(session, skip, limit))
 
 
-@router.get("/device-insts/{obj_id}", response_model=DeviceInstResponse)
+@router.get("/device-insts/{obj_id}")
 async def get_device_inst(
     obj_id: UUID,
     session: AsyncSession = Depends(get_session),
@@ -401,18 +402,18 @@ async def get_device_inst(
     obj = await DeviceInstService.get_by_id(session, obj_id)
     if not obj:
         raise HTTPException(status_code=404, detail="DeviceInst not found")
-    return obj
+    return success(obj)
 
 
-@router.post("/device-insts", response_model=DeviceInstResponse)
+@router.post("/device-insts")
 async def create_device_inst(
     item: DeviceInstCreate,
     session: AsyncSession = Depends(get_session),
 ):
-    return await DeviceInstService.create(session, item.model_dump())
+    return success(await DeviceInstService.create(session, item.model_dump()))
 
 
-@router.put("/device-insts/{obj_id}", response_model=DeviceInstResponse)
+@router.put("/device-insts/{obj_id}")
 async def update_device_inst(
     obj_id: UUID,
     item: DeviceInstUpdate,
@@ -423,7 +424,7 @@ async def update_device_inst(
         raise HTTPException(status_code=404, detail="DeviceInst not found")
 
     update_data = item.model_dump(exclude_unset=True)
-    return await DeviceInstService.update(session, db_obj, update_data)
+    return success(await DeviceInstService.update(session, db_obj, update_data))
 
 
 @router.delete("/device-insts/{obj_id}")
@@ -436,22 +437,22 @@ async def delete_device_inst(
         raise HTTPException(status_code=404, detail="DeviceInst not found")
 
     await DeviceInstService.delete(session, db_obj)
-    return {"message": "DeviceInst deleted successfully"}
+    return success({"message": "DeviceInst deleted successfully"})
 
 
 # ==========================================
 # 5. Process
 # ==========================================
-@router.get("/processes", response_model=List[ProcessResponse])
+@router.get("/processes")
 async def list_processes(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     session: AsyncSession = Depends(get_session),
 ):
-    return await ProcessService.get_all(session, skip, limit)
+    return success(await ProcessService.get_all(session, skip, limit))
 
 
-@router.get("/processes/{obj_id}", response_model=ProcessResponse)
+@router.get("/processes/{obj_id}")
 async def get_process(
     obj_id: UUID,
     session: AsyncSession = Depends(get_session),
@@ -459,18 +460,18 @@ async def get_process(
     obj = await ProcessService.get_by_id(session, obj_id)
     if not obj:
         raise HTTPException(status_code=404, detail="Process not found")
-    return obj
+    return success(obj)
 
 
-@router.post("/processes", response_model=ProcessResponse)
+@router.post("/processes")
 async def create_process(
     item: ProcessCreate,
     session: AsyncSession = Depends(get_session),
 ):
-    return await ProcessService.create(session, item.model_dump())
+    return success(await ProcessService.create(session, item.model_dump()))
 
 
-@router.put("/processes/{obj_id}", response_model=ProcessResponse)
+@router.put("/processes/{obj_id}")
 async def update_process(
     obj_id: UUID,
     item: ProcessUpdate,
@@ -481,7 +482,7 @@ async def update_process(
         raise HTTPException(status_code=404, detail="Process not found")
 
     update_data = item.model_dump(exclude_unset=True)
-    return await ProcessService.update(session, db_obj, update_data)
+    return success(await ProcessService.update(session, db_obj, update_data))
 
 
 @router.delete("/processes/{obj_id}")
@@ -494,22 +495,22 @@ async def delete_process(
         raise HTTPException(status_code=404, detail="Process not found")
 
     await ProcessService.delete(session, db_obj)
-    return {"message": "Process deleted successfully"}
+    return success({"message": "Process deleted successfully"})
 
 
 # ==========================================
 # 6. ProcessItem
 # ==========================================
-@router.get("/process-items", response_model=List[ProcessItemResponse])
+@router.get("/process-items")
 async def list_process_items(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     session: AsyncSession = Depends(get_session),
 ):
-    return await ProcessItemService.get_all(session, skip, limit)
+    return success(await ProcessItemService.get_all(session, skip, limit))
 
 
-@router.get("/process-items/{obj_id}", response_model=ProcessItemResponse)
+@router.get("/process-items/{obj_id}")
 async def get_process_item(
     obj_id: UUID,
     session: AsyncSession = Depends(get_session),
@@ -517,18 +518,18 @@ async def get_process_item(
     obj = await ProcessItemService.get_by_id(session, obj_id)
     if not obj:
         raise HTTPException(status_code=404, detail="ProcessItem not found")
-    return obj
+    return success(obj)
 
 
-@router.post("/process-items", response_model=ProcessItemResponse)
+@router.post("/process-items")
 async def create_process_item(
     item: ProcessItemCreate,
     session: AsyncSession = Depends(get_session),
 ):
-    return await ProcessItemService.create(session, item.model_dump())
+    return success(await ProcessItemService.create(session, item.model_dump()))
 
 
-@router.put("/process-items/{obj_id}", response_model=ProcessItemResponse)
+@router.put("/process-items/{obj_id}")
 async def update_process_item(
     obj_id: UUID,
     item: ProcessItemUpdate,
@@ -539,7 +540,7 @@ async def update_process_item(
         raise HTTPException(status_code=404, detail="ProcessItem not found")
 
     update_data = item.model_dump(exclude_unset=True)
-    return await ProcessItemService.update(session, db_obj, update_data)
+    return success(await ProcessItemService.update(session, db_obj, update_data))
 
 
 @router.delete("/process-items/{obj_id}")
@@ -552,22 +553,22 @@ async def delete_process_item(
         raise HTTPException(status_code=404, detail="ProcessItem not found")
 
     await ProcessItemService.delete(session, db_obj)
-    return {"message": "ProcessItem deleted successfully"}
+    return success({"message": "ProcessItem deleted successfully"})
 
 
 # ==========================================
 # 7. ProcessDevice
 # ==========================================
-@router.get("/process-devices", response_model=List[ProcessDeviceResponse])
+@router.get("/process-devices")
 async def list_process_devices(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     session: AsyncSession = Depends(get_session),
 ):
-    return await ProcessDeviceService.get_all(session, skip, limit)
+    return success(await ProcessDeviceService.get_all(session, skip, limit))
 
 
-@router.get("/process-devices/{obj_id}", response_model=ProcessDeviceResponse)
+@router.get("/process-devices/{obj_id}")
 async def get_process_device(
     obj_id: UUID,
     session: AsyncSession = Depends(get_session),
@@ -575,18 +576,18 @@ async def get_process_device(
     obj = await ProcessDeviceService.get_by_id(session, obj_id)
     if not obj:
         raise HTTPException(status_code=404, detail="ProcessDevice not found")
-    return obj
+    return success(obj)
 
 
-@router.post("/process-devices", response_model=ProcessDeviceResponse)
+@router.post("/process-devices")
 async def create_process_device(
     item: ProcessDeviceCreate,
     session: AsyncSession = Depends(get_session),
 ):
-    return await ProcessDeviceService.create(session, item.model_dump())
+    return success(await ProcessDeviceService.create(session, item.model_dump()))
 
 
-@router.put("/process-devices/{obj_id}", response_model=ProcessDeviceResponse)
+@router.put("/process-devices/{obj_id}")
 async def update_process_device(
     obj_id: UUID,
     item: ProcessDeviceUpdate,
@@ -597,7 +598,7 @@ async def update_process_device(
         raise HTTPException(status_code=404, detail="ProcessDevice not found")
 
     update_data = item.model_dump(exclude_unset=True)
-    return await ProcessDeviceService.update(session, db_obj, update_data)
+    return success(await ProcessDeviceService.update(session, db_obj, update_data))
 
 
 @router.delete("/process-devices/{obj_id}")
@@ -610,22 +611,22 @@ async def delete_process_device(
         raise HTTPException(status_code=404, detail="ProcessDevice not found")
 
     await ProcessDeviceService.delete(session, db_obj)
-    return {"message": "ProcessDevice deleted successfully"}
+    return success({"message": "ProcessDevice deleted successfully"})
 
 
 # ==========================================
 # 8. ProcessDeviceItem
 # ==========================================
-@router.get("/process-device-items", response_model=List[ProcessDeviceItemResponse])
+@router.get("/process-device-items")
 async def list_process_device_items(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     session: AsyncSession = Depends(get_session),
 ):
-    return await ProcessDeviceItemService.get_all(session, skip, limit)
+    return success(await ProcessDeviceItemService.get_all(session, skip, limit))
 
 
-@router.get("/process-device-items/{obj_id}", response_model=ProcessDeviceItemResponse)
+@router.get("/process-device-items/{obj_id}")
 async def get_process_device_item(
     obj_id: UUID,
     session: AsyncSession = Depends(get_session),
@@ -633,18 +634,18 @@ async def get_process_device_item(
     obj = await ProcessDeviceItemService.get_by_id(session, obj_id)
     if not obj:
         raise HTTPException(status_code=404, detail="ProcessDeviceItem not found")
-    return obj
+    return success(obj)
 
 
-@router.post("/process-device-items", response_model=ProcessDeviceItemResponse)
+@router.post("/process-device-items")
 async def create_process_device_item(
     item: ProcessDeviceItemCreate,
     session: AsyncSession = Depends(get_session),
 ):
-    return await ProcessDeviceItemService.create(session, item.model_dump())
+    return success(await ProcessDeviceItemService.create(session, item.model_dump()))
 
 
-@router.put("/process-device-items/{obj_id}", response_model=ProcessDeviceItemResponse)
+@router.put("/process-device-items/{obj_id}")
 async def update_process_device_item(
     obj_id: UUID,
     item: ProcessDeviceItemUpdate,
@@ -655,7 +656,7 @@ async def update_process_device_item(
         raise HTTPException(status_code=404, detail="ProcessDeviceItem not found")
 
     update_data = item.model_dump(exclude_unset=True)
-    return await ProcessDeviceItemService.update(session, db_obj, update_data)
+    return success(await ProcessDeviceItemService.update(session, db_obj, update_data))
 
 
 @router.delete("/process-device-items/{obj_id}")
@@ -668,13 +669,13 @@ async def delete_process_device_item(
         raise HTTPException(status_code=404, detail="ProcessDeviceItem not found")
 
     await ProcessDeviceItemService.delete(session, db_obj)
-    return {"message": "ProcessDeviceItem deleted successfully"}
+    return success({"message": "ProcessDeviceItem deleted successfully"})
 
 
 # ==========================================
 # 9. SensorMonitoring
 # ==========================================
-@router.get("/sensor-monitorings", response_model=List[SensorMonitoringResponse])
+@router.get("/sensor-monitorings")
 async def list_sensor_monitorings(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
@@ -682,13 +683,12 @@ async def list_sensor_monitorings(
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
-    return await SensorMonitoringService.get_all_by_tenant(session, tenant_id, skip, limit)
+    return success(await SensorMonitoringService.get_all_by_tenant(session, tenant_id, skip, limit))
 
 
 
 @router.get(
     "/sensor-monitorings/device-insts",
-    response_model=PagedDeviceInstResponse,
 )
 async def list_sensor_monitoring_device_insts(
     current: int = Query(1, ge=1),
@@ -701,10 +701,10 @@ async def list_sensor_monitoring_device_insts(
     items, total = await DeviceInstService.get_tenant_device_insts_paged(
         session, tenant_id, current, pageSize, keyword
     )
-    return PagedDeviceInstResponse(items=items, total=total)
+    return success(PagedDeviceInstResponse(items=items, total=total))
 
 
-@router.get("/sensor-monitorings/{obj_id}", response_model=SensorMonitoringResponse)
+@router.get("/sensor-monitorings/{obj_id}")
 async def get_sensor_monitoring(
     obj_id: UUID,
     current_account: AccountModel = Depends(get_current_account),
@@ -714,11 +714,11 @@ async def get_sensor_monitoring(
     obj = await SensorMonitoringService.get_by_id_and_tenant(session, obj_id, tenant_id)
     if not obj:
         raise HTTPException(status_code=404, detail="SensorMonitoring not found")
-    return obj
+    return success(obj)
 
 
 
-@router.post("/sensor-monitorings", response_model=SensorMonitoringResponse)
+@router.post("/sensor-monitorings")
 async def create_sensor_monitoring(
     item: SensorMonitoringCreate,
     current_account: AccountModel = Depends(get_current_account),
@@ -727,10 +727,10 @@ async def create_sensor_monitoring(
     tenant_id = current_account.tenant_id
     payload = item.model_dump()
     await _validate_sensor_monitoring_refs(session, tenant_id, payload)
-    return await SensorMonitoringService.create(session, payload)
+    return success(await SensorMonitoringService.create(session, payload))
 
 
-@router.put("/sensor-monitorings/{obj_id}", response_model=SensorMonitoringResponse)
+@router.put("/sensor-monitorings/{obj_id}")
 async def update_sensor_monitoring(
     obj_id: UUID,
     item: SensorMonitoringUpdate,
@@ -744,7 +744,7 @@ async def update_sensor_monitoring(
 
     update_data = item.model_dump(exclude_unset=True)
     await _validate_sensor_monitoring_refs(session, tenant_id, update_data)
-    return await SensorMonitoringService.update(session, db_obj, update_data)
+    return success(await SensorMonitoringService.update(session, db_obj, update_data))
 
 
 
@@ -760,5 +760,5 @@ async def delete_sensor_monitoring(
         raise HTTPException(status_code=404, detail="SensorMonitoring not found")
 
     await SensorMonitoringService.delete(session, db_obj)
-    return {"message": "SensorMonitoring deleted successfully"}
+    return success({"message": "SensorMonitoring deleted successfully"})
 

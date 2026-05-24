@@ -167,7 +167,9 @@ const MonitoringPointsPage = () => {
       title: '传感器',
       dataIndex: 'sensor_id',
       width: 180,
+      render: (_, row) => (row.sensor_id ? sensorMap.get(row.sensor_id) || row.sensor_id : '-'),
     },
+
     {
       title: '方向',
       dataIndex: 'direction',

@@ -20,6 +20,7 @@ from app.services.customer_service import (
     HealthCheckFreqService,
 )
 from app.utils.auth import get_current_account
+from app.utils.response import success
 from app.contract.customers import (
     TenantCreate,
     TenantUpdate,
@@ -57,7 +58,7 @@ router = APIRouter(tags=["customers"])
 # ==========================================
 
 
-@router.get("/tenants/current", response_model=TenantResponse)
+@router.get("/tenants/current")
 async def get_current_tenant(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
@@ -65,10 +66,10 @@ async def get_current_tenant(
     tenant = await TenantService.get_tenant(session, current_account.tenant_id)
     if not tenant:
         raise HTTPException(status_code=404, detail="Tenant not found")
-    return tenant
+    return success(tenant)
 
 
-@router.put("/tenants/current", response_model=TenantResponse)
+@router.put("/tenants/current")
 async def update_current_tenant(
     payload: CurrentTenantUpdate,
     current_account: AccountModel = Depends(get_current_account),
@@ -79,19 +80,20 @@ async def update_current_tenant(
         raise HTTPException(status_code=404, detail="Tenant not found")
 
     update_data = payload.model_dump(exclude_unset=True)
-    return await TenantService.update_tenant(session, tenant, update_data)
+    return success(await TenantService.update_tenant(session, tenant, update_data))
 
 
-@router.get("/tenants", response_model=List[TenantResponse])
+@router.get("/tenants")
 async def list_tenants(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     session: AsyncSession = Depends(get_session),
 ):
-    return await TenantService.get_tenants(session, skip, limit)
+    tenants = await TenantService.get_tenants(session, skip, limit)
+    return success([TenantResponse.model_validate(t) for t in tenants])
 
 
-@router.get("/tenants/{tenant_id}", response_model=TenantResponse)
+@router.get("/tenants/{tenant_id}")
 async def get_tenant(
     tenant_id: UUID,
     session: AsyncSession = Depends(get_session),
@@ -99,18 +101,18 @@ async def get_tenant(
     tenant = await TenantService.get_tenant(session, tenant_id)
     if not tenant:
         raise HTTPException(status_code=404, detail="Tenant not found")
-    return tenant
+    return success(tenant)
 
 
-@router.post("/tenants", response_model=TenantResponse)
+@router.post("/tenants")
 async def create_tenant(
     tenant: TenantCreate,
     session: AsyncSession = Depends(get_session),
 ):
-    return await TenantService.create_tenant(session, tenant.model_dump())
+    return success(await TenantService.create_tenant(session, tenant.model_dump()))
 
 
-@router.put("/tenants/{tenant_id}", response_model=TenantResponse)
+@router.put("/tenants/{tenant_id}")
 async def update_tenant(
     tenant_id: UUID,
     tenant: TenantUpdate,
@@ -121,7 +123,7 @@ async def update_tenant(
         raise HTTPException(status_code=404, detail="Tenant not found")
 
     update_data = tenant.model_dump(exclude_unset=True)
-    return await TenantService.update_tenant(session, db_tenant, update_data)
+    return success(await TenantService.update_tenant(session, db_tenant, update_data))
 
 
 @router.delete("/tenants/{tenant_id}")
@@ -134,22 +136,22 @@ async def delete_tenant(
         raise HTTPException(status_code=404, detail="Tenant not found")
 
     await TenantService.delete_tenant(session, db_tenant)
-    return {"message": "Tenant deleted successfully"}
+    return success({"message": "Tenant deleted successfully"})
 
 
 # ==========================================
 # 2. TenantSensor
 # ==========================================
-@router.get("/tenant-sensors", response_model=List[TenantSensorResponse])
+@router.get("/tenant-sensors")
 async def list_tenant_sensors(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     session: AsyncSession = Depends(get_session),
 ):
-    return await TenantSensorService.get_tenant_sensors(session, skip, limit)
+    return success(await TenantSensorService.get_tenant_sensors(session, skip, limit))
 
 
-@router.get("/tenant-sensors/{ts_id}", response_model=TenantSensorResponse)
+@router.get("/tenant-sensors/{ts_id}")
 async def get_tenant_sensor(
     ts_id: UUID,
     session: AsyncSession = Depends(get_session),
@@ -157,18 +159,18 @@ async def get_tenant_sensor(
     ts = await TenantSensorService.get_tenant_sensor(session, ts_id)
     if not ts:
         raise HTTPException(status_code=404, detail="TenantSensor not found")
-    return ts
+    return success(ts)
 
 
-@router.post("/tenant-sensors", response_model=TenantSensorResponse)
+@router.post("/tenant-sensors")
 async def create_tenant_sensor(
     ts: TenantSensorCreate,
     session: AsyncSession = Depends(get_session),
 ):
-    return await TenantSensorService.create_tenant_sensor(session, ts.model_dump())
+    return success(await TenantSensorService.create_tenant_sensor(session, ts.model_dump()))
 
 
-@router.put("/tenant-sensors/{ts_id}", response_model=TenantSensorResponse)
+@router.put("/tenant-sensors/{ts_id}")
 async def update_tenant_sensor(
     ts_id: UUID,
     ts: TenantSensorUpdate,
@@ -179,7 +181,7 @@ async def update_tenant_sensor(
         raise HTTPException(status_code=404, detail="TenantSensor not found")
 
     update_data = ts.model_dump(exclude_unset=True)
-    return await TenantSensorService.update_tenant_sensor(session, db_ts, update_data)
+    return success(await TenantSensorService.update_tenant_sensor(session, db_ts, update_data))
 
 
 @router.delete("/tenant-sensors/{ts_id}")
@@ -192,13 +194,13 @@ async def delete_tenant_sensor(
         raise HTTPException(status_code=404, detail="TenantSensor not found")
 
     await TenantSensorService.delete_tenant_sensor(session, db_ts)
-    return {"message": "TenantSensor deleted successfully"}
+    return success({"message": "TenantSensor deleted successfully"})
 
 
 # ==========================================
 # 3. Supplier
 # ==========================================
-@router.get("/suppliers", response_model=List[SupplierResponse])
+@router.get("/suppliers")
 async def list_suppliers(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
@@ -207,10 +209,11 @@ async def list_suppliers(
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
-    return await SupplierService.get_suppliers(session, tenant_id, skip, limit, keyword)
+    suppliers = await SupplierService.get_suppliers(session, tenant_id, skip, limit, keyword)
+    return success([SupplierResponse.model_validate(s) for s in suppliers])
 
 
-@router.get("/suppliers/count", response_model=PagedCountResponse)
+@router.get("/suppliers/count")
 async def count_suppliers(
     keyword: Optional[str] = Query(None),
     current_account: AccountModel = Depends(get_current_account),
@@ -218,10 +221,10 @@ async def count_suppliers(
 ):
     tenant_id = current_account.tenant_id
     total = await SupplierService.count_suppliers(session, tenant_id, keyword)
-    return {"total": total}
+    return success({"total": total})
 
 
-@router.get("/suppliers/{supplier_id}", response_model=SupplierResponse)
+@router.get("/suppliers/{supplier_id}")
 async def get_supplier(
     supplier_id: UUID,
     current_account: AccountModel = Depends(get_current_account),
@@ -231,10 +234,10 @@ async def get_supplier(
     supplier = await SupplierService.get_supplier(session, tenant_id, supplier_id)
     if not supplier:
         raise HTTPException(status_code=404, detail="Supplier not found")
-    return supplier
+    return success(supplier)
 
 
-@router.post("/suppliers", response_model=SupplierResponse)
+@router.post("/suppliers")
 async def create_supplier(
     supplier: SupplierCreate,
     current_account: AccountModel = Depends(get_current_account),
@@ -245,10 +248,10 @@ async def create_supplier(
     if "tenant_id" in payload and payload["tenant_id"] is not None and payload["tenant_id"] != tenant_id:
         raise HTTPException(status_code=400, detail="tenant_id mismatch")
     payload["tenant_id"] = tenant_id
-    return await SupplierService.create_supplier(session, payload)
+    return success(await SupplierService.create_supplier(session, payload))
 
 
-@router.put("/suppliers/{supplier_id}", response_model=SupplierResponse)
+@router.put("/suppliers/{supplier_id}")
 async def update_supplier(
     supplier_id: UUID,
     supplier: SupplierUpdate,
@@ -261,7 +264,7 @@ async def update_supplier(
         raise HTTPException(status_code=404, detail="Supplier not found")
 
     update_data = supplier.model_dump(exclude_unset=True)
-    return await SupplierService.update_supplier(session, db_supplier, update_data)
+    return success(await SupplierService.update_supplier(session, db_supplier, update_data))
 
 
 @router.delete("/suppliers/{supplier_id}")
@@ -276,13 +279,13 @@ async def delete_supplier(
         raise HTTPException(status_code=404, detail="Supplier not found")
 
     await SupplierService.delete_supplier(session, db_supplier)
-    return {"message": "Supplier deleted successfully"}
+    return success({"message": "Supplier deleted successfully"})
 
 
 # ==========================================
 # 4b. Tenant-scoped Account (authenticated) - MUST be defined before /accounts/{account_id}
 # ==========================================
-@router.get("/accounts/by-admin", response_model=List[AccountResponse])
+@router.get("/accounts/by-admin")
 async def list_admin_accounts(
     session: AsyncSession = Depends(get_session),
 ):
@@ -304,10 +307,10 @@ async def list_admin_accounts(
             tenant_id=a.tenant_id,
         )
         response.append(resp)
-    return response
+    return success(response)
 
 
-@router.post("/accounts/by-admin", response_model=AccountResponse)
+@router.post("/accounts/by-admin")
 async def create_admin_account(
     payload: AdminAccountCreate,
     session: AsyncSession = Depends(get_session),
@@ -342,7 +345,7 @@ async def create_admin_account(
     account = await AccountService.create_account(session, data)
 
     # 3. 返回完整响应
-    return AccountResponse(
+    return success(AccountResponse(
         id=account.id,
         username=account.username,
         flag=account.flag,
@@ -351,10 +354,10 @@ async def create_admin_account(
         contact_id=account.contact_id,
         contact_name=contact.name,
         tenant_id=account.tenant_id,
-    )
+    ))
 
 
-@router.put("/accounts/by-admin/{account_id}", response_model=AccountResponse)
+@router.put("/accounts/by-admin/{account_id}")
 async def update_admin_account(
     account_id: UUID,
     payload: AccountUpdate,
@@ -367,7 +370,7 @@ async def update_admin_account(
 
     update_data = payload.model_dump(exclude_unset=True)
     update_data.pop("tenant_id", None)
-    return await AccountService.update_account(session, db_account, update_data)
+    return success(await AccountService.update_account(session, db_account, update_data))
 
 
 @router.put("/accounts/by-admin/{account_id}/password")
@@ -385,7 +388,7 @@ async def update_admin_account_password(
     if "password" not in update_data or not update_data["password"]:
         raise HTTPException(status_code=400, detail="Password is required")
 
-    return await AccountService.update_account(session, db_account, update_data)
+    return success(await AccountService.update_account(session, db_account, update_data))
 
 
 @router.delete("/accounts/by-admin/{account_id}")
@@ -399,13 +402,13 @@ async def delete_admin_account(
         raise HTTPException(status_code=404, detail="Account not found")
 
     await AccountService.delete_account(session, db_account)
-    return {"message": "Account deleted successfully"}
+    return success({"message": "Account deleted successfully"})
 
 
 # ==========================================
 # 4c. Tenant-scoped Account (authenticated) - for portal
 # ==========================================
-@router.get("/accounts/by-tenant", response_model=List[AccountResponse])
+@router.get("/accounts/by-tenant")
 async def list_tenant_accounts(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
@@ -428,10 +431,10 @@ async def list_tenant_accounts(
             tenant_id=a.tenant_id,
         )
         response.append(resp)
-    return response
+    return success(response)
 
 
-@router.post("/accounts/by-tenant", response_model=AccountResponse)
+@router.post("/accounts/by-tenant")
 async def create_tenant_account(
     payload: TenantAccountCreate,
     current_account: AccountModel = Depends(get_current_account),
@@ -452,7 +455,7 @@ async def create_tenant_account(
     account = await AccountService.create_account(session, data)
 
     # 3. 返回完整响应
-    return AccountResponse(
+    return success(AccountResponse(
         id=account.id,
         username=account.username,
         flag=account.flag,
@@ -461,10 +464,10 @@ async def create_tenant_account(
         contact_id=account.contact_id,
         contact_name=contact.name,
         tenant_id=account.tenant_id,
-    )
+    ))
 
 
-@router.put("/accounts/by-tenant/{account_id}", response_model=AccountResponse)
+@router.put("/accounts/by-tenant/{account_id}")
 async def update_tenant_account(
     account_id: UUID,
     payload: AccountUpdate,
@@ -479,7 +482,7 @@ async def update_tenant_account(
     update_data = payload.model_dump(exclude_unset=True)
     # 不允许通过此接口修改 tenant_id
     update_data.pop("tenant_id", None)
-    return await AccountService.update_account(session, db_account, update_data)
+    return success(await AccountService.update_account(session, db_account, update_data))
 
 
 @router.put("/accounts/by-tenant/{account_id}/password")
@@ -498,7 +501,7 @@ async def update_tenant_account_password(
     if "password" not in update_data or not update_data["password"]:
         raise HTTPException(status_code=400, detail="Password is required")
 
-    return await AccountService.update_account(session, db_account, update_data)
+    return success(await AccountService.update_account(session, db_account, update_data))
 
 
 @router.delete("/accounts/by-tenant/{account_id}")
@@ -513,19 +516,19 @@ async def delete_tenant_account(
         raise HTTPException(status_code=404, detail="Account not found")
 
     await AccountService.delete_account(session, db_account)
-    return {"message": "Account deleted successfully"}
+    return success({"message": "Account deleted successfully"})
 
 
-@router.get("/accounts", response_model=List[AccountResponse])
+@router.get("/accounts")
 async def list_accounts(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     session: AsyncSession = Depends(get_session),
 ):
-    return await AccountService.get_accounts(session, skip, limit)
+    return success(await AccountService.get_accounts(session, skip, limit))
 
 
-@router.get("/accounts/{account_id}", response_model=AccountResponse)
+@router.get("/accounts/{account_id}")
 async def get_account(
     account_id: UUID,
     session: AsyncSession = Depends(get_session),
@@ -533,19 +536,19 @@ async def get_account(
     account = await AccountService.get_account(session, account_id)
     if not account:
         raise HTTPException(status_code=404, detail="Account not found")
-    return account
+    return success(account)
 
 
-@router.post("/accounts", response_model=AccountResponse)
+@router.post("/accounts")
 async def create_account(
     account: AccountCreate,
     session: AsyncSession = Depends(get_session),
 ):
     # 在实际应用中, 此处通常需对 password 进行哈希处理
-    return await AccountService.create_account(session, account.model_dump())
+    return success(await AccountService.create_account(session, account.model_dump()))
 
 
-@router.put("/accounts/{account_id}", response_model=AccountResponse)
+@router.put("/accounts/{account_id}")
 async def update_account(
     account_id: UUID,
     account: AccountUpdate,
@@ -557,7 +560,7 @@ async def update_account(
 
     update_data = account.model_dump(exclude_unset=True)
     # 实际项目中如果修改 password，也需重新哈希处理
-    return await AccountService.update_account(session, db_account, update_data)
+    return success(await AccountService.update_account(session, db_account, update_data))
 
 
 @router.delete("/accounts/{account_id}")
@@ -570,13 +573,13 @@ async def delete_account(
         raise HTTPException(status_code=404, detail="Account not found")
 
     await AccountService.delete_account(session, db_account)
-    return {"message": "Account deleted successfully"}
+    return success({"message": "Account deleted successfully"})
 
 
 # ==========================================
 # 5. Area
 # ==========================================
-@router.get("/areas", response_model=List[AreaResponse])
+@router.get("/areas")
 async def list_areas(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
@@ -584,10 +587,10 @@ async def list_areas(
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
-    return await AreaService.get_areas(session, tenant_id, skip, limit)
+    return success(await AreaService.get_areas(session, tenant_id, skip, limit))
 
 
-@router.post("/areas", response_model=AreaResponse)
+@router.post("/areas")
 async def create_area(
     area: AreaCreate,
     current_account: AccountModel = Depends(get_current_account),
@@ -598,10 +601,10 @@ async def create_area(
     if "tenant_id" in payload and payload["tenant_id"] is not None and payload["tenant_id"] != tenant_id:
         raise HTTPException(status_code=400, detail="tenant_id mismatch")
     payload["tenant_id"] = tenant_id
-    return await AreaService.create_area(session, payload)
+    return success(await AreaService.create_area(session, payload))
 
 
-@router.put("/areas/{area_id}", response_model=AreaResponse)
+@router.put("/areas/{area_id}")
 async def update_area(
     area_id: UUID,
     area: AreaUpdate,
@@ -617,7 +620,7 @@ async def update_area(
     if "tenant_id" in update_data and update_data["tenant_id"] != tenant_id:
         raise HTTPException(status_code=400, detail="tenant_id cannot be changed")
     update_data.pop("tenant_id", None)
-    return await AreaService.update_area(session, db_area, update_data)
+    return success(await AreaService.update_area(session, db_area, update_data))
 
 
 @router.delete("/areas/{area_id}")
@@ -632,13 +635,13 @@ async def delete_area(
         raise HTTPException(status_code=404, detail="Area not found")
 
     await AreaService.delete_area(session, db_area)
-    return {"message": "Area deleted successfully"}
+    return success({"message": "Area deleted successfully"})
 
 
 # ==========================================
 # 6. Location
 # ==========================================
-@router.get("/locations", response_model=PagedLocationResponse)
+@router.get("/locations")
 async def list_locations(
     current: int = Query(1, ge=1),
     pageSize: int = Query(10, ge=1, le=100),
@@ -650,10 +653,10 @@ async def list_locations(
     items, total = await LocationService.get_paged_locations(
         session, tenant_id, current, pageSize, keyword
     )
-    return PagedLocationResponse(items=items, total=total)
+    return success(PagedLocationResponse(items=items, total=total))
 
 
-@router.post("/locations", response_model=LocationResponse)
+@router.post("/locations")
 async def create_location(
     location: LocationCreate,
     current_account: AccountModel = Depends(get_current_account),
@@ -664,10 +667,10 @@ async def create_location(
     if "tenant_id" in payload and payload["tenant_id"] is not None and payload["tenant_id"] != tenant_id:
         raise HTTPException(status_code=400, detail="tenant_id mismatch")
     payload["tenant_id"] = tenant_id
-    return await LocationService.create_location(session, payload)
+    return success(await LocationService.create_location(session, payload))
 
 
-@router.put("/locations/{location_id}", response_model=LocationResponse)
+@router.put("/locations/{location_id}")
 async def update_location(
     location_id: UUID,
     location: LocationUpdate,
@@ -683,7 +686,7 @@ async def update_location(
     if "tenant_id" in update_data and update_data["tenant_id"] != tenant_id:
         raise HTTPException(status_code=400, detail="tenant_id cannot be changed")
     update_data.pop("tenant_id", None)
-    return await LocationService.update_location(session, db_obj, update_data)
+    return success(await LocationService.update_location(session, db_obj, update_data))
 
 
 @router.delete("/locations/{location_id}")
@@ -698,13 +701,13 @@ async def delete_location(
         raise HTTPException(status_code=404, detail="Location not found")
 
     await LocationService.delete_location(session, db_obj)
-    return {"message": "Location deleted successfully"}
+    return success({"message": "Location deleted successfully"})
 
 
 # ==========================================
 # 7. HealthCheckFreq
 # ==========================================
-@router.get("/health-check-freqs", response_model=List[HealthCheckFreqResponse])
+@router.get("/health-check-freqs")
 async def list_health_check_freqs(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
@@ -712,10 +715,10 @@ async def list_health_check_freqs(
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = current_account.tenant_id
-    return await HealthCheckFreqService.get_health_check_freqs(session, tenant_id, skip, limit)
+    return success(await HealthCheckFreqService.get_health_check_freqs(session, tenant_id, skip, limit))
 
 
-@router.post("/health-check-freqs", response_model=HealthCheckFreqResponse)
+@router.post("/health-check-freqs")
 async def create_health_check_freq(
     freq: HealthCheckFreqCreate,
     current_account: AccountModel = Depends(get_current_account),
@@ -724,10 +727,10 @@ async def create_health_check_freq(
     tenant_id = current_account.tenant_id
     payload = freq.model_dump(exclude_unset=True)
     payload["tenant_id"] = tenant_id
-    return await HealthCheckFreqService.create_health_check_freq(session, payload)
+    return success(await HealthCheckFreqService.create_health_check_freq(session, payload))
 
 
-@router.put("/health-check-freqs/{freq_id}", response_model=HealthCheckFreqResponse)
+@router.put("/health-check-freqs/{freq_id}")
 async def update_health_check_freq(
     freq_id: UUID,
     freq: HealthCheckFreqUpdate,
@@ -743,7 +746,7 @@ async def update_health_check_freq(
     if "tenant_id" in update_data and update_data["tenant_id"] != tenant_id:
         raise HTTPException(status_code=400, detail="tenant_id cannot be changed")
     update_data.pop("tenant_id", None)
-    return await HealthCheckFreqService.update_health_check_freq(session, db_freq, update_data)
+    return success(await HealthCheckFreqService.update_health_check_freq(session, db_freq, update_data))
 
 
 @router.delete("/health-check-freqs/{freq_id}")
@@ -758,4 +761,4 @@ async def delete_health_check_freq(
         raise HTTPException(status_code=404, detail="HealthCheckFreq not found")
 
     await HealthCheckFreqService.delete_health_check_freq(session, db_freq)
-    return {"message": "HealthCheckFreq deleted successfully"}
+    return success({"message": "HealthCheckFreq deleted successfully"})

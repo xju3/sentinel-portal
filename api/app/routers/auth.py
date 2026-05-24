@@ -11,11 +11,13 @@ from fastapi import APIRouter, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.config import settings
+from app.contract.common import ApiResponse
 from app.services.dependencies import get_session
 from app.models.customer import Account
 from app.services.customer_service import AuthService
 from app.utils.auth import get_current_account
 from app.utils.jwt_token import create_access_token
+from app.utils.response import success
 from app.contract.auth import (
     RegisterRequest,
     RegisterResponse,
@@ -54,7 +56,7 @@ async def _generate_unique_tenant_code(session: AsyncSession) -> str:
     raise HTTPException(status_code=500, detail="Unable to generate unique tenant code")
 
 
-@router.post("/auth/register", response_model=RegisterResponse)
+@router.post("/auth/register")
 async def register(
     payload: RegisterRequest,
     session: AsyncSession = Depends(get_session),
@@ -122,17 +124,17 @@ async def register(
         await AuthService.rollback(session)
         raise
 
-    return RegisterResponse(
+    return success(RegisterResponse(
         tenant_id=tenant.id,
         contact_id=contact.id,
         account_id=account.id,
         account_username=account.username,
         login_channel=login_channel,
         generated_password=random_password,
-    )
+    ))
 
 
-@router.post("/auth/login", response_model=LoginResponse)
+@router.post("/auth/login")
 async def login(
     payload: LoginRequest,
     session: AsyncSession = Depends(get_session),
@@ -162,7 +164,7 @@ async def login(
         username=account.username,
     )
 
-    return LoginResponse(
+    return success(LoginResponse(
         access_token=access_token,
         token_type="Bearer",
         expires_in=expires_in,
@@ -173,7 +175,7 @@ async def login(
         contact_id=account.contact_id,
         contact_name=contact_name,
         flag=account.flag,
-    )
+    ))
 
 
 @router.post("/auth/change-password")
@@ -188,4 +190,4 @@ async def change_password(
         raise HTTPException(status_code=400, detail="new password must be different")
 
     await AuthService.update_account_password(session, current_account, payload.new_password)
-    return {"message": "password updated"}
+    return success({"message": "password updated"})

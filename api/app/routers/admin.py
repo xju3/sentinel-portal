@@ -10,6 +10,7 @@ from uuid import UUID
 
 logger = logging.getLogger(__name__)
 
+from app.utils.response import success
 from app.services.dependencies import get_session
 from app.services.sensor_service import SensorBatchService
 from app.models.customer import Account
@@ -19,7 +20,7 @@ from app.contract.admin import SensorBatchResponse
 router = APIRouter(prefix="/admin", tags=["admin"])
 
 
-@router.get("/sensor-batches", response_model=List[SensorBatchResponse])
+@router.get("/sensor-batches")
 async def list_all_sensor_batches(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=1000),
@@ -27,10 +28,10 @@ async def list_all_sensor_batches(
     current_account: Account = Depends(get_current_account),
 ):
     """List all sensor batches across all tenants (admin only)"""
-    return await SensorBatchService.get_all(session, skip, limit)
+    return success(await SensorBatchService.get_all(session, skip, limit))
 
 
-@router.get("/sensor-batches/{obj_id}", response_model=SensorBatchResponse)
+@router.get("/sensor-batches/{obj_id}")
 async def get_sensor_batch(
     obj_id: UUID,
     session: AsyncSession = Depends(get_session),
@@ -40,4 +41,4 @@ async def get_sensor_batch(
     obj = await SensorBatchService.get_by_id(session, obj_id)
     if not obj:
         raise HTTPException(status_code=404, detail="SensorBatch not found")
-    return obj
+    return success(obj)

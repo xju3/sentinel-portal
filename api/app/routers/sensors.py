@@ -17,6 +17,7 @@ from app.services.sensor_service import SensorTypeService, SensorDbService, Sens
 from app.models.customer import Account
 from app.models.sensor import Sensor
 from app.utils.auth import get_current_account
+from app.utils.response import success
 from app.contract.sensors import (
     SensorTypeCreate,
     SensorTypeUpdate,
@@ -33,16 +34,16 @@ from app.contract.sensors import (
 router = APIRouter(prefix="/sensors", tags=["sensors"])
 
 
-@router.get("/types", response_model=List[SensorTypeResponse])
+@router.get("/types")
 async def list_sensor_types(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     session: AsyncSession = Depends(get_session),
 ):
-    return await SensorTypeService.get_all(session, skip, limit)
+    return success(await SensorTypeService.get_all(session, skip, limit))
 
 
-@router.get("/types/{obj_id}", response_model=SensorTypeResponse)
+@router.get("/types/{obj_id}")
 async def get_sensor_type(
     obj_id: UUID,
     session: AsyncSession = Depends(get_session),
@@ -50,18 +51,18 @@ async def get_sensor_type(
     obj = await SensorTypeService.get_by_id(session, obj_id)
     if not obj:
         raise HTTPException(status_code=404, detail="SensorType not found")
-    return obj
+    return success(obj)
 
 
-@router.post("/types", response_model=SensorTypeResponse)
+@router.post("/types")
 async def create_sensor_type(
     item: SensorTypeCreate,
     session: AsyncSession = Depends(get_session),
 ):
-    return await SensorTypeService.create(session, item.model_dump())
+    return success(await SensorTypeService.create(session, item.model_dump()))
 
 
-@router.put("/types/{obj_id}", response_model=SensorTypeResponse)
+@router.put("/types/{obj_id}")
 async def update_sensor_type(
     obj_id: UUID,
     item: SensorTypeUpdate,
@@ -72,7 +73,7 @@ async def update_sensor_type(
         raise HTTPException(status_code=404, detail="SensorType not found")
 
     update_data = item.model_dump(exclude_unset=True)
-    return await SensorTypeService.update(session, db_obj, update_data)
+    return success(await SensorTypeService.update(session, db_obj, update_data))
 
 
 @router.delete("/types/{obj_id}")
@@ -85,23 +86,23 @@ async def delete_sensor_type(
         raise HTTPException(status_code=404, detail="SensorType not found")
 
     await SensorTypeService.delete(session, db_obj)
-    return {"message": "SensorType deleted successfully"}
+    return success({"message": "SensorType deleted successfully"})
 
 
 # ==========================================
 # 2. SensorBatch (defined before Sensor to avoid path conflict with /{obj_id})
 # ==========================================
-@router.get("/batches", response_model=List[SensorBatchResponse])
+@router.get("/batches")
 async def list_sensor_batches(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
-    return await SensorBatchService.get_by_tenant(session, current_account.tenant_id, skip, limit)
+    return success(await SensorBatchService.get_by_tenant(session, current_account.tenant_id, skip, limit))
 
 
-@router.get("/batches/{obj_id}", response_model=SensorBatchResponse)
+@router.get("/batches/{obj_id}")
 async def get_sensor_batch(
     obj_id: UUID,
     session: AsyncSession = Depends(get_session),
@@ -110,10 +111,10 @@ async def get_sensor_batch(
     obj = await SensorBatchService.get_by_id_and_tenant(session, obj_id, current_account.tenant_id)
     if not obj:
         raise HTTPException(status_code=404, detail="SensorBatch not found")
-    return obj
+    return success(obj)
 
 
-@router.post("/batches", response_model=SensorBatchResponse)
+@router.post("/batches")
 async def create_sensor_batch(
     item: SensorBatchCreate,
     session: AsyncSession = Depends(get_session),
@@ -121,10 +122,10 @@ async def create_sensor_batch(
 ):
     data = item.model_dump()
     data["tenant_id"] = current_account.tenant_id
-    return await SensorBatchService.create(session, data)
+    return success(await SensorBatchService.create(session, data))
 
 
-@router.put("/batches/{obj_id}", response_model=SensorBatchResponse)
+@router.put("/batches/{obj_id}")
 async def update_sensor_batch(
     obj_id: UUID,
     item: SensorBatchUpdate,
@@ -138,7 +139,7 @@ async def update_sensor_batch(
     update_data = item.model_dump(exclude_unset=True)
 
     try:
-        return await SensorBatchService.update(session, db_obj, update_data)
+        return success(await SensorBatchService.update(session, db_obj, update_data))
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))
 
@@ -155,13 +156,13 @@ async def delete_sensor_batch(
         raise HTTPException(status_code=404, detail="SensorBatch not found")
 
     await SensorBatchService.delete(session, db_obj)
-    return {"message": "SensorBatch deleted successfully"}
+    return success({"message": "SensorBatch deleted successfully"})
 
 
 # ==========================================
 # 3. Sensor
 # ==========================================
-@router.get("", response_model=PagedSensorResponse)
+@router.get("")
 async def list_sensors(
     current: int = Query(1, ge=1),
     pageSize: int = Query(10, ge=1, le=100),
@@ -169,10 +170,10 @@ async def list_sensors(
     session: AsyncSession = Depends(get_session),
 ):
     items, total = await SensorDbService.get_paged(session, current, pageSize, keyword)
-    return PagedSensorResponse(items=items, total=total)
+    return success(PagedSensorResponse(items=items, total=total))
 
 
-@router.get("/by-batch/{batch_id}", response_model=List[SensorResponse])
+@router.get("/by-batch/{batch_id}")
 async def list_sensors_by_batch(
     batch_id: UUID,
     skip: int = Query(0, ge=0),
@@ -184,10 +185,10 @@ async def list_sensors_by_batch(
     batch = await SensorBatchService.get_by_id_and_tenant(session, batch_id, current_account.tenant_id)
     if not batch:
         raise HTTPException(status_code=404, detail="SensorBatch not found")
-    return await SensorDbService.get_by_batch_id(session, batch_id, skip, limit)
+    return success(await SensorDbService.get_by_batch_id(session, batch_id, skip, limit))
 
 
-@router.get("/{obj_id}", response_model=SensorResponse)
+@router.get("/{obj_id}")
 async def get_sensor(
     obj_id: UUID,
     session: AsyncSession = Depends(get_session),
@@ -195,18 +196,18 @@ async def get_sensor(
     obj = await SensorDbService.get_by_id(session, obj_id)
     if not obj:
         raise HTTPException(status_code=404, detail="Sensor not found")
-    return obj
+    return success(obj)
 
 
-@router.post("", response_model=SensorResponse)
+@router.post("")
 async def create_sensor(
     item: SensorCreate,
     session: AsyncSession = Depends(get_session),
 ):
-    return await SensorDbService.create(session, item.model_dump())
+    return success(await SensorDbService.create(session, item.model_dump()))
 
 
-@router.put("/{obj_id}", response_model=SensorResponse)
+@router.put("/{obj_id}")
 async def update_sensor(
     obj_id: UUID,
     item: SensorUpdate,
@@ -217,7 +218,7 @@ async def update_sensor(
         raise HTTPException(status_code=404, detail="Sensor not found")
 
     update_data = item.model_dump(exclude_unset=True)
-    return await SensorDbService.update(session, db_obj, update_data)
+    return success(await SensorDbService.update(session, db_obj, update_data))
 
 
 @router.delete("/{obj_id}")
@@ -230,4 +231,4 @@ async def delete_sensor(
         raise HTTPException(status_code=404, detail="Sensor not found")
 
     await SensorDbService.delete(session, db_obj)
-    return {"message": "Sensor deleted successfully"}
+    return success({"message": "Sensor deleted successfully"})
