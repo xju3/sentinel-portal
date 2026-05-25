@@ -145,7 +145,7 @@ const DashboardOverview = () => {
     <PageContainer title="仪表盘" subTitle="概览">
       <ProCard style={{ marginTop: 16 }} ghost>
         <ProCard
-          title="设备概览"
+          title="警情概览"
           bordered
           headerBordered
           loading={loading}
@@ -173,7 +173,7 @@ const DashboardOverview = () => {
             />
             <StatisticCard
               statistic={{
-                title: '故障设备',
+                title: '报警设备',
                 value: data.faultyDevices,
                 suffix: '台',
                 status: 'error',
@@ -192,7 +192,7 @@ const DashboardOverview = () => {
 
       <ProCard style={{ marginTop: 16 }} ghost>
         <ProCard
-          title="故障视图"
+          title="分布视图"
           bordered
           headerBordered
           loading={loading}
@@ -244,7 +244,7 @@ const DashboardOverview = () => {
 
       <ProCard style={{ marginTop: 16 }} ghost>
         <ProCard
-          title="故障年历"
+          title="年历视图"
           bordered
           headerBordered
           loading={calendarLoading}
@@ -259,7 +259,7 @@ const DashboardOverview = () => {
       </ProCard>
 
       <ProCard style={{ marginTop: 16 }} ghost>
-        <ProCard title="最新故障预警" bordered headerBordered loading={loading}>
+        <ProCard title="最新预警" bordered headerBordered loading={loading}>
           <FaultAlertList dataSource={data.recentAnomalies} />
         </ProCard>
       </ProCard>

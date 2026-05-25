@@ -26,30 +26,133 @@ CALENDAR_FULL_KEY = "calendar:full"
 # TTL for cached historical data (7 days)
 CALENDAR_CACHE_TTL = 604800
 
+# Redis key prefix for device stats cache (no TTL, invalidated on data change)
+DEVICE_STATS_PREFIX = "dashboard:device_stats:"
+
 
 class DashboardService:
     """Service for handling dashboard data aggregations."""
 
+    # ============================================================
+    # Redis helpers
+    # ============================================================
+
+    @staticmethod
+    def _get_redis_client():
+        """Get Redis client safely."""
+        try:
+            return redis_manager.get_client()
+        except RuntimeError:
+            logger.warning("Redis not available for cache")
+            return None
+
+    # ============================================================
+    # Device stats cache (permanent TTL, invalidated on data change)
+    # ============================================================
+
+    @staticmethod
+    def _get_device_stats_cache_key(tenant_id: UUID) -> str:
+        return f"{DEVICE_STATS_PREFIX}{tenant_id}"
+
+    @staticmethod
+    def invalidate_device_stats_cache(tenant_id: UUID) -> None:
+        """清除设备统计缓存，由外部（路由层）在设备/分类/区域数据变更时调用"""
+        client = DashboardService._get_redis_client()
+        if not client:
+            return
+        try:
+            key = DashboardService._get_device_stats_cache_key(tenant_id)
+            client.delete(key)
+            logger.info(f"Invalidated device stats cache for tenant {tenant_id}")
+        except Exception as e:
+            logger.error(f"Failed to invalidate device stats cache: {e}")
+
+    @staticmethod
+    def _get_cached_device_stats(tenant_id: UUID) -> Optional[dict]:
+        """从 Redis 读取缓存的设备基础统计数据"""
+        client = DashboardService._get_redis_client()
+        if not client:
+            return None
+        try:
+            key = DashboardService._get_device_stats_cache_key(tenant_id)
+            val = client.get(key)
+            if val is not None:
+                return json.loads(val)
+        except Exception as e:
+            logger.debug(f"Failed to get cached device stats: {e}")
+        return None
+
+    @staticmethod
+    def _set_cached_device_stats(tenant_id: UUID, data: dict) -> None:
+        """将设备基础统计数据写入 Redis 缓存（永久有效，无 TTL，由数据变更触发失效）"""
+        client = DashboardService._get_redis_client()
+        if not client:
+            return
+        try:
+            key = DashboardService._get_device_stats_cache_key(tenant_id)
+            client.set(key, json.dumps(data))
+            logger.info(f"Cached device stats for tenant {tenant_id}")
+        except Exception as e:
+            logger.error(f"Failed to cache device stats: {e}")
+
+    # ============================================================
+    # Overview
+    # ============================================================
+
     @staticmethod
     async def get_overview(session: AsyncSession, tenant_id: UUID) -> dict:
-        # 1. 设备总数
-        stmt_total = (
+        # 1. 先尝试从 Redis 读取缓存的设备基础数据
+        cached = DashboardService._get_cached_device_stats(tenant_id)
+
+        if cached:
+            total_devices = cached["totalDevices"]
+            running_devices = cached["runningDevices"]
+            devices_by_category_tree = cached["devicesByCategoryTree"]
+            devices_by_area_tree = cached["devicesByAreaTree"]
+        else:
+            # 缓存未命中，查询 DB
+            # 1a. 设备总数
+            stmt_total = (
+                select(func.count(DeviceInst.id))
+                .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
+                .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+                .where(DeviceCategory.tenant_id == tenant_id)
+            )
+            total_devices = (await session.execute(stmt_total)).scalar() or 0
+
+            # 1b. 运行设备 (active == 1)
+            stmt_running = stmt_total.where(DeviceInst.active == 1)
+            running_devices = (await session.execute(stmt_running)).scalar() or 0
+
+            # 1c. 按设备分类树聚合设备总数和异常设备数
+            devices_by_category_tree = await DashboardService._get_category_device_tree(
+                session, tenant_id
+            )
+
+            # 1d. 按区域树聚合设备总数和异常设备数
+            devices_by_area_tree = await DashboardService._get_area_device_tree(
+                session, tenant_id
+            )
+
+            # 写入缓存
+            DashboardService._set_cached_device_stats(tenant_id, {
+                "totalDevices": total_devices,
+                "runningDevices": running_devices,
+                "devicesByCategoryTree": devices_by_category_tree,
+                "devicesByAreaTree": devices_by_area_tree,
+            })
+
+        # 2. 今日新增 (取 purchase_date 等于今天的数量) — 实时查询
+        stmt_total_base = (
             select(func.count(DeviceInst.id))
             .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
             .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
             .where(DeviceCategory.tenant_id == tenant_id)
         )
-        total_devices = (await session.execute(stmt_total)).scalar() or 0
-
-        # 2. 运行设备 (active == 1)
-        stmt_running = stmt_total.where(DeviceInst.active == 1)
-        running_devices = (await session.execute(stmt_running)).scalar() or 0
-
-        # 3. 今日新增 (取 purchase_date 等于今天的数量)
-        stmt_new = stmt_total.where(DeviceInst.purchase_date == date.today())
+        stmt_new = stmt_total_base.where(DeviceInst.purchase_date == date.today())
         new_devices_today = (await session.execute(stmt_new)).scalar() or 0
 
-        # 4. 故障设备数 (对应有关联传感器且 anomaly > 0 的不重复设备数)
+        # 3. 故障设备数 (对应有关联传感器且 anomaly > 0 的不重复设备数) — 实时查询
         stmt_faulty = (
             select(func.count(func.distinct(SensorMonitoring.device_inst_id)))
             .join(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
@@ -62,7 +165,7 @@ class DashboardService:
         )
         faulty_devices = (await session.execute(stmt_faulty)).scalar() or 0
 
-        # 4a. 按异常类型分类统计 (anomaly=1 震动异常, anomaly=2 温度异常, anomaly=3 双异常)
+        # 3a. 按异常类型分类统计 (anomaly=1 震动异常, anomaly=2 温度异常, anomaly=3 双异常)
         async def _count_by_anomaly(anomaly_value: int) -> int:
             stmt = (
                 select(func.count(func.distinct(SensorMonitoring.device_inst_id)))
@@ -80,7 +183,7 @@ class DashboardService:
         temperature_anomaly_count = await _count_by_anomaly(2)
         both_anomaly_count = await _count_by_anomaly(3)
 
-        # 5. 最新故障预警 (获取存在异常的设备及相关信息，按时间倒序)
+        # 4. 最新故障预警 (获取存在异常的设备及相关信息，按时间倒序) — 实时查询
         stmt_recent = (
             select(
                 SensorMonitoring.id,
@@ -109,16 +212,6 @@ class DashboardService:
                 "ts": row.ts or 0
             } for row in recent_result.all()
         ]
-
-        # 6. 按设备分类树聚合设备总数和异常设备数
-        devices_by_category_tree = await DashboardService._get_category_device_tree(
-            session, tenant_id
-        )
-
-        # 7. 按区域树聚合设备总数和异常设备数
-        devices_by_area_tree = await DashboardService._get_area_device_tree(
-            session, tenant_id
-        )
 
         return {
             "totalDevices": total_devices,
@@ -361,15 +454,6 @@ class DashboardService:
             return 3
         else:
             return 4
-
-    @staticmethod
-    def _get_redis_client():
-        """Get Redis client safely."""
-        try:
-            return redis_manager.get_client()
-        except RuntimeError:
-            logger.warning("Redis not available for calendar cache")
-            return None
 
     @staticmethod
     async def _query_daily_fault_count(session: AsyncSession, target_date: date) -> int:

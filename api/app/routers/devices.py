@@ -26,6 +26,7 @@ from app.services.device_service import (
     ProcessDeviceItemService,
     SensorMonitoringService,
 )
+from app.services.dashboard_service import DashboardService
 from app.utils.auth import get_current_account
 from app.utils.response import success
 from app.contract.devices import (
@@ -267,6 +268,8 @@ async def create_device_category(
     payload["tenant_id"] = tenant_id
     await _validate_device_category_parent(session, tenant_id, payload.get("parent_id"))
     created = await DeviceCategoryService.create(session, payload)
+    # 分类结构变更，清除设备统计缓存
+    DashboardService.invalidate_device_stats_cache(tenant_id)
     freq_map = await DeviceCategoryService.get_health_check_freq_map(
         session,
         tenant_id,
@@ -294,6 +297,8 @@ async def update_device_category(
     if "parent_id" in update_data:
         await _validate_device_category_parent(session, tenant_id, update_data.get("parent_id"), obj_id)
     updated = await DeviceCategoryService.update(session, db_obj, update_data)
+    # 分类结构变更，清除设备统计缓存
+    DashboardService.invalidate_device_stats_cache(tenant_id)
     freq_map = await DeviceCategoryService.get_health_check_freq_map(
         session,
         tenant_id,
@@ -321,6 +326,8 @@ async def delete_device_category(
         )
 
     await DeviceCategoryService.delete(session, db_obj)
+    # 分类结构变更，清除设备统计缓存
+    DashboardService.invalidate_device_stats_cache(tenant_id)
     return success({"message": "DeviceCategory deleted successfully"})
 
 

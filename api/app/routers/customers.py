@@ -19,6 +19,7 @@ from app.services.customer_service import (
     LocationService,
     HealthCheckFreqService,
 )
+from app.services.dashboard_service import DashboardService
 from app.utils.auth import get_current_account
 from app.utils.response import success
 from app.contract.customers import (
@@ -601,7 +602,10 @@ async def create_area(
     if "tenant_id" in payload and payload["tenant_id"] is not None and payload["tenant_id"] != tenant_id:
         raise HTTPException(status_code=400, detail="tenant_id mismatch")
     payload["tenant_id"] = tenant_id
-    return success(await AreaService.create_area(session, payload))
+    result = await AreaService.create_area(session, payload)
+    # 区域结构变更，清除设备统计缓存
+    DashboardService.invalidate_device_stats_cache(tenant_id)
+    return success(result)
 
 
 @router.put("/areas/{area_id}")
@@ -620,7 +624,10 @@ async def update_area(
     if "tenant_id" in update_data and update_data["tenant_id"] != tenant_id:
         raise HTTPException(status_code=400, detail="tenant_id cannot be changed")
     update_data.pop("tenant_id", None)
-    return success(await AreaService.update_area(session, db_area, update_data))
+    result = await AreaService.update_area(session, db_area, update_data)
+    # 区域结构变更，清除设备统计缓存
+    DashboardService.invalidate_device_stats_cache(tenant_id)
+    return success(result)
 
 
 @router.delete("/areas/{area_id}")
@@ -635,6 +642,8 @@ async def delete_area(
         raise HTTPException(status_code=404, detail="Area not found")
 
     await AreaService.delete_area(session, db_area)
+    # 区域结构变更，清除设备统计缓存
+    DashboardService.invalidate_device_stats_cache(tenant_id)
     return success({"message": "Area deleted successfully"})
 
 
