@@ -18,6 +18,7 @@ from app.models.customer import (
     Location,
     HealthCheckFreq,
 )
+from app.utils.exceptions import DomainException
 
 from app.models.sensor import SensorMonitoring, Sensor
 from app.models.device import DeviceCategory, DeviceSpec, DeviceInst
@@ -524,6 +525,83 @@ class AuthService:
     @staticmethod
     async def rollback(session: AsyncSession) -> None:
         await session.rollback()
+
+    @staticmethod
+    async def register(
+        session: AsyncSession,
+        username: str,
+        email: Optional[str],
+        normalized_phone: str,
+        company_name: str,
+        contact_name: str,
+        login_channel: str,
+        account_flag: int,
+        tenant_code: str,
+        tenant_host: str,
+        random_password: str,
+    ) -> dict:
+        """Complete registration business logic with all validations.
+
+        Raises DomainException if any uniqueness constraint is violated.
+        """
+        # Check username uniqueness
+        existing_username = await AuthService.get_account_by_username(session, username)
+        if existing_username is not None:
+            raise DomainException(code=409, message="account username already exists")
+
+        # Check email uniqueness
+        if email:
+            existing_email = await AuthService.get_account_by_email(session, email)
+            if existing_email is not None:
+                raise DomainException(code=409, message="email already exists")
+            existing_contact_email = await AuthService.get_contact_by_email(session, email)
+            if existing_contact_email is not None:
+                raise DomainException(code=409, message="email already exists")
+
+        # Check phone uniqueness
+        existing_mobile = await AuthService.get_account_by_mobile(session, normalized_phone)
+        if existing_mobile is not None:
+            raise DomainException(code=409, message="phone already exists")
+        existing_contact_mobile = await AuthService.get_contact_by_mobile(session, normalized_phone)
+        if existing_contact_mobile is not None:
+            raise DomainException(code=409, message="phone already exists")
+
+        # Create tenant, contact, account
+        tenant = await AuthService.create_tenant(session, {
+            "code": tenant_code,
+            "name": company_name,
+            "host": tenant_host,
+            "active": True,
+        })
+
+        contact = await AuthService.create_contact(session, {
+            "name": contact_name,
+            "mobile": normalized_phone,
+            "email": email,
+            "active": True,
+            "tenant_id": tenant.id,
+        })
+
+        account = await AuthService.create_account(session, {
+            "username": username,
+            "password": random_password,
+            "email": email,
+            "mobile": normalized_phone,
+            "flag": account_flag,
+            "active": True,
+            "admin": False,
+            "contact_id": contact.id,
+            "tenant_id": tenant.id,
+        })
+
+        return {
+            "tenant_id": tenant.id,
+            "contact_id": contact.id,
+            "account_id": account.id,
+            "account_username": account.username,
+            "login_channel": login_channel,
+            "generated_password": random_password,
+        }
 
 
 class HealthCheckFreqService:

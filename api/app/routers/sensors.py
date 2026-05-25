@@ -18,6 +18,7 @@ from app.models.customer import Account
 from app.models.sensor import Sensor
 from app.utils.auth import get_current_account
 from app.utils.response import success
+from app.utils.exceptions import DomainException
 from app.contract.sensors import (
     SensorTypeCreate,
     SensorTypeUpdate,
@@ -138,10 +139,7 @@ async def update_sensor_batch(
 
     update_data = item.model_dump(exclude_unset=True)
 
-    try:
-        return success(await SensorBatchService.update(session, db_obj, update_data))
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=str(e))
+    return success(await SensorBatchService.update(session, db_obj, update_data))
 
 
 

@@ -3,14 +3,28 @@ Dashboard service - business logic for dashboard aggregations
 """
 
 import json
-from sqlalchemy import select, func
-from sqlalchemy.ext.asyncio import AsyncSession
-from datetime import date
+import logging
+import time
+from datetime import date, datetime, timedelta
+from typing import Optional
 from uuid import UUID
 
+from sqlalchemy import select, func
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.database import redis_manager
 from app.models.device import DeviceInst, DeviceSpec, DeviceCategory, ProcessDevice, ProcessDeviceItem
-from app.models.sensor import SensorMonitoring
+from app.models.sensor import PatrolDiagnosticRecord, SensorMonitoring
 from app.models.customer import Area
+
+logger = logging.getLogger(__name__)
+
+# Redis key prefix for calendar daily cache
+CALENDAR_DAILY_PREFIX = "calendar:daily:"
+# Redis key for the full calendar cache (past 12 months)
+CALENDAR_FULL_KEY = "calendar:full"
+# TTL for cached historical data (7 days)
+CALENDAR_CACHE_TTL = 604800
 
 
 class DashboardService:
@@ -333,3 +347,237 @@ class DashboardService:
         print(json.dumps(tree, ensure_ascii=False, indent=2))
 
         return tree
+
+    @staticmethod
+    def _get_level(count: int) -> int:
+        """Convert fault device count to color level (0-4)."""
+        if count <= 0:
+            return 0
+        elif count <= 2:
+            return 1
+        elif count <= 5:
+            return 2
+        elif count <= 10:
+            return 3
+        else:
+            return 4
+
+    @staticmethod
+    def _get_redis_client():
+        """Get Redis client safely."""
+        try:
+            return redis_manager.get_client()
+        except RuntimeError:
+            logger.warning("Redis not available for calendar cache")
+            return None
+
+    @staticmethod
+    async def _query_daily_fault_count(session: AsyncSession, target_date: date) -> int:
+        """Query the number of faulty devices for a specific date from PatrolDiagnosticRecord.
+        
+        Counts distinct SNs where health_status > 0 on the given date.
+        Uses the `ts` field (Unix ms timestamp) for date filtering.
+        """
+        # Calculate start and end of the target date in Unix ms
+        start_dt = datetime(target_date.year, target_date.month, target_date.day, tzinfo=None)
+        end_dt = start_dt + timedelta(days=1)
+        start_ts = int(start_dt.timestamp() * 1000)
+        end_ts = int(end_dt.timestamp() * 1000)
+
+        stmt = (
+            select(func.count(func.distinct(PatrolDiagnosticRecord.sn)))
+            .where(
+                PatrolDiagnosticRecord.ts >= start_ts,
+                PatrolDiagnosticRecord.ts < end_ts,
+                PatrolDiagnosticRecord.health_status > 0,
+            )
+        )
+        result = await session.execute(stmt)
+        return result.scalar() or 0
+
+    @staticmethod
+    async def _get_cached_daily_count(date_str: str) -> Optional[int]:
+        """Get cached daily fault count from Redis."""
+        client = DashboardService._get_redis_client()
+        if not client:
+            return None
+        try:
+            key = f"{CALENDAR_DAILY_PREFIX}{date_str}"
+            val = client.get(key)
+            if val is not None:
+                return int(val)
+        except Exception as e:
+            logger.debug(f"Failed to get cached daily count for {date_str}: {e}")
+        return None
+
+    @staticmethod
+    async def _set_cached_daily_count(date_str: str, count: int) -> None:
+        """Cache daily fault count to Redis."""
+        client = DashboardService._get_redis_client()
+        if not client:
+            return
+        try:
+            key = f"{CALENDAR_DAILY_PREFIX}{date_str}"
+            client.setex(key, CALENDAR_CACHE_TTL, count)
+        except Exception as e:
+            logger.debug(f"Failed to cache daily count for {date_str}: {e}")
+
+    @staticmethod
+    async def get_calendar_data(session: AsyncSession) -> dict:
+        """Get calendar heatmap data for the past 12 months (including current month).
+        
+        Returns exactly 12 months: from 11 months ago to current month.
+        e.g., if today is 2026-05-25, returns months 2025-06 through 2026-05.
+        
+        Performance: Uses a single batch query for all dates, then fills in
+        per-day counts from the result set. Redis cache is used for historical
+        data to avoid repeated DB queries across requests.
+        """
+        today = date.today()
+        
+        # Calculate the date range: 12 months ago to today
+        start_date = date(today.year, today.month, 1)
+        # Go back 11 months to get the first day of the range
+        for _ in range(11):
+            if start_date.month > 1:
+                start_date = date(start_date.year, start_date.month - 1, 1)
+            else:
+                start_date = date(start_date.year - 1, 12, 1)
+        
+        # Try to get full calendar data from Redis cache (excluding today)
+        cached_data = await DashboardService._get_cached_full_calendar(start_date, today)
+        
+        if cached_data:
+            # Only need to query today's data
+            today_str = today.isoformat()
+            today_count = await DashboardService._query_daily_fault_count(session, today)
+            today_level = DashboardService._get_level(today_count)
+            
+            # Update today's data in the cached result
+            for month in cached_data["months"]:
+                for day in month["days"]:
+                    if day["date"] == today_str:
+                        day["count"] = today_count
+                        day["level"] = today_level
+                        break
+            
+            return cached_data
+        
+        # Cache miss: batch query all dates from database
+        # Calculate start and end timestamps (Unix ms)
+        start_dt = datetime(start_date.year, start_date.month, start_date.day, tzinfo=None)
+        end_dt = datetime(today.year, today.month, today.day, 23, 59, 59, tzinfo=None)
+        start_ts = int(start_dt.timestamp() * 1000)
+        end_ts = int(end_dt.timestamp() * 1000)
+        
+        # Single batch query: group by date and count distinct SNs per day
+        # Use ts field to extract date (divide by 86400000 ms per day)
+        stmt = (
+            select(
+                func.floor(PatrolDiagnosticRecord.ts / 86400000).label("day_offset"),
+                func.count(func.distinct(PatrolDiagnosticRecord.sn)).label("cnt"),
+            )
+            .where(
+                PatrolDiagnosticRecord.ts >= start_ts,
+                PatrolDiagnosticRecord.ts < end_ts,
+                PatrolDiagnosticRecord.health_status > 0,
+            )
+            .group_by(func.floor(PatrolDiagnosticRecord.ts / 86400000))
+        )
+        result = await session.execute(stmt)
+        
+        # Build lookup: date_str -> count
+        # day_offset is days since epoch (1970-01-01)
+        epoch = date(1970, 1, 1)
+        daily_counts: dict[str, int] = {}
+        for row in result.all():
+            day_date = epoch + timedelta(days=int(row.day_offset))
+            daily_counts[day_date.isoformat()] = row.cnt
+        
+        # Build month-by-month response
+        months_data = []
+        current = start_date
+        while current <= today:
+            month = current.month
+            year = current.year
+            
+            # Last day of this month
+            if month == 12:
+                next_month = date(year + 1, 1, 1)
+            else:
+                next_month = date(year, month + 1, 1)
+            last_day = next_month - timedelta(days=1)
+            
+            days_in_month = []
+            day = current
+            while day <= last_day and day <= today:
+                date_str = day.isoformat()
+                count = daily_counts.get(date_str, 0)
+                level = DashboardService._get_level(count)
+                days_in_month.append({
+                    "date": date_str,
+                    "count": count,
+                    "level": level,
+                })
+                day += timedelta(days=1)
+            
+            months_data.append({
+                "month": month,
+                "days": days_in_month,
+            })
+            
+            current = next_month
+        
+        result_data = {
+            "year": today.year,
+            "months": months_data,
+        }
+        
+        # Cache the full result (excluding today's data which is always fresh)
+        await DashboardService._set_cached_full_calendar(result_data, today)
+        
+        return result_data
+
+    @staticmethod
+    def _get_cached_full_calendar_key(start_date: date, today: date) -> str:
+        """Generate cache key for full calendar data."""
+        return f"{CALENDAR_FULL_KEY}:{start_date.isoformat()}:{today.isoformat()}"
+
+    @staticmethod
+    async def _get_cached_full_calendar(start_date: date, today: date) -> Optional[dict]:
+        """Get full calendar data from Redis cache (excluding today)."""
+        client = DashboardService._get_redis_client()
+        if not client:
+            return None
+        try:
+            key = DashboardService._get_cached_full_calendar_key(start_date, today)
+            val = client.get(key)
+            if val is not None:
+                return json.loads(val)
+        except Exception as e:
+            logger.debug(f"Failed to get cached full calendar: {e}")
+        return None
+
+    @staticmethod
+    async def _set_cached_full_calendar(data: dict, today: date) -> None:
+        """Cache full calendar data to Redis (with today's count set to 0 for caching)."""
+        client = DashboardService._get_redis_client()
+        if not client:
+            return
+        try:
+            # Set today's count to 0 for caching (will be queried fresh each time)
+            today_str = today.isoformat()
+            for month in data["months"]:
+                for day in month["days"]:
+                    if day["date"] == today_str:
+                        day["count"] = 0
+                        day["level"] = 0
+                        break
+            
+            key = DashboardService._get_cached_full_calendar_key(
+                date.fromisoformat(data["months"][0]["days"][0]["date"]),
+                today
+            )
+            client.setex(key, CALENDAR_CACHE_TTL, json.dumps(data))
+        except Exception as e:
+            logger.debug(f"Failed to cache full calendar: {e}")

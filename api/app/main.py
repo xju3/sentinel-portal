@@ -19,6 +19,7 @@ from starlette.types import Receive, Scope, Send
 from app.config import settings
 from app.contract.common import ApiResponse
 from app.database import db_manager, redis_manager, influxdb_manager, minio_manager
+from app.utils.exceptions import DomainException
 from app.clients.mqtt import mqtt_manager
 from app.clients.handler import patrol_msg_handler
 from app.utils.logger import setup_logging
@@ -154,6 +155,30 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         status_code=200,
         content=jsonable_encoder(
             ApiResponse(code=422, message=str(errors), data=None)
+        ),
+    )
+
+
+@app.exception_handler(DomainException)
+async def domain_exception_handler(request: Request, exc: DomainException):
+    """Handle domain/business logic exceptions and return unified ApiResponse format
+
+    DomainException is raised by service layer when business rules are violated
+    (e.g. duplicate username, not found, invalid state transition). The handler
+    returns HTTP 200 with the business error code embedded in the response body,
+    so the frontend interceptor can handle it uniformly.
+    """
+    logger.warning(
+        "Domain error on %s %s: code=%d, message=%s",
+        request.method,
+        request.url.path,
+        exc.code,
+        exc.message,
+    )
+    return JSONResponse(
+        status_code=200,
+        content=jsonable_encoder(
+            ApiResponse(code=exc.code, message=exc.message, data=None)
         ),
     )
 

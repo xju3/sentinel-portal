@@ -27,6 +27,25 @@ class CategoryTreeNodeResponse(BaseModel):
     children: Optional[List["CategoryTreeNodeResponse"]] = None
 
 
+class CalendarDayResponse(BaseModel):
+    """Single day's fault count for calendar heatmap"""
+    date: str  # "2026-05-25"
+    count: int  # Number of faulty devices on that day
+    level: int  # 0-4 color level
+
+
+class CalendarMonthResponse(BaseModel):
+    """Month data for calendar heatmap"""
+    month: int  # 1-12
+    days: List[CalendarDayResponse]
+
+
+class CalendarResponse(BaseModel):
+    """Calendar heatmap data response"""
+    year: int
+    months: List[CalendarMonthResponse]
+
+
 class DashboardOverviewResponse(BaseModel):
     totalDevices: int
     runningDevices: int

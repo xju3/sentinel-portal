@@ -15,6 +15,7 @@ from influxdb_client.client.query_api import QueryApi
 from app.database import influxdb_manager
 from app.config import settings
 from app.models.sensor import SensorType, Sensor, SensorBatch, SensorThreshold
+from app.utils.exceptions import DomainException
 
 logger = logging.getLogger(__name__)
 
@@ -183,8 +184,9 @@ class SensorBatchService:
         # Status 只能向前递增，不能回退
         if "status" in data:
             if data["status"] < db_obj.status:
-                raise ValueError(
-                    f"Status cannot be decreased from {db_obj.status} to {data['status']}"
+                raise DomainException(
+                    code=400,
+                    message=f"Status cannot be decreased from {db_obj.status} to {data['status']}",
                 )
 
             # 当 status 从 1（生产中）→ 2（交付中）时，自动生成该批次的传感器数据

@@ -69,68 +69,36 @@ async def register(
     login_channel = "email" if payload.email else "mobile"
     account_flag = USERNAME_FLAG_EMAIL if payload.email else USERNAME_FLAG_MOBILE
 
-    existing_username = await AuthService.get_account_by_username(session, username)
-    if existing_username is not None:
-        raise HTTPException(status_code=409, detail="account username already exists")
-
-    if payload.email:
-        existing_email = await AuthService.get_account_by_email(session, payload.email)
-        if existing_email is not None:
-            raise HTTPException(status_code=409, detail="email already exists")
-        existing_contact_email = await AuthService.get_contact_by_email(session, payload.email)
-        if existing_contact_email is not None:
-            raise HTTPException(status_code=409, detail="email already exists")
-
-    existing_mobile = await AuthService.get_account_by_mobile(session, normalized_phone)
-    if existing_mobile is not None:
-        raise HTTPException(status_code=409, detail="phone already exists")
-    existing_contact_mobile = await AuthService.get_contact_by_mobile(session, normalized_phone)
-    if existing_contact_mobile is not None:
-        raise HTTPException(status_code=409, detail="phone already exists")
-
     tenant_code = await _generate_unique_tenant_code(session)
     tenant_host = f"{_company_slug(payload.company_name)}.portal.local"
     random_password = _generate_password()
 
     try:
-        tenant = await AuthService.create_tenant(session, {
-            "code": tenant_code,
-            "name": payload.company_name,
-            "host": tenant_host,
-            "active": True,
-        })
-
-        contact = await AuthService.create_contact(session, {
-            "name": payload.contact_name,
-            "mobile": normalized_phone,
-            "email": payload.email,
-            "active": True,
-            "tenant_id": tenant.id,
-        })
-
-        account = await AuthService.create_account(session, {
-            "username": username,
-            "password": random_password,
-            "email": payload.email,
-            "mobile": normalized_phone,
-            "flag": account_flag,
-            "active": True,
-            "admin": False,
-            "contact_id": contact.id,
-            "tenant_id": tenant.id,
-        })
+        result = await AuthService.register(
+            session=session,
+            username=username,
+            email=payload.email,
+            normalized_phone=normalized_phone,
+            company_name=payload.company_name,
+            contact_name=payload.contact_name,
+            login_channel=login_channel,
+            account_flag=account_flag,
+            tenant_code=tenant_code,
+            tenant_host=tenant_host,
+            random_password=random_password,
+        )
         await AuthService.commit(session)
     except Exception:
         await AuthService.rollback(session)
         raise
 
     return success(RegisterResponse(
-        tenant_id=tenant.id,
-        contact_id=contact.id,
-        account_id=account.id,
-        account_username=account.username,
-        login_channel=login_channel,
-        generated_password=random_password,
+        tenant_id=result["tenant_id"],
+        contact_id=result["contact_id"],
+        account_id=result["account_id"],
+        account_username=result["account_username"],
+        login_channel=result["login_channel"],
+        generated_password=result["generated_password"],
     ))
 
 
