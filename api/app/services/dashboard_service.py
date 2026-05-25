@@ -15,7 +15,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import redis_manager
 from app.models.device import DeviceInst, DeviceSpec, DeviceCategory, ProcessDevice, ProcessDeviceItem
 from app.models.sensor import PatrolDiagnosticRecord, SensorMonitoring
-from app.models.customer import Area
+from app.models.customer import Area, Tenant
 
 logger = logging.getLogger(__name__)
 
@@ -443,7 +443,7 @@ class DashboardService:
 
     @staticmethod
     def _get_level(count: int) -> int:
-        """Convert fault device count to color level (0-4)."""
+        """Convert fault device count to color level (0-5)."""
         if count <= 0:
             return 0
         elif count <= 2:
@@ -452,8 +452,10 @@ class DashboardService:
             return 2
         elif count <= 10:
             return 3
-        else:
+        elif count <= 20:
             return 4
+        else:
+            return 5
 
     @staticmethod
     async def _query_daily_fault_count(session: AsyncSession, target_date: date) -> int:
@@ -507,17 +509,25 @@ class DashboardService:
             logger.debug(f"Failed to cache daily count for {date_str}: {e}")
 
     @staticmethod
-    async def get_calendar_data(session: AsyncSession) -> dict:
+    async def get_calendar_data(session: AsyncSession, tenant_id: UUID) -> dict:
         """Get calendar heatmap data for the past 12 months (including current month).
         
         Returns exactly 12 months: from 11 months ago to current month.
         e.g., if today is 2026-05-25, returns months 2025-06 through 2026-05.
+        
+        Also returns the tenant's create_at date to distinguish pre-creation vs
+        post-creation dates in the frontend heatmap.
         
         Performance: Uses a single batch query for all dates, then fills in
         per-day counts from the result set. Redis cache is used for historical
         data to avoid repeated DB queries across requests.
         """
         today = date.today()
+        
+        # Query tenant's start_at (fixed, never changes)
+        stmt_tenant = select(Tenant.start_at).where(Tenant.id == tenant_id)
+        tenant_start_at = (await session.execute(stmt_tenant)).scalar()
+        start_at_str = tenant_start_at.isoformat() if tenant_start_at else today.isoformat()
         
         # Calculate the date range: 12 months ago to today
         start_date = date(today.year, today.month, 1)
@@ -545,6 +555,7 @@ class DashboardService:
                         day["level"] = today_level
                         break
             
+            cached_data["start_at"] = start_at_str
             return cached_data
         
         # Cache miss: batch query all dates from database
@@ -615,6 +626,7 @@ class DashboardService:
         result_data = {
             "year": today.year,
             "months": months_data,
+            "start_at": start_at_str,
         }
         
         # Cache the full result (excluding today's data which is always fresh)

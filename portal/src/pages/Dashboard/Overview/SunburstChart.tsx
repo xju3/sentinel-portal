@@ -38,7 +38,7 @@ const convertToSunburst = (nodes: any[], anomalyDepth: number = 0): any[] => {
         anomaly: n.anomaly,
         value: n.anomaly,
         itemStyle: { color: ANOMALY_COLORS[outerColorIndex] },
-        label: { show: true, formatter: '{c}', color: '#fff', textBorderWidth: 0 },
+        label: { show: true, formatter: '{c}', textBorderWidth: 0 },
       });
     }
 
@@ -59,7 +59,6 @@ const convertToSunburst = (nodes: any[], anomalyDepth: number = 0): any[] => {
       value: children.length > 0 ? undefined : Math.max(n.total, 1),
       itemStyle: { color },
       label: {
-        color: n.total === 0 ? '#999' : (n.anomaly > 0 ? '#c62828' : '#666'),
         textBorderColor: n.total === 0 ? 'transparent' : 'rgba(255,255,255,0.8)',
         textBorderWidth: n.total === 0 ? 0 : 1,
       },
@@ -143,6 +142,8 @@ const SunburstChart = ({
             itemStyle: { borderRadius: 4, borderWidth: 2, borderColor: '#fff' },
             label: {
               show: true,
+              fontSize: 8,
+              fontFamily: '"Microsoft YaHei", "PingFang SC", "Helvetica Neue", sans-serif',
               formatter: (params: any) => {
                 const { name, data } = params;
                 if (!data) return '';
@@ -151,10 +152,6 @@ const SunburstChart = ({
                   return `全部(${realTotal}台)`;
                 }
                 return ` ${name}\n${realTotal} 台`;
-              },
-              rich: {
-                name: { color: 'inherit', fontSize: 10, align: 'center', lineHeight: 18 },
-                total: { color: 'inherit', fontSize: 12, align: 'center', lineHeight: 16 },
               },
             },
           },
@@ -178,7 +175,7 @@ const SunburstChart = ({
     };
   }, [treeData, anomalyColor, onViewModeToggle]);
 
-  return <div ref={chartRef} style={{ height: 350, width: '100%' }} />;
+  return <div ref={chartRef} style={{ height: 263, width: '100%' }} />;
 };
 
 export default SunburstChart;

@@ -32,5 +32,7 @@ async def get_dashboard_calendar(
     
     Returns daily fault device counts with color levels (0-4).
     Today's data is queried from DB; historical data uses Redis cache.
+    Also returns the tenant's create_at date for frontend color differentiation.
     """
-    return success(await DashboardService.get_calendar_data(session))
+    tenant_id = current_account.tenant_id
+    return success(await DashboardService.get_calendar_data(session, tenant_id))

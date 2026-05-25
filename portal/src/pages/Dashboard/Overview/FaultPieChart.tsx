@@ -39,7 +39,7 @@ const FaultPieChart = ({
           {
             name: '故障概览',
             type: 'pie',
-            radius: ['40%', '70%'],
+            radius: ['30%', '55%'],
             avoidLabelOverlap: false,
             itemStyle: {
               borderRadius: 8,
@@ -95,7 +95,7 @@ const FaultPieChart = ({
     };
   }, [totalDevices, runningDevices, faultyDevices, vibrationAnomalyCount, temperatureAnomalyCount, bothAnomalyCount]);
 
-  return <div ref={chartRef} style={{ height: 350, width: '100%' }} />;
+  return <div ref={chartRef} style={{ height: 100, width: '100%' }} />;
 };
 
 export default FaultPieChart;

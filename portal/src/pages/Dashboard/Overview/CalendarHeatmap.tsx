@@ -1,21 +1,28 @@
 import { useMemo, useRef, useState, useEffect } from 'react';
 import { Tooltip } from 'antd';
 
-// 颜色等级定义（红色系，与故障主题一致）
+// 颜色等级定义
+// level 0: 租户创建之前的日期（无数据）- 浅灰
+// level 6: 租户已使用但无故障 - 浅绿
+// level 1-5: 故障数量递增 - 红色系（由浅入深）
 const LEVEL_COLORS: Record<number, string> = {
-  0: '#ebedf0', // 无故障 - 浅灰
+  0: '#ebedf0', // 无数据（租户创建之前）- 浅灰
   1: '#ffebee', // 1-2 台 - 极浅红
   2: '#ffcdd2', // 3-5 台 - 浅红
   3: '#ef9a9a', // 6-10 台 - 中红
   4: '#e53935', // >10 台 - 深红
+  5: '#b71c1c', // 20+ 台 - 更深红
+  6: '#e8f5e9', // 正常运行（租户已使用但无故障）- 极浅绿
 };
 
 const LEVEL_LABELS: Record<number, string> = {
-  0: '无故障',
+  0: '无数据',
   1: '1-2 台',
   2: '3-5 台',
   3: '6-10 台',
   4: '10+ 台',
+  5: '20+ 台',
+  6: '正常运行',
 };
 
 // 月份故障颜色（根据故障数量深浅不同）
@@ -51,6 +58,7 @@ interface CalendarMonth {
 interface CalendarData {
   year: number;
   months: CalendarMonth[];
+  start_at?: string; // Tenant's start date, e.g. "2026-01-15"
 }
 
 interface CalendarHeatmapProps {
@@ -123,10 +131,13 @@ const CalendarHeatmap = ({ data, loading }: CalendarHeatmapProps) => {
     return result;
   }, []);
 
-  // 将后端数据合并到生成的月份中
+  // 将后端数据合并到生成的月份中，并根据 start_at 调整 level
   const mergedMonths = useMemo(() => {
     if (!data || !data.months) return allMonths;
 
+    const startAt = data.start_at;
+    const today = new Date();
+    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
     const lookup = new Map<string, { count: number; level: number }>();
     for (const month of data.months) {
       for (const day of month.days) {
@@ -138,10 +149,26 @@ const CalendarHeatmap = ({ data, loading }: CalendarHeatmapProps) => {
       ...month,
       days: month.days.map(day => {
         const found = lookup.get(day.date);
+        let count = 0;
+        let level = 0;
         if (found) {
-          return { ...day, count: found.count, level: found.level };
+          count = found.count;
+          level = found.level;
         }
-        return day;
+
+        // 根据 start_at 调整颜色级别
+        if (startAt) {
+          if (day.date < startAt || day.date > todayStr) {
+            // 租户开始使用之前的日期 或 未来日期：使用灰色（无数据）
+            level = 0;
+          } else if (count === 0) {
+            // 租户已使用但无故障：使用浅绿色
+            level = 6;
+          }
+          // 有故障的情况：保持后端返回的 level（1-5）
+        }
+
+        return { ...day, count, level };
       }),
     }));
   }, [data, allMonths]);
@@ -267,16 +294,34 @@ const CalendarHeatmap = ({ data, loading }: CalendarHeatmapProps) => {
 
   return (
     <div ref={containerRef} style={{ width: '100%', padding: '8px 0', marginTop: 10 }}>
-      {/* 统计摘要 */}
+      {/* 统计摘要 + 图例 */}
       <div
         style={{
-          fontSize: 13,
-          color: '#333',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
           marginBottom: 12,
-          fontWeight: 500,
         }}
       >
-        {stats.totalFaults} 次故障记录 · 过去 12 个月
+        <div style={{ fontSize: 13, color: '#333', fontWeight: 500 }}>
+          {stats.totalFaults} 次故障记录 · 过去 12 个月
+        </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
+          <span style={{ fontSize: 11, color: '#999', marginRight: 4 }}>Less</span>
+          {[1, 2, 3, 4, 5].map((level) => (
+            <div
+              key={level}
+              style={{
+                width: cellSize - 2,
+                height: cellSize - 2,
+                borderRadius: 2,
+                backgroundColor: LEVEL_COLORS[level],
+              }}
+              title={LEVEL_LABELS[level]}
+            />
+          ))}
+          <span style={{ fontSize: 11, color: '#999', marginLeft: 4 }}>More</span>
+        </div>
       </div>
 
       <div style={{ display: 'flex', gap: 4, width: '100%' }}>
@@ -375,6 +420,39 @@ const CalendarHeatmap = ({ data, loading }: CalendarHeatmapProps) => {
                   const dateObj = new Date(day.date);
                   const dateStr = `${dateObj.getFullYear()}-${String(dateObj.getMonth() + 1).padStart(2, '0')}-${String(dateObj.getDate()).padStart(2, '0')}`;
 
+                  // start_at 之前或未来日期：不显示提示信息
+                  const startAt = data?.start_at;
+                  const today = new Date();
+                  const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+                  const isNoData = startAt && (day.date < startAt || day.date > todayStr);
+
+                  const cell = (
+                    <div
+                      style={{
+                        width: cellSize,
+                        height: cellSize,
+                        borderRadius: 3,
+                        backgroundColor: color,
+                        cursor: isNoData ? 'default' : 'pointer',
+                        transition: 'all 0.1s ease',
+                      }}
+                      onMouseEnter={(e) => {
+                        if (isNoData) return;
+                        e.currentTarget.style.transform = 'scale(1.2)';
+                        e.currentTarget.style.boxShadow = '0 0 4px rgba(0,0,0,0.2)';
+                      }}
+                      onMouseLeave={(e) => {
+                        if (isNoData) return;
+                        e.currentTarget.style.transform = 'scale(1)';
+                        e.currentTarget.style.boxShadow = 'none';
+                      }}
+                    />
+                  );
+
+                  if (isNoData) {
+                    return <div key={rowIndex}>{cell}</div>;
+                  }
+
                   return (
                     <Tooltip
                       key={rowIndex}
@@ -392,24 +470,7 @@ const CalendarHeatmap = ({ data, loading }: CalendarHeatmapProps) => {
                       }
                       overlayStyle={{ fontSize: 12 }}
                     >
-                      <div
-                        style={{
-                          width: cellSize,
-                          height: cellSize,
-                          borderRadius: 3,
-                          backgroundColor: color,
-                          cursor: 'pointer',
-                          transition: 'all 0.1s ease',
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'scale(1.2)';
-                          e.currentTarget.style.boxShadow = '0 0 4px rgba(0,0,0,0.2)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'scale(1)';
-                          e.currentTarget.style.boxShadow = 'none';
-                        }}
-                      />
+                      {cell}
                     </Tooltip>
                   );
                 })}
@@ -419,32 +480,6 @@ const CalendarHeatmap = ({ data, loading }: CalendarHeatmapProps) => {
         </div>
       </div>
 
-      {/* 图例 */}
-      <div
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          gap: 3,
-          marginTop: 12,
-          paddingRight: 4,
-        }}
-      >
-        <span style={{ fontSize: 11, color: '#999', marginRight: 4 }}>Less</span>
-        {[0, 1, 2, 3, 4].map((level) => (
-          <div
-            key={level}
-            style={{
-              width: cellSize - 2,
-              height: cellSize - 2,
-              borderRadius: 2,
-              backgroundColor: LEVEL_COLORS[level],
-            }}
-            title={LEVEL_LABELS[level]}
-          />
-        ))}
-        <span style={{ fontSize: 11, color: '#999', marginLeft: 4 }}>More</span>
-      </div>
     </div>
   );
 };

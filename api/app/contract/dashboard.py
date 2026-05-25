@@ -44,6 +44,7 @@ class CalendarResponse(BaseModel):
     """Calendar heatmap data response"""
     year: int
     months: List[CalendarMonthResponse]
+    start_at: str  # Tenant's start date, e.g. "2026-01-15"
 
 
 class DashboardOverviewResponse(BaseModel):

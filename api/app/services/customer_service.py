@@ -492,7 +492,9 @@ class AuthService:
 
     @staticmethod
     async def create_tenant(session: AsyncSession, data: dict) -> Tenant:
+        from datetime import date
         db_tenant = Tenant(**data)
+        db_tenant.create_at = date.today()  # 设置创建日期为当前日期
         session.add(db_tenant)
         await session.flush()
         return db_tenant

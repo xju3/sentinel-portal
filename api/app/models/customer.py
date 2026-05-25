@@ -18,6 +18,8 @@ class Tenant(Base):
     name = Column(String(64), nullable=False)
     host = Column(String(255), nullable=False)
     active = Column(Boolean, default=True)
+    create_at = Column(Date, nullable=False)
+    start_at = Column(Date, nullable=False)  # The date when the tenant started using the service
 
     def __repr__(self):
         return f"<Tenant {self.id}: {self.code} - {self.name}>"

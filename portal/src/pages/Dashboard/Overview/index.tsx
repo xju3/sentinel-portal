@@ -189,7 +189,21 @@ const DashboardOverview = () => {
           </StatisticCard.Group>
         </ProCard>
       </ProCard>
-
+   <ProCard style={{ marginTop: 16 }} ghost>
+        <ProCard
+          title="年历视图"
+          bordered
+          headerBordered
+          loading={calendarLoading}
+          extra={
+            <a onClick={fetchCalendarData} style={{ cursor: 'pointer' }}>
+              刷新
+            </a>
+          }
+        >
+          <CalendarHeatmap data={calendarData} loading={calendarLoading} />
+        </ProCard>
+      </ProCard>
       <ProCard style={{ marginTop: 16 }} ghost>
         <ProCard
           title="分布视图"
@@ -203,7 +217,7 @@ const DashboardOverview = () => {
           }
         >
           <div style={{ display: 'flex', gap: 16 }}>
-            <div style={{ flex: 1, minWidth: 0, textAlign: 'center' }}>
+            {/* <div style={{ flex: 1, minWidth: 0, textAlign: 'center' }}>
               <FaultPieChart
                 totalDevices={data.totalDevices}
                 runningDevices={data.runningDevices}
@@ -215,7 +229,7 @@ const DashboardOverview = () => {
               <div style={{ marginTop: 8, fontSize: 14, fontWeight: 500, color: '#333' }}>
                 故障总览（{data.faultyDevices}台）
               </div>
-            </div>
+            </div> */}
             <div style={{ flex: 1, minWidth: 0, textAlign: 'center' }}>
               <SunburstChart
                 treeData={treeViewMode === 'category' ? (data.devicesByCategoryTree || []) : (data.devicesByAreaTree || [])}
@@ -242,21 +256,7 @@ const DashboardOverview = () => {
         </ProCard>
       </ProCard>
 
-      <ProCard style={{ marginTop: 16 }} ghost>
-        <ProCard
-          title="年历视图"
-          bordered
-          headerBordered
-          loading={calendarLoading}
-          extra={
-            <a onClick={fetchCalendarData} style={{ cursor: 'pointer' }}>
-              刷新
-            </a>
-          }
-        >
-          <CalendarHeatmap data={calendarData} loading={calendarLoading} />
-        </ProCard>
-      </ProCard>
+   
 
       <ProCard style={{ marginTop: 16 }} ghost>
         <ProCard title="最新预警" bordered headerBordered loading={loading}>
