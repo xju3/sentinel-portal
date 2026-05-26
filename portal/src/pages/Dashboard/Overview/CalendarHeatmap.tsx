@@ -7,12 +7,12 @@ import { Tooltip } from 'antd';
 // level 1-5: 故障数量递增 - 红色系（由浅入深）
 const LEVEL_COLORS: Record<number, string> = {
   0: '#ebedf0', // 无数据（租户创建之前）- 浅灰
-  1: '#ffebee', // 1-2 台 - 极浅红
-  2: '#ffcdd2', // 3-5 台 - 浅红
-  3: '#ef9a9a', // 6-10 台 - 中红
-  4: '#e53935', // >10 台 - 深红
+  1: '#f8c0c9', // 1-2 台 - 极浅红
+  2: '#f999a2', // 3-5 台 - 浅红
+  3: '#ef7070', // 6-10 台 - 中红
+  4: '#e53935', // >10 台 - 深红s
   5: '#b71c1c', // 20+ 台 - 更深红
-  6: '#e8f5e9', // 正常运行（租户已使用但无故障）- 极浅绿
+  6: '#8aefa1', // 正常运行（租户已使用但无故障）- 极浅绿
 };
 
 const LEVEL_LABELS: Record<number, string> = {
@@ -27,7 +27,7 @@ const LEVEL_LABELS: Record<number, string> = {
 
 // 月份故障颜色（根据故障数量深浅不同）
 const MONTH_FAULT_COLORS = [
-  '#4caf50', // 0 台 - 绿色（无故障）
+  '#316d33', // 0 台 - 绿色（无故障）
   '#ff9800', // 1-2 台 - 橙色
   '#f44336', // 3-5 台 - 红色
   '#d32f2f', // 6-10 台 - 深红
@@ -333,7 +333,7 @@ const CalendarHeatmap = ({ data, loading }: CalendarHeatmapProps) => {
             gap: cellGap,
             paddingTop: 26,
             minWidth: labelWidth,
-            flexShrink: 0,
+            flexShrink: 1,
           }}
         >
           {WEEKDAY_LABELS.map((label, i) => (
@@ -377,6 +377,7 @@ const CalendarHeatmap = ({ data, loading }: CalendarHeatmapProps) => {
                     transform: 'translateX(-50%)',
                     fontSize: Math.max(9, Math.min(11, cellSize)),
                     color: label.totalFaults > 0 ? monthFaultColor : '#666',
+                    // color: '#666',
                     whiteSpace: 'nowrap',
                     fontWeight: label.totalFaults > 0 ? 600 : 500,
                   }}
