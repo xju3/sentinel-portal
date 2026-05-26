@@ -14,7 +14,7 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from app.database import redis_manager
-from app.models.device import DeviceInst, DeviceSpec, DeviceCategory, ProcessDevice, ProcessDeviceItem
+from app.models.device import DeviceInst, DeviceSpec, DeviceCategory, Process, ProcessDevice, ProcessDeviceItem
 from app.models.sensor import PatrolDiagnosticRecord, SensorMonitoring
 from app.models.customer import Area, Tenant
 
@@ -118,8 +118,8 @@ class DashboardService:
         """获取并缓存静态拓扑骨架，将分类和区域树与设备关联关系分离"""
         if not force_rebuild:
             cached = DashboardService._get_cached_device_stats(tenant_id)
-            # 兼容处理：检查是否存在 deviceMeta，以防读取到遗留的旧版本缓存结构
-            if cached and "deviceMeta" in cached:
+            # 兼容处理：检查是否存在 deviceMeta 和 processMap，以防读取到遗留的旧版本缓存结构
+            if cached and "deviceMeta" in cached and "processMap" in cached:
                 return cached
 
         # 获取全量设备及其映射关系（无异常状态计算）
@@ -131,7 +131,8 @@ class DashboardService:
                 DeviceInst.purchase_date,
                 DeviceInst.active,
                 DeviceCategory.id.label("category_id"),
-                ProcessDevice.area_id.label("area_id")
+                ProcessDevice.area_id.label("area_id"),
+                ProcessDevice.process_id.label("process_id")
             )
             .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
             .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
@@ -151,16 +152,20 @@ class DashboardService:
                     "sn": row.sn,
                     "purchase_date": row.purchase_date.isoformat() if row.purchase_date else None,
                     "category_id": str(row.category_id) if row.category_id else None,
-                    "areas": set()
+                    "areas": set(),
+                    "processes": set()
                 }
             if row.area_id:
                 dev_map[dev_id_str]["areas"].add(str(row.area_id))
+            if row.process_id:
+                dev_map[dev_id_str]["processes"].add(str(row.process_id))
                 
         total_devices = len(dev_map)
         running_devices = sum(1 for info in dev_map.values() if info["active"] == 1)
         
         device_cat_map = {}
         device_area_map = {}
+        device_process_map = {}
         device_meta = {}
         unassigned_devices = []
         
@@ -174,6 +179,8 @@ class DashboardService:
                 device_area_map[dev_id] = list(info["areas"])
             else:
                 unassigned_devices.append(dev_id)
+            if info["processes"]:
+                device_process_map[dev_id] = list(info["processes"])
 
         # 获取分类骨架
         stmt_cats = select(DeviceCategory).where(DeviceCategory.tenant_id == tenant_id)
@@ -201,6 +208,19 @@ class DashboardService:
             } for a in area_rows
         }
         
+        # 获取工段骨架
+        stmt_processes = select(Process).where(Process.tenant_id == tenant_id)
+        process_rows = (await session.execute(stmt_processes)).scalars().all()
+        process_map = {
+            str(p.id): {
+                "id": str(p.id),
+                "name": p.name,
+                "parent_id": None,
+                "total": 0,
+                "anomaly": 0
+            } for p in process_rows
+        }
+        
         # 静态骨架计算 - 分类 total 上卷
         for dev_id, cat_id in device_cat_map.items():
             curr = cat_id
@@ -222,6 +242,12 @@ class DashboardService:
                     area_map[curr]["total"] += 1
                     curr = area_map[curr]["parent_id"]
                     
+        # 静态骨架计算 - 工段 total
+        for dev_id, processes in device_process_map.items():
+            for process_id in processes:
+                if process_id in process_map:
+                    process_map[process_id]["total"] += 1
+                    
         skeleton = {
             "totalDevices": total_devices,
             "runningDevices": running_devices,
@@ -229,6 +255,8 @@ class DashboardService:
             "deviceCatMap": device_cat_map,
             "areaMap": area_map,
             "deviceAreaMap": device_area_map,
+            "processMap": process_map,
+            "deviceProcessMap": device_process_map,
             "deviceMeta": device_meta,
             "unassignedTotal": len(unassigned_devices),
             "unassignedDevices": unassigned_devices
@@ -299,6 +327,7 @@ class DashboardService:
         # 4. 内存染色：将动态故障数据极速注入到树状骨架中
         cat_map = skeleton["catMap"]
         area_map = skeleton["areaMap"]
+        process_map = skeleton["processMap"]
         unassigned_anomaly = 0
         unassigned_set = set(skeleton["unassignedDevices"])
         
@@ -324,6 +353,13 @@ class DashboardService:
                         curr_area = area_map[curr_area]["parent_id"]
             elif dev_id_str in unassigned_set:
                 unassigned_anomaly += 1
+                
+            # 为工段染色
+            curr_processes = skeleton["deviceProcessMap"].get(dev_id_str)
+            if curr_processes:
+                for curr_process in curr_processes:
+                    if curr_process in process_map:
+                        process_map[curr_process]["anomaly"] += 1
 
         # 将平行对象重组为前端所需的树状层级结构
         def assemble_tree(flat_map, root_name="全部", unassigned_total=0, unassigned_anom=0):
@@ -365,6 +401,7 @@ class DashboardService:
             unassigned_total=skeleton["unassignedTotal"], 
             unassigned_anom=unassigned_anomaly
         )
+        devices_by_process_tree = assemble_tree(process_map)
 
         # 5. 内存组装最新预警所需信息 (由于砍掉了 JOIN，在内存里把 code 和 sn 拼装回来)
         recent_candidates.sort(key=lambda x: x.ts or 0, reverse=True)
@@ -391,6 +428,7 @@ class DashboardService:
             "recentAnomalies": recent_anomalies,
             "devicesByCategoryTree": devices_by_category_tree,
             "devicesByAreaTree": devices_by_area_tree,
+            "devicesByProcessTree": devices_by_process_tree,
         }
 
     @staticmethod

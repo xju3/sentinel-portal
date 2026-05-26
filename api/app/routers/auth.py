@@ -116,36 +116,37 @@ async def login(
     tenant_name: Optional[str] = None
     contact_name: Optional[str] = None
 
-    tenant = await AuthService.get_tenant_by_id(session, account.tenant_id)
+    tenant = await AuthService.get_tenant_by_id(session, account.tenant_id)  # type: ignore[arg-type]
     if tenant is not None:
-        tenant_name = tenant.name
+        tenant_name = str(tenant.name)
 
-    if account.contact_id:
-        contact = await AuthService.get_contact_by_id(session, account.contact_id)
+    if account.contact_id:  # type: ignore[truthy-bool]
+        contact = await AuthService.get_contact_by_id(session, account.contact_id)  # type: ignore[arg-type]
+
         if contact is not None:
-            contact_name = contact.name
+            contact_name = str(contact.name)
 
     expires_in = settings.jwt_access_token_expires_minutes * 60
     access_token = create_access_token(
         subject=str(account.id),
         tenant_id=str(account.tenant_id),
-        username=account.username,
-        admin=account.admin,
-        contact_id=str(account.contact_id) if account.contact_id else None,
-        flag=account.flag,
+        username=account.username,  # type: ignore[arg-type]
+        admin=account.admin,  # type: ignore[arg-type]
+        contact_id=str(account.contact_id) if account.contact_id else None,  # type: ignore[truthy-bool]
+        flag=account.flag,  # type: ignore[arg-type]
     )
 
     return success(LoginResponse(
         access_token=access_token,
         token_type="Bearer",
         expires_in=expires_in,
-        account_id=account.id,
-        username=account.username,
-        tenant_id=account.tenant_id,
+        account_id=account.id,  # type: ignore[arg-type]
+        username=account.username,  # type: ignore[arg-type]
+        tenant_id=account.tenant_id,  # type: ignore[arg-type]
         tenant_name=tenant_name,
-        contact_id=account.contact_id,
+        contact_id=account.contact_id,  # type: ignore[arg-type]
         contact_name=contact_name,
-        flag=account.flag,
+        flag=account.flag,  # type: ignore[arg-type]
     ))
 
 
@@ -156,9 +157,10 @@ async def change_password(
     session: AsyncSession = Depends(get_session),
 ):
     # Because JWT is stateless, we must query DB for the real password hash
-    db_account = await AuthService.get_account(session, current_account.id)
-    if not db_account or db_account.password != payload.current_password:
+    db_account = await AuthService.get_account(session, current_account.id)  # type: ignore[arg-type]
+    if not db_account or db_account.password != payload.current_password:  # type: ignore[truthy-bool]
         raise HTTPException(status_code=400, detail="current password is incorrect")
+
     if payload.current_password == payload.new_password:
         raise HTTPException(status_code=400, detail="new password must be different")
 

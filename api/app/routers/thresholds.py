@@ -5,7 +5,7 @@ Sensor threshold management endpoints
 import logging
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List
+from typing import cast,  List
 from uuid import UUID
 
 logger = logging.getLogger(__name__)
@@ -15,6 +15,7 @@ from app.services.dependencies import get_session
 from app.services.sensor_service import SensorThresholdService
 from app.models.customer import Account
 from app.utils.auth import get_current_account
+from app.utils.decorators import rebuild_dashboard_cache
 from app.contract.sensors import (
     SensorThresholdCreate,
     SensorThresholdUpdate,
@@ -31,7 +32,7 @@ async def list_sensor_thresholds(
     session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
-    return success(await SensorThresholdService.get_by_tenant(session, current_account.tenant_id, skip, limit))
+    return success(await SensorThresholdService.get_by_tenant(session, cast(UUID, current_account.tenant_id), skip, limit))
 
 
 @router.get("/{obj_id}")
@@ -40,31 +41,33 @@ async def get_sensor_threshold(
     session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
-    obj = await SensorThresholdService.get_by_id_and_tenant(session, obj_id, current_account.tenant_id)
+    obj = await SensorThresholdService.get_by_id_and_tenant(session, obj_id, cast(UUID, current_account.tenant_id))
     if not obj:
         raise HTTPException(status_code=404, detail="SensorThreshold not found")
     return success(obj)
 
 
 @router.post("")
+@rebuild_dashboard_cache()
 async def create_sensor_threshold(
     item: SensorThresholdCreate,
     session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
     data = item.model_dump()
-    data["tenant_id"] = current_account.tenant_id
+    data["tenant_id"] = cast(UUID, current_account.tenant_id)
     return success(await SensorThresholdService.create(session, data))
 
 
 @router.put("/{obj_id}")
+@rebuild_dashboard_cache()
 async def update_sensor_threshold(
     obj_id: UUID,
     item: SensorThresholdUpdate,
     session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
-    db_obj = await SensorThresholdService.get_by_id_and_tenant(session, obj_id, current_account.tenant_id)
+    db_obj = await SensorThresholdService.get_by_id_and_tenant(session, obj_id, cast(UUID, current_account.tenant_id))
     if not db_obj:
         raise HTTPException(status_code=404, detail="SensorThreshold not found")
 
@@ -73,12 +76,13 @@ async def update_sensor_threshold(
 
 
 @router.delete("/{obj_id}")
+@rebuild_dashboard_cache()
 async def delete_sensor_threshold(
     obj_id: UUID,
     session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
-    db_obj = await SensorThresholdService.get_by_id_and_tenant(session, obj_id, current_account.tenant_id)
+    db_obj = await SensorThresholdService.get_by_id_and_tenant(session, obj_id, cast(UUID, current_account.tenant_id))
     if not db_obj:
         raise HTTPException(status_code=404, detail="SensorThreshold not found")
 

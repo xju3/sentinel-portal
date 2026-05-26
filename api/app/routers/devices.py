@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
 from datetime import date
 from sqlalchemy import select, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List, Optional
+from typing import List, Optional, cast
 from uuid import UUID
 
 from app.services.dependencies import get_session
@@ -26,9 +26,9 @@ from app.services.device_service import (
     ProcessDeviceItemService,
     SensorMonitoringService,
 )
-from app.services.dashboard_service import DashboardService
 from app.utils.auth import get_current_account
 from app.utils.response import success
+from app.utils.decorators import rebuild_dashboard_cache
 from app.contract.devices import (
     IsoStandardCreate,
     IsoStandardUpdate,
@@ -157,11 +157,11 @@ def _serialize_device_category(
         "name": item.name,
         "description": item.description,
         "parent_id": item.parent_id,
-        "health_check_freq_id": item.health_check_freq_id,
-        "tenant_id": item.tenant_id,
-        "iso_standard_id": item.iso_standard_id,
-        "vib_threshold_id": item.vib_threshold_id,
-        "temp_threshold_id": item.temp_threshold_id,
+        "health_check_freq_id": cast(Optional[UUID], item.health_check_freq_id),
+        "tenant_id": cast(Optional[UUID], item.tenant_id),
+        "iso_standard_id": cast(Optional[UUID], item.iso_standard_id),
+        "vib_threshold_id": cast(Optional[UUID], item.vib_threshold_id),
+        "temp_threshold_id": cast(Optional[UUID], item.temp_threshold_id),
         "health_check_freq": (
             {
                 "id": freq_obj.id,
@@ -213,15 +213,16 @@ async def list_device_categories(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     rows = await DeviceCategoryService.get_all(session, tenant_id, skip, limit, keyword)
+    freq_ids: List[UUID] = [cast(UUID, row.health_check_freq_id) for row in rows]
     freq_map = await DeviceCategoryService.get_health_check_freq_map(
         session,
         tenant_id,
-        [row.health_check_freq_id for row in rows],
+        freq_ids,
     )
     return success([
-        _serialize_device_category(row, freq_map.get(row.health_check_freq_id))
+        _serialize_device_category(row, freq_map.get(cast(UUID, row.health_check_freq_id)))
         for row in rows
     ])
 
@@ -232,7 +233,7 @@ async def count_device_categories(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     total = await DeviceCategoryService.count_all(session, tenant_id, keyword)
     return success({"total": total})
 
@@ -243,43 +244,45 @@ async def get_device_category(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     obj = await DeviceCategoryService.get_by_id(session, tenant_id, obj_id)
     if not obj:
         raise HTTPException(status_code=404, detail="DeviceCategory not found")
+    freq_id = cast(UUID, obj.health_check_freq_id)
     freq_map = await DeviceCategoryService.get_health_check_freq_map(
         session,
         tenant_id,
-        [obj.health_check_freq_id],
+        [freq_id],
     )
-    return success(_serialize_device_category(obj, freq_map.get(obj.health_check_freq_id)))
+    return success(_serialize_device_category(obj, freq_map.get(freq_id)))
 
 
 @router.post("/device-categories")
+@rebuild_dashboard_cache()
 async def create_device_category(
     item: DeviceCategoryCreate,
     background_tasks: BackgroundTasks,
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     payload = item.model_dump(exclude_unset=True)
     if "tenant_id" in payload and payload["tenant_id"] is not None and payload["tenant_id"] != tenant_id:
         raise HTTPException(status_code=400, detail="tenant_id mismatch")
     payload["tenant_id"] = tenant_id
     await _validate_device_category_parent(session, tenant_id, payload.get("parent_id"))
     created = await DeviceCategoryService.create(session, payload)
-    # 异步重建设备统计缓存
-    background_tasks.add_task(DashboardService.rebuild_device_stats_cache_task, tenant_id)
+    created_freq_id = cast(UUID, created.health_check_freq_id)
     freq_map = await DeviceCategoryService.get_health_check_freq_map(
         session,
         tenant_id,
-        [created.health_check_freq_id],
+        [created_freq_id],
     )
-    return success(_serialize_device_category(created, freq_map.get(created.health_check_freq_id)))
+    return success(_serialize_device_category(created, freq_map.get(created_freq_id)))
 
 
 @router.put("/device-categories/{obj_id}")
+@rebuild_dashboard_cache()
 async def update_device_category(
     obj_id: UUID,
     item: DeviceCategoryUpdate,
@@ -287,7 +290,7 @@ async def update_device_category(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     db_obj = await DeviceCategoryService.get_by_id(session, tenant_id, obj_id)
     if not db_obj:
         raise HTTPException(status_code=404, detail="DeviceCategory not found")
@@ -299,24 +302,24 @@ async def update_device_category(
     if "parent_id" in update_data:
         await _validate_device_category_parent(session, tenant_id, update_data.get("parent_id"), obj_id)
     updated = await DeviceCategoryService.update(session, db_obj, update_data)
-    # 异步重建设备统计缓存
-    background_tasks.add_task(DashboardService.rebuild_device_stats_cache_task, tenant_id)
+    updated_freq_id = cast(UUID, updated.health_check_freq_id)
     freq_map = await DeviceCategoryService.get_health_check_freq_map(
         session,
         tenant_id,
-        [updated.health_check_freq_id],
+        [updated_freq_id],
     )
-    return success(_serialize_device_category(updated, freq_map.get(updated.health_check_freq_id)))
+    return success(_serialize_device_category(updated, freq_map.get(updated_freq_id)))
 
 
 @router.delete("/device-categories/{obj_id}")
+@rebuild_dashboard_cache()
 async def delete_device_category(
     obj_id: UUID,
     background_tasks: BackgroundTasks,
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     db_obj = await DeviceCategoryService.get_by_id(session, tenant_id, obj_id)
     if not db_obj:
         raise HTTPException(status_code=404, detail="DeviceCategory not found")
@@ -329,8 +332,6 @@ async def delete_device_category(
         )
 
     await DeviceCategoryService.delete(session, db_obj)
-    # 异步重建设备统计缓存
-    background_tasks.add_task(DashboardService.rebuild_device_stats_cache_task, tenant_id)
     return success({"message": "DeviceCategory deleted successfully"})
 
 
@@ -358,6 +359,7 @@ async def get_device_spec(
 
 
 @router.post("/device-specs")
+@rebuild_dashboard_cache()
 async def create_device_spec(
     item: DeviceSpecCreate,
     session: AsyncSession = Depends(get_session),
@@ -366,6 +368,7 @@ async def create_device_spec(
 
 
 @router.put("/device-specs/{obj_id}")
+@rebuild_dashboard_cache()
 async def update_device_spec(
     obj_id: UUID,
     item: DeviceSpecUpdate,
@@ -380,6 +383,7 @@ async def update_device_spec(
 
 
 @router.delete("/device-specs/{obj_id}")
+@rebuild_dashboard_cache()
 async def delete_device_spec(
     obj_id: UUID,
     session: AsyncSession = Depends(get_session),
@@ -416,6 +420,7 @@ async def get_device_inst(
 
 
 @router.post("/device-insts")
+@rebuild_dashboard_cache()
 async def create_device_inst(
     item: DeviceInstCreate,
     background_tasks: BackgroundTasks,
@@ -423,11 +428,11 @@ async def create_device_inst(
     session: AsyncSession = Depends(get_session),
 ):
     result = await DeviceInstService.create(session, item.model_dump())
-    background_tasks.add_task(DashboardService.rebuild_device_stats_cache_task, current_account.tenant_id)
     return success(result)
 
 
 @router.put("/device-insts/{obj_id}")
+@rebuild_dashboard_cache()
 async def update_device_inst(
     obj_id: UUID,
     item: DeviceInstUpdate,
@@ -441,11 +446,11 @@ async def update_device_inst(
 
     update_data = item.model_dump(exclude_unset=True)
     result = await DeviceInstService.update(session, db_obj, update_data)
-    background_tasks.add_task(DashboardService.rebuild_device_stats_cache_task, current_account.tenant_id)
     return success(result)
 
 
 @router.delete("/device-insts/{obj_id}")
+@rebuild_dashboard_cache()
 async def delete_device_inst(
     obj_id: UUID,
     background_tasks: BackgroundTasks,
@@ -457,7 +462,6 @@ async def delete_device_inst(
         raise HTTPException(status_code=404, detail="DeviceInst not found")
 
     await DeviceInstService.delete(session, db_obj)
-    background_tasks.add_task(DashboardService.rebuild_device_stats_cache_task, current_account.tenant_id)
     return success({"message": "DeviceInst deleted successfully"})
 
 
@@ -601,6 +605,7 @@ async def get_process_device(
 
 
 @router.post("/process-devices")
+@rebuild_dashboard_cache()
 async def create_process_device(
     item: ProcessDeviceCreate,
     background_tasks: BackgroundTasks,
@@ -608,11 +613,11 @@ async def create_process_device(
     session: AsyncSession = Depends(get_session),
 ):
     result = await ProcessDeviceService.create(session, item.model_dump())
-    background_tasks.add_task(DashboardService.rebuild_device_stats_cache_task, current_account.tenant_id)
     return success(result)
 
 
 @router.put("/process-devices/{obj_id}")
+@rebuild_dashboard_cache()
 async def update_process_device(
     obj_id: UUID,
     item: ProcessDeviceUpdate,
@@ -626,11 +631,11 @@ async def update_process_device(
 
     update_data = item.model_dump(exclude_unset=True)
     result = await ProcessDeviceService.update(session, db_obj, update_data)
-    background_tasks.add_task(DashboardService.rebuild_device_stats_cache_task, current_account.tenant_id)
     return success(result)
 
 
 @router.delete("/process-devices/{obj_id}")
+@rebuild_dashboard_cache()
 async def delete_process_device(
     obj_id: UUID,
     background_tasks: BackgroundTasks,
@@ -642,7 +647,6 @@ async def delete_process_device(
         raise HTTPException(status_code=404, detail="ProcessDevice not found")
 
     await ProcessDeviceService.delete(session, db_obj)
-    background_tasks.add_task(DashboardService.rebuild_device_stats_cache_task, current_account.tenant_id)
     return success({"message": "ProcessDevice deleted successfully"})
 
 
@@ -670,6 +674,7 @@ async def get_process_device_item(
 
 
 @router.post("/process-device-items")
+@rebuild_dashboard_cache()
 async def create_process_device_item(
     item: ProcessDeviceItemCreate,
     background_tasks: BackgroundTasks,
@@ -677,11 +682,11 @@ async def create_process_device_item(
     session: AsyncSession = Depends(get_session),
 ):
     result = await ProcessDeviceItemService.create(session, item.model_dump())
-    background_tasks.add_task(DashboardService.rebuild_device_stats_cache_task, current_account.tenant_id)
     return success(result)
 
 
 @router.put("/process-device-items/{obj_id}")
+@rebuild_dashboard_cache()
 async def update_process_device_item(
     obj_id: UUID,
     item: ProcessDeviceItemUpdate,
@@ -695,11 +700,11 @@ async def update_process_device_item(
 
     update_data = item.model_dump(exclude_unset=True)
     result = await ProcessDeviceItemService.update(session, db_obj, update_data)
-    background_tasks.add_task(DashboardService.rebuild_device_stats_cache_task, current_account.tenant_id)
     return success(result)
 
 
 @router.delete("/process-device-items/{obj_id}")
+@rebuild_dashboard_cache()
 async def delete_process_device_item(
     obj_id: UUID,
     background_tasks: BackgroundTasks,
@@ -711,7 +716,6 @@ async def delete_process_device_item(
         raise HTTPException(status_code=404, detail="ProcessDeviceItem not found")
 
     await ProcessDeviceItemService.delete(session, db_obj)
-    background_tasks.add_task(DashboardService.rebuild_device_stats_cache_task, current_account.tenant_id)
     return success({"message": "ProcessDeviceItem deleted successfully"})
 
 
@@ -725,7 +729,7 @@ async def list_sensor_monitorings(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     return success(await SensorMonitoringService.get_all_by_tenant(session, tenant_id, skip, limit))
 
 
@@ -740,7 +744,7 @@ async def list_sensor_monitoring_device_insts(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     items, total = await DeviceInstService.get_tenant_device_insts_paged(
         session, tenant_id, current, pageSize, keyword
     )
@@ -753,7 +757,7 @@ async def get_sensor_monitoring(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     obj = await SensorMonitoringService.get_by_id_and_tenant(session, obj_id, tenant_id)
     if not obj:
         raise HTTPException(status_code=404, detail="SensorMonitoring not found")
@@ -762,25 +766,27 @@ async def get_sensor_monitoring(
 
 
 @router.post("/sensor-monitorings")
+@rebuild_dashboard_cache()
 async def create_sensor_monitoring(
     item: SensorMonitoringCreate,
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     payload = item.model_dump()
     await _validate_sensor_monitoring_refs(session, tenant_id, payload)
     return success(await SensorMonitoringService.create(session, payload))
 
 
 @router.put("/sensor-monitorings/{obj_id}")
+@rebuild_dashboard_cache()
 async def update_sensor_monitoring(
     obj_id: UUID,
     item: SensorMonitoringUpdate,
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     db_obj = await SensorMonitoringService.get_by_id_and_tenant(session, obj_id, tenant_id)
     if not db_obj:
         raise HTTPException(status_code=404, detail="SensorMonitoring not found")
@@ -790,14 +796,14 @@ async def update_sensor_monitoring(
     return success(await SensorMonitoringService.update(session, db_obj, update_data))
 
 
-
 @router.delete("/sensor-monitorings/{obj_id}")
+@rebuild_dashboard_cache()
 async def delete_sensor_monitoring(
     obj_id: UUID,
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     db_obj = await SensorMonitoringService.get_by_id_and_tenant(session, obj_id, tenant_id)
     if not db_obj:
         raise HTTPException(status_code=404, detail="SensorMonitoring not found")

@@ -4,7 +4,7 @@ Sensor service - business logic for sensor operations
 
 import logging
 from datetime import datetime, timedelta
-from typing import List, Optional
+from typing import List, Optional, Sequence
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -16,7 +16,6 @@ from app.database import influxdb_manager
 from app.config import settings
 from app.models.sensor import SensorType, Sensor, SensorBatch, SensorThreshold
 from app.utils.exceptions import DomainException
-
 logger = logging.getLogger(__name__)
 
 
@@ -25,7 +24,7 @@ class SensorTypeService:
     async def get_all(session: AsyncSession, skip: int, limit: int) -> List[SensorType]:
         stmt = select(SensorType).offset(skip).limit(limit)
         result = await session.execute(stmt)
-        return result.scalars().all()
+        return list(result.scalars().all())
 
     @staticmethod
     async def get_by_id(session: AsyncSession, obj_id: UUID) -> Optional[SensorType]:
@@ -60,7 +59,7 @@ class SensorDbService:
     async def get_all(session: AsyncSession, skip: int, limit: int) -> List[Sensor]:
         stmt = select(Sensor).offset(skip).order_by(Sensor.sn).limit(limit)
         result = await session.execute(stmt)
-        return result.scalars().all()
+        return list(result.scalars().all())
 
     @staticmethod
     async def get_by_id(session: AsyncSession, obj_id: UUID) -> Optional[Sensor]:
@@ -77,7 +76,7 @@ class SensorDbService:
             .limit(limit)
         )
         result = await session.execute(stmt)
-        return result.scalars().all()
+        return list(result.scalars().all())
 
     @staticmethod
     async def get_paged(
@@ -101,7 +100,7 @@ class SensorDbService:
         skip = (current - 1) * page_size
         fetch_stmt = base_stmt.offset(skip).limit(page_size)
         result = await session.execute(fetch_stmt)
-        items = result.scalars().all()
+        items = list(result.scalars().all())
 
         return items, total
 
@@ -143,7 +142,7 @@ class SensorBatchService:
     async def get_all(session: AsyncSession, skip: int, limit: int) -> List[SensorBatch]:
         stmt = select(SensorBatch).offset(skip).limit(limit)
         result = await session.execute(stmt)
-        return result.scalars().all()
+        return list(result.scalars().all())
 
     @staticmethod
     async def get_by_id(session: AsyncSession, obj_id: UUID) -> Optional[SensorBatch]:
@@ -160,7 +159,7 @@ class SensorBatchService:
             .limit(limit)
         )
         result = await session.execute(stmt)
-        return result.scalars().all()
+        return list(result.scalars().all())
 
     @staticmethod
     async def get_by_id_and_tenant(session: AsyncSession, obj_id: UUID, tenant_id: UUID) -> Optional[SensorBatch]:
@@ -190,7 +189,7 @@ class SensorBatchService:
                 )
 
             # 当 status 从 1（生产中）→ 2（交付中）时，自动生成该批次的传感器数据
-            if db_obj.status == 1 and data["status"] == 2:
+            if db_obj.status == 1 and data["status"] == 2: # type: ignore
                 existing_sensors = await SensorDbService.get_by_batch_id(session, db_obj.id)
                 if not existing_sensors:
                     await SensorBatchService.generate_sensors_for_batch(session, db_obj)
@@ -218,8 +217,8 @@ class SensorBatchService:
         - active = False (0)
         - active_at = None
         """
-        sn_prefix = batch.sn
-        qty = batch.qty
+        sn_prefix = str(batch.sn)  # type: ignore[arg-type]
+        qty = int(batch.qty) # type: ignore[assignment]
 
         items = []
         for i in range(1, qty + 1):
@@ -237,7 +236,7 @@ class SensorBatchService:
 
 class SensorThresholdService:
     @staticmethod
-    async def get_by_tenant(session: AsyncSession, tenant_id: UUID, skip: int, limit: int) -> List[SensorThreshold]:
+    async def get_by_tenant(session: AsyncSession, tenant_id: UUID, skip: int, limit: int) -> Sequence[SensorThreshold]:
         stmt = (
             select(SensorThreshold)
             .where(SensorThreshold.tenant_id == tenant_id)

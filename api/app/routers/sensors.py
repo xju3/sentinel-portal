@@ -6,7 +6,7 @@ import logging
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List, Optional
+from typing import cast, List, Optional
 from uuid import UUID
 
 logger = logging.getLogger(__name__)
@@ -19,6 +19,7 @@ from app.models.sensor import Sensor
 from app.utils.auth import get_current_account
 from app.utils.response import success
 from app.utils.exceptions import DomainException
+from app.utils.decorators import rebuild_dashboard_cache
 from app.contract.sensors import (
     SensorTypeCreate,
     SensorTypeUpdate,
@@ -35,6 +36,9 @@ from app.contract.sensors import (
 router = APIRouter(prefix="/sensors", tags=["sensors"])
 
 
+# ==========================================
+# 1. SensorType
+# ==========================================
 @router.get("/types")
 async def list_sensor_types(
     skip: int = Query(0, ge=0),
@@ -56,6 +60,7 @@ async def get_sensor_type(
 
 
 @router.post("/types")
+@rebuild_dashboard_cache()
 async def create_sensor_type(
     item: SensorTypeCreate,
     session: AsyncSession = Depends(get_session),
@@ -64,6 +69,7 @@ async def create_sensor_type(
 
 
 @router.put("/types/{obj_id}")
+@rebuild_dashboard_cache()
 async def update_sensor_type(
     obj_id: UUID,
     item: SensorTypeUpdate,
@@ -78,6 +84,7 @@ async def update_sensor_type(
 
 
 @router.delete("/types/{obj_id}")
+@rebuild_dashboard_cache()
 async def delete_sensor_type(
     obj_id: UUID,
     session: AsyncSession = Depends(get_session),
@@ -100,7 +107,7 @@ async def list_sensor_batches(
     session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
-    return success(await SensorBatchService.get_by_tenant(session, current_account.tenant_id, skip, limit))
+    return success(await SensorBatchService.get_by_tenant(session, cast(UUID, current_account.tenant_id), skip, limit))
 
 
 @router.get("/batches/{obj_id}")
@@ -109,47 +116,48 @@ async def get_sensor_batch(
     session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
-    obj = await SensorBatchService.get_by_id_and_tenant(session, obj_id, current_account.tenant_id)
+    obj = await SensorBatchService.get_by_id_and_tenant(session, obj_id, cast(UUID, current_account.tenant_id))
     if not obj:
         raise HTTPException(status_code=404, detail="SensorBatch not found")
     return success(obj)
 
 
 @router.post("/batches")
+@rebuild_dashboard_cache()
 async def create_sensor_batch(
     item: SensorBatchCreate,
     session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
     data = item.model_dump()
-    data["tenant_id"] = current_account.tenant_id
+    data["tenant_id"] = cast(UUID, current_account.tenant_id)
     return success(await SensorBatchService.create(session, data))
 
 
 @router.put("/batches/{obj_id}")
+@rebuild_dashboard_cache()
 async def update_sensor_batch(
     obj_id: UUID,
     item: SensorBatchUpdate,
     session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
-    db_obj = await SensorBatchService.get_by_id_and_tenant(session, obj_id, current_account.tenant_id)
+    db_obj = await SensorBatchService.get_by_id_and_tenant(session, obj_id, cast(UUID, current_account.tenant_id))
     if not db_obj:
         raise HTTPException(status_code=404, detail="SensorBatch not found")
 
     update_data = item.model_dump(exclude_unset=True)
-
     return success(await SensorBatchService.update(session, db_obj, update_data))
 
 
-
 @router.delete("/batches/{obj_id}")
+@rebuild_dashboard_cache()
 async def delete_sensor_batch(
     obj_id: UUID,
     session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
-    db_obj = await SensorBatchService.get_by_id_and_tenant(session, obj_id, current_account.tenant_id)
+    db_obj = await SensorBatchService.get_by_id_and_tenant(session, obj_id, cast(UUID, current_account.tenant_id))
     if not db_obj:
         raise HTTPException(status_code=404, detail="SensorBatch not found")
 
@@ -180,7 +188,7 @@ async def list_sensors_by_batch(
     current_account: Account = Depends(get_current_account),
 ):
     # Verify the batch belongs to the current tenant
-    batch = await SensorBatchService.get_by_id_and_tenant(session, batch_id, current_account.tenant_id)
+    batch = await SensorBatchService.get_by_id_and_tenant(session, batch_id, cast(UUID, current_account.tenant_id))
     if not batch:
         raise HTTPException(status_code=404, detail="SensorBatch not found")
     return success(await SensorDbService.get_by_batch_id(session, batch_id, skip, limit))
@@ -198,6 +206,7 @@ async def get_sensor(
 
 
 @router.post("")
+@rebuild_dashboard_cache()
 async def create_sensor(
     item: SensorCreate,
     session: AsyncSession = Depends(get_session),
@@ -206,6 +215,7 @@ async def create_sensor(
 
 
 @router.put("/{obj_id}")
+@rebuild_dashboard_cache()
 async def update_sensor(
     obj_id: UUID,
     item: SensorUpdate,
@@ -220,6 +230,7 @@ async def update_sensor(
 
 
 @router.delete("/{obj_id}")
+@rebuild_dashboard_cache()
 async def delete_sensor(
     obj_id: UUID,
     session: AsyncSession = Depends(get_session),

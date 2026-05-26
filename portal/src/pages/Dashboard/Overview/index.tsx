@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react';
 import { PageContainer, ProCard, StatisticCard } from '@ant-design/pro-components';
-import { message } from 'antd';
+import { message, Segmented } from 'antd';
 import { request } from '@umijs/max';
 import CalendarHeatmap from './CalendarHeatmap';
 import FaultPieChart from './FaultPieChart';
-import SunburstChart from './SunburstChart';
+import FaultRankBarChart from './FaultRankBarChart';
 import FaultAlertList from './FaultAlertList';
 
 const { Statistic } = StatisticCard;
@@ -25,8 +25,33 @@ type DashboardData = {
     anomaly: number;
     ts: number;
   }[];
+  faultsByCategory?: { name: string; count: number }[];
+  faultsByArea?: { name: string; count: number }[];
+  faultsByProcess?: { name: string; count: number }[];
+  // 兼容老版本接口返回的树形结构
   devicesByCategoryTree?: any[];
   devicesByAreaTree?: any[];
+  devicesByProcessTree?: any[];
+};
+
+// 将老版树形数据(Tree)拍平成条形图所需的一维数组(Flat Array)
+const flattenTreeData = (nodes?: any[], path: string = ''): { name: string; count: number }[] => {
+  let result: { name: string; count: number }[] = [];
+  if (!nodes) return result;
+  for (const node of nodes) {
+    // 拼接层级路径，例如 "一厂区/冲压车间"
+    const currentPath = path ? `${path}/${node.name}` : node.name;
+    if (node.anomaly > 0) {
+      // 如果是末端节点，或者没有子节点，就收集它
+      if (!node.children || node.children.length === 0) {
+        result.push({ name: currentPath, count: node.anomaly });
+      } else {
+        // 如果还有子节点，继续向下递归寻找真正出故障的末端设备
+        result = result.concat(flattenTreeData(node.children, currentPath));
+      }
+    }
+  }
+  return result;
 };
 
 const DashboardOverview = () => {
@@ -46,14 +71,22 @@ const DashboardOverview = () => {
   const [calendarData, setCalendarData] = useState<any>(null);
   const [calendarLoading, setCalendarLoading] = useState(false);
 
-  const [treeViewMode, setTreeViewMode] = useState<'category' | 'area'>('category');
+  const [viewMode, setViewMode] = useState<'category' | 'area' | 'process'>('category');
 
   // 从后端获取 Dashboard 聚合数据
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
       const res = await request<DashboardData>('/api/v1/dashboard/overview');
-      if (res) setData(res);
+      if (res) {
+        // 如果后端已经返回了 flat 数组，就用后端的，否则前端自己去递归遍历树
+        setData({
+          ...res,
+          faultsByCategory: res.faultsByCategory || flattenTreeData(res.devicesByCategoryTree),
+          faultsByArea: res.faultsByArea || flattenTreeData(res.devicesByAreaTree),
+          faultsByProcess: res.faultsByProcess || flattenTreeData(res.devicesByProcessTree),
+        });
+      }
     } catch (error) {
       message.error('获取仪表盘数据失败');
     } finally {
@@ -90,8 +123,9 @@ const DashboardOverview = () => {
           vibrationAnomalyCount: res.vibrationAnomalyCount,
           temperatureAnomalyCount: res.temperatureAnomalyCount,
           bothAnomalyCount: res.bothAnomalyCount,
-          devicesByCategoryTree: res.devicesByCategoryTree,
-          devicesByAreaTree: res.devicesByAreaTree,
+          faultsByCategory: res.faultsByCategory || flattenTreeData(res.devicesByCategoryTree),
+          faultsByArea: res.faultsByArea || flattenTreeData(res.devicesByAreaTree),
+          faultsByProcess: res.faultsByProcess || flattenTreeData(res.devicesByProcessTree),
         }));
       }
     } catch (error) {
@@ -206,14 +240,25 @@ const DashboardOverview = () => {
       </ProCard>
       <ProCard style={{ marginTop: 16 }} ghost>
         <ProCard
-          title="分布视图"
+          title="故障分布排行"
           bordered
           headerBordered
           loading={loading}
           extra={
-            <a onClick={refreshCharts} style={{ cursor: 'pointer' }}>
-              刷新
-            </a>
+            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
+              <Segmented
+                options={[
+                  { label: '按类别', value: 'category' },
+                  { label: '按区域', value: 'area' },
+                  { label: '按工段', value: 'process' },
+                ]}
+                value={viewMode}
+                onChange={(val) => setViewMode(val as 'category' | 'area' | 'process')}
+              />
+              <a onClick={refreshCharts} style={{ cursor: 'pointer' }}>
+                刷新
+              </a>
+            </div>
           }
         >
           <div style={{ display: 'flex', gap: 16 }}>
@@ -231,26 +276,15 @@ const DashboardOverview = () => {
               </div>
             </div> */}
             <div style={{ flex: 1, minWidth: 0, textAlign: 'center' }}>
-              <SunburstChart
-                treeData={treeViewMode === 'category' ? (data.devicesByCategoryTree || []) : (data.devicesByAreaTree || [])}
-                onViewModeToggle={() => setTreeViewMode(prev => prev === 'category' ? 'area' : 'category')}
+              <FaultRankBarChart
+                data={
+                  viewMode === 'category'
+                    ? data.faultsByCategory || []
+                    : viewMode === 'area'
+                    ? data.faultsByArea || []
+                    : data.faultsByProcess || []
+                }
               />
-              <div style={{ marginTop: 8, fontSize: 14, fontWeight: 500, color: '#333' }}>
-                {treeViewMode === 'category' ? '类别视图' : '区域视图'}（{data.faultyDevices}台）
-                <span
-                  style={{
-                    marginLeft: 12,
-                    fontSize: 12,
-                    fontWeight: 400,
-                    color: '#999',
-                    cursor: 'pointer',
-                    borderBottom: '1px dashed #999',
-                  }}
-                  onClick={() => setTreeViewMode(prev => prev === 'category' ? 'area' : 'category')}
-                >
-                  点击中心切换至{treeViewMode === 'category' ? '区域视图' : '类别视图'}
-                </span>
-              </div>
             </div>
           </div>
         </ProCard>

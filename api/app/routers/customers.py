@@ -4,7 +4,7 @@ Customer related management endpoints
 
 from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import List, Optional
+from typing import cast,  List, Optional
 from uuid import UUID
 
 from app.services.dependencies import get_session
@@ -22,6 +22,7 @@ from app.services.customer_service import (
 from app.services.dashboard_service import DashboardService
 from app.utils.auth import get_current_account
 from app.utils.response import success
+from app.utils.decorators import rebuild_dashboard_cache
 from app.contract.customers import (
     TenantCreate,
     TenantUpdate,
@@ -64,7 +65,7 @@ async def get_current_tenant(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant = await TenantService.get_tenant(session, current_account.tenant_id)
+    tenant = await TenantService.get_tenant(session, cast(UUID, current_account.tenant_id))
     if not tenant:
         raise HTTPException(status_code=404, detail="Tenant not found")
     return success(tenant)
@@ -76,7 +77,7 @@ async def update_current_tenant(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant = await TenantService.get_tenant(session, current_account.tenant_id)
+    tenant = await TenantService.get_tenant(session, cast(UUID, current_account.tenant_id))
     if not tenant:
         raise HTTPException(status_code=404, detail="Tenant not found")
 
@@ -209,7 +210,7 @@ async def list_suppliers(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     suppliers = await SupplierService.get_suppliers(session, tenant_id, skip, limit, keyword)
     return success([SupplierResponse.model_validate(s) for s in suppliers])
 
@@ -220,7 +221,7 @@ async def count_suppliers(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     total = await SupplierService.count_suppliers(session, tenant_id, keyword)
     return success({"total": total})
 
@@ -231,7 +232,7 @@ async def get_supplier(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     supplier = await SupplierService.get_supplier(session, tenant_id, supplier_id)
     if not supplier:
         raise HTTPException(status_code=404, detail="Supplier not found")
@@ -244,7 +245,7 @@ async def create_supplier(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     payload = supplier.model_dump(exclude_unset=True)
     if "tenant_id" in payload and payload["tenant_id"] is not None and payload["tenant_id"] != tenant_id:
         raise HTTPException(status_code=400, detail="tenant_id mismatch")
@@ -259,7 +260,7 @@ async def update_supplier(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     db_supplier = await SupplierService.get_supplier(session, tenant_id, supplier_id)
     if not db_supplier:
         raise HTTPException(status_code=404, detail="Supplier not found")
@@ -274,7 +275,7 @@ async def delete_supplier(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     db_supplier = await SupplierService.get_supplier(session, tenant_id, supplier_id)
     if not db_supplier:
         raise HTTPException(status_code=404, detail="Supplier not found")
@@ -415,7 +416,7 @@ async def list_tenant_accounts(
     session: AsyncSession = Depends(get_session),
 ):
     """List all accounts belonging to the current tenant"""
-    accounts = await AccountService.get_tenant_accounts(session, current_account.tenant_id)
+    accounts = await AccountService.get_tenant_accounts(session, cast(UUID, current_account.tenant_id))
     contact_ids = [a.contact_id for a in accounts if a.contact_id]
     contact_map = await AccountService.get_contacts_by_ids(session, contact_ids)
 
@@ -445,13 +446,13 @@ async def create_tenant_account(
     # 1. 先创建 Contact
     contact_data = {
         "name": payload.contact_name,
-        "tenant_id": current_account.tenant_id,
+        "tenant_id": cast(UUID, current_account.tenant_id),
     }
     contact = await ContactService.create_contact(session, contact_data)
 
     # 2. 再创建 Account，关联 contact_id
     data = payload.model_dump(exclude={"contact_name"})
-    data["tenant_id"] = current_account.tenant_id
+    data["tenant_id"] = cast(UUID, current_account.tenant_id)
     data["contact_id"] = contact.id
     account = await AccountService.create_account(session, data)
 
@@ -476,7 +477,7 @@ async def update_tenant_account(
     session: AsyncSession = Depends(get_session),
 ):
     """Update an account belonging to the current tenant (e.g. toggle active)"""
-    db_account = await AccountService.get_tenant_account(session, account_id, current_account.tenant_id)
+    db_account = await AccountService.get_tenant_account(session, account_id, cast(UUID, current_account.tenant_id))
     if not db_account:
         raise HTTPException(status_code=404, detail="Account not found")
 
@@ -494,7 +495,7 @@ async def update_tenant_account_password(
     session: AsyncSession = Depends(get_session),
 ):
     """Update password for an account belonging to the current tenant"""
-    db_account = await AccountService.get_tenant_account(session, account_id, current_account.tenant_id)
+    db_account = await AccountService.get_tenant_account(session, account_id, cast(UUID, current_account.tenant_id))
     if not db_account:
         raise HTTPException(status_code=404, detail="Account not found")
 
@@ -512,7 +513,7 @@ async def delete_tenant_account(
     session: AsyncSession = Depends(get_session),
 ):
     """Delete an account belonging to the current tenant"""
-    db_account = await AccountService.get_tenant_account(session, account_id, current_account.tenant_id)
+    db_account = await AccountService.get_tenant_account(session, account_id, cast(UUID, current_account.tenant_id))
     if not db_account:
         raise HTTPException(status_code=404, detail="Account not found")
 
@@ -587,29 +588,29 @@ async def list_areas(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     return success(await AreaService.get_areas(session, tenant_id, skip, limit))
 
 
 @router.post("/areas")
+@rebuild_dashboard_cache()
 async def create_area(
     area: AreaCreate,
     background_tasks: BackgroundTasks,
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     payload = area.model_dump(exclude_unset=True)
     if "tenant_id" in payload and payload["tenant_id"] is not None and payload["tenant_id"] != tenant_id:
         raise HTTPException(status_code=400, detail="tenant_id mismatch")
     payload["tenant_id"] = tenant_id
     result = await AreaService.create_area(session, payload)
-    # 异步重建设备统计缓存
-    background_tasks.add_task(DashboardService.rebuild_device_stats_cache_task, tenant_id)
     return success(result)
 
 
 @router.put("/areas/{area_id}")
+@rebuild_dashboard_cache()
 async def update_area(
     area_id: UUID,
     area: AreaUpdate,
@@ -617,7 +618,7 @@ async def update_area(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     db_area = await AreaService.get_area(session, tenant_id, area_id)
     if not db_area:
         raise HTTPException(status_code=404, detail="Area not found")
@@ -627,26 +628,23 @@ async def update_area(
         raise HTTPException(status_code=400, detail="tenant_id cannot be changed")
     update_data.pop("tenant_id", None)
     result = await AreaService.update_area(session, db_area, update_data)
-    # 异步重建设备统计缓存
-    background_tasks.add_task(DashboardService.rebuild_device_stats_cache_task, tenant_id)
     return success(result)
 
 
 @router.delete("/areas/{area_id}")
+@rebuild_dashboard_cache()
 async def delete_area(
     area_id: UUID,
     background_tasks: BackgroundTasks,
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     db_area = await AreaService.get_area(session, tenant_id, area_id)
     if not db_area:
         raise HTTPException(status_code=404, detail="Area not found")
 
     await AreaService.delete_area(session, db_area)
-    # 异步重建设备统计缓存
-    background_tasks.add_task(DashboardService.rebuild_device_stats_cache_task, tenant_id)
     return success({"message": "Area deleted successfully"})
 
 
@@ -661,7 +659,7 @@ async def list_locations(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     items, total = await LocationService.get_paged_locations(
         session, tenant_id, current, pageSize, keyword
     )
@@ -674,7 +672,7 @@ async def create_location(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     payload = location.model_dump(exclude_unset=True)
     if "tenant_id" in payload and payload["tenant_id"] is not None and payload["tenant_id"] != tenant_id:
         raise HTTPException(status_code=400, detail="tenant_id mismatch")
@@ -689,7 +687,7 @@ async def update_location(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     db_obj = await LocationService.get_location(session, tenant_id, location_id)
     if not db_obj:
         raise HTTPException(status_code=404, detail="Location not found")
@@ -707,7 +705,7 @@ async def delete_location(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     db_obj = await LocationService.get_location(session, tenant_id, location_id)
     if not db_obj:
         raise HTTPException(status_code=404, detail="Location not found")
@@ -726,7 +724,7 @@ async def list_health_check_freqs(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     return success(await HealthCheckFreqService.get_health_check_freqs(session, tenant_id, skip, limit))
 
 
@@ -736,7 +734,7 @@ async def create_health_check_freq(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     payload = freq.model_dump(exclude_unset=True)
     payload["tenant_id"] = tenant_id
     return success(await HealthCheckFreqService.create_health_check_freq(session, payload))
@@ -749,7 +747,7 @@ async def update_health_check_freq(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     db_freq = await HealthCheckFreqService.get_health_check_freq(session, tenant_id, freq_id)
     if not db_freq:
         raise HTTPException(status_code=404, detail="HealthCheckFreq not found")
@@ -767,7 +765,7 @@ async def delete_health_check_freq(
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    tenant_id = current_account.tenant_id
+    tenant_id = cast(UUID, current_account.tenant_id)
     db_freq = await HealthCheckFreqService.get_health_check_freq(session, tenant_id, freq_id)
     if not db_freq:
         raise HTTPException(status_code=404, detail="HealthCheckFreq not found")

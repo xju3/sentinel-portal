@@ -463,6 +463,14 @@ class AuthService:
         return result.scalar_one_or_none()
 
     @staticmethod
+    async def get_account(
+        session: AsyncSession, account_id: UUID
+    ) -> Optional[Account]:
+        stmt = select(Account).where(Account.id == account_id)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
     async def get_account_by_credentials(
         session: AsyncSession, username: str, password: str
     ) -> Optional[Account]:
@@ -492,11 +500,20 @@ class AuthService:
 
     @staticmethod
     async def create_tenant(session: AsyncSession, data: dict) -> Tenant:
+        """Create a new tenant with proper defaults.
+
+        Ensures create_at and start_at are set to today's date if not provided.
+        """
         from datetime import date
+
+        today = date.today()
+        data.setdefault("create_at", today)
+        data.setdefault("start_at", today)
+
         db_tenant = Tenant(**data)
-        db_tenant.create_at = date.today()  # 设置创建日期为当前日期
         session.add(db_tenant)
-        await session.flush()
+        await session.commit()
+        await session.refresh(db_tenant)
         return db_tenant
 
     @staticmethod
