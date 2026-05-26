@@ -186,7 +186,7 @@ export default defineConfig({
     },
     {
       path: '/',
-      redirect: '/device/categories',
+      redirect: '/dashboard/overview',
     },
   ],
 });

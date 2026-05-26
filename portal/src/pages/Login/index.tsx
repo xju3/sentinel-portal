@@ -38,7 +38,7 @@ const LoginPage = () => {
               <Space direction="vertical" size={4}>
                 <Typography.Text>用户名: {session.username}</Typography.Text>
                 <Space>
-                  <Button type="primary" onClick={() => navigate('/device/categories')}>
+                  <Button type="primary" onClick={() => navigate('/dashboard/overview')}>
                     进入主应用
                   </Button>
                   <Button onClick={handleLogout}>退出登录</Button>
@@ -63,7 +63,7 @@ const LoginPage = () => {
                   saveSession(res);
                   setSession(res);
                   message.success('登录成功');
-                  navigate('/device/categories');
+                  navigate('/');
                   return true;
                 } catch (error: any) {
                   const detail =

@@ -191,7 +191,7 @@ const DashboardOverview = () => {
       </ProCard>
    <ProCard style={{ marginTop: 16 }} ghost>
         <ProCard
-          title="年历视图"
+          title="日历视图"
           bordered
           headerBordered
           loading={calendarLoading}

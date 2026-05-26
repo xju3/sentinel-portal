@@ -180,7 +180,7 @@ const MonitoringAreaPage = () => {
     {
       title: '序号',
       valueType: 'indexBorder',
-      width: 68,
+      width: 100,
       hideInSearch: true,
       fixed: 'left',
     },

@@ -4,6 +4,7 @@ Dashboard service - business logic for dashboard aggregations
 
 import json
 import logging
+import copy
 import time
 from datetime import date, datetime, timedelta
 from typing import Optional
@@ -68,6 +69,19 @@ class DashboardService:
             logger.error(f"Failed to invalidate device stats cache: {e}")
 
     @staticmethod
+    async def rebuild_device_stats_cache_task(tenant_id: UUID) -> None:
+        """后台任务：异步重建设备拓扑缓存。脱离原请求生命周期，由 BackgroundTasks 调用。"""
+        from app.database import db_manager
+        # 为后台任务独立获取新的数据库 Session
+        async for session in db_manager.get_session():
+            try:
+                await DashboardService._get_topology_skeleton(session, tenant_id, force_rebuild=True)
+                logger.info(f"Successfully rebuilt topology cache for tenant {tenant_id} in background")
+                break
+            except Exception as e:
+                logger.error(f"Failed to rebuild topology cache in background for tenant {tenant_id}: {e}")
+
+    @staticmethod
     def _get_cached_device_stats(tenant_id: UUID) -> Optional[dict]:
         """从 Redis 读取缓存的设备基础统计数据"""
         client = DashboardService._get_redis_client()
@@ -100,122 +114,275 @@ class DashboardService:
     # ============================================================
 
     @staticmethod
-    async def get_overview(session: AsyncSession, tenant_id: UUID) -> dict:
-        # 1. 先尝试从 Redis 读取缓存的设备基础数据
-        cached = DashboardService._get_cached_device_stats(tenant_id)
+    async def _get_topology_skeleton(session: AsyncSession, tenant_id: UUID, force_rebuild: bool = False) -> dict:
+        """获取并缓存静态拓扑骨架，将分类和区域树与设备关联关系分离"""
+        if not force_rebuild:
+            cached = DashboardService._get_cached_device_stats(tenant_id)
+            # 兼容处理：检查是否存在 deviceMeta，以防读取到遗留的旧版本缓存结构
+            if cached and "deviceMeta" in cached:
+                return cached
 
-        if cached:
-            total_devices = cached["totalDevices"]
-            running_devices = cached["runningDevices"]
-            devices_by_category_tree = cached["devicesByCategoryTree"]
-            devices_by_area_tree = cached["devicesByAreaTree"]
-        else:
-            # 缓存未命中，查询 DB
-            # 1a. 设备总数
-            stmt_total = (
-                select(func.count(DeviceInst.id))
-                .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
-                .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
-                .where(DeviceCategory.tenant_id == tenant_id)
+        # 获取全量设备及其映射关系（无异常状态计算）
+        stmt_dev = (
+            select(
+                DeviceInst.id,
+                DeviceInst.code,
+                DeviceInst.sn,
+                DeviceInst.purchase_date,
+                DeviceInst.active,
+                DeviceCategory.id.label("category_id"),
+                ProcessDevice.area_id.label("area_id")
             )
-            total_devices = (await session.execute(stmt_total)).scalar() or 0
-
-            # 1b. 运行设备 (active == 1)
-            stmt_running = stmt_total.where(DeviceInst.active == 1)
-            running_devices = (await session.execute(stmt_running)).scalar() or 0
-
-            # 1c. 按设备分类树聚合设备总数和异常设备数
-            devices_by_category_tree = await DashboardService._get_category_device_tree(
-                session, tenant_id
-            )
-
-            # 1d. 按区域树聚合设备总数和异常设备数
-            devices_by_area_tree = await DashboardService._get_area_device_tree(
-                session, tenant_id
-            )
-
-            # 写入缓存
-            DashboardService._set_cached_device_stats(tenant_id, {
-                "totalDevices": total_devices,
-                "runningDevices": running_devices,
-                "devicesByCategoryTree": devices_by_category_tree,
-                "devicesByAreaTree": devices_by_area_tree,
-            })
-
-        # 2. 今日新增 (取 purchase_date 等于今天的数量) — 实时查询
-        stmt_total_base = (
-            select(func.count(DeviceInst.id))
             .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
             .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+            .outerjoin(ProcessDeviceItem, ProcessDeviceItem.device_inst_id == DeviceInst.id)
+            .outerjoin(ProcessDevice, ProcessDevice.id == ProcessDeviceItem.process_device_id)
             .where(DeviceCategory.tenant_id == tenant_id)
         )
-        stmt_new = stmt_total_base.where(DeviceInst.purchase_date == date.today())
-        new_devices_today = (await session.execute(stmt_new)).scalar() or 0
+        dev_rows = await session.execute(stmt_dev)
+        
+        dev_map = {}
+        for row in dev_rows:
+            dev_id_str = str(row.id)
+            if dev_id_str not in dev_map:
+                dev_map[dev_id_str] = {
+                    "active": row.active,
+                    "code": row.code,
+                    "sn": row.sn,
+                    "purchase_date": row.purchase_date.isoformat() if row.purchase_date else None,
+                    "category_id": str(row.category_id) if row.category_id else None,
+                    "areas": set()
+                }
+            if row.area_id:
+                dev_map[dev_id_str]["areas"].add(str(row.area_id))
+                
+        total_devices = len(dev_map)
+        running_devices = sum(1 for info in dev_map.values() if info["active"] == 1)
+        
+        device_cat_map = {}
+        device_area_map = {}
+        device_meta = {}
+        unassigned_devices = []
+        
+        for dev_id, info in dev_map.items():
+            device_meta[dev_id] = {
+                "code": info["code"], "sn": info["sn"], "purchase_date": info["purchase_date"]
+            }
+            if info["category_id"]:
+                device_cat_map[dev_id] = info["category_id"]
+            if info["areas"]:
+                device_area_map[dev_id] = list(info["areas"])
+            else:
+                unassigned_devices.append(dev_id)
 
-        # 3. 故障设备数 (对应有关联传感器且 anomaly > 0 的不重复设备数) — 实时查询
-        stmt_faulty = (
-            select(func.count(func.distinct(SensorMonitoring.device_inst_id)))
-            .join(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
-            .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
-            .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
-            .where(
-                DeviceCategory.tenant_id == tenant_id,
-                SensorMonitoring.anomaly > 0
-            )
-        )
-        faulty_devices = (await session.execute(stmt_faulty)).scalar() or 0
-
-        # 3a. 按异常类型分类统计 (anomaly=1 震动异常, anomaly=2 温度异常, anomaly=3 双异常)
-        async def _count_by_anomaly(anomaly_value: int) -> int:
-            stmt = (
-                select(func.count(func.distinct(SensorMonitoring.device_inst_id)))
-                .join(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
-                .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
-                .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
-                .where(
-                    DeviceCategory.tenant_id == tenant_id,
-                    SensorMonitoring.anomaly == anomaly_value
-                )
-            )
-            return (await session.execute(stmt)).scalar() or 0
-
-        vibration_anomaly_count = await _count_by_anomaly(1)
-        temperature_anomaly_count = await _count_by_anomaly(2)
-        both_anomaly_count = await _count_by_anomaly(3)
-
-        # 4. 最新故障预警 (获取存在异常的设备及相关信息，按时间倒序) — 实时查询
-        stmt_recent = (
-            select(
-                SensorMonitoring.id,
-                DeviceInst.code.label("device_code"),
-                DeviceInst.sn.label("device_sn"),
-                SensorMonitoring.anomaly,
-                SensorMonitoring.ts
-            )
-            .join(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
-            .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
-            .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
-            .where(
-                DeviceCategory.tenant_id == tenant_id,
-                SensorMonitoring.anomaly > 0
-            )
-            .order_by(SensorMonitoring.ts.desc())
-            .limit(10)
-        )
-        recent_result = await session.execute(stmt_recent)
-        recent_anomalies = [
-            {
-                "id": str(row.id),
-                "device_code": row.device_code,
-                "device_sn": row.device_sn,
-                "anomaly": row.anomaly,
-                "ts": row.ts or 0
-            } for row in recent_result.all()
-        ]
-
-        return {
+        # 获取分类骨架
+        stmt_cats = select(DeviceCategory).where(DeviceCategory.tenant_id == tenant_id)
+        cat_rows = (await session.execute(stmt_cats)).scalars().all()
+        cat_map = {
+            str(c.id): {
+                "id": str(c.id),
+                "name": c.name,
+                "parent_id": str(c.parent_id) if c.parent_id else None,
+                "total": 0,
+                "anomaly": 0
+            } for c in cat_rows
+        }
+        
+        # 获取区域骨架
+        stmt_areas = select(Area).where(Area.tenant_id == tenant_id)
+        area_rows = (await session.execute(stmt_areas)).scalars().all()
+        area_map = {
+            str(a.id): {
+                "id": str(a.id),
+                "name": a.name,
+                "parent_id": str(a.parent_id) if a.parent_id else None,
+                "total": 0,
+                "anomaly": 0
+            } for a in area_rows
+        }
+        
+        # 静态骨架计算 - 分类 total 上卷
+        for dev_id, cat_id in device_cat_map.items():
+            curr = cat_id
+            visited = set()
+            while curr and curr in cat_map:
+                if curr in visited: break
+                visited.add(curr)
+                cat_map[curr]["total"] += 1
+                curr = cat_map[curr]["parent_id"]
+                
+        # 静态骨架计算 - 区域 total 上卷
+        for dev_id, areas in device_area_map.items():
+            for area_id in areas:
+                curr = area_id
+                visited = set()
+                while curr and curr in area_map:
+                    if curr in visited: break
+                    visited.add(curr)
+                    area_map[curr]["total"] += 1
+                    curr = area_map[curr]["parent_id"]
+                    
+        skeleton = {
             "totalDevices": total_devices,
             "runningDevices": running_devices,
+            "catMap": cat_map,
+            "deviceCatMap": device_cat_map,
+            "areaMap": area_map,
+            "deviceAreaMap": device_area_map,
+            "deviceMeta": device_meta,
+            "unassignedTotal": len(unassigned_devices),
+            "unassignedDevices": unassigned_devices
+        }
+        
+        # 缓存永久保存，只有增删改数据时通过 invalidate 方法主动使其失效
+        DashboardService._set_cached_device_stats(tenant_id, skeleton)
+        return skeleton
+
+    @staticmethod
+    async def get_overview(session: AsyncSession, tenant_id: UUID) -> dict:
+        # 1. 尝试从 Redis 获取或重建静态拓扑骨架，并深拷贝防止内存污染
+        skeleton = await DashboardService._get_topology_skeleton(session, tenant_id)
+        skeleton = copy.deepcopy(skeleton)
+        device_meta = skeleton["deviceMeta"]
+
+        # 2. 今日新增 (利用缓存直接进行纯内存计算，0 次数据库查询)
+        today_str = date.today().isoformat()
+        new_devices_today = sum(1 for meta in device_meta.values() if meta.get("purchase_date") == today_str)
+
+        # 3. 极速获取实时动态故障数据 (完全摒弃 JOIN，使用 IN 批量查询单表)
+        dev_anomalies = {}
+        recent_candidates = []
+        device_ids = [UUID(dev_id) for dev_id in device_meta.keys()]
+        
+        if device_ids:
+            # 分块查询防止 SQL 语句过长 (每 2000 个设备查一次)
+            chunk_size = 2000
+            for i in range(0, len(device_ids), chunk_size):
+                chunk = device_ids[i:i + chunk_size]
+                
+                # 无 JOIN，直接查单表
+                stmt_anomaly = (
+                    select(SensorMonitoring.device_inst_id, SensorMonitoring.anomaly)
+                    .where(
+                        SensorMonitoring.device_inst_id.in_(chunk),
+                        SensorMonitoring.anomaly > 0
+                    )
+                )
+                for dev_id, anomaly in await session.execute(stmt_anomaly):
+                    dev_id_str = str(dev_id)
+                    if dev_id_str not in dev_anomalies:
+                        dev_anomalies[dev_id_str] = set()
+                    dev_anomalies[dev_id_str].add(anomaly)
+                    
+                # 最新预警，无 JOIN，查单表
+                stmt_recent = (
+                    select(
+                        SensorMonitoring.id,
+                        SensorMonitoring.device_inst_id,
+                        SensorMonitoring.anomaly,
+                        SensorMonitoring.ts
+                    )
+                    .where(
+                        SensorMonitoring.device_inst_id.in_(chunk),
+                        SensorMonitoring.anomaly > 0
+                    )
+                    .order_by(SensorMonitoring.ts.desc())
+                    .limit(10)
+                )
+                recent_candidates.extend((await session.execute(stmt_recent)).all())
+            
+        faulty_devices = len(dev_anomalies)
+        vibration_anomaly_count = sum(1 for a in dev_anomalies.values() if 1 in a)
+        temperature_anomaly_count = sum(1 for a in dev_anomalies.values() if 2 in a)
+        both_anomaly_count = sum(1 for a in dev_anomalies.values() if 3 in a)
+
+        # 4. 内存染色：将动态故障数据极速注入到树状骨架中
+        cat_map = skeleton["catMap"]
+        area_map = skeleton["areaMap"]
+        unassigned_anomaly = 0
+        unassigned_set = set(skeleton["unassignedDevices"])
+        
+        for dev_id_str in dev_anomalies.keys():
+            # 为分类树染色（计算故障数量并向上级累加）
+            curr_cat = skeleton["deviceCatMap"].get(dev_id_str)
+            visited = set()
+            while curr_cat and curr_cat in cat_map:
+                if curr_cat in visited: break
+                visited.add(curr_cat)
+                cat_map[curr_cat]["anomaly"] += 1
+                curr_cat = cat_map[curr_cat]["parent_id"]
+                
+            # 为区域树染色
+            curr_areas = skeleton["deviceAreaMap"].get(dev_id_str)
+            if curr_areas:
+                for curr_area in curr_areas:
+                    visited_area = set()
+                    while curr_area and curr_area in area_map:
+                        if curr_area in visited_area: break
+                        visited_area.add(curr_area)
+                        area_map[curr_area]["anomaly"] += 1
+                        curr_area = area_map[curr_area]["parent_id"]
+            elif dev_id_str in unassigned_set:
+                unassigned_anomaly += 1
+
+        # 将平行对象重组为前端所需的树状层级结构
+        def assemble_tree(flat_map, root_name="全部", unassigned_total=0, unassigned_anom=0):
+            for info in flat_map.values():
+                info["children"] = []
+                
+            top_level = []
+            for info in flat_map.values():
+                pid = info["parent_id"]
+                if pid and pid in flat_map:
+                    flat_map[pid]["children"].append(info)
+                else:
+                    top_level.append(info)
+                    
+            if unassigned_total > 0:
+                top_level.append({
+                    "id": "__unassigned__",
+                    "name": "未分配",
+                    "parent_id": None,
+                    "total": unassigned_total,
+                    "anomaly": unassigned_anom,
+                    "children": []
+                })
+                
+            if top_level or unassigned_total > 0:
+                return [{
+                    "id": "__root__",
+                    "name": root_name,
+                    "parent_id": None,
+                    "total": sum(c["total"] for c in top_level),
+                    "anomaly": sum(c["anomaly"] for c in top_level),
+                    "children": top_level
+                }]
+            return []
+            
+        devices_by_category_tree = assemble_tree(cat_map)
+        devices_by_area_tree = assemble_tree(
+            area_map, 
+            unassigned_total=skeleton["unassignedTotal"], 
+            unassigned_anom=unassigned_anomaly
+        )
+
+        # 5. 内存组装最新预警所需信息 (由于砍掉了 JOIN，在内存里把 code 和 sn 拼装回来)
+        recent_candidates.sort(key=lambda x: x.ts or 0, reverse=True)
+        recent_anomalies = []
+        for row in recent_candidates[:10]:
+            dev_id_str = str(row.device_inst_id)
+            meta = device_meta.get(dev_id_str, {})
+            recent_anomalies.append({
+                "id": str(row.id),
+                "device_code": meta.get("code", "Unknown"),
+                "device_sn": meta.get("sn", "Unknown"),
+                "anomaly": row.anomaly,
+                "ts": row.ts or 0
+            })
+
+        return {
+            "totalDevices": skeleton["totalDevices"],
+            "runningDevices": skeleton["runningDevices"],
             "faultyDevices": faulty_devices,
             "newDevicesToday": new_devices_today,
             "vibrationAnomalyCount": vibration_anomaly_count,
@@ -225,221 +392,6 @@ class DashboardService:
             "devicesByCategoryTree": devices_by_category_tree,
             "devicesByAreaTree": devices_by_area_tree,
         }
-
-    @staticmethod
-    async def _get_category_device_tree(
-        session: AsyncSession, tenant_id: UUID
-    ) -> list:
-        """
-        按设备分类树聚合设备总数和异常设备数。
-        先确定分类树结构，再统计每个分类下的设备总数和异常设备数。
-        返回树形结构: [{name, total, anomaly, children: [...]}]
-        """
-        # 1. 获取该租户下所有 DeviceCategory
-        stmt_cats = (
-            select(DeviceCategory)
-            .where(DeviceCategory.tenant_id == tenant_id)
-        )
-        cat_rows = (await session.execute(stmt_cats)).scalars().all()
-
-        # 构建分类字典，包含基础统计字段 (统一转为 str 确保查找匹配)
-        cat_map = {}
-        for cat in cat_rows:
-            cat_map[str(cat.id)] = {
-                "id": str(cat.id),
-                "name": cat.name,
-                "parent_id": str(cat.parent_id) if cat.parent_id else None,
-                "total": 0,
-                "anomaly": 0,
-                "children": [],
-            }
-
-        # 2. 完全按建议算法：将设备实例、规格、分类、异常测点提取合并为一个平铺组合数据
-        stmt_devices = (
-            select(
-                DeviceInst.id.label("inst_id"),
-                DeviceInst.code.label("instance_name"),
-                DeviceSpec.id.label("spec_id"),
-                DeviceCategory.id.label("category_id"),
-                func.max(SensorMonitoring.anomaly).label("anomaly")
-            )
-            .select_from(DeviceInst)
-            .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
-            .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
-            .outerjoin(SensorMonitoring, SensorMonitoring.device_inst_id == DeviceInst.id)
-            .where(DeviceCategory.tenant_id == tenant_id)
-            .group_by(DeviceInst.id, DeviceInst.code, DeviceSpec.id, DeviceCategory.id)
-        )
-        device_rows = (await session.execute(stmt_devices)).all()
-
-        # 3. 对组合数据进行在内存中的精确累加 (从叶子向所有祖级传递)
-        for row in device_rows:
-            cid = str(row.category_id) if row.category_id else None
-            if not cid or cid not in cat_map:
-                continue
-                
-            is_anomaly = 1 if (row.anomaly and row.anomaly > 0) else 0
-            
-            # 将当前实例的数据累加到自身直接分类，并不断向上追溯累加到全部上级父分类
-            curr_cid = cid
-            visited = set()
-            while curr_cid and curr_cid in cat_map:
-                if curr_cid in visited:
-                    break  # 防止数据中的死循环环状关联
-                visited.add(curr_cid)
-                
-                cat_map[curr_cid]["total"] += 1
-                cat_map[curr_cid]["anomaly"] += is_anomaly
-                
-                curr_cid = cat_map[curr_cid]["parent_id"]
-
-        # 4. 组装父子树形结构提供给前端
-        top_level_cats = []
-        for cid, info in cat_map.items():
-            pid = info["parent_id"]
-            if pid and pid in cat_map:
-                cat_map[pid]["children"].append(info)
-            else:
-                # 无父节点的即为最顶层根节点
-                top_level_cats.append(info)
-
-        # 5. 始终创建一个"全部"根节点，包裹所有顶层分类
-        if len(top_level_cats) > 0:
-            tree = [{
-                "id": "__root__",
-                "name": "全部",
-                "parent_id": None,
-                "total": sum(c["total"] for c in top_level_cats),
-                "anomaly": sum(c["anomaly"] for c in top_level_cats),
-                "children": top_level_cats,
-            }]
-        else:
-            tree = []
-
-        print("=== NestedPieChart Tree Data ===")
-        print(json.dumps(tree, ensure_ascii=False, indent=2))
-
-        return tree
-
-
-    @staticmethod
-    async def _get_area_device_tree(
-        session: AsyncSession, tenant_id: UUID
-    ) -> list:
-        """
-        按区域树聚合设备总数和异常设备数。
-        关联路径: DeviceInst → ProcessDeviceItem → ProcessDevice → Area
-        返回树形结构: [{name, total, anomaly, children: [...]}]
-        """
-        # 1. 获取该租户下所有 Area
-        stmt_areas = (
-            select(Area)
-            .where(Area.tenant_id == tenant_id)
-        )
-        area_rows = (await session.execute(stmt_areas)).scalars().all()
-
-        # 构建区域字典
-        area_map = {}
-        for area in area_rows:
-            area_map[str(area.id)] = {
-                "id": str(area.id),
-                "name": area.name,
-                "parent_id": str(area.parent_id) if area.parent_id else None,
-                "total": 0,
-                "anomaly": 0,
-                "children": [],
-            }
-
-        # 2. 查询设备实例 → ProcessDeviceItem → ProcessDevice → Area 的关联
-        #    同时 LEFT JOIN SensorMonitoring 获取异常信息
-        #    使用 LEFT JOIN 确保即使设备未关联 ProcessDevice 也能被统计到"未分配区域"
-        stmt_devices = (
-            select(
-                DeviceInst.id.label("inst_id"),
-                DeviceInst.code.label("instance_name"),
-                ProcessDevice.area_id.label("area_id"),
-                func.max(SensorMonitoring.anomaly).label("anomaly"),
-            )
-            .select_from(DeviceInst)
-            .outerjoin(ProcessDeviceItem, ProcessDeviceItem.device_inst_id == DeviceInst.id)
-            .outerjoin(ProcessDevice, ProcessDevice.id == ProcessDeviceItem.process_device_id)
-            .outerjoin(SensorMonitoring, SensorMonitoring.device_inst_id == DeviceInst.id)
-            .group_by(DeviceInst.id, DeviceInst.code, ProcessDevice.area_id)
-        )
-        device_rows = (await session.execute(stmt_devices)).all()
-
-        # 3. 对组合数据进行在内存中的精确累加 (从叶子向所有祖级传递)
-        #    先统计"未分配区域"的设备
-        unassigned_total = 0
-        unassigned_anomaly = 0
-
-        for row in device_rows:
-            aid = str(row.area_id) if row.area_id else None
-            if not aid or aid not in area_map:
-                # 设备未关联到任何已知区域，归入"未分配区域"
-                is_anomaly = 1 if (row.anomaly and row.anomaly > 0) else 0
-                unassigned_total += 1
-                unassigned_anomaly += is_anomaly
-                continue
-
-            is_anomaly = 1 if (row.anomaly and row.anomaly > 0) else 0
-
-            # 将当前实例的数据累加到自身直接区域，并不断向上追溯累加到全部上级父区域
-            curr_aid = aid
-            visited = set()
-            while curr_aid and curr_aid in area_map:
-                if curr_aid in visited:
-                    break  # 防止数据中的死循环环状关联
-                visited.add(curr_aid)
-
-                area_map[curr_aid]["total"] += 1
-                area_map[curr_aid]["anomaly"] += is_anomaly
-
-                curr_aid = area_map[curr_aid]["parent_id"]
-
-        # 如果有未分配区域的设备，添加一个虚拟根节点包裹所有区域和未分配设备
-        if unassigned_total > 0 or len(area_map) > 0:
-            # 先组装父子关系：将子区域挂载到父区域的 children 中
-            for aid, info in area_map.items():
-                pid = info["parent_id"]
-                if pid and pid in area_map:
-                    area_map[pid]["children"].append(info)
-
-            # 提取所有顶层区域（没有父节点或父节点不在 area_map 中的）
-            top_level_areas = []
-            for aid, info in area_map.items():
-                if not info["parent_id"] or info["parent_id"] not in area_map:
-                    top_level_areas.append(info)
-
-            # 如果存在未分配设备，添加"未分配区域"节点
-            if unassigned_total > 0:
-                top_level_areas.append({
-                    "id": "__unassigned__",
-                    "name": "未分配",
-                    "parent_id": None,
-                    "total": unassigned_total,
-                    "anomaly": unassigned_anomaly,
-                    "children": [],
-                })
-
-
-            # 始终创建一个"全部"根节点，包裹所有顶层区域和未分配区域
-            tree = [{
-                "id": "__root__",
-                "name": "全部",
-                "parent_id": None,
-                "total": sum(a["total"] for a in top_level_areas),
-                "anomaly": sum(a["anomaly"] for a in top_level_areas),
-                "children": top_level_areas,
-            }]
-
-        else:
-            tree = []
-
-        print("=== Area Tree Data ===")
-        print(json.dumps(tree, ensure_ascii=False, indent=2))
-
-        return tree
 
     @staticmethod
     def _get_level(count: int) -> int:

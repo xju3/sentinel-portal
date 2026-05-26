@@ -130,6 +130,9 @@ async def login(
         subject=str(account.id),
         tenant_id=str(account.tenant_id),
         username=account.username,
+        admin=account.admin,
+        contact_id=str(account.contact_id) if account.contact_id else None,
+        flag=account.flag,
     )
 
     return success(LoginResponse(
@@ -152,10 +155,12 @@ async def change_password(
     current_account: Account = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    if current_account.password != payload.current_password:
+    # Because JWT is stateless, we must query DB for the real password hash
+    db_account = await AuthService.get_account(session, current_account.id)
+    if not db_account or db_account.password != payload.current_password:
         raise HTTPException(status_code=400, detail="current password is incorrect")
     if payload.current_password == payload.new_password:
         raise HTTPException(status_code=400, detail="new password must be different")
 
-    await AuthService.update_account_password(session, current_account, payload.new_password)
+    await AuthService.update_account_password(session, db_account, payload.new_password)
     return success({"message": "password updated"})

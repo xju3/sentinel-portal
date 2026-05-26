@@ -27,6 +27,9 @@ def create_access_token(
     subject: str,
     tenant_id: str,
     username: str,
+    admin: bool = False,
+    contact_id: Optional[str] = None,
+    flag: int = 1,
     expires_minutes: Optional[int] = None,
 ) -> str:
     header = {"alg": "HS256", "typ": "JWT"}
@@ -36,6 +39,9 @@ def create_access_token(
         "sub": subject,
         "tenant_id": tenant_id,
         "username": username,
+        "admin": admin,
+        "contact_id": contact_id,
+        "flag": flag,
         "iat": now,
         "exp": now + ttl_minutes * 60,
     }

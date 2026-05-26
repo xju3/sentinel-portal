@@ -6,10 +6,7 @@ from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import db_manager
 from app.models.customer import Account
 from app.utils.jwt_token import decode_access_token
 
@@ -18,7 +15,6 @@ bearer_scheme = HTTPBearer(auto_error=False)
 
 async def get_current_account(
     credentials: HTTPAuthorizationCredentials | None = Depends(bearer_scheme),
-    session: AsyncSession = Depends(db_manager.get_session),
 ) -> Account:
     if credentials is None or credentials.scheme.lower() != "bearer":
         raise HTTPException(
@@ -30,20 +26,26 @@ async def get_current_account(
         payload = decode_access_token(credentials.credentials)
         account_id = UUID(str(payload.get("sub")))
         token_tenant_id = UUID(str(payload.get("tenant_id")))
+        username = payload.get("username")
+        admin = payload.get("admin", False)
+        contact_id_str = payload.get("contact_id")
+        contact_id = UUID(contact_id_str) if contact_id_str else None
+        flag = payload.get("flag", 1)
     except Exception as exc:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="authorization expired",
         ) from exc
 
-    result = await session.execute(
-        select(Account).where(Account.id == account_id, Account.active == True)  # noqa: E712
+    # Construct an in-memory Account object to avoid a DB hit on every request
+    account = Account(
+        id=account_id,
+        tenant_id=token_tenant_id,
+        username=username,
+        admin=admin,
+        contact_id=contact_id,
+        flag=flag,
+        active=True,  # Assume active since token is valid. Real state requires DB query.
     )
-    account = result.scalar_one_or_none()
-    if account is None or account.tenant_id != token_tenant_id:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="authorization expired",
-        )
 
     return account

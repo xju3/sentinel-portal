@@ -98,7 +98,7 @@ export const layout: RunTimeLayoutConfig = () => {
         return;
       }
       if (loggedIn && PUBLIC_PATHS.includes(pathname)) {
-        history.push('/device/categories');
+        history.push('/dashboard/overview');
       }
     },
   };
