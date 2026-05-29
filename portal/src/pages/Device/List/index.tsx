@@ -10,7 +10,7 @@ import {
   ProFormText,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Popconfirm, Space, message } from 'antd';
+import { Button, Popconfirm, Space, Tag, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs, { type Dayjs } from 'dayjs';
 
@@ -197,6 +197,24 @@ const DeviceListPage = () => {
       dataIndex: 'life_span',
       width: 110,
       valueType: 'digit',
+    },
+    {
+      title: '关联传感器(测点)',
+      hideInSearch: true,
+      width: 240,
+      render: (_, row: any) => {
+        const monitorings = row.sensor_monitorings || [];
+        if (!monitorings?.length) return '-';
+        return (
+          <Space size={[0, 4]} wrap>
+            {monitorings.map((m: any, idx: number) => {
+              const sn = m.sensor?.sn || '未知SN';
+              const loc = m.location?.name || '未知测点';
+              return <Tag color="blue" key={m.id || idx}>{`${sn} / ${loc}`}</Tag>;
+            })}
+          </Space>
+        );
+      },
     },
     {
       title: '描述',

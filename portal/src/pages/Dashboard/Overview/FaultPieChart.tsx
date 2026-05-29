@@ -27,7 +27,8 @@ const FaultPieChart = ({
     const offlineDevices = Math.max(0, totalDevices - normalRunning - faultyDevices);
 
     if (chartRef.current) {
-      pieChart = echarts.init(chartRef.current);
+      // 尝试获取已有实例复用，避免数据变动时反复创建引发性能问题
+      pieChart = echarts.getInstanceByDom(chartRef.current) || echarts.init(chartRef.current);
       pieChart.setOption({
         tooltip: {
           trigger: 'item',
@@ -91,9 +92,18 @@ const FaultPieChart = ({
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      pieChart?.dispose();
+      // 移除 dispose 调用以复用实例
     };
   }, [totalDevices, runningDevices, faultyDevices, vibrationAnomalyCount, temperatureAnomalyCount, bothAnomalyCount]);
+
+  // 组件卸载时安全销毁
+  useEffect(() => {
+    return () => {
+      if (chartRef.current) {
+        echarts.getInstanceByDom(chartRef.current)?.dispose();
+      }
+    };
+  }, []);
 
   return <div ref={chartRef} style={{ height: 100, width: '100%' }} />;
 };

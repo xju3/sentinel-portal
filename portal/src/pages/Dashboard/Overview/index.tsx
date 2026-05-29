@@ -168,11 +168,28 @@ const DashboardOverview = () => {
 
   // 定时刷新：每10分钟一次
   useEffect(() => {
-    const timer = setInterval(() => {
-      fetchDashboardData();
-      fetchCalendarData();
-    }, 600000);
-    return () => clearInterval(timer);
+    let timer: NodeJS.Timeout;
+
+    const scheduleNextFetch = () => {
+      // 引入随机抖动 (Jitter)：基础时间 10 分钟 (600000ms) + 随机延迟 (0 ~ 60秒)
+      // 目的：防止多个客户端在同一瞬间并发请求，避免瞬间打死 Python FastAPI 的单线程事件循环
+      const jitter = Math.floor(Math.random() * 60000);
+      const nextInterval = 600000 + jitter;
+
+      timer = setTimeout(() => {
+      // 如果当前页面不可见（例如最小化、切换到了其他标签页），则跳过本次刷新请求
+      if (!document.hidden) {
+        fetchDashboardData();
+        fetchCalendarData();
+      }
+        // 递归调用，实现下一次带有随机抖动的定时
+        scheduleNextFetch();
+      }, nextInterval);
+    };
+
+    scheduleNextFetch();
+
+    return () => clearTimeout(timer);
   }, []);
 
   return (

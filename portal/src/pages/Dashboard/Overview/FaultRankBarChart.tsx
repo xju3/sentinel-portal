@@ -17,7 +17,8 @@ const FaultRankBarChart = ({ data }: FaultRankBarChartProps) => {
     let chart: echarts.ECharts | undefined;
 
     if (chartRef.current) {
-      chart = echarts.init(chartRef.current);
+      // 尝试获取已有实例，如果没有再初始化。避免每次数据更新都重复创建 Canvas
+      chart = echarts.getInstanceByDom(chartRef.current) || echarts.init(chartRef.current);
 
       if (!data || data.length === 0) {
         chart.setOption({
@@ -91,9 +92,18 @@ const FaultRankBarChart = ({ data }: FaultRankBarChartProps) => {
 
     return () => {
       window.removeEventListener('resize', handleResize);
-      chart?.dispose();
+      // 此处不调用 chart?.dispose()，否则每次数据刷新图表都会被销毁重建
     };
   }, [data]);
+
+  // 单独增加一个 effect，仅在组件真正被卸载时才销毁 Echarts 实例
+  useEffect(() => {
+    return () => {
+      if (chartRef.current) {
+        echarts.getInstanceByDom(chartRef.current)?.dispose();
+      }
+    };
+  }, []);
 
   return <div ref={chartRef} style={{ height: 263, width: '100%' }} />;
 };
