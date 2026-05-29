@@ -140,6 +140,12 @@ export default defineConfig({
           hideInMenu: true,
         },
         {
+          path: '/monitoring/sensors/:sn/history',
+          name: '历史趋势',
+          component: '@/pages/Monitoring/Sensors/History/index',
+          hideInMenu: true,
+        },
+        {
           path: '/monitoring/points',
           name: '测点设置',
           component: '@/pages/Monitoring/Points',

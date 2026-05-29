@@ -32,15 +32,18 @@ class PatrolDiagnosticEngine:
         计算指定时间切片内的斜率和累计落差
         注意：传入的 data_slice 是时间倒序(最新->最老)，需要反转为时间正序(最老->最新)来算斜率
         """
+        if len(data_slice) < 2:
+            return 0.0, 0.0
+
         y = np.array(data_slice[::-1]) 
-        amplitude = np.max(y) - np.min(y)
+        amplitude = float(np.max(y) - np.min(y))
         x = np.arange(len(y))
         
         # 至少需要 3 个点拟合斜率才具有统计学意义，否则设为 0
         if len(y) >= 3:
             slope, _, _, _, _ = linregress(x, y)
         else:
-            slope = y[-1] - y[0] # 若只有2个点，斜率即为首尾差
+            slope = float(y[-1] - y[0]) # 若只有2个点，斜率即为首尾差
             
         return slope, amplitude
 
@@ -81,12 +84,12 @@ class PatrolDiagnosticEngine:
         details = []
         for w in windows:
             need_points = int(w * freq)
-            if queue_len < need_points:
+            if queue_len < need_points or need_points < 2:
                 details.append({
                     "window": label_map.get(w, f"{w}h"),
                     "status": self.STATUS_MAP["INSUFFICIENT_DATA"],
                     "metric": "N/A",
-                    "desc": f"数据不足 (需≥{need_points}点，当前{queue_len}点)"
+                    "desc": f"数据不足 (需≥{max(need_points, 2)}点，当前{queue_len}点)"
                 })
                 continue
 

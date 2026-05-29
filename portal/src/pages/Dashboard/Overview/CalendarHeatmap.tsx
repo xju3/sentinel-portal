@@ -304,7 +304,7 @@ const CalendarHeatmap = ({ data, loading }: CalendarHeatmapProps) => {
         }}
       >
         <div style={{ fontSize: 13, color: '#333', fontWeight: 500 }}>
-          {stats.totalFaults} 次故障记录 · 过去 12 个月
+           过去 <strong style={{ color: '#1890ff' }}>12</strong> 个月, <strong style={{ color: '#ff4d4f' }}>{stats.totalFaults}</strong> 监控日产生故障, 共 <strong style={{ color: '#1890ff' }}>{stats.totalDays}</strong> 天
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
           <span style={{ fontSize: 11, color: '#999', marginRight: 4 }}>Less</span>

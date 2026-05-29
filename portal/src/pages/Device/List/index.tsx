@@ -12,6 +12,7 @@ import {
 } from '@ant-design/pro-components';
 import { Button, Popconfirm, Space, Tag, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import { useNavigate } from '@umijs/max';
 import dayjs, { type Dayjs } from 'dayjs';
 
 import EntityPicker from '@/components/EntityPicker';
@@ -57,6 +58,7 @@ const toApiDate = (value: string | Dayjs): string => {
 };
 
 const DeviceListPage = () => {
+  const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -210,7 +212,18 @@ const DeviceListPage = () => {
             {monitorings.map((m: any, idx: number) => {
               const sn = m.sensor?.sn || '未知SN';
               const loc = m.location?.name || '未知测点';
-              return <Tag color="blue" key={m.id || idx}>{`${sn} / ${loc}`}</Tag>;
+              return (
+                <Tag 
+                  color="blue" 
+                  key={m.id || idx}
+                  style={{ cursor: sn !== '未知SN' ? 'pointer' : 'default' }}
+                  onClick={() => {
+                    if (sn !== '未知SN') {
+                      navigate(`/monitoring/sensors/${sn}/history?location=${encodeURIComponent(loc)}`);
+                    }
+                  }}
+                >{`${sn} / ${loc}`}</Tag>
+              );
             })}
           </Space>
         );

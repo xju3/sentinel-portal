@@ -23,7 +23,7 @@ from app.utils.exceptions import DomainException
 from app.clients.mqtt import mqtt_manager
 from app.clients.handler import patrol_msg_handler
 from app.utils.logger import setup_logging
-from app.routers import auth, health, sensors, devices, customers, admin, dashboard, thresholds
+from app.routers import auth, health, sensors, devices, customers, admin, dashboard, thresholds, sensor_trends
 
 # Setup logging
 setup_logging()
@@ -114,6 +114,7 @@ app.include_router(auth.router, prefix=settings.api_prefix)
 app.include_router(admin.router, prefix=settings.api_prefix)
 app.include_router(dashboard.router, prefix=settings.api_prefix)
 app.include_router(thresholds.router, prefix=settings.api_prefix)
+app.include_router(sensor_trends.router, prefix=settings.api_prefix)
 
 
 
