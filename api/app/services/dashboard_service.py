@@ -2,6 +2,7 @@
 Dashboard service - business logic for dashboard aggregations
 """
 
+import asyncio
 import json
 import logging
 import copy
@@ -82,14 +83,14 @@ class DashboardService:
                 logger.error(f"Failed to rebuild topology cache in background for tenant {tenant_id}: {e}")
 
     @staticmethod
-    def _get_cached_device_stats(tenant_id: UUID) -> Optional[dict]:
+    async def _get_cached_device_stats(tenant_id: UUID) -> Optional[dict]:
         """从 Redis 读取缓存的设备基础统计数据"""
         client = DashboardService._get_redis_client()
         if not client:
             return None
         try:
             key = DashboardService._get_device_stats_cache_key(tenant_id)
-            val = client.get(key)
+            val = await asyncio.to_thread(client.get, key)
             if val is not None:
                 return json.loads(val)
         except Exception as e:
@@ -97,14 +98,14 @@ class DashboardService:
         return None
 
     @staticmethod
-    def _set_cached_device_stats(tenant_id: UUID, data: dict) -> None:
+    async def _set_cached_device_stats(tenant_id: UUID, data: dict) -> None:
         """将设备基础统计数据写入 Redis 缓存（永久有效，无 TTL，由数据变更触发失效）"""
         client = DashboardService._get_redis_client()
         if not client:
             return
         try:
             key = DashboardService._get_device_stats_cache_key(tenant_id)
-            client.set(key, json.dumps(data))
+            await asyncio.to_thread(client.set, key, json.dumps(data))
             logger.info(f"Cached device stats for tenant {tenant_id}")
         except Exception as e:
             logger.error(f"Failed to cache device stats: {e}")
@@ -117,7 +118,7 @@ class DashboardService:
     async def _get_topology_skeleton(session: AsyncSession, tenant_id: UUID, force_rebuild: bool = False) -> dict:
         """获取并缓存静态拓扑骨架，将分类和区域树与设备关联关系分离"""
         if not force_rebuild:
-            cached = DashboardService._get_cached_device_stats(tenant_id)
+            cached = await DashboardService._get_cached_device_stats(tenant_id)
             # 兼容处理：检查是否存在 deviceMeta 和 processMap，以防读取到遗留的旧版本缓存结构
             if cached and "deviceMeta" in cached and "processMap" in cached:
                 return cached
@@ -263,7 +264,7 @@ class DashboardService:
         }
         
         # 缓存永久保存，只有增删改数据时通过 invalidate 方法主动使其失效
-        DashboardService._set_cached_device_stats(tenant_id, skeleton)
+        await DashboardService._set_cached_device_stats(tenant_id, skeleton)
         return skeleton
 
     @staticmethod
@@ -479,7 +480,7 @@ class DashboardService:
             return None
         try:
             key = f"{CALENDAR_DAILY_PREFIX}{date_str}"
-            val = client.get(key)
+            val = await asyncio.to_thread(client.get, key)
             if val is not None:
                 return int(val)
         except Exception as e:
@@ -494,7 +495,7 @@ class DashboardService:
             return
         try:
             key = f"{CALENDAR_DAILY_PREFIX}{date_str}"
-            client.setex(key, CALENDAR_CACHE_TTL, count)
+            await asyncio.to_thread(client.setex, key, CALENDAR_CACHE_TTL, count)
         except Exception as e:
             logger.debug(f"Failed to cache daily count for {date_str}: {e}")
 
@@ -637,7 +638,7 @@ class DashboardService:
             return None
         try:
             key = DashboardService._get_cached_full_calendar_key(start_date, today)
-            val = client.get(key)
+            val = await asyncio.to_thread(client.get, key)
             if val is not None:
                 return json.loads(val)
         except Exception as e:
@@ -664,6 +665,6 @@ class DashboardService:
                 date.fromisoformat(data["months"][0]["days"][0]["date"]),
                 today
             )
-            client.setex(key, CALENDAR_CACHE_TTL, json.dumps(data))
+            await asyncio.to_thread(client.setex, key, CALENDAR_CACHE_TTL, json.dumps(data))
         except Exception as e:
             logger.debug(f"Failed to cache full calendar: {e}")

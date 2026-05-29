@@ -4,6 +4,7 @@ Device data models
 
 import uuid
 from sqlalchemy import Column, String, Date, Uuid, Integer, SmallInteger, Float, Boolean, Text
+from sqlalchemy.orm import relationship
 
 from app.models import Base
 
@@ -69,6 +70,13 @@ class DeviceInst(Base):
     active = Column(SmallInteger, default=1, comment="设备是否运行") 
     available = Column(SmallInteger, default=1, comment="设备是否可用, 如未分配或正在维修则不可用")
     device_spec_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to device_specs
+
+    sensor_monitorings = relationship(
+        "SensorMonitoring",
+        primaryjoin="DeviceInst.id == foreign(SensorMonitoring.device_inst_id)",
+        lazy="selectin",
+        uselist=True
+    )
 
 
 class Process(Base):

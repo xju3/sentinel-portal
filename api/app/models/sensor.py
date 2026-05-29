@@ -5,6 +5,7 @@ Sensor data models
 import uuid
 from datetime import datetime
 from sqlalchemy import Uuid, Column, SmallInteger, Numeric, Integer, String, Float, DateTime, Boolean, Text, BigInteger
+from sqlalchemy.orm import relationship
 
 from sqlalchemy.dialects.mysql import JSON as MySQLJSON
 
@@ -95,6 +96,19 @@ class SensorMonitoring(Base):
     anomaly = Column(SmallInteger, nullable=False, default=0, comment="异常类型: 0=正常, 1=震动异常, 2=温度异常, 3=震动与温度异常")
     ts = Column(BigInteger, nullable=True, comment="异常发生时间戳(Unix毫秒)")
     status = Column(SmallInteger, default=1, comment="tiny(1) status")
+
+    sensor = relationship(
+        "Sensor",
+        primaryjoin="foreign(SensorMonitoring.sensor_id) == Sensor.id",
+        lazy="selectin",
+        uselist=False
+    )
+    location = relationship(
+        "Location",
+        primaryjoin="foreign(SensorMonitoring.location_id) == Location.id",
+        lazy="selectin",
+        uselist=False
+    )
 
 
 class SensorThreshold(Base):
