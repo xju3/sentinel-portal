@@ -43,11 +43,13 @@ const MonitoringLocationPage = () => {
   const [rows, setRows] = useState<Location[]>([]);
   const [editing, setEditing] = useState<Location | null>(null);
   const [query, setQuery] = useState<Record<string, any>>({});
+  const [sort, setSort] = useState<Record<string, any>>({});
 
-  const loadRows = async () => {
+  const loadRows = async (currentSort = sort) => {
     setLoading(true);
     try {
-      setRows(await listAllLocations());
+      // 注意：这里需要你同步修改服务层的 listAllLocations 方法，让它把排序参数发给后端
+      setRows(await listAllLocations({ sort_field: currentSort.field, sort_order: currentSort.order }));
     } catch (error) {
       message.error(toErrorMessage(error));
     } finally {
@@ -92,14 +94,14 @@ const MonitoringLocationPage = () => {
       title: '测点名称',
       dataIndex: 'name',
       width: 220,
-      sorter: (a, b) => (a.name || '').localeCompare(b.name || '', 'zh-CN'),
+      sorter: true,
     },
     {
       title: '描述',
       dataIndex: 'description',
       ellipsis: true,
       render: (_, row) => row.description || '-',
-      sorter: (a, b) => (a.description || '').localeCompare(b.description || '', 'zh-CN'),
+      sorter: true,
     },
     {
       title: '状态',
@@ -112,7 +114,7 @@ const MonitoringLocationPage = () => {
       },
       render: (_, row) =>
         Number(row.status) === 1 ? <Tag color="success">启用</Tag> : <Tag>停用</Tag>,
-      sorter: (a, b) => Number(a.status) - Number(b.status),
+      sorter: true,
     },
     {
       title: '操作',
@@ -161,6 +163,12 @@ const MonitoringLocationPage = () => {
         search={{ labelWidth: 'auto' }}
         onSubmit={(values) => setQuery(values)}
         onReset={() => setQuery({})}
+        onChange={(pagination, filters, sorter: any) => {
+          // 捕获服务端的排序指令并触发数据刷新
+          const currentSort = sorter.order ? { field: sorter.field, order: sorter.order } : {};
+          setSort(currentSort);
+          loadRows(currentSort);
+        }}
         loading={loading}
         columns={columns}
         dataSource={filteredRows}

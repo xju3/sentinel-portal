@@ -44,11 +44,13 @@ const DeviceSupplierPage = () => {
   const [rows, setRows] = useState<Supplier[]>([]);
   const [editing, setEditing] = useState<Supplier | null>(null);
   const [query, setQuery] = useState<Record<string, any>>({});
+  const [sort, setSort] = useState<Record<string, any>>({});
 
-  const loadRows = async () => {
+  const loadRows = async (currentSort = sort) => {
     setLoading(true);
     try {
-      setRows(await listAllSuppliers());
+      // 注意：同样需要后端接口支持接收排序参数
+      setRows(await listAllSuppliers({ sort_field: currentSort.field, sort_order: currentSort.order }));
     } catch (error) {
       message.error(toErrorMessage(error));
     } finally {
@@ -91,20 +93,20 @@ const DeviceSupplierPage = () => {
       title: '供应商名称',
       dataIndex: 'name',
       width: 180,
-      sorter: (a, b) => (a.name || '').localeCompare(b.name || '', 'zh-CN'),
+      sorter: true,
     },
     {
       title: '品牌',
       dataIndex: 'brand',
       width: 160,
-      sorter: (a, b) => (a.brand || '').localeCompare(b.brand || '', 'zh-CN'),
+      sorter: true,
     },
     {
       title: '联系方式',
       dataIndex: 'contact_info',
       ellipsis: true,
       render: (_, row) => row.contact_info || '-',
-      sorter: (a, b) => (a.contact_info || '').localeCompare(b.contact_info || '', 'zh-CN'),
+      sorter: true,
     },
     {
       title: '状态',
@@ -115,7 +117,7 @@ const DeviceSupplierPage = () => {
         false: { text: '停用' },
       },
       render: (_, row) => (row.active ? <Tag color="success">启用</Tag> : <Tag>停用</Tag>),
-      sorter: (a, b) => Number(a.active) - Number(b.active),
+      sorter: true,
     },
     {
       title: '操作',
@@ -166,6 +168,11 @@ const DeviceSupplierPage = () => {
         search={{ labelWidth: 'auto' }}
         onSubmit={(values) => setQuery(values)}
         onReset={() => setQuery({})}
+        onChange={(pagination, filters, sorter: any) => {
+          const currentSort = sorter.order ? { field: sorter.field, order: sorter.order } : {};
+          setSort(currentSort);
+          loadRows(currentSort);
+        }}
         options={{ reload: loadRows }}
         optionsRender={renderRefSafeTableOptions}
         toolBarRender={() => [
