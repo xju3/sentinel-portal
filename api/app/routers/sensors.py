@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 from app.services.dependencies import get_session
 from app.services.sensor_service import SensorTypeService, SensorDbService, SensorBatchService
 from app.models.customer import Account
-from app.models.sensor import Sensor
+from app.models.sensor import Sensor, SensorBatch
 from app.utils.auth import get_current_account
 from app.utils.response import success
 from app.utils.exceptions import DomainException
@@ -111,8 +111,16 @@ async def list_sensor_batches(
     session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
-    return success(await SensorBatchService.get_by_tenant(session, cast(UUID, current_account.tenant_id), skip, limit, sort_by, sort_order))
+    stmt = select(SensorBatch).where(SensorBatch.tenant_id == current_account.tenant_id)
+    if sort_by and hasattr(SensorBatch, sort_by):
+        col = getattr(SensorBatch, sort_by)
+        stmt = stmt.order_by(col.desc() if sort_order == "descend" else col.asc())
+    else:
+        stmt = stmt.order_by(SensorBatch.created_at.desc())
 
+    total = await session.scalar(select(func.count()).select_from(stmt.subquery()))
+    items = (await session.execute(stmt.offset(skip).limit(limit))).scalars().all()
+    return success({"items": items, "total": total})
 
 @router.get("/batches/{obj_id}")
 async def get_sensor_batch(

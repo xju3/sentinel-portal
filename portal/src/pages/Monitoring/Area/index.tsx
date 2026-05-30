@@ -163,7 +163,7 @@ const MonitoringAreaPage = () => {
           return false;
         }
         if (query.parent_id) {
-          const parentName = row.parent_id ? areaMap.get(row.parent_id) || '' : '';
+        const parentName = row.parent?.name || '';
           const hit =
             norm(parentName).includes(norm(query.parent_id)) ||
             norm(row.parent_id).includes(norm(query.parent_id));

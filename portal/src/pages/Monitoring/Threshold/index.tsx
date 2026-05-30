@@ -18,7 +18,6 @@ import {
   listSensorThresholds,
   updateSensorThreshold,
 } from '@/services/sensorThreshold';
-import { listSensorTypes, SensorType } from '@/services/sensorType';
 
 import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';
 
@@ -61,7 +60,6 @@ const MonitoringThresholdPage = () => {
   const [rows, setRows] = useState<SensorThreshold[]>([]);
   const [editing, setEditing] = useState<SensorThreshold | null>(null);
   const [query, setQuery] = useState<Record<string, any>>({});
-  const [sensorTypes, setSensorTypes] = useState<SensorType[]>([]);
 
   const loadRows = async () => {
     setLoading(true);
@@ -74,17 +72,8 @@ const MonitoringThresholdPage = () => {
     }
   };
 
-  const loadSensorTypes = async () => {
-    try {
-      setSensorTypes(await listSensorTypes());
-    } catch (error) {
-      message.error(toErrorMessage(error));
-    }
-  };
-
   useEffect(() => {
     loadRows();
-    loadSensorTypes();
   }, []);
 
   const filteredRows = useMemo(() => {
@@ -100,11 +89,6 @@ const MonitoringThresholdPage = () => {
     });
   }, [query, rows]);
 
-  const getSensorTypeName = (code: string) => {
-    const found = sensorTypes.find((t) => t.name === code);
-    return found ? found.name : code;
-  };
-
   const columns: ProColumns<SensorThreshold>[] = [
     {
       title: '序号',
@@ -119,8 +103,8 @@ const MonitoringThresholdPage = () => {
       dataIndex: 'code',
       align: 'center',
       width: 120,
-      render: (_, row) => <Tag>{getSensorTypeName(row.code)}</Tag>,
-      sorter: (a, b) => getSensorTypeName(a.code).localeCompare(getSensorTypeName(b.code), 'zh-CN'),
+      render: (_, row) => <Tag>{row.code || '-'}</Tag>,
+      sorter: (a, b) => (a.code || '').localeCompare(b.code || '', 'zh-CN'),
     },
     {
       title: '监测指标',

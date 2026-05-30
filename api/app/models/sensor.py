@@ -68,6 +68,13 @@ class SensorBatch(Base):
     sensor_type_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to sensor_types
     tenant_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to tenant for multi-tenant support
     created_at = Column(DateTime, default=datetime.utcnow)
+    
+    sensor_type = relationship(
+        "SensorType",
+        primaryjoin="foreign(SensorBatch.sensor_type_id) == SensorType.id",
+        lazy="selectin",
+        uselist=False
+    )
 
 class SensorStatus(Base):
     """Sensor status entity model"""
@@ -106,6 +113,12 @@ class SensorMonitoring(Base):
     location = relationship(
         "Location",
         primaryjoin="foreign(SensorMonitoring.location_id) == Location.id",
+        lazy="selectin",
+        uselist=False
+    )
+    device_inst = relationship(
+        "DeviceInst",
+        primaryjoin="foreign(SensorMonitoring.device_inst_id) == DeviceInst.id",
         lazy="selectin",
         uselist=False
     )

@@ -2,13 +2,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { PageContainer, ProCard } from '@ant-design/pro-components';
 import { Badge, Button, Col, Drawer, Empty, List, Row, Space, Spin, Tag, Tooltip, message } from 'antd';
 
-import { listAllSensorMonitorings, listSensorMonitoringDeviceInstOptions } from '@/services/sensorMonitoring';
-import { listAllLocations } from '@/services/location';
-import { listAllSensors } from '@/services/tenantSensor';
-import { listAllDeviceSpecs } from '@/services/deviceSpec';
-import { listAllDeviceCategories } from '@/services/deviceCategory';
-import { listAllProcessDeviceItems, listAllProcessDevices, listAllProcesses } from '@/services/process';
-import { listAllAreas } from '@/services/area';
+import { listAllSensorMonitorings } from '@/services/sensorMonitoring';
 import HistoryPage from '@/pages/Monitoring/Sensors/History';
 
 // 异常映射字典
@@ -36,15 +30,6 @@ const MonitoringSensorsPage = () => {
 
   // 数据源
   const [monitorings, setMonitorings] = useState<any[]>([]);
-  const [devices, setDevices] = useState<any[]>([]);
-  const [locations, setLocations] = useState<any[]>([]);
-  const [sensors, setSensors] = useState<any[]>([]);
-  const [specs, setSpecs] = useState<any[]>([]);
-  const [categories, setCategories] = useState<any[]>([]);
-  const [processes, setProcesses] = useState<any[]>([]);
-  const [processDevices, setProcessDevices] = useState<any[]>([]);
-  const [processDeviceItems, setProcessDeviceItems] = useState<any[]>([]);
-  const [areas, setAreas] = useState<any[]>([]);
 
   // 侧边栏图表状态
   const [drawerVisible, setDrawerVisible] = useState(false);
@@ -54,28 +39,8 @@ const MonitoringSensorsPage = () => {
   const loadData = async () => {
     setLoading(true);
     try {
-      const [mRes, dRes, lRes, sRes, specRes, catRes, procRes, pdRes, pdiRes, areaRes] = await Promise.all([
-        listAllSensorMonitorings(),
-        listSensorMonitoringDeviceInstOptions(),
-        listAllLocations(),
-        listAllSensors(),
-        listAllDeviceSpecs(),
-        listAllDeviceCategories(),
-        listAllProcesses(),
-        listAllProcessDevices(),
-        listAllProcessDeviceItems(),
-        listAllAreas(),
-      ]);
+      const mRes = await listAllSensorMonitorings();
       setMonitorings(mRes || []);
-      setDevices(dRes || []);
-      setLocations(lRes || []);
-      setSensors(sRes || []);
-      setSpecs(specRes || []);
-      setCategories(catRes || []);
-      setProcesses(procRes || []);
-      setProcessDevices(pdRes || []);
-      setProcessDeviceItems(pdiRes || []);
-      setAreas(areaRes || []);
     } catch (error) {
       message.error(toErrorMessage(error));
     } finally {
@@ -87,95 +52,32 @@ const MonitoringSensorsPage = () => {
     loadData();
   }, []);
 
-  // 构建设备关系映射：DeviceInst → DeviceSpec → DeviceCategory → Process → Area
-  const deviceRelationMap = useMemo(() => {
-    const safeDevices = getArray(devices);
-    const safeProcessDeviceItems = getArray(processDeviceItems);
-    const safeProcessDevices = getArray(processDevices);
-    const safeAreas = getArray(areas);
-    const safeProcesses = getArray(processes);
-    const safeCategories = getArray(categories);
-    const safeSpecs = getArray(specs);
-
-    // processDeviceItem → processDevice 映射 (按 device_inst_id)
-    const pdiToPd = new Map<string, string>();
-    safeProcessDeviceItems.forEach((pdi: any) => {
-      if (pdi?.device_inst_id && pdi?.process_device_id) {
-        pdiToPd.set(pdi.device_inst_id, pdi.process_device_id);
-      }
-    });
-
-    // processDevice 快速查找表
-    const pdMap = new Map<string, any>();
-    safeProcessDevices.forEach((pd: any) => {
-      if (pd?.id) {
-        pdMap.set(pd.id, pd);
-      }
-    });
-
-    // 各实体快速查找表
-    const areaMap = new Map(safeAreas.map((a: any) => [a.id, a]));
-    const processMap = new Map(safeProcesses.map((p: any) => [p.id, p]));
-    const categoryMap = new Map(safeCategories.map((c: any) => [c.id, c]));
-    const specMap = new Map(safeSpecs.map((s: any) => [s.id, s]));
-
-    // 按 device_inst_id 汇总关系
-    const result = new Map<string, any>();
-    safeDevices.forEach((d: any) => {
-      if (!d?.id) return;
-
-      const spec = specMap.get(d.device_spec_id);
-      const category = spec ? categoryMap.get(spec.device_category_id) : undefined;
-
-      const pdId = pdiToPd.get(d.id);
-      const pd = pdId ? pdMap.get(pdId) : undefined;
-      const process = pd ? processMap.get(pd.process_id) : undefined;
-      const area = pd?.area_id ? areaMap.get(pd.area_id) : undefined;
-
-      result.set(d.id, {
-        specName: spec?.name || undefined,
-        specModel: spec?.model || undefined,
-        specBrand: spec?.brand || undefined,
-        categoryName: category?.name || undefined,
-        processName: process?.name || undefined,
-        areaName: area?.name || undefined,
-      });
-    });
-
-    return result;
-  }, [devices, specs, categories, processes, processDevices, processDeviceItems, areas]);
-
-  // 核心分组逻辑：只找出存在报警的测点，并按设备实例归类
   const alertGroups = useMemo(() => {
     const safeMonitorings = getArray(monitorings);
-    const safeDevices = getArray(devices);
-    const safeLocations = getArray(locations);
-    const safeSensors = getArray(sensors);
 
     const anomalousMonitorings = safeMonitorings.filter((m: any) => m && m.anomaly > 0);
 
     const groups = new Map<string, any>();
     anomalousMonitorings.forEach((m: any) => {
-      const device = safeDevices.find((d: any) => d && d.id === m.device_inst_id);
-      if (!device) return;
+      const deviceId = m.device_inst_id;
+      if (!deviceId) return;
 
-      if (!groups.has(device.id)) {
-        groups.set(device.id, {
-          device,
-          relation: deviceRelationMap.get(device.id),
+      if (!groups.has(deviceId)) {
+        groups.set(deviceId, {
+          device: m.device_inst || { id: deviceId, code: '未知设备', name: '未知设备' },
           alerts: [],
         });
       }
 
-      groups.get(device.id).alerts.push({
+      groups.get(deviceId).alerts.push({
         monitoring: m,
-        location: safeLocations.find((l: any) => l && l.id === m.location_id),
-        sensor: safeSensors.find((s: any) => s && s.id === m.sensor_id),
+        location: m.location || { name: '未知测点' },
+        sensor: m.sensor || { sn: '未知SN' },
       });
     });
 
     return Array.from(groups.values());
-  }, [monitorings, devices, locations, sensors, deviceRelationMap]);
+  }, [monitorings]);
 
   return (
     <PageContainer title="设备报警监控" subTitle="实时监控存在异常状态的设备及其测点">
@@ -185,7 +87,12 @@ const MonitoringSensorsPage = () => {
         ) : (
           <Row gutter={[16, 16]}>
             {alertGroups.map((group) => {
-              const rel = group.relation;
+              const dev = group.device;
+              const spec = dev?.device_spec;
+              const categoryName = spec?.device_category?.name;
+              // 假设后端返回了工段/区域信息，或者可为空
+              const processName = dev?.process_device?.process?.name;
+              const areaName = dev?.process_device?.area?.name;
               return (
                 <Col xs={24} lg={12} xl={8} key={group.device.id}>
                   <ProCard
@@ -208,30 +115,30 @@ const MonitoringSensorsPage = () => {
                         {group.device.name || '-'}
                       </div>
                       {/* 第3行：标签（分类 / 工段 / 区域） */}
-                      {(rel?.categoryName || rel?.processName || rel?.areaName) && (
+                      {(categoryName || processName || areaName) && (
                         <div style={{ marginBottom: 6 }}>
                           <Space size={[4, 4]} wrap>
-                            {rel?.categoryName && (
-                              <Tag color="purple">{rel.categoryName}</Tag>
+                            {categoryName && (
+                              <Tag color="purple">{categoryName}</Tag>
                             )}
-                            {rel?.processName && (
-                              <Tag color="cyan">{rel.processName}</Tag>
+                            {processName && (
+                              <Tag color="cyan">{processName}</Tag>
                             )}
-                            {rel?.areaName && (
-                              <Tag color="green">{rel.areaName}</Tag>
+                            {areaName && (
+                              <Tag color="green">{areaName}</Tag>
                             )}
                           </Space>
                         </div>
                       )}
                       {/* 第4行：规格 + 描述 */}
-                      {(rel?.specName || group.device.desc) && (
+                      {(spec?.name || group.device.desc) && (
                         <div style={{ fontSize: 12, color: '#8c8c8c', lineHeight: '18px' }}>
-                          {rel?.specName && (
+                          {spec?.name && (
                             <span>
-                              规格：{rel.specName}{rel.specModel ? ` / ${rel.specModel}` : ''}{rel.specBrand ? ` / ${rel.specBrand}` : ''}
+                              规格：{spec.name}{spec.model ? ` / ${spec.model}` : ''}{spec.brand ? ` / ${spec.brand}` : ''}
                             </span>
                           )}
-                          {rel?.specName && group.device.desc && <span style={{ margin: '0 6px' }}>|</span>}
+                          {spec?.name && group.device.desc && <span style={{ margin: '0 6px' }}>|</span>}
                           {group.device.desc && (
                             <Tooltip title={group.device.desc}>
                               <span

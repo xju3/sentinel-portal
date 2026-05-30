@@ -70,6 +70,13 @@ class DeviceInst(Base):
     active = Column(SmallInteger, default=1, comment="设备是否运行") 
     available = Column(SmallInteger, default=1, comment="设备是否可用, 如未分配或正在维修则不可用")
     device_spec_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to device_specs
+    
+    device_spec = relationship(
+        "DeviceSpec",
+        primaryjoin="foreign(DeviceInst.device_spec_id) == DeviceSpec.id",
+        lazy="selectin",
+        uselist=False
+    )
 
     sensor_monitorings = relationship(
         "SensorMonitoring",

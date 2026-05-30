@@ -120,7 +120,7 @@ const ProcessManagePage = () => {
   const filteredRows = useMemo(() => {
     const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();
     return rows.filter((row) => {
-      const processName = processMap.get(row.process_id)?.name || '';
+      const processName = row.process?.name || '';
       if (query.code && !norm(row.code).includes(norm(query.code))) {
         return false;
       }
@@ -136,7 +136,7 @@ const ProcessManagePage = () => {
         }
       }
       if (query.area_id) {
-        const areaName = row.area_id ? areaMap.get(row.area_id) || '' : '';
+        const areaName = row.area?.name || '';
         const hit =
           norm(areaName).includes(norm(query.area_id)) ||
           norm(row.area_id).includes(norm(query.area_id));

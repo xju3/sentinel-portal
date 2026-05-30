@@ -29,14 +29,26 @@ const MonitoringSensorsPage = () => {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState<SensorBatch[]>([]);
+  const [total, setTotal] = useState(0);
+  const [current, setCurrent] = useState(1);
+  const [pageSize, setPageSize] = useState(10);
   const [query, setQuery] = useState<Record<string, any>>({});
   const [sort, setSort] = useState<Record<string, any>>({});
-  const [sensorTypes, setSensorTypes] = useState<SensorType[]>([]);
 
-  const loadRows = async (currentSort = sort) => {
+  const loadRows = async (page: number, size: number, currentSort = sort) => {
     setLoading(true);
     try {
-      setRows(await listSensorBatches({ sort_field: currentSort.field, sort_order: currentSort.order }));
+      const skip = (page - 1) * size;
+      const res = await listSensorBatches(skip, size, { sort_field: currentSort.field, sort_order: currentSort.order }) as any;
+      const items = Array.isArray(res) ? res : res?.items || res?.data || [];
+      setRows(items);
+      if (res && res.total !== undefined) {
+        setTotal(res.total);
+      } else if (items.length < size) {
+        setTotal(skip + items.length);
+      } else {
+        setTotal(skip + size + 1);
+      }
     } catch (error) {
       message.error(toErrorMessage(error));
     } finally {
@@ -44,17 +56,8 @@ const MonitoringSensorsPage = () => {
     }
   };
 
-  const loadSensorTypes = async () => {
-    try {
-      setSensorTypes(await listSensorTypes());
-    } catch (error) {
-      message.error(toErrorMessage(error));
-    }
-  };
-
   useEffect(() => {
-    loadRows();
-    loadSensorTypes();
+    loadRows(current, pageSize);
   }, []);
 
   const filteredRows = useMemo(() => {
@@ -67,9 +70,16 @@ const MonitoringSensorsPage = () => {
     });
   }, [query, rows]);
 
-  const getSensorTypeName = (id: string) => {
-    const found = sensorTypes.find((t) => t.id === id);
-    return found ? found.name : id;
+  const handleSearch = (values: Record<string, any>) => {
+    setQuery(values);
+    setCurrent(1);
+    loadRows(1, pageSize, sort);
+  };
+
+  const handleReset = () => {
+    setQuery({});
+    setCurrent(1);
+    loadRows(1, pageSize, sort);
   };
 
   const columns: ProColumns<SensorBatch>[] = [
@@ -107,7 +117,7 @@ const MonitoringSensorsPage = () => {
       dataIndex: 'sensor_type_id',
       width: 120,
       hideInSearch: true,
-      render: (_, row) => getSensorTypeName(row.sensor_type_id),
+      render: (_, row) => row.sensor_type?.name || row.sensor_type_id,
       sorter: true,
     },
     {
@@ -170,17 +180,33 @@ const MonitoringSensorsPage = () => {
         columns={columns}
         dataSource={filteredRows}
         search={{ labelWidth: 'auto' }}
-        onSubmit={(values) => setQuery(values)}
-        onReset={() => setQuery({})}
+        onSubmit={handleSearch}
+        onReset={handleReset}
         onChange={(pagination, filters, sorter: any) => {
           const currentSort = sorter.order ? { field: sorter.field, order: sorter.order } : {};
           setSort(currentSort);
-          loadRows(currentSort);
+          const newPage = pagination.current || current;
+          const newSize = pagination.pageSize || pageSize;
+          setCurrent(newPage);
+          setPageSize(newSize);
+          loadRows(newPage, newSize, currentSort);
         }}
-        options={{ reload: loadRows }}
+        options={{ reload: () => loadRows(current, pageSize, sort) }}
         optionsRender={renderRefSafeTableOptions}
         cardProps={{ bodyStyle: { paddingInline: 24 } }}
         toolBarRender={false}
+        pagination={{
+          current,
+          pageSize,
+          total,
+          showSizeChanger: true,
+          showTotal: (t) => `共 ${t} 条`,
+          onChange: (page, size) => {
+            setCurrent(page);
+            setPageSize(size);
+            loadRows(page, size, sort);
+          },
+        }}
       />
     </PageContainer>
   );

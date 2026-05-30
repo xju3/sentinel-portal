@@ -53,45 +53,11 @@ const MonitoringPointsPage = () => {
   const [query, setQuery] = useState<Record<string, any>>({});
   const [sort, setSort] = useState<Record<string, any>>({});
 
-  const [deviceInstOptions, setDeviceInstOptions] = useState<SensorMonitoringDeviceInstOption[]>([]);
-  const [locations, setLocations] = useState<Location[]>([]);
-  const [sensors, setSensors] = useState<Sensor[]>([]);
-
-  const deviceInstMap = useMemo(
-    () => new Map(deviceInstOptions.map((item) => [item.id, `${item.code} / ${item.sn}`])),
-    [deviceInstOptions],
-  );
-  const locationMap = useMemo(() => new Map(locations.map((item) => [item.id, item.name])), [locations]);
-  const sensorMap = useMemo(() => new Map(sensors.map((item) => [item.id, item.sn])), [sensors]);
-
-  const loadDeviceInstOptions = async () => {
-    const all: SensorMonitoringDeviceInstOption[] = [];
-    let current = 1;
-    const pageSize = 100;
-    while (true) {
-      const result = await querySensorMonitoringDeviceInsts(current, pageSize);
-      all.push(...result.items);
-      if (result.items.length < pageSize) {
-        break;
-      }
-      current++;
-    }
-    return all;
-  };
-
   const loadData = async (currentSort = sort) => {
     setLoading(true);
     try {
-      const [monitorings, instOptions, locationRows, sensorRows] = await Promise.all([
-        listAllSensorMonitorings({ sort_field: currentSort.field, sort_order: currentSort.order }),
-        loadDeviceInstOptions(),
-        listAllLocations(),
-        listAllSensors(),
-      ]);
+      const monitorings = await listAllSensorMonitorings({ sort_field: currentSort.field, sort_order: currentSort.order });
       setRows(monitorings || []);
-      setDeviceInstOptions(instOptions || []);
-      setLocations(locationRows || []);
-      setSensors(sensorRows || []);
     } catch (error) {
       message.error(toErrorMessage(error));
     } finally {
@@ -107,7 +73,7 @@ const MonitoringPointsPage = () => {
     const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();
     return rows.filter((row) => {
       if (query.device_inst_id) {
-        const display = deviceInstMap.get(row.device_inst_id) || row.device_inst_id;
+        const display = row.device_inst ? `${row.device_inst.code} / ${row.device_inst.sn}` : row.device_inst_id;
         const hit =
           norm(display).includes(norm(query.device_inst_id)) ||
           norm(row.device_inst_id).includes(norm(query.device_inst_id));
@@ -116,14 +82,14 @@ const MonitoringPointsPage = () => {
         }
       }
       if (query.location_id) {
-        const display = row.location_id ? locationMap.get(row.location_id) || row.location_id : '';
+        const display = row.location?.name || row.location_id || '';
         const hit = norm(display).includes(norm(query.location_id));
         if (!hit) {
           return false;
         }
       }
       if (query.sensor_id) {
-        const display = row.sensor_id ? sensorMap.get(row.sensor_id) || row.sensor_id : '';
+        const display = row.sensor?.sn || row.sensor_id || '';
         const hit = norm(display).includes(norm(query.sensor_id));
         if (!hit) {
           return false;
@@ -142,7 +108,7 @@ const MonitoringPointsPage = () => {
       }
       return true;
     });
-  }, [deviceInstMap, locationMap, query, rows, sensorMap]);
+  }, [query, rows]);
 
   const columns: ProColumns<SensorMonitoring>[] = [
     {
@@ -156,21 +122,21 @@ const MonitoringPointsPage = () => {
       title: '设备实例',
       dataIndex: 'device_inst_id',
       width: 220,
-      render: (_, row) => deviceInstMap.get(row.device_inst_id) || row.device_inst_id,
+      render: (_, row) => row.device_inst ? `${row.device_inst.code} / ${row.device_inst.sn}` : row.device_inst_id,
       sorter: true,
     },
     {
       title: '故障测点',
       dataIndex: 'location_id',
       width: 180,
-      render: (_, row) => (row.location_id ? locationMap.get(row.location_id) || row.location_id : '-'),
+      render: (_, row) => row.location?.name || row.location_id || '-',
       sorter: true,
     },
     {
       title: '传感器',
       dataIndex: 'sensor_id',
       width: 180,
-      render: (_, row) => (row.sensor_id ? sensorMap.get(row.sensor_id) || row.sensor_id : '-'),
+      render: (_, row) => row.sensor?.sn || row.sensor_id || '-',
       sorter: true,
     },
 
@@ -372,9 +338,9 @@ const MonitoringPointsPage = () => {
             triggerText="选择设备"
             placeholder="请选择设备实例"
             valueLabel={
-              editing?.device_inst_id
-                ? deviceInstMap.get(editing.device_inst_id) || editing.device_inst_id
-                : undefined
+              editing?.device_inst
+                ? `${editing.device_inst.code} / ${editing.device_inst.sn}`
+                : editing?.device_inst_id
             }
             fetcher={async ({ current, pageSize, keyword }) => {
               const result = await querySensorMonitoringDeviceInsts(current, pageSize, keyword);
@@ -396,9 +362,7 @@ const MonitoringPointsPage = () => {
             triggerText="选择测点"
             placeholder="请选择故障测点"
             valueLabel={
-              editing?.location_id
-                ? locationMap.get(editing.location_id) || editing.location_id
-                : undefined
+              editing?.location?.name || editing?.location_id
             }
             fetcher={async ({ current, pageSize, keyword }) => {
               const result = await queryLocations(current, pageSize, keyword);
@@ -419,9 +383,7 @@ const MonitoringPointsPage = () => {
             triggerText="选择传感器"
             placeholder="请选择传感器"
             valueLabel={
-              editing?.sensor_id
-                ? sensorMap.get(editing.sensor_id) || editing.sensor_id
-                : undefined
+              editing?.sensor?.sn || editing?.sensor_id
             }
             fetcher={async ({ current, pageSize, keyword }) => {
               const result = await querySensors(current, pageSize, keyword);

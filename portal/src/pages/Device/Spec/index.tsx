@@ -100,15 +100,10 @@ const DeviceSpecPage = () => {
   const [query, setQuery] = useState<Record<string, any>>({});
 
   const [categories, setCategories] = useState<DeviceCategory[]>([]);
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
 
   const categoryMap = useMemo(
     () => new Map(categories.map((item) => [item.id, item.name])),
     [categories],
-  );
-  const supplierMap = useMemo(
-    () => new Map(suppliers.map((item) => [item.id, item.name])),
-    [suppliers],
   );
 
   const categoryTreeData = useMemo(() => buildCategoryTree(categories), [categories]);
@@ -126,9 +121,8 @@ const DeviceSpecPage = () => {
 
   const loadReferences = async () => {
     try {
-      const [cates, sups] = await Promise.all([listAllDeviceCategories(), listAllSuppliers()]);
+      const cates = await listAllDeviceCategories();
       setCategories(cates || []);
-      setSuppliers(sups || []);
     } catch (error) {
       message.error(toErrorMessage(error));
     }
@@ -152,7 +146,7 @@ const DeviceSpecPage = () => {
         return false;
       }
       if (query.supplier_id) {
-        const supplierName = supplierMap.get(row.supplier_id) || '';
+        const supplierName = row.supplier?.name || '';
         const hit =
           norm(supplierName).includes(norm(query.supplier_id)) ||
           norm(row.supplier_id).includes(norm(query.supplier_id));
@@ -181,7 +175,7 @@ const DeviceSpecPage = () => {
       }
       return true;
     });
-  }, [categoryMap, query, rows, supplierMap]);
+  }, [categoryMap, query, rows]);
 
   const supplierPickerColumns: ColumnsType<Supplier> = [
     { title: '名称', dataIndex: 'name' },
@@ -252,12 +246,7 @@ const DeviceSpecPage = () => {
       title: '供应商',
       dataIndex: 'supplier_id',
       width: 180,
-      render: (_, row) => supplierMap.get(row.supplier_id) || row.supplier_id,
-      sorter: (a, b) => {
-        const labelA = supplierMap.get(a.supplier_id) || '';
-        const labelB = supplierMap.get(b.supplier_id) || '';
-        return labelA.localeCompare(labelB, 'zh-CN');
-      },
+      render: (_, row) => row.supplier?.name || row.supplier_id,
     },
     {
       title: '分类',
@@ -425,7 +414,7 @@ const DeviceSpecPage = () => {
             placeholder="请点击选择供应商"
             modalTitle="选择供应商"
             triggerText="选择"
-            valueLabel={editing ? supplierMap.get(editing.supplier_id) : undefined}
+            valueLabel={editing?.supplier?.name || editing?.supplier_id}
             columns={supplierPickerColumns}
             getRecordLabel={(record) => record.name}
             fetcher={({ current, pageSize, keyword }) =>

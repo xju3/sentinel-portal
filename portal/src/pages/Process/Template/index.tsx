@@ -64,18 +64,6 @@ const ProcessTemplatePage = () => {
   const [itemSaving, setItemSaving] = useState(false);
   const [itemModalOpen, setItemModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState<ProcessItem | null>(null);
-  const [specs, setSpecs] = useState<DeviceSpec[]>([]);
-
-  const specMap = useMemo(
-    () =>
-      new Map(
-        specs.map((item) => [
-          item.id,
-          `${item.name} / ${item.model}${item.brand ? ` / ${item.brand}` : ''}`,
-        ]),
-      ),
-    [specs],
-  );
 
   const loadProcesses = async () => {
     setLoading(true);
@@ -96,18 +84,9 @@ const ProcessTemplatePage = () => {
     }
   };
 
-  const loadSpecs = async () => {
-    try {
-      setSpecs(await listAllDeviceSpecs());
-    } catch (error) {
-      message.error(toErrorMessage(error));
-    }
-  };
-
   useEffect(() => {
     loadProcesses();
     loadItems();
-    loadSpecs();
   }, []);
 
   const filteredRows = useMemo(() => {
@@ -217,7 +196,7 @@ const ProcessTemplatePage = () => {
     {
       title: '设备规格',
       dataIndex: 'device_spec_id',
-      render: (_, row) => specMap.get(row.device_spec_id) || row.device_spec_id,
+      render: (_, row) => row.device_spec?.name || row.device_spec_id,
     },
     {
       title: '数量',
@@ -472,9 +451,9 @@ const ProcessTemplatePage = () => {
               modalTitle="选择设备规格"
               triggerText="选择"
               valueLabel={
-                editingItem?.device_spec_id
-                  ? specMap.get(editingItem.device_spec_id) || editingItem.device_spec_id
-                  : undefined
+                editingItem?.device_spec
+                  ? `${editingItem.device_spec.name} / ${editingItem.device_spec.model}`
+                  : editingItem?.device_spec_id
               }
               columns={specPickerColumns}
               getRecordLabel={(record) => `${record.name} / ${record.model} / ${record.brand}`}

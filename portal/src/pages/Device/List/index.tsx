@@ -24,7 +24,7 @@ import {
   listAllDeviceInsts,
   updateDeviceInst,
 } from '@/services/deviceInst';
-import { DeviceSpec, listAllDeviceSpecs, queryDeviceSpecs } from '@/services/deviceSpec';
+import { DeviceSpec, queryDeviceSpecs } from '@/services/deviceSpec';
 
 import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';
 type DeviceInstFormValues = {
@@ -91,17 +91,8 @@ const DeviceListPage = () => {
     }
   };
 
-  const loadSpecs = async () => {
-    try {
-      setSpecs(await listAllDeviceSpecs());
-    } catch (error) {
-      message.error(toErrorMessage(error));
-    }
-  };
-
   useEffect(() => {
     loadRows();
-    loadSpecs();
   }, []);
 
   const filteredRows = useMemo(() => {
@@ -140,7 +131,8 @@ const DeviceListPage = () => {
         return false;
       }
       if (query.device_spec_id) {
-        const specText = specMap.get(row.device_spec_id) || '';
+        const spec = (row as any).device_spec;
+        const specText = spec ? `${spec.name} / ${spec.model}${spec.brand ? ` / ${spec.brand}` : ''}` : '';
         const hit =
           norm(specText).includes(norm(query.device_spec_id)) ||
           norm(row.device_spec_id).includes(norm(query.device_spec_id));
@@ -150,7 +142,7 @@ const DeviceListPage = () => {
       }
       return true;
     });
-  }, [query, rows, specMap]);
+  }, [query, rows]);
 
   const specPickerColumns: ColumnsType<DeviceSpec> = [
     { title: '名称', dataIndex: 'name' },
@@ -219,7 +211,10 @@ const DeviceListPage = () => {
       title: '设备规格',
       dataIndex: 'device_spec_id',
       width: 260,
-      render: (_, row) => specMap.get(row.device_spec_id) || row.device_spec_id,
+      render: (_, row: any) => {
+        const spec = row.device_spec;
+        return spec ? `${spec.name} / ${spec.model}${spec.brand ? ` / ${spec.brand}` : ''}` : row.device_spec_id;
+      },
       sorter: true,
     },
     {
@@ -470,7 +465,9 @@ const DeviceListPage = () => {
             triggerText="选择规格"
             placeholder="请选择设备规格"
             valueLabel={
-              editing?.device_spec_id ? specMap.get(editing.device_spec_id) || editing.device_spec_id : undefined
+              (editing as any)?.device_spec
+                ? `${(editing as any).device_spec.name} / ${(editing as any).device_spec.model}${(editing as any).device_spec.brand ? ` / ${(editing as any).device_spec.brand}` : ''}`
+                : editing?.device_spec_id
             }
             fetcher={queryDeviceSpecs}
             columns={specPickerColumns}

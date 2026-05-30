@@ -353,7 +353,7 @@ const DeviceCategoryPage = () => {
     const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();
     return categories
       .filter((row) => {
-        const parentName = row.parent_id ? categoryMap.get(row.parent_id)?.name || '' : '';
+        const parentName = row.parent?.name || '';
         if (query.name && !norm(row.name).includes(norm(query.name))) {
           return false;
         }
