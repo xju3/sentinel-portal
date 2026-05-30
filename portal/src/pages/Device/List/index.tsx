@@ -131,7 +131,7 @@ const DeviceListPage = () => {
         return false;
       }
       if (query.device_spec_id) {
-        const spec = (row as any).device_spec;
+        const spec = row.device_spec;
         const specText = spec ? `${spec.name} / ${spec.model}${spec.brand ? ` / ${spec.brand}` : ''}` : '';
         const hit =
           norm(specText).includes(norm(query.device_spec_id)) ||
@@ -465,8 +465,8 @@ const DeviceListPage = () => {
             triggerText="选择规格"
             placeholder="请选择设备规格"
             valueLabel={
-              (editing as any)?.device_spec
-                ? `${(editing as any).device_spec.name} / ${(editing as any).device_spec.model}${(editing as any).device_spec.brand ? ` / ${(editing as any).device_spec.brand}` : ''}`
+              editing?.device_spec 
+                ? `${editing.device_spec.name} / ${editing.device_spec.model}${editing.device_spec.brand ? ` / ${editing.device_spec.brand}` : ''}`
                 : editing?.device_spec_id
             }
             fetcher={queryDeviceSpecs}

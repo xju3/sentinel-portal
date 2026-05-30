@@ -14,7 +14,6 @@ import type { ColumnsType } from 'antd/es/table';
 import EntityPicker from '@/components/EntityPicker';
 import {
   DeviceCategory,
-  listAllDeviceCategories,
   queryDeviceCategories,
 } from '@/services/deviceCategory';
 import {
@@ -25,7 +24,7 @@ import {
   listAllDeviceSpecs,
   updateDeviceSpec,
 } from '@/services/deviceSpec';
-import { Supplier, listAllSuppliers, querySuppliers } from '@/services/supplier';
+import { Supplier, querySuppliers } from '@/services/supplier';
 
 import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';
 
@@ -100,10 +99,15 @@ const DeviceSpecPage = () => {
   const [query, setQuery] = useState<Record<string, any>>({});
 
   const [categories, setCategories] = useState<DeviceCategory[]>([]);
+  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
 
   const categoryMap = useMemo(
     () => new Map(categories.map((item) => [item.id, item.name])),
     [categories],
+  );
+  const supplierMap = useMemo(
+    () => new Map(suppliers.map((item) => [item.id, item.name])),
+    [suppliers],
   );
 
   const categoryTreeData = useMemo(() => buildCategoryTree(categories), [categories]);
@@ -119,18 +123,8 @@ const DeviceSpecPage = () => {
     }
   };
 
-  const loadReferences = async () => {
-    try {
-      const cates = await listAllDeviceCategories();
-      setCategories(cates || []);
-    } catch (error) {
-      message.error(toErrorMessage(error));
-    }
-  };
-
   useEffect(() => {
     loadRows();
-    loadReferences();
   }, []);
 
   const filteredRows = useMemo(() => {
@@ -146,7 +140,7 @@ const DeviceSpecPage = () => {
         return false;
       }
       if (query.supplier_id) {
-        const supplierName = row.supplier?.name || '';
+        const supplierName = supplierMap.get(row.supplier_id) || '';
         const hit =
           norm(supplierName).includes(norm(query.supplier_id)) ||
           norm(row.supplier_id).includes(norm(query.supplier_id));
@@ -175,7 +169,7 @@ const DeviceSpecPage = () => {
       }
       return true;
     });
-  }, [categoryMap, query, rows]);
+  }, [query, rows]);
 
   const supplierPickerColumns: ColumnsType<Supplier> = [
     { title: '名称', dataIndex: 'name' },
@@ -247,15 +241,20 @@ const DeviceSpecPage = () => {
       dataIndex: 'supplier_id',
       width: 180,
       render: (_, row) => row.supplier?.name || row.supplier_id,
+      sorter: (a, b) => {
+        const labelA = a.supplier?.name || '';
+        const labelB = b.supplier?.name || '';
+        return labelA.localeCompare(labelB, 'zh-CN');
+      },
     },
     {
       title: '分类',
       dataIndex: 'device_category_id',
       width: 180,
-      render: (_, row) => categoryMap.get(row.device_category_id) || row.device_category_id,
+      render: (_, row) => row.device_category?.name || row.device_category_id,
       sorter: (a, b) => {
-        const labelA = categoryMap.get(a.device_category_id) || '';
-        const labelB = categoryMap.get(b.device_category_id) || '';
+        const labelA = a.device_category?.name || '';
+        const labelB = b.device_category?.name || '';
         return labelA.localeCompare(labelB, 'zh-CN');
       },
     },
@@ -414,7 +413,7 @@ const DeviceSpecPage = () => {
             placeholder="请点击选择供应商"
             modalTitle="选择供应商"
             triggerText="选择"
-            valueLabel={editing?.supplier?.name || editing?.supplier_id}
+            valueLabel={editing ? supplierMap.get(editing.supplier_id) : undefined}
             columns={supplierPickerColumns}
             getRecordLabel={(record) => record.name}
             fetcher={({ current, pageSize, keyword }) =>

@@ -11,7 +11,7 @@ import { Button, Popconfirm, Space, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 
 import EntityPicker from '@/components/EntityPicker';
-import { listAllLocations, Location, queryLocations } from '@/services/location';
+import { Location, queryLocations } from '@/services/location';
 import {
   createSensorMonitoring,
   deleteSensorMonitoring,
@@ -22,7 +22,7 @@ import {
   SensorMonitoringPayload,
   updateSensorMonitoring,
 } from '@/services/sensorMonitoring';
-import { listAllSensors, querySensors, Sensor } from '@/services/tenantSensor';
+import { querySensors, Sensor } from '@/services/tenantSensor';
 
 import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';
 type SensorMonitoringFormValues = {
@@ -73,7 +73,7 @@ const MonitoringPointsPage = () => {
     const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();
     return rows.filter((row) => {
       if (query.device_inst_id) {
-        const display = row.device_inst ? `${row.device_inst.code} / ${row.device_inst.sn}` : row.device_inst_id;
+        const display = deviceInstMap.get(row.device_inst_id) || row.device_inst_id;
         const hit =
           norm(display).includes(norm(query.device_inst_id)) ||
           norm(row.device_inst_id).includes(norm(query.device_inst_id));
@@ -82,14 +82,14 @@ const MonitoringPointsPage = () => {
         }
       }
       if (query.location_id) {
-        const display = row.location?.name || row.location_id || '';
+        const display = row.location_id ? locationMap.get(row.location_id) || row.location_id : '';
         const hit = norm(display).includes(norm(query.location_id));
         if (!hit) {
           return false;
         }
       }
       if (query.sensor_id) {
-        const display = row.sensor?.sn || row.sensor_id || '';
+        const display = row.sensor_id ? sensorMap.get(row.sensor_id) || row.sensor_id : '';
         const hit = norm(display).includes(norm(query.sensor_id));
         if (!hit) {
           return false;
