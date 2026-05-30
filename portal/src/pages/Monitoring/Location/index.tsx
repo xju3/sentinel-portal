@@ -92,12 +92,14 @@ const MonitoringLocationPage = () => {
       title: '测点名称',
       dataIndex: 'name',
       width: 220,
+      sorter: (a, b) => (a.name || '').localeCompare(b.name || '', 'zh-CN'),
     },
     {
       title: '描述',
       dataIndex: 'description',
       ellipsis: true,
       render: (_, row) => row.description || '-',
+      sorter: (a, b) => (a.description || '').localeCompare(b.description || '', 'zh-CN'),
     },
     {
       title: '状态',
@@ -110,6 +112,7 @@ const MonitoringLocationPage = () => {
       },
       render: (_, row) =>
         Number(row.status) === 1 ? <Tag color="success">启用</Tag> : <Tag>停用</Tag>,
+      sorter: (a, b) => Number(a.status) - Number(b.status),
     },
     {
       title: '操作',

@@ -207,29 +207,38 @@ const DeviceListPage = () => {
       title: '编号',
       dataIndex: 'code',
       width: 180,
+      sorter: (a, b) => (a.code || '').localeCompare(b.code || '', 'zh-CN'),
     },
     {
       title: '名称',
       dataIndex: 'name',
       width: 140,
+      sorter: (a, b) => (a.name || '').localeCompare(b.name || '', 'zh-CN'),
     },
     {
       title: '设备规格',
       dataIndex: 'device_spec_id',
       width: 260,
       render: (_, row) => specMap.get(row.device_spec_id) || row.device_spec_id,
+      sorter: (a, b) => {
+        const labelA = specMap.get(a.device_spec_id) || '';
+        const labelB = specMap.get(b.device_spec_id) || '';
+        return labelA.localeCompare(labelB, 'zh-CN');
+      },
     },
     {
       title: '服役日期',
       dataIndex: 'purchase_date',
       width: 140,
       valueType: 'date',
+      sorter: (a, b) => (a.purchase_date || '').localeCompare(b.purchase_date || '', 'zh-CN'),
     },
     {
       title: '可用年限(月)',
       dataIndex: 'life_span',
       width: 110,
       valueType: 'digit',
+      sorter: (a, b) => Number(a.life_span) - Number(b.life_span),
     },
 
     {
@@ -237,6 +246,7 @@ const DeviceListPage = () => {
       dataIndex: 'desc',
       ellipsis: true,
       render: (_, row) => row.desc || '-',
+      sorter: (a, b) => (a.desc || '').localeCompare(b.desc || '', 'zh-CN'),
     },
     {
       title: '运行状态',
@@ -248,6 +258,7 @@ const DeviceListPage = () => {
         0: { text: '已停止', status: 'Default' },
       },
       render: (_, row) => (Number(row.active) === 1 ? '运行中' : '已停止'),
+      sorter: (a, b) => Number(a.active) - Number(b.active),
     },
     {
       title: '服役状态',
@@ -259,6 +270,7 @@ const DeviceListPage = () => {
         0: { text: '不可用', status: 'Error' },
       },
       render: (_, row) => (Number(row.available) === 1 ? '服役中' : '不可用'),
+      sorter: (a, b) => Number(a.available) - Number(b.available),
     },
     {
       title: '状态',
@@ -270,6 +282,7 @@ const DeviceListPage = () => {
         0: { text: '停用' },
       },
       render: (_, row) => (Number(row.status) === 1 ? '启用' : '停用'),
+      sorter: (a, b) => Number(a.status) - Number(b.status),
     },
     {
       title: '操作',

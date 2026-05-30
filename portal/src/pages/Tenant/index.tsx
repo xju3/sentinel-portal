@@ -207,12 +207,14 @@ const TenantPage = () => {
       key: 'contact_name',
       width: 120,
       render: (text: string | null) => text || '-',
+      sorter: (a: any, b: any) => (a.contact_name || '').localeCompare(b.contact_name || '', 'zh-CN'),
     },
     {
       title: '登录账号',
       dataIndex: 'username',
       key: 'username',
       width: 220,
+      sorter: (a: any, b: any) => (a.username || '').localeCompare(b.username || '', 'zh-CN'),
     },
     {
       title: '类型',
@@ -224,6 +226,7 @@ const TenantPage = () => {
           {USER_FLAG_MAP[flag] || '未知'}
         </Tag>
       ),
+      sorter: (a: any, b: any) => Number(a.flag) - Number(b.flag),
     },
     {
       title: '管理员',
@@ -235,6 +238,7 @@ const TenantPage = () => {
           {admin ? '是' : '否'}
         </Tag>
       ),
+      sorter: (a: any, b: any) => Number(a.admin) - Number(b.admin),
     },
     {
       title: '状态',
@@ -246,6 +250,7 @@ const TenantPage = () => {
           {active ? '启用' : '禁用'}
         </Tag>
       ),
+      sorter: (a: any, b: any) => Number(a.active) - Number(b.active),
     },
     {
       title: '操作',

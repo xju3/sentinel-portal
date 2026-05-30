@@ -82,6 +82,7 @@ const BatchDevicesPage = () => {
       title: '传感器SN',
       dataIndex: 'sn',
       width: 180,
+      sorter: (a, b) => (a.sn || '').localeCompare(b.sn || '', 'zh-CN'),
     },
     {
       title: '设备状态',
@@ -90,6 +91,7 @@ const BatchDevicesPage = () => {
       hideInSearch: true,
       render: (_, row) =>
         row.active === undefined ? '-' : row.active ? <Tag color="green">在线</Tag> : <Tag>离线</Tag>,
+      sorter: (a, b) => Number(a.active || 0) - Number(b.active || 0),
     },
     {
       title: '最近活跃',
@@ -98,6 +100,7 @@ const BatchDevicesPage = () => {
       valueType: 'dateTime',
       hideInSearch: true,
       render: (_, row) => row.active_at || '-',
+      sorter: (a, b) => (a.active_at || '').localeCompare(b.active_at || '', 'zh-CN'),
     },
     {
       title: '备注',
@@ -105,6 +108,7 @@ const BatchDevicesPage = () => {
       ellipsis: true,
       hideInSearch: true,
       render: (_, row) => row.description || '-',
+      sorter: (a, b) => (a.description || '').localeCompare(b.description || '', 'zh-CN'),
     },
   ];
 

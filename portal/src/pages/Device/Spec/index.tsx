@@ -220,40 +220,55 @@ const DeviceSpecPage = () => {
       title: '规格名称',
       dataIndex: 'name',
       width: 180,
+      sorter: (a, b) => (a.name || '').localeCompare(b.name || '', 'zh-CN'),
     },
     {
       title: '型号',
       dataIndex: 'model',
       width: 100,
+      sorter: (a, b) => (a.model || '').localeCompare(b.model || '', 'zh-CN'),
     },
     {
       title: '品牌',
       dataIndex: 'brand',
       width: 100,
+      sorter: (a, b) => (a.brand || '').localeCompare(b.brand || '', 'zh-CN'),
     },
     {
       title: '电压(V)',
       dataIndex: 'voltage',
       width: 100,
       valueType: 'digit',
+      sorter: (a, b) => Number(a.voltage) - Number(b.voltage),
     },
     {
       title: '转速(RPM)',
       dataIndex: 'rpm',
       width: 100,
       valueType: 'digit',
+      sorter: (a, b) => Number(a.rpm) - Number(b.rpm),
     },
     {
       title: '供应商',
       dataIndex: 'supplier_id',
       width: 180,
       render: (_, row) => supplierMap.get(row.supplier_id) || row.supplier_id,
+      sorter: (a, b) => {
+        const labelA = supplierMap.get(a.supplier_id) || '';
+        const labelB = supplierMap.get(b.supplier_id) || '';
+        return labelA.localeCompare(labelB, 'zh-CN');
+      },
     },
     {
       title: '分类',
       dataIndex: 'device_category_id',
       width: 180,
       render: (_, row) => categoryMap.get(row.device_category_id) || row.device_category_id,
+      sorter: (a, b) => {
+        const labelA = categoryMap.get(a.device_category_id) || '';
+        const labelB = categoryMap.get(b.device_category_id) || '';
+        return labelA.localeCompare(labelB, 'zh-CN');
+      },
     },
     {
       title: '备注',
@@ -261,6 +276,7 @@ const DeviceSpecPage = () => {
       ellipsis: true,
       render: (_, row) => row.description || '-',
       hideInSearch: true,
+      sorter: (a, b) => (a.description || '').localeCompare(b.description || '', 'zh-CN'),
     },
     {
       title: '操作',

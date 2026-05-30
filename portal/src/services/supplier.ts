@@ -26,7 +26,10 @@ export type SupplierPagedResult = {
   total: number;
 };
 
-export async function listAllSuppliers() {
+export async function listAllSuppliers(
+  sort_by?: string,
+  sort_order?: string,
+) {
   const limit = 100;
   let skip = 0;
   const all: Supplier[] = [];
@@ -35,7 +38,7 @@ export async function listAllSuppliers() {
     const batch =
       (await request<Supplier[]>('/api/v1/suppliers', {
         method: 'GET',
-        params: { skip, limit },
+        params: { skip, limit, sort_by, sort_order },
       })) || [];
     all.push(...batch);
     if (batch.length < limit) {

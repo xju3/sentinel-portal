@@ -221,6 +221,7 @@ const DeviceCategoryPage = () => {
       title: '名称',
       dataIndex: 'name',
       width: 120,
+      sorter: (a, b) => (a.name || '').localeCompare(b.name || '', 'zh-CN'),
     },
     // {
     //   title: '上级',
@@ -242,6 +243,11 @@ const DeviceCategoryPage = () => {
         row.vib_threshold_id
           ? thresholdLabelMap.get(row.vib_threshold_id) || row.vib_threshold_id
           : '-',
+      sorter: (a, b) => {
+        const labelA = a.vib_threshold_id ? thresholdLabelMap.get(a.vib_threshold_id) || '' : '';
+        const labelB = b.vib_threshold_id ? thresholdLabelMap.get(b.vib_threshold_id) || '' : '';
+        return labelA.localeCompare(labelB, 'zh-CN');
+      },
     },
     {
       title: '温度阀值',
@@ -251,6 +257,11 @@ const DeviceCategoryPage = () => {
         row.temp_threshold_id
           ? thresholdLabelMap.get(row.temp_threshold_id) || row.temp_threshold_id
           : '-',
+      sorter: (a, b) => {
+        const labelA = a.temp_threshold_id ? thresholdLabelMap.get(a.temp_threshold_id) || '' : '';
+        const labelB = b.temp_threshold_id ? thresholdLabelMap.get(b.temp_threshold_id) || '' : '';
+        return labelA.localeCompare(labelB, 'zh-CN');
+      },
     },
     {
       title: '监测频率',
@@ -263,18 +274,27 @@ const DeviceCategoryPage = () => {
         }
         return `巡检${freq.patrol}m / 诊断${freq.diagnosis}m / 上报${freq.report}`;
       },
+      sorter: (a, b) => {
+        const fa = a.health_check_freq;
+        const fb = b.health_check_freq;
+        const labelA = fa ? `巡检${fa.patrol}m / 诊断${fa.diagnosis}m / 上报${fa.report}` : '';
+        const labelB = fb ? `巡检${fb.patrol}m / 诊断${fb.diagnosis}m / 上报${fb.report}` : '';
+        return labelA.localeCompare(labelB, 'zh-CN');
+      },
     },
     {
       title: 'ISO',
       dataIndex: 'iso_standard_id',
       ellipsis: true,
       render: (_, row) => row.iso_standard_id || '-',
+      sorter: (a, b) => (a.iso_standard_id || '').localeCompare(b.iso_standard_id || '', 'zh-CN'),
     },
     {
       title: '备注',
       dataIndex: 'description',
       ellipsis: true,
       render: (_, row) => row.description || '-',
+      sorter: (a, b) => (a.description || '').localeCompare(b.description || '', 'zh-CN'),
     },
     {
       title: '操作',

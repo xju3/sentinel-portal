@@ -20,12 +20,21 @@ from app.models.device import (
 )
 from app.models.sensor import SensorMonitoring
 from app.models.customer import HealthCheckFreq
+from app.utils.sorting import apply_sorting
 
 
 class IsoStandardService:
     @staticmethod
-    async def get_all(session: AsyncSession, skip: int, limit: int) -> List[IsoStandard]:
-        stmt = select(IsoStandard).offset(skip).limit(limit)
+    async def get_all(
+        session: AsyncSession,
+        skip: int,
+        limit: int,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ) -> List[IsoStandard]:
+        stmt = select(IsoStandard)
+        stmt = apply_sorting(stmt, IsoStandard, sort_by, sort_order)
+        stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return result.scalars().all()
 
@@ -65,6 +74,8 @@ class DeviceCategoryService:
         skip: int,
         limit: int,
         keyword: Optional[str] = None,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
     ) -> List[DeviceCategory]:
         stmt = select(DeviceCategory).where(DeviceCategory.tenant_id == tenant_id)
         if keyword:
@@ -75,6 +86,7 @@ class DeviceCategoryService:
                     DeviceCategory.description.ilike(like_kw),
                 )
             )
+        stmt = apply_sorting(stmt, DeviceCategory, sort_by, sort_order)
         stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return result.scalars().all()
@@ -163,8 +175,16 @@ class DeviceCategoryService:
 
 class DeviceSpecService:
     @staticmethod
-    async def get_all(session: AsyncSession, skip: int, limit: int) -> List[DeviceSpec]:
-        stmt = select(DeviceSpec).offset(skip).order_by(DeviceSpec.name).limit(limit)
+    async def get_all(
+        session: AsyncSession,
+        skip: int,
+        limit: int,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ) -> List[DeviceSpec]:
+        stmt = select(DeviceSpec)
+        stmt = apply_sorting(stmt, DeviceSpec, sort_by, sort_order or "ascend")
+        stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return result.scalars().all()
 
@@ -198,8 +218,16 @@ class DeviceSpecService:
 
 class DeviceInstService:
     @staticmethod
-    async def get_all(session: AsyncSession, skip: int, limit: int) -> List[DeviceInst]:
-        stmt = select(DeviceInst).offset(skip).order_by(DeviceInst.code).limit(limit)
+    async def get_all(
+        session: AsyncSession,
+        skip: int,
+        limit: int,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ) -> List[DeviceInst]:
+        stmt = select(DeviceInst)
+        stmt = apply_sorting(stmt, DeviceInst, sort_by, sort_order or "ascend")
+        stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return result.scalars().all()
 
@@ -288,8 +316,16 @@ def generate_standard_service(model_class):
     """Factory class to generate basic CRUD services to avoid excessive boilerplate"""
     class StandardService:
         @staticmethod
-        async def get_all(session: AsyncSession, skip: int, limit: int):
-            stmt = select(model_class).offset(skip).limit(limit)
+        async def get_all(
+            session: AsyncSession,
+            skip: int,
+            limit: int,
+            sort_by: str | None = None,
+            sort_order: str = "ascend",
+        ):
+            stmt = select(model_class)
+            stmt = apply_sorting(stmt, model_class, sort_by, sort_order)
+            stmt = stmt.offset(skip).limit(limit)
             result = await session.execute(stmt)
             return result.scalars().all()
 
@@ -330,15 +366,20 @@ class SensorMonitoringService:
     """Service for SensorMonitoring with tenant-scoped queries."""
 
     @staticmethod
-    async def get_all(session: AsyncSession, skip: int, limit: int):
+    async def get_all(
+        session: AsyncSession,
+        skip: int,
+        limit: int,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ):
         from app.models.device import DeviceInst
         stmt = (
             select(SensorMonitoring)
             .join(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
-            .offset(skip)
-            .order_by(DeviceInst.code)
-            .limit(limit)
         )
+        stmt = apply_sorting(stmt, SensorMonitoring, sort_by, sort_order)
+        stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return result.scalars().all()
 
@@ -360,6 +401,8 @@ class SensorMonitoringService:
         tenant_id: UUID,
         skip: int,
         limit: int,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
     ):
         """Get SensorMonitoring records scoped to a tenant."""
         from app.models.device import DeviceInst, DeviceSpec, DeviceCategory
@@ -370,9 +413,9 @@ class SensorMonitoringService:
             .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
             .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
             .where(DeviceCategory.tenant_id == tenant_id)
-            .offset(skip)
-            .limit(limit)
         )
+        stmt = apply_sorting(stmt, SensorMonitoring, sort_by, sort_order)
+        stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return result.scalars().all()
 

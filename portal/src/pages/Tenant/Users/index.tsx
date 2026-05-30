@@ -113,6 +113,7 @@ const TenantUsersPage = () => {
       dataIndex: 'username',
       key: 'username',
       width: 180,
+      sorter: (a: any, b: any) => (a.username || '').localeCompare(b.username || '', 'zh-CN'),
     },
     {
       title: '邮箱',
@@ -120,6 +121,7 @@ const TenantUsersPage = () => {
       key: 'email',
       width: 200,
       render: (text: string | null) => text || '-',
+      sorter: (a: any, b: any) => (a.email || '').localeCompare(b.email || '', 'zh-CN'),
     },
     {
       title: '手机号',
@@ -127,6 +129,7 @@ const TenantUsersPage = () => {
       key: 'mobile',
       width: 160,
       render: (text: string | null) => text || '-',
+      sorter: (a: any, b: any) => (a.mobile || '').localeCompare(b.mobile || '', 'zh-CN'),
     },
     {
       title: '登录方式',
@@ -138,6 +141,7 @@ const TenantUsersPage = () => {
           {USER_FLAG_MAP[flag] || '未知'}
         </Tag>
       ),
+      sorter: (a: any, b: any) => Number(a.flag) - Number(b.flag),
     },
     {
       title: '状态',
@@ -162,6 +166,7 @@ const TenantUsersPage = () => {
           </Tooltip>
         );
       },
+      sorter: (a: any, b: any) => Number(a.active) - Number(b.active),
     },
     {
       title: '操作',

@@ -145,8 +145,8 @@ const ProcessTemplatePage = () => {
       hideInSearch: true,
       fixed: 'left',
     },
-    { title: '工段编码', dataIndex: 'code', width: 140 },
-    { title: '工段名称', dataIndex: 'name' },
+    { title: '工段编码', dataIndex: 'code', width: 140, sorter: (a, b) => (a.code || '').localeCompare(b.code || '', 'zh-CN') },
+    { title: '工段名称', dataIndex: 'name', sorter: (a, b) => (a.name || '').localeCompare(b.name || '', 'zh-CN') },
     {
       title: '状态',
       width: 120,
@@ -157,6 +157,7 @@ const ProcessTemplatePage = () => {
         0: { text: '停用' },
       },
       render: (_, row) => (Number(row.status) === 1 ? '启用' : '停用'),
+      sorter: (a, b) => Number(a.status) - Number(b.status),
     },
     {
       title: '操作',

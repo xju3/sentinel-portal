@@ -120,6 +120,7 @@ const MonitoringThresholdPage = () => {
       align: 'center',
       width: 120,
       render: (_, row) => <Tag>{getSensorTypeName(row.code)}</Tag>,
+      sorter: (a, b) => getSensorTypeName(a.code).localeCompare(getSensorTypeName(b.code), 'zh-CN'),
     },
     {
       title: '监测指标',
@@ -135,6 +136,7 @@ const MonitoringThresholdPage = () => {
         const info = METRIC_MAP[row.metric] || { text: `${row.metric}`, color: 'default' };
         return <Tag color={info.color}>{info.text}</Tag>;
       },
+      sorter: (a, b) => Number(a.metric) - Number(b.metric),
     },
     {
       title: '最大偏差(实时)',
@@ -143,6 +145,7 @@ const MonitoringThresholdPage = () => {
       hideInSearch: true,
       align: 'center',
       render: (_, row) => row.rt_max_delta,
+      sorter: (a, b) => Number(a.rt_max_delta) - Number(b.rt_max_delta),
     },
     {
       title: '短期(小时)',
@@ -188,6 +191,7 @@ const MonitoringThresholdPage = () => {
       align: 'center',
       width: 60,
       hideInSearch: true,
+      sorter: (a, b) => Number(a.baseline) - Number(b.baseline),
     },
     {
       title: '操作',

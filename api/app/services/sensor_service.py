@@ -17,13 +17,22 @@ from app.database import influxdb_manager
 from app.config import settings
 from app.models.sensor import SensorType, Sensor, SensorBatch, SensorThreshold, SensorMonitoring
 from app.utils.exceptions import DomainException
+from app.utils.sorting import apply_sorting
 logger = logging.getLogger(__name__)
 
 
 class SensorTypeService:
     @staticmethod
-    async def get_all(session: AsyncSession, skip: int, limit: int) -> List[SensorType]:
-        stmt = select(SensorType).offset(skip).limit(limit)
+    async def get_all(
+        session: AsyncSession,
+        skip: int,
+        limit: int,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ) -> List[SensorType]:
+        stmt = select(SensorType)
+        stmt = apply_sorting(stmt, SensorType, sort_by, sort_order)
+        stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return list(result.scalars().all())
 
@@ -57,8 +66,16 @@ class SensorTypeService:
 
 class SensorDbService:
     @staticmethod
-    async def get_all(session: AsyncSession, skip: int, limit: int) -> List[Sensor]:
-        stmt = select(Sensor).offset(skip).order_by(Sensor.sn).limit(limit)
+    async def get_all(
+        session: AsyncSession,
+        skip: int,
+        limit: int,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ) -> List[Sensor]:
+        stmt = select(Sensor)
+        stmt = apply_sorting(stmt, Sensor, sort_by, sort_order)
+        stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return list(result.scalars().all())
 
@@ -85,11 +102,14 @@ class SensorDbService:
         current: int,
         page_size: int,
         keyword: Optional[str] = None,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
     ) -> tuple:
         """Get paged sensors with total count. Returns (items, total)."""
         from sqlalchemy import func
 
-        base_stmt = select(Sensor).order_by(Sensor.sn)
+        base_stmt = select(Sensor)
+        base_stmt = apply_sorting(base_stmt, Sensor, sort_by, sort_order)
         if keyword:
             like = f"%{keyword}%"
             base_stmt = base_stmt.where(Sensor.sn.ilike(like))
@@ -140,8 +160,16 @@ class SensorDbService:
 
 class SensorBatchService:
     @staticmethod
-    async def get_all(session: AsyncSession, skip: int, limit: int) -> List[SensorBatch]:
-        stmt = select(SensorBatch).offset(skip).limit(limit)
+    async def get_all(
+        session: AsyncSession,
+        skip: int,
+        limit: int,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ) -> List[SensorBatch]:
+        stmt = select(SensorBatch)
+        stmt = apply_sorting(stmt, SensorBatch, sort_by, sort_order)
+        stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return list(result.scalars().all())
 
@@ -152,13 +180,20 @@ class SensorBatchService:
         return result.scalar_one_or_none()
 
     @staticmethod
-    async def get_by_tenant(session: AsyncSession, tenant_id: UUID, skip: int, limit: int) -> List[SensorBatch]:
+    async def get_by_batch_id(
+        session: AsyncSession,
+        batch_id: UUID,
+        skip: int = 0,
+        limit: int = 100,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ) -> List[Sensor]:
         stmt = (
-            select(SensorBatch)
-            .where(SensorBatch.tenant_id == tenant_id)
-            .offset(skip)
-            .limit(limit)
+            select(Sensor)
+            .where(Sensor.sensor_batch_id == batch_id)
         )
+        stmt = apply_sorting(stmt, Sensor, sort_by, sort_order)
+        stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return list(result.scalars().all())
 
@@ -237,13 +272,20 @@ class SensorBatchService:
 
 class SensorThresholdService:
     @staticmethod
-    async def get_by_tenant(session: AsyncSession, tenant_id: UUID, skip: int, limit: int) -> Sequence[SensorThreshold]:
+    async def get_by_tenant(
+        session: AsyncSession,
+        tenant_id: UUID,
+        skip: int,
+        limit: int,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ) -> Sequence[SensorThreshold]:
         stmt = (
             select(SensorThreshold)
             .where(SensorThreshold.tenant_id == tenant_id)
-            .offset(skip)
-            .limit(limit)
         )
+        stmt = apply_sorting(stmt, SensorThreshold, sort_by, sort_order)
+        stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return result.scalars().all()
 

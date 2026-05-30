@@ -19,14 +19,23 @@ from app.models.customer import (
     HealthCheckFreq,
 )
 from app.utils.exceptions import DomainException
+from app.utils.sorting import apply_sorting
 
 from app.models.sensor import SensorMonitoring, Sensor
 from app.models.device import DeviceCategory, DeviceSpec, DeviceInst
 
 class TenantService:
     @staticmethod
-    async def get_tenants(session: AsyncSession, skip: int, limit: int) -> List[Tenant]:
-        stmt = select(Tenant).offset(skip).limit(limit)
+    async def get_tenants(
+        session: AsyncSession,
+        skip: int,
+        limit: int,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ) -> List[Tenant]:
+        stmt = select(Tenant)
+        stmt = apply_sorting(stmt, Tenant, sort_by, sort_order)
+        stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return result.scalars().all()
 
@@ -60,8 +69,16 @@ class TenantService:
 
 class TenantSensorService:
     @staticmethod
-    async def get_tenant_sensors(session: AsyncSession, skip: int, limit: int) -> List[TenantSensor]:
-        stmt = select(TenantSensor).offset(skip).limit(limit)
+    async def get_tenant_sensors(
+        session: AsyncSession,
+        skip: int,
+        limit: int,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ) -> List[TenantSensor]:
+        stmt = select(TenantSensor)
+        stmt = apply_sorting(stmt, TenantSensor, sort_by, sort_order)
+        stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return result.scalars().all()
 
@@ -101,6 +118,8 @@ class SupplierService:
         skip: int,
         limit: int,
         keyword: Optional[str] = None,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
     ) -> List[Supplier]:
         stmt = select(Supplier).where(Supplier.tenant_id == tenant_id)
         if keyword:
@@ -112,6 +131,7 @@ class SupplierService:
                     Supplier.contact_info.ilike(like_kw),
                 )
             )
+        stmt = apply_sorting(stmt, Supplier, sort_by, sort_order)
         stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return result.scalars().all()
@@ -172,8 +192,16 @@ class SupplierService:
 
 class ContactService:
     @staticmethod
-    async def get_contacts(session: AsyncSession, skip: int, limit: int) -> List[Contact]:
-        stmt = select(Contact).offset(skip).limit(limit)
+    async def get_contacts(
+        session: AsyncSession,
+        skip: int,
+        limit: int,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ) -> List[Contact]:
+        stmt = select(Contact)
+        stmt = apply_sorting(stmt, Contact, sort_by, sort_order)
+        stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return result.scalars().all()
 
@@ -188,8 +216,16 @@ class ContactService:
 
 class AccountService:
     @staticmethod
-    async def get_accounts(session: AsyncSession, skip: int, limit: int) -> List[Account]:
-        stmt = select(Account).offset(skip).limit(limit)
+    async def get_accounts(
+        session: AsyncSession,
+        skip: int,
+        limit: int,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ) -> List[Account]:
+        stmt = select(Account)
+        stmt = apply_sorting(stmt, Account, sort_by, sort_order)
+        stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return result.scalars().all()
 
@@ -267,13 +303,15 @@ class AreaService:
         tenant_id: UUID,
         skip: int,
         limit: int,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
     ) -> List[Area]:
         stmt = (
             select(Area)
             .where(Area.tenant_id == tenant_id)
-            .offset(skip)
-            .limit(limit)
         )
+        stmt = apply_sorting(stmt, Area, sort_by, sort_order)
+        stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return result.scalars().all()
 
@@ -323,13 +361,15 @@ class LocationService:
         tenant_id: UUID,
         skip: int,
         limit: int,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
     ) -> List[Location]:
         stmt = (
             select(Location)
             .where(Location.tenant_id == tenant_id)
-            .offset(skip)
-            .limit(limit)
         )
+        stmt = apply_sorting(stmt, Location, sort_by, sort_order)
+        stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return result.scalars().all()
 
@@ -624,6 +664,23 @@ class AuthService:
 
 
 class HealthCheckFreqService:
+    @staticmethod
+    async def get_health_check_freqs(
+        session: AsyncSession,
+        tenant_id: UUID,
+        skip: int,
+        limit: int,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ) -> List[HealthCheckFreq]:
+        stmt = (
+            select(HealthCheckFreq)
+            .where(HealthCheckFreq.tenant_id == tenant_id)
+        )
+        stmt = apply_sorting(stmt, HealthCheckFreq, sort_by, sort_order)
+        stmt = stmt.offset(skip).limit(limit)
+        result = await session.execute(stmt)
+        return result.scalars().all()
 
     @staticmethod
     async def get_health_check_by_sensor_sn(
@@ -644,22 +701,6 @@ class HealthCheckFreqService:
         result = await session.execute(stmt)
         # 同样使用第一问提到的 scalars().first() 或 scalar_one_or_none()
         return result.scalars().first()
-
-    @staticmethod
-    async def get_health_check_freqs(
-        session: AsyncSession,
-        tenant_id: UUID,
-        skip: int,
-        limit: int,
-    ) -> List[HealthCheckFreq]:
-        stmt = (
-            select(HealthCheckFreq)
-            .where(HealthCheckFreq.tenant_id == tenant_id)
-            .offset(skip)
-            .limit(limit)
-        )
-        result = await session.execute(stmt)
-        return result.scalars().all()
 
     @staticmethod
     async def get_health_check_freq(

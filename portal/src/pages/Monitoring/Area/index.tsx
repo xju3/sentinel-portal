@@ -184,18 +184,24 @@ const MonitoringAreaPage = () => {
       hideInSearch: true,
       fixed: 'left',
     },
-    { title: '区域名称', dataIndex: 'name', width: 180 },
+    { title: '区域名称', dataIndex: 'name', width: 180, sorter: (a, b) => (a.name || '').localeCompare(b.name || '', 'zh-CN') },
     {
       title: '上级区域',
       dataIndex: 'parent_id',
       width: 180,
       render: (_, row) => (row.parent_id ? areaMap.get(row.parent_id) || row.parent_id : '-'),
+      sorter: (a, b) => {
+        const labelA = a.parent_id ? areaMap.get(a.parent_id) || '' : '';
+        const labelB = b.parent_id ? areaMap.get(b.parent_id) || '' : '';
+        return labelA.localeCompare(labelB, 'zh-CN');
+      },
     },
     {
       title: 'Wi-Fi SSID',
       dataIndex: 'ssid',
       width: 180,
       render: (_, row) => row.ssid || '-',
+      sorter: (a, b) => (a.ssid || '').localeCompare(b.ssid || '', 'zh-CN'),
     },
     {
       title: '描述',
@@ -203,6 +209,7 @@ const MonitoringAreaPage = () => {
       ellipsis: true,
       render: (_, row) => row.description || '-',
       hideInSearch: true,
+      sorter: (a, b) => (a.description || '').localeCompare(b.description || '', 'zh-CN'),
     },
     {
       title: '操作',

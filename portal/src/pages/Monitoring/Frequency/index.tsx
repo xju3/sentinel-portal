@@ -111,18 +111,21 @@ const MonitoringFrequencyPage = () => {
       dataIndex: 'patrol',
       width: 140,
       valueType: 'digit',
+      sorter: (a, b) => Number(a.patrol) - Number(b.patrol),
     },
     {
       title: '诊断频率(分钟)',
       dataIndex: 'diagnosis',
       width: 140,
       valueType: 'digit',
+      sorter: (a, b) => Number(a.diagnosis) - Number(b.diagnosis),
     },
     {
       title: '上报批次',
       dataIndex: 'report',
       width: 120,
       valueType: 'digit',
+      sorter: (a, b) => Number(a.report) - Number(b.report),
     },
     {
       title: '状态',
@@ -134,6 +137,7 @@ const MonitoringFrequencyPage = () => {
       },
       render: (_: any, row: any) =>
         row.status ? <Tag color="success">启用</Tag> : <Tag>停用</Tag>,
+      sorter: (a, b) => Number(a.status) - Number(b.status),
     },
     {
       title: '操作',

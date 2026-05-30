@@ -195,17 +195,27 @@ const ProcessManagePage = () => {
 
   const columns: ProColumns<ProcessDevice>[] = [
     { title: '序号', valueType: 'indexBorder', width: 68, hideInSearch: true, fixed: 'left' },
-    { title: '实例编码', dataIndex: 'code'},
-    { title: '实例SN', dataIndex: 'sn' },
+    { title: '实例编码', dataIndex: 'code', sorter: (a, b) => (a.code || '').localeCompare(b.code || '', 'zh-CN') },
+    { title: '实例SN', dataIndex: 'sn', sorter: (a, b) => (a.sn || '').localeCompare(b.sn || '', 'zh-CN') },
     {
       title: '工段模板',
       dataIndex: 'process_id',
       render: (_, row) => processMap.get(row.process_id)?.name || row.process_id,
+      sorter: (a, b) => {
+        const labelA = processMap.get(a.process_id)?.name || '';
+        const labelB = processMap.get(b.process_id)?.name || '';
+        return labelA.localeCompare(labelB, 'zh-CN');
+      },
     },
     {
       title: '工作区域',
       dataIndex: 'area_id',
       render: (_, row) => (row.area_id ? areaMap.get(row.area_id) || row.area_id : '-'),
+      sorter: (a, b) => {
+        const labelA = a.area_id ? areaMap.get(a.area_id) || '' : '';
+        const labelB = b.area_id ? areaMap.get(b.area_id) || '' : '';
+        return labelA.localeCompare(labelB, 'zh-CN');
+      },
     },
     {
       title: '状态',
@@ -213,6 +223,7 @@ const ProcessManagePage = () => {
       valueType: 'select',
       valueEnum: { 1: { text: '启用' }, 0: { text: '停用' } },
       render: (_, row) => (Number(row.status) === 1 ? '启用' : '停用'),
+      sorter: (a, b) => Number(a.status) - Number(b.status),
     },
     {
       title: '操作',

@@ -156,18 +156,33 @@ const MonitoringPointsPage = () => {
       dataIndex: 'device_inst_id',
       width: 220,
       render: (_, row) => deviceInstMap.get(row.device_inst_id) || row.device_inst_id,
+      sorter: (a, b) => {
+        const labelA = deviceInstMap.get(a.device_inst_id) || '';
+        const labelB = deviceInstMap.get(b.device_inst_id) || '';
+        return labelA.localeCompare(labelB, 'zh-CN');
+      },
     },
     {
       title: '故障测点',
       dataIndex: 'location_id',
       width: 180,
       render: (_, row) => (row.location_id ? locationMap.get(row.location_id) || row.location_id : '-'),
+      sorter: (a, b) => {
+        const labelA = a.location_id ? locationMap.get(a.location_id) || '' : '';
+        const labelB = b.location_id ? locationMap.get(b.location_id) || '' : '';
+        return labelA.localeCompare(labelB, 'zh-CN');
+      },
     },
     {
       title: '传感器',
       dataIndex: 'sensor_id',
       width: 180,
       render: (_, row) => (row.sensor_id ? sensorMap.get(row.sensor_id) || row.sensor_id : '-'),
+      sorter: (a, b) => {
+        const labelA = a.sensor_id ? sensorMap.get(a.sensor_id) || '' : '';
+        const labelB = b.sensor_id ? sensorMap.get(b.sensor_id) || '' : '';
+        return labelA.localeCompare(labelB, 'zh-CN');
+      },
     },
 
     {
@@ -188,6 +203,7 @@ const MonitoringPointsPage = () => {
         };
         return row.direction ? map[row.direction] || row.direction : '-';
       },
+      sorter: (a, b) => (a.direction || '').localeCompare(b.direction || '', 'zh-CN'),
     },
     {
       title: '故障',
@@ -203,6 +219,7 @@ const MonitoringPointsPage = () => {
         };
         return map[Number(row.anomaly)] || '正常';
       },
+      sorter: (a, b) => Number(a.anomaly) - Number(b.anomaly),
     },
     {
       title: '时间',
@@ -214,6 +231,7 @@ const MonitoringPointsPage = () => {
         const d = new Date(Number(row.ts));
         return d.toLocaleString('zh-CN', { hour12: false });
       },
+      sorter: (a, b) => Number(a.ts) - Number(b.ts),
     },
     {
       title: '状态',
@@ -225,6 +243,7 @@ const MonitoringPointsPage = () => {
         0: { text: '停用' },
       },
       render: (_, row) => (Number(row.status) === 1 ? '启用' : '停用'),
+      sorter: (a, b) => Number(a.status) - Number(b.status),
     },
     {
       title: '操作',

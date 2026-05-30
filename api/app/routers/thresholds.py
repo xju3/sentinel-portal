@@ -5,7 +5,7 @@ Sensor threshold management endpoints
 import logging
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import cast,  List
+from typing import cast, List, Optional
 from uuid import UUID
 
 logger = logging.getLogger(__name__)
@@ -29,10 +29,12 @@ router = APIRouter(prefix="/thresholds", tags=["thresholds"])
 async def list_sensor_thresholds(
     skip: int = Query(0, ge=0),
     limit: int = Query(100, ge=1, le=200),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
     session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
-    return success(await SensorThresholdService.get_by_tenant(session, cast(UUID, current_account.tenant_id), skip, limit))
+    return success(await SensorThresholdService.get_by_tenant(session, cast(UUID, current_account.tenant_id), skip, limit, sort_by, sort_order))
 
 
 @router.get("/{obj_id}")

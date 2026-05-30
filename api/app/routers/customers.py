@@ -89,9 +89,11 @@ async def update_current_tenant(
 async def list_tenants(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
     session: AsyncSession = Depends(get_session),
 ):
-    tenants = await TenantService.get_tenants(session, skip, limit)
+    tenants = await TenantService.get_tenants(session, skip, limit, sort_by, sort_order)
     return success([TenantResponse.model_validate(t) for t in tenants])
 
 
@@ -148,9 +150,11 @@ async def delete_tenant(
 async def list_tenant_sensors(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
     session: AsyncSession = Depends(get_session),
 ):
-    return success(await TenantSensorService.get_tenant_sensors(session, skip, limit))
+    return success(await TenantSensorService.get_tenant_sensors(session, skip, limit, sort_by, sort_order))
 
 
 @router.get("/tenant-sensors/{ts_id}")
@@ -207,11 +211,13 @@ async def list_suppliers(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     keyword: Optional[str] = Query(None),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
-    suppliers = await SupplierService.get_suppliers(session, tenant_id, skip, limit, keyword)
+    suppliers = await SupplierService.get_suppliers(session, tenant_id, skip, limit, keyword, sort_by, sort_order)
     return success([SupplierResponse.model_validate(s) for s in suppliers])
 
 
@@ -585,11 +591,13 @@ async def delete_account(
 async def list_areas(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
-    return success(await AreaService.get_areas(session, tenant_id, skip, limit))
+    return success(await AreaService.get_areas(session, tenant_id, skip, limit, sort_by, sort_order))
 
 
 @router.post("/areas")
@@ -721,11 +729,13 @@ async def delete_location(
 async def list_health_check_freqs(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
-    return success(await HealthCheckFreqService.get_health_check_freqs(session, tenant_id, skip, limit))
+    return success(await HealthCheckFreqService.get_health_check_freqs(session, tenant_id, skip, limit, sort_by, sort_order))
 
 
 @router.post("/health-check-freqs")

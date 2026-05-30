@@ -94,9 +94,11 @@ async def _validate_sensor_monitoring_refs(
 async def list_iso_standards(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
     session: AsyncSession = Depends(get_session),
 ):
-    return success(await IsoStandardService.get_all(session, skip, limit))
+    return success(await IsoStandardService.get_all(session, skip, limit, sort_by, sort_order))
 
 
 @router.get("/iso-standards/{obj_id}")
@@ -210,11 +212,13 @@ async def list_device_categories(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
     keyword: Optional[str] = Query(None),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
-    rows = await DeviceCategoryService.get_all(session, tenant_id, skip, limit, keyword)
+    rows = await DeviceCategoryService.get_all(session, tenant_id, skip, limit, keyword, sort_by, sort_order)
     freq_ids: List[UUID] = [cast(UUID, row.health_check_freq_id) for row in rows]
     freq_map = await DeviceCategoryService.get_health_check_freq_map(
         session,
@@ -342,9 +346,11 @@ async def delete_device_category(
 async def list_device_specs(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
     session: AsyncSession = Depends(get_session),
 ):
-    return success(await DeviceSpecService.get_all(session, skip, limit))
+    return success(await DeviceSpecService.get_all(session, skip, limit, sort_by, sort_order))
 
 
 @router.get("/device-specs/{obj_id}")
@@ -403,9 +409,11 @@ async def delete_device_spec(
 async def list_device_insts(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
     session: AsyncSession = Depends(get_session),
 ):
-    return success(await DeviceInstService.get_all(session, skip, limit))
+    return success(await DeviceInstService.get_all(session, skip, limit, sort_by, sort_order))
 
 
 @router.get("/device-insts/{obj_id}")
@@ -472,9 +480,11 @@ async def delete_device_inst(
 async def list_processes(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
     session: AsyncSession = Depends(get_session),
 ):
-    return success(await ProcessService.get_all(session, skip, limit))
+    return success(await ProcessService.get_all(session, skip, limit, sort_by, sort_order))
 
 
 @router.get("/processes/{obj_id}")
@@ -530,9 +540,11 @@ async def delete_process(
 async def list_process_items(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
     session: AsyncSession = Depends(get_session),
 ):
-    return success(await ProcessItemService.get_all(session, skip, limit))
+    return success(await ProcessItemService.get_all(session, skip, limit, sort_by, sort_order))
 
 
 @router.get("/process-items/{obj_id}")
@@ -588,9 +600,11 @@ async def delete_process_item(
 async def list_process_devices(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
     session: AsyncSession = Depends(get_session),
 ):
-    return success(await ProcessDeviceService.get_all(session, skip, limit))
+    return success(await ProcessDeviceService.get_all(session, skip, limit, sort_by, sort_order))
 
 
 @router.get("/process-devices/{obj_id}")
@@ -657,9 +671,11 @@ async def delete_process_device(
 async def list_process_device_items(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
     session: AsyncSession = Depends(get_session),
 ):
-    return success(await ProcessDeviceItemService.get_all(session, skip, limit))
+    return success(await ProcessDeviceItemService.get_all(session, skip, limit, sort_by, sort_order))
 
 
 @router.get("/process-device-items/{obj_id}")
@@ -726,11 +742,13 @@ async def delete_process_device_item(
 async def list_sensor_monitorings(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
-    return success(await SensorMonitoringService.get_all_by_tenant(session, tenant_id, skip, limit))
+    return success(await SensorMonitoringService.get_all_by_tenant(session, tenant_id, skip, limit, sort_by, sort_order))
 
 
 

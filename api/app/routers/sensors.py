@@ -43,9 +43,11 @@ router = APIRouter(prefix="/sensors", tags=["sensors"])
 async def list_sensor_types(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
     session: AsyncSession = Depends(get_session),
 ):
-    return success(await SensorTypeService.get_all(session, skip, limit))
+    return success(await SensorTypeService.get_all(session, skip, limit, sort_by, sort_order))
 
 
 @router.get("/types/{obj_id}")
@@ -104,10 +106,12 @@ async def delete_sensor_type(
 async def list_sensor_batches(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
     session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
-    return success(await SensorBatchService.get_by_tenant(session, cast(UUID, current_account.tenant_id), skip, limit))
+    return success(await SensorBatchService.get_by_tenant(session, cast(UUID, current_account.tenant_id), skip, limit, sort_by, sort_order))
 
 
 @router.get("/batches/{obj_id}")
@@ -173,9 +177,11 @@ async def list_sensors(
     current: int = Query(1, ge=1),
     pageSize: int = Query(10, ge=1, le=100),
     keyword: Optional[str] = Query(None),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
     session: AsyncSession = Depends(get_session),
 ):
-    items, total = await SensorDbService.get_paged(session, current, pageSize, keyword)
+    items, total = await SensorDbService.get_paged(session, current, pageSize, keyword, sort_by, sort_order)
     return success(PagedSensorResponse(items=items, total=total))
 
 
@@ -184,6 +190,8 @@ async def list_sensors_by_batch(
     batch_id: UUID,
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
     session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
@@ -191,7 +199,7 @@ async def list_sensors_by_batch(
     batch = await SensorBatchService.get_by_id_and_tenant(session, batch_id, cast(UUID, current_account.tenant_id))
     if not batch:
         raise HTTPException(status_code=404, detail="SensorBatch not found")
-    return success(await SensorDbService.get_by_batch_id(session, batch_id, skip, limit))
+    return success(await SensorDbService.get_by_batch_id(session, batch_id, skip, limit, sort_by, sort_order))
 
 
 @router.get("/{obj_id}")
