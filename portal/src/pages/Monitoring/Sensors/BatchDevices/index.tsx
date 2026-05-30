@@ -23,13 +23,14 @@ const BatchDevicesPage = () => {
   const [current, setCurrent] = useState(1);
   const [pageSize, setPageSize] = useState(10);
   const [querySn, setQuerySn] = useState('');
+  const [sort, setSort] = useState<Record<string, any>>({});
 
-  const loadRows = async (page: number, size: number, sn?: string) => {
+  const loadRows = async (page: number, size: number, sn?: string, currentSort = sort) => {
     if (!batchId) return;
     setLoading(true);
     try {
       const skip = (page - 1) * size;
-      const sensors = await listSensorsByBatch(batchId, skip, size);
+      const sensors = await listSensorsByBatch(batchId, skip, size, { sort_field: currentSort.field, sort_order: currentSort.order });
       setRows(sensors);
       // If the result count is less than pageSize, we know we've reached the end
       // For a more accurate total, we'd need a count endpoint, but this is sufficient
@@ -82,7 +83,7 @@ const BatchDevicesPage = () => {
       title: '传感器SN',
       dataIndex: 'sn',
       width: 180,
-      sorter: (a, b) => (a.sn || '').localeCompare(b.sn || '', 'zh-CN'),
+      sorter: true,
     },
     {
       title: '设备状态',
@@ -91,7 +92,7 @@ const BatchDevicesPage = () => {
       hideInSearch: true,
       render: (_, row) =>
         row.active === undefined ? '-' : row.active ? <Tag color="green">在线</Tag> : <Tag>离线</Tag>,
-      sorter: (a, b) => Number(a.active || 0) - Number(b.active || 0),
+      sorter: true,
     },
     {
       title: '最近活跃',
@@ -100,7 +101,7 @@ const BatchDevicesPage = () => {
       valueType: 'dateTime',
       hideInSearch: true,
       render: (_, row) => row.active_at || '-',
-      sorter: (a, b) => (a.active_at || '').localeCompare(b.active_at || '', 'zh-CN'),
+      sorter: true,
     },
     {
       title: '备注',
@@ -108,7 +109,7 @@ const BatchDevicesPage = () => {
       ellipsis: true,
       hideInSearch: true,
       render: (_, row) => row.description || '-',
-      sorter: (a, b) => (a.description || '').localeCompare(b.description || '', 'zh-CN'),
+      sorter: true,
     },
   ];
 
@@ -128,7 +129,13 @@ const BatchDevicesPage = () => {
         }}
         onSubmit={handleSearch}
         onReset={handleReset}
-        options={{ reload: () => loadRows(current, pageSize, querySn) }}
+      onChange={(pagination, filters, sorter: any) => {
+        const currentSort = sorter.order ? { field: sorter.field, order: sorter.order } : {};
+        setSort(currentSort);
+        // 分页参数如果有变化这里也能一同接收到，并传入 loadRows
+        loadRows(pagination.current || current, pagination.pageSize || pageSize, querySn, currentSort);
+      }}
+      options={{ reload: () => loadRows(current, pageSize, querySn, sort) }}
         optionsRender={renderRefSafeTableOptions}
         cardProps={{ bodyStyle: { paddingInline: 24 } }}
         toolBarRender={false}
@@ -141,7 +148,7 @@ const BatchDevicesPage = () => {
           onChange: (page, size) => {
             setCurrent(page);
             setPageSize(size);
-            loadRows(page, size, querySn);
+          loadRows(page, size, querySn, sort);
           },
         }}
       />

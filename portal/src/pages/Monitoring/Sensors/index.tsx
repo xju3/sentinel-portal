@@ -30,12 +30,13 @@ const MonitoringSensorsPage = () => {
   const [loading, setLoading] = useState(false);
   const [rows, setRows] = useState<SensorBatch[]>([]);
   const [query, setQuery] = useState<Record<string, any>>({});
+  const [sort, setSort] = useState<Record<string, any>>({});
   const [sensorTypes, setSensorTypes] = useState<SensorType[]>([]);
 
-  const loadRows = async () => {
+  const loadRows = async (currentSort = sort) => {
     setLoading(true);
     try {
-      setRows(await listSensorBatches());
+      setRows(await listSensorBatches({ sort_field: currentSort.field, sort_order: currentSort.order }));
     } catch (error) {
       message.error(toErrorMessage(error));
     } finally {
@@ -83,7 +84,7 @@ const MonitoringSensorsPage = () => {
       title: '批次编码',
       dataIndex: 'code',
       width: 180,
-      sorter: (a, b) => (a.code || '').localeCompare(b.code || '', 'zh-CN'),
+      sorter: true,
     },
     {
       title: '序列号前缀',
@@ -91,7 +92,7 @@ const MonitoringSensorsPage = () => {
       width: 120,
       hideInSearch: true,
       render: (_, row) => <Tag>{row.sn}</Tag>,
-      sorter: (a, b) => (a.sn || '').localeCompare(b.sn || '', 'zh-CN'),
+      sorter: true,
     },
     {
       title: '数量',
@@ -99,7 +100,7 @@ const MonitoringSensorsPage = () => {
       width: 80,
       hideInSearch: true,
       render: (_, row) => <Tag color="blue">{row.qty}</Tag>,
-      sorter: (a, b) => Number(a.qty) - Number(b.qty),
+      sorter: true,
     },
     {
       title: '传感器型号',
@@ -107,11 +108,7 @@ const MonitoringSensorsPage = () => {
       width: 120,
       hideInSearch: true,
       render: (_, row) => getSensorTypeName(row.sensor_type_id),
-      sorter: (a, b) => {
-        const labelA = getSensorTypeName(a.sensor_type_id);
-        const labelB = getSensorTypeName(b.sensor_type_id);
-        return labelA.localeCompare(labelB, 'zh-CN');
-      },
+      sorter: true,
     },
     {
       title: '状态',
@@ -128,7 +125,7 @@ const MonitoringSensorsPage = () => {
         const info = STATUS_MAP[row.status] || { text: `${row.status}`, color: 'default' };
         return <Tag color={info.color}>{info.text}</Tag>;
       },
-      sorter: (a, b) => Number(a.status) - Number(b.status),
+      sorter: true,
     },
     {
       title: '描述',
@@ -136,7 +133,7 @@ const MonitoringSensorsPage = () => {
       ellipsis: true,
       hideInSearch: true,
       render: (_, row) => row.description || '-',
-      sorter: (a, b) => (a.description || '').localeCompare(b.description || '', 'zh-CN'),
+      sorter: true,
     },
     {
       title: '创建时间',
@@ -144,7 +141,7 @@ const MonitoringSensorsPage = () => {
       width: 180,
       valueType: 'dateTime',
       hideInSearch: true,
-      sorter: (a, b) => (a.created_at || '').localeCompare(b.created_at || '', 'zh-CN'),
+      sorter: true,
     },
     {
       title: '操作',
@@ -175,6 +172,11 @@ const MonitoringSensorsPage = () => {
         search={{ labelWidth: 'auto' }}
         onSubmit={(values) => setQuery(values)}
         onReset={() => setQuery({})}
+        onChange={(pagination, filters, sorter: any) => {
+          const currentSort = sorter.order ? { field: sorter.field, order: sorter.order } : {};
+          setSort(currentSort);
+          loadRows(currentSort);
+        }}
         options={{ reload: loadRows }}
         optionsRender={renderRefSafeTableOptions}
         cardProps={{ bodyStyle: { paddingInline: 24 } }}
