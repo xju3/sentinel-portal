@@ -9,11 +9,21 @@ import { getSensorHistory } from '@/services/sensorTrends';
 
 const { Text } = Typography;
 
-const HistoryPage = () => {
-  const { sn } = useParams<{ sn: string }>();
+interface HistoryPageProps {
+  sensorSn?: string;
+  locationName?: string;
+  embedded?: boolean;
+}
+
+const HistoryPage = (props?: HistoryPageProps) => {
+  const { sn: routeSn } = useParams<{ sn: string }>();
   const [searchParams] = useSearchParams();
-  const locationName = searchParams.get('location') || '未知测点';
   const navigate = useNavigate();
+
+  // 支持两种模式：路由参数（URL路径）或 props 传入（嵌入模式）
+  const sn = props?.sensorSn || routeSn;
+  const locationName = props?.locationName || searchParams.get('location') || '未知测点';
+  const embedded = props?.embedded || false;
 
   const [loading, setLoading] = useState(false);
   const [range, setRange] = useState('1w');

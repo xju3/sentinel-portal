@@ -61,8 +61,8 @@ class DeviceInst(Base):
     __tablename__ = "device_inst"
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    code = Column(String(16), nullable=False, unique=True, index=True) # unique code for device instance, e.g. for QR code generation
-    sn = Column(String(64), nullable=False, unique=True, index=True)  # serial number for physical tracking
+    name = Column(String(128), nullable=False, unique=True, index=True) # unique code for device instance, e.g. for QR code generation
+    code = Column(String(64), nullable=False, unique=True, index=True)  # serial number for physical tracking
     purchase_date = Column(Date, nullable=False) # purchase date for lifecycle management
     life_span = Column(Integer, nullable=False, default=0)  # Expected lifespan in months
     desc = Column(String(128), nullable=False) # description for device instance, e.g. installation location or specific notes

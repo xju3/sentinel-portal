@@ -28,6 +28,11 @@ import {
 import { Supplier, listAllSuppliers, querySuppliers } from '@/services/supplier';
 
 import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';
+
+type CategoryTreeRow = DeviceCategory & {
+  children?: CategoryTreeRow[];
+};
+
 type DeviceSpecFormValues = {
   name: string;
   model: string;
@@ -38,6 +43,7 @@ type DeviceSpecFormValues = {
   supplier_id: string;
   device_category_id: string;
 };
+
 
 const toErrorMessage = (error: unknown): string => {
   const e = error as
@@ -50,7 +56,42 @@ const toErrorMessage = (error: unknown): string => {
   return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';
 };
 
+const buildCategoryTree = (rows: DeviceCategory[]): CategoryTreeRow[] => {
+  const nodeMap = new Map<string, CategoryTreeRow>();
+  rows.forEach((item) => nodeMap.set(item.id, { ...item, children: [] }));
+
+  const roots: CategoryTreeRow[] = [];
+  rows.forEach((item) => {
+    const node = nodeMap.get(item.id);
+    if (!node) {
+      return;
+    }
+    const pid = item.parent_id || undefined;
+    if (pid && nodeMap.has(pid)) {
+      const parent = nodeMap.get(pid);
+      if (parent) {
+        parent.children = parent.children || [];
+        parent.children.push(node);
+      }
+      return;
+    }
+    roots.push(node);
+  });
+
+  const sortTree = (nodes: CategoryTreeRow[]) => {
+    nodes.sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
+    nodes.forEach((item) => {
+      if (item.children && item.children.length > 0) {
+        sortTree(item.children);
+      }
+    });
+  };
+  sortTree(roots);
+  return roots;
+};
+
 const DeviceSpecPage = () => {
+
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -69,6 +110,8 @@ const DeviceSpecPage = () => {
     () => new Map(suppliers.map((item) => [item.id, item.name])),
     [suppliers],
   );
+
+  const categoryTreeData = useMemo(() => buildCategoryTree(categories), [categories]);
 
   const loadRows = async () => {
     setLoading(true);
@@ -385,6 +428,11 @@ const DeviceSpecPage = () => {
             triggerText="选择"
             valueLabel={editing ? categoryMap.get(editing.device_category_id) : undefined}
             columns={categoryPickerColumns}
+            treeData={categoryTreeData}
+            treeColumns={[
+              { title: '分类名称', dataIndex: 'name' },
+              { title: '描述', dataIndex: 'description', render: (_, row) => row.description || '-' },
+            ]}
             getRecordLabel={(record) => record.name}
             fetcher={({ current, pageSize, keyword }) =>
               queryDeviceCategories({ current, pageSize, keyword })

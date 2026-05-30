@@ -28,9 +28,9 @@ import { DeviceSpec, listAllDeviceSpecs, queryDeviceSpecs } from '@/services/dev
 
 import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';
 type DeviceInstFormValues = {
-  code: string;
+  name: string;
   device_spec_id: string;
-  sn: string;
+  code: string;
   purchase_date: string | Dayjs;
   life_span: number;
   desc: string;
@@ -65,7 +65,9 @@ const DeviceListPage = () => {
   const [rows, setRows] = useState<DeviceInst[]>([]);
   const [query, setQuery] = useState<Record<string, any>>({});
   const [editing, setEditing] = useState<DeviceInst | null>(null);
+  const [copyMode, setCopyMode] = useState(false);
   const [specs, setSpecs] = useState<DeviceSpec[]>([]);
+
 
   const specMap = useMemo(
     () =>
@@ -111,10 +113,10 @@ const DeviceListPage = () => {
           ? query.purchase_date.format('YYYY-MM-DD').toLowerCase()
           : norm(query.purchase_date);
     return rows.filter((row) => {
-      if (query.code && !norm(row.code).includes(norm(query.code))) {
+      if (query.code && !norm(row.name).includes(norm(query.code))) {
         return false;
       }
-      if (query.sn && !norm(row.sn).includes(norm(query.sn))) {
+      if (query.sn && !norm(row.code).includes(norm(query.sn))) {
         return false;
       }
       if (purchaseDateQuery && !norm(row.purchase_date).includes(purchaseDateQuery)) {
@@ -151,7 +153,7 @@ const DeviceListPage = () => {
   }, [query, rows, specMap]);
 
   const specPickerColumns: ColumnsType<DeviceSpec> = [
-    { title: '规格名称', dataIndex: 'name' },
+    { title: '名称', dataIndex: 'name' },
     { title: '型号', dataIndex: 'model' },
     { title: '品牌', dataIndex: 'brand' },
     {
@@ -173,14 +175,43 @@ const DeviceListPage = () => {
       fixed: 'left',
     },
     {
-      title: '编码',
-      dataIndex: 'code',
-      width: 140,
+      title: '传感器测点',
+      hideInSearch: true,
+      width: 100,
+      render: (_, row: any) => {
+        const monitorings = row.sensor_monitorings || [];
+        if (!monitorings?.length) return '-';
+        return (
+          <Space size={[0, 4]} wrap>
+            {monitorings.map((m: any, idx: number) => {
+              const sn = m.sensor?.sn || '未知SN';
+              const loc = m.location?.name || '未知测点';
+              return (
+                <Tag
+                  color="blue"
+                  key={m.id || idx}
+                  style={{ cursor: sn !== '未知SN' ? 'pointer' : 'default' }}
+                  onClick={() => {
+                    if (sn !== '未知SN') {
+                      navigate(`/monitoring/sensors/${sn}/history?location=${encodeURIComponent(loc)}`);
+                    }
+                  }}
+                >{`${sn} / ${loc}`}</Tag>
+              );
+            })}
+          </Space>
+        );
+      },
     },
     {
-      title: '序列号',
-      dataIndex: 'sn',
+      title: '编号',
+      dataIndex: 'code',
       width: 180,
+    },
+    {
+      title: '名称',
+      dataIndex: 'name',
+      width: 140,
     },
     {
       title: '设备规格',
@@ -200,35 +231,7 @@ const DeviceListPage = () => {
       width: 110,
       valueType: 'digit',
     },
-    {
-      title: '关联传感器(测点)',
-      hideInSearch: true,
-      width: 240,
-      render: (_, row: any) => {
-        const monitorings = row.sensor_monitorings || [];
-        if (!monitorings?.length) return '-';
-        return (
-          <Space size={[0, 4]} wrap>
-            {monitorings.map((m: any, idx: number) => {
-              const sn = m.sensor?.sn || '未知SN';
-              const loc = m.location?.name || '未知测点';
-              return (
-                <Tag 
-                  color="blue" 
-                  key={m.id || idx}
-                  style={{ cursor: sn !== '未知SN' ? 'pointer' : 'default' }}
-                  onClick={() => {
-                    if (sn !== '未知SN') {
-                      navigate(`/monitoring/sensors/${sn}/history?location=${encodeURIComponent(loc)}`);
-                    }
-                  }}
-                >{`${sn} / ${loc}`}</Tag>
-              );
-            })}
-          </Space>
-        );
-      },
-    },
+
     {
       title: '描述',
       dataIndex: 'desc',
@@ -275,36 +278,49 @@ const DeviceListPage = () => {
       fixed: 'right',
       align: 'center',
       render: (_, row) => (
-        <Space size="middle">
+        <Space size="small">
           <Button
-          key="edit"
-          type="link"
-          onClick={() => {
-            setEditing(row);
-            setModalOpen(true);
-          }}
-        >
-          编辑
+            key="edit"
+            type="link"
+            onClick={() => {
+              setEditing(row);
+              setModalOpen(true);
+            }}
+          >
+            编辑
+          </Button>
+          <Button
+            key="copy"
+            type="link"
+            onClick={() => {
+              setEditing(row);
+              setCopyMode(true);
+              setModalOpen(true);
+            }}
+          >
+            复制
           </Button>
           <Popconfirm
-          key="delete"
-          title="确认删除该设备实例吗？"
-          onConfirm={async () => {
-            try {
-              await deleteDeviceInst(row.id);
-              message.success('删除成功');
-              await loadRows();
-            } catch (error) {
-              message.error(toErrorMessage(error));
-            }
-          }}
-        >
-          <Button danger type="link">
-            删除
-          </Button>
+            key="delete"
+            title="确认删除该设备实例吗？"
+            onConfirm={async () => {
+              try {
+                await deleteDeviceInst(row.id);
+                message.success('删除成功');
+                await loadRows();
+              } catch (error) {
+                message.error(toErrorMessage(error));
+              }
+            }}
+          >
+            <Button danger type="link">
+              删除
+            </Button>
           </Popconfirm>
-      </Space>
+        </Space>
       ),
+
+
     },
   ];
 
@@ -336,13 +352,14 @@ const DeviceListPage = () => {
       />
 
       <ModalForm<DeviceInstFormValues>
-        title={editing ? '编辑设备实例' : '新建设备实例'}
+        title={copyMode ? '复制设备实例' : editing ? '编辑设备实例' : '新建设备实例'}
         open={modalOpen}
         modalProps={{
           destroyOnHidden: true,
           onCancel: () => {
             setModalOpen(false);
             setEditing(null);
+            setCopyMode(false);
           },
         }}
         submitter={{
@@ -350,11 +367,11 @@ const DeviceListPage = () => {
           searchConfig: { submitText: '保存' },
         }}
         initialValues={
-          editing
+          editing && !copyMode
             ? {
-              code: editing.code,
+              name: editing.name,
               device_spec_id: editing.device_spec_id,
-              sn: editing.sn,
+              code: editing.code,
               purchase_date: dayjs(editing.purchase_date),
               life_span: editing.life_span,
               desc: editing.desc,
@@ -362,20 +379,32 @@ const DeviceListPage = () => {
               active: Number(editing.active),
               available: Number(editing.available),
             }
-            : {
-              life_span: 0,
-              status: 1,
-              active: 1,
-              available: 1,
-            }
+            : editing && copyMode
+              ? {
+                name: '',
+                device_spec_id: editing.device_spec_id,
+                code: editing.code,
+                purchase_date: dayjs(editing.purchase_date),
+                life_span: editing.life_span,
+                desc: editing.desc,
+                status: Number(editing.status),
+                active: Number(editing.active),
+                available: Number(editing.available),
+              }
+              : {
+                life_span: 0,
+                status: 1,
+                active: 1,
+                available: 1,
+              }
         }
         onFinish={async (values) => {
           setSaving(true);
           try {
             const payload: DeviceInstPayload = {
-              code: values.code.trim(),
+              name: values.name.trim(),
               device_spec_id: values.device_spec_id,
-              sn: values.sn.trim(),
+              code: values.code.trim(),
               purchase_date: toApiDate(values.purchase_date),
               life_span: Number(values.life_span ?? 0),
               desc: values.desc.trim(),
@@ -384,7 +413,7 @@ const DeviceListPage = () => {
               available: Number(values.available ?? 1),
             };
 
-            if (editing) {
+            if (editing && !copyMode) {
               await updateDeviceInst(editing.id, payload);
               message.success('更新成功');
             } else {
@@ -393,6 +422,7 @@ const DeviceListPage = () => {
             }
             setModalOpen(false);
             setEditing(null);
+            setCopyMode(false);
             await loadRows();
             return true;
           } catch (error) {
@@ -402,17 +432,18 @@ const DeviceListPage = () => {
             setSaving(false);
           }
         }}
+
       >
         <ProFormText
-          name="code"
+          name="name"
           label="编码"
           rules={[
             { required: true, message: '请输入设备编码' },
-            { max: 16, message: '设备编码最多16个字符' },
+            { max: 128, message: '设备编码最多128个字符' },
           ]}
         />
         <ProFormText
-          name="sn"
+          name="code"
           label="序列号"
         />
         <ProForm.Item

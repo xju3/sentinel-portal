@@ -213,7 +213,7 @@ const DeviceCategoryPage = () => {
     {
       title: '序号',
       valueType: 'indexBorder',
-      width: 68,
+      width: 120,
       hideInSearch: true,
       fixed: 'left',
     },

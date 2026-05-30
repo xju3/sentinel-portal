@@ -135,9 +135,9 @@ class DeviceSpecResponse(BaseModel):
 # DeviceInst
 # ==========================================
 class DeviceInstCreate(BaseModel):
-    code: str
+    name: str
     device_spec_id: UUID
-    sn: str
+    code: str
     purchase_date: date
     life_span: Optional[int] = 0
     desc: str
@@ -145,9 +145,9 @@ class DeviceInstCreate(BaseModel):
 
 
 class DeviceInstUpdate(BaseModel):
-    code: Optional[str] = None
+    name: Optional[str] = None
     device_spec_id: Optional[UUID] = None
-    sn: Optional[str] = None
+    code: Optional[str] = None
     purchase_date: Optional[date] = None
     life_span: Optional[int] = None
     desc: Optional[str] = None
@@ -156,9 +156,9 @@ class DeviceInstUpdate(BaseModel):
 
 class DeviceInstResponse(BaseModel):
     id: UUID
-    code: str
+    name: str
     device_spec_id: UUID
-    sn: str
+    code: str
     purchase_date: date
     life_span: int
     desc: str
@@ -309,8 +309,8 @@ class SensorMonitoringResponse(BaseModel):
 
 class SensorMonitoringDeviceInstOption(BaseModel):
     id: UUID
+    name: str
     code: str
-    sn: str
     device_spec_id: UUID
 
     model_config = ConfigDict(from_attributes=True)

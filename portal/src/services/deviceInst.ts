@@ -2,9 +2,9 @@ import { request } from '@umijs/max';
 
 export type DeviceInst = {
   id: string;
-  code: string;
+  name: string;
   device_spec_id: string;
-  sn: string;
+  code: string;
   purchase_date: string;
   life_span: number;
   desc: string;
@@ -14,9 +14,9 @@ export type DeviceInst = {
 };
 
 export type DeviceInstPayload = {
-  code: string;
+  name: string;
   device_spec_id: string;
-  sn: string;
+  code: string;
   purchase_date: string;
   life_span: number;
   desc: string;

@@ -164,7 +164,7 @@ class DeviceCategoryService:
 class DeviceSpecService:
     @staticmethod
     async def get_all(session: AsyncSession, skip: int, limit: int) -> List[DeviceSpec]:
-        stmt = select(DeviceSpec).offset(skip).limit(limit)
+        stmt = select(DeviceSpec).offset(skip).order_by(DeviceSpec.name).limit(limit)
         result = await session.execute(stmt)
         return result.scalars().all()
 
@@ -199,7 +199,7 @@ class DeviceSpecService:
 class DeviceInstService:
     @staticmethod
     async def get_all(session: AsyncSession, skip: int, limit: int) -> List[DeviceInst]:
-        stmt = select(DeviceInst).offset(skip).limit(limit)
+        stmt = select(DeviceInst).offset(skip).order_by(DeviceInst.code).limit(limit)
         result = await session.execute(stmt)
         return result.scalars().all()
 
@@ -248,7 +248,7 @@ class DeviceInstService:
         if keyword:
             like = f"%{keyword}%"
             base_join = base_join.where(
-                or_(DeviceInst.code.ilike(like), DeviceInst.sn.ilike(like))
+                or_(DeviceInst.name.ilike(like), DeviceInst.code.ilike(like))
             )
 
         count_stmt = select(func.count()).select_from(base_join.subquery())
@@ -331,13 +331,20 @@ class SensorMonitoringService:
 
     @staticmethod
     async def get_all(session: AsyncSession, skip: int, limit: int):
-        stmt = select(SensorMonitoring).offset(skip).limit(limit)
+        from app.models.device import DeviceInst
+        stmt = (
+            select(SensorMonitoring)
+            .join(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
+            .offset(skip)
+            .order_by(DeviceInst.code)
+            .limit(limit)
+        )
         result = await session.execute(stmt)
         return result.scalars().all()
 
     @staticmethod
-    async def get_by_sn(session: AsyncSession, sn: str):
-        stmt = select(SensorMonitoring).where(SensorMonitoring.sn == sn and SensorMonitoring.status == 1)
+    async def get_by_code(session: AsyncSession, code: str):
+        stmt = select(SensorMonitoring).where(SensorMonitoring.code == code and SensorMonitoring.status == 1)
         result = await session.execute(stmt)
         return result.scalar_one_or_none() 
 

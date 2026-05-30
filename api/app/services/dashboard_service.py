@@ -127,8 +127,8 @@ class DashboardService:
         stmt_dev = (
             select(
                 DeviceInst.id,
+                DeviceInst.name,
                 DeviceInst.code,
-                DeviceInst.sn,
                 DeviceInst.purchase_date,
                 DeviceInst.active,
                 DeviceCategory.id.label("category_id"),
@@ -149,8 +149,8 @@ class DashboardService:
             if dev_id_str not in dev_map:
                 dev_map[dev_id_str] = {
                     "active": row.active,
+                    "name": row.name,
                     "code": row.code,
-                    "sn": row.sn,
                     "purchase_date": row.purchase_date.isoformat() if row.purchase_date else None,
                     "category_id": str(row.category_id) if row.category_id else None,
                     "areas": set(),
@@ -172,7 +172,7 @@ class DashboardService:
         
         for dev_id, info in dev_map.items():
             device_meta[dev_id] = {
-                "code": info["code"], "sn": info["sn"], "purchase_date": info["purchase_date"]
+                "name": info["name"], "code": info["code"], "purchase_date": info["purchase_date"]
             }
             if info["category_id"]:
                 device_cat_map[dev_id] = info["category_id"]
@@ -404,7 +404,7 @@ class DashboardService:
         )
         devices_by_process_tree = assemble_tree(process_map)
 
-        # 5. 内存组装最新预警所需信息 (由于砍掉了 JOIN，在内存里把 code 和 sn 拼装回来)
+        # 5. 内存组装最新预警所需信息 (由于砍掉了 JOIN，在内存里把 name 和 code 拼装回来)
         recent_candidates.sort(key=lambda x: x.ts or 0, reverse=True)
         recent_anomalies = []
         for row in recent_candidates[:10]:
@@ -412,8 +412,8 @@ class DashboardService:
             meta = device_meta.get(dev_id_str, {})
             recent_anomalies.append({
                 "id": str(row.id),
-                "device_code": meta.get("code", "Unknown"),
-                "device_sn": meta.get("sn", "Unknown"),
+                "device_code": meta.get("name", "Unknown"),
+                "device_sn": meta.get("code", "Unknown"),
                 "anomaly": row.anomaly,
                 "ts": row.ts or 0
             })
