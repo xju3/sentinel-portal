@@ -4,6 +4,7 @@ export type Area = {
   id: string;
   name: string;
   description?: string;
+  network: number;
   ssid?: string;
   passwd?: string;
   parent_id?: string | null;
@@ -13,6 +14,7 @@ export type Area = {
 export type AreaPayload = {
   name: string;
   description?: string;
+  network?: number;
   ssid?: string;
   passwd?: string;
   parent_id?: string | null;

@@ -4,6 +4,8 @@ import {
   PageContainer,
   ProColumns,
   ProForm,
+  ProFormDependency,
+  ProFormSelect,
   ProFormText,
   ProTable,
 } from '@ant-design/pro-components';
@@ -19,9 +21,15 @@ type AreaTreeRow = Area & {
   children?: AreaTreeRow[];
 };
 
+const NETWORK_OPTIONS = [
+  { label: '4G', value: 1 },
+  { label: 'Wi-Fi', value: 2 },
+];
+
 type AreaFormValues = {
   name: string;
   description?: string;
+  network?: number;
   ssid?: string;
   passwd?: string;
   parent_id?: string;
@@ -186,6 +194,17 @@ const MonitoringAreaPage = () => {
     },
     { title: '区域名称', dataIndex: 'name', width: 180, sorter: (a, b) => (a.name || '').localeCompare(b.name || '', 'zh-CN') },
     {
+      title: '网络类型',
+      dataIndex: 'network',
+      width: 120,
+      valueEnum: {
+        1: { text: '4G' },
+        2: { text: 'Wi-Fi' },
+      },
+      render: (_, row) => (row.network === 2 ? 'Wi-Fi' : '4G'),
+      sorter: (a, b) => (a.network || 0) - (b.network || 0),
+    },
+    {
       title: '上级区域',
       dataIndex: 'parent_id',
       width: 180,
@@ -306,6 +325,7 @@ const MonitoringAreaPage = () => {
             ? {
                 name: editing.name,
                 description: editing.description,
+                network: editing.network,
                 ssid: editing.ssid,
                 passwd: editing.passwd,
                 parent_id: editing.parent_id || undefined,
@@ -332,6 +352,7 @@ const MonitoringAreaPage = () => {
           const payload: AreaPayload = {
             name: values.name.trim(),
             description: values.description?.trim() || undefined,
+            network: values.network ?? 1,
             ssid: values.ssid?.trim() || undefined,
             passwd: values.passwd?.trim() || undefined,
             parent_id: values.parent_id?.trim() || undefined,
@@ -410,8 +431,32 @@ const MonitoringAreaPage = () => {
             }}
           />
         </ProForm.Item>
-        <ProFormText name="ssid" label="Wi-Fi SSID" />
-        <ProFormText name="passwd" label="Wi-Fi 密码" />
+        <ProFormSelect
+          name="network"
+          label="网络类型"
+          options={NETWORK_OPTIONS}
+          initialValue={1}
+          rules={[{ required: true, message: '请选择网络类型' }]}
+        />
+        <ProFormDependency name={['network']}>
+          {({ network }) => {
+            const isWifi = network === 2;
+            return (
+              <>
+                <ProFormText
+                  name="ssid"
+                  label="Wi-Fi SSID"
+                  rules={isWifi ? [{ required: true, message: 'Wi-Fi 模式下请输入 SSID' }] : []}
+                />
+                <ProFormText
+                  name="passwd"
+                  label="Wi-Fi 密码"
+                  rules={isWifi ? [{ required: true, message: 'Wi-Fi 模式下请输入密码' }] : []}
+                />
+              </>
+            );
+          }}
+        </ProFormDependency>
         <ProFormText
           name="description"
           label="描述"

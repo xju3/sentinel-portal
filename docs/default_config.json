@@ -1,0 +1,19 @@
+{
+    "iso": {
+        "standard": 1,
+        "category": 3,
+        "foundation": 1
+    },
+    "rpm": 1480,
+    "battery": 19000,
+    "host": "139.9.50.7",
+    "patrol": 2,
+    "diagnosis": 1440,
+    "report": 1,
+    "network": 1,
+    "wifi": {
+        "ssid": "CU_Up3k",
+        "pass": "hen6n6c7"
+    },
+    "configured": true
+}

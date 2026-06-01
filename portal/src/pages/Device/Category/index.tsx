@@ -117,6 +117,12 @@ const DeviceCategoryPage = () => {
     return map;
   }, [vibThresholdOptions, tempThresholdOptions]);
 
+  const isoLabelMap = useMemo(() => {
+    const map = new Map<string, string>();
+    isoOptions.forEach((opt) => map.set(opt.value, opt.label));
+    return map;
+  }, [isoOptions]);
+
   const treeData = useMemo(() => buildCategoryTree(categories), [categories]);
   const categoryMap = useMemo(
     () => new Map(categories.map((item) => [item.id, item])),
@@ -180,7 +186,7 @@ const DeviceCategoryPage = () => {
       setIsoOptions(
         (isos || []).map((item) => ({
           value: item.id,
-          label: `${item.code} - ${item.name}`,
+          label: `${item.code} (ISO-${item.version === 1 ? '10816' : '20816'})`,
         })),
       );
       setVibThresholdOptions(
@@ -286,7 +292,10 @@ const DeviceCategoryPage = () => {
       title: 'ISO',
       dataIndex: 'iso_standard_id',
       ellipsis: true,
-      render: (_, row) => row.iso_standard_id || '-',
+      render: (_, row) =>
+        row.iso_standard_id
+          ? isoLabelMap.get(row.iso_standard_id) || row.iso_standard_id
+          : '-',
       sorter: (a, b) => (a.iso_standard_id || '').localeCompare(b.iso_standard_id || '', 'zh-CN'),
     },
     {

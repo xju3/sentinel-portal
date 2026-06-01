@@ -74,7 +74,11 @@ export default defineConfig({
           name: '工作区域',
           component: '@/pages/Monitoring/Area',
         },
-
+        {
+          path: '/data/iso-standards',
+          name: '国际标准',
+          component: '@/pages/Monitoring/IsoStandard',
+        },
         {
           path: '/data',
           redirect: '/data/suppliers',
@@ -146,6 +150,11 @@ export default defineConfig({
           hideInMenu: true,
         },
         {
+          path: '/monitoring/sensors',
+          name: '设备批次',
+          component: '@/pages/Monitoring/Sensors',
+        },
+        {
           path: '/monitoring/points',
           name: '测点设置',
           component: '@/pages/Monitoring/Points',
@@ -154,11 +163,6 @@ export default defineConfig({
           path: '/monitoring/frequency',
           name: '监测频率',
           component: '@/pages/Monitoring/Frequency',
-        },
-        {
-          path: '/monitoring/sensors',
-          name: '设备批次',
-          component: '@/pages/Monitoring/Sensors',
         },
         {
           path: '/monitoring/threshold',

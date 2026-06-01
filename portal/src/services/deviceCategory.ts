@@ -43,9 +43,9 @@ export type HealthCheckFreq = {
 export type IsoStandard = {
   id: string;
   code: string;
-  name: string;
-  category: string;
-  foundation: string;
+  version: number;
+  category: number;
+  foundation: number;
   description?: string;
 };
 
