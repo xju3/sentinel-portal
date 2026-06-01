@@ -17,6 +17,7 @@ from app.models.customer import (
     Area,
     Location,
     HealthCheckFreq,
+    IsoStandard,
 )
 from app.utils.exceptions import DomainException
 from app.utils.sorting import apply_sorting
@@ -738,4 +739,68 @@ class HealthCheckFreqService:
     @staticmethod
     async def delete_health_check_freq(session: AsyncSession, db_freq: HealthCheckFreq) -> None:
         await session.delete(db_freq)
+        await session.commit()
+
+
+class IsoStandardService:
+    @staticmethod
+    async def get_iso_standards(
+        session: AsyncSession,
+        tenant_id: UUID,
+        skip: int,
+        limit: int,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ) -> List[IsoStandard]:
+        stmt = select(IsoStandard).where(IsoStandard.tenant_id == tenant_id)
+        stmt = apply_sorting(stmt, IsoStandard, sort_by, sort_order)
+        stmt = stmt.offset(skip).limit(limit)
+        result = await session.execute(stmt)
+        return result.scalars().all()
+
+    @staticmethod
+    async def count_iso_standards(
+        session: AsyncSession,
+        tenant_id: UUID,
+    ) -> int:
+        stmt = select(func.count(IsoStandard.id)).where(IsoStandard.tenant_id == tenant_id)
+        result = await session.execute(stmt)
+        return int(result.scalar_one() or 0)
+
+    @staticmethod
+    async def get_iso_standard(
+        session: AsyncSession,
+        tenant_id: UUID,
+        iso_id: UUID,
+    ) -> Optional[IsoStandard]:
+        stmt = select(IsoStandard).where(
+            IsoStandard.id == iso_id,
+            IsoStandard.tenant_id == tenant_id,
+        )
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def create_iso_standard(session: AsyncSession, data: dict) -> IsoStandard:
+        db_obj = IsoStandard(**data)
+        session.add(db_obj)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def update_iso_standard(
+        session: AsyncSession,
+        db_obj: IsoStandard,
+        data: dict,
+    ) -> IsoStandard:
+        for key, value in data.items():
+            setattr(db_obj, key, value)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def delete_iso_standard(session: AsyncSession, db_obj: IsoStandard) -> None:
+        await session.delete(db_obj)
         await session.commit()

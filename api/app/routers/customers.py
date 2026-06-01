@@ -18,6 +18,7 @@ from app.services.customer_service import (
     AreaService,
     LocationService,
     HealthCheckFreqService,
+    IsoStandardService,
 )
 from app.services.dashboard_service import DashboardService
 from app.utils.auth import get_current_account
@@ -50,6 +51,9 @@ from app.contract.customers import (
     HealthCheckFreqCreate,
     HealthCheckFreqUpdate,
     HealthCheckFreqResponse,
+    IsoStandardCreate,
+    IsoStandardUpdate,
+    IsoStandardResponse,
 )
 
 router = APIRouter(tags=["customers"])
@@ -782,3 +786,136 @@ async def delete_health_check_freq(
 
     await HealthCheckFreqService.delete_health_check_freq(session, db_freq)
     return success({"message": "HealthCheckFreq deleted successfully"})
+
+
+# ==========================================
+# 8. IsoStandard
+# ==========================================
+@router.get("/iso-standards")
+async def list_iso_standards(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    return success(await IsoStandardService.get_iso_standards(session, tenant_id, skip, limit, sort_by, sort_order))
+
+
+@router.get("/iso-standards/count")
+async def count_iso_standards(
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    total = await IsoStandardService.count_iso_standards(session, tenant_id)
+    return success({"total": total})
+
+
+@router.get("/iso-standards/all")
+async def list_all_iso_standards(
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    return success(await IsoStandardService.get_iso_standards(session, tenant_id, 0, 1000))
+
+
+@router.get("/iso-standards/{iso_id}")
+async def get_iso_standard(
+    iso_id: UUID,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    iso = await IsoStandardService.get_iso_standard(session, tenant_id, iso_id)
+    if not iso:
+        raise HTTPException(status_code=404, detail="IsoStandard not found")
+    return success(iso)
+
+
+@router.post("/iso-standards")
+async def create_iso_standard(
+    iso: IsoStandardCreate,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    payload = iso.model_dump(exclude_unset=True)
+    if "tenant_id" in payload and payload["tenant_id"] is not None and payload["tenant_id"] != tenant_id:
+        raise HTTPException(status_code=400, detail="tenant_id mismatch")
+    payload["tenant_id"] = tenant_id
+    # Validate version
+    if payload.get("version") not in (1, 2):
+        raise HTTPException(status_code=400, detail="version must be 1 (ISO-10816) or 2 (ISO-20816)")
+    # Validate category based on version
+    version = payload.get("version")
+    category = payload.get("category")
+    if version == 1 and category not in (1, 2, 3):
+        raise HTTPException(status_code=400, detail="category for version 1 must be 1 (Class I), 2 (Class II), or 3 (Class III)")
+    if version == 2 and category not in (1, 2, 3, 4):
+        raise HTTPException(status_code=400, detail="category for version 2 must be 1-4")
+    # Validate foundation — 0 only allowed when version=1 and category=1
+    foundation = payload.get("foundation")
+    if foundation == 0:
+        if version != 1 or category != 1:
+            raise HTTPException(status_code=400, detail="foundation=0 is only allowed when version=1 and category=1")
+    elif foundation not in (1, 2):
+        raise HTTPException(status_code=400, detail="foundation must be 1 (刚性基础) or 2 (柔性基础)")
+    return success(await IsoStandardService.create_iso_standard(session, payload))
+
+
+@router.put("/iso-standards/{iso_id}")
+async def update_iso_standard(
+    iso_id: UUID,
+    iso: IsoStandardUpdate,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    db_obj = await IsoStandardService.get_iso_standard(session, tenant_id, iso_id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="IsoStandard not found")
+
+    update_data = iso.model_dump(exclude_unset=True)
+    if "tenant_id" in update_data and update_data["tenant_id"] != tenant_id:
+        raise HTTPException(status_code=400, detail="tenant_id cannot be changed")
+    update_data.pop("tenant_id", None)
+    # Validate version if provided
+    if "version" in update_data and update_data["version"] not in (1, 2):
+        raise HTTPException(status_code=400, detail="version must be 1 (ISO-10816) or 2 (ISO-20816)")
+    # Validate category if version+both provided or category alone
+    effective_version = update_data.get("version", db_obj.version)
+    eff_cat = update_data.get("category", db_obj.category)
+    if "category" in update_data:
+        cat = update_data["category"]
+        if effective_version == 1 and cat not in (1, 2, 3):
+            raise HTTPException(status_code=400, detail="category for version 1 must be 1 (Class I), 2 (Class II), or 3 (Class III)")
+        if effective_version == 2 and cat not in (1, 2, 3, 4):
+            raise HTTPException(status_code=400, detail="category for version 2 must be 1-4")
+    # Validate foundation if provided — 0 only allowed when version=1 and category=1
+    if "foundation" in update_data:
+        fdn = update_data["foundation"]
+        if fdn == 0:
+            if effective_version != 1 or eff_cat != 1:
+                raise HTTPException(status_code=400, detail="foundation=0 is only allowed when version=1 and category=1")
+        elif fdn not in (1, 2):
+            raise HTTPException(status_code=400, detail="foundation must be 1 (刚性基础) or 2 (柔性基础)")
+    return success(await IsoStandardService.update_iso_standard(session, db_obj, update_data))
+
+
+@router.delete("/iso-standards/{iso_id}")
+async def delete_iso_standard(
+    iso_id: UUID,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    db_obj = await IsoStandardService.get_iso_standard(session, tenant_id, iso_id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="IsoStandard not found")
+
+    await IsoStandardService.delete_iso_standard(session, db_obj)
+    return success({"message": "IsoStandard deleted successfully"})

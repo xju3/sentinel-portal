@@ -8,6 +8,22 @@ from app.services.dashboard_service import DashboardService
 
 logger = logging.getLogger(__name__)
 
+# def esp_configration_monitor(): 
+#     """
+#     """
+#     def decorator(func):
+#         @wraps(func)
+#         async def async_wrapper(*args, **kwargs):
+#             result = await func(*args, **kwargs)
+#             _invalidate_cache(args, kwargs, func.__name__)
+#             return result
+
+#         @wraps(func)
+#         def sync_wrapper(*args, **kwargs):
+#             result = func(*args, **kwargs)
+#             _invalidate_cache(args, kwargs, func.__name__)
+#             return result
+
 
 def rebuild_dashboard_cache():
     """

@@ -13,7 +13,7 @@ logger = logging.getLogger(__name__)
 
 
 from app.services.dependencies import get_session
-from app.services.sensor_service import SensorTypeService, SensorDbService, SensorBatchService
+from app.services.sensor_service import SensorTypeService, SensorDbService, SensorBatchService, SensorConfigService
 from app.models.customer import Account
 from app.models.sensor import Sensor, SensorBatch
 from app.utils.auth import get_current_account
@@ -208,6 +208,17 @@ async def list_sensors_by_batch(
     if not batch:
         raise HTTPException(status_code=404, detail="SensorBatch not found")
     return success(await SensorDbService.get_by_batch_id(session, batch_id, skip, limit, sort_by, sort_order))
+
+
+@router.get("/config/{sn}")
+async def get_sensor_config(
+    sn: str,
+    session: AsyncSession = Depends(get_session),
+):
+    config = await SensorConfigService.get_config_by_sn(session, sn)
+    if config is None:
+        raise HTTPException(status_code=404, detail="Sensor config not found")
+    return success(config)
 
 
 @router.get("/{obj_id}")

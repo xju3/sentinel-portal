@@ -5,7 +5,7 @@ Sensor API contracts
 from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 
 # ==========================================
@@ -143,3 +143,32 @@ class SensorThresholdResponse(BaseModel):
     tenant_id: UUID
 
     model_config = ConfigDict(from_attributes=True)
+
+
+# ==========================================
+# SensorConfig
+# ==========================================
+class SensorConfigIso(BaseModel):
+    standard: int = 0
+    category: int = 0
+    foundation: int = 0
+
+
+class SensorConfigWifi(BaseModel):
+    ssid: Optional[str] = None
+    password: Optional[str] = Field(None, serialization_alias="pass")
+
+    model_config = ConfigDict(populate_by_name=True)
+
+
+class SensorConfigResponse(BaseModel):
+    iso: SensorConfigIso
+    rpm: int = 0
+    battery: int = 0
+    host: str = ""
+    patrol: int = 60
+    diagnosis: int = 1440
+    report: int = 1
+    network: int = 1
+    wifi: SensorConfigWifi
+    configured: bool = False

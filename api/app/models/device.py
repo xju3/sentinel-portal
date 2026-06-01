@@ -8,17 +8,8 @@ from sqlalchemy.orm import relationship
 
 from app.models import Base
 
-class IsoStandard(Base):
-    """ISO standard entity model"""
+from app.models.customer import IsoStandard
 
-    __tablename__ = "iso_standard"
-
-    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    code = Column(String(16), nullable=False, unique=True, index=True)
-    name = Column(String(64), nullable=False)
-    category = Column(String(32), nullable=False)
-    foundation = Column(String(64), nullable=False)
-    description = Column(String(255))
 
 class DeviceCategory(Base):
     """Device category entity model"""
@@ -34,6 +25,12 @@ class DeviceCategory(Base):
     health_check_freq_id  = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to health_check_freq for default frequencies
     tenant_id = Column(Uuid(as_uuid=True), default=uuid.uuid4, index=False) # link to tenant for multi-tenant support
     iso_standard_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Optional link to ISO standard for compliance reference
+    
+    parent = relationship("DeviceCategory", primaryjoin="foreign(DeviceCategory.parent_id) == remote(DeviceCategory.id)", lazy="selectin", uselist=False)
+    vib_threshold = relationship("SensorThreshold", primaryjoin="foreign(DeviceCategory.vib_threshold_id) == SensorThreshold.id", lazy="selectin", uselist=False)
+    temp_threshold = relationship("SensorThreshold", primaryjoin="foreign(DeviceCategory.temp_threshold_id) == SensorThreshold.id", lazy="selectin", uselist=False)
+    health_check_freq = relationship("HealthCheckFreq", primaryjoin="foreign(DeviceCategory.health_check_freq_id) == HealthCheckFreq.id", lazy="selectin", uselist=False)
+    iso_standard = relationship("IsoStandard", primaryjoin="foreign(DeviceCategory.iso_standard_id) == IsoStandard.id", lazy="selectin", uselist=False)
 
 class DeviceSpec(Base):
     """Device specification entity model"""
@@ -49,6 +46,9 @@ class DeviceSpec(Base):
     rpm = Column(Integer, nullable=False, default=0)
     supplier_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to supplier for multi-tenant support
     device_category_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to device_category
+    
+    supplier = relationship("Supplier", primaryjoin="foreign(DeviceSpec.supplier_id) == Supplier.id", lazy="selectin", uselist=False)
+    device_category = relationship("DeviceCategory", primaryjoin="foreign(DeviceSpec.device_category_id) == DeviceCategory.id", lazy="selectin", uselist=False)
     
 
     def __repr__(self):
@@ -108,6 +108,8 @@ class ProcessItem(Base):
     process_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to processes
     device_spec_id = Column(Uuid(as_uuid=True), nullable=False, index=True)
     qty = Column(Integer, nullable=False, default=1)
+    
+    device_spec = relationship("DeviceSpec", primaryjoin="foreign(ProcessItem.device_spec_id) == DeviceSpec.id", lazy="selectin", uselist=False)
 
     
 class ProcessDevice(Base):
@@ -122,6 +124,9 @@ class ProcessDevice(Base):
     status = Column(SmallInteger, default=1, comment="tiny(1) status")
     area_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Optional link to area for location-based processes
     
+    process = relationship("Process", primaryjoin="foreign(ProcessDevice.process_id) == Process.id", lazy="selectin", uselist=False)
+    area = relationship("Area", primaryjoin="foreign(ProcessDevice.area_id) == Area.id", lazy="selectin", uselist=False)
+    
     def __repr__(self):
         return f"<ProcessDevice {self.id}: {self.code} - {self.sn}>"
 
@@ -135,3 +140,5 @@ class ProcessDeviceItem(Base):
     desc = Column(String(128), nullable=False)
     device_inst_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to device_insts
     process_device_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to process_devices
+    
+    device_inst = relationship("DeviceInst", primaryjoin="foreign(ProcessDeviceItem.device_inst_id) == DeviceInst.id", lazy="selectin", uselist=False)

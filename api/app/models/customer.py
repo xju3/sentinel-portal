@@ -4,6 +4,7 @@ Customer data models
 
 import uuid
 from sqlalchemy import Column, String, Uuid, Boolean, Date, Integer, SmallInteger
+from sqlalchemy.orm import relationship
 
 from app.models import Base
 
@@ -99,10 +100,13 @@ class Area(Base):
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     name = Column(String(64), nullable=False)
     description = Column(String(255))
+    network = Column(SmallInteger, nullable=False, default=1)  # network type, 1: 4G,  2: Wi-Fi
     ssid = Column(String(64), nullable=True)  # Optional Wi-Fi SSID for location-based services
     passwd = Column(String(255), nullable=True)  # Optional Wi-Fi password for location-based services
     parent_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # For hierarchical area structure
     tenant_id = Column(Uuid(as_uuid=True), nullable=False, default=uuid.uuid4, index=False) # link to tenant for multi-tenant support
+    
+    parent = relationship("Area", primaryjoin="foreign(Area.parent_id) == remote(Area.id)", lazy="selectin", uselist=False)
 
     def __repr__(self):
         return f"<Area {self.id}: {self.name}>"
@@ -134,3 +138,19 @@ class HealthCheckFreq(Base):
 
     def __repr__(self):
         return f"<HealthCheckFreq {self.id}: {self.tenant_id} - {self.device_id}>"
+
+class IsoStandard(Base):
+    """ISO standard entity model"""
+
+    __tablename__ = "iso_standard"
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    code = Column(String(8), nullable=False, unique=True)  # user-defined code, max 8 chars
+    version = Column(SmallInteger, nullable=False)  # 1: ISO-10816, 2: ISO-20816
+    category = Column(SmallInteger, nullable=False)  # version-dependent category code
+    foundation = Column(SmallInteger, nullable=False)  # 1: 刚性基础, 2: 柔性基础
+    description = Column(String(255))
+    tenant_id = Column(Uuid(as_uuid=True), nullable=False, index=False)
+
+    def __repr__(self):
+        return f"<IsoStandard {self.id}: {self.code}>"

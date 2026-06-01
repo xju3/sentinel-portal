@@ -147,6 +147,7 @@ class AdminAccountCreate(BaseModel):
 class AreaCreate(BaseModel):
     name: str
     description: Optional[str] = None
+    network: Optional[int] = 1  # 1: 4G, 2: Wi-Fi
     ssid: Optional[str] = None
     passwd: Optional[str] = None
     parent_id: Optional[UUID] = None
@@ -156,6 +157,7 @@ class AreaCreate(BaseModel):
 class AreaUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
+    network: Optional[int] = None  # 1: 4G, 2: Wi-Fi
     ssid: Optional[str] = None
     passwd: Optional[str] = None
     parent_id: Optional[UUID] = None
@@ -166,6 +168,7 @@ class AreaResponse(BaseModel):
     id: UUID
     name: str
     description: Optional[str] = None
+    network: int
     ssid: Optional[str] = None
     passwd: Optional[str] = None
     parent_id: Optional[UUID] = None
@@ -231,6 +234,39 @@ class HealthCheckFreqResponse(BaseModel):
     diagnosis: int
     report: int
     status: bool
+    tenant_id: UUID
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+# ==========================================
+# IsoStandard
+# ==========================================
+class IsoStandardCreate(BaseModel):
+    code: str
+    version: int  # 1: ISO-10816, 2: ISO-20816
+    category: int  # version-dependent
+    foundation: int  # 1: 刚性基础, 2: 柔性基础
+    description: Optional[str] = None
+    tenant_id: Optional[UUID] = None
+
+
+class IsoStandardUpdate(BaseModel):
+    code: Optional[str] = None
+    version: Optional[int] = None
+    category: Optional[int] = None
+    foundation: Optional[int] = None
+    description: Optional[str] = None
+    tenant_id: Optional[UUID] = None
+
+
+class IsoStandardResponse(BaseModel):
+    id: UUID
+    code: str
+    version: int
+    category: int
+    foundation: int
+    description: Optional[str] = None
     tenant_id: UUID
 
     model_config = ConfigDict(from_attributes=True)
