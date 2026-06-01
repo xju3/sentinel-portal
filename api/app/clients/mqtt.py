@@ -74,6 +74,32 @@ class MQTTManager:
         """Callback for when the client disconnects from the server."""
         logger.info(f"Disconnected from MQTT broker (Return code: {rc})")
 
+    def publish(self, topic: str, payload: str, qos: int = 1) -> bool:
+        """向指定的 MQTT topic 发布消息。
+
+        Args:
+            topic:   MQTT topic，如 "/sentinel/config/SN001"
+            payload: 消息体，JSON 字符串
+            qos:     QoS 级别，默认 1（至少一次）
+
+        Returns:
+            True 表示发布成功，False 表示失败。
+        """
+        if self.client is None:
+            logger.error(f"MQTT client not initialized, cannot publish to {topic}")
+            return False
+        try:
+            result = self.client.publish(topic, payload, qos=qos)
+            if result.rc == mqtt.MQTT_ERR_SUCCESS:
+                logger.debug(f"MQTT published: {topic} -> {payload}")
+                return True
+            else:
+                logger.error(f"MQTT publish failed: {topic}, rc={result.rc}")
+                return False
+        except Exception as e:
+            logger.error(f"MQTT publish exception: {topic}, error={e}")
+            return False
+
     def close(self) -> None:
         """Stop background loop and disconnect"""
         if self.client:

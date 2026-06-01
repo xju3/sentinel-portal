@@ -23,7 +23,9 @@ from app.services.customer_service import (
 from app.services.dashboard_service import DashboardService
 from app.utils.auth import get_current_account
 from app.utils.response import success
-from app.utils.decorators import rebuild_dashboard_cache
+from app.utils.decorators import rebuild_dashboard_cache, monitor_config_change
+from app.models.customer import HealthCheckFreq, IsoStandard, Area, Tenant
+from app.models.device import ProcessDevice
 from app.contract.customers import (
     TenantCreate,
     TenantUpdate,
@@ -76,6 +78,7 @@ async def get_current_tenant(
 
 
 @router.put("/tenants/current")
+@monitor_config_change(Tenant, "host", "payload")
 async def update_current_tenant(
     payload: CurrentTenantUpdate,
     current_account: AccountModel = Depends(get_current_account),
@@ -121,6 +124,7 @@ async def create_tenant(
 
 
 @router.put("/tenants/{tenant_id}")
+@monitor_config_change(Tenant, "host", "tenant")
 async def update_tenant(
     tenant_id: UUID,
     tenant: TenantUpdate,
@@ -622,6 +626,7 @@ async def create_area(
 
 
 @router.put("/areas/{area_id}")
+@monitor_config_change(Area, "area_id", "area")
 @rebuild_dashboard_cache()
 async def update_area(
     area_id: UUID,
@@ -755,6 +760,7 @@ async def create_health_check_freq(
 
 
 @router.put("/health-check-freqs/{freq_id}")
+@monitor_config_change(HealthCheckFreq, "freq_id", "freq")
 async def update_health_check_freq(
     freq_id: UUID,
     freq: HealthCheckFreqUpdate,
@@ -868,6 +874,7 @@ async def create_iso_standard(
 
 
 @router.put("/iso-standards/{iso_id}")
+@monitor_config_change(IsoStandard, "iso_id", "iso")
 async def update_iso_standard(
     iso_id: UUID,
     iso: IsoStandardUpdate,

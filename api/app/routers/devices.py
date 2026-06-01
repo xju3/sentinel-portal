@@ -11,7 +11,8 @@ from uuid import UUID
 
 from app.services.dependencies import get_session
 from app.models.customer import Account as AccountModel, TenantSensor
-from app.models.device import DeviceCategory, DeviceInst, DeviceSpec
+from app.models.device import DeviceCategory, DeviceInst, DeviceSpec, ProcessDevice, ProcessDeviceItem
+from app.models.sensor import SensorMonitoring
 from app.services.customer_service import LocationService
 
 
@@ -28,7 +29,7 @@ from app.services.device_service import (
 )
 from app.utils.auth import get_current_account
 from app.utils.response import success
-from app.utils.decorators import rebuild_dashboard_cache
+from app.utils.decorators import rebuild_dashboard_cache, monitor_config_change
 from app.contract.devices import (
     IsoStandardCreate,
     IsoStandardUpdate,
@@ -286,6 +287,7 @@ async def create_device_category(
 
 
 @router.put("/device-categories/{obj_id}")
+@monitor_config_change(DeviceCategory, "obj_id", "item")
 @rebuild_dashboard_cache()
 async def update_device_category(
     obj_id: UUID,
@@ -374,6 +376,7 @@ async def create_device_spec(
 
 
 @router.put("/device-specs/{obj_id}")
+@monitor_config_change(DeviceSpec, "obj_id", "item")
 @rebuild_dashboard_cache()
 async def update_device_spec(
     obj_id: UUID,
@@ -440,6 +443,7 @@ async def create_device_inst(
 
 
 @router.put("/device-insts/{obj_id}")
+@monitor_config_change(DeviceInst, "obj_id", "item")
 @rebuild_dashboard_cache()
 async def update_device_inst(
     obj_id: UUID,
@@ -631,6 +635,7 @@ async def create_process_device(
 
 
 @router.put("/process-devices/{obj_id}")
+@monitor_config_change(ProcessDevice, "obj_id", "item")
 @rebuild_dashboard_cache()
 async def update_process_device(
     obj_id: UUID,
@@ -702,6 +707,7 @@ async def create_process_device_item(
 
 
 @router.put("/process-device-items/{obj_id}")
+@monitor_config_change(ProcessDeviceItem, "obj_id", "item")
 @rebuild_dashboard_cache()
 async def update_process_device_item(
     obj_id: UUID,
@@ -797,6 +803,7 @@ async def create_sensor_monitoring(
 
 
 @router.put("/sensor-monitorings/{obj_id}")
+@monitor_config_change(SensorMonitoring, "obj_id", "item")
 @rebuild_dashboard_cache()
 async def update_sensor_monitoring(
     obj_id: UUID,
