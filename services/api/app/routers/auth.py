@@ -132,9 +132,11 @@ async def login(
         subject=str(account.id),
         tenant_id=str(account.tenant_id),
         username=account.username,  # type: ignore[arg-type]
+        jwt_secret_key=settings.jwt_secret_key,
         admin=account.admin,  # type: ignore[arg-type]
         contact_id=str(account.contact_id) if account.contact_id else None,  # type: ignore[truthy-bool]
         flag=account.flag,  # type: ignore[arg-type]
+        expires_minutes=settings.jwt_access_token_expires_minutes,
     )
 
     return success(LoginResponse(
