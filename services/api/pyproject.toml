@@ -62,7 +62,8 @@ managed = true
 package = false
 
 [tool.uv.sources]
-pub = { path = "../pub", editable = true }
+pub = { workspace = true }
+
 
 [tool.black]
 line-length = 100
