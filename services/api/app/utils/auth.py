@@ -7,8 +7,9 @@ from uuid import UUID
 from fastapi import Depends, HTTPException, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 
-from app.models.customer import Account
-from app.utils.jwt_token import decode_access_token
+from app.config import settings
+from pub.models.customer import Account
+from pub.utils.jwt_token import decode_access_token
 
 bearer_scheme = HTTPBearer(auto_error=False)
 
@@ -23,7 +24,7 @@ async def get_current_account(
         )
 
     try:
-        payload = decode_access_token(credentials.credentials)
+        payload = decode_access_token(credentials.credentials, settings.jwt_secret_key)
         account_id = UUID(str(payload.get("sub")))
         token_tenant_id = UUID(str(payload.get("tenant_id")))
         username = payload.get("username")

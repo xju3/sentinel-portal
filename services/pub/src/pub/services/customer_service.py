@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import func, or_
 
-from app.models.customer import (
+from pub.models.customer import (
     Tenant,
     TenantSensor,
     Supplier,
@@ -19,11 +19,11 @@ from app.models.customer import (
     HealthCheckFreq,
     IsoStandard,
 )
-from app.utils.exceptions import DomainException
-from app.utils.sorting import apply_sorting
+from pub.utils.exceptions import DomainException
+from pub.utils.sorting import apply_sorting
 
-from app.models.sensor import SensorMonitoring, Sensor
-from app.models.device import DeviceCategory, DeviceSpec, DeviceInst
+from pub.models.sensor import SensorMonitoring, Sensor
+from pub.models.device import DeviceCategory, DeviceSpec, DeviceInst
 
 class TenantService:
     @staticmethod

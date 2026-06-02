@@ -1,9 +1,10 @@
 from typing import List
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+
 class Settings(BaseSettings):
     """Application settings loaded from environment variables or .env file."""
-    
+
     # Application Settings
     app_name: str = "Sensor Portal API"
     app_version: str = "1.0.0"
@@ -17,19 +18,19 @@ class Settings(BaseSettings):
     # JWT
     jwt_secret_key: str = "change-this-secret-in-production"
     jwt_access_token_expires_minutes: int = 1440
-    
+
     # MySQL Database
     mysql_url: str = "mysql+aiomysql://db_user_name:db_user_password@host_name_or_ip_address:3306/database_name"
-    
+
     # Redis
     redis_url: str = "redis://host_name_or_ip_address:6379/0"
-    
+
     # InfluxDB
     influx_url: str = "http://host_name_or_ip_address:8086"
     influx_token: str = "your_influxdb_token"
     influx_org: str = "myorg"
     influx_bucket: str = "sentinel-accel-raw-data"
-    
+
     # MinIO
     minio_endpoint: str = "host_name_or_ip_address:9000"
     minio_access_key: str = "your_minio_access_key"
@@ -55,5 +56,6 @@ class Settings(BaseSettings):
         env_file_encoding="utf-8",
         extra="ignore",
     )
+
 
 settings = Settings()

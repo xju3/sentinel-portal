@@ -12,14 +12,15 @@ from uuid import UUID
 logger = logging.getLogger(__name__)
 
 
-from app.services.dependencies import get_session
-from app.services.sensor_service import SensorTypeService, SensorDbService, SensorBatchService, SensorConfigService
-from app.models.customer import Account
-from app.models.sensor import Sensor, SensorBatch
+from pub.services.dependencies import get_session
+from pub.services.sensor_service import SensorTypeService, SensorDbService, SensorBatchService, SensorConfigService
+from pub.models.customer import Account
+from pub.models.sensor import Sensor, SensorBatch
+from pub.utils.exceptions import DomainException
+from pub.utils.decorators import rebuild_dashboard_cache
+
 from app.utils.auth import get_current_account
 from app.utils.response import success
-from app.utils.exceptions import DomainException
-from app.utils.decorators import rebuild_dashboard_cache
 from app.contract.sensors import (
     SensorTypeCreate,
     SensorTypeUpdate,

@@ -10,7 +10,7 @@ readme = "README.md"
 requires-python = ">=3.14"
 license = {text = "MIT"}
 authors = [
-    {name = "Portal Team"},
+    {name = "Sentinel Team"},
 ]
 keywords = ["sensor", "api", "fastapi", "influxdb", "mysql", "redis", "minio"]
 
@@ -43,6 +43,7 @@ dependencies = [
     "scikit-learn>=1.8.0",
     "seaborn>=0.13.2",
     "orjson>=3.11.9",
+    "pub",
 ]
 
 [project.optional-dependencies]
@@ -53,9 +54,15 @@ dev = [
     "pytest-cov==4.1.0",
 ]
 
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
 [tool.uv]
 managed = true
 package = false
+
+[tool.uv.sources]
+pub = { path = "../pub", editable = true }
 
 [tool.black]
 line-length = 100

@@ -8,7 +8,7 @@ from typing import Optional, Type
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.services.dashboard_service import DashboardService
+from pub.services.dashboard_service import DashboardService
 
 logger = logging.getLogger(__name__)
 
@@ -81,7 +81,7 @@ def monitor_config_change(model_class: Type, obj_id_param: str, new_data_param: 
         obj_id_param:   kwargs key for the record ID (e.g. "obj_id", "area_id")
         new_data_param: kwargs key for the new data (e.g. "item", "area")
     """
-    from app.services.config_service import bg_handle_config_change
+    from pub.services.config_service import bg_handle_config_change
 
     def decorator(func):
         @wraps(func)

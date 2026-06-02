@@ -20,12 +20,12 @@ def init_sensitive_fields():
     if CONFIG_SENSITIVE_FIELDS:
         return
 
-    from app.models.sensor import SensorMonitoring
-    from app.models.device import DeviceInst, DeviceSpec, DeviceCategory
-    from app.models.customer import HealthCheckFreq, IsoStandard, Area
-    from app.models.device import ProcessDevice, ProcessDeviceItem
+    from pub.models.sensor import SensorMonitoring
+    from pub.models.device import DeviceInst, DeviceSpec, DeviceCategory
+    from pub.models.customer import HealthCheckFreq, IsoStandard, Area
+    from pub.models.device import ProcessDevice, ProcessDeviceItem
 
-    from app.models.customer import Tenant
+    from pub.models.customer import Tenant
 
     CONFIG_SENSITIVE_FIELDS.update({
         SensorMonitoring:    {"device_inst_id"},
@@ -43,13 +43,13 @@ def init_sensitive_fields():
 
 async def find_affected_sns(session: AsyncSession, model_class: Type, obj_id: UUID) -> List[str]:
     """根据模型类和记录 ID，反向追溯所有受影响的 sensor.sn。"""
-    from app.models.sensor import Sensor, SensorMonitoring
-    from app.models.device import DeviceInst, DeviceSpec, DeviceCategory, ProcessDevice, ProcessDeviceItem
-    from app.models.customer import IsoStandard, HealthCheckFreq, Area
+    from pub.models.sensor import Sensor, SensorMonitoring
+    from pub.models.device import DeviceInst, DeviceSpec, DeviceCategory, ProcessDevice, ProcessDeviceItem
+    from pub.models.customer import IsoStandard, HealthCheckFreq, Area
 
     sns: List[str] = []
 
-    from app.models.customer import Tenant
+    from pub.models.customer import Tenant
 
     if model_class is Tenant:
         stmt = (
@@ -156,8 +156,8 @@ async def create_config_tasks(session: AsyncSession, sns: List[str]) -> None:
     """
     import json
     from datetime import datetime
-    from app.models.sensor import SensorTask
-    from app.clients.mqtt import mqtt_manager
+    from pub.models.sensor import SensorTask
+    from pub.clients.mqtt import mqtt_manager
 
     tasks = []
     for sn in sns:
@@ -227,7 +227,7 @@ async def bg_handle_config_change(
         new_data:    提交的 Pydantic 请求体
         old_values:  CUD 前抓取的旧值 dict
     """
-    from app.database import db_manager
+    from pub.database import db_manager
 
     init_sensitive_fields()
     sensitive = CONFIG_SENSITIVE_FIELDS.get(model_class, set())

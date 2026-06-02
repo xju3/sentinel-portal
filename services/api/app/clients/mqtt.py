@@ -8,7 +8,6 @@ from typing import Optional
 import paho.mqtt.client as mqtt
 
 from app.config import settings
-from app.clients.handler import patrol_msg_handler
 
 logger = logging.getLogger(__name__)
 
@@ -65,7 +64,6 @@ class MQTTManager:
     def on_message(self, client, userdata, msg):
         """Callback for when a PUBLISH message is received from the server."""
         try:
-            patrol_msg_handler.handle_message(msg.topic, msg.payload)
             pass
         except Exception as e:
             logger.error(f"Error processing MQTT message on topic {msg.topic}: {e}")

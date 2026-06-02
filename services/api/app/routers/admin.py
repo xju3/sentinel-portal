@@ -11,9 +11,9 @@ from uuid import UUID
 logger = logging.getLogger(__name__)
 
 from app.utils.response import success
-from app.services.dependencies import get_session
-from app.services.sensor_service import SensorBatchService
-from app.models.customer import Account
+from pub.services.dependencies import get_session
+from pub.services.sensor_service import SensorBatchService
+from pub.models.customer import Account
 from app.utils.auth import get_current_account
 from app.contract.admin import SensorBatchResponse
 

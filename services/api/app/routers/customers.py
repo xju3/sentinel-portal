@@ -7,9 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import cast,  List, Optional
 from uuid import UUID
 
-from app.services.dependencies import get_session
-from app.models.customer import Account as AccountModel
-from app.services.customer_service import (
+from pub.services.dependencies import get_session
+from pub.models.customer import Account as AccountModel
+from pub.services.customer_service import (
     TenantService,
     TenantSensorService,
     SupplierService,
@@ -20,12 +20,14 @@ from app.services.customer_service import (
     HealthCheckFreqService,
     IsoStandardService,
 )
-from app.services.dashboard_service import DashboardService
+from pub.services.dashboard_service import DashboardService
+from pub.utils.decorators import rebuild_dashboard_cache, monitor_config_change
+from pub.models.customer import HealthCheckFreq, IsoStandard, Area, Tenant
+from pub.models.device import ProcessDevice
+
+
 from app.utils.auth import get_current_account
 from app.utils.response import success
-from app.utils.decorators import rebuild_dashboard_cache, monitor_config_change
-from app.models.customer import HealthCheckFreq, IsoStandard, Area, Tenant
-from app.models.device import ProcessDevice
 from app.contract.customers import (
     TenantCreate,
     TenantUpdate,

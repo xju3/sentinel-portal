@@ -6,7 +6,7 @@ import uuid
 from sqlalchemy import Column, String, Uuid, Boolean, Date, Integer, SmallInteger
 from sqlalchemy.orm import relationship
 
-from app.models import Base
+from pub.models import Base
 
 
 class Tenant(Base):
@@ -41,7 +41,7 @@ class TenantSensor(Base):
 
     def __repr__(self):
         return f"<TenantSensor {self.id}: {self.tenant_id} - {self.sensor_id}>"
-    
+
 class Supplier(Base):
     """Supplier entity model"""
 
@@ -52,7 +52,7 @@ class Supplier(Base):
     brand = Column(String(64), nullable=False)
     contact_info = Column(String(255))
     active = Column(Boolean, default=True)
-    tenant_id = Column(Uuid(as_uuid=True), nullable=False, default=uuid.uuid4, index=False) # link to tenant for multi-tenant support   
+    tenant_id = Column(Uuid(as_uuid=True), nullable=False, default=uuid.uuid4, index=False) # link to tenant for multi-tenant support
 
     def __repr__(self):
         return f"<Supplier {self.id}: {self.name}>"
@@ -74,7 +74,7 @@ class Contact(Base):
     def __repr__(self):
         return f"<Contact {self.id}: {self.name}>"
 
-    
+
 class Account(Base):
     """Account entity model"""
 
@@ -105,25 +105,25 @@ class Area(Base):
     passwd = Column(String(255), nullable=True)  # Optional Wi-Fi password for location-based services
     parent_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # For hierarchical area structure
     tenant_id = Column(Uuid(as_uuid=True), nullable=False, default=uuid.uuid4, index=False) # link to tenant for multi-tenant support
-    
+
     parent = relationship("Area", primaryjoin="foreign(Area.parent_id) == remote(Area.id)", lazy="selectin", uselist=False)
 
     def __repr__(self):
         return f"<Area {self.id}: {self.name}>"
 
-        
+
 class Location(Base):
     """Location entity model"""
 
     __tablename__ = "location"
-    
-    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)   
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     name = Column(String(64), nullable=False)
     description = Column(String(255))
     status  = Column(SmallInteger, nullable=False, default=1)  # tinyint(1) for status
     tenant_id = Column(Uuid(as_uuid=True), nullable=False, default=uuid.uuid4, index=False) # link to tenant for multi-tenant support
 
-    
+
 class HealthCheckFreq(Base):
     """Health check frequency entity model"""
 

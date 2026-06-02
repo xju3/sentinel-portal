@@ -13,13 +13,12 @@ from sqlalchemy.future import select
 from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb_client.client.query_api import QueryApi
 
-from app.database import influxdb_manager
-from app.config import settings
-from app.models.sensor import SensorType, Sensor, SensorBatch, SensorThreshold, SensorMonitoring
-from app.models.device import DeviceInst, DeviceSpec, DeviceCategory, ProcessDeviceItem, ProcessDevice
-from app.models.customer import Tenant, Area, HealthCheckFreq, IsoStandard
-from app.utils.exceptions import DomainException
-from app.utils.sorting import apply_sorting
+from pub.database import influxdb_manager
+from pub.models.sensor import SensorType, Sensor, SensorBatch, SensorThreshold, SensorMonitoring
+from pub.models.device import DeviceInst, DeviceSpec, DeviceCategory, ProcessDeviceItem, ProcessDevice
+from pub.models.customer import Tenant, Area, HealthCheckFreq, IsoStandard
+from pub.utils.exceptions import DomainException
+from pub.utils.sorting import apply_sorting
 logger = logging.getLogger(__name__)
 
 
@@ -341,14 +340,14 @@ class SensorService:
             query_api = client.query_api(query_type="pandas")
 
             query = f'''
-                from(bucket:"{settings.influx_bucket}")
+                from(bucket:"{influxdb_manager.bucket}")
                 |> range(start: -1000d)
                 |> filter(fn: (r) => r._measurement == "sensor_reading")
                 |> filter(fn: (r) => r.sensor_id == "{sensor_id}")
                 |> last()
             '''
 
-            result = query_api.query(org=settings.influx_org, query=query)
+            result = query_api.query(org=influxdb_manager.org, query=query)
 
             for table in result:
                 for record in table.records:
@@ -370,7 +369,7 @@ class SensorService:
         days = ranges.get(time_range, 7)
         total_minutes = days * 24 * 60
 
-        from app.services.customer_service import HealthCheckFreqService
+        from pub.services.customer_service import HealthCheckFreqService
         freq = await HealthCheckFreqService.get_health_check_by_sensor_sn(session, sn)
         patrol_m = freq.patrol if freq else 60
         
@@ -407,7 +406,7 @@ class SensorService:
 
             # Flux 查询: 提取基础数据后，不仅查 max，针对 rms_m 并发查询 min, first, last 凑齐 Candlestick 所需的 4 要素
             query = f'''
-                data = from(bucket:"{settings.influx_bucket}")
+                data = from(bucket:"{influxdb_manager.bucket}")
                     |> range(start: -{days}d)
                     |> filter(fn: (r) => r.sn == "{sn}")
                     |> filter(fn: (r) => r._field == "temperature" or r._field == "rms_x" or r._field == "rms_y" or r._field == "rms_z" or r._field == "rms_m")
@@ -418,7 +417,7 @@ class SensorService:
                 data |> filter(fn: (r) => r._field == "rms_m" or r._field == "temperature") |> aggregateWindow(every: {window_str}, fn: last, createEmpty: true) |> yield(name: "last")
             '''
 
-            result = await asyncio.to_thread(query_api.query, org=settings.influx_org, query=query)
+            result = await asyncio.to_thread(query_api.query, org=influxdb_manager.org, query=query)
 
             # 拼装数据对齐字典
             data_map = {}

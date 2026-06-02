@@ -1,5 +1,8 @@
 """
 Minimal JWT utilities (HS256) without external dependencies.
+
+All config values (secret key, expiry) are passed as parameters rather than
+read from a hard-coded config module, so this module is reusable.
 """
 
 from __future__ import annotations
@@ -10,8 +13,6 @@ import hmac
 import json
 import time
 from typing import Dict, Optional
-
-from app.config import settings
 
 
 def _b64url_encode(raw: bytes) -> str:
@@ -27,13 +28,13 @@ def create_access_token(
     subject: str,
     tenant_id: str,
     username: str,
+    jwt_secret_key: str,
     admin: bool = False,
     contact_id: Optional[str] = None,
     flag: int = 1,
-    expires_minutes: Optional[int] = None,
+    expires_minutes: int = 1440,
 ) -> str:
     header = {"alg": "HS256", "typ": "JWT"}
-    ttl_minutes = expires_minutes or settings.jwt_access_token_expires_minutes
     now = int(time.time())
     payload = {
         "sub": subject,
@@ -43,7 +44,7 @@ def create_access_token(
         "contact_id": contact_id,
         "flag": flag,
         "iat": now,
-        "exp": now + ttl_minutes * 60,
+        "exp": now + expires_minutes * 60,
     }
 
     header_encoded = _b64url_encode(
@@ -55,7 +56,7 @@ def create_access_token(
     signing_input = f"{header_encoded}.{payload_encoded}".encode("ascii")
 
     signature = hmac.new(
-        settings.jwt_secret_key.encode("utf-8"),
+        jwt_secret_key.encode("utf-8"),
         signing_input,
         hashlib.sha256,
     ).digest()
@@ -63,7 +64,7 @@ def create_access_token(
     return f"{header_encoded}.{payload_encoded}.{_b64url_encode(signature)}"
 
 
-def decode_access_token(token: str) -> Dict[str, object]:
+def decode_access_token(token: str, jwt_secret_key: str) -> Dict[str, object]:
     parts = token.split(".")
     if len(parts) != 3:
         raise ValueError("invalid token format")
@@ -71,7 +72,7 @@ def decode_access_token(token: str) -> Dict[str, object]:
     header_encoded, payload_encoded, signature_encoded = parts
     signing_input = f"{header_encoded}.{payload_encoded}".encode("ascii")
     expected_signature = hmac.new(
-        settings.jwt_secret_key.encode("utf-8"),
+        jwt_secret_key.encode("utf-8"),
         signing_input,
         hashlib.sha256,
     ).digest()

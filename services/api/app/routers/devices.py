@@ -9,14 +9,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional, cast
 from uuid import UUID
 
-from app.services.dependencies import get_session
-from app.models.customer import Account as AccountModel, TenantSensor
-from app.models.device import DeviceCategory, DeviceInst, DeviceSpec, ProcessDevice, ProcessDeviceItem
-from app.models.sensor import SensorMonitoring
-from app.services.customer_service import LocationService
+from pub.services.dependencies import get_session
+from pub.models.customer import Account as AccountModel, TenantSensor
+from pub.models.device import DeviceCategory, DeviceInst, DeviceSpec, ProcessDevice, ProcessDeviceItem
+from pub.models.sensor import SensorMonitoring
+from pub.services.customer_service import LocationService
 
 
-from app.services.device_service import (
+from pub.services.device_service import (
     IsoStandardService,
     DeviceCategoryService,
     DeviceSpecService,
@@ -27,9 +27,10 @@ from app.services.device_service import (
     ProcessDeviceItemService,
     SensorMonitoringService,
 )
+from pub.utils.decorators import rebuild_dashboard_cache, monitor_config_change
+
 from app.utils.auth import get_current_account
 from app.utils.response import success
-from app.utils.decorators import rebuild_dashboard_cache, monitor_config_change
 from app.contract.devices import (
     IsoStandardCreate,
     IsoStandardUpdate,

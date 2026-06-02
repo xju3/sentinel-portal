@@ -9,7 +9,7 @@ from sqlalchemy.orm import relationship
 
 from sqlalchemy.dialects.mysql import JSON as MySQLJSON
 
-from app.models import Base
+from pub.models import Base
 
 class PatrolDiagnosticRecord(Base):
     """Patrol diagnostic result record"""
@@ -32,7 +32,7 @@ class SensorType(Base):
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     name = Column(String(100), nullable=False, unique=True)
-    battery = Column(Integer, nullable=False, default=0)  
+    battery = Column(Integer, nullable=False, default=0)
     network = Column(Integer, nullable=False, default=1)  # Network range in meters
     bluetooth = Column(Boolean, default=False)  # Bluetooth support
     description = Column(Text)
@@ -68,7 +68,7 @@ class SensorBatch(Base):
     sensor_type_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to sensor_types
     tenant_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to tenant for multi-tenant support
     created_at = Column(DateTime, default=datetime.utcnow)
-    
+
     sensor_type = relationship(
         "SensorType",
         primaryjoin="foreign(SensorBatch.sensor_type_id) == SensorType.id",
@@ -139,7 +139,7 @@ class SensorThreshold(Base):
     mt_max_amplitude = Column(Numeric(10, 4), nullable=False)
     baseline = Column(Numeric(10, 4), nullable=False)
     tenant_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to tenant for multi-tenant support
-    
+
 
 class SensorTask(Base):
     """Sensor task entity model"""
@@ -153,6 +153,3 @@ class SensorTask(Base):
     status = Column(SmallInteger, nullable=False, default=1, comment="tiny(1) status") # 任务状态
     create_time = Column(DateTime, default=datetime.utcnow) # 任务创建时间
     complete_time = Column(DateTime, nullable=True) # 任务完成时间
-
-    
-    

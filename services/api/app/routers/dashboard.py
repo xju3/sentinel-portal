@@ -8,10 +8,10 @@ from typing import cast
 from uuid import UUID
 
 from app.utils.response import success
-from app.services.dependencies import get_session
-from app.models.customer import Account as AccountModel
+from pub.services.dependencies import get_session
+from pub.models.customer import Account as AccountModel
 from app.utils.auth import get_current_account
-from app.services.dashboard_service import DashboardService
+from pub.services.dashboard_service import DashboardService
 from app.contract.dashboard import CalendarResponse, DashboardOverviewResponse
 
 router = APIRouter(tags=["dashboard"])

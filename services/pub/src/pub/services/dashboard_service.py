@@ -14,10 +14,10 @@ from uuid import UUID
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from app.database import redis_manager
-from app.models.device import DeviceInst, DeviceSpec, DeviceCategory, Process, ProcessDevice, ProcessDeviceItem
-from app.models.sensor import PatrolDiagnosticRecord, SensorMonitoring
-from app.models.customer import Area, Tenant
+from pub.database import redis_manager
+from pub.models.device import DeviceInst, DeviceSpec, DeviceCategory, Process, ProcessDevice, ProcessDeviceItem
+from pub.models.sensor import PatrolDiagnosticRecord, SensorMonitoring
+from pub.models.customer import Area, Tenant
 
 logger = logging.getLogger(__name__)
 
@@ -72,7 +72,7 @@ class DashboardService:
     @staticmethod
     async def rebuild_device_stats_cache_task(tenant_id: UUID) -> None:
         """后台任务：异步重建设备拓扑缓存。脱离原请求生命周期，由 BackgroundTasks 调用。"""
-        from app.database import db_manager
+        from pub.database import db_manager
         # 为后台任务独立获取新的数据库 Session
         async for session in db_manager.get_session():
             try:

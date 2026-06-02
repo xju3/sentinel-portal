@@ -19,14 +19,12 @@ from starlette.types import Receive, Scope, Send
 from app.config import settings
 from app.contract.common import ApiResponse
 from app.database import db_manager, redis_manager, influxdb_manager, minio_manager
-from app.utils.exceptions import DomainException
+from app.utils import DomainException, setup_logging
 from app.clients.mqtt import mqtt_manager
-from app.clients.handler import patrol_msg_handler
-from app.utils.logger import setup_logging
 from app.routers import auth, health, sensors, devices, customers, admin, dashboard, thresholds, sensor_trends
 
 # Setup logging
-setup_logging()
+setup_logging(settings.environment, settings.debug)
 logger = logging.getLogger(__name__)
 
 
@@ -39,15 +37,20 @@ async def lifespan(app: FastAPI):
     # Startup
     logger.info(f"Starting {settings.app_name} v{settings.app_version}")
     try:
-        await db_manager.init()
-        redis_manager.init()
-        influxdb_manager.init()
-        minio_manager.init()
+        await db_manager.init(settings.mysql_url, settings.debug)
+        redis_manager.init(settings.redis_url)
+        influxdb_manager.init(settings.influx_url, settings.influx_token, settings.influx_org, settings.influx_bucket)
+        minio_manager.init(
+            settings.minio_endpoint,
+            settings.minio_access_key,
+            settings.minio_secret_key,
+            settings.minio_secure,
+            settings.minio_bucket,
+        )
         mqtt_manager.init()
 
         # Inject the running event loop into patrol_msg_handler
         # so it can schedule async DB writes from the sync MQTT callback thread.
-        patrol_msg_handler._set_loop(asyncio.get_running_loop())
 
         logger.info("All services initialized successfully")
     except Exception as e:

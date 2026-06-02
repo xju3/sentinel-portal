@@ -8,8 +8,8 @@ from typing import Dict, Any
 
 from sqlalchemy import select
 
-from app.database import db_manager
-from app.models.sensor import PatrolDiagnosticRecord, Sensor, SensorMonitoring
+from pub.database import db_manager
+from pub.models.sensor import PatrolDiagnosticRecord, Sensor, SensorMonitoring
 
 logger = logging.getLogger(__name__)
 

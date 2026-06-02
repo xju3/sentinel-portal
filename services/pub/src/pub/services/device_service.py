@@ -8,7 +8,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import func, or_
 
-from app.models.device import (
+from pub.models.device import (
     IsoStandard,
     DeviceCategory,
     DeviceSpec,
@@ -18,9 +18,9 @@ from app.models.device import (
     ProcessDevice,
     ProcessDeviceItem,
 )
-from app.models.sensor import SensorMonitoring
-from app.models.customer import HealthCheckFreq
-from app.utils.sorting import apply_sorting
+from pub.models.sensor import SensorMonitoring
+from pub.models.customer import HealthCheckFreq
+from pub.utils.sorting import apply_sorting
 
 
 class IsoStandardService:
@@ -265,7 +265,7 @@ class DeviceInstService:
         keyword: Optional[str] = None,
     ) -> tuple:
         """Get paged DeviceInsts scoped to tenant, with total count."""
-        from app.models.customer import Location as LocationModel
+        from pub.models.customer import Location as LocationModel
 
         base_join = (
             select(DeviceInst)
@@ -373,7 +373,7 @@ class SensorMonitoringService:
         sort_by: str | None = None,
         sort_order: str = "ascend",
     ):
-        from app.models.device import DeviceInst
+        from pub.models.device import DeviceInst
         stmt = (
             select(SensorMonitoring)
             .join(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
@@ -405,7 +405,7 @@ class SensorMonitoringService:
         sort_order: str = "ascend",
     ):
         """Get SensorMonitoring records scoped to a tenant."""
-        from app.models.device import DeviceInst, DeviceSpec, DeviceCategory
+        from pub.models.device import DeviceInst, DeviceSpec, DeviceCategory
 
         stmt = (
             select(SensorMonitoring)
@@ -426,7 +426,7 @@ class SensorMonitoringService:
         tenant_id: UUID,
     ):
         """Get a SensorMonitoring record by id, scoped to a tenant."""
-        from app.models.device import DeviceInst, DeviceSpec, DeviceCategory
+        from pub.models.device import DeviceInst, DeviceSpec, DeviceCategory
 
         stmt = (
             select(SensorMonitoring)
