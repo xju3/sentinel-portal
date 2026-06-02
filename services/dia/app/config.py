@@ -5,7 +5,7 @@ class Settings(BaseSettings):
     """Application settings loaded from environment variables or .env file."""
     
     # Application Settings
-    app_name: str = "Sensor Portal API"
+    app_name: str = "Sensor Diagnosis Expert System"
     app_version: str = "1.0.0"
     environment: str = "development"
     host: str = "0.0.0.0"

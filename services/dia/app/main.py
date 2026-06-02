@@ -6,8 +6,6 @@ import asyncio
 import logging
 from contextlib import asynccontextmanager
 
-import json
-
 from fastapi import FastAPI, Request
 from fastapi.encoders import jsonable_encoder
 from fastapi.exceptions import RequestValidationError
@@ -16,14 +14,14 @@ from fastapi.responses import JSONResponse, Response
 from starlette.exceptions import HTTPException as StarletteHTTPException
 from starlette.types import Receive, Scope, Send
 
+from pub.utils.exceptions import DomainException
+from pub.utils.logger import setup_logging
+
 from app.config import settings
 from app.contract.common import ApiResponse
 from app.database import db_manager, redis_manager, influxdb_manager, minio_manager
-from app.utils.exceptions import DomainException
 from app.clients.mqtt import mqtt_manager
 from app.clients.handler import patrol_msg_handler
-from app.utils.logger import setup_logging
-from app.routers import auth, health, sensors, devices, customers, admin, dashboard, thresholds, sensor_trends
 
 # Setup logging
 setup_logging()
@@ -103,18 +101,6 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
-
-
-# Include routers
-app.include_router(health.router, prefix=settings.api_prefix)
-app.include_router(sensors.router, prefix=settings.api_prefix)
-app.include_router(customers.router, prefix=settings.api_prefix)
-app.include_router(devices.router, prefix=settings.api_prefix)
-app.include_router(auth.router, prefix=settings.api_prefix)
-app.include_router(admin.router, prefix=settings.api_prefix)
-app.include_router(dashboard.router, prefix=settings.api_prefix)
-app.include_router(thresholds.router, prefix=settings.api_prefix)
-app.include_router(sensor_trends.router, prefix=settings.api_prefix)
 
 
 

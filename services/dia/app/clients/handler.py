@@ -7,10 +7,11 @@ import logging
 import json
 from typing import Any, Optional
 
-from app.models.message_pb2 import MsgRmsReport
+from pub.models.message_pb2 import MsgRmsReport
+from pub.services.diagnosis_service import PatrolDiagnosisRecordService
+
 from app.clients.redis import redis_client
 from app.diagnosis.patrol_diagnosis import patrol_diagnostic_engine
-from app.services.diagnosis_service import PatrolDiagnosisRecordService
 
 logger = logging.getLogger(__name__)
 
