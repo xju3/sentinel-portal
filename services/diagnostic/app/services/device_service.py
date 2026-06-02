@@ -1,0 +1,477 @@
+"""
+Device service - business logic for device operations
+"""
+
+from uuid import UUID
+from typing import List, Optional
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.future import select
+from sqlalchemy import func, or_
+
+from app.models.device import (
+    IsoStandard,
+    DeviceCategory,
+    DeviceSpec,
+    DeviceInst,
+    Process,
+    ProcessItem,
+    ProcessDevice,
+    ProcessDeviceItem,
+)
+from app.models.sensor import SensorMonitoring
+from app.models.customer import HealthCheckFreq
+from app.utils.sorting import apply_sorting
+
+
+class IsoStandardService:
+    @staticmethod
+    async def get_all(
+        session: AsyncSession,
+        skip: int,
+        limit: int,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ) -> List[IsoStandard]:
+        stmt = select(IsoStandard)
+        stmt = apply_sorting(stmt, IsoStandard, sort_by, sort_order)
+        stmt = stmt.offset(skip).limit(limit)
+        result = await session.execute(stmt)
+        return result.scalars().all()
+
+    @staticmethod
+    async def get_by_id(session: AsyncSession, obj_id: UUID) -> Optional[IsoStandard]:
+        stmt = select(IsoStandard).where(IsoStandard.id == obj_id)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def create(session: AsyncSession, data: dict) -> IsoStandard:
+        db_obj = IsoStandard(**data)
+        session.add(db_obj)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def update(session: AsyncSession, db_obj: IsoStandard, data: dict) -> IsoStandard:
+        for key, value in data.items():
+            setattr(db_obj, key, value)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def delete(session: AsyncSession, db_obj: IsoStandard) -> None:
+        await session.delete(db_obj)
+        await session.commit()
+
+
+class DeviceCategoryService:
+    @staticmethod
+    async def get_all(
+        session: AsyncSession,
+        tenant_id: UUID,
+        skip: int,
+        limit: int,
+        keyword: Optional[str] = None,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ) -> List[DeviceCategory]:
+        stmt = select(DeviceCategory).where(DeviceCategory.tenant_id == tenant_id)
+        if keyword:
+            like_kw = f"%{keyword.strip()}%"
+            stmt = stmt.where(
+                or_(
+                    DeviceCategory.name.ilike(like_kw),
+                    DeviceCategory.description.ilike(like_kw),
+                )
+            )
+        stmt = apply_sorting(stmt, DeviceCategory, sort_by, sort_order)
+        stmt = stmt.offset(skip).limit(limit)
+        result = await session.execute(stmt)
+        return result.scalars().all()
+
+    @staticmethod
+    async def count_all(
+        session: AsyncSession,
+        tenant_id: UUID,
+        keyword: Optional[str] = None,
+    ) -> int:
+        stmt = select(func.count(DeviceCategory.id)).where(DeviceCategory.tenant_id == tenant_id)
+        if keyword:
+            like_kw = f"%{keyword.strip()}%"
+            stmt = stmt.where(
+                or_(
+                    DeviceCategory.name.ilike(like_kw),
+                    DeviceCategory.description.ilike(like_kw),
+                )
+            )
+        result = await session.execute(stmt)
+        return int(result.scalar_one() or 0)
+
+    @staticmethod
+    async def has_children(session: AsyncSession, tenant_id: UUID, obj_id: UUID) -> bool:
+        stmt = (
+            select(DeviceCategory.id)
+            .where(
+                DeviceCategory.parent_id == obj_id,
+                DeviceCategory.tenant_id == tenant_id,
+            )
+            .limit(1)
+        )
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none() is not None
+
+    @staticmethod
+    async def get_by_id(
+        session: AsyncSession,
+        tenant_id: UUID,
+        obj_id: UUID,
+    ) -> Optional[DeviceCategory]:
+        stmt = select(DeviceCategory).where(
+            DeviceCategory.id == obj_id,
+            DeviceCategory.tenant_id == tenant_id,
+        )
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def get_health_check_freq_map(
+        session: AsyncSession,
+        tenant_id: UUID,
+        freq_ids: List[UUID],
+    ) -> dict[UUID, HealthCheckFreq]:
+        if not freq_ids:
+            return {}
+        stmt = select(HealthCheckFreq).where(
+            HealthCheckFreq.tenant_id == tenant_id,
+            HealthCheckFreq.id.in_(freq_ids),
+        )
+        result = await session.execute(stmt)
+        rows = result.scalars().all()
+        return {row.id: row for row in rows}
+
+    @staticmethod
+    async def create(session: AsyncSession, data: dict) -> DeviceCategory:
+        db_obj = DeviceCategory(**data)
+        session.add(db_obj)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def update(session: AsyncSession, db_obj: DeviceCategory, data: dict) -> DeviceCategory:
+        for key, value in data.items():
+            setattr(db_obj, key, value)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def delete(session: AsyncSession, db_obj: DeviceCategory) -> None:
+        await session.delete(db_obj)
+        await session.commit()
+
+
+class DeviceSpecService:
+    @staticmethod
+    async def get_all(
+        session: AsyncSession,
+        skip: int,
+        limit: int,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ) -> List[DeviceSpec]:
+        stmt = select(DeviceSpec)
+        stmt = apply_sorting(stmt, DeviceSpec, sort_by, sort_order or "ascend")
+        stmt = stmt.offset(skip).limit(limit)
+        result = await session.execute(stmt)
+        return result.scalars().all()
+
+    @staticmethod
+    async def get_by_id(session: AsyncSession, obj_id: UUID) -> Optional[DeviceSpec]:
+        stmt = select(DeviceSpec).where(DeviceSpec.id == obj_id)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def create(session: AsyncSession, data: dict) -> DeviceSpec:
+        db_obj = DeviceSpec(**data)
+        session.add(db_obj)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def update(session: AsyncSession, db_obj: DeviceSpec, data: dict) -> DeviceSpec:
+        for key, value in data.items():
+            setattr(db_obj, key, value)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def delete(session: AsyncSession, db_obj: DeviceSpec) -> None:
+        await session.delete(db_obj)
+        await session.commit()
+
+
+class DeviceInstService:
+    @staticmethod
+    async def get_all(
+        session: AsyncSession,
+        skip: int,
+        limit: int,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ) -> List[DeviceInst]:
+        stmt = select(DeviceInst)
+        stmt = apply_sorting(stmt, DeviceInst, sort_by, sort_order or "ascend")
+        stmt = stmt.offset(skip).limit(limit)
+        result = await session.execute(stmt)
+        return result.scalars().all()
+
+    @staticmethod
+    async def get_by_id(session: AsyncSession, obj_id: UUID) -> Optional[DeviceInst]:
+        stmt = select(DeviceInst).where(DeviceInst.id == obj_id)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def is_tenant_device_inst(
+        session: AsyncSession,
+        tenant_id: UUID,
+        device_inst_id: UUID,
+    ) -> bool:
+        stmt = (
+            select(DeviceInst.id)
+            .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
+            .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+            .where(
+                DeviceInst.id == device_inst_id,
+                DeviceCategory.tenant_id == tenant_id,
+            )
+            .limit(1)
+        )
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none() is not None
+
+    @staticmethod
+    async def get_tenant_device_insts_paged(
+        session: AsyncSession,
+        tenant_id: UUID,
+        current: int,
+        page_size: int,
+        keyword: Optional[str] = None,
+    ) -> tuple:
+        """Get paged DeviceInsts scoped to tenant, with total count."""
+        from app.models.customer import Location as LocationModel
+
+        base_join = (
+            select(DeviceInst)
+            .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
+            .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+            .where(DeviceCategory.tenant_id == tenant_id)
+        )
+        if keyword:
+            like = f"%{keyword}%"
+            base_join = base_join.where(
+                or_(DeviceInst.name.ilike(like), DeviceInst.code.ilike(like))
+            )
+
+        count_stmt = select(func.count()).select_from(base_join.subquery())
+        count_result = await session.execute(count_stmt)
+        total = count_result.scalar() or 0
+
+        skip = (current - 1) * page_size
+        fetch_stmt = base_join.offset(skip).limit(page_size)
+        result = await session.execute(fetch_stmt)
+        items = result.scalars().all()
+
+        return items, total
+
+    @staticmethod
+    async def create(session: AsyncSession, data: dict) -> DeviceInst:
+        db_obj = DeviceInst(**data)
+        session.add(db_obj)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def update(session: AsyncSession, db_obj: DeviceInst, data: dict) -> DeviceInst:
+        for key, value in data.items():
+            setattr(db_obj, key, value)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def delete(session: AsyncSession, db_obj: DeviceInst) -> None:
+        await session.delete(db_obj)
+        await session.commit()
+
+
+def generate_standard_service(model_class):
+    """Factory class to generate basic CRUD services to avoid excessive boilerplate"""
+    class StandardService:
+        @staticmethod
+        async def get_all(
+            session: AsyncSession,
+            skip: int,
+            limit: int,
+            sort_by: str | None = None,
+            sort_order: str = "ascend",
+        ):
+            stmt = select(model_class)
+            stmt = apply_sorting(stmt, model_class, sort_by, sort_order)
+            stmt = stmt.offset(skip).limit(limit)
+            result = await session.execute(stmt)
+            return result.scalars().all()
+
+        @staticmethod
+        async def get_by_id(session: AsyncSession, obj_id: UUID):
+            stmt = select(model_class).where(model_class.id == obj_id)
+            result = await session.execute(stmt)
+            return result.scalar_one_or_none()
+
+        @staticmethod
+        async def create(session: AsyncSession, data: dict):
+            db_obj = model_class(**data)
+            session.add(db_obj)
+            await session.commit()
+            await session.refresh(db_obj)
+            return db_obj
+
+        @staticmethod
+        async def update(session: AsyncSession, db_obj, data: dict):
+            for key, value in data.items():
+                setattr(db_obj, key, value)
+            await session.commit()
+            await session.refresh(db_obj)
+            return db_obj
+
+        @staticmethod
+        async def delete(session: AsyncSession, db_obj) -> None:
+            await session.delete(db_obj)
+            await session.commit()
+
+    return StandardService
+
+
+# 使用工厂模式来创建剩余的模型 Service 以减少代码冗余
+# 如果这些模型后续需要扩展复杂的特定业务逻辑，可以随时像上面那样独立定义类
+
+class SensorMonitoringService:
+    """Service for SensorMonitoring with tenant-scoped queries."""
+
+    @staticmethod
+    async def get_all(
+        session: AsyncSession,
+        skip: int,
+        limit: int,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ):
+        from app.models.device import DeviceInst
+        stmt = (
+            select(SensorMonitoring)
+            .join(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
+        )
+        stmt = apply_sorting(stmt, SensorMonitoring, sort_by, sort_order)
+        stmt = stmt.offset(skip).limit(limit)
+        result = await session.execute(stmt)
+        return result.scalars().all()
+
+    @staticmethod
+    async def get_by_code(session: AsyncSession, code: str):
+        stmt = select(SensorMonitoring).where(SensorMonitoring.code == code and SensorMonitoring.status == 1)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none() 
+
+    @staticmethod
+    async def get_by_id(session: AsyncSession, obj_id: UUID):
+        stmt = select(SensorMonitoring).where(SensorMonitoring.id == obj_id)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def get_all_by_tenant(
+        session: AsyncSession,
+        tenant_id: UUID,
+        skip: int,
+        limit: int,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ):
+        """Get SensorMonitoring records scoped to a tenant."""
+        from app.models.device import DeviceInst, DeviceSpec, DeviceCategory
+
+        stmt = (
+            select(SensorMonitoring)
+            .join(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
+            .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
+            .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+            .where(DeviceCategory.tenant_id == tenant_id)
+        )
+        stmt = apply_sorting(stmt, SensorMonitoring, sort_by, sort_order)
+        stmt = stmt.offset(skip).limit(limit)
+        result = await session.execute(stmt)
+        return result.scalars().all()
+
+    @staticmethod
+    async def get_by_id_and_tenant(
+        session: AsyncSession,
+        obj_id: UUID,
+        tenant_id: UUID,
+    ):
+        """Get a SensorMonitoring record by id, scoped to a tenant."""
+        from app.models.device import DeviceInst, DeviceSpec, DeviceCategory
+
+        stmt = (
+            select(SensorMonitoring)
+            .join(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
+            .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
+            .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+            .where(
+                SensorMonitoring.id == obj_id,
+                DeviceCategory.tenant_id == tenant_id,
+            )
+            .limit(1)
+        )
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def create(session: AsyncSession, data: dict):
+        db_obj = SensorMonitoring(**data)
+        session.add(db_obj)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def update(session: AsyncSession, db_obj, data: dict):
+        for key, value in data.items():
+            setattr(db_obj, key, value)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def delete(session: AsyncSession, db_obj) -> None:
+        await session.delete(db_obj)
+        await session.commit()
+
+
+ProcessService = generate_standard_service(Process)
+ProcessItemService = generate_standard_service(ProcessItem)
+ProcessDeviceService = generate_standard_service(ProcessDevice)
+ProcessDeviceItemService = generate_standard_service(ProcessDeviceItem)
+
+# Backward-compatible aliases for legacy router names.
+DeviceComboSpecService = ProcessService
+DeviceComboSpecItemService = ProcessItemService
+DeviceComboInstService = ProcessDeviceService
+DeviceComboInstItemService = ProcessDeviceItemService
+DeviceInstTagService = SensorMonitoringService

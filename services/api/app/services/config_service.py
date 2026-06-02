@@ -165,6 +165,7 @@ async def create_config_tasks(session: AsyncSession, sns: List[str]) -> None:
             name="config_update",
             sn=sn,
             action=1,
+            val = 1,
             status=0,
             create_time=datetime.utcnow(),
         )
@@ -176,8 +177,8 @@ async def create_config_tasks(session: AsyncSession, sns: List[str]) -> None:
 
     # 为每个任务通过 MQTT 下发通知
     for task in tasks:
-        topic = f"/sentinel/config/{task.sn}"
-        payload = json.dumps({"task_id": str(task.id), "action": task.action})
+        topic = f"/sentinel/task/{task.sn}"
+        payload = json.dumps({"task_id": str(task.id), "action": task.action, "val": task.val})
         success = mqtt_manager.publish(topic, payload)
         if success:
             logger.info(f"[ConfigChange] MQTT 通知已下发: {topic} -> {payload}")
@@ -209,57 +210,76 @@ def core_fields_changed(model_class: Type, old_record, new_data_pydantic) -> boo
     return False
 
 
-async def handle_config_change(
-    session: AsyncSession,
+async def bg_handle_config_change(
     model_class: Type,
     obj_id: UUID,
     new_data,
-    old_record=None,
+    old_values: dict,
 ) -> None:
-    """处理配置变更的完整业务逻辑。
+    """后台异步任务：对比新旧值，追溯受影响传感器，创建任务，发送 MQTT。
 
-    由 monitor_config_change 装饰器调用。检查核心字段是否变更，
-    如果变更则追溯到受影响的传感器列表，记录日志并创建 SensorTask。
+    由 monitor_config_change 装饰器通过 asyncio.create_task 启动，
+    不阻塞 HTTP 响应。自行管理数据库 session 生命周期。
 
     参数:
-        session:      数据库会话
-        model_class:  SQLAlchemy 模型类
-        obj_id:       发生变更的记录 ID
-        new_data:     提交的 Pydantic 请求体
-        old_record:   CUD 前抓取的旧记录（由装饰器提供）
+        model_class: SQLAlchemy 模型类
+        obj_id:      记录 ID
+        new_data:    提交的 Pydantic 请求体
+        old_values:  CUD 前抓取的旧值 dict
     """
+    from app.database import db_manager
+
     init_sensitive_fields()
+    sensitive = CONFIG_SENSITIVE_FIELDS.get(model_class, set())
 
     logger.info(f"[ConfigChange] 开始检测 {model_class.__name__}(id={obj_id}) 配置变更")
 
-    # 1. 旧记录由装饰器在 CUD 前抓取并传入
-    logger.info(f"[ConfigChange] {model_class.__name__}(id={obj_id}) 旧记录: {'存在' if old_record else '不存在'}")
+    new_values = new_data.model_dump(exclude_unset=True)
+    logger.info(f"[ConfigChange] {model_class.__name__} 提交字段: {list(new_values.keys())}")
 
-    if old_record is None:
-        logger.info(f"[ConfigChange] {model_class.__name__}(id={obj_id}) 旧记录不存在，跳过检测")
+    if not new_values:
+        logger.info(f"[ConfigChange] {model_class.__name__}(id={obj_id}) 无字段变更（no-op 保存）")
         return
 
-    # 2. 检查核心字段是否实际变更
-    changed = core_fields_changed(model_class, old_record, new_data)
-    logger.info(f"[ConfigChange] {model_class.__name__}(id={obj_id}) 核心字段变更检查: {changed}")
+    # Compare old vs new values
+    changed = False
+    for field in sensitive:
+        if field in new_values:
+            old_val = old_values.get(field)
+            new_val = new_values[field]
+            if old_val != new_val:
+                logger.info(
+                    f"[ConfigChange] {model_class.__name__} 核心字段变更: "
+                    f"{field}: {old_val!r} -> {new_val!r}"
+                )
+                changed = True
+
     if not changed:
         logger.info(f"[ConfigChange] {model_class.__name__}(id={obj_id}) 核心字段无变更，跳过")
         return
 
-    # 3. 反向追溯受影响的传感器列表
-    logger.info(f"[ConfigChange] {model_class.__name__}(id={obj_id}) 开始反向追溯受影响的传感器...")
-    affected_sns = await find_affected_sns(session, model_class, obj_id)
-    logger.info(f"[ConfigChange] {model_class.__name__}(id={obj_id}) 追溯完成, 受影响传感器: {affected_sns if affected_sns else '无'}")
+    # Open own DB session for tracing + task creation
+    try:
+        async for session in db_manager.get_session():
+            # 3. Trace affected sensors
+            logger.info(f"[ConfigChange] {model_class.__name__}(id={obj_id}) 开始反向追溯受影响的传感器...")
+            affected_sns = await find_affected_sns(session, model_class, obj_id)
+            logger.info(f"[ConfigChange] {model_class.__name__}(id={obj_id}) 追溯完成, 受影响传感器: {affected_sns if affected_sns else '无'}")
 
-    if affected_sns:
-        logger.info(
-            f"[ConfigChange] {model_class.__name__}(id={obj_id}) 核心字段变更, "
-            f"受影响传感器 SN: {affected_sns}"
-        )
-        # 4. 为每个受影响的传感器创建配置更新任务
-        await create_config_tasks(session, affected_sns)
-    else:
-        logger.info(
-            f"[ConfigChange] {model_class.__name__}(id={obj_id}) 核心字段变更, "
-            f"无上层传感器关联"
+            if affected_sns:
+                logger.info(
+                    f"[ConfigChange] {model_class.__name__}(id={obj_id}) 核心字段变更, "
+                    f"受影响传感器 SN: {affected_sns}"
+                )
+                # 4. Create tasks + publish MQTT
+                await create_config_tasks(session, affected_sns)
+            else:
+                logger.info(
+                    f"[ConfigChange] {model_class.__name__}(id={obj_id}) 核心字段变更, "
+                    f"无上层传感器关联"
+                )
+            break  # Single session iteration
+    except Exception as e:
+        logger.error(
+            f"[ConfigChange] 后台检测 {model_class.__name__}(id={obj_id}) 变更时出错: {e}"
         )

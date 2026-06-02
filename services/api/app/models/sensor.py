@@ -149,6 +149,7 @@ class SensorTask(Base):
     name = Column(String(255), nullable=False) # 任务名称
     sn = Column(String(255), nullable=False, index=True) # 传感器序列号
     action = Column(SmallInteger, nullable=False) # 动作类型
+    val = Column(SmallInteger, nullable=False, default=0) # 执行多少次
     status = Column(SmallInteger, nullable=False, default=1, comment="tiny(1) status") # 任务状态
     create_time = Column(DateTime, default=datetime.utcnow) # 任务创建时间
     complete_time = Column(DateTime, nullable=True) # 任务完成时间

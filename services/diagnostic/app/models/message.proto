@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+message MsgRmsReport {
+  uint32 sn          = 1;   // 设备序列号
+  float  temperature = 2;
+  uint32 iso         = 3;   // iso标准
+  float  rms_x       = 4;
+  float  rms_y       = 5;
+  float  rms_z       = 6;
+  float  rms_m       = 7;
+  float  peak_x      = 8;
+  float  peak_y      = 9;
+  float  peak_z      = 10;
+  float  peak_m      = 11;
+}
