@@ -4,7 +4,7 @@ services:
       context: ../
       dockerfile: docker/api/Dockerfile
       args:
-        PYTHON_IMAGE: ${PYTHON_IMAGE:-python:3.11-slim}
+        PYTHON_IMAGE: ${PYTHON_IMAGE:-python:3.14-slim}
     container_name: api
     restart: unless-stopped
     extra_hosts:
