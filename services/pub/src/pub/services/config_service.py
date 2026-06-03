@@ -153,14 +153,9 @@ async def create_config_tasks(session: AsyncSession, sns: List[str]) -> None:
     
     对于每个 SN，先检查是否存在 status=0（未完成）的相同任务。
     若存在则跳过创建，避免重复下发；仅当无未完成任务时才新建。
-
-    任务写入数据库后，通过 MQTT 向 /sentinel/task/{sn} 下发通知，
-    消息体: {"task_id": "<uuid>", "action": 1, "val": 1}
     """
-    import json
     from datetime import datetime
     from pub.models.sensor import SensorTask
-    from pub.clients.mqtt import mqtt_manager
 
     tasks = []
     for sn in sns:
@@ -193,14 +188,6 @@ async def create_config_tasks(session: AsyncSession, sns: List[str]) -> None:
     session.add_all(tasks)
     await session.commit()
     logger.info(f"[ConfigChange] 已为 {len(tasks)} 个传感器创建配置更新任务: {[t.sn for t in tasks]}")
-
-    # 为每个任务通过 MQTT 下发通知
-    for task in tasks:
-        topic = f"/sentinel/task/{task.sn}"
-        payload = json.dumps({"task_id": str(task.id), "action": task.action, "val": task.val})
-        success = mqtt_manager.publish(topic, payload)
-        if success:
-            logger.info(f"[ConfigChange] MQTT 通知已下发: {topic} -> {payload}")
 
 
 
@@ -236,7 +223,7 @@ async def bg_handle_config_change(
     new_data,
     old_values: dict,
 ) -> None:
-    """后台异步任务：对比新旧值，追溯受影响传感器，创建任务，发送 MQTT。
+    """后台异步任务：对比新旧值，追溯受影响传感器，创建任务（仅入库，不下发 MQTT）。
 
     由 monitor_config_change 装饰器通过 asyncio.create_task 启动，
     不阻塞 HTTP 响应。自行管理数据库 session 生命周期。
@@ -291,7 +278,7 @@ async def bg_handle_config_change(
                     f"[ConfigChange] {model_class.__name__}(id={obj_id}) 核心字段变更, "
                     f"受影响传感器 SN: {affected_sns}"
                 )
-                # 4. Create tasks + publish MQTT
+                # 4. Create tasks (DB only, no MQTT publish)
                 await create_config_tasks(session, affected_sns)
             else:
                 logger.info(
