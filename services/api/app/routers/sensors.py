@@ -216,10 +216,14 @@ async def list_sensor_tasks_by_sn(
     sn: str,
     session: AsyncSession = Depends(get_session),
 ):
-    stmt = select(SensorTask).where(SensorTask.sn == sn and SensorTask.status == 0).order_by(SensorTask.create_time.desc())
+    stmt = (
+        select(SensorTask.id, SensorTask.action, SensorTask.val)
+        .where(SensorTask.sn == sn, SensorTask.status == 0)
+        .order_by(SensorTask.create_time.desc())
+    )
     result = await session.execute(stmt)
-    tasks = result.scalars().all()
-    return tasks
+    rows = result.all()
+    return [{"id": str(row.id), "action": row.action, "val": row.val} for row in rows]
 
 
 @router.get("/task/{task_id}")

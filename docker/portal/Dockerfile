@@ -5,10 +5,10 @@ FROM ${NODE_IMAGE} AS builder
 
 WORKDIR /app
 
-COPY portal/package.json ./
+COPY clients/portal/package.json ./
 RUN npm install
 
-COPY portal/ .
+COPY clients/portal/ .
 RUN npm run build
 
 FROM ${NGINX_IMAGE}

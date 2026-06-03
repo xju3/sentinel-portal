@@ -10,9 +10,9 @@ services:
     extra_hosts:
           - "host.docker.internal:host-gateway"
     env_file:
-      - ../api/.env
+      - ../services/api/.env
     ports:
-      - "3030:8000"
+      - "3090:8000"
 
   portal:
     build:
