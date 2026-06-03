@@ -151,8 +151,11 @@ async def find_affected_sns(session: AsyncSession, model_class: Type, obj_id: UU
 async def create_config_tasks(session: AsyncSession, sns: List[str]) -> None:
     """为受影响的传感器创建配置更新任务 (SensorTask.action=1, status=0)。
     
-    任务写入数据库后，通过 MQTT 向 /sentinel/config/{sn} 下发通知，
-    消息体: {"task_id": "<uuid>", "action": 1}
+    对于每个 SN，先检查是否存在 status=0（未完成）的相同任务。
+    若存在则跳过创建，避免重复下发；仅当无未完成任务时才新建。
+
+    任务写入数据库后，通过 MQTT 向 /sentinel/task/{sn} 下发通知，
+    消息体: {"task_id": "<uuid>", "action": 1, "val": 1}
     """
     import json
     from datetime import datetime
@@ -161,19 +164,35 @@ async def create_config_tasks(session: AsyncSession, sns: List[str]) -> None:
 
     tasks = []
     for sn in sns:
+        # 检查是否存在未完成的相同任务 (status=0 表示任务进行中)
+        stmt = select(SensorTask).where(
+            SensorTask.sn == sn,
+            SensorTask.action == 1,
+            SensorTask.status == 0,
+        )
+        result = await session.execute(stmt)
+        existing = result.scalar_one_or_none()
+        if existing is not None:
+            logger.info(f"[ConfigChange] SN={sn} 已有未完成的配置更新任务(id={existing.id})，跳过创建")
+            continue
+
         task = SensorTask(
             name="config_update",
             sn=sn,
             action=1,
-            val = 1,
+            val=1,
             status=0,
             create_time=datetime.utcnow(),
         )
         tasks.append(task)
 
+    if not tasks:
+        logger.info(f"[ConfigChange] 所有传感器均有未完成任务，无需新建")
+        return
+
     session.add_all(tasks)
     await session.commit()
-    logger.info(f"[ConfigChange] 已为 {len(sns)} 个传感器创建配置更新任务: {sns}")
+    logger.info(f"[ConfigChange] 已为 {len(tasks)} 个传感器创建配置更新任务: {[t.sn for t in tasks]}")
 
     # 为每个任务通过 MQTT 下发通知
     for task in tasks:
@@ -182,6 +201,7 @@ async def create_config_tasks(session: AsyncSession, sns: List[str]) -> None:
         success = mqtt_manager.publish(topic, payload)
         if success:
             logger.info(f"[ConfigChange] MQTT 通知已下发: {topic} -> {payload}")
+
 
 
 def core_fields_changed(model_class: Type, old_record, new_data_pydantic) -> bool:

@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 from pub.services.dependencies import get_session
 from pub.services.sensor_service import SensorTypeService, SensorDbService, SensorBatchService, SensorConfigService
 from pub.models.customer import Account
-from pub.models.sensor import Sensor, SensorBatch
+from pub.models.sensor import Sensor, SensorBatch, SensorTask
 from pub.utils.exceptions import DomainException
 from pub.utils.decorators import rebuild_dashboard_cache
 
@@ -211,15 +211,32 @@ async def list_sensors_by_batch(
     return success(await SensorDbService.get_by_batch_id(session, batch_id, skip, limit, sort_by, sort_order))
 
 
-@router.get("/config/{sn}")
-async def get_sensor_config(
+@router.get("/tasks/{sn}")
+async def list_sensor_tasks_by_sn(
     sn: str,
     session: AsyncSession = Depends(get_session),
 ):
-    config = await SensorConfigService.get_config_by_sn(session, sn)
+    stmt = select(SensorTask).where(SensorTask.sn == sn and SensorTask.status == 0).order_by(SensorTask.create_time.desc())
+    result = await session.execute(stmt)
+    tasks = result.scalars().all()
+    return tasks
+
+
+@router.get("/task/{task_id}")
+async def get_sensor_config_by_task(
+    task_id: UUID,
+    session: AsyncSession = Depends(get_session),
+):
+    stmt = select(SensorTask).where(SensorTask.id == task_id)
+    result = await session.execute(stmt)
+    task = result.scalar_one_or_none()
+    if not task:
+        raise HTTPException(status_code=404, detail="Sensor task not found")
+    config = await SensorConfigService.get_config_by_sn(session, task.sn)
     if config is None:
         raise HTTPException(status_code=404, detail="Sensor config not found")
-    return success(config)
+    return config
+
 
 
 @router.get("/{obj_id}")

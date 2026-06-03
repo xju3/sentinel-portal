@@ -11,6 +11,8 @@ services:
           - "host.docker.internal:host-gateway"
     env_file:
       - ../api/.env
+    ports:
+      - "3030:8000"
 
   portal:
     build:
@@ -38,4 +40,4 @@ services:
     depends_on:
       - api
     ports:
-      - "3011:80"
+      - "3020:80"
