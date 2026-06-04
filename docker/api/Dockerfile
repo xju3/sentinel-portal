@@ -24,6 +24,9 @@ RUN uv sync --no-dev --no-install-project
 # Copy api application source code
 COPY services/api/app /app/services/api/app
 
+# 安装项目自身和本地工作区依赖 (pub)
+RUN uv sync --no-dev
+
 ENV PATH="/app/services/.venv/bin:$PATH"
 
 EXPOSE 8000

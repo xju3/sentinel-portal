@@ -226,7 +226,7 @@ async def list_sensor_tasks_by_sn(
     return [{"id": str(row.id), "action": row.action, "val": row.val} for row in rows]
 
 
-@router.get("/task/{task_id}")
+@router.get("/config/{task_id}")
 async def get_sensor_config_by_task(
     task_id: UUID,
     session: AsyncSession = Depends(get_session),
