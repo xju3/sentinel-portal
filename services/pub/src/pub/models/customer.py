@@ -3,7 +3,7 @@ Customer data models
 """
 
 import uuid
-from sqlalchemy import Column, String, Uuid, Boolean, Date, Integer, SmallInteger
+from sqlalchemy import Column, String, Uuid, Boolean, Numeric, Date, Integer, SmallInteger
 from sqlalchemy.orm import relationship
 
 from pub.models import Base
@@ -130,8 +130,8 @@ class HealthCheckFreq(Base):
     __tablename__ = "health_check_freq"
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    patrol = Column(Integer, nullable=False, default=60) # patrol frequency in minutes (1 hour)
-    diagnosis = Column(Integer, nullable=False, default=1440) # diagnosis frequency in minutes (24 hours)
+    patrol = Column(Numeric(10, 2), nullable=False, default=60.0) # patrol frequency in minutes (1 hour)
+    diagnosis = Column(Numeric(10, 2), nullable=False, default=1440.0) # diagnosis frequency in minutes (24 hours)
     report = Column(Integer, nullable=False, default=1)  # the mount of accumulated messages to report
     status = Column(Boolean, nullable=False, default=True)
     tenant_id = Column(Uuid(as_uuid=True), nullable=False, index=False)

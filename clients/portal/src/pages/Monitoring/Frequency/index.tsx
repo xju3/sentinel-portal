@@ -266,7 +266,7 @@ const MonitoringFrequencyPage = () => {
           name="patrol"
           label="巡检频率(分钟)"
           min={1}
-          fieldProps={{ precision: 0 }}
+          fieldProps={{ precision: 2 }}
           rules={[
             { required: true, message: '请输入巡检频率' },
             { validator: validateMinuteValue },
@@ -276,7 +276,7 @@ const MonitoringFrequencyPage = () => {
           name="diagnosis"
           label="诊断频率(分钟)"
           min={1}
-          fieldProps={{ precision: 0 }}
+          fieldProps={{ precision: 2 }}
           rules={[
             { required: true, message: '请输入诊断频率' },
             { validator: validateMinuteValue },
