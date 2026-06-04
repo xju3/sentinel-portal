@@ -10,7 +10,7 @@ COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 WORKDIR /app/services/api
 
 # Copy workspace root configuration and lock file
-COPY services/pyproject.toml services/uv.lock /app/services/
+COPY services/pyproject.toml services/uv.lock* /app/services/
 
 # Copy api pyproject.toml
 COPY services/api/pyproject.toml /app/services/api/
@@ -19,7 +19,7 @@ COPY services/api/pyproject.toml /app/services/api/
 COPY services/pub/pyproject.toml services/pub/README.md /app/services/pub/
 COPY services/pub/src /app/services/pub/src/
 
-RUN uv sync --frozen --no-dev --no-install-project
+RUN uv sync --no-dev --no-install-project
 
 # Copy api application source code
 COPY services/api/app /app/services/api/app
