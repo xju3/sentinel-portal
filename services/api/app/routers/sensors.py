@@ -3,6 +3,7 @@ Sensor management endpoints
 """
 
 import logging
+from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -239,6 +240,11 @@ async def get_sensor_config_by_task(
     config = await SensorConfigService.get_config_by_sn(session, task.sn)
     if config is None:
         raise HTTPException(status_code=404, detail="Sensor config not found")
+
+    task.status = 1
+    task.complete_time = datetime.utcnow()
+    await session.commit()
+
     return config
 
 
