@@ -24,6 +24,20 @@ class PatrolDiagnosticRecord(Base):
     details = Column(MySQLJSON, nullable=True, comment="诊断详情列表: [{window, status, metric, desc}, ...]")
     ts = Column(BigInteger, nullable=False, comment="诊断产生时的时间戳(Unix毫秒)")
     created_at = Column(DateTime, default=datetime.utcnow)
+    
+class SensorFirmware(Base):
+    """Sensor firmware entity model"""
+
+    __tablename__ = "sensor_firmware"
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    version = Column(String(64), nullable=False, unique=True)
+    description = Column(Text)
+    release_date = Column(DateTime, nullable=True)
+    file_url = Column(String(255), nullable=False)
+    sensor_type_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to sensor_types
+    tenant_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Link to tenant for multi-tenant support
+    status = Column(SmallInteger, default=0, comment="状态: 1=active, 0=inactive")
 
 class SensorType(Base):
     """Sensor type entity model"""

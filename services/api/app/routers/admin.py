@@ -16,6 +16,8 @@ from pub.services.sensor_service import SensorBatchService
 from pub.models.customer import Account
 from app.utils.auth import get_current_account
 from app.contract.admin import SensorBatchResponse
+from app.contract.admin_firmware import SensorFirmwareCreate, SensorFirmwareUpdate, SensorFirmwareResponse
+from pub.services.firmware_service import SensorFirmwareService
 
 router = APIRouter(prefix="/admin", tags=["admin"])
 
@@ -42,3 +44,64 @@ async def get_sensor_batch(
     if not obj:
         raise HTTPException(status_code=404, detail="SensorBatch not found")
     return success(obj)
+
+
+# ==========================================
+# Sensor Firmware Management
+# ==========================================
+
+@router.get("/sensor-firmwares")
+async def list_sensor_firmwares(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=1000),
+    session: AsyncSession = Depends(get_session),
+    current_account: Account = Depends(get_current_account),
+):
+    items = await SensorFirmwareService.get_all(session, skip, limit)
+    return success([SensorFirmwareResponse.model_validate(item) for item in items])
+
+@router.post("/sensor-firmwares")
+async def create_sensor_firmware(
+    item: SensorFirmwareCreate,
+    session: AsyncSession = Depends(get_session),
+    current_account: Account = Depends(get_current_account),
+):
+    return success(await SensorFirmwareService.create(session, item.model_dump()))
+
+@router.put("/sensor-firmwares/{obj_id}")
+async def update_sensor_firmware(
+    obj_id: UUID,
+    item: SensorFirmwareUpdate,
+    session: AsyncSession = Depends(get_session),
+    current_account: Account = Depends(get_current_account),
+):
+    db_obj = await SensorFirmwareService.get_by_id(session, obj_id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="SensorFirmware not found")
+    if db_obj.status == 1:
+        raise HTTPException(status_code=400, detail="Cannot modify a released firmware")
+    return success(await SensorFirmwareService.update(session, db_obj, item.model_dump(exclude_unset=True)))
+
+@router.delete("/sensor-firmwares/{obj_id}")
+async def delete_sensor_firmware(
+    obj_id: UUID,
+    session: AsyncSession = Depends(get_session),
+    current_account: Account = Depends(get_current_account),
+):
+    db_obj = await SensorFirmwareService.get_by_id(session, obj_id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="SensorFirmware not found")
+    await SensorFirmwareService.delete(session, db_obj)
+    return success({"message": "SensorFirmware deleted successfully"})
+
+@router.post("/sensor-firmwares/{obj_id}/release")
+async def release_sensor_firmware(
+    obj_id: UUID,
+    session: AsyncSession = Depends(get_session),
+    current_account: Account = Depends(get_current_account),
+):
+    try:
+        firmware = await SensorFirmwareService.release_firmware(session, obj_id)
+        return success(SensorFirmwareResponse.model_validate(firmware))
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=str(e))

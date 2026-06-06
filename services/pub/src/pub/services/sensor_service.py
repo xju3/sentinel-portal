@@ -566,7 +566,7 @@ class SensorConfigService:
         if device_cat.tenant_id:
             tenant = await session.get(Tenant, device_cat.tenant_id)
             if tenant:
-                config["host"] = tenant.host or "139.9.50.7"
+                config["host"] = tenant.mqtt or "139.9.50.7"
 
         # 7. SensorType values (battery, network)
         if sensor_type:
