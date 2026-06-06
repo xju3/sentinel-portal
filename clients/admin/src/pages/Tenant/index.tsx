@@ -58,7 +58,10 @@ const TenantPage = () => {
       if (query.name && !norm(row.name).includes(norm(query.name))) {
         return false;
       }
-      if (query.host && !norm(row.host).includes(norm(query.host))) {
+      if (query.mqtt_server && !norm(row.mqtt_server).includes(norm(query.mqtt_server))) {
+        return false;
+      }
+      if (query.api_server && !norm(row.api_server).includes(norm(query.api_server))) {
         return false;
       }
       return true;
@@ -84,8 +87,13 @@ const TenantPage = () => {
       width: 200,
     },
     {
-      title: '域名',
-      dataIndex: 'host',
+      title: 'MQTT 服务器',
+      dataIndex: 'mqtt_server',
+      width: 200,
+    },
+    {
+      title: 'API 服务器',
+      dataIndex: 'api_server',
       width: 200,
     },
     {
@@ -198,10 +206,11 @@ const TenantPage = () => {
             ? {
                 code: editing.code,
                 name: editing.name,
-                host: editing.host,
+                mqtt_server: editing.mqtt_server,
+                api_server: editing.api_server,
                 active: editing.active,
               }
-            : { active: true }
+            : { active: true, mqtt_server: 'mqtt.api-server.icu', api_server: 'api.api-server.icu' }
         }
         onFinish={async (values) => {
           setSaving(true);
@@ -209,7 +218,8 @@ const TenantPage = () => {
             const payload: TenantPayload = {
               code: values.code.trim(),
               name: values.name.trim(),
-              host: values.host.trim(),
+              mqtt_server: values.mqtt_server.trim(),
+              api_server: values.api_server.trim(),
               active: values.active,
             };
 
@@ -249,11 +259,19 @@ const TenantPage = () => {
           ]}
         />
         <ProFormText
-          name="host"
-          label="域名"
+          name="mqtt_server"
+          label="MQTT 服务器"
           rules={[
-            { required: true, message: '请输入域名' },
-            { max: 255, message: '域名最多255个字符' },
+            { required: true, message: '请输入 MQTT 服务器地址' },
+            { max: 255, message: '地址最多255个字符' },
+          ]}
+        />
+        <ProFormText
+          name="api_server"
+          label="API 服务器"
+          rules={[
+            { required: true, message: '请输入 API 服务器地址' },
+            { max: 255, message: '地址最多255个字符' },
           ]}
         />
         <ProFormSwitch name="active" label="状态" />

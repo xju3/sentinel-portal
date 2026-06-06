@@ -17,8 +17,8 @@ class Tenant(Base):
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     code = Column(String(12), nullable=False, unique=True, index=True)
     name = Column(String(64), nullable=False)
-    mqtt = Column(String(255), nullable=False)
-    api = Column(String(255), nullable=False)
+    mqtt_server = Column(String(255), nullable=False, default="mqtt.api-server.icu")
+    api_server = Column(String(255), nullable=False, default="api.api-server.icu")
     active = Column(Boolean, default=True)
     create_at = Column(Date, nullable=False)
     start_at = Column(Date, nullable=False)  # The date when the tenant started using the service

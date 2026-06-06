@@ -7,13 +7,15 @@ export type TenantInfo = {
   id: string;
   code: string;
   name: string;
-  host: string;
+  mqtt_server: string;
+  api_server: string;
   active: boolean;
 };
 
 export type TenantUpdatePayload = {
   name?: string;
-  host?: string;
+  mqtt_server?: string;
+  api_server?: string;
 };
 
 export async function getCurrentTenant() {

@@ -71,7 +71,8 @@ async def register(
     account_flag = USERNAME_FLAG_EMAIL if payload.email else USERNAME_FLAG_MOBILE
 
     tenant_code = await _generate_unique_tenant_code(session)
-    tenant_host = f"{_company_slug(payload.company_name)}.portal.local"
+    tenant_mqtt_server = f"mqtt.{_company_slug(payload.company_name)}.portal.local"
+    tenant_api_server = f"api.{_company_slug(payload.company_name)}.portal.local"
     random_password = _generate_password()
 
     try:
@@ -85,7 +86,8 @@ async def register(
             login_channel=login_channel,
             account_flag=account_flag,
             tenant_code=tenant_code,
-            tenant_host=tenant_host,
+            tenant_mqtt_server=tenant_mqtt_server,
+            tenant_api_server=tenant_api_server,
             random_password=random_password,
         )
         await AuthService.commit(session)

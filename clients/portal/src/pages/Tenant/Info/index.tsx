@@ -33,7 +33,8 @@ const TenantInfoPage = () => {
     if (!tenant) return;
     form.setFieldsValue({
       name: tenant.name,
-      host: tenant.host,
+      mqtt_server: tenant.mqtt_server,
+      api_server: tenant.api_server,
     });
     setModalOpen(true);
   };
@@ -44,7 +45,8 @@ const TenantInfoPage = () => {
       setSubmitting(true);
       await updateCurrentTenant({
         name: values.name,
-        host: values.host,
+        mqtt_server: values.mqtt_server,
+        api_server: values.api_server,
       });
       message.success('公司信息更新成功');
       setModalOpen(false);
@@ -75,7 +77,8 @@ const TenantInfoPage = () => {
           <Descriptions column={1} bordered>
             <Descriptions.Item label="公司编码">{tenant.code}</Descriptions.Item>
             <Descriptions.Item label="公司名称">{tenant.name}</Descriptions.Item>
-            <Descriptions.Item label="域名">{tenant.host}</Descriptions.Item>
+            <Descriptions.Item label="MQTT 服务器">{tenant.mqtt_server}</Descriptions.Item>
+            <Descriptions.Item label="API 服务器">{tenant.api_server}</Descriptions.Item>
             <Descriptions.Item label="状态">
               {tenant.active ? '启用' : '禁用'}
             </Descriptions.Item>
@@ -106,11 +109,18 @@ const TenantInfoPage = () => {
             <Input placeholder="请输入公司名称" />
           </Form.Item>
           <Form.Item
-            name="host"
-            label="域名"
-            rules={[{ required: true, message: '请输入域名' }]}
+            name="mqtt_server"
+            label="MQTT 服务器"
+            rules={[{ required: true, message: '请输入 MQTT 服务器地址' }]}
           >
-            <Input placeholder="请输入域名" />
+            <Input placeholder="请输入 MQTT 服务器地址" />
+          </Form.Item>
+          <Form.Item
+            name="api_server"
+            label="API 服务器"
+            rules={[{ required: true, message: '请输入 API 服务器地址' }]}
+          >
+            <Input placeholder="请输入 API 服务器地址" />
           </Form.Item>
         </Form>
       </Modal>

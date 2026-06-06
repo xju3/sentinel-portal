@@ -13,14 +13,16 @@ from pydantic import BaseModel, ConfigDict
 class TenantCreate(BaseModel):
     code: str
     name: str
-    host: str
+    mqtt_server: str = "mqtt.api-server.icu"
+    api_server: str = "api.api-server.icu"
     active: Optional[bool] = True
 
 
 class TenantUpdate(BaseModel):
     code: Optional[str] = None
     name: Optional[str] = None
-    host: Optional[str] = None
+    mqtt_server: Optional[str] = None
+    api_server: Optional[str] = None
     active: Optional[bool] = None
 
 
@@ -28,7 +30,8 @@ class TenantResponse(BaseModel):
     id: UUID
     code: str
     name: str
-    host: str
+    mqtt_server: str
+    api_server: str
     active: bool
 
     model_config = ConfigDict(from_attributes=True)
@@ -36,7 +39,8 @@ class TenantResponse(BaseModel):
 
 class CurrentTenantUpdate(BaseModel):
     name: Optional[str] = None
-    host: Optional[str] = None
+    mqtt_server: Optional[str] = None
+    api_server: Optional[str] = None
 
 
 # ==========================================

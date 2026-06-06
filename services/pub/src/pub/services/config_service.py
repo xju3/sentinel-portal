@@ -34,7 +34,7 @@ def init_sensitive_fields():
         DeviceCategory:      {"iso_standard_id", "health_check_freq_id"},
         IsoStandard:         {"version", "category", "foundation"},
         HealthCheckFreq:     {"patrol", "diagnosis", "report"},
-        Tenant:              {"host"},
+        Tenant:              {"mqtt_server", "api_server"},
         Area:                {"ssid", "passwd"},
         ProcessDevice:       {"area_id"},
         ProcessDeviceItem:   {"process_device_id"},

@@ -562,11 +562,12 @@ class SensorConfigService:
                 config["diagnosis"] = hcf.diagnosis
                 config["report"] = hcf.report
 
-        # 6. Tenant host
+        # 6. Tenant mqtt_server and api_server
         if device_cat.tenant_id:
             tenant = await session.get(Tenant, device_cat.tenant_id)
             if tenant:
-                config["host"] = tenant.mqtt or "139.9.50.7"
+                config["mqtt_host"] = tenant.mqtt_server or "mqtt.api-server.icu"
+                config["api_host"] = tenant.api_server or "api.api-server.icu"
 
         # 7. SensorType values (battery, network)
         if sensor_type:

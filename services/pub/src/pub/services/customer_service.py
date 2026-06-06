@@ -597,7 +597,8 @@ class AuthService:
         login_channel: str,
         account_flag: int,
         tenant_code: str,
-        tenant_host: str,
+        tenant_mqtt_server: str,
+        tenant_api_server: str,
         random_password: str,
     ) -> dict:
         """Complete registration business logic with all validations.
@@ -630,7 +631,8 @@ class AuthService:
         tenant = await AuthService.create_tenant(session, {
             "code": tenant_code,
             "name": company_name,
-            "host": tenant_host,
+            "mqtt_server": tenant_mqtt_server,
+            "api_server": tenant_api_server,
             "active": True,
         })
 

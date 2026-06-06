@@ -80,7 +80,7 @@ async def get_current_tenant(
 
 
 @router.put("/tenants/current")
-@monitor_config_change(Tenant, "host", "payload")
+@monitor_config_change(Tenant, "mqtt_server", "payload")
 async def update_current_tenant(
     payload: CurrentTenantUpdate,
     current_account: AccountModel = Depends(get_current_account),
@@ -126,7 +126,7 @@ async def create_tenant(
 
 
 @router.put("/tenants/{tenant_id}")
-@monitor_config_change(Tenant, "host", "tenant")
+@monitor_config_change(Tenant, "tenant_id", "tenant")
 async def update_tenant(
     tenant_id: UUID,
     tenant: TenantUpdate,

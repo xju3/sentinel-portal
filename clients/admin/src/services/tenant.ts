@@ -4,14 +4,16 @@ export type Tenant = {
   id: string;
   code: string;
   name: string;
-  host: string;
+  mqtt_server: string;
+  api_server: string;
   active: boolean;
 };
 
 export type TenantPayload = {
   code: string;
   name: string;
-  host: string;
+  mqtt_server: string;
+  api_server: string;
   active?: boolean;
 };
 
