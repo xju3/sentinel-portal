@@ -1,4 +1,5 @@
 import { defineConfig } from '@umijs/max';
+import { Children } from 'react';
 
 export default defineConfig({
   npmClient: 'npm',
@@ -29,36 +30,50 @@ export default defineConfig({
       layout: false,
     },
     {
-      path: '/tenant',
-      name: '租户',
-      icon: 'TeamOutlined',
-      component: '@/pages/Tenant',
-    },
-    {
       path: '/account',
-      name: '用户管理',
+      name: '账号管理',
       icon: 'UserOutlined',
-      component: '@/pages/Account',
+      routes: [
+        {
+          path: '/account/tenant',
+          name: '租户管理',
+          component: '@/pages/Tenant',
+        },
+        {
+          path: '/account/user',
+          name: '系统用户',
+          component: '@/pages/Account',
+        },
+        {
+          path: '/account',
+          redirect: '/account/tenant',
+        },
+      ],
     },
     {
       path: '/sensor',
-      name: '传感器',
+      name: '设备管理',
       icon: 'RadarChartOutlined',
       routes: [
         {
           path: '/sensor/type',
-          name: '型号',
+          name: '型号规格',
           component: '@/pages/Sensor/Type',
         },
         {
           path: '/sensor/batch',
-          name: '批次',
+          name: '生产批次',
           component: '@/pages/Sensor/Batch',
         },
         {
           path: '/sensor/product',
-          name: '产品',
+          name: '产品列表',
           component: '@/pages/Sensor/Product',
+        },
+        {
+          path: '/sensor/firmware',
+          name: '固件升级',
+          component: '@/pages/Sensor/Firmware',
         },
         {
           path: '/sensor',

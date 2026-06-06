@@ -98,7 +98,7 @@ export const layout: RunTimeLayoutConfig = () => {
         return;
       }
       if (loggedIn && PUBLIC_PATHS.includes(pathname)) {
-        history.push('/tenant');
+        history.push('/account/tenant');
       }
     },
   };

@@ -16,7 +16,7 @@ const LoginPage = () => {
 
   useEffect(() => {
     if (session) {
-      history.push('/tenant');
+      history.push('/account/tenant');
     }
   }, [session]);
 
@@ -42,7 +42,7 @@ const LoginPage = () => {
                 saveSession(res);
                 setSession(res);
                 message.success('登录成功');
-                history.push('/tenant');
+                history.push('/account/tenant');
                 return true;
               } catch (error: any) {
                 const detail =

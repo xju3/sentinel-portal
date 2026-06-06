@@ -26,5 +26,16 @@ class SensorFirmwareResponse(BaseModel):
     sensor_type_id: UUID
     tenant_id: Optional[UUID] = None
     status: int
-    
+
     model_config = ConfigDict(from_attributes=True)
+
+
+class PresignedUploadRequest(BaseModel):
+    version: str
+    filename: str
+
+
+class PresignedUploadResponse(BaseModel):
+    presigned_url: str
+    file_url: str
+    object_name: str
