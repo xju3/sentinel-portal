@@ -132,7 +132,7 @@ async def get_presigned_upload_url(
     {version}/{filename}
     """
     client = minio_manager.get_client()
-    bucket_name = "oat"
+    bucket_name = "ota"
 
     # Build the object name: version/filename
     object_name = f"{req.version}/{req.filename}"

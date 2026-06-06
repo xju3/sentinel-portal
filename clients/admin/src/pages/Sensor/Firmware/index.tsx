@@ -9,8 +9,8 @@ import {
   ProFormTextArea,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Popconfirm, Tag, Upload, message } from 'antd';
-import { UploadOutlined } from '@ant-design/icons';
+import { Button, Popconfirm, Row, Col, Tag, Upload, message, Space, Typography } from 'antd';
+import { UploadOutlined, InboxOutlined, LinkOutlined } from '@ant-design/icons';
 
 import {
   SensorFirmware,
@@ -26,11 +26,19 @@ import {
 import { listSensorTypes, SensorType } from '@/services/sensorType';
 import { listTenants, Tenant } from '@/services/tenant';
 
+const { Text, Paragraph } = Typography;
+
 const toErrorMessage = (error: unknown): string => {
   const e = error as
     | { data?: { detail?: string }; info?: { errorMessage?: string }; message?: string }
     | undefined;
   return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';
+};
+
+const formatFileSize = (bytes: number): string => {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(2)} MB`;
 };
 
 const SensorFirmwarePage = () => {
@@ -49,6 +57,7 @@ const SensorFirmwarePage = () => {
   const [uploading, setUploading] = useState(false);
   const [uploadResult, setUploadResult] = useState<PresignedUploadResponse | null>(null);
   const [formVersion, setFormVersion] = useState('');
+  const [replaceFile, setReplaceFile] = useState(false);
 
   const sensorTypeMap = useMemo(() => {
     const map = new Map<string, string>();
@@ -151,6 +160,7 @@ const SensorFirmwarePage = () => {
     setUploadFile(null);
     setUploadResult(null);
     setFormVersion(record?.version || '');
+    setReplaceFile(false);
     setModalOpen(true);
   };
 
@@ -160,6 +170,15 @@ const SensorFirmwarePage = () => {
     setUploadFile(null);
     setUploadResult(null);
     setFormVersion('');
+    setReplaceFile(false);
+  };
+
+  const getEffectiveFileUrl = () => {
+    if (!editing) {
+      return uploadResult?.file_url || '';
+    }
+    // Editing mode: use new upload result if available, otherwise keep original
+    return uploadResult?.file_url || editing.file_url;
   };
 
   const columns: ProColumns<SensorFirmware>[] = [
@@ -176,28 +195,15 @@ const SensorFirmwarePage = () => {
       width: 160,
     },
     {
-      title: '描述',
-      dataIndex: 'description',
-      ellipsis: true,
-      hideInSearch: true,
-      render: (_, row) => row.description || '-',
-    },
-    {
-      title: '发布日期',
-      dataIndex: 'release_date',
-      width: 120,
-      hideInSearch: true,
-      render: (_, row) => (row.release_date ? row.release_date.split('T')[0] : '-'),
-    },
-    {
-      title: '文件地址',
+      title: '文件',
       dataIndex: 'file_url',
-      width: 200,
+      width: 160,
       ellipsis: true,
       hideInSearch: true,
       render: (_, row) => (
         <a href={row.file_url} target="_blank" rel="noopener noreferrer">
-          {row.file_url}
+          <LinkOutlined style={{ marginRight: 4 }} />
+          {row.file_url.split('/').pop() || row.file_url}
         </a>
       ),
     },
@@ -217,6 +223,13 @@ const SensorFirmwarePage = () => {
         row.tenant_id ? tenantMap.get(row.tenant_id) || row.tenant_id : '-',
     },
     {
+      title: '发布日志',
+      dataIndex: 'release_date',
+      width: 120,
+      hideInSearch: true,
+      render: (_, row) => (row.release_date ? row.release_date.split('T')[0] : '-'),
+    },
+    {
       title: '状态',
       dataIndex: 'status',
       width: 80,
@@ -230,6 +243,13 @@ const SensorFirmwarePage = () => {
         ) : (
           <Tag color="default">禁用</Tag>
         ),
+    },
+        {
+      title: '描述',
+      dataIndex: 'description',
+      ellipsis: true,
+      hideInSearch: true,
+      render: (_, row) => row.description || '-',
     },
     {
       title: '操作',
@@ -317,12 +337,15 @@ const SensorFirmwarePage = () => {
         modalProps={{
           destroyOnHidden: true,
           onCancel: handleModalCancel,
-          width: 640,
+          width: 720,
         }}
+        layout="horizontal"
+        labelCol={{ span: 7 }}
+        wrapperCol={{ span: 17 }}
         submitter={{
           submitButtonProps: {
             loading: saving,
-            disabled: editing ? false : !uploadResult,
+            disabled: editing ? (replaceFile && !uploadResult ? true : false) : !uploadResult,
           },
           searchConfig: { submitText: '保存' },
         }}
@@ -348,7 +371,7 @@ const SensorFirmwarePage = () => {
               version: values.version?.trim(),
               description: values.description?.trim(),
               release_date: values.release_date,
-              file_url: editing ? editing.file_url : uploadResult?.file_url || values.file_url,
+              file_url: getEffectiveFileUrl(),
               sensor_type_id: values.sensor_type_id,
               tenant_id: values.tenant_id,
               status: Number(values.status ?? 1),
@@ -375,6 +398,7 @@ const SensorFirmwarePage = () => {
         <ProFormText
           name="version"
           label="版本号"
+          tooltip={editing ? '创建后版本号不可修改' : undefined}
           rules={[
             { required: true, message: '请输入固件版本号' },
             { max: 64, message: '版本号最多64个字符' },
@@ -382,16 +406,161 @@ const SensorFirmwarePage = () => {
           fieldProps={{
             onChange: (e) => setFormVersion(e.target.value),
             disabled: !!editing,
+            addonAfter: editing ? (
+              <Tag color="default" style={{ marginRight: 0, border: 'none', background: 'transparent' }}>
+                不可修改
+              </Tag>
+            ) : undefined,
           }}
         />
-        <ProFormTextArea
-          name="description"
-          label="描述"
+
+        {/* ===== File Section ===== */}
+        <ProFormText
+          name="file_url"
+          label="文件地址"
+          hidden
         />
-        <ProFormDatePicker
-          name="release_date"
-          label="发布日期"
-        />
+
+        {editing && !replaceFile ? (
+          // === EDIT MODE: Show current file with option to replace ===
+          <Row style={{ marginBottom: 24 }}>
+            <Col span={7} style={{ textAlign: 'right', paddingRight: 8 }}>
+              <div style={{ fontWeight: 500, padding: '5px 0', color: 'rgba(0,0,0,0.88)' }}>当前文件</div>
+            </Col>
+            <Col span={17}>
+              <div
+                style={{
+                  padding: '12px 16px',
+                  background: '#fafafa',
+                  borderRadius: 6,
+                  border: '1px solid #d9d9d9',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                }}
+              >
+                <Space>
+                  <LinkOutlined style={{ color: '#1677ff' }} />
+                  <a href={editing.file_url} target="_blank" rel="noopener noreferrer">
+                    {editing.file_url.split('/').pop() || editing.file_url}
+                  </a>
+                </Space>
+                <Button
+                  size="small"
+                  icon={<UploadOutlined />}
+                  onClick={() => setReplaceFile(true)}
+                >
+                  替换文件
+                </Button>
+              </div>
+            </Col>
+          </Row>
+        ) : (
+          // === CREATE MODE / REPLACE MODE: Upload dragger + upload button ===
+          <>
+            <Row style={{ marginBottom: 24 }}>
+              <Col span={7} style={{ textAlign: 'right', paddingRight: 8 }}>
+                <div style={{ fontWeight: 500, padding: '5px 0', color: 'rgba(0,0,0,0.88)' }}>
+                  固件文件
+                  {editing && (
+                    <Tag
+                      color="blue"
+                      style={{ marginLeft: 8, cursor: 'pointer' }}
+                      onClick={() => {
+                        setReplaceFile(false);
+                        setUploadFile(null);
+                        setUploadResult(null);
+                      }}
+                    >
+                      取消替换
+                    </Tag>
+                  )}
+                </div>
+              </Col>
+              <Col span={17}>
+                <Upload
+                  accept=".bin,.hex,.zip,.tar.gz"
+                  showUploadList={true}
+                  beforeUpload={(file) => {
+                    setUploadFile(file);
+                    return false;
+                  }}
+                  fileList={uploadFile ? ([uploadFile] as any) : []}
+                  onRemove={() => {
+                    setUploadFile(null);
+                    setUploadResult(null);
+                  }}
+                  disabled={!formVersion}
+                >
+                  <Button
+                    icon={<UploadOutlined />}
+                    disabled={!formVersion}
+                  >
+                    选择固件文件
+                  </Button>
+                </Upload>
+                {!formVersion && (
+                  <Text type="secondary" style={{ marginLeft: 8, fontSize: 12 }}>
+                    请先填写版本号
+                  </Text>
+                )}
+              </Col>
+            </Row>
+
+            {uploadFile && (
+              <Row style={{ marginBottom: 24 }}>
+                <Col span={7}></Col>
+                <Col span={17}>
+                  <div
+                    style={{
+                      padding: '8px 12px',
+                      background: '#f6ffed',
+                      borderRadius: 6,
+                      border: '1px solid #b7eb8f',
+                    }}
+                  >
+                    <Space direction="vertical" size={4} style={{ width: '100%' }}>
+                      <Space>
+                        <Text strong>已选择文件：</Text>
+                        <Text>{uploadFile.name}</Text>
+                        <Text type="secondary">({formatFileSize(uploadFile.size)})</Text>
+                      </Space>
+                      <Space>
+                        <Button
+                          type="primary"
+                          loading={uploading}
+                          icon={<UploadOutlined />}
+                          disabled={!!uploadResult}
+                          onClick={async () => {
+                            const result = await doUploadFile(formVersion, uploadFile);
+                            if (result) {
+                              setUploadResult(result);
+                            }
+                          }}
+                        >
+                          {uploading ? '上传中...' : uploadResult ? '已上传' : '上传到 MinIO'}
+                        </Button>
+                        {uploadResult && (
+                          <Tag color="success" style={{ marginLeft: 4 }}>
+                            上传完成
+                          </Tag>
+                        )}
+                      </Space>
+                      {uploadResult && (
+                        <div>
+                          <Text type="secondary" style={{ fontSize: 12 }}>
+                            存储路径: {uploadResult.object_name}
+                          </Text>
+                        </div>
+                      )}
+                    </Space>
+                  </div>
+                </Col>
+              </Row>
+            )}
+          </>
+        )}
+
         <ProFormSelect
           name="sensor_type_id"
           label="传感器类型"
@@ -408,6 +577,10 @@ const SensorFirmwarePage = () => {
           allowClear
           showSearch
         />
+        <ProFormDatePicker
+          name="release_date"
+          label="发布日志"
+        />
         <ProFormSelect
           name="status"
           label="状态"
@@ -417,73 +590,11 @@ const SensorFirmwarePage = () => {
           ]}
           rules={[{ required: true, message: '请选择状态' }]}
         />
-        {/* File upload section */}
-        {editing ? (
-          <ProFormText
-            name="file_url"
-            label="文件地址"
-            rules={[{ max: 255, message: '文件地址最多255个字符' }]}
-          />
-        ) : (
-          <>
-            {/* Hidden field to store file_url value */}
-            <ProFormText
-              name="file_url"
-              label="文件地址"
-              hidden
-            />
-            <div style={{ marginBottom: 24 }}>
-              <div style={{ marginBottom: 8, fontWeight: 500, color: 'rgba(0,0,0,0.88)' }}>固件文件</div>
-              <Upload.Dragger
-                accept=".bin,.hex,.zip,.tar.gz"
-                showUploadList={true}
-                beforeUpload={(file) => {
-                  setUploadFile(file);
-                  return false;
-                }}
-                fileList={uploadFile ? ([uploadFile] as any) : []}
-                onRemove={() => {
-                  setUploadFile(null);
-                  setUploadResult(null);
-                }}
-                disabled={!formVersion}
-              >
-                <p className="ant-upload-drag-icon">
-                  <UploadOutlined />
-                </p>
-                <p className="ant-upload-text">点击或拖拽文件到此区域上传</p>
-                <p className="ant-upload-hint">
-                  {formVersion
-                    ? `文件将上传至 oat/${formVersion}/ 目录`
-                    : '请先填写版本号'}
-                </p>
-              </Upload.Dragger>
-            </div>
-            {uploadFile && formVersion && (
-              <div style={{ marginBottom: 24 }}>
-                <Button
-                  type="primary"
-                  loading={uploading}
-                  icon={<UploadOutlined />}
-                  onClick={async () => {
-                    const result = await doUploadFile(formVersion, uploadFile!);
-                    if (result) {
-                      setUploadResult(result);
-                    }
-                  }}
-                  disabled={!!uploadResult}
-                >
-                  {uploadResult ? '已上传' : '上传到 MinIO'}
-                </Button>
-                {uploadResult && (
-                  <Tag color="green" style={{ marginLeft: 8 }}>
-                    上传完成: {uploadResult.file_url}
-                  </Tag>
-                )}
-              </div>
-            )}
-          </>
-        )}
+        <ProFormTextArea
+          name="description"
+          label="描述"
+          fieldProps={{ rows: 3 }}
+        />
       </ModalForm>
     </PageContainer>
   );
