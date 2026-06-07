@@ -32,6 +32,7 @@ export const request: RequestConfig = {
       // Parse the unified ApiResponse body from axios response.data
       try {
         const body = response.data;
+        console.log(body);
 
         // Check for unauthorized (code === 401)
         if (body && body.code === 401) {

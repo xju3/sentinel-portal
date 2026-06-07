@@ -3,8 +3,10 @@ Sensor management endpoints
 """
 
 import logging
-from datetime import datetime
-from fastapi import APIRouter, Depends, HTTPException, Query
+import json
+import io
+from datetime import datetime, timezone, timedelta
+from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, Body
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import cast, List, Optional
@@ -22,6 +24,7 @@ from pub.utils.decorators import rebuild_dashboard_cache
 
 from app.utils.auth import get_current_account
 from app.utils.response import success
+from app.database import minio_manager
 from app.contract.sensors import (
     SensorTypeCreate,
     SensorTypeUpdate,
@@ -296,3 +299,53 @@ async def delete_sensor(
 
     await SensorDbService.delete(session, db_obj)
     return success({"message": "Sensor deleted successfully"})
+
+
+# ==========================================
+# 4. Data Collection Endpoint
+# ==========================================
+def _upload_data_to_minio_sync(object_name: str, payload: dict):
+    """Synchronous background task to upload data to MinIO without blocking the event loop"""
+    try:
+        json_bytes = json.dumps(payload, ensure_ascii=False).encode('utf-8')
+        data_stream = io.BytesIO(json_bytes)
+        minio_manager.client.put_object(
+            bucket_name="json",
+            object_name=object_name,
+            data=data_stream,
+            length=len(json_bytes),
+            content_type="application/json"
+        )
+        logger.info(f"Successfully uploaded sensor data to MinIO: {object_name}")
+    except Exception as e:
+        logger.error(f"Failed to upload sensor data to MinIO ({object_name}): {e}", exc_info=True)
+
+
+@router.post("/data")
+async def receive_sensor_data(
+    background_tasks: BackgroundTasks,
+    payload: dict = Body(...),
+):
+    """Receive processed sensor data and asynchronously store to MinIO"""
+    sn = payload.get("sn")
+    ts_ms = payload.get("ts_ms")
+
+    if not sn or not ts_ms:
+        raise HTTPException(status_code=400, detail="Missing 'sn' or 'ts_ms' in payload")
+
+    try:
+        # Convert timestamp (ms) to UTC+8
+        dt_utc = datetime.fromtimestamp(ts_ms / 1000.0, tz=timezone.utc)
+        tz_utc_8 = timezone(timedelta(hours=8))
+        dt_utc8 = dt_utc.astimezone(tz_utc_8)
+
+        # Format paths: {sn}/{YYYY}/{MM}/{DD}/{HH}-{mm}-{ss}.json
+        object_name = f"{sn}/{dt_utc8.strftime('%Y/%m/%d/%H-%M-%S')}.json"
+
+        # Add to background tasks to execute immediately after returning response
+        background_tasks.add_task(_upload_data_to_minio_sync, object_name, payload)
+
+        return success({"path": object_name})
+    except Exception as e:
+        logger.error(f"Error processing sensor data: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail="Internal server error processing data")

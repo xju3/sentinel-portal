@@ -254,10 +254,11 @@ const SensorFirmwarePage = () => {
     {
       title: '操作',
       valueType: 'option',
-      width: 220,
+      width: 160,
       render: (_, row) => [
         <Button
           key="edit"
+          size="small"
           type="link"
           disabled={row.status === 1}
           onClick={() => handleModalOpen(row)}
@@ -294,7 +295,7 @@ const SensorFirmwarePage = () => {
             }
           }}
         >
-          <Button danger type="link" disabled={row.status === 1}>
+          <Button danger size="small" type="link" disabled={row.status === 1}>
             删除
           </Button>
         </Popconfirm>,
