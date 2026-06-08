@@ -134,7 +134,8 @@ class SensorMonitoring(Base):
         "DeviceInst",
         primaryjoin="foreign(SensorMonitoring.device_inst_id) == DeviceInst.id",
         lazy="selectin",
-        uselist=False
+        uselist=False,
+        overlaps="sensor_monitorings"
     )
 
 
