@@ -22,7 +22,7 @@ x-node-app: &node-app
 services:
   api:
     <<: *python-app
-    container_name: sentinel-api
+    container_name: stl-api
     working_dir: /app/apps/api
     env_file:
       - ../apps/api/.env
@@ -39,7 +39,7 @@ services:
 
   dia:
     <<: *python-app
-    container_name: sentinel-dia
+    container_name: stl-dia
     working_dir: /app/apps/dia
     env_file:
       - ../apps/dia/.env
@@ -56,7 +56,7 @@ services:
 
   portal:
     <<: *node-app
-    container_name: sentinel-portal
+    container_name: stl-portal
     working_dir: /app
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
     volumes:
@@ -69,7 +69,7 @@ services:
 
   admin:
     <<: *node-app
-    container_name: sentinel-admin
+    container_name: stl-admin
     working_dir: /app
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
     volumes:
