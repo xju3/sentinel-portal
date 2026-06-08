@@ -12,7 +12,7 @@ from fastapi import FastAPI
 
 from app.config import settings
 from app.database import db_manager, redis_manager, influxdb_manager, minio_manager
-from app.clients.handler import handler
+from app.clients.dia_mqtt_client import dia_mqtt_client
 
 logger = logging.getLogger(__name__)
 
@@ -41,7 +41,7 @@ async def lifespan(app: FastAPI):
         minio_manager.init()
 
         # Start MQTT client and register the current module's handler
-        handler.start()
+        dia_mqtt_client.start()
 
         logger.info("All services initialized successfully")
     except Exception as e:
@@ -72,8 +72,8 @@ async def lifespan(app: FastAPI):
             logger.error(f"Error shutting down {name}: {e}")
 
     try:
-        if handler.mqtt_manager:
-            handler.mqtt_manager.close()
+        if dia_mqtt_client.mqtt_manager:
+            dia_mqtt_client.mqtt_manager.close()
     except Exception as e:
         logger.error(f"Error shutting down MQTT: {e}")
 

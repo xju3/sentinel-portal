@@ -17,7 +17,7 @@ from app.clients.redis import redis_client
 logger = logging.getLogger(__name__)
 
 
-class DiagnosisticHandler:
+class DiaMqttClient:
     """Handler for patrol (巡检) MQTT messages.
 
     Parses protobuf-encoded MsgRmsReport messages and pushes
@@ -72,7 +72,7 @@ class DiagnosisticHandler:
             client.subscribe(settings.mqtt_topic)
             
         def on_mqtt_message(client, userdata, msg):
-            logger.debug(f"Received MQTT message on topic '{msg.topic}' with payload: {msg.payload}")
+            logger.info(f"Received MQTT message on topic '{msg.topic}' with payload: {msg.payload}")
             self.handle_message(msg.topic, msg.payload)
             
         self.mqtt_manager = MQTTManager(
@@ -82,19 +82,25 @@ class DiagnosisticHandler:
         self.mqtt_manager.init()
 
 
-    def handle_message(self, topic: str, payload: str) -> None:
+    def handle_message(self, topic: str, payload: bytes) -> None:
         """Handle an incoming MQTT message.
 
-        Parses the protobuf payload to extract the SN, rms_m, and temperature,
-        then pushes the data into a fixed-length Redis queue.
+        Parses the JSON payload to extract bucket and path, then fetches 
+        the file from MinIO to process diagnosis.
 
         Args:
             topic: The MQTT topic the message was published on.
             payload: The raw message payload (bytes).
         """
-        # logger.info(f"[PatrolMsgHandler] Received message on topic '{topic}': {payload}")
-        logger.debug(payload)
+        logger.info(f"[DiagnosisticHandler] Received message on topic '{topic}'")
+        
+        try:
+            data = json.loads(payload.decode('utf-8'))
+            logger.info(f"Parsed notification payload: {data}")
+            # TODO: 结合 MinIOManager 下载 data['bucket'] 和 data['path'] 对应的 json 文件以继续诊断逻辑
+        except Exception as e:
+            logger.error(f"Failed to process message: {e}")
 
 
                
-handler = DiagnosisticHandler() 
+dia_mqtt_client = DiaMqttClient() 

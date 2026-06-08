@@ -27,7 +27,7 @@ from app.utils.auth import get_current_account
 from app.utils.response import success
 from app.database import minio_manager
 from app.clients.mqtt import api_mqtt_manager
-from pub.utils.minio_utils import upload_json_to_minio_sync
+from pub.clients.minio import upload_json_to_minio_sync
 from pub.contract.sensors import (
     SensorTypeCreate,
     SensorTypeUpdate,
