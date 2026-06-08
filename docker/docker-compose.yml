@@ -17,29 +17,19 @@ services:
       - ../services/api/app:/app/services/api/app   # 挂载源码
 
   portal:
-    build:
-      context: ../
-      dockerfile: docker/portal/Dockerfile
-      args:
-        NODE_IMAGE: ${NODE_IMAGE:-node:22-alpine}
-        NGINX_IMAGE: ${NGINX_IMAGE:-nginx:1.27-alpine}
-    container_name: portal
-    restart: unless-stopped
-    depends_on:
-      - api
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 80"
+    volumes:
+      - ../clients/portal:/app
     ports:
       - "3010:80"
 
   admin:
-    build:
-      context: ../
-      dockerfile: docker/admin/Dockerfile
-      args:
-        NODE_IMAGE: ${NODE_IMAGE:-node:22-alpine}
-        NGINX_IMAGE: ${NGINX_IMAGE:-nginx:1.27-alpine}
-    container_name: admin
-    restart: unless-stopped
-    depends_on:
-      - api
+    image: node:22-alpine
+    working_dir: /app
+    command: sh -c "npm install && npm run dev -- --host 0.0.0.0 --port 80"
+    volumes:
+      - ../clients/admin:/app
     ports:
       - "3020:80"
