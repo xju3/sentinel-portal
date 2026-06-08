@@ -32,7 +32,7 @@ redis_key: dia:temperature:{sn}:recent
 
 import logging
 from dataclasses import dataclass
-from datetime import datetime, timezone
+from datetime import datetime
 from decimal import Decimal
 from math import sqrt
 from typing import Any
@@ -248,7 +248,7 @@ def query_recent_report_temperatures_from_influx(
 
     tables = _query_influx(_build_recent_temperature_query(sn, limit))
     reports = _extract_report_temperatures(tables)
-    return sorted(reports, key=lambda item: item.sort_key)
+    return sorted(reports, key=_report_sort_ts_ms)
 
 
 def _log_temperature_result(result: TemperatureDiagnosisResult) -> None:
@@ -336,19 +336,6 @@ def _sort_key_to_ts_ms(sort_key: Any) -> int | None:
     if isinstance(sort_key, datetime):
         return int(sort_key.timestamp() * 1000)
     return None
-
-
-def _next_sort_key(reports: list[ReportTemperature]) -> Any:
-    if not reports:
-        return 0
-    latest_sort_key = max(report.sort_key for report in reports)
-    if isinstance(latest_sort_key, bool):
-        return 0
-    if isinstance(latest_sort_key, (int, float)):
-        return latest_sort_key + 1
-    if isinstance(latest_sort_key, datetime):
-        return datetime.now(timezone.utc)
-    return latest_sort_key
 
 
 def _log_short_term_temperature_rise(
@@ -458,9 +445,13 @@ def _extract_report_temperatures(tables: Any) -> list[ReportTemperature]:
 
 def _dedupe_report_temperatures(reports: list[ReportTemperature]) -> list[ReportTemperature]:
     deduped: dict[str, ReportTemperature] = {}
-    for report in sorted(reports, key=lambda item: item.sort_key):
+    for report in sorted(reports, key=_report_sort_ts_ms):
         deduped[report.report_id] = report
     return list(deduped.values())
+
+
+def _report_sort_ts_ms(report: ReportTemperature) -> int:
+    return _sort_key_to_ts_ms(report.sort_key) or 0
 
 
 def _find_report_index(reports: list[ReportTemperature], report_id: str) -> int | None:
