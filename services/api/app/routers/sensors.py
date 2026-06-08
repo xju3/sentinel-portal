@@ -321,7 +321,7 @@ def _upload_data_to_minio_sync(object_name: str, payload: dict):
         try:
             from pub.clients.mqtt import mqtt_manager  # 注意：请替换为您项目中实际的 MQTT 客户端实例引入路径
             mqtt_payload = json.dumps({"bucket": "json", "path": object_name})
-            mqtt_manager.client.publish("diagnostic", mqtt_payload) # 如果您的 topic 拼写确为 diagonsistic 请自行修正
+            mqtt_manager.client.publish("diagonsistic", mqtt_payload) # 如果您的 topic 拼写确为 diagonsistic 请自行修正
             logger.info(f"Published to MQTT topic 'diagnostic': {mqtt_payload}")
         except ImportError:
             logger.warning("未找到 mqtt_manager，请在此处补充您实际的 MQTT 发布逻辑。")
