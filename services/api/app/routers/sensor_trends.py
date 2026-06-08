@@ -4,7 +4,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from pub.services.dependencies import get_session
 from pub.services.sensor_service import SensorService
-from app.contract.common import ApiResponse
+from pub.contract.common import ApiResponse
 
 router = APIRouter(tags=["Sensor Trends"])
 

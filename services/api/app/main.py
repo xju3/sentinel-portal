@@ -18,7 +18,7 @@ from starlette.types import Receive, Scope, Send
 
 from pub.clients.mqtt import mqtt_manager
 from app.config import settings
-from app.contract.common import ApiResponse
+from pub.contract.common import ApiResponse
 from app.database import db_manager, redis_manager, influxdb_manager, minio_manager
 from app.utils import DomainException, setup_logging
 from app.routers import auth, health, sensors, devices, customers, admin, dashboard, thresholds, sensor_trends

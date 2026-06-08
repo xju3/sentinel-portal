@@ -16,10 +16,10 @@ from pub.services.customer_service import AuthService
 from pub.utils.jwt_token import create_access_token
 
 from app.config import settings
-from app.contract.common import ApiResponse
+from pub.contract.common import ApiResponse
 from app.utils.auth import get_current_account
 from app.utils.response import success
-from app.contract.auth import (
+from pub.contract.auth import (
     RegisterRequest,
     RegisterResponse,
     LoginRequest,

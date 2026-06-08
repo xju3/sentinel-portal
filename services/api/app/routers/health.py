@@ -6,7 +6,7 @@ from fastapi import APIRouter, Depends, Response
 
 from app.utils.response import success
 from app.database import db_manager, redis_manager, influxdb_manager, minio_manager
-from app.contract.health import HealthResponse
+from pub.contract.health import HealthResponse
 
 router = APIRouter(prefix="/health", tags=["health"])
 

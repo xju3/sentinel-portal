@@ -6,7 +6,7 @@ from typing import Any, Optional
 
 from fastapi.encoders import jsonable_encoder
 
-from app.contract.common import ApiResponse
+from pub.contract.common import ApiResponse
 
 
 def success(data: Any = None, message: str = "ok") -> ApiResponse:

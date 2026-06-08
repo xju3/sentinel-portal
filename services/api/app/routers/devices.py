@@ -31,7 +31,7 @@ from pub.utils.decorators import rebuild_dashboard_cache, monitor_config_change
 
 from app.utils.auth import get_current_account
 from app.utils.response import success
-from app.contract.devices import (
+from pub.contract.devices import (
     IsoStandardCreate,
     IsoStandardUpdate,
     IsoStandardResponse,

@@ -28,7 +28,7 @@ from pub.models.device import ProcessDevice
 
 from app.utils.auth import get_current_account
 from app.utils.response import success
-from app.contract.customers import (
+from pub.contract.customers import (
     TenantCreate,
     TenantUpdate,
     TenantResponse,

@@ -12,7 +12,7 @@ from pub.services.dependencies import get_session
 from pub.models.customer import Account as AccountModel
 from app.utils.auth import get_current_account
 from pub.services.dashboard_service import DashboardService
-from app.contract.dashboard import CalendarResponse, DashboardOverviewResponse
+from pub.contract.dashboard import CalendarResponse, DashboardOverviewResponse
 
 router = APIRouter(tags=["dashboard"])
 

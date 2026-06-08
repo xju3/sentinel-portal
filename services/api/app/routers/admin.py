@@ -16,8 +16,8 @@ from pub.services.dependencies import get_session
 from pub.services.sensor_service import SensorBatchService
 from pub.models.customer import Account
 from app.utils.auth import get_current_account
-from app.contract.admin import SensorBatchResponse
-from app.contract.admin_firmware import (
+from pub.contract.admin import SensorBatchResponse
+from pub.contract.admin_firmware import (
     SensorFirmwareCreate,
     SensorFirmwareUpdate,
     SensorFirmwareResponse,

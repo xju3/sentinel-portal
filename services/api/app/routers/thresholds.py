@@ -17,7 +17,7 @@ from pub.models.customer import Account
 from pub.utils.decorators import rebuild_dashboard_cache
 
 from app.utils.auth import get_current_account
-from app.contract.sensors import (
+from pub.contract.sensors import (
     SensorThresholdCreate,
     SensorThresholdUpdate,
     SensorThresholdResponse,

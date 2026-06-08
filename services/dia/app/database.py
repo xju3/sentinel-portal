@@ -14,7 +14,7 @@ from influxdb_client import InfluxDBClient
 from minio import Minio
 from minio.error import S3Error
 
-from app.models import Base
+from pub.models import Base
 from app.config import settings
 
 logger = logging.getLogger(__name__)
