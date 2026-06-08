@@ -25,6 +25,7 @@ from pub.utils.decorators import rebuild_dashboard_cache
 from app.utils.auth import get_current_account
 from app.utils.response import success
 from app.database import minio_manager
+from pub.utils.minio_utils import upload_json_to_minio_sync
 from pub.contract.sensors import (
     SensorTypeCreate,
     SensorTypeUpdate,
@@ -304,32 +305,29 @@ async def delete_sensor(
 # ==========================================
 # 4. Data Collection Endpoint
 # ==========================================
-def _upload_data_to_minio_sync(object_name: str, payload: dict):
-    """Synchronous background task to upload data to MinIO without blocking the event loop"""
-    try:
-        json_bytes = json.dumps(payload, ensure_ascii=False).encode('utf-8')
-        data_stream = io.BytesIO(json_bytes)
-        minio_manager.client.put_object(
-            bucket_name="json",
-            object_name=object_name,
-            data=data_stream,
-            length=len(json_bytes),
-            content_type="application/json"
-        )
-        logger.info(f"Successfully uploaded sensor data to MinIO: {object_name}")
-         # 成功存入 MinIO 后，发送消息到 MQTT
+def _process_sensor_data_background(object_name: str, payload: dict):
+    """Background task to upload data to MinIO and notify via MQTT"""
+    # 1. 调用通用的 MinIO 上传工具
+    success = upload_json_to_minio_sync(
+        minio_client=minio_manager.client,
+        bucket_name="json",
+        object_name=object_name,
+        payload=payload
+    )
+    
+    # 2. 成功存入 MinIO 后，执行业务强相关的 MQTT 通知
+    if success:
         try:
             from pub.clients.mqtt import mqtt_manager  # 注意：请替换为您项目中实际的 MQTT 客户端实例引入路径
             mqtt_payload = json.dumps({"bucket": "json", "path": object_name})
-            mqtt_manager.client.publish("diagonsistic", mqtt_payload) # 如果您的 topic 拼写确为 diagonsistic 请自行修正
-            logger.info(f"Published to MQTT topic 'diagnostic': {mqtt_payload}")
+            mqtt_manager.client.publish("diagonsistic", mqtt_payload) 
+            logger.info(f"Published to MQTT topic 'diagnosistic': {mqtt_payload}")
         except ImportError:
             logger.warning("未找到 mqtt_manager，请在此处补充您实际的 MQTT 发布逻辑。")
         except Exception as mqtt_err:
             logger.error(f"Failed to publish MQTT message for {object_name}: {mqtt_err}")
-
-    except Exception as e:
-        logger.error(f"Failed to upload sensor data to MinIO ({object_name}): {e}", exc_info=True)
+    else:
+        logger.error(f"Failed to upload data to MinIO for {object_name}")
 
 
 @router.post("/data")
@@ -354,7 +352,7 @@ async def receive_sensor_data(
         object_name = f"{sn}/{dt_utc8.strftime('%Y/%m/%d/%H-%M-%S')}.json"
 
         # Add to background tasks to execute immediately after returning response
-        background_tasks.add_task(_upload_data_to_minio_sync, object_name, payload)
+        background_tasks.add_task(_process_sensor_data_background, object_name, payload)
 
         return success({"path": object_name})
     except Exception as e:

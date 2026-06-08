@@ -16,12 +16,12 @@ from starlette.types import Receive, Scope, Send
 
 from pub.utils.exceptions import DomainException
 from pub.utils.logger import setup_logging
+from pub.contract.common import ApiResponse
+from pub.clients.mqtt import mqtt_manager
 
 from app.config import settings
-from pub.contract.common import ApiResponse
 from app.database import db_manager, redis_manager, influxdb_manager, minio_manager
-from pub.clients.mqtt import mqtt_manager
-from app.clients.handler import patrol_msg_handler
+from app.clients.handler import handler
 
 # Setup logging
 setup_logging()
@@ -41,11 +41,9 @@ async def lifespan(app: FastAPI):
         redis_manager.init()
         influxdb_manager.init()
         minio_manager.init()
-        mqtt_manager.init()
 
-        # Inject the running event loop into patrol_msg_handler
-        # so it can schedule async DB writes from the sync MQTT callback thread.
-        patrol_msg_handler._set_loop(asyncio.get_running_loop())
+        # 启动 MQTT 客户端并注册当前模块的处理器
+        handler.start()
 
         logger.info("All services initialized successfully")
     except Exception as e:

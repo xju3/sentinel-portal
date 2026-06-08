@@ -17,6 +17,16 @@ class MQTTManager:
 
     def __init__(self):
         self.client: Optional[mqtt.Client] = None
+        self._on_connect_callbacks = []
+        self._on_message_callbacks = []
+
+    def register_on_connect(self, callback) -> None:
+        """注册自定义的 on_connect 回调函数"""
+        self._on_connect_callbacks.append(callback)
+
+    def register_on_message(self, callback) -> None:
+        """注册自定义的 on_message 回调函数"""
+        self._on_message_callbacks.append(callback)
 
     def init(self) -> None:
         """Initialize MQTT connection and start background loop"""
@@ -56,17 +66,24 @@ class MQTTManager:
     def on_connect(self, client, userdata, flags, rc, *args):
         """Callback for when the client receives a CONNACK response from the server."""
         if rc == 0:
-            logger.info(f"Connected to MQTT broker successfully. Subscribing to topic: '{settings.mqtt_topic}'")
-            client.subscribe(settings.mqtt_topic)
+            logger.info("Connected to MQTT broker successfully.")
+            # 执行所有调用者注册的 on_connect 回调（例如：订阅 topic）
+            for cb in self._on_connect_callbacks:
+                try:
+                    cb(client, userdata, flags, rc, *args)
+                except Exception as e:
+                    logger.error(f"Error in custom on_connect callback: {e}", exc_info=True)
         else:
             logger.error(f"Failed to connect to MQTT broker with return code: {rc}")
 
     def on_message(self, client, userdata, msg):
         """Callback for when a PUBLISH message is received from the server."""
-        try:
-            pass
-        except Exception as e:
-            logger.error(f"Error processing MQTT message on topic {msg.topic}: {e}")
+        # 将收到的消息分发给所有调用者注册的处理函数
+        for cb in self._on_message_callbacks:
+            try:
+                cb(client, userdata, msg)
+            except Exception as e:
+                logger.error(f"Error in custom on_message callback for topic {msg.topic}: {e}", exc_info=True)
 
     def on_disconnect(self, client, userdata, rc, *args):
         """Callback for when the client disconnects from the server."""
