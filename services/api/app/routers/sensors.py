@@ -26,6 +26,7 @@ from pub.utils.decorators import rebuild_dashboard_cache
 from app.utils.auth import get_current_account
 from app.utils.response import success
 from app.database import minio_manager
+from app.clients.mqtt import api_mqtt_manager
 from pub.utils.minio_utils import upload_json_to_minio_sync
 from pub.contract.sensors import (
     SensorTypeCreate,
@@ -319,13 +320,10 @@ def _process_sensor_data_background(object_name: str, payload: dict):
     # 2. 成功存入 MinIO 后，执行业务强相关的 MQTT 通知
     if success:
         try:
-            from pub.clients.mqtt import mqtt_manager  # 注意：请替换为您项目中实际的 MQTT 客户端实例引入路径
             mqtt_payload = json.dumps({"bucket": "json", "path": object_name})
             
-            if mqtt_manager.publish(settings.mqtt_topic, mqtt_payload):
+            if api_mqtt_manager.publish(settings.mqtt_topic, mqtt_payload):
                 logger.info(f"Published to MQTT topic '{settings.mqtt_topic}': {mqtt_payload}")
-        except ImportError:
-            logger.warning("未找到 mqtt_manager，请在此处补充您实际的 MQTT 发布逻辑。")
         except Exception as mqtt_err:
             logger.error(f"Failed to publish MQTT message for {object_name}: {mqtt_err}")
     else:

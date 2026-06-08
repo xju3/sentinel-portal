@@ -1,3 +1,3 @@
 """
-Utility modules for the diagnosis (dia) service.
+API specific clients
 """

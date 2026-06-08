@@ -10,7 +10,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from pub.clients.mqtt import mqtt_manager
+from app.clients.mqtt import api_mqtt_manager
 from app.config import settings
 from app.database import db_manager, redis_manager, influxdb_manager, minio_manager
 from app.utils import setup_logging
@@ -56,7 +56,7 @@ async def lifespan(app: FastAPI):
             settings.minio_secure,
             settings.minio_bucket,
         )
-        mqtt_manager.init()
+        api_mqtt_manager.init()
         logger.info("All services initialized successfully")
     except Exception as e:
         logger.error(f"Startup failed: {e}")
@@ -79,7 +79,7 @@ async def lifespan(app: FastAPI):
         ("Redis", redis_manager.close),
         ("InfluxDB", influxdb_manager.close),
         ("MinIO", minio_manager.close),
-        ("MQTT", mqtt_manager.close),
+        ("MQTT", api_mqtt_manager.close),
     ):
         try:
             closer()
