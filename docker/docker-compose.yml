@@ -15,6 +15,7 @@ services:
       - "3091:8000"
     volumes:
       - ../services/api/app:/app/services/api/app   # 挂载源码
+      - ../services/pub:/app/services/pub           # 挂载共享 pub 模块
 
   portal:
     image: node:22-alpine
