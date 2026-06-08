@@ -71,6 +71,7 @@ class DiagnosisticHandler:
             client.subscribe(settings.mqtt_topic)
             
         def on_mqtt_message(client, userdata, msg):
+            logger.debug(f"Received MQTT message on topic '{msg.topic}' with payload: {msg.payload}")
             self.handle_message(msg.topic, msg.payload)
             
         mqtt_manager.register_on_connect(on_mqtt_connect)
@@ -78,7 +79,7 @@ class DiagnosisticHandler:
         mqtt_manager.init()
 
         # Inject the running event loop into handler
-        self._set_loop(asyncio.get_running_loop())
+        # self._set_loop(asyncio.get_running_loop())
 
     def handle_message(self, topic: str, payload: bytes) -> None:
         """Handle an incoming MQTT message.
