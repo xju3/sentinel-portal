@@ -7,6 +7,26 @@ import logging
 import logging.config
 
 
+class ColorFormatter(logging.Formatter):
+    """ANSI color formatter for console logs."""
+
+    COLORS = {
+        logging.DEBUG: "\033[36m",  # cyan
+        logging.INFO: "\033[32m",  # green
+        logging.WARNING: "\033[33m",  # yellow
+        logging.ERROR: "\033[31m",  # red
+        logging.CRITICAL: "\033[1;31m",  # bold red
+    }
+    RESET = "\033[0m"
+
+    def format(self, record: logging.LogRecord) -> str:
+        message = super().format(record)
+        color = self.COLORS.get(record.levelno)
+        if not color:
+            return message
+        return f"{color}{message}{self.RESET}"
+
+
 def setup_logging(environment: str = "development", debug: bool = False):
     """Configure application logging.
 
@@ -21,6 +41,10 @@ def setup_logging(environment: str = "development", debug: bool = False):
             "default": {
                 "format": "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
             },
+            "colored": {
+                "()": "pub.utils.logger.ColorFormatter",
+                "format": "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s",
+            },
             "detailed": {
                 "format": "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"
             },
@@ -29,7 +53,7 @@ def setup_logging(environment: str = "development", debug: bool = False):
             "console": {
                 "class": "logging.StreamHandler",
                 "level": "INFO",
-                "formatter": "default",
+                "formatter": "colored",
                 "stream": "ext://sys.stdout",
             },
             "file": {

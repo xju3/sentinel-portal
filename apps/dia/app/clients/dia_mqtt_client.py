@@ -9,10 +9,12 @@ from typing import Any
 from app.clients.dia_influxdb_client import send_vibration_features_to_telegraf
 from app.config import settings
 from app.database import minio_manager
+from app.handler.diagnosis import start_diagnosis_async
 from pub.clients.mqtt import MQTTManager
 from pub.clients.minio import download_json_from_minio_sync
 
 logger = logging.getLogger(__name__)
+REQUIRED_AXES = frozenset({"X", "Y", "Z"})
 
 
 class DiaMqttClient:
@@ -63,7 +65,26 @@ class DiaMqttClient:
                 bucket_name=bucket_name,
                 object_name=object_name,
             )
-            logger.info(f"Downloaded JSON from MinIO: bucket='{bucket_name}', object='{object_name}'")
+
+            logger.info(
+                f"Downloaded JSON from MinIO: bucket='{bucket_name}', object='{object_name}'"
+            )
+            present_axes = self._present_payload_axes(sensor_payload)
+            missing_axes = REQUIRED_AXES - present_axes
+            if missing_axes:
+                logger.warning(
+                    "Abort ingestion for MinIO JSON %s/%s: missing vibration axes %s, "
+                    "present axes %s",
+                    bucket_name,
+                    object_name,
+                    sorted(missing_axes),
+                    sorted(present_axes),
+                )
+                return
+
+            sn = self._require_payload_str(sensor_payload, "sn")
+            temperature_c = self._require_payload_number(sensor_payload, "temperature_c")
+            ts_ms = self._require_payload_int(sensor_payload, "ts_ms")
             report_id, point_count = send_vibration_features_to_telegraf(sensor_payload)
             logger.info(
                 "Processed MinIO JSON notification %s/%s into %s vibration feature points "
@@ -73,6 +94,8 @@ class DiaMqttClient:
                 point_count,
                 report_id,
             )
+            start_diagnosis_async(report_id, sn, temperature_c, ts_ms)
+
         except Exception as e:
             logger.error(f"Failed to process message: {e}", exc_info=True)
 
@@ -82,5 +105,39 @@ class DiaMqttClient:
         if not isinstance(value, str) or not value:
             raise ValueError(f"MQTT notification missing non-empty '{key}'")
         return value
+
+
+    @staticmethod
+    def _present_payload_axes(payload: dict[str, Any]) -> set[str]:
+        axis_features = payload.get("axis_features")
+        if not isinstance(axis_features, dict):
+            return set()
+        return {
+            axis
+            for axis in REQUIRED_AXES
+            if isinstance(axis_features.get(axis), dict)
+        }
+
+    @staticmethod
+    def _require_payload_str(payload: dict[str, Any], key: str) -> str:
+        value = payload.get(key)
+        if not isinstance(value, str) or not value:
+            raise ValueError(f"sensor payload missing non-empty '{key}'")
+        return value
+
+    @staticmethod
+    def _require_payload_number(payload: dict[str, Any], key: str) -> float:
+        value = payload.get(key)
+        if isinstance(value, bool) or not isinstance(value, (int, float)):
+            raise ValueError(f"sensor payload.{key} must be numeric")
+        return float(value)
+
+    @staticmethod
+    def _require_payload_int(payload: dict[str, Any], key: str) -> int:
+        value = payload.get(key)
+        if isinstance(value, bool) or not isinstance(value, int):
+            raise ValueError(f"sensor payload.{key} must be an integer")
+        return value
+
 
 dia_mqtt_client = DiaMqttClient()

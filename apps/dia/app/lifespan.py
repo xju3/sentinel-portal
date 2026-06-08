@@ -35,10 +35,21 @@ async def lifespan(app: FastAPI):
     # ==============================
     logger.info(f"Starting {settings.app_name} v{settings.app_version}")
     try:
-        await db_manager.init()
-        redis_manager.init()
-        influxdb_manager.init()
-        minio_manager.init()
+        await db_manager.init(settings.mysql_url, settings.debug)
+        redis_manager.init(settings.redis_url)
+        influxdb_manager.init(
+            settings.influx_url,
+            settings.influx_token,
+            settings.influx_org,
+            settings.influx_bucket,
+        )
+        minio_manager.init(
+            settings.minio_endpoint,
+            settings.minio_access_key,
+            settings.minio_secret_key,
+            settings.minio_secure,
+            settings.minio_bucket,
+        )
 
         # Start MQTT client and register the current module's handler
         dia_mqtt_client.start()

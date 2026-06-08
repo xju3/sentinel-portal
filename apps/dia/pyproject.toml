@@ -43,7 +43,7 @@ dependencies = [
     "scikit-learn>=1.8.0",
     "seaborn>=0.13.2",
     "orjson>=3.11.9",
-    "pub"
+    "pub",
 ]
 
 [tool.uv.sources]
@@ -58,9 +58,12 @@ dev = [
     "pytest-cov==4.1.0",
 ]
 
+[tool.hatch.build.targets.wheel]
+packages = ["app"]
+
 [tool.uv]
 managed = true
-package = false
+package = true
 
 [tool.black]
 line-length = 100

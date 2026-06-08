@@ -55,7 +55,7 @@ class DatabaseManager:
             # Create all tables if they do not exist
             async with self.engine.begin() as conn:
                 await conn.run_sync(Base.metadata.create_all)
-            logger.info("MySQL database initialized successfully")
+            # logger.info("MySQL database initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize MySQL database: {e}")
             raise
@@ -103,7 +103,7 @@ class RedisManager:
         try:
             self.client = redis.from_url(redis_url, decode_responses=True)
             self.health_check()
-            logger.info("Redis connection initialized successfully")
+            # logger.info("Redis connection initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize Redis: {e}")
             raise
@@ -152,7 +152,7 @@ class InfluxDBManager:
                 org=influx_org,
             )
             self.health_check()
-            logger.info("InfluxDB connection initialized successfully")
+            # logger.info("InfluxDB connection initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize InfluxDB: {e}")
             raise
@@ -208,7 +208,7 @@ class MinIOManager:
             )
             self.health_check()
             self._ensure_bucket()
-            logger.info("MinIO connection initialized successfully")
+            # logger.info("MinIO connection initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize MinIO: {e}")
             raise
