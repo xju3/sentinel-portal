@@ -27,6 +27,7 @@ dependencies = [
     "cryptography>=48.0.0",
     "protobuf>=6.33.6",
     "pandas>=3.0.3",
+    "fastapi>=0.115.0",
 ]
 
 [tool.hatch.build.targets.wheel]

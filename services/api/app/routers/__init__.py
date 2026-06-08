@@ -1,3 +1,23 @@
 """
 API routers
+
+Provides a helper to register all route modules on a FastAPI application.
 """
+
+from fastapi import FastAPI
+
+from app.config import settings
+from app.routers import auth, health, sensors, devices, customers, admin, dashboard, thresholds, sensor_trends
+
+
+def register_routers(app: FastAPI) -> None:
+    """Register all API routers with the given FastAPI application."""
+    app.include_router(health.router, prefix=settings.api_prefix)
+    app.include_router(sensors.router, prefix=settings.api_prefix)
+    app.include_router(customers.router, prefix=settings.api_prefix)
+    app.include_router(devices.router, prefix=settings.api_prefix)
+    app.include_router(auth.router, prefix=settings.api_prefix)
+    app.include_router(admin.router, prefix=settings.api_prefix)
+    app.include_router(dashboard.router, prefix=settings.api_prefix)
+    app.include_router(thresholds.router, prefix=settings.api_prefix)
+    app.include_router(sensor_trends.router, prefix=settings.api_prefix)
