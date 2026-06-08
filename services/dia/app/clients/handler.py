@@ -8,7 +8,7 @@ import json
 from typing import Any, Optional
 
 from pub.models.message_pb2 import MsgRmsReport
-from pub.clients.mqtt import mqtt_manager
+from pub.clients.mqtt import MQTTManager
 from pub.services.diagnosis_service import PatrolDiagnosisRecordService
 from app.config import settings
 
@@ -27,6 +27,7 @@ class DiagnosisticHandler:
     def __init__(self) -> None:
         self._redis_client = redis_client
         self._loop: Optional[asyncio.AbstractEventLoop] = None
+        self.mqtt_manager: Optional[MQTTManager] = None
 
     def _set_loop(self, loop: asyncio.AbstractEventLoop) -> None:
         """Set the asyncio event loop for scheduling async tasks from sync context."""
@@ -74,14 +75,14 @@ class DiagnosisticHandler:
             logger.debug(f"Received MQTT message on topic '{msg.topic}' with payload: {msg.payload}")
             self.handle_message(msg.topic, msg.payload)
             
-        mqtt_manager.register_on_connect(on_mqtt_connect)
-        mqtt_manager.register_on_message(on_mqtt_message)
-        mqtt_manager.init()
+        self.mqtt_manager = MQTTManager(
+            on_connect_callback=on_mqtt_connect,
+            on_message_callback=on_mqtt_message
+        )
+        self.mqtt_manager.init()
 
-        # Inject the running event loop into handler
-        # self._set_loop(asyncio.get_running_loop())
 
-    def handle_message(self, topic: str, payload: bytes) -> None:
+    def handle_message(self, topic: str, payload: str) -> None:
         """Handle an incoming MQTT message.
 
         Parses the protobuf payload to extract the SN, rms_m, and temperature,
@@ -92,16 +93,8 @@ class DiagnosisticHandler:
             payload: The raw message payload (bytes).
         """
         # logger.info(f"[PatrolMsgHandler] Received message on topic '{topic}': {payload}")
+        logger.debug(payload)
 
-        # Parse protobuf payload
-        report = self._parse_payload(payload)
-        if not report:
-            logger.warning("Failed to parse payload")
-            return
 
-        sn = str(report.sn)
-        logger.info(
-            f"Parsed message: SN={sn}, rms_m={report.rms_m}, temperature={report.temperature}"
-        )
-       
+               
 handler = DiagnosisticHandler() 

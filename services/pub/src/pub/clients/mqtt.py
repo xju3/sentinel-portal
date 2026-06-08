@@ -15,18 +15,16 @@ logger = logging.getLogger(__name__)
 class MQTTManager:
     """Manager for MQTT connection and subscriptions"""
 
-    def __init__(self):
+    def __init__(
+        self,
+        on_connect_callback=None,
+        on_message_callback=None,
+        on_disconnect_callback=None,
+    ):
         self.client: Optional[mqtt.Client] = None
-        self._on_connect_callbacks = []
-        self._on_message_callbacks = []
-
-    def register_on_connect(self, callback) -> None:
-        """注册自定义的 on_connect 回调函数"""
-        self._on_connect_callbacks.append(callback)
-
-    def register_on_message(self, callback) -> None:
-        """注册自定义的 on_message 回调函数"""
-        self._on_message_callbacks.append(callback)
+        self._on_connect_callback = on_connect_callback
+        self._on_message_callback = on_message_callback
+        self._on_disconnect_callback = on_disconnect_callback
 
     def init(self) -> None:
         """Initialize MQTT connection and start background loop"""
@@ -50,9 +48,12 @@ class MQTTManager:
             if settings.mqtt_username and settings.mqtt_password:
                 self.client.username_pw_set(settings.mqtt_username, settings.mqtt_password)
 
-            self.client.on_connect = self.on_connect
-            self.client.on_message = self.on_message
-            self.client.on_disconnect = self.on_disconnect
+            if self._on_connect_callback:
+                self.client.on_connect = self._on_connect_callback
+            if self._on_message_callback:
+                self.client.on_message = self._on_message_callback
+            if self._on_disconnect_callback:
+                self.client.on_disconnect = self._on_disconnect_callback
 
             self.client.connect(settings.mqtt_host, settings.mqtt_port, keepalive=60)
             # Start a background thread to process network traffic and dispatch callbacks
@@ -62,32 +63,6 @@ class MQTTManager:
         except Exception as e:
             logger.error(f"Failed to initialize MQTT: {e}")
             raise
-
-    def on_connect(self, client, userdata, flags, rc, *args):
-        """Callback for when the client receives a CONNACK response from the server."""
-        if rc == 0:
-            logger.info("Connected to MQTT broker successfully.")
-            # 执行所有调用者注册的 on_connect 回调（例如：订阅 topic）
-            for cb in self._on_connect_callbacks:
-                try:
-                    cb(client, userdata, flags, rc, *args)
-                except Exception as e:
-                    logger.error(f"Error in custom on_connect callback: {e}", exc_info=True)
-        else:
-            logger.error(f"Failed to connect to MQTT broker with return code: {rc}")
-
-    def on_message(self, client, userdata, msg):
-        """Callback for when a PUBLISH message is received from the server."""
-        # 将收到的消息分发给所有调用者注册的处理函数
-        for cb in self._on_message_callbacks:
-            try:
-                cb(client, userdata, msg)
-            except Exception as e:
-                logger.error(f"Error in custom on_message callback for topic {msg.topic}: {e}", exc_info=True)
-
-    def on_disconnect(self, client, userdata, rc, *args):
-        """Callback for when the client disconnects from the server."""
-        logger.info(f"Disconnected from MQTT broker (Return code: {rc})")
 
     def publish(self, topic: str, payload: str, qos: int = 1) -> bool:
         """向指定的 MQTT topic 发布消息。

@@ -17,7 +17,6 @@ from starlette.types import Receive, Scope, Send
 from pub.utils.exceptions import DomainException
 from pub.utils.logger import setup_logging
 from pub.contract.common import ApiResponse
-from pub.clients.mqtt import mqtt_manager
 
 from app.config import settings
 from app.database import db_manager, redis_manager, influxdb_manager, minio_manager
@@ -76,7 +75,8 @@ async def lifespan(app: FastAPI):
         logger.error(f"Error shutting down MinIO: {e}")
 
     try:
-        mqtt_manager.close()
+        if handler.mqtt_manager:
+            handler.mqtt_manager.close()
     except Exception as e:
         logger.error(f"Error shutting down MQTT: {e}")
 

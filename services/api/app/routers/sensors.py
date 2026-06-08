@@ -320,8 +320,9 @@ def _process_sensor_data_background(object_name: str, payload: dict):
         try:
             from pub.clients.mqtt import mqtt_manager  # 注意：请替换为您项目中实际的 MQTT 客户端实例引入路径
             mqtt_payload = json.dumps({"bucket": "json", "path": object_name})
-            mqtt_manager.client.publish("diagonsistic", mqtt_payload) 
-            logger.info(f"Published to MQTT topic 'diagnosistic': {mqtt_payload}")
+            
+            if mqtt_manager.publish("diagonsistic", mqtt_payload):
+                logger.info(f"Published to MQTT topic 'diagonsistic': {mqtt_payload}")
         except ImportError:
             logger.warning("未找到 mqtt_manager，请在此处补充您实际的 MQTT 发布逻辑。")
         except Exception as mqtt_err:
