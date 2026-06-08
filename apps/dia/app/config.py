@@ -3,7 +3,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables or .env file."""
-    
+
     # Application Settings
     app_name: str = "Sensor Diagnosis Expert System"
     app_version: str = "1.0.0"
@@ -46,6 +46,9 @@ class Settings(BaseSettings):
     mqtt_client_id: str = "sentinel-api-client"
     mqtt_client_id_unique: bool = True
     mqtt_protocol_version: str = "3.1.1"
+
+    #telegraf url
+    telegraf_url: str = "http://host_name_or_ip_address:7009"
 
     # Queue Configuration
     patrol_queue_length: int = 72

@@ -10,7 +10,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, B
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import cast, List, Optional
-from uuid import UUID
+from uuid import UUID, uuid4
 from app.config import settings
 
 logger = logging.getLogger(__name__)
@@ -350,11 +350,14 @@ async def receive_sensor_data(
 
         # Format paths: {sn}/{YYYY}/{MM}/{DD}/{HH}-{mm}-{ss}.json
         object_name = f"{sn}/{dt_utc8.strftime('%Y/%m/%d/%H-%M-%S')}.json"
+        report_id = str(uuid4())
+        stored_payload = dict(payload)
+        stored_payload["report_id"] = report_id
 
         # Add to background tasks to execute immediately after returning response
-        background_tasks.add_task(_process_sensor_data_background, object_name, payload)
+        background_tasks.add_task(_process_sensor_data_background, object_name, stored_payload)
 
-        return success({"path": object_name})
+        return success({"path": object_name, "report_id": report_id})
     except Exception as e:
         logger.error(f"Error processing sensor data: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error processing data")
