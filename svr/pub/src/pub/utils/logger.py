@@ -43,7 +43,10 @@ def setup_logging(environment: str = "development", debug: bool = False):
             },
             "colored": {
                 "()": "pub.utils.logger.ColorFormatter",
-                "format": "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s",
+                "format": "%(asctime)s - %(filename)s:%(lineno)d - %(message)s",
+                "datefmt": '%m-%d %H:%M:%S'
+                # "datefmt": '%Y-%m-%d %H:%M:%S'
+                # "format": "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s",
             },
             "detailed": {
                 "format": "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"

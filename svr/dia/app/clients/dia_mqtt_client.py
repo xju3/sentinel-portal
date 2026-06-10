@@ -67,7 +67,7 @@ class DiaMqttClient:
 
             # logger.info(f"Downloaded JSON from MinIO: bucket='{bucket_name}', object='{object_name}'")
             report_id, point_count = send_vibration_features_to_telegraf(sensor_payload)
-            logger.info(
+            logger.debug(
                 "Processed MinIO JSON notification %s/%s into %s vibration feature points "
                 "with report_id=%s", bucket_name, object_name, point_count, report_id,
             )

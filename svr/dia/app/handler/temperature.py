@@ -99,19 +99,19 @@ def run_temperature_check(
     current_ts_ms: int,
 ) -> TemperatureDiagnosisResult:
     """Run temperature diagnosis for the sensor that produced report_id."""
-    logger.info(
-        "Temperature diagnosis started: report_id=%s sn=%s current_temperature_c=%s",
-        report_id,
-        sn,
-        current_temperature_c,
-    )
+    # logger.info(
+    #     "Temperature diagnosis started: report_id=%s sn=%s current_temperature_c=%s",
+    #     report_id,
+    #     sn,
+    #     current_temperature_c,
+    # )
     reports = load_recent_report_temperatures(sn, limit=RECENT_QUERY_LIMIT)
-    logger.info(
-        "Temperature history loaded: report_id=%s sn=%s history_report_count=%s",
-        report_id,
-        sn,
-        len(reports),
-    )
+    # logger.info(
+    #     "Temperature history loaded: report_id=%s sn=%s history_report_count=%s",
+    #     report_id,
+    #     sn,
+    # len(reports),
+    # )
     reports = _ensure_current_report_temperature(
         reports,
         report_id,
@@ -125,12 +125,12 @@ def run_temperature_check(
     )
     result = diagnose_temperature(sn, report_id, reports)
     _log_temperature_result(result)
-    logger.info(
-        "Temperature diagnosis finished: report_id=%s sn=%s report_count=%s",
-        report_id,
-        sn,
-        result.report_count,
-    )
+    # logger.info(
+    #     "Temperature diagnosis finished: report_id=%s sn=%s report_count=%s",
+    #     report_id,
+    #     sn,
+    #     result.report_count,
+    # )
     return result
 
 

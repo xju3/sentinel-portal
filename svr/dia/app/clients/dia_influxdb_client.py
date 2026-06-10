@@ -81,7 +81,7 @@ def send_vibration_features_to_telegraf(payload: dict[str, Any]) -> tuple[str, i
         )
         response.raise_for_status()
 
-    logger.info(
+    logger.debug(
         "Wrote %s vibration_feature points to Telegraf for report_id=%s",
         len(lines),
         report_id,
