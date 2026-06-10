@@ -9,7 +9,7 @@ x-python-app: &python-app
     PYTHONDONTWRITEBYTECODE: "1"
     PYTHONUNBUFFERED: "1"
   volumes:
-    - ../apps:/app/apps
+    - ../svr:/app/svr
 
 x-node-app: &node-app
   image: node:22-alpine
@@ -23,45 +23,45 @@ services:
   api:
     <<: *python-app
     container_name: stl-api
-    working_dir: /app/apps/api
+    working_dir: /app/svr/api
     env_file:
-      - ../apps/api/.env
+      - ../svr/api/.env
     command: >
       sh -c "pip install uv -i $${UV_INDEX_URL} &&
       uv sync --no-dev &&
       uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-      --reload-dir /app/apps/api/app --reload-dir /app/apps/pub/src"
+      --reload-dir /app/svr/api/app --reload-dir /app/svr/pub/src"
     ports:
       - "3090:8000"
     volumes:
-      - ../apps:/app/apps
-      - api_venv:/app/apps/.venv
+      - ../svr:/app/svr
+      - api_venv:/app/svr/.venv
 
   dia:
     <<: *python-app
     container_name: stl-dia
-    working_dir: /app/apps/dia
+    working_dir: /app/svr/dia
     env_file:
-      - ../apps/dia/.env
+      - ../svr/dia/.env
     command: >
       sh -c "pip install uv -i $${UV_INDEX_URL} &&
       uv sync --no-dev &&
       uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-      --reload-dir /app/apps/dia/app --reload-dir /app/apps/pub/src"
+      --reload-dir /app/svr/dia/app --reload-dir /app/svr/pub/src"
     ports:
       - "3091:8000"
     volumes:
-      - ../apps:/app/apps
-      - dia_venv:/app/apps/.venv
+      - ../svr:/app/svr
+      - dia_venv:/app/svr/.venv
 
-  portal:
+  tenant:
     <<: *node-app
-    container_name: stl-portal
+    container_name: stl-tenant
     working_dir: /app
     command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
     volumes:
-      - ../web/portal:/app
-      - portal_node_modules:/app/node_modules
+      - ../web/tenant:/app
+      - tenant_node_modules:/app/node_modules
     ports:
       - "3010:8000"
     depends_on:
@@ -83,5 +83,5 @@ services:
 volumes:
   api_venv:
   dia_venv:
-  portal_node_modules:
+  tenant_node_modules:
   admin_node_modules:

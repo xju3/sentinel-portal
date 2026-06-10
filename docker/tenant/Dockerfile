@@ -5,15 +5,15 @@ FROM ${NODE_IMAGE} AS builder
 
 WORKDIR /app
 
-COPY clients/portal/package.json ./
+COPY web/tenant/package.json ./
 RUN npm install
 
-COPY clients/portal/ .
+COPY web/tenant/ .
 RUN npm run build
 
 FROM ${NGINX_IMAGE}
 
-COPY docker/portal/nginx.conf /etc/nginx/conf.d/default.conf
+COPY docker/tenant/nginx.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 EXPOSE 80

@@ -2,7 +2,6 @@
 Diagnosis entrypoint.
 """
 
-import asyncio
 import logging
 from concurrent.futures import Future, ThreadPoolExecutor
 
@@ -46,13 +45,11 @@ def run_diagnosis(
         current_temperature_c,
         current_ts_ms,
     )
-    asyncio.run(
-        run_temperature_check(
-            report_id,
-            sn,
-            current_temperature_c,
-            current_ts_ms,
-        )
+    run_temperature_check(
+        report_id,
+        sn,
+        current_temperature_c,
+        current_ts_ms,
     )
     logger.info("Diagnosis job finished for report_id=%s sn=%s", report_id, sn)
 

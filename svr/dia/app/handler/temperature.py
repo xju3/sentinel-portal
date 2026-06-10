@@ -92,7 +92,7 @@ class TemperatureDiagnosisResult:
     trend: TrendTemperatureResult
 
 
-async def run_temperature_check(
+def run_temperature_check(
     report_id: str,
     sn: str,
     current_temperature_c: float,

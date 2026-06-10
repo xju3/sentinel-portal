@@ -8,20 +8,20 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 # 用 pip 安装 uv，避免访问 ghcr.io
 RUN pip install uv -i https://mirrors.aliyun.com/pypi/simple/
 
-WORKDIR /app/services/api
+WORKDIR /app
 
-COPY services/pyproject.toml services/uv.lock* /app/services/
-COPY services/api/pyproject.toml /app/services/api/
-COPY services/pub/pyproject.toml services/pub/README.md /app/services/pub/
-COPY services/pub/src /app/services/pub/src/
+COPY svr/pyproject.toml svr/uv.lock* /app/api
+COPY svr/api/pyproject.toml /app/api
+COPY svr/pub/pyproject.toml /app/pub/README.md /app/pub/
+COPY svr/pub/src /app/pub/src/
 
 RUN uv sync --no-dev --no-install-project
 
-COPY services/api/app /app/services/api/app
+COPY svr/api/app /app/svr/api/app
 
 RUN uv sync --no-dev
 
-ENV PATH="/app/services/.venv/bin:$PATH"
+ENV PATH="/app/svr/.venv/bin:$PATH"
 
 EXPOSE 8000
 
