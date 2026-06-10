@@ -134,6 +134,21 @@ def setup_logging(environment: str = "development", debug: bool = True):
                 "level": "WARNING",
                 "propagate": False
             },
+            # --- 新增：强制接管 Uvicorn 服务器日志 ---
+            "uvicorn": {
+                "handlers": ["console", "file"], # 强行绑定你的彩色控制台和文件
+                "level": "INFO",
+                "propagate": False               # 阻止双重打印
+            },
+            "uvicorn.error": {
+                "level": "INFO",
+                "propagate": True                # 错误日志交给父级 uvicorn 处理即可
+            },
+            "uvicorn.access": {
+                "handlers": ["console", "file"], # 强行绑定你的彩色控制台和文件
+                "level": "INFO",
+                "propagate": False               # 阻止它用自带的格式输出
+            },
         },
         "root": {
             "level": "DEBUG" if debug else "INFO",
