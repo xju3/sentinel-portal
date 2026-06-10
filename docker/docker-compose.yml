@@ -8,6 +8,7 @@ x-python-app: &python-app
     UV_LINK_MODE: copy
     PYTHONDONTWRITEBYTECODE: "1"
     PYTHONUNBUFFERED: "1"
+    TZ: "Asia/Shanghai"
   volumes:
     - ../svr:/app/svr
 

@@ -32,9 +32,9 @@ class ColorFormatter(logging.Formatter):
  
 
 class SpringBootFormatter(logging.Formatter):
-    """复刻 Spring Boot 风格的日志格式化器"""
+    """复刻 Spring Boot 风格的日志格式化器 (文件名颜色跟随日志级别)"""
 
-    # 级别颜色 (Spring Boot 经典配色)
+    # 级别颜色
     LEVEL_COLORS = {
         logging.DEBUG: "\033[36m",       # Cyan (青色)
         logging.INFO: "\033[32m",        # Green (绿色)
@@ -45,39 +45,32 @@ class SpringBootFormatter(logging.Formatter):
 
     # 局部组件颜色
     DIM = "\033[90m"     # Dark Gray (暗灰色，用于时间和分隔符)
-    CYAN = "\033[36m"    # Cyan (青色，用于文件名/行号)
     RESET = "\033[0m"    # 颜色重置
 
     def format(self, record: logging.LogRecord) -> str:
-        # 注意：为了不污染写入文件的日志（FileHandler），我们这里不修改 record 原有属性，而是直接拼装
-        
         # 1. 格式化时间 (暗灰色)
         asctime = self.formatTime(record, self.datefmt)
         time_part = f"{self.DIM}{asctime}{self.RESET}"
         
-        # 2. 格式化级别 (自带对应颜色，固定占据 7 个字符宽度对齐)
+        # 获取当前日志级别的颜色，如果找不到则默认无色
         level_color = self.LEVEL_COLORS.get(record.levelno, "")
-        level_part = f"{level_color}{record.levelname:<5}{self.RESET}"
         
-        # 3. 格式化代码位置 (青色)
-        # location = f"{record.filename}:{record.lineno}"
-        # location_part = f"{self.CYAN}{location}{self.RESET}"
-
-        # 3. 格式化代码位置 (青色) - 改用 record.module 去掉 .py 后缀
+        # 2. 格式化级别 (自带对应颜色，固定占据 7 个字符宽度对齐)
+        level_part = f"{level_color}{record.levelname:<7}{self.RESET}"
+        
+        
+        # 3. 格式化代码位置 
         location = f"{record.module}:{record.lineno}"
-        location_part = f"{self.CYAN}{location}{self.RESET}"
-
-        # 限定占位 15 个字符并右对齐（>15），超过 15 字符的自动完整显示
-        # location = f"{record.module}:{record.lineno}"
-        # location_part = f"{self.CYAN}{location:>18}{self.RESET}"
+        location_part = f"{level_color}{location:>0}{self.RESET}"
+        
         
         # 4. 日志正文主体 (默认终端白/灰)
         message = record.getMessage()
+        message = f"{self.DIM}{message}{self.RESET}"
         
         # 5. 拼装成 Spring Boot 经典排版格式
-        # 输出示例: 06-10 12:30:05  INFO    --- [main.py:42] : Starting application...
-        return f"{time_part}  {level_part} {self.DIM}-{self.RESET} [{location_part}] : {message}"
-
+        return f"{time_part} {level_part}{self.DIM}{self.RESET}[{location_part}]: {message}"
+  
 class ExcludeFileFilter(logging.Filter):
     """自定义过滤器：屏蔽特定文件产生的日志"""
     def filter(self, record: logging.LogRecord) -> bool:
@@ -99,7 +92,8 @@ def setup_logging(environment: str = "development", debug: bool = True):
                 # 把这里指向新的 SpringBootFormatter
                 "()": "pub.utils.logger.SpringBootFormatter",
                 # 注意：因为我们在类里已经写死了拼装逻辑，这里的 format 参数可以保留也可删除，不影响输出了
-                "datefmt": '%m-%d %H:%M:%S'
+                # "datefmt": '%m-%d %H:%M:%S'
+                "datefmt": '%H:%M:%S'
             },
             "detailed": {
                 "format": "%(asctime)s - %(name)s - %(levelname)s - %(filename)s:%(lineno)d - %(message)s"
