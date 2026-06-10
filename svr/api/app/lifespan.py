@@ -39,7 +39,7 @@ async def lifespan(app: FastAPI):
     # ==============================
     # Startup
     # ==============================
-    logger.info(f"Starting {settings.app_name} v{settings.app_version}")
+    logger.debug(f"Starting {settings.app_name} v{settings.app_version}")
     try:
         await db_manager.init(settings.mysql_url, settings.debug)
         redis_manager.init(settings.redis_url)

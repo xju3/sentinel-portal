@@ -59,7 +59,7 @@ class MQTTManager:
             # Start a background thread to process network traffic and dispatch callbacks
             self.client.loop_start()
             
-            logger.info(f"MQTT connection initialized (Host: {settings.mqtt_host}:{settings.mqtt_port})")
+            logger.debug(f"MQTT connection initialized (Host: {settings.mqtt_host}:{settings.mqtt_port})")
         except Exception as e:
             logger.error(f"Failed to initialize MQTT: {e}")
             raise

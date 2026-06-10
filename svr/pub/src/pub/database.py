@@ -45,7 +45,8 @@ class DatabaseManager:
             self._debug = debug
             self.engine = create_async_engine(
                 mysql_url,
-                echo=debug,
+                # echo=debug,
+                echo=False,  # 通过 logging 配置控制日志输出，避免 SQL 语句过多时日志过于冗长
                 poolclass=NullPool,
                 pool_pre_ping=True,
             )

@@ -27,7 +27,7 @@ def start_diagnosis_async(
         current_ts_ms,
     )
     future.add_done_callback(_log_diagnosis_failure)
-    logger.info("Queued diagnosis job for report_id=%s sn=%s", report_id, sn)
+    logger.debug("Queued diagnosis job for report_id=%s sn=%s", report_id, sn)
     return future
 
 
@@ -38,7 +38,7 @@ def run_diagnosis(
     current_ts_ms: int,
 ) -> None:
     """Run one diagnosis job for an already-ingested report."""
-    logger.info(
+    logger.debug(
         "Diagnosis job started for report_id=%s sn=%s current_temperature_c=%s ts_ms=%s",
         report_id,
         sn,
@@ -51,7 +51,7 @@ def run_diagnosis(
         current_temperature_c,
         current_ts_ms,
     )
-    logger.info("Diagnosis job finished for report_id=%s sn=%s", report_id, sn)
+    logger.debug("Diagnosis job finished for report_id=%s sn=%s", report_id, sn)
 
 
 def _log_diagnosis_failure(future: Future[None]) -> None:

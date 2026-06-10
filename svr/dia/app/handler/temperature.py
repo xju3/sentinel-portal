@@ -221,7 +221,7 @@ def load_recent_report_temperatures(
     """Load recent temperatures from Redis first, then InfluxDB as fallback."""
     cached_points = get_recent_temperature_points(sn, limit=TEMPERATURE_CACHE_LIMIT)
     if len(cached_points) >= TEMPERATURE_CACHE_LIMIT:
-        logger.info(
+        logger.debug(
             "Temperature history loaded from Redis: sn=%s point_count=%s",
             sn,
             len(cached_points),
@@ -259,7 +259,7 @@ def _log_temperature_result(result: TemperatureDiagnosisResult) -> None:
             short_term,
         )
     elif not short_term.enough_data:
-        logger.info(
+        logger.debug(
             "Temperature short-term rise skipped: sn=%s report_id=%s not enough data",
             result.sn,
             result.report_id,
