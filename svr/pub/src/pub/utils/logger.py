@@ -60,8 +60,16 @@ class SpringBootFormatter(logging.Formatter):
         level_part = f"{level_color}{record.levelname:<5}{self.RESET}"
         
         # 3. 格式化代码位置 (青色)
-        location = f"{record.filename}:{record.lineno}"
+        # location = f"{record.filename}:{record.lineno}"
+        # location_part = f"{self.CYAN}{location}{self.RESET}"
+
+        # 3. 格式化代码位置 (青色) - 改用 record.module 去掉 .py 后缀
+        location = f"{record.module}:{record.lineno}"
         location_part = f"{self.CYAN}{location}{self.RESET}"
+
+        # 限定占位 15 个字符并右对齐（>15），超过 15 字符的自动完整显示
+        # location = f"{record.module}:{record.lineno}"
+        # location_part = f"{self.CYAN}{location:>18}{self.RESET}"
         
         # 4. 日志正文主体 (默认终端白/灰)
         message = record.getMessage()
@@ -73,13 +81,11 @@ class SpringBootFormatter(logging.Formatter):
 class ExcludeFileFilter(logging.Filter):
     """自定义过滤器：屏蔽特定文件产生的日志"""
     def filter(self, record: logging.LogRecord) -> bool:
-        # 如果日志的来源文件名是 _trace.py，则返回 False（丢弃该日志）
-        if record.filename == "_trace.py":
+        # 只要文件名是以 "_" 开头的（比如 _trace.py, _config.py, _client.py），统统拦截！
+        if record.filename.startswith("_"):
             return False
-        # 你也可以用 in 来模糊匹配：
-        # if "_trace" in record.filename: return False
         return True
-
+    
 def setup_logging(environment: str = "development", debug: bool = True):
     """Configure application logging."""
     logging_config = {
