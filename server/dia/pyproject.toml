@@ -16,6 +16,7 @@ keywords = ["sensor", "dia", "fastapi", "influxdb", "mysql", "redis", "minio"]
 
 dependencies = [
     "fastapi>=0.115.0",
+    "anyio>=4,<5",
     "uvicorn[standard]==0.24.0",
     "sqlalchemy>=2.0.36",
     "pymysql[rsa]==1.1.0",

@@ -1,29 +1,33 @@
+x-python-env: &python-env
+  UV_INDEX_URL: ${UV_INDEX_URL:-https://mirrors.aliyun.com/pypi/simple/}
+  UV_LINK_MODE: copy
+  PYTHONDONTWRITEBYTECODE: "1"
+  PYTHONUNBUFFERED: "1"
+  TZ: "Asia/Shanghai"
+
 x-python-app: &python-app
   image: ${PYTHON_IMAGE:-python:3.14-slim}
   restart: unless-stopped
   extra_hosts:
     - "host.docker.internal:host-gateway"
-  environment:
-    UV_INDEX_URL: ${UV_INDEX_URL:-https://mirrors.aliyun.com/pypi/simple/}
-    UV_LINK_MODE: copy
-    PYTHONDONTWRITEBYTECODE: "1"
-    PYTHONUNBUFFERED: "1"
-    TZ: "Asia/Shanghai"
-  volumes:
-    - ../server:/app/server
+  working_dir: /app/server
+  env_file:
+    - ../.env
+  command: >
+    sh -c "pip install uv -i $${UV_INDEX_URL} &&
+    uv sync --package $${APP_PACKAGE} --no-dev &&
+    uv run --package $${APP_PACKAGE} python -m uvicorn app.main:app
+    --app-dir /app/server/$${APP_PACKAGE}
+    --host 0.0.0.0 --port 8000 --reload
+    --reload-dir /app/server/$${APP_PACKAGE}/app --reload-dir /app/server/pub/src"
 
 services:
   api:
     <<: *python-app
     container_name: stl-api
-    working_dir: /app/server/api
-    env_file:
-      - ~/.env
-    command: >
-      sh -c "pip install uv -i $${UV_INDEX_URL} &&
-      uv sync --no-dev &&
-      uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-      --reload-dir /app/server/api/app --reload-dir /app/server/pub/src"
+    environment:
+      <<: *python-env
+      APP_PACKAGE: api
     ports:
       - "3090:8000"
     volumes:
@@ -33,14 +37,9 @@ services:
   dia:
     <<: *python-app
     container_name: stl-dia
-    working_dir: /app/server/dia
-    env_file:
-      - ~/.env
-    command: >
-      sh -c "pip install uv -i $${UV_INDEX_URL} &&
-      uv sync --no-dev &&
-      uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-      --reload-dir /app/server/dia/app --reload-dir /app/server/pub/src"
+    environment:
+      <<: *python-env
+      APP_PACKAGE: dia
     ports:
       - "3091:8000"
     volumes:

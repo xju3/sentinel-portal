@@ -6,7 +6,7 @@ import json
 import logging
 from typing import Any
 
-from app.clients.dia_influxdb_client import send_vibration_features_to_telegraf
+from app.clients.influxdb_client import send_vibration_features_to_telegraf
 from app.config import settings
 from app.database import minio_manager
 from pub.clients.mqtt import MQTTManager

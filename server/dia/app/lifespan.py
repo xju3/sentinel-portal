@@ -12,7 +12,7 @@ from fastapi import FastAPI
 
 from app.config import settings
 from app.database import db_manager, redis_manager, influxdb_manager, minio_manager
-from app.clients.dia_mqtt_client import dia_mqtt_client
+from app.clients.mqtt_client import dia_mqtt_client
 
 logger = logging.getLogger(__name__)
 
@@ -54,7 +54,7 @@ async def lifespan(app: FastAPI):
         # Start MQTT client and register the current module's handler
         dia_mqtt_client.start()
 
-        logger.info("All services initialized successfully")
+        logger.debug("All services initialized successfully")
     except Exception as e:
         logger.error(f"Startup failed: {e}")
         raise

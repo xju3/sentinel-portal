@@ -36,8 +36,10 @@ class SpringBootFormatter(logging.Formatter):
 
     # 级别颜色
     LEVEL_COLORS = {
-        logging.DEBUG: "\033[36m",       # Cyan (青色)
-        logging.INFO: "\033[32m",        # Green (绿色)
+        logging.DEBUG: "\033[30m",       # Cyan (青色)
+        # logging.DEBUG: "\033[36m",       # Cyan (青色)
+        # logging.INFO: "\033[32m",        # Green (绿色)
+        logging.INFO: "\033[36m",        # Green (绿色)
         logging.WARNING: "\033[33m",     # Yellow (黄色)
         logging.ERROR: "\033[31m",       # Red (红色)
         logging.CRITICAL: "\033[1;31m",  # Bold Red (加粗红色)

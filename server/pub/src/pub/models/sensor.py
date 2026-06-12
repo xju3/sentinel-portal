@@ -50,6 +50,21 @@ class SensorType(Base):
     network = Column(Integer, nullable=False, default=1)  # Network range in meters
     bluetooth = Column(Boolean, default=False)  # Bluetooth support
     description = Column(Text)
+    
+class SimCard(Base):
+    """SIM card entity model"""
+
+    __tablename__ = "sim_card"
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    number = Column(String(20), nullable=False, unique=True)  # SIM card number
+    ccid = Column(String(64), nullable=False, unique=True)  # SIM card ICCID
+    carrier = Column(String(64), nullable=False)  # Mobile carrier
+    data_plan = Column(String(64), nullable=False)  # Data plan details
+    activated_at = Column(DateTime, nullable=True)  # SIM card activation date
+    expires_at = Column(DateTime, nullable=False) # SIM card service expiration date
+    # 可用服务时间, 例如 "2024-01-01 to 2024-12-31"
+    status = Column(SmallInteger, default=1, comment="tiny(1) status")  # SIM card status: 1=active, 0=inactive
 
 class Sensor(Base):
     """Sensor entity model"""
@@ -60,6 +75,7 @@ class Sensor(Base):
     sn = Column(String(255), nullable=False, index=True)
     description = Column(Text)
     active = Column(Boolean, default=True)
+    sim_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # SIM card number for cellular connectivity
     active_at = Column(DateTime, default=datetime.utcnow)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)

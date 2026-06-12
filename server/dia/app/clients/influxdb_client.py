@@ -71,7 +71,7 @@ def send_vibration_features_to_telegraf(payload: dict[str, Any]) -> tuple[str, i
     lines = build_vibration_feature_lines(payload, report_id=report_id)
     body = "\n".join(lines) + "\n"
     url = _telegraf_write_url(settings.telegraf_url)
-    logger.info(f"Sending vibration features to Telegraf at {url}")
+    logger.debug(f"Sending vibration features to Telegraf at {url}")
 
     with httpx.Client(timeout=10.0) as client:
         response = client.post(
