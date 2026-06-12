@@ -5,10 +5,10 @@ FROM ${NODE_IMAGE} AS builder
 
 WORKDIR /app
 
-COPY clients/admin/package.json ./
+COPY web/admin/package*.json ./
 RUN npm install
 
-COPY clients/admin/ .
+COPY web/admin/ .
 RUN npm run build
 
 FROM ${NGINX_IMAGE}

@@ -5,7 +5,7 @@ FROM ${NODE_IMAGE} AS builder
 
 WORKDIR /app
 
-COPY web/tenant/package.json ./
+COPY web/tenant/package*.json ./
 RUN npm install
 
 COPY web/tenant/ .
