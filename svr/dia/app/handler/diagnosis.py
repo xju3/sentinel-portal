@@ -57,5 +57,5 @@ def run_diagnosis(
 def _log_diagnosis_failure(future: Future[None]) -> None:
     try:
         future.result()
-    except Exception:
-        logger.exception("Background diagnosis job failed")
+    except Exception as e:
+        logger.exception("Background diagnosis job failed: %s", e or "Unknown error")

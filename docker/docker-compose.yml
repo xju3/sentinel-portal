@@ -12,14 +12,6 @@ x-python-app: &python-app
   volumes:
     - ../svr:/app/svr
 
-x-node-app: &node-app
-  image: node:22-alpine
-  restart: unless-stopped
-  environment:
-    API_PROXY_TARGET: http://api:8000
-    CHOKIDAR_USEPOLLING: "true"
-    WATCHPACK_POLLING: "true"
-
 services:
   api:
     <<: *python-app
@@ -56,33 +48,31 @@ services:
       - dia_venv:/app/svr/.venv
 
   tenant:
-    <<: *node-app
     container_name: stl-tenant
-    working_dir: /app
-    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
-    volumes:
-      - ../web/tenant:/app
-      - tenant_node_modules:/app/node_modules
+    build:
+      context: ..
+      dockerfile: docker/tenant/Dockerfile
+    restart: unless-stopped
     ports:
-      - "3010:8000"
+      - "3010:80"
     depends_on:
       - api
+    environment:
+      TZ: "Asia/Shanghai"
 
   admin:
-    <<: *node-app
     container_name: stl-admin
-    working_dir: /app
-    command: sh -c "npm install && npm run dev -- --host 0.0.0.0"
-    volumes:
-      - ../web/admin:/app
-      - admin_node_modules:/app/node_modules
+    build:
+      context: ..
+      dockerfile: docker/admin/Dockerfile
+    restart: unless-stopped
     ports:
-      - "3020:8000"
+      - "3020:80"
     depends_on:
       - api
+    environment:
+      TZ: "Asia/Shanghai"
 
 volumes:
   api_venv:
   dia_venv:
-  tenant_node_modules:
-  admin_node_modules:

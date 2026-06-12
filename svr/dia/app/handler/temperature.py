@@ -12,17 +12,31 @@ module falls back to InfluxDB, backfills Redis with the recent window, and then
 continues diagnosis. The current JSON point is pushed to Redis after history is
 loaded so the next diagnosis can avoid the InfluxDB query.
 
-Temperature is checked on two tracks:
+Temperature is checked on three tracks:
 1. Short-term rise:
    Compare the current report temperature with the previous report for the
    same sensor. If the rise is greater than 10%, log "关注"; greater than 15%,
    log "警告"; greater than 20%, log "严重".
-2. Trend rise:
+2. Short-window rise:
+   Run only when the current report is warmer than the previous report. Use the
+   latest 6 reports to catch short-term cumulative warming that a single-period
+   ratio check can miss. A 0.5°C delta is treated as the single-period noise
+   band: small increases can still accumulate into a warning, small drops do
+   not break the window, and a drop of 0.5°C or more ends the short-window
+   rise chain. The window logs "持续升温" while the latest point is still
+   clearly rising, and "高位保持" when a prior rise is being held near the
+   elevated temperature.
+3. Trend rise:
    Read recent unique report temperatures for the same sensor and inject the
    current report temperature if it is not visible in InfluxDB yet. Use the
    latest 72 reports as a sliding window; compare the newest point against the
    previous 71 points with Z-Score / 3-Sigma. If abs(z_score) > 3, log a
    warning.
+
+Every diagnosis returns a top-level conclusion and one conclusion for each
+track. The top-level conclusion uses the highest level reported by the three
+tracks; skipped tracks are marked as "未检测" and do not raise the overall
+level.
 
 InfluxDB stores `temperature_c` once per axis row under the same report_id, so
 historical reads deduplicate by report_id before any diagnosis calculation.
@@ -54,7 +68,24 @@ RECENT_QUERY_LIMIT = TREND_WINDOW_SIZE + 1
 SHORT_TERM_ATTENTION_RATIO = 0.10
 SHORT_TERM_WARNING_RATIO = 0.15
 SHORT_TERM_SEVERE_RATIO = 0.20
+SHORT_WINDOW_SIZE = 6
+SHORT_WINDOW_MIN_POINTS = 3
+TEMP_STABLE_DELTA_C = 0.5
+SHORT_WINDOW_ATTENTION_DELTA_C = 1.0
+SHORT_WINDOW_WARNING_DELTA_C = 2.0
+SHORT_WINDOW_SEVERE_DELTA_C = 3.0
 TREND_SIGMA_LIMIT = 3.0
+LEVEL_NOT_CHECKED = "未检测"
+LEVEL_NORMAL = "正常"
+LEVEL_ATTENTION = "关注"
+LEVEL_WARNING = "警告"
+LEVEL_SEVERE = "严重"
+CONCLUSION_LEVEL_ORDER = {
+    LEVEL_NORMAL: 0,
+    LEVEL_ATTENTION: 1,
+    LEVEL_WARNING: 2,
+    LEVEL_SEVERE: 3,
+}
 
 
 @dataclass(frozen=True)
@@ -84,12 +115,42 @@ class TrendTemperatureResult:
 
 
 @dataclass(frozen=True)
+class ShortWindowTemperatureResult:
+    enough_data: bool
+    status: str | None
+    level: str | None
+    window_count: int
+    start_temperature_c: float | None
+    current_temperature_c: float | None
+    cumulative_delta_c: float | None
+    latest_delta_c: float | None
+
+
+@dataclass(frozen=True)
+class TemperatureCheckConclusion:
+    name: str
+    level: str
+    triggered: bool
+    conclusion: str
+
+
+@dataclass(frozen=True)
+class TemperatureConclusion:
+    level: str
+    triggered: bool
+    conclusion: str
+    items: list[TemperatureCheckConclusion]
+
+
+@dataclass(frozen=True)
 class TemperatureDiagnosisResult:
     sn: str
     report_id: str
     report_count: int
     short_term: ShortTermTemperatureResult
+    short_window: ShortWindowTemperatureResult
     trend: TrendTemperatureResult
+    conclusion: TemperatureConclusion
 
 
 def run_temperature_check(
@@ -146,14 +207,23 @@ def diagnose_temperature(
     current = unique_reports[current_index] if current_index >= 0 else None
     previous = unique_reports[current_index - 1] if current_index > 0 else None
 
+    history_to_current = unique_reports[: current_index + 1]
     short_term = check_short_term_temperature_rise(current, previous)
-    trend = check_temperature_trend(unique_reports[: current_index + 1])
+    short_window = check_short_window_temperature_rise(history_to_current)
+    trend = check_temperature_trend(history_to_current)
+    conclusion = build_temperature_conclusion(
+        short_window=short_window,
+        trend=trend,
+        short_term=short_term,
+    )
     return TemperatureDiagnosisResult(
         sn=sn,
         report_id=report_id,
         report_count=len(unique_reports),
         short_term=short_term,
+        short_window=short_window,
         trend=trend,
+        conclusion=conclusion,
     )
 
 
@@ -214,6 +284,101 @@ def check_temperature_trend(reports: list[ReportTemperature]) -> TrendTemperatur
     )
 
 
+def check_short_window_temperature_rise(
+    reports: list[ReportTemperature],
+) -> ShortWindowTemperatureResult:
+    """Detect cumulative short-window warming with a 0.5°C noise band."""
+    unique_reports = _dedupe_report_temperatures(reports)
+    if len(unique_reports) < SHORT_WINDOW_MIN_POINTS:
+        current = unique_reports[-1] if unique_reports else None
+        return ShortWindowTemperatureResult(
+            enough_data=False,
+            status=None,
+            level=None,
+            window_count=len(unique_reports),
+            start_temperature_c=None,
+            current_temperature_c=current.temperature_c if current else None,
+            cumulative_delta_c=None,
+            latest_delta_c=None,
+        )
+
+    current = unique_reports[-1]
+    previous = unique_reports[-2]
+    latest_delta = _temperature_delta(current.temperature_c, previous.temperature_c)
+    if latest_delta <= 0:
+        return ShortWindowTemperatureResult(
+            enough_data=True,
+            status=None,
+            level=None,
+            window_count=min(len(unique_reports), SHORT_WINDOW_SIZE),
+            start_temperature_c=None,
+            current_temperature_c=current.temperature_c,
+            cumulative_delta_c=None,
+            latest_delta_c=latest_delta,
+        )
+
+    window = unique_reports[-SHORT_WINDOW_SIZE:]
+    deltas = [
+        _temperature_delta(right.temperature_c, left.temperature_c)
+        for left, right in zip(window, window[1:], strict=False)
+    ]
+    if any(delta <= -TEMP_STABLE_DELTA_C for delta in deltas):
+        return ShortWindowTemperatureResult(
+            enough_data=True,
+            status=None,
+            level=None,
+            window_count=len(window),
+            start_temperature_c=window[0].temperature_c,
+            current_temperature_c=current.temperature_c,
+            cumulative_delta_c=_temperature_delta(current.temperature_c, window[0].temperature_c),
+            latest_delta_c=latest_delta,
+        )
+
+    cumulative_delta = _temperature_delta(current.temperature_c, window[0].temperature_c)
+    level = _short_window_level(cumulative_delta)
+    status = _short_window_status(deltas) if level else None
+    return ShortWindowTemperatureResult(
+        enough_data=True,
+        status=status,
+        level=level,
+        window_count=len(window),
+        start_temperature_c=window[0].temperature_c,
+        current_temperature_c=current.temperature_c,
+        cumulative_delta_c=cumulative_delta,
+        latest_delta_c=latest_delta,
+    )
+
+
+def build_temperature_conclusion(
+    short_window: ShortWindowTemperatureResult,
+    trend: TrendTemperatureResult,
+    short_term: ShortTermTemperatureResult,
+) -> TemperatureConclusion:
+    """Build the overall temperature conclusion from all diagnosis tracks."""
+    items = [
+        _short_window_conclusion(short_window),
+        _trend_conclusion(trend),
+        _short_term_conclusion(short_term),
+    ]
+    level = _highest_conclusion_level(items)
+    triggered_items = [item for item in items if item.triggered]
+    if not triggered_items:
+        return TemperatureConclusion(
+            level=LEVEL_NORMAL,
+            triggered=False,
+            conclusion="温度诊断结论：正常",
+            items=items,
+        )
+
+    reasons = "；".join(item.conclusion for item in triggered_items)
+    return TemperatureConclusion(
+        level=level,
+        triggered=True,
+        conclusion=f"温度诊断结论：{level}，{reasons}",
+        items=items,
+    )
+
+
 def load_recent_report_temperatures(
     sn: str,
     limit: int = RECENT_QUERY_LIMIT,
@@ -252,6 +417,16 @@ def query_recent_report_temperatures_from_influx(
 
 
 def _log_temperature_result(result: TemperatureDiagnosisResult) -> None:
+    logger.info(
+        "Temperature diagnosis conclusion: sn=%s report_id=%s level=%s triggered=%s "
+        "conclusion=%s",
+        result.sn,
+        result.report_id,
+        result.conclusion.level,
+        result.conclusion.triggered,
+        result.conclusion.conclusion,
+    )
+
     short_term = result.short_term
     if short_term.enough_data and short_term.level:
         _log_short_term_temperature_rise(
@@ -263,6 +438,18 @@ def _log_temperature_result(result: TemperatureDiagnosisResult) -> None:
             "Temperature short-term rise skipped: sn=%s report_id=%s not enough data",
             result.sn,
             result.report_id,
+        )
+
+    short_window = result.short_window
+    if short_window.enough_data and short_window.level:
+        _log_short_window_temperature_rise(result, short_window)
+    elif not short_window.enough_data:
+        logger.debug(
+            "Temperature short-window rise skipped: sn=%s report_id=%s report_count=%s need=%s",
+            result.sn,
+            result.report_id,
+            short_window.window_count,
+            SHORT_WINDOW_MIN_POINTS,
         )
 
     trend = result.trend
@@ -360,6 +547,151 @@ def _log_short_term_temperature_rise(
     )
 
 
+def _log_short_window_temperature_rise(
+    result: TemperatureDiagnosisResult,
+    short_window: ShortWindowTemperatureResult,
+) -> None:
+    log = logger.info
+    if short_window.level == "警告":
+        log = logger.warning
+    elif short_window.level == "严重":
+        log = logger.error
+
+    log(
+        "Temperature short-window rise %s/%s: sn=%s report_id=%s start=%s current=%s "
+        "cumulative_delta_c=%.4f latest_delta_c=%.4f window_count=%s",
+        short_window.status,
+        short_window.level,
+        result.sn,
+        result.report_id,
+        short_window.start_temperature_c,
+        short_window.current_temperature_c,
+        short_window.cumulative_delta_c,
+        short_window.latest_delta_c,
+        short_window.window_count,
+    )
+
+
+def _short_window_conclusion(
+    short_window: ShortWindowTemperatureResult,
+) -> TemperatureCheckConclusion:
+    name = "短窗口"
+    if not short_window.enough_data:
+        return TemperatureCheckConclusion(
+            name=name,
+            level=LEVEL_NOT_CHECKED,
+            triggered=False,
+            conclusion=(
+                f"短窗口检测数据不足，当前 {short_window.window_count} 个点，"
+                f"至少需要 {SHORT_WINDOW_MIN_POINTS} 个点"
+            ),
+        )
+    if short_window.level:
+        status = short_window.status or "升温"
+        return TemperatureCheckConclusion(
+            name=name,
+            level=short_window.level,
+            triggered=True,
+            conclusion=(
+                f"短窗口{status}，累计升温 "
+                f"{_format_temperature_value(short_window.cumulative_delta_c)}°C，"
+                f"最新周期变化 {_format_temperature_value(short_window.latest_delta_c)}°C"
+            ),
+        )
+    if short_window.latest_delta_c is not None and short_window.latest_delta_c <= 0:
+        conclusion = "当前周期未升温，短窗口检测未触发"
+    else:
+        conclusion = "短窗口累计升温未达到阈值或窗口内存在明显回落"
+    return TemperatureCheckConclusion(
+        name=name,
+        level=LEVEL_NORMAL,
+        triggered=False,
+        conclusion=conclusion,
+    )
+
+
+def _trend_conclusion(trend: TrendTemperatureResult) -> TemperatureCheckConclusion:
+    name = "长窗口"
+    if not trend.enough_data:
+        return TemperatureCheckConclusion(
+            name=name,
+            level=LEVEL_NOT_CHECKED,
+            triggered=False,
+            conclusion=f"长窗口检测数据不足，至少需要 {TREND_WINDOW_SIZE} 个点",
+        )
+    if trend.warning:
+        return TemperatureCheckConclusion(
+            name=name,
+            level=LEVEL_WARNING,
+            triggered=True,
+            conclusion=(
+                "长窗口统计异常，当前温度 "
+                f"{_format_temperature_value(trend.current_temperature_c)}°C，"
+                f"均值 {_format_temperature_value(trend.mean_temperature_c)}°C，"
+                f"z_score={_format_temperature_value(trend.z_score)}"
+            ),
+        )
+    return TemperatureCheckConclusion(
+        name=name,
+        level=LEVEL_NORMAL,
+        triggered=False,
+        conclusion="长窗口统计未发现异常",
+    )
+
+
+def _short_term_conclusion(
+    short_term: ShortTermTemperatureResult,
+) -> TemperatureCheckConclusion:
+    name = "单次检测温度抬升"
+    if not short_term.enough_data:
+        return TemperatureCheckConclusion(
+            name=name,
+            level=LEVEL_NOT_CHECKED,
+            triggered=False,
+            conclusion="单次检测温度抬升数据不足",
+        )
+    if short_term.level:
+        return TemperatureCheckConclusion(
+            name=name,
+            level=short_term.level,
+            triggered=True,
+            conclusion=(
+                f"单次检测温度抬升{short_term.level}，"
+                f"从 {_format_temperature_value(short_term.previous_temperature_c)}°C "
+                f"升至 {_format_temperature_value(short_term.current_temperature_c)}°C，"
+                f"升幅 {_format_ratio(short_term.increase_ratio)}"
+            ),
+        )
+    return TemperatureCheckConclusion(
+        name=name,
+        level=LEVEL_NORMAL,
+        triggered=False,
+        conclusion="单次检测温度抬升未达到阈值",
+    )
+
+
+def _highest_conclusion_level(items: list[TemperatureCheckConclusion]) -> str:
+    level = LEVEL_NORMAL
+    for item in items:
+        if CONCLUSION_LEVEL_ORDER.get(item.level, 0) > CONCLUSION_LEVEL_ORDER[level]:
+            level = item.level
+    return level
+
+
+def _format_temperature_value(value: float | None) -> str:
+    if value is None:
+        return "N/A"
+    return f"{value:.4f}".rstrip("0").rstrip(".")
+
+
+def _format_ratio(value: float | None) -> str:
+    if value is None:
+        return "N/A"
+    if value == float("inf"):
+        return "inf"
+    return f"{value:.2%}"
+
+
 def _short_term_level(increase_ratio: float) -> str | None:
     if increase_ratio > SHORT_TERM_SEVERE_RATIO:
         return "严重"
@@ -370,12 +702,34 @@ def _short_term_level(increase_ratio: float) -> str | None:
     return None
 
 
+def _short_window_level(cumulative_delta_c: float) -> str | None:
+    if cumulative_delta_c >= SHORT_WINDOW_SEVERE_DELTA_C:
+        return "严重"
+    if cumulative_delta_c >= SHORT_WINDOW_WARNING_DELTA_C:
+        return "警告"
+    if cumulative_delta_c >= SHORT_WINDOW_ATTENTION_DELTA_C:
+        return "关注"
+    return None
+
+
+def _short_window_status(deltas: list[float]) -> str:
+    latest_delta = deltas[-1]
+    has_clear_rise = any(delta >= TEMP_STABLE_DELTA_C for delta in deltas[:-1])
+    if has_clear_rise and latest_delta < TEMP_STABLE_DELTA_C:
+        return "高位保持"
+    return "持续升温"
+
+
 def _temperature_increase_ratio(current_temperature: float, previous_temperature: float) -> float:
     if previous_temperature == 0:
         if current_temperature > 0:
             return float("inf")
         return 0.0
     return (current_temperature - previous_temperature) / abs(previous_temperature)
+
+
+def _temperature_delta(current_temperature: float, previous_temperature: float) -> float:
+    return round(current_temperature - previous_temperature, 4)
 
 
 def _population_sigma(values: list[float], mean_value: float) -> float:
