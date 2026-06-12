@@ -10,18 +10,18 @@ RUN pip install uv -i https://mirrors.aliyun.com/pypi/simple/
 
 WORKDIR /app
 
-COPY svr/pyproject.toml svr/uv.lock* /app/api
-COPY svr/api/pyproject.toml /app/api
-COPY svr/pub/pyproject.toml /app/pub/README.md /app/pub/
-COPY svr/pub/src /app/pub/src/
+COPY server/pyproject.toml server/uv.lock* /app/api
+COPY server/api/pyproject.toml /app/api
+COPY server/pub/pyproject.toml /app/pub/README.md /app/pub/
+COPY server/pub/src /app/pub/src/
 
 RUN uv sync --no-dev --no-install-project
 
-COPY svr/api/app /app/svr/api/app
+COPY server/api/app /app/server/api/app
 
 RUN uv sync --no-dev
 
-ENV PATH="/app/svr/.venv/bin:$PATH"
+ENV PATH="/app/server/.venv/bin:$PATH"
 
 EXPOSE 8000
 

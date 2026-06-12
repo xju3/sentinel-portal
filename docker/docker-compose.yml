@@ -10,42 +10,42 @@ x-python-app: &python-app
     PYTHONUNBUFFERED: "1"
     TZ: "Asia/Shanghai"
   volumes:
-    - ../svr:/app/svr
+    - ../server:/app/server
 
 services:
   api:
     <<: *python-app
     container_name: stl-api
-    working_dir: /app/svr/api
+    working_dir: /app/server/api
     env_file:
       - ../.env
     command: >
       sh -c "pip install uv -i $${UV_INDEX_URL} &&
       uv sync --no-dev &&
       uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-      --reload-dir /app/svr/api/app --reload-dir /app/svr/pub/src"
+      --reload-dir /app/server/api/app --reload-dir /app/server/pub/src"
     ports:
       - "3090:8000"
     volumes:
-      - ../svr:/app/svr
-      - api_venv:/app/svr/.venv
+      - ../server:/app/server
+      - api_venv:/app/server/.venv
 
   dia:
     <<: *python-app
     container_name: stl-dia
-    working_dir: /app/svr/dia
+    working_dir: /app/server/dia
     env_file:
       - ../.env
     command: >
       sh -c "pip install uv -i $${UV_INDEX_URL} &&
       uv sync --no-dev &&
       uv run uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
-      --reload-dir /app/svr/dia/app --reload-dir /app/svr/pub/src"
+      --reload-dir /app/server/dia/app --reload-dir /app/server/pub/src"
     ports:
       - "3091:8000"
     volumes:
-      - ../svr:/app/svr
-      - dia_venv:/app/svr/.venv
+      - ../server:/app/server
+      - dia_venv:/app/server/.venv
 
   tenant:
     container_name: stl-tenant

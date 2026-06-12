@@ -5,10 +5,10 @@ FROM ${NODE_IMAGE} AS builder
 
 WORKDIR /app
 
-COPY web/tenant/package*.json ./
+COPY client/tenant/package*.json ./
 RUN npm install
 
-COPY web/tenant/ .
+COPY client/tenant/ .
 RUN npm run build
 
 FROM ${NGINX_IMAGE}
