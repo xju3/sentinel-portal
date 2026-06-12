@@ -18,7 +18,7 @@ services:
     container_name: stl-api
     working_dir: /app/server/api
     env_file:
-      - ../.env
+      - ~/.env
     command: >
       sh -c "pip install uv -i $${UV_INDEX_URL} &&
       uv sync --no-dev &&
@@ -35,7 +35,7 @@ services:
     container_name: stl-dia
     working_dir: /app/server/dia
     env_file:
-      - ../.env
+      - ~/.env
     command: >
       sh -c "pip install uv -i $${UV_INDEX_URL} &&
       uv sync --no-dev &&
