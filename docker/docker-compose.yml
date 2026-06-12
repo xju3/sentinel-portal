@@ -51,7 +51,9 @@ services:
     container_name: stl-tenant
     build:
       context: ..
-      dockerfile: docker/tenant/Dockerfile
+      dockerfile: docker/client/Dockerfile
+      args:
+        APP_NAME: tenant
     restart: unless-stopped
     ports:
       - "3010:80"
@@ -64,7 +66,9 @@ services:
     container_name: stl-admin
     build:
       context: ..
-      dockerfile: docker/admin/Dockerfile
+      dockerfile: docker/client/Dockerfile
+      args:
+        APP_NAME: admin
     restart: unless-stopped
     ports:
       - "3020:80"
