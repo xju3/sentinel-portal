@@ -1,5 +1,8 @@
-from typing import List
+from typing import Any, List
+
+from pydantic import field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
 
 class Settings(BaseSettings):
     """Application settings loaded from environment variables or .env file."""
@@ -52,6 +55,13 @@ class Settings(BaseSettings):
 
     # Queue Configuration
     patrol_queue_length: int = 72
+
+    @field_validator("debug", mode="before")
+    @classmethod
+    def parse_debug(cls, value: Any) -> Any:
+        if isinstance(value, str) and value.lower() in {"release", "prod", "production"}:
+            return False
+        return value
 
     model_config = SettingsConfigDict(
         env_file=".env",

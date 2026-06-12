@@ -68,7 +68,7 @@ class SpringBootFormatter(logging.Formatter):
         
         # 4. 日志正文主体 (默认终端白/灰)
         message = record.getMessage()
-        message = f"{self.DIM}{message}{self.RESET}"
+        message = f"{level_color}{message}{self.RESET}"
         
         # 5. 拼装成 Spring Boot 经典排版格式
         return f"{time_part} {level_part}{self.DIM}{self.RESET}[{location_part}]: {message}"

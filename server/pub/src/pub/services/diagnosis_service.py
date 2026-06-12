@@ -4,14 +4,195 @@ Diagnosis service - business logic for patrol diagnosis record operations
 
 import logging
 import time
-from typing import Dict, Any
+from typing import Any, Dict, Optional
+from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import desc, select
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
 
 from pub.database import db_manager
+from pub.models.diagnosis import DiagnosisResult, DiagnosisResultItem
 from pub.models.sensor import PatrolDiagnosticRecord, Sensor, SensorMonitoring
 
 logger = logging.getLogger(__name__)
+
+
+class DiagnosisResultService:
+    """Service for storing and querying structured diagnosis results."""
+
+    @staticmethod
+    async def create(
+        session: AsyncSession,
+        data: dict[str, Any],
+        items: list[dict[str, Any]] | None = None,
+    ) -> DiagnosisResult:
+        """Create a diagnosis result with optional per-check items."""
+        data = dict(data)
+        item_data = items or data.pop("items", None) or []
+        db_obj = DiagnosisResult(**data)
+        session.add(db_obj)
+        await session.flush()
+
+        if item_data:
+            session.add_all(
+                [
+                    DiagnosisResultItem(
+                        result_id=db_obj.id,
+                        sort_order=index,
+                        **item,
+                    )
+                    for index, item in enumerate(item_data)
+                ]
+            )
+
+        await session.commit()
+        await session.refresh(db_obj)
+        return await DiagnosisResultService.get_by_id(session, db_obj.id) or db_obj
+
+    @staticmethod
+    async def get_by_id(session: AsyncSession, result_id: UUID) -> Optional[DiagnosisResult]:
+        stmt = (
+            select(DiagnosisResult)
+            .options(selectinload(DiagnosisResult.items))
+            .where(DiagnosisResult.id == result_id)
+        )
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def get_by_report_id(
+        session: AsyncSession,
+        report_id: str,
+        metric: str | None = None,
+    ) -> list[DiagnosisResult]:
+        stmt = (
+            select(DiagnosisResult)
+            .options(selectinload(DiagnosisResult.items))
+            .where(DiagnosisResult.report_id == report_id)
+            .order_by(desc(DiagnosisResult.diagnosed_at))
+        )
+        if metric:
+            stmt = stmt.where(DiagnosisResult.metric == metric)
+        result = await session.execute(stmt)
+        return list(result.scalars().all())
+
+    @staticmethod
+    async def list_by_sn(
+        session: AsyncSession,
+        sn: str,
+        metric: str | None = None,
+        skip: int = 0,
+        limit: int = 100,
+    ) -> list[DiagnosisResult]:
+        stmt = (
+            select(DiagnosisResult)
+            .options(selectinload(DiagnosisResult.items))
+            .where(DiagnosisResult.sn == sn)
+            .order_by(desc(DiagnosisResult.report_ts), desc(DiagnosisResult.diagnosed_at))
+            .offset(skip)
+            .limit(limit)
+        )
+        if metric:
+            stmt = stmt.where(DiagnosisResult.metric == metric)
+        result = await session.execute(stmt)
+        return list(result.scalars().all())
+
+    @staticmethod
+    async def get_latest_by_sn(
+        session: AsyncSession,
+        sn: str,
+        metric: str | None = None,
+    ) -> Optional[DiagnosisResult]:
+        results = await DiagnosisResultService.list_by_sn(
+            session=session,
+            sn=sn,
+            metric=metric,
+            skip=0,
+            limit=1,
+        )
+        return results[0] if results else None
+
+    @staticmethod
+    async def save_temperature_result(
+        session: AsyncSession,
+        result: Any,
+        report_ts: int | None = None,
+    ) -> DiagnosisResult:
+        """Persist a temperature diagnosis result object.
+
+        The object is intentionally duck-typed so the shared `pub` package does
+        not need to import DIA's temperature dataclasses.
+        """
+        data, items = DiagnosisResultService.temperature_result_to_record_data(
+            result,
+            report_ts=report_ts,
+        )
+        return await DiagnosisResultService.create(session, data, items)
+
+    @staticmethod
+    async def save_temperature_result_managed(
+        result: Any,
+        report_ts: int | None = None,
+    ) -> Optional[DiagnosisResult]:
+        """Persist a temperature diagnosis result using an internally managed session."""
+        if db_manager.SessionLocal is None:
+            raise RuntimeError("Database not initialized. Call db_manager.init() first.")
+
+        try:
+            await db_manager.ensure_schema()
+            async with db_manager.SessionLocal() as session:
+                return await DiagnosisResultService.save_temperature_result(
+                    session=session,
+                    result=result,
+                    report_ts=report_ts,
+                )
+        except Exception as e:
+            logger.error("Failed to save temperature diagnosis result: %s", e)
+            return None
+
+    @staticmethod
+    def temperature_result_to_record_data(
+        result: Any,
+        report_ts: int | None = None,
+    ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        conclusion = result.conclusion
+        data = {
+            "report_id": result.report_id,
+            "sn": result.sn,
+            "metric": "temperature",
+            "level": conclusion.level,
+            "triggered": bool(conclusion.triggered),
+            "conclusion": conclusion.conclusion,
+            "evidence": _json_safe(conclusion.evidence),
+            "report_ts": report_ts,
+        }
+        items = [
+            {
+                "name": item.name,
+                "level": item.level,
+                "triggered": bool(item.triggered),
+                "conclusion": item.conclusion,
+                "evidence": _json_safe(item.evidence),
+            }
+            for item in conclusion.items
+        ]
+        return data, items
+
+
+def _json_safe(value: Any) -> Any:
+    """Return a JSON-column friendly value."""
+    if value is None:
+        return None
+    if isinstance(value, (str, int, float, bool)):
+        return value
+    if isinstance(value, list):
+        return [_json_safe(item) for item in value]
+    if isinstance(value, tuple):
+        return [_json_safe(item) for item in value]
+    if isinstance(value, dict):
+        return {str(key): _json_safe(item) for key, item in value.items()}
+    return str(value)
 
 
 class PatrolDiagnosisRecordService:

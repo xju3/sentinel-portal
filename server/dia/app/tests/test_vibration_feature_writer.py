@@ -1,7 +1,7 @@
 import json
 from pathlib import Path
 
-from app.clients.dia_influxdb_client import build_vibration_feature_lines
+from server.dia.app.clients.influxdb_client import build_vibration_feature_lines
 
 
 def test_build_vibration_feature_lines_flattens_axis_features():

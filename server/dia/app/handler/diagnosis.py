@@ -2,10 +2,12 @@
 Diagnosis entrypoint.
 """
 
+import asyncio
 import logging
 from concurrent.futures import Future, ThreadPoolExecutor
 
 from app.handler.temperature import run_temperature_check
+from pub.services.diagnosis_service import DiagnosisResultService
 
 logger = logging.getLogger(__name__)
 
@@ -45,12 +47,31 @@ def run_diagnosis(
         current_temperature_c,
         current_ts_ms,
     )
-    run_temperature_check(
+    result = run_temperature_check(
         report_id,
         sn,
         current_temperature_c,
         current_ts_ms,
     )
+    saved_result = asyncio.run(
+        DiagnosisResultService.save_temperature_result_managed(
+            result,
+            report_ts=current_ts_ms,
+        )
+    )
+    if saved_result is None:
+        logger.warning(
+            "Temperature diagnosis result was not saved: report_id=%s sn=%s",
+            report_id,
+            sn,
+        )
+    else:
+        logger.debug(
+            "Temperature diagnosis result saved: report_id=%s sn=%s diagnosis_result_id=%s",
+            report_id,
+            sn,
+            saved_result.id,
+        )
     logger.debug("Diagnosis job finished for report_id=%s sn=%s", report_id, sn)
 
 

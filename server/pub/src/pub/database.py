@@ -18,7 +18,7 @@ from influxdb_client import InfluxDBClient
 from minio import Minio
 from minio.error import S3Error
 
-from pub.models import Base
+from pub.models import Base, import_all_models
 
 logger = logging.getLogger(__name__)
 
@@ -32,6 +32,7 @@ class DatabaseManager:
         self.SessionLocal = None
         self._mysql_url: str = ""
         self._debug: bool = False
+        self._schema_ready: bool = False
 
     async def init(self, mysql_url: str, debug: bool = False) -> None:
         """Initialize database engine and session factory.
@@ -53,18 +54,29 @@ class DatabaseManager:
             self.SessionLocal = async_sessionmaker(
                 self.engine, class_=AsyncSession, expire_on_commit=False
             )
-            # Create all tables if they do not exist
-            async with self.engine.begin() as conn:
-                await conn.run_sync(Base.metadata.create_all)
+            self._schema_ready = False
+            await self.ensure_schema()
             # logger.info("MySQL database initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize MySQL database: {e}")
             raise
 
+    async def ensure_schema(self) -> None:
+        """Create missing tables for registered SQLAlchemy models."""
+        if self.engine is None:
+            raise RuntimeError("Database engine not initialized. Call init() first.")
+        if self._schema_ready:
+            return
+        import_all_models()
+        async with self.engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
+        self._schema_ready = True
+
     async def close(self) -> None:
         """Close database engine"""
         if self.engine:
             await self.engine.dispose()
+            self._schema_ready = False
             logger.info("MySQL database closed")
 
     async def get_session(self) -> AsyncGenerator[AsyncSession, None]:
