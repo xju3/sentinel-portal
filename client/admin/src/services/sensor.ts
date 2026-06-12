@@ -5,17 +5,29 @@ export type Sensor = {
   sn: string;
   description?: string;
   active: boolean;
+  sim_id?: string | null;
+  sim_card?: {
+    id: string;
+    number: string;
+    ccid: string;
+    carrier: string;
+    data_plan: string;
+    activated_at?: string | null;
+    expires_at: string;
+    status: number;
+  } | null;
   active_at: string;
   created_at: string;
   updated_at: string;
-  sensor_type_id: string;
+  sensor_type_id?: string;
 };
 
 export type SensorPayload = {
   sn: string;
   description?: string;
   active?: boolean;
-  sensor_type_id: string;
+  sim_id?: string | null;
+  sensor_type_id?: string;
 };
 
 export type PagedSensorResponse = {

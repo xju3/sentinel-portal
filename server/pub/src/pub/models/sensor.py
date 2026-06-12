@@ -5,7 +5,7 @@ Sensor data models
 import uuid
 from datetime import datetime
 from sqlalchemy import Uuid, Column, SmallInteger, Numeric, Integer, String, Float, DateTime, Boolean, Text, BigInteger
-from sqlalchemy.orm import relationship
+from sqlalchemy.orm import relationship, backref
 
 from sqlalchemy.dialects.mysql import JSON as MySQLJSON
 
@@ -81,6 +81,14 @@ class Sensor(Base):
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
     sensor_batch_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Optional link to sensor_batch for batch tracking
 
+    # Define the relationship to SimCard
+    sim_card = relationship(
+        "SimCard",
+        primaryjoin="foreign(Sensor.sim_id) == SimCard.id",
+        backref=backref("sensor", uselist=False),  # 修正: 一张SIM卡同一时间只能绑定一个传感器
+        lazy="selectin",     # Eagerly load the related SimCard when querying Sensors
+        uselist=False        # A Sensor has at most one SimCard
+    )
     def __repr__(self):
         return f"<Sensor {self.id}: {self.sn}>"
 

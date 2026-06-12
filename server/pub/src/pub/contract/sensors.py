@@ -80,12 +80,27 @@ class SensorCreate(BaseModel):
     sn: str
     description: Optional[str] = None
     active: Optional[bool] = True
+    sim_id: Optional[UUID] = None
 
 
 class SensorUpdate(BaseModel):
     sn: Optional[str] = None
     description: Optional[str] = None
     active: Optional[bool] = None
+    sim_id: Optional[UUID] = None
+
+
+class SensorSimCardResponse(BaseModel):
+    id: UUID
+    number: str
+    ccid: str
+    carrier: str
+    data_plan: str
+    activated_at: Optional[datetime] = None
+    expires_at: datetime
+    status: int
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 class SensorResponse(BaseModel):
@@ -93,6 +108,8 @@ class SensorResponse(BaseModel):
     sn: str
     description: Optional[str] = None
     active: bool
+    sim_id: Optional[UUID] = None
+    sim_card: Optional[SensorSimCardResponse] = None
     active_at: datetime
     created_at: datetime
     updated_at: datetime

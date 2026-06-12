@@ -14,7 +14,7 @@ from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb_client.client.query_api import QueryApi
 
 from pub.database import influxdb_manager
-from pub.models.sensor import SensorType, Sensor, SensorBatch, SensorThreshold, SensorMonitoring
+from pub.models.sensor import SensorType, Sensor, SensorBatch, SensorThreshold, SensorMonitoring, SimCard
 from pub.models.device import DeviceInst, DeviceSpec, DeviceCategory, ProcessDeviceItem, ProcessDevice
 from pub.models.customer import Tenant, Area, HealthCheckFreq, IsoStandard
 from pub.utils.exceptions import DomainException
@@ -130,6 +130,14 @@ class SensorDbService:
     async def create(session: AsyncSession, data: dict) -> Sensor:
         db_obj = Sensor(**data)
         session.add(db_obj)
+
+        # 绑定 SIM 卡时，自动更新激活时间和状态
+        if db_obj.sim_id:
+            sim_card = await session.get(SimCard, db_obj.sim_id)
+            if sim_card and sim_card.activated_at is None:
+                sim_card.activated_at = datetime.utcnow()
+                sim_card.status = 1
+
         await session.commit()
         await session.refresh(db_obj)
         return db_obj
@@ -146,8 +154,19 @@ class SensorDbService:
 
     @staticmethod
     async def update(session: AsyncSession, db_obj: Sensor, data: dict) -> Sensor:
+        old_sim_id = db_obj.sim_id
+
         for key, value in data.items():
             setattr(db_obj, key, value)
+
+        # 如果更换或新绑定了 SIM 卡，自动更新激活时间和状态
+        new_sim_id = db_obj.sim_id
+        if new_sim_id and new_sim_id != old_sim_id:
+            sim_card = await session.get(SimCard, new_sim_id)
+            if sim_card and sim_card.activated_at is None:
+                sim_card.activated_at = datetime.utcnow()
+                sim_card.status = 1
+
         await session.commit()
         await session.refresh(db_obj)
         return db_obj
@@ -157,6 +176,79 @@ class SensorDbService:
         await session.delete(db_obj)
         await session.commit()
 
+
+class SimCardService:
+    @staticmethod
+    async def get_paged(
+        session: AsyncSession,
+        current: int,
+        page_size: int,
+        keyword: Optional[str] = None,
+        status: Optional[int] = None,
+        unbound_only: bool = False,
+        unactivated_only: bool = False,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ) -> tuple:
+        from sqlalchemy import func
+        from pub.models.sensor import Sensor
+
+        base_stmt = select(SimCard)
+        base_stmt = apply_sorting(base_stmt, SimCard, sort_by, sort_order)
+        
+        if keyword:
+            like = f"%{keyword}%"
+            base_stmt = base_stmt.where(
+                (SimCard.number.ilike(like)) | (SimCard.ccid.ilike(like)) | (SimCard.carrier.ilike(like))
+            )
+            
+        if status is not None:
+            base_stmt = base_stmt.where(SimCard.status == status)
+            
+        if unbound_only:
+            # 左连接 Sensor 表，筛选出尚未绑定任何传感器的 SIM 卡
+            base_stmt = base_stmt.outerjoin(Sensor, Sensor.sim_id == SimCard.id).where(Sensor.id.is_(None))
+            
+        if unactivated_only:
+            base_stmt = base_stmt.where(SimCard.activated_at.is_(None))
+
+        count_stmt = select(func.count()).select_from(base_stmt.subquery())
+        count_result = await session.execute(count_stmt)
+        total = count_result.scalar() or 0
+
+        skip = (current - 1) * page_size
+        fetch_stmt = base_stmt.offset(skip).limit(page_size)
+        result = await session.execute(fetch_stmt)
+        items = list(result.scalars().all())
+
+        return items, total
+
+    @staticmethod
+    async def get_by_id(session: AsyncSession, obj_id: UUID) -> Optional[SimCard]:
+        stmt = select(SimCard).where(SimCard.id == obj_id)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def create(session: AsyncSession, data: dict) -> SimCard:
+        db_obj = SimCard(**data)
+        session.add(db_obj)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def update(session: AsyncSession, db_obj: SimCard, data: dict) -> SimCard:
+        for key, value in data.items():
+            setattr(db_obj, key, value)
+        await session.commit()
+        await session.refresh(db_obj)
+        return db_obj
+
+    @staticmethod
+    async def delete(session: AsyncSession, db_obj: SimCard) -> None:
+        await session.delete(db_obj)
+        await session.commit()
 
 
 class SensorBatchService:

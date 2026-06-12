@@ -18,6 +18,7 @@ import {
   listSensors,
   updateSensor,
 } from '@/services/sensor';
+import { getSimCards } from '@/services/simCard';
 
 const toErrorMessage = (error: unknown): string => {
   const e = error as
@@ -99,12 +100,12 @@ const SensorProductPage = () => {
         />
       ),
     },
+
     {
-      title: '描述',
-      dataIndex: 'description',
-      ellipsis: true,
+      title: '绑定 SIM 卡',
+      dataIndex: 'sim_id',
       hideInSearch: true,
-      render: (_, row) => row.description || '-',
+      render: (_, row) => row.sim_card ? `${row.sim_card.number} (${row.sim_card.carrier})` : (row.sim_id || '-'),
     },
     {
       title: '激活时间',
@@ -112,6 +113,13 @@ const SensorProductPage = () => {
       width: 180,
       valueType: 'dateTime',
       hideInSearch: true,
+    },
+    {
+      title: '描述',
+      dataIndex: 'description',
+      ellipsis: true,
+      hideInSearch: true,
+      render: (_, row) => row.description || '-',
     },
     {
       title: '创建时间',
@@ -202,11 +210,12 @@ const SensorProductPage = () => {
         initialValues={
           editing
             ? {
-                sn: editing.sn,
-                description: editing.description,
-                active: editing.active,
-                sensor_type_id: editing.sensor_type_id,
-              }
+              sn: editing.sn,
+              description: editing.description,
+              active: editing.active,
+              sensor_type_id: editing.sensor_type_id,
+              sim_id: editing.sim_id,
+            }
             : { active: true }
         }
         onFinish={async (values) => {
@@ -217,6 +226,7 @@ const SensorProductPage = () => {
               description: values.description?.trim(),
               active: values.active,
               sensor_type_id: values.sensor_type_id,
+              sim_id: values.sim_id || null,
             };
 
             if (editing) {
@@ -246,10 +256,39 @@ const SensorProductPage = () => {
             { max: 255, message: '序列号最多255个字符' },
           ]}
         />
-        <ProFormTextArea
-          name="description"
-          label="描述"
+
+        <ProFormSelect
+          name="sim_id"
+          label="绑定 SIM 卡"
+          showSearch
+          allowClear
+          placeholder="请选择要绑定的 SIM 卡（可选）"
+          request={async () => {
+            try {
+              // 请求接口：只显示 status=1 (正常) 且 unbound_only=true (尚未分配) 且 unactivated_only=true (未激活) 的 SIM 卡
+              const res = await getSimCards({ pageSize: 1000, status: 1, unbound_only: true, unactivated_only: true });
+              const options = (res?.list || []).map((item: any) => ({
+                label: `${item.number} (${item.carrier})`,
+                value: item.id,
+              }));
+
+              // 如果当前正在编辑，且该传感器已经绑定了 SIM 卡，将该卡补充进下拉列表防止只显示 UUID
+              if (editing?.sim_card) {
+                const currentSim = editing.sim_card;
+                if (!options.find((opt: any) => opt.value === currentSim.id)) {
+                  options.unshift({
+                    label: `${currentSim.number} (${currentSim.carrier}) - 当前绑定`,
+                    value: currentSim.id,
+                  });
+                }
+              }
+              return options;
+            } catch (e) {
+              return [];
+            }
+          }}
         />
+
         <ProFormSelect
           name="active"
           label="状态"
@@ -258,6 +297,10 @@ const SensorProductPage = () => {
             { label: '离线', value: false },
           ]}
           rules={[{ required: true, message: '请选择状态' }]}
+        />
+        <ProFormTextArea
+          name="description"
+          label="描述"
         />
       </ModalForm>
     </PageContainer>

@@ -76,6 +76,11 @@ export default defineConfig({
           component: '@/pages/Sensor/Firmware',
         },
         {
+          path: '/sensor/sim-card',
+          name: 'SIM卡管理',
+          component: '@/pages/SImCard',
+        },
+        {
           path: '/sensor',
           redirect: '/sensor/type',
         },
