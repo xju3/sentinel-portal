@@ -1,92 +1,175 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { PageContainer, ProCard, StatisticCard } from '@ant-design/pro-components';
-import { message, Segmented } from 'antd';
+import {
+  Badge,
+  Button,
+  Col,
+  Empty,
+  List,
+  Progress,
+  Row,
+  Space,
+  Table,
+  Tag,
+  Typography,
+  message,
+} from 'antd';
+import { ReloadOutlined } from '@ant-design/icons';
 import { request } from '@umijs/max';
+import type { ColumnsType } from 'antd/es/table';
 import CalendarHeatmap from './CalendarHeatmap';
-import FaultPieChart from './FaultPieChart';
-import FaultRankBarChart from './FaultRankBarChart';
-import FaultAlertList from './FaultAlertList';
 
 const { Statistic } = StatisticCard;
+const { Text } = Typography;
 
-// 定义 Dashboard 聚合数据类型
-type DashboardData = {
+type LevelName = '正常' | '关注' | '警告' | '严重' | '离线' | '未检测' | '未配置';
+
+type DashboardSummary = {
   totalDevices: number;
-  runningDevices: number;
+  onlineDevices: number;
+  normalDevices: number;
   faultyDevices: number;
-  newDevicesToday: number;
-  vibrationAnomalyCount: number;
-  temperatureAnomalyCount: number;
-  bothAnomalyCount: number;
-  recentAnomalies: {
-    id: string;
-    device_code: string;
-    device_sn: string;
-    anomaly: number;
-    ts: number;
-  }[];
-  faultsByCategory?: { name: string; count: number }[];
-  faultsByArea?: { name: string; count: number }[];
-  faultsByProcess?: { name: string; count: number }[];
-  // 兼容老版本接口返回的树形结构
-  devicesByCategoryTree?: any[];
-  devicesByAreaTree?: any[];
-  devicesByProcessTree?: any[];
+  attentionDevices: number;
+  warningDevices: number;
+  severeDevices: number;
+  offlineSensors: number;
+  notCheckedDevices: number;
+  unconfiguredDevices: number;
+  latestReportTs?: number | null;
 };
 
-// 将老版树形数据(Tree)拍平成条形图所需的一维数组(Flat Array)
-const flattenTreeData = (nodes?: any[], path: string = ''): { name: string; count: number }[] => {
-  let result: { name: string; count: number }[] = [];
-  if (!nodes) return result;
-  for (const node of nodes) {
-    // 拼接层级路径，例如 "一厂区/冲压车间"
-    const currentPath = path ? `${path}/${node.name}` : node.name;
-    if (node.anomaly > 0) {
-      // 如果是末端节点，或者没有子节点，就收集它
-      if (!node.children || node.children.length === 0) {
-        result.push({ name: currentPath, count: node.anomaly });
-      } else {
-        // 如果还有子节点，继续向下递归寻找真正出故障的末端设备
-        result = result.concat(flattenTreeData(node.children, currentPath));
-      }
-    }
-  }
-  return result;
+type HealthDistributionItem = {
+  level: LevelName;
+  count: number;
+};
+
+type DiagnosisDistributionItem = {
+  metric: string;
+  label: string;
+  count: number;
+  attention: number;
+  warning: number;
+  severe: number;
+};
+
+type PriorityFault = {
+  id: string;
+  device_id: string;
+  device_name: string;
+  device_code: string;
+  sn: string;
+  area: string;
+  process: string;
+  level: LevelName;
+  metric: string;
+  metric_label: string;
+  conclusion: string;
+  report_ts?: number | null;
+  diagnosed_at?: string | null;
+  duration_ms?: number | null;
+  sequence?: number | null;
+  last_activity_at?: string | null;
+};
+
+type CommunicationSummary = {
+  onlineSensors: number;
+  offlineSensors: number;
+  slowSensors: number;
+  avgDurationMs?: number | null;
+  maxDurationMs?: number | null;
+  latestActivityAt?: string | null;
+};
+
+type TrendItem = {
+  date: string;
+  attention: number;
+  warning: number;
+  severe: number;
+  total: number;
+};
+
+type DashboardWorkbenchData = {
+  summary: DashboardSummary;
+  healthDistribution: HealthDistributionItem[];
+  diagnosisDistribution: DiagnosisDistributionItem[];
+  priorityFaults: PriorityFault[];
+  communication: CommunicationSummary;
+  trend: TrendItem[];
+};
+
+const emptyData: DashboardWorkbenchData = {
+  summary: {
+    totalDevices: 0,
+    onlineDevices: 0,
+    normalDevices: 0,
+    faultyDevices: 0,
+    attentionDevices: 0,
+    warningDevices: 0,
+    severeDevices: 0,
+    offlineSensors: 0,
+    notCheckedDevices: 0,
+    unconfiguredDevices: 0,
+  },
+  healthDistribution: [],
+  diagnosisDistribution: [],
+  priorityFaults: [],
+  communication: {
+    onlineSensors: 0,
+    offlineSensors: 0,
+    slowSensors: 0,
+  },
+  trend: [],
+};
+
+const levelColor: Record<LevelName, string> = {
+  正常: '#52c41a',
+  关注: '#faad14',
+  警告: '#fa8c16',
+  严重: '#f5222d',
+  离线: '#8c8c8c',
+  未检测: '#1677ff',
+  未配置: '#bfbfbf',
+};
+
+const levelStatus: Record<LevelName, 'success' | 'warning' | 'error' | 'default' | 'processing'> = {
+  正常: 'success',
+  关注: 'warning',
+  警告: 'warning',
+  严重: 'error',
+  离线: 'default',
+  未检测: 'processing',
+  未配置: 'default',
+};
+
+const formatTime = (value?: string | number | null) => {
+  if (!value) return '-';
+  const date = typeof value === 'number' ? new Date(value) : new Date(value);
+  if (Number.isNaN(date.getTime())) return '-';
+  return date.toLocaleString();
+};
+
+const formatDuration = (value?: number | null) => {
+  if (value === undefined || value === null) return '-';
+  if (value < 1000) return `${Math.round(value)} ms`;
+  return `${(value / 1000).toFixed(1)} s`;
+};
+
+const percentOf = (value: number, total: number) => {
+  if (!total) return 0;
+  return Math.round((value / total) * 100);
 };
 
 const DashboardOverview = () => {
   const [loading, setLoading] = useState(true);
-  const [data, setData] = useState<DashboardData>({
-    totalDevices: 0,
-    runningDevices: 0,
-    faultyDevices: 0,
-    newDevicesToday: 0,
-    vibrationAnomalyCount: 0,
-    temperatureAnomalyCount: 0,
-    bothAnomalyCount: 0,
-    recentAnomalies: [],
-  });
-
-  // 年历数据
+  const [data, setData] = useState<DashboardWorkbenchData>(emptyData);
   const [calendarData, setCalendarData] = useState<any>(null);
   const [calendarLoading, setCalendarLoading] = useState(false);
 
-  const [viewMode, setViewMode] = useState<'category' | 'area' | 'process'>('category');
-
-  // 从后端获取 Dashboard 聚合数据
   const fetchDashboardData = async () => {
     setLoading(true);
     try {
-      const res = await request<DashboardData>('/api/v1/dashboard/overview');
-      if (res) {
-        // 如果后端已经返回了 flat 数组，就用后端的，否则前端自己去递归遍历树
-        setData({
-          ...res,
-          faultsByCategory: res.faultsByCategory || flattenTreeData(res.devicesByCategoryTree),
-          faultsByArea: res.faultsByArea || flattenTreeData(res.devicesByAreaTree),
-          faultsByProcess: res.faultsByProcess || flattenTreeData(res.devicesByProcessTree),
-        });
-      }
+      const res = await request<DashboardWorkbenchData>('/api/v1/dashboard/workbench');
+      setData(res || emptyData);
     } catch (error) {
       message.error('获取仪表盘数据失败');
     } finally {
@@ -94,226 +177,256 @@ const DashboardOverview = () => {
     }
   };
 
-  // 仅刷新统计卡片数据
-  const refreshStats = async () => {
-    try {
-      const res = await request<DashboardData>('/api/v1/dashboard/overview');
-      if (res) {
-        setData(prev => ({
-          ...prev,
-          totalDevices: res.totalDevices,
-          runningDevices: res.runningDevices,
-          faultyDevices: res.faultyDevices,
-          newDevicesToday: res.newDevicesToday,
-        }));
-      }
-    } catch (error) {
-      message.error('刷新统计数据失败');
-    }
-  };
-
-  // 仅刷新故障视图（三个图表）
-  const refreshCharts = async () => {
-    try {
-      const res = await request<DashboardData>('/api/v1/dashboard/overview');
-      if (res) {
-        setData(prev => ({
-          ...prev,
-          faultyDevices: res.faultyDevices,
-          vibrationAnomalyCount: res.vibrationAnomalyCount,
-          temperatureAnomalyCount: res.temperatureAnomalyCount,
-          bothAnomalyCount: res.bothAnomalyCount,
-          faultsByCategory: res.faultsByCategory || flattenTreeData(res.devicesByCategoryTree),
-          faultsByArea: res.faultsByArea || flattenTreeData(res.devicesByAreaTree),
-          faultsByProcess: res.faultsByProcess || flattenTreeData(res.devicesByProcessTree),
-        }));
-      }
-    } catch (error) {
-      message.error('刷新图表数据失败');
-    }
-  };
-
-  // 仅刷新最新故障预警列表
-  const refreshAlerts = async () => {
-    try {
-      const res = await request<DashboardData>('/api/v1/dashboard/overview');
-      if (res) {
-        setData(prev => ({
-          ...prev,
-          recentAnomalies: res.recentAnomalies,
-        }));
-      }
-    } catch (error) {
-      message.error('刷新预警数据失败');
-    }
-  };
-
-  // 获取年历数据
   const fetchCalendarData = async () => {
     setCalendarLoading(true);
     try {
       const res = await request<any>('/api/v1/dashboard/calendar');
-      if (res) setCalendarData(res);
+      setCalendarData(res);
     } catch (error) {
-      console.error('获取年历数据失败', error);
+      message.error('获取年历数据失败');
     } finally {
       setCalendarLoading(false);
     }
   };
 
-  useEffect(() => {
+  const refreshAll = () => {
     fetchDashboardData();
     fetchCalendarData();
+  };
+
+  useEffect(() => {
+    refreshAll();
   }, []);
 
-  // 定时刷新：每10分钟一次
   useEffect(() => {
-    let timer: NodeJS.Timeout;
+    let timer: ReturnType<typeof setTimeout>;
 
     const scheduleNextFetch = () => {
-      // 引入随机抖动 (Jitter)：基础时间 10 分钟 (600000ms) + 随机延迟 (0 ~ 60秒)
-      // 目的：防止多个客户端在同一瞬间并发请求，避免瞬间打死 Python FastAPI 的单线程事件循环
       const jitter = Math.floor(Math.random() * 60000);
-      const nextInterval = 600000 + jitter;
-
       timer = setTimeout(() => {
-      // 如果当前页面不可见（例如最小化、切换到了其他标签页），则跳过本次刷新请求
-      if (!document.hidden) {
-        fetchDashboardData();
-        fetchCalendarData();
-      }
-        // 递归调用，实现下一次带有随机抖动的定时
+        if (!document.hidden) {
+          refreshAll();
+        }
         scheduleNextFetch();
-      }, nextInterval);
+      }, 600000 + jitter);
     };
 
     scheduleNextFetch();
-
     return () => clearTimeout(timer);
   }, []);
 
+  const totalDevices = data.summary.totalDevices;
+  const activeFaultCount = data.summary.warningDevices + data.summary.severeDevices;
+  const healthRows = useMemo(
+    () => data.healthDistribution.filter(item => item.count > 0 || ['正常', '关注', '警告', '严重'].includes(item.level)),
+    [data.healthDistribution],
+  );
+
+  const faultColumns: ColumnsType<PriorityFault> = [
+    {
+      title: '级别',
+      dataIndex: 'level',
+      width: 86,
+      render: level => <Tag color={levelColor[level as LevelName]}>{level}</Tag>,
+    },
+    {
+      title: '设备',
+      dataIndex: 'device_name',
+      width: 180,
+      render: (_, record) => (
+        <Space direction="vertical" size={0}>
+          <Text strong>{record.device_name}</Text>
+          <Text type="secondary">{record.device_code}</Text>
+        </Space>
+      ),
+    },
+    {
+      title: '测点',
+      dataIndex: 'sn',
+      width: 150,
+    },
+    {
+      title: '诊断项',
+      dataIndex: 'metric_label',
+      width: 120,
+    },
+    {
+      title: '结论',
+      dataIndex: 'conclusion',
+      render: value => <Text>{value}</Text>,
+    },
+    {
+      title: '位置',
+      dataIndex: 'area',
+      width: 120,
+    },
+    {
+      title: '采集耗时',
+      dataIndex: 'duration_ms',
+      width: 110,
+      render: formatDuration,
+    },
+    {
+      title: '最近活动',
+      dataIndex: 'last_activity_at',
+      width: 180,
+      render: formatTime,
+    },
+  ];
+
   return (
-    <PageContainer title="仪表盘" subTitle="概览">
-      <ProCard style={{ marginTop: 16 }} ghost>
-        <ProCard
-          title="警情概览"
-          bordered
-          headerBordered
+    <PageContainer
+      title="设备运行总览"
+      subTitle={`最近上报：${formatTime(data.summary.latestReportTs)}`}
+      extra={
+        <Button icon={<ReloadOutlined />} onClick={refreshAll} loading={loading || calendarLoading}>
+          刷新
+        </Button>
+      }
+    >
+      <StatisticCard.Group direction="row" gutter={16}>
+        <StatisticCard loading={loading} statistic={{ title: '设备总数', value: totalDevices, suffix: '台' }} />
+        <StatisticCard
           loading={loading}
-          extra={
-            <a onClick={refreshStats} style={{ cursor: 'pointer' }}>
-              刷新
-            </a>
-          }
-        >
-          <StatisticCard.Group direction="row" gutter={16}>
-            <StatisticCard
-              statistic={{
-                title: '设备总数',
-                value: data.totalDevices,
-                suffix: '台',
-              }}
-            />
-            <StatisticCard
-              statistic={{
-                title: '在线设备',
-                value: data.runningDevices,
-                suffix: '台',
-                status: 'success',
-              }}
-            />
-            <StatisticCard
-              statistic={{
-                title: '报警设备',
-                value: data.faultyDevices,
-                suffix: '台',
-                status: 'error',
-              }}
-            />
-            <StatisticCard
-              statistic={{
-                title: '今日新增',
-                value: data.newDevicesToday,
-                suffix: '台',
-              }}
-            />
-          </StatisticCard.Group>
-        </ProCard>
-      </ProCard>
-   <ProCard style={{ marginTop: 16 }} ghost>
-        <ProCard
-          title="日历视图"
-          bordered
-          headerBordered
-          loading={calendarLoading}
-          extra={
-            <a onClick={fetchCalendarData} style={{ cursor: 'pointer' }}>
-              刷新
-            </a>
-          }
-        >
-          <CalendarHeatmap data={calendarData} loading={calendarLoading} />
-        </ProCard>
-      </ProCard>
-      <ProCard style={{ marginTop: 16 }} ghost>
-        <ProCard
-          title="故障分布排行"
-          bordered
-          headerBordered
+          statistic={{ title: '正常运行', value: data.summary.normalDevices, suffix: '台', status: 'success' }}
+        />
+        <StatisticCard
           loading={loading}
-          extra={
-            <div style={{ display: 'flex', alignItems: 'center', gap: 16 }}>
-              <Segmented
-                options={[
-                  { label: '按类别', value: 'category' },
-                  { label: '按区域', value: 'area' },
-                  { label: '按工段', value: 'process' },
-                ]}
-                value={viewMode}
-                onChange={(val) => setViewMode(val as 'category' | 'area' | 'process')}
-              />
-              <a onClick={refreshCharts} style={{ cursor: 'pointer' }}>
-                刷新
-              </a>
-            </div>
-          }
-        >
-          <div style={{ display: 'flex', gap: 16 }}>
-            {/* <div style={{ flex: 1, minWidth: 0, textAlign: 'center' }}>
-              <FaultPieChart
-                totalDevices={data.totalDevices}
-                runningDevices={data.runningDevices}
-                faultyDevices={data.faultyDevices}
-                vibrationAnomalyCount={data.vibrationAnomalyCount}
-                temperatureAnomalyCount={data.temperatureAnomalyCount}
-                bothAnomalyCount={data.bothAnomalyCount}
-              />
-              <div style={{ marginTop: 8, fontSize: 14, fontWeight: 500, color: '#333' }}>
-                故障总览（{data.faultyDevices}台）
-              </div>
-            </div> */}
-            <div style={{ flex: 1, minWidth: 0, textAlign: 'center' }}>
-              <FaultRankBarChart
-                data={
-                  viewMode === 'category'
-                    ? data.faultsByCategory || []
-                    : viewMode === 'area'
-                    ? data.faultsByArea || []
-                    : data.faultsByProcess || []
-                }
-              />
-            </div>
-          </div>
-        </ProCard>
-      </ProCard>
+          statistic={{ title: '故障设备', value: data.summary.faultyDevices, suffix: '台', status: 'error' }}
+        />
+        <StatisticCard
+          loading={loading}
+          statistic={{ title: '严重/警告', value: activeFaultCount, suffix: '台', status: 'warning' }}
+        />
+        <StatisticCard
+          loading={loading}
+          statistic={{ title: '未覆盖', value: data.summary.unconfiguredDevices, suffix: '台' }}
+        />
+      </StatisticCard.Group>
 
-   
+      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+        <Col xs={24} xl={15}>
+          <ProCard title="设备状态" bordered headerBordered loading={loading}>
+            {healthRows.length ? (
+              <Space direction="vertical" size={14} style={{ width: '100%' }}>
+                {healthRows.map(item => (
+                  <div key={item.level}>
+                    <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+                      <Space>
+                        <Badge status={levelStatus[item.level]} />
+                        <Text>{item.level}</Text>
+                      </Space>
+                      <Text strong>{item.count} 台</Text>
+                    </Space>
+                    <Progress
+                      percent={percentOf(item.count, totalDevices)}
+                      showInfo={false}
+                      strokeColor={levelColor[item.level]}
+                    />
+                  </div>
+                ))}
+              </Space>
+            ) : (
+              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+            )}
+          </ProCard>
+        </Col>
 
-      <ProCard style={{ marginTop: 16 }} ghost>
-        <ProCard title="最新预警" bordered headerBordered loading={loading}>
-          <FaultAlertList dataSource={data.recentAnomalies} />
-        </ProCard>
-      </ProCard>
+        <Col xs={24} xl={9}>
+          <ProCard title="通讯活跃" bordered headerBordered loading={loading}>
+            <StatisticCard.Group direction="row">
+              <Statistic title="在线测点" value={data.communication.onlineSensors} suffix="个" />
+              <Statistic title="离线测点" value={data.communication.offlineSensors} suffix="个" status="warning" />
+            </StatisticCard.Group>
+            <Space direction="vertical" size={8} style={{ width: '100%', marginTop: 16 }}>
+              <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+                <Text type="secondary">平均采集耗时</Text>
+                <Text strong>{formatDuration(data.communication.avgDurationMs)}</Text>
+              </Space>
+              <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+                <Text type="secondary">最长采集耗时</Text>
+                <Text strong>{formatDuration(data.communication.maxDurationMs)}</Text>
+              </Space>
+              <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+                <Text type="secondary">最近活动</Text>
+                <Text strong>{formatTime(data.communication.latestActivityAt)}</Text>
+              </Space>
+            </Space>
+          </ProCard>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+        <Col xs={24} xl={14}>
+          <ProCard title="故障设备优先级" bordered headerBordered loading={loading}>
+            <Table<PriorityFault>
+              rowKey={record => `${record.id}-${record.device_id}-${record.sn}`}
+              columns={faultColumns}
+              dataSource={data.priorityFaults}
+              pagination={{ pageSize: 8 }}
+              size="middle"
+            />
+          </ProCard>
+        </Col>
+
+        <Col xs={24} xl={10}>
+          <ProCard title="诊断项分布" bordered headerBordered loading={loading}>
+            <List
+              dataSource={data.diagnosisDistribution}
+              locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} /> }}
+              renderItem={item => (
+                <List.Item>
+                  <div style={{ width: '100%' }}>
+                    <Space style={{ width: '100%', justifyContent: 'space-between' }}>
+                      <Text>{item.label}</Text>
+                      <Text strong>{item.count} 项</Text>
+                    </Space>
+                    <Progress
+                      percent={percentOf(item.count, Math.max(data.summary.faultyDevices, 1))}
+                      showInfo={false}
+                      strokeColor={item.severe ? '#f5222d' : item.warning ? '#fa8c16' : '#faad14'}
+                    />
+                    <Space size={12}>
+                      <Text type="secondary">关注 {item.attention}</Text>
+                      <Text type="secondary">警告 {item.warning}</Text>
+                      <Text type="secondary">严重 {item.severe}</Text>
+                    </Space>
+                  </div>
+                </List.Item>
+              )}
+            />
+          </ProCard>
+        </Col>
+      </Row>
+
+      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
+        <Col xs={24} xl={10}>
+          <ProCard title="最近 7 天趋势" bordered headerBordered loading={loading}>
+            <Space direction="vertical" size={12} style={{ width: '100%' }}>
+              {data.trend.map(item => (
+                <Space key={item.date} style={{ width: '100%', justifyContent: 'space-between' }}>
+                  <Text type="secondary">{item.date.slice(5)}</Text>
+                  <Progress
+                    percent={percentOf(item.total, Math.max(...data.trend.map(row => row.total), 1))}
+                    showInfo={false}
+                    strokeColor={item.severe ? '#f5222d' : item.warning ? '#fa8c16' : '#faad14'}
+                    style={{ flex: 1 }}
+                  />
+                  <Text strong style={{ width: 40, textAlign: 'right' }}>
+                    {item.total}
+                  </Text>
+                </Space>
+              ))}
+            </Space>
+          </ProCard>
+        </Col>
+
+        <Col xs={24} xl={14}>
+          <ProCard title="故障年历" bordered headerBordered loading={calendarLoading}>
+            <CalendarHeatmap data={calendarData} loading={calendarLoading} />
+          </ProCard>
+        </Col>
+      </Row>
     </PageContainer>
   );
 };

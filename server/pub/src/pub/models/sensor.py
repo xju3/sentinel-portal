@@ -4,7 +4,20 @@ Sensor data models
 
 import uuid
 from datetime import datetime
-from sqlalchemy import Uuid, Column, SmallInteger, Numeric, Integer, String, Float, DateTime, Boolean, Text, BigInteger
+from sqlalchemy import (
+    BigInteger,
+    Boolean,
+    Column,
+    DateTime,
+    Float,
+    Integer,
+    Numeric,
+    SmallInteger,
+    String,
+    Text,
+    UniqueConstraint,
+    Uuid,
+)
 from sqlalchemy.orm import relationship, backref
 
 from sqlalchemy.dialects.mysql import JSON as MySQLJSON
@@ -127,6 +140,36 @@ class SensorStatus(Base):
     vibration = Column(Float, nullable=True)
     battery = Column(Float, nullable=True)
     active = Column(Boolean, default=True)
+
+
+class SensorCommunicationState(Base):
+    """Latest communication state and sequence counter for one sensor."""
+
+    __tablename__ = "sensor_communication_state"
+
+    sn = Column(String(255), primary_key=True)
+    last_sequence = Column(BigInteger, nullable=False, default=0)
+    last_ts_ms = Column(BigInteger, nullable=True, index=True)
+    last_duration_ms = Column(Float, nullable=True)
+    last_activity_at = Column(DateTime, nullable=True, index=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+
+
+class SensorCommunicationRecord(Base):
+    """One sensor data collection communication timing event."""
+
+    __tablename__ = "sensor_communication_record"
+    __table_args__ = (
+        UniqueConstraint("sn", "sequence", name="uq_sensor_communication_record_sn_sequence"),
+    )
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    sn = Column(String(255), nullable=False, index=True)
+    ts_ms = Column(BigInteger, nullable=False, index=True)
+    duration_ms = Column(Float, nullable=False)
+    sequence = Column(BigInteger, nullable=False, index=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
 
 class SensorMonitoring(Base):
     """Sensor monitoring entity model"""

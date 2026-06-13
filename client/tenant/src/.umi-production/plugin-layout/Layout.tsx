@@ -11,7 +11,7 @@ import {
 import React, { useMemo } from 'react';
 import {
   ProLayout,
-} from "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/node_modules/@ant-design/pro-components";
+} from "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/client/tenant/node_modules/@ant-design/pro-components";
 import './Layout.css';
 import Logo from './Logo';
 import Exception from './Exception';
@@ -112,7 +112,7 @@ const formatMessage = undefined;
     <ProLayout
       route={route}
       location={location}
-      title={userConfig.title || 'portal-web'}
+      title={userConfig.title || 'portal'}
       navTheme="dark"
       siderWidth={256}
       onMenuHeaderClick={(e) => {

@@ -124,11 +124,46 @@ class DiagnosisResultService:
         The object is intentionally duck-typed so the shared `pub` package does
         not need to import DIA's temperature dataclasses.
         """
-        data, items = DiagnosisResultService.temperature_result_to_record_data(
+        data, items = DiagnosisResultService.metric_result_to_record_data(
+            result,
+            metric="temperature",
+            report_ts=report_ts,
+        )
+        return await DiagnosisResultService.create(session, data, items)
+
+    @staticmethod
+    async def save_metric_result(
+        session: AsyncSession,
+        result: Any,
+        report_ts: int | None = None,
+    ) -> DiagnosisResult:
+        """Persist a structured diagnosis result object with a `metric` attribute."""
+        data, items = DiagnosisResultService.metric_result_to_record_data(
             result,
             report_ts=report_ts,
         )
         return await DiagnosisResultService.create(session, data, items)
+
+    @staticmethod
+    async def save_metric_result_managed(
+        result: Any,
+        report_ts: int | None = None,
+    ) -> Optional[DiagnosisResult]:
+        """Persist a structured diagnosis result using an internally managed session."""
+        if db_manager.SessionLocal is None:
+            raise RuntimeError("Database not initialized. Call db_manager.init() first.")
+
+        try:
+            await db_manager.ensure_schema()
+            async with db_manager.SessionLocal() as session:
+                return await DiagnosisResultService.save_metric_result(
+                    session=session,
+                    result=result,
+                    report_ts=report_ts,
+                )
+        except Exception as e:
+            logger.error("Failed to save diagnosis result: %s", e)
+            return None
 
     @staticmethod
     async def save_temperature_result_managed(
@@ -156,11 +191,23 @@ class DiagnosisResultService:
         result: Any,
         report_ts: int | None = None,
     ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
+        return DiagnosisResultService.metric_result_to_record_data(
+            result,
+            metric="temperature",
+            report_ts=report_ts,
+        )
+
+    @staticmethod
+    def metric_result_to_record_data(
+        result: Any,
+        metric: str | None = None,
+        report_ts: int | None = None,
+    ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         conclusion = result.conclusion
         data = {
             "report_id": result.report_id,
             "sn": result.sn,
-            "metric": "temperature",
+            "metric": metric or result.metric,
             "level": conclusion.level,
             "triggered": bool(conclusion.triggered),
             "conclusion": conclusion.conclusion,

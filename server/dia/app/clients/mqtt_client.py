@@ -2,6 +2,7 @@
 MQTT message handler
 """
 
+import asyncio
 import json
 import logging
 from typing import Any
@@ -12,6 +13,7 @@ from app.database import minio_manager
 from pub.clients.mqtt import MQTTManager
 from pub.clients.minio import download_json_from_minio_sync
 from app.handler.diagnosis import start_diagnosis_async
+from pub.services.communication_service import SensorCommunicationService
 
 logger = logging.getLogger(__name__)
 
@@ -64,6 +66,20 @@ class DiaMqttClient:
                 bucket_name=bucket_name,
                 object_name=object_name,
             )
+            try:
+                communication_record = asyncio.run(
+                    SensorCommunicationService.record_from_payload_managed(sensor_payload)
+                )
+                if communication_record is not None:
+                    logger.debug(
+                        "Sensor communication timing saved: sn=%s ts_ms=%s duration_ms=%s sequence=%s",
+                        communication_record.sn,
+                        communication_record.ts_ms,
+                        communication_record.duration_ms,
+                        communication_record.sequence,
+                    )
+            except Exception as e:
+                logger.error("Failed to save sensor communication timing: %s", e, exc_info=True)
 
             # logger.info(f"Downloaded JSON from MinIO: bucket='{bucket_name}', object='{object_name}'")
             report_id, point_count = send_vibration_features_to_telegraf(sensor_payload)
@@ -81,6 +97,7 @@ class DiaMqttClient:
                     sn=sn,
                     current_temperature_c=float(temperature_c),
                     current_ts_ms=int(ts_ms),
+                    payload=sensor_payload,
                 )
             
         except Exception as e:

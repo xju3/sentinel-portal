@@ -14,7 +14,8 @@ from app.utils.response import success
 from pub.services.dependencies import get_session
 from pub.services.sensor_service import SensorThresholdService
 from pub.models.customer import Account
-from pub.utils.decorators import rebuild_dashboard_cache
+from pub.models.sensor import SensorThreshold
+from pub.utils.decorators import rebuild_dashboard_cache, monitor_config_change
 
 from app.utils.auth import get_current_account
 from pub.contract.sensors import (
@@ -63,6 +64,7 @@ async def create_sensor_threshold(
 
 
 @router.put("/{obj_id}")
+@monitor_config_change(SensorThreshold, "obj_id", "item")
 @rebuild_dashboard_cache()
 async def update_sensor_threshold(
     obj_id: UUID,

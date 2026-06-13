@@ -20,7 +20,7 @@ def init_sensitive_fields():
     if CONFIG_SENSITIVE_FIELDS:
         return
 
-    from pub.models.sensor import SensorMonitoring
+    from pub.models.sensor import SensorMonitoring, SensorThreshold
     from pub.models.device import DeviceInst, DeviceSpec, DeviceCategory
     from pub.models.customer import HealthCheckFreq, IsoStandard, Area
     from pub.models.device import ProcessDevice, ProcessDeviceItem
@@ -28,10 +28,20 @@ def init_sensitive_fields():
     from pub.models.customer import Tenant
 
     CONFIG_SENSITIVE_FIELDS.update({
-        SensorMonitoring:    {"device_inst_id"},
-        DeviceInst:          {"device_spec_id"},
+        SensorMonitoring:    {"device_inst_id", "sensor_id", "direction", "status"},
+        DeviceInst:          {"device_spec_id", "status", "active", "available"},
         DeviceSpec:          {"rpm", "device_category_id"},
-        DeviceCategory:      {"iso_standard_id", "health_check_freq_id"},
+        DeviceCategory:      {"iso_standard_id", "health_check_freq_id", "vib_threshold_id", "temp_threshold_id"},
+        SensorThreshold:     {
+            "code",
+            "metric",
+            "rt_max_delta",
+            "st_max_slope",
+            "st_max_amplitude",
+            "mt_max_slope",
+            "mt_max_amplitude",
+            "baseline",
+        },
         IsoStandard:         {"version", "category", "foundation"},
         HealthCheckFreq:     {"patrol", "diagnosis", "report"},
         Tenant:              {"mqtt_server", "api_server"},
@@ -43,7 +53,7 @@ def init_sensitive_fields():
 
 async def find_affected_sns(session: AsyncSession, model_class: Type, obj_id: UUID) -> List[str]:
     """根据模型类和记录 ID，反向追溯所有受影响的 sensor.sn。"""
-    from pub.models.sensor import Sensor, SensorMonitoring
+    from pub.models.sensor import Sensor, SensorMonitoring, SensorThreshold
     from pub.models.device import DeviceInst, DeviceSpec, DeviceCategory, ProcessDevice, ProcessDeviceItem
     from pub.models.customer import IsoStandard, HealthCheckFreq, Area
 
@@ -108,6 +118,20 @@ async def find_affected_sns(session: AsyncSession, model_class: Type, obj_id: UU
             .join(DeviceSpec, DeviceSpec.id == DeviceInst.device_spec_id)
             .join(DeviceCategory, DeviceCategory.id == DeviceSpec.device_category_id)
             .where(fk_col == obj_id)
+        )
+
+    elif model_class is SensorThreshold:
+        stmt = (
+            select(Sensor.sn)
+            .select_from(SensorMonitoring)
+            .join(Sensor, Sensor.id == SensorMonitoring.sensor_id)
+            .join(DeviceInst, DeviceInst.id == SensorMonitoring.device_inst_id)
+            .join(DeviceSpec, DeviceSpec.id == DeviceInst.device_spec_id)
+            .join(DeviceCategory, DeviceCategory.id == DeviceSpec.device_category_id)
+            .where(
+                (DeviceCategory.vib_threshold_id == obj_id)
+                | (DeviceCategory.temp_threshold_id == obj_id)
+            )
         )
 
     elif model_class is Area:
@@ -188,6 +212,33 @@ async def create_config_tasks(session: AsyncSession, sns: List[str]) -> None:
     session.add_all(tasks)
     await session.commit()
     logger.info(f"[ConfigChange] 已为 {len(tasks)} 个传感器创建配置更新任务: {[t.sn for t in tasks]}")
+
+
+async def _include_old_sensor_monitoring_sn(
+    session: AsyncSession,
+    model_class: Type,
+    old_values: dict,
+    new_values: dict,
+    sns: List[str],
+) -> List[str]:
+    """Include the old SN when a monitoring record is moved to a different sensor."""
+    from pub.models.sensor import Sensor, SensorMonitoring
+
+    if model_class is not SensorMonitoring:
+        return sns
+    if "sensor_id" not in new_values:
+        return sns
+
+    old_sensor_id = old_values.get("sensor_id")
+    new_sensor_id = new_values.get("sensor_id")
+    if old_sensor_id is None or old_sensor_id == new_sensor_id:
+        return sns
+
+    result = await session.execute(select(Sensor.sn).where(Sensor.id == old_sensor_id))
+    old_sn = result.scalar_one_or_none()
+    if old_sn and old_sn not in sns:
+        return [*sns, old_sn]
+    return sns
 
 
 
@@ -271,6 +322,13 @@ async def bg_handle_config_change(
             # 3. Trace affected sensors
             logger.info(f"[ConfigChange] {model_class.__name__}(id={obj_id}) 开始反向追溯受影响的传感器...")
             affected_sns = await find_affected_sns(session, model_class, obj_id)
+            affected_sns = await _include_old_sensor_monitoring_sn(
+                session,
+                model_class,
+                old_values,
+                new_values,
+                affected_sns,
+            )
             logger.info(f"[ConfigChange] {model_class.__name__}(id={obj_id}) 追溯完成, 受影响传感器: {affected_sns if affected_sns else '无'}")
 
             if affected_sns:
@@ -278,7 +336,12 @@ async def bg_handle_config_change(
                     f"[ConfigChange] {model_class.__name__}(id={obj_id}) 核心字段变更, "
                     f"受影响传感器 SN: {affected_sns}"
                 )
-                # 4. Create tasks (DB only, no MQTT publish)
+                # 4. Invalidate diagnosis context cache before downstream diagnosis uses stale metadata.
+                from pub.services.diagnosis_context_service import DiagnosisContextService
+
+                await DiagnosisContextService.invalidate_by_sns(affected_sns)
+
+                # 5. Create tasks (DB only, no MQTT publish)
                 await create_config_tasks(session, affected_sns)
             else:
                 logger.info(

@@ -11,12 +11,13 @@ from datetime import date, datetime, timedelta
 from typing import Optional
 from uuid import UUID
 
-from sqlalchemy import select, func
+from sqlalchemy import select, func, desc, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pub.database import redis_manager
 from pub.models.device import DeviceInst, DeviceSpec, DeviceCategory, Process, ProcessDevice, ProcessDeviceItem
-from pub.models.sensor import PatrolDiagnosticRecord, SensorMonitoring
+from pub.models.diagnosis import DiagnosisResult
+from pub.models.sensor import PatrolDiagnosticRecord, Sensor, SensorCommunicationState, SensorMonitoring
 from pub.models.customer import Area, Tenant
 
 logger = logging.getLogger(__name__)
@@ -30,6 +31,25 @@ CALENDAR_CACHE_TTL = 604800
 
 # Redis key prefix for device stats cache (no TTL, invalidated on data change)
 DEVICE_STATS_PREFIX = "dashboard:device_stats:"
+
+DIAGNOSIS_LEVEL_SCORE = {
+    "未检测": -1,
+    "正常": 0,
+    "关注": 1,
+    "警告": 2,
+    "严重": 3,
+}
+
+DASHBOARD_METRIC_LABELS = {
+    "quality": "数据质量",
+    "temperature": "温度",
+    "vibration_intensity": "振动强度",
+    "energy_impact": "能量冲击",
+    "peak_structure": "主频结构",
+}
+
+OFFLINE_AFTER_MS = 24 * 60 * 60 * 1000
+SLOW_DURATION_MS = 60 * 1000
 
 
 class DashboardService:
@@ -431,6 +451,337 @@ class DashboardService:
             "devicesByAreaTree": devices_by_area_tree,
             "devicesByProcessTree": devices_by_process_tree,
         }
+
+    @staticmethod
+    async def get_workbench_overview(session: AsyncSession, tenant_id: UUID) -> dict:
+        """Get the new dashboard workbench data from diagnosis and communication state."""
+        device_rows = await DashboardService._query_dashboard_devices(session, tenant_id)
+        total_devices = len(device_rows)
+
+        sn_to_devices: dict[str, list[str]] = {}
+        device_states: dict[str, dict] = {}
+        monitored_sns: set[str] = set()
+        monitored_device_ids: set[str] = set()
+
+        for row in device_rows.values():
+            device_states[row["device_id"]] = {
+                **row,
+                "sns": set(row["sns"]),
+                "diagnosis_score": None,
+                "diagnosis_level": "未检测",
+                "online": False,
+                "has_diagnosis": False,
+            }
+            if row["sns"]:
+                monitored_device_ids.add(row["device_id"])
+            for sn in row["sns"]:
+                monitored_sns.add(sn)
+                sn_to_devices.setdefault(sn, []).append(row["device_id"])
+
+        latest_results = await DashboardService._query_latest_diagnosis_by_sn_metric(session, monitored_sns)
+        communication_states = await DashboardService._query_communication_states(session, monitored_sns)
+
+        now_ms = int(datetime.utcnow().timestamp() * 1000)
+        offline_sensors = 0
+        slow_sensors = 0
+        duration_values: list[float] = []
+        latest_activity_at = None
+
+        for sn in monitored_sns:
+            comm = communication_states.get(sn)
+            is_online = bool(comm and comm.last_ts_ms and now_ms - comm.last_ts_ms <= OFFLINE_AFTER_MS)
+            if not is_online:
+                offline_sensors += 1
+            elif comm and comm.last_duration_ms is not None and comm.last_duration_ms > SLOW_DURATION_MS:
+                slow_sensors += 1
+
+            if comm and comm.last_duration_ms is not None:
+                duration_values.append(float(comm.last_duration_ms))
+            if comm and comm.last_activity_at and (
+                latest_activity_at is None or comm.last_activity_at > latest_activity_at
+            ):
+                latest_activity_at = comm.last_activity_at
+
+            for device_id in sn_to_devices.get(sn, []):
+                if is_online:
+                    device_states[device_id]["online"] = True
+
+        metric_distribution = {
+            metric: {
+                "metric": metric,
+                "label": label,
+                "count": 0,
+                "attention": 0,
+                "warning": 0,
+                "severe": 0,
+            }
+            for metric, label in DASHBOARD_METRIC_LABELS.items()
+        }
+        priority_faults = []
+        latest_report_ts = None
+
+        for sn, metric_results in latest_results.items():
+            for result in metric_results.values():
+                if result.report_ts and (latest_report_ts is None or result.report_ts > latest_report_ts):
+                    latest_report_ts = result.report_ts
+
+                score = DIAGNOSIS_LEVEL_SCORE.get(result.level, 0)
+                for device_id in sn_to_devices.get(sn, []):
+                    device_state = device_states[device_id]
+                    device_state["has_diagnosis"] = True
+                    current = device_state["diagnosis_score"]
+                    if current is None or score > current:
+                        device_state["diagnosis_score"] = score
+                        device_state["diagnosis_level"] = result.level
+
+                if not result.triggered:
+                    continue
+
+                metric_info = metric_distribution.setdefault(
+                    result.metric,
+                    {
+                        "metric": result.metric,
+                        "label": DASHBOARD_METRIC_LABELS.get(result.metric, result.metric),
+                        "count": 0,
+                        "attention": 0,
+                        "warning": 0,
+                        "severe": 0,
+                    },
+                )
+                metric_info["count"] += 1
+                if result.level == "关注":
+                    metric_info["attention"] += 1
+                elif result.level == "警告":
+                    metric_info["warning"] += 1
+                elif result.level == "严重":
+                    metric_info["severe"] += 1
+
+                for device_id in sn_to_devices.get(sn, []):
+                    device = device_states[device_id]
+                    comm = communication_states.get(sn)
+                    priority_faults.append({
+                        "id": str(result.id),
+                        "device_id": device_id,
+                        "device_name": device["device_name"],
+                        "device_code": device["device_code"],
+                        "sn": sn,
+                        "area": device["area"],
+                        "process": device["process"],
+                        "level": result.level,
+                        "level_score": score,
+                        "metric": result.metric,
+                        "metric_label": DASHBOARD_METRIC_LABELS.get(result.metric, result.metric),
+                        "conclusion": result.conclusion,
+                        "report_ts": result.report_ts,
+                        "diagnosed_at": result.diagnosed_at.isoformat() if result.diagnosed_at else None,
+                        "duration_ms": comm.last_duration_ms if comm else None,
+                        "sequence": comm.last_sequence if comm else None,
+                        "last_activity_at": comm.last_activity_at.isoformat() if comm and comm.last_activity_at else None,
+                    })
+
+        health_distribution = {
+            "正常": 0,
+            "关注": 0,
+            "警告": 0,
+            "严重": 0,
+            "离线": 0,
+            "未检测": 0,
+            "未配置": max(total_devices - len(monitored_device_ids), 0),
+        }
+
+        faulty_devices = 0
+        not_checked_devices = 0
+        online_devices = 0
+
+        for device in device_states.values():
+            if not device["sns"]:
+                continue
+            if device["online"]:
+                online_devices += 1
+            else:
+                health_distribution["离线"] += 1
+                continue
+
+            if not device["has_diagnosis"]:
+                not_checked_devices += 1
+                health_distribution["未检测"] += 1
+                continue
+
+            level = device["diagnosis_level"]
+            if DIAGNOSIS_LEVEL_SCORE.get(level, 0) > 0:
+                faulty_devices += 1
+            health_distribution[level if level in health_distribution else "未检测"] += 1
+
+        priority_faults.sort(
+            key=lambda item: (
+                item["level_score"],
+                item["report_ts"] or 0,
+                item["diagnosed_at"] or "",
+            ),
+            reverse=True,
+        )
+
+        trend = await DashboardService._query_diagnosis_trend(session, monitored_sns)
+
+        return {
+            "summary": {
+                "totalDevices": total_devices,
+                "onlineDevices": online_devices,
+                "normalDevices": health_distribution["正常"],
+                "faultyDevices": faulty_devices,
+                "attentionDevices": health_distribution["关注"],
+                "warningDevices": health_distribution["警告"],
+                "severeDevices": health_distribution["严重"],
+                "offlineSensors": offline_sensors,
+                "notCheckedDevices": not_checked_devices,
+                "unconfiguredDevices": health_distribution["未配置"],
+                "latestReportTs": latest_report_ts,
+            },
+            "healthDistribution": [
+                {"level": level, "count": count}
+                for level, count in health_distribution.items()
+            ],
+            "diagnosisDistribution": list(metric_distribution.values()),
+            "priorityFaults": priority_faults[:20],
+            "communication": {
+                "onlineSensors": max(len(monitored_sns) - offline_sensors, 0),
+                "offlineSensors": offline_sensors,
+                "slowSensors": slow_sensors,
+                "avgDurationMs": round(sum(duration_values) / len(duration_values), 2) if duration_values else None,
+                "maxDurationMs": max(duration_values) if duration_values else None,
+                "latestActivityAt": latest_activity_at.isoformat() if latest_activity_at else None,
+            },
+            "trend": trend,
+        }
+
+    @staticmethod
+    async def _query_dashboard_devices(session: AsyncSession, tenant_id: UUID) -> dict[str, dict]:
+        stmt = (
+            select(
+                DeviceInst.id.label("device_id"),
+                DeviceInst.name.label("device_name"),
+                DeviceInst.code.label("device_code"),
+                Sensor.sn.label("sn"),
+                Area.name.label("area"),
+                Process.name.label("process"),
+            )
+            .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
+            .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+            .outerjoin(
+                SensorMonitoring,
+                and_(SensorMonitoring.device_inst_id == DeviceInst.id, SensorMonitoring.status == 1),
+            )
+            .outerjoin(Sensor, SensorMonitoring.sensor_id == Sensor.id)
+            .outerjoin(ProcessDeviceItem, ProcessDeviceItem.device_inst_id == DeviceInst.id)
+            .outerjoin(ProcessDevice, ProcessDevice.id == ProcessDeviceItem.process_device_id)
+            .outerjoin(Process, Process.id == ProcessDevice.process_id)
+            .outerjoin(Area, Area.id == ProcessDevice.area_id)
+            .where(DeviceCategory.tenant_id == tenant_id)
+        )
+        rows = await session.execute(stmt)
+        devices: dict[str, dict] = {}
+        for row in rows:
+            device_id = str(row.device_id)
+            if device_id not in devices:
+                devices[device_id] = {
+                    "device_id": device_id,
+                    "device_name": row.device_name,
+                    "device_code": row.device_code,
+                    "area": row.area or "未分配",
+                    "process": row.process or "未分配",
+                    "sns": set(),
+                }
+            if row.sn:
+                devices[device_id]["sns"].add(row.sn)
+            if row.area:
+                devices[device_id]["area"] = row.area
+            if row.process:
+                devices[device_id]["process"] = row.process
+        return devices
+
+    @staticmethod
+    async def _query_latest_diagnosis_by_sn_metric(
+        session: AsyncSession,
+        sns: set[str],
+    ) -> dict[str, dict[str, DiagnosisResult]]:
+        if not sns:
+            return {}
+        ranked = (
+            select(
+                DiagnosisResult.id.label("id"),
+                func.row_number()
+                .over(
+                    partition_by=(DiagnosisResult.sn, DiagnosisResult.metric),
+                    order_by=(desc(DiagnosisResult.report_ts), desc(DiagnosisResult.diagnosed_at)),
+                )
+                .label("row_num"),
+            )
+            .where(DiagnosisResult.sn.in_(list(sns)))
+            .subquery()
+        )
+        stmt = (
+            select(DiagnosisResult)
+            .join(ranked, DiagnosisResult.id == ranked.c.id)
+            .where(ranked.c.row_num == 1)
+        )
+        rows = (await session.execute(stmt)).scalars().all()
+        latest: dict[str, dict[str, DiagnosisResult]] = {}
+        for result in rows:
+            sn_latest = latest.setdefault(result.sn, {})
+            if result.metric not in sn_latest:
+                sn_latest[result.metric] = result
+        return latest
+
+    @staticmethod
+    async def _query_communication_states(
+        session: AsyncSession,
+        sns: set[str],
+    ) -> dict[str, SensorCommunicationState]:
+        if not sns:
+            return {}
+        stmt = select(SensorCommunicationState).where(SensorCommunicationState.sn.in_(list(sns)))
+        rows = (await session.execute(stmt)).scalars().all()
+        return {state.sn: state for state in rows}
+
+    @staticmethod
+    async def _query_diagnosis_trend(session: AsyncSession, sns: set[str]) -> list[dict]:
+        today = date.today()
+        start_day = today - timedelta(days=6)
+        trend = {
+            (start_day + timedelta(days=offset)).isoformat(): {
+                "date": (start_day + timedelta(days=offset)).isoformat(),
+                "attention": 0,
+                "warning": 0,
+                "severe": 0,
+                "total": 0,
+            }
+            for offset in range(7)
+        }
+        if not sns:
+            return list(trend.values())
+
+        start_dt = datetime(start_day.year, start_day.month, start_day.day)
+        stmt = (
+            select(DiagnosisResult)
+            .where(
+                DiagnosisResult.sn.in_(list(sns)),
+                DiagnosisResult.triggered.is_(True),
+                DiagnosisResult.diagnosed_at >= start_dt,
+            )
+        )
+        rows = (await session.execute(stmt)).scalars().all()
+        for result in rows:
+            key = result.diagnosed_at.date().isoformat()
+            if key not in trend:
+                continue
+            trend[key]["total"] += 1
+            if result.level == "关注":
+                trend[key]["attention"] += 1
+            elif result.level == "警告":
+                trend[key]["warning"] += 1
+            elif result.level == "严重":
+                trend[key]["severe"] += 1
+        return list(trend.values())
 
     @staticmethod
     def _get_level(count: int) -> int:

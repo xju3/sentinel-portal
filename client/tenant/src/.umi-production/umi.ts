@@ -3,7 +3,7 @@
 // DO NOT CHANGE IT MANUALLY!
 import './core/polyfill';
 import 'antd/dist/reset.css';
-import { renderClient } from '/Users/tju/Workspace/PDI/Sentinel/Codes/platform/portal/web/node_modules/@umijs/renderer-react';
+import { renderClient } from '/Users/tju/Workspace/PDI/Sentinel/Codes/platform/client/tenant/node_modules/@umijs/renderer-react';
 import { getRoutes } from './core/route';
 import { createPluginManager } from './core/plugin';
 import { createHistory } from './core/history';

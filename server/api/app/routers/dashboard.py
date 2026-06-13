@@ -25,6 +25,15 @@ async def get_dashboard_overview(
     return success(await DashboardService.get_overview(session, tenant_id))
 
 
+@router.get("/dashboard/workbench")
+async def get_dashboard_workbench(
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    return success(await DashboardService.get_workbench_overview(session, tenant_id))
+
+
 @router.get("/dashboard/calendar")
 async def get_dashboard_calendar(
     current_account: AccountModel = Depends(get_current_account),
