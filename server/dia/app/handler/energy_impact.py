@@ -8,6 +8,7 @@ kurtosis, peak-to-peak jumps, and high-frequency energy concentration.
 import logging
 from typing import Any
 
+from app.handler.horizontal_compare import PeerThresholds, build_peer_item_conclusion, compare_peer_value
 from app.handler.vibration_common import (
     AXES,
     HISTORY_WINDOW_SIZE,
@@ -48,6 +49,22 @@ REL_ATTENTION = 0.5
 REL_WARNING = 1.0
 REL_SEVERE = 2.0
 MIN_HISTORY_POINTS = 6
+PEER_SHAPE_THRESHOLDS = PeerThresholds(
+    relative_attention=0.20,
+    relative_warning=0.50,
+    relative_severe=1.00,
+    absolute_attention=1.0,
+    absolute_warning=2.0,
+    absolute_severe=3.0,
+)
+PEER_IMPACT_THRESHOLDS = PeerThresholds(
+    relative_attention=0.20,
+    relative_warning=0.50,
+    relative_severe=1.00,
+    absolute_attention=0.05,
+    absolute_warning=0.10,
+    absolute_severe=0.20,
+)
 
 
 def run_energy_impact_check(
@@ -85,7 +102,31 @@ def diagnose_energy_impact(
         items.extend(
             [
                 _crest_factor_conclusion(axis, payload, context),
+                _peer_feature_conclusion(
+                    axis=axis,
+                    sn=sn,
+                    payload=payload,
+                    context=context,
+                    current_value=time_feature(payload, axis, "crest_factor"),
+                    field="crest_factor",
+                    name="冲击因子横向比较",
+                    normal_text="冲击因子相对同组设备未见明显偏高",
+                    warning_text="冲击因子相对同组设备偏高",
+                    thresholds=PEER_SHAPE_THRESHOLDS,
+                ),
                 _kurtosis_conclusion(axis, payload, context),
+                _peer_feature_conclusion(
+                    axis=axis,
+                    sn=sn,
+                    payload=payload,
+                    context=context,
+                    current_value=time_feature(payload, axis, "kurtosis"),
+                    field="kurtosis",
+                    name="峭度横向比较",
+                    normal_text="峭度相对同组设备未见明显偏高",
+                    warning_text="峭度相对同组设备偏高",
+                    thresholds=PEER_SHAPE_THRESHOLDS,
+                ),
                 _relative_feature_conclusion(
                     axis=axis,
                     payload=payload,
@@ -97,6 +138,18 @@ def diagnose_energy_impact(
                     normal_text="峰峰值未见突增",
                     warning_text="峰峰值相比历史基线突增",
                 ),
+                _peer_feature_conclusion(
+                    axis=axis,
+                    sn=sn,
+                    payload=payload,
+                    context=context,
+                    current_value=time_feature(payload, axis, "peak_to_peak_acc_g"),
+                    field="peak_to_peak_acc_g",
+                    name="峰峰值冲击横向比较",
+                    normal_text="峰峰值相对同组设备未见明显偏高",
+                    warning_text="峰峰值相对同组设备偏高",
+                    thresholds=PEER_IMPACT_THRESHOLDS,
+                ),
                 _relative_feature_conclusion(
                     axis=axis,
                     payload=payload,
@@ -107,6 +160,18 @@ def diagnose_energy_impact(
                     name="高频能量冲击",
                     normal_text="高频能量占比未见突增",
                     warning_text="高频能量占比相比历史基线突增",
+                ),
+                _peer_feature_conclusion(
+                    axis=axis,
+                    sn=sn,
+                    payload=payload,
+                    context=context,
+                    current_value=band_feature(payload, axis, "2000_5000"),
+                    field="band_2000_5000",
+                    name="高频能量冲击横向比较",
+                    normal_text="高频能量占比相对同组设备未见明显偏高",
+                    warning_text="高频能量占比相对同组设备偏高",
+                    thresholds=PEER_IMPACT_THRESHOLDS,
                 ),
             ]
         )
@@ -279,3 +344,36 @@ def _absolute_level(value: float, attention: float, warning: float, severe: floa
     if value >= attention:
         return LEVEL_ATTENTION
     return LEVEL_NORMAL
+
+
+def _peer_feature_conclusion(
+    *,
+    axis: str,
+    sn: str,
+    payload: dict[str, Any],
+    context: dict[str, Any] | None,
+    current_value: float | None,
+    field: str,
+    name: str,
+    normal_text: str,
+    warning_text: str,
+    thresholds: PeerThresholds,
+) -> DiagnosisItemConclusion:
+    del payload
+    label = axis_label(axis, context)
+    result = compare_peer_value(
+        current_sn=sn,
+        current_value=current_value,
+        context=context,
+        field=field,
+        axis=axis,
+        same_direction=True,
+        thresholds=thresholds,
+    )
+    return build_peer_item_conclusion(
+        result=result,
+        name=f"{label}{name}",
+        normal_text=f"{label}{normal_text}",
+        warning_text=f"{label}{warning_text}",
+        thresholds=thresholds,
+    )

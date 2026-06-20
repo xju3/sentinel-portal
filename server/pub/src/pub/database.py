@@ -70,7 +70,54 @@ class DatabaseManager:
         import_all_models()
         async with self.engine.begin() as conn:
             await conn.run_sync(Base.metadata.create_all)
+            await self._ensure_diagnosis_result_relation_columns(conn)
+            await self._ensure_sensor_task_columns(conn)
         self._schema_ready = True
+
+    async def _ensure_diagnosis_result_relation_columns(self, conn) -> None:
+        """Add relation columns introduced after the diagnosis_result table existed."""
+        columns = [
+            "sensor_id",
+            "sensor_monitoring_id",
+            "device_inst_id",
+            "device_spec_id",
+            "device_category_id",
+        ]
+        for column in columns:
+            exists = await conn.execute(
+                text("SHOW COLUMNS FROM diagnosis_result LIKE :column_name"),
+                {"column_name": column},
+            )
+            if exists.first() is None:
+                await conn.execute(
+                    text(f"ALTER TABLE diagnosis_result ADD COLUMN {column} CHAR(32) NULL")
+                )
+
+            index_name = f"ix_diagnosis_result_{column}"
+            index_exists = await conn.execute(
+                text("SHOW INDEX FROM diagnosis_result WHERE Key_name = :index_name"),
+                {"index_name": index_name},
+            )
+            if index_exists.first() is None:
+                await conn.execute(
+                    text(f"CREATE INDEX {index_name} ON diagnosis_result ({column})")
+                )
+
+    async def _ensure_sensor_task_columns(self, conn) -> None:
+        """Add task metadata columns introduced after sensor_task existed."""
+        columns = {
+            "remark": "TEXT NULL",
+            "dispatched_at": "DATETIME NULL",
+        }
+        for column, definition in columns.items():
+            exists = await conn.execute(
+                text("SHOW COLUMNS FROM sensor_task LIKE :column_name"),
+                {"column_name": column},
+            )
+            if exists.first() is None:
+                await conn.execute(
+                    text(f"ALTER TABLE sensor_task ADD COLUMN {column} {definition}")
+                )
 
     async def close(self) -> None:
         """Close database engine"""

@@ -9,6 +9,7 @@ from typing import Any
 
 from app.handler.energy_impact import run_energy_impact_check
 from app.handler.peak_structure import run_peak_structure_check
+from app.handler.quick_history_cache import record_quick_diagnosis_snapshot
 from app.handler.quality import run_quality_check
 from app.handler.temperature import run_temperature_check
 from app.handler.vibration_intensity import run_vibration_intensity_check
@@ -57,11 +58,26 @@ def run_diagnosis(
         current_ts_ms,
     )
     payload = payload or {}
+    quick_snapshot = record_quick_diagnosis_snapshot(
+        report_id=report_id,
+        sn=sn,
+        payload=payload,
+    )
+    if quick_snapshot is not None:
+        logger.debug(
+            "Quick diagnosis snapshot cached: report_id=%s sn=%s task_report=%s",
+            report_id,
+            sn,
+            quick_snapshot.is_task_report,
+        )
+    context = _load_diagnosis_context(sn)
+
     quality_result = run_quality_check(report_id, sn, payload)
     saved_quality_result = asyncio.run(
         DiagnosisResultService.save_metric_result_managed(
             quality_result,
             report_ts=current_ts_ms,
+            context=context,
         )
     )
     if saved_quality_result is None:
@@ -87,18 +103,18 @@ def run_diagnosis(
         )
         return
 
-    context = _load_diagnosis_context(sn)
-
     result = run_temperature_check(
         report_id,
         sn,
         current_temperature_c,
         current_ts_ms,
+        context,
     )
     saved_result = asyncio.run(
         DiagnosisResultService.save_temperature_result_managed(
             result,
             report_ts=current_ts_ms,
+            context=context,
         )
     )
     if saved_result is None:
@@ -125,6 +141,7 @@ def run_diagnosis(
             DiagnosisResultService.save_metric_result_managed(
                 vibration_result,
                 report_ts=current_ts_ms,
+                context=context,
             )
         )
         if saved_vibration_result is None:

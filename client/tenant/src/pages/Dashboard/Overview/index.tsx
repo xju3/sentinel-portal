@@ -32,8 +32,10 @@ type DashboardSummary = {
   attentionDevices: number;
   warningDevices: number;
   severeDevices: number;
+  offlineDevices: number;
   offlineSensors: number;
   notCheckedDevices: number;
+  pendingDevices: number;
   unconfiguredDevices: number;
   latestReportTs?: number | null;
 };
@@ -106,8 +108,10 @@ const emptyData: DashboardWorkbenchData = {
     attentionDevices: 0,
     warningDevices: 0,
     severeDevices: 0,
+    offlineDevices: 0,
     offlineSensors: 0,
     notCheckedDevices: 0,
+    pendingDevices: 0,
     unconfiguredDevices: 0,
   },
   healthDistribution: [],
@@ -217,6 +221,8 @@ const DashboardOverview = () => {
 
   const totalDevices = data.summary.totalDevices;
   const activeFaultCount = data.summary.warningDevices + data.summary.severeDevices;
+  const pendingDevices =
+    data.summary.pendingDevices ?? data.summary.offlineDevices + data.summary.notCheckedDevices;
   const healthRows = useMemo(
     () => data.healthDistribution.filter(item => item.count > 0 || ['正常', '关注', '警告', '严重'].includes(item.level)),
     [data.healthDistribution],
@@ -293,6 +299,10 @@ const DashboardOverview = () => {
         <StatisticCard
           loading={loading}
           statistic={{ title: '故障设备', value: data.summary.faultyDevices, suffix: '台', status: 'error' }}
+        />
+        <StatisticCard
+          loading={loading}
+          statistic={{ title: '待确认', value: pendingDevices, suffix: '台', status: 'processing' }}
         />
         <StatisticCard
           loading={loading}

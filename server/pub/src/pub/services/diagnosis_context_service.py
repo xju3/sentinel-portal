@@ -21,7 +21,7 @@ from sqlalchemy.orm import aliased
 
 from pub.database import db_manager, redis_manager
 from pub.models.customer import HealthCheckFreq, IsoStandard
-from pub.models.device import DeviceCategory, DeviceInst, DeviceSpec
+from pub.models.device import DeviceCategory, DeviceInst, DeviceSpec, Process, ProcessDevice, ProcessDeviceItem, ProcessItem
 from pub.models.sensor import Sensor, SensorMonitoring, SensorThreshold
 
 logger = logging.getLogger(__name__)
@@ -104,6 +104,15 @@ class DiagnosisContextService:
             temp_threshold,
         ) = row
 
+        peer_group = None
+        if monitoring is not None and device_inst is not None and device_spec is not None:
+            peer_group = await DiagnosisContextService._build_peer_group_context(
+                session=session,
+                device_inst=device_inst,
+                device_spec=device_spec,
+                monitoring=monitoring,
+            )
+
         return _json_safe({
             "sn": sensor.sn,
             "sensor": _sensor_context(sensor),
@@ -117,9 +126,124 @@ class DiagnosisContextService:
                 "vibration": _threshold_context(vib_threshold),
                 "temperature": _threshold_context(temp_threshold),
             },
+            "peer_group": peer_group,
             "configured": monitoring is not None and device_inst is not None and device_category is not None,
             "cached_at": datetime.utcnow().isoformat(),
         })
+
+    @staticmethod
+    async def _build_peer_group_context(
+        session: AsyncSession,
+        device_inst: DeviceInst,
+        device_spec: DeviceSpec,
+        monitoring: SensorMonitoring,
+    ) -> dict[str, Any]:
+        """Build the same-process same-spec peer group used for horizontal diagnosis."""
+        stmt_process_device = (
+            select(ProcessDeviceItem, ProcessDevice, Process)
+            .join(ProcessDevice, ProcessDevice.id == ProcessDeviceItem.process_device_id)
+            .join(Process, Process.id == ProcessDevice.process_id)
+            .where(ProcessDeviceItem.device_inst_id == device_inst.id)
+            .limit(1)
+        )
+        process_row = (await session.execute(stmt_process_device)).first()
+        if process_row is None:
+            return {
+                "enabled": False,
+                "reason": "device_not_in_process_device",
+                "current_device_inst_id": device_inst.id,
+                "current_monitoring_id": monitoring.id,
+                "device_spec_id": device_spec.id,
+                "expected_qty": None,
+                "members": [],
+            }
+
+        process_device_item, process_device, process = process_row
+        stmt_process_item = (
+            select(ProcessItem)
+            .where(
+                ProcessItem.process_id == process.id,
+                ProcessItem.device_spec_id == device_spec.id,
+            )
+            .limit(1)
+        )
+        process_item = (await session.execute(stmt_process_item)).scalar_one_or_none()
+        expected_qty = process_item.qty if process_item is not None else None
+        if expected_qty is None:
+            enabled = False
+            reason = "process_item_not_configured"
+        elif expected_qty <= 1:
+            enabled = False
+            reason = "single_device_required"
+        else:
+            enabled = True
+            reason = None
+
+        members = await DiagnosisContextService._query_peer_group_members(
+            session=session,
+            process_device_id=process_device.id,
+            device_spec_id=device_spec.id,
+        )
+
+        comparable_member_count = len({
+            member["device_inst"]["id"]
+            for member in members
+            if member.get("sensor") is not None and member.get("monitoring") is not None
+        })
+        if enabled and comparable_member_count < 2:
+            enabled = False
+            reason = "not_enough_configured_peers"
+
+        return {
+            "enabled": enabled,
+            "reason": reason,
+            "process": _process_context(process),
+            "process_device": _process_device_context(process_device),
+            "process_device_item": _process_device_item_context(process_device_item),
+            "process_item": _process_item_context(process_item),
+            "current_device_inst_id": device_inst.id,
+            "current_monitoring_id": monitoring.id,
+            "device_spec_id": device_spec.id,
+            "expected_qty": expected_qty,
+            "comparable_member_count": comparable_member_count,
+            "members": members,
+        }
+
+    @staticmethod
+    async def _query_peer_group_members(
+        session: AsyncSession,
+        process_device_id: UUID,
+        device_spec_id: UUID,
+    ) -> list[dict[str, Any]]:
+        stmt = (
+            select(
+                ProcessDeviceItem,
+                DeviceInst,
+                SensorMonitoring,
+                Sensor,
+            )
+            .join(DeviceInst, DeviceInst.id == ProcessDeviceItem.device_inst_id)
+            .outerjoin(
+                SensorMonitoring,
+                (SensorMonitoring.device_inst_id == DeviceInst.id) & (SensorMonitoring.status == 1),
+            )
+            .outerjoin(Sensor, Sensor.id == SensorMonitoring.sensor_id)
+            .where(
+                ProcessDeviceItem.process_device_id == process_device_id,
+                DeviceInst.device_spec_id == device_spec_id,
+            )
+            .order_by(ProcessDeviceItem.code, DeviceInst.code, SensorMonitoring.direction)
+        )
+        rows = await session.execute(stmt)
+        members: list[dict[str, Any]] = []
+        for process_device_item, device_inst, monitoring, sensor in rows:
+            members.append({
+                "process_device_item": _process_device_item_context(process_device_item),
+                "device_inst": _device_inst_context(device_inst),
+                "monitoring": _monitoring_context(monitoring),
+                "sensor": _sensor_context(sensor) if sensor is not None else None,
+            })
+        return members
 
     @staticmethod
     async def invalidate_by_sn(sn: str) -> None:
@@ -291,6 +415,54 @@ def _health_check_context(health_check: HealthCheckFreq | None) -> dict[str, Any
         "diagnosis": health_check.diagnosis,
         "report": health_check.report,
         "status": health_check.status,
+    }
+
+
+def _process_context(process: Process | None) -> dict[str, Any] | None:
+    if process is None:
+        return None
+    return {
+        "id": process.id,
+        "tenant_id": process.tenant_id,
+        "code": process.code,
+        "name": process.name,
+        "status": process.status,
+    }
+
+
+def _process_item_context(process_item: ProcessItem | None) -> dict[str, Any] | None:
+    if process_item is None:
+        return None
+    return {
+        "id": process_item.id,
+        "process_id": process_item.process_id,
+        "device_spec_id": process_item.device_spec_id,
+        "qty": process_item.qty,
+    }
+
+
+def _process_device_context(process_device: ProcessDevice | None) -> dict[str, Any] | None:
+    if process_device is None:
+        return None
+    return {
+        "id": process_device.id,
+        "code": process_device.code,
+        "process_id": process_device.process_id,
+        "sn": process_device.sn,
+        "status": process_device.status,
+        "area_id": process_device.area_id,
+    }
+
+
+def _process_device_item_context(process_device_item: ProcessDeviceItem | None) -> dict[str, Any] | None:
+    if process_device_item is None:
+        return None
+    return {
+        "id": process_device_item.id,
+        "code": process_device_item.code,
+        "desc": process_device_item.desc,
+        "device_inst_id": process_device_item.device_inst_id,
+        "process_device_id": process_device_item.process_device_id,
     }
 
 

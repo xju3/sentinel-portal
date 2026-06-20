@@ -173,21 +173,25 @@ async def find_affected_sns(session: AsyncSession, model_class: Type, obj_id: UU
 
 
 async def create_config_tasks(session: AsyncSession, sns: List[str]) -> None:
-    """为受影响的传感器创建配置更新任务 (SensorTask.action=1, status=0)。
+    """为受影响的传感器创建配置更新任务 (SensorTask.action=1, status=0 待下发)。
     
-    对于每个 SN，先检查是否存在 status=0（未完成）的相同任务。
+    对于每个 SN，先检查是否存在未闭环的相同任务。
     若存在则跳过创建，避免重复下发；仅当无未完成任务时才新建。
     """
     from datetime import datetime
     from pub.models.sensor import SensorTask
+    from pub.services.sensor_task_service import (
+        SENSOR_TASK_OPEN_STATUSES,
+        SENSOR_TASK_STATUS_PENDING,
+    )
 
     tasks = []
     for sn in sns:
-        # 检查是否存在未完成的相同任务 (status=0 表示任务进行中)
+        # 检查是否存在未闭环的相同任务
         stmt = select(SensorTask).where(
             SensorTask.sn == sn,
             SensorTask.action == 1,
-            SensorTask.status == 0,
+            SensorTask.status.in_(SENSOR_TASK_OPEN_STATUSES),
         )
         result = await session.execute(stmt)
         existing = result.scalar_one_or_none()
@@ -200,7 +204,8 @@ async def create_config_tasks(session: AsyncSession, sns: List[str]) -> None:
             sn=sn,
             action=1,
             val=1,
-            status=0,
+            remark="任务内容: 配置更新; 发起原因: 设备相关基础配置发生变化; 编码: action=1, val=1",
+            status=SENSOR_TASK_STATUS_PENDING,
             create_time=datetime.utcnow(),
         )
         tasks.append(task)

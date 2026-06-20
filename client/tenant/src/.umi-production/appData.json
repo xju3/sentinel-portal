@@ -43,7 +43,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 21
+        "register": 4
       },
       "enableBy": "register"
     },
@@ -56,7 +56,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 6
+        "register": 3
       },
       "enableBy": "register"
     },
@@ -73,7 +73,7 @@
             0
           ]
         },
-        "register": 5
+        "register": 4
       },
       "enableBy": "register"
     },
@@ -87,10 +87,10 @@
       "time": {
         "hooks": {
           "onStart": [
-            3
+            2
           ]
         },
-        "register": 3
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -134,10 +134,10 @@
       "time": {
         "hooks": {
           "modifyAppData": [
-            42
+            23
           ]
         },
-        "register": 17
+        "register": 15
       },
       "enableBy": "register"
     },
@@ -150,7 +150,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -217,7 +217,7 @@
             0
           ]
         },
-        "register": 8
+        "register": 6
       },
       "enableBy": "register"
     },
@@ -1069,7 +1069,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1086,7 +1086,7 @@
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1112,7 +1112,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 59
+        "register": 53
       },
       "enableBy": "register"
     },
@@ -1125,7 +1125,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 40
+        "register": 29
       },
       "enableBy": "config"
     },
@@ -1138,7 +1138,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 11
+        "register": 9
       },
       "enableBy": "config"
     },
@@ -1155,7 +1155,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1168,7 +1168,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1181,7 +1181,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1194,7 +1194,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 26
+        "register": 25
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/mpa/mpa": {
@@ -1206,7 +1206,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1219,7 +1219,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/overrides/overrides": {
@@ -1231,7 +1231,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1258,7 +1258,7 @@
       "time": {
         "hooks": {
           "modifyConfig": [
-            0
+            1
           ]
         },
         "register": 1
@@ -1338,7 +1338,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 4
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -1364,7 +1364,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/ssr/ssr": {
@@ -1376,7 +1376,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1402,7 +1402,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -1441,7 +1441,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 5
+        "register": 3
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/monorepo/redirect": {
@@ -1453,7 +1453,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 16
+        "register": 15
       },
       "enableBy": "config"
     },
@@ -1478,7 +1478,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/legacy/legacy": {
@@ -1503,7 +1503,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1532,7 +1532,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1545,7 +1545,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 4
+        "register": 2
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/mako/mako": {
@@ -1594,7 +1594,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 19
+        "register": 18
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/forget/forget": {
@@ -1606,7 +1606,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "config"
     },
@@ -1619,7 +1619,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1632,7 +1632,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 4
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -1645,7 +1645,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 29
+        "register": 24
       },
       "enableBy": "register"
     },
@@ -1658,7 +1658,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 31
+        "register": 22
       }
     },
     "./node_modules/@umijs/preset-umi/dist/commands/help": {
@@ -1683,7 +1683,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1696,7 +1696,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1709,7 +1709,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1839,7 +1839,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1852,7 +1852,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1865,7 +1865,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1878,7 +1878,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1904,7 +1904,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 15
+        "register": 17
       },
       "enableBy": "register"
     },
@@ -1917,7 +1917,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1930,7 +1930,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -1943,7 +1943,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1958,7 +1958,7 @@
       },
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/plugins/dist/antd": {
@@ -1980,7 +1980,7 @@
             0
           ]
         },
-        "register": 7
+        "register": 6
       }
     },
     "./node_modules/@umijs/plugins/dist/dva": {
@@ -2005,7 +2005,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2024,10 +2024,10 @@
             0
           ],
           "addLayouts": [
-            1
+            0
           ],
           "modifyAppData": [
-            0
+            1
           ]
         },
         "register": 3
@@ -2043,7 +2043,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 2
       },
       "enableBy": "config"
     },
@@ -2056,7 +2056,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 3
       },
       "enableBy": "config"
     },
@@ -2082,7 +2082,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2120,7 +2120,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       }
     },
     "./node_modules/@umijs/plugins/dist/react-query": {
@@ -2132,7 +2132,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2145,7 +2145,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2184,7 +2184,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2201,7 +2201,7 @@
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -2235,7 +2235,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -2248,7 +2248,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     }
@@ -3633,7 +3633,7 @@
       "parentId": "3",
       "id": "4",
       "absPath": "/dashboard/overview",
-      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport { PageContainer, ProCard, StatisticCard } from '@ant-design/pro-components';\nimport {\n  Badge,\n  Button,\n  Col,\n  Empty,\n  List,\n  Progress,\n  Row,\n  Space,\n  Table,\n  Tag,\n  Typography,\n  message,\n} from 'antd';\nimport { ReloadOutlined } from '@ant-design/icons';\nimport { request } from '@umijs/max';\nimport type { ColumnsType } from 'antd/es/table';\nimport CalendarHeatmap from './CalendarHeatmap';\n\nconst { Statistic } = StatisticCard;\nconst { Text } = Typography;\n\ntype LevelName = '正常' | '关注' | '警告' | '严重' | '离线' | '未检测' | '未配置';\n\ntype DashboardSummary = {\n  totalDevices: number;\n  onlineDevices: number;\n  normalDevices: number;\n  faultyDevices: number;\n  attentionDevices: number;\n  warningDevices: number;\n  severeDevices: number;\n  offlineSensors: number;\n  notCheckedDevices: number;\n  unconfiguredDevices: number;\n  latestReportTs?: number | null;\n};\n\ntype HealthDistributionItem = {\n  level: LevelName;\n  count: number;\n};\n\ntype DiagnosisDistributionItem = {\n  metric: string;\n  label: string;\n  count: number;\n  attention: number;\n  warning: number;\n  severe: number;\n};\n\ntype PriorityFault = {\n  id: string;\n  device_id: string;\n  device_name: string;\n  device_code: string;\n  sn: string;\n  area: string;\n  process: string;\n  level: LevelName;\n  metric: string;\n  metric_label: string;\n  conclusion: string;\n  report_ts?: number | null;\n  diagnosed_at?: string | null;\n  duration_ms?: number | null;\n  sequence?: number | null;\n  last_activity_at?: string | null;\n};\n\ntype CommunicationSummary = {\n  onlineSensors: number;\n  offlineSensors: number;\n  slowSensors: number;\n  avgDurationMs?: number | null;\n  maxDurationMs?: number | null;\n  latestActivityAt?: string | null;\n};\n\ntype TrendItem = {\n  date: string;\n  attention: number;\n  warning: number;\n  severe: number;\n  total: number;\n};\n\ntype DashboardWorkbenchData = {\n  summary: DashboardSummary;\n  healthDistribution: HealthDistributionItem[];\n  diagnosisDistribution: DiagnosisDistributionItem[];\n  priorityFaults: PriorityFault[];\n  communication: CommunicationSummary;\n  trend: TrendItem[];\n};\n\nconst emptyData: DashboardWorkbenchData = {\n  summary: {\n    totalDevices: 0,\n    onlineDevices: 0,\n    normalDevices: 0,\n    faultyDevices: 0,\n    attentionDevices: 0,\n    warningDevices: 0,\n    severeDevices: 0,\n    offlineSensors: 0,\n    notCheckedDevices: 0,\n    unconfiguredDevices: 0,\n  },\n  healthDistribution: [],\n  diagnosisDistribution: [],\n  priorityFaults: [],\n  communication: {\n    onlineSensors: 0,\n    offlineSensors: 0,\n    slowSensors: 0,\n  },\n  trend: [],\n};\n\nconst levelColor: Record<LevelName, string> = {\n  正常: '#52c41a',\n  关注: '#faad14',\n  警告: '#fa8c16',\n  严重: '#f5222d',\n  离线: '#8c8c8c',\n  未检测: '#1677ff',\n  未配置: '#bfbfbf',\n};\n\nconst levelStatus: Record<LevelName, 'success' | 'warning' | 'error' | 'default' | 'processing'> = {\n  正常: 'success',\n  关注: 'warning',\n  警告: 'warning',\n  严重: 'error',\n  离线: 'default',\n  未检测: 'processing',\n  未配置: 'default',\n};\n\nconst formatTime = (value?: string | number | null) => {\n  if (!value) return '-';\n  const date = typeof value === 'number' ? new Date(value) : new Date(value);\n  if (Number.isNaN(date.getTime())) return '-';\n  return date.toLocaleString();\n};\n\nconst formatDuration = (value?: number | null) => {\n  if (value === undefined || value === null) return '-';\n  if (value < 1000) return `${Math.round(value)} ms`;\n  return `${(value / 1000).toFixed(1)} s`;\n};\n\nconst percentOf = (value: number, total: number) => {\n  if (!total) return 0;\n  return Math.round((value / total) * 100);\n};\n\nconst DashboardOverview = () => {\n  const [loading, setLoading] = useState(true);\n  const [data, setData] = useState<DashboardWorkbenchData>(emptyData);\n  const [calendarData, setCalendarData] = useState<any>(null);\n  const [calendarLoading, setCalendarLoading] = useState(false);\n\n  const fetchDashboardData = async () => {\n    setLoading(true);\n    try {\n      const res = await request<DashboardWorkbenchData>('/api/v1/dashboard/workbench');\n      setData(res || emptyData);\n    } catch (error) {\n      message.error('获取仪表盘数据失败');\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  const fetchCalendarData = async () => {\n    setCalendarLoading(true);\n    try {\n      const res = await request<any>('/api/v1/dashboard/calendar');\n      setCalendarData(res);\n    } catch (error) {\n      message.error('获取年历数据失败');\n    } finally {\n      setCalendarLoading(false);\n    }\n  };\n\n  const refreshAll = () => {\n    fetchDashboardData();\n    fetchCalendarData();\n  };\n\n  useEffect(() => {\n    refreshAll();\n  }, []);\n\n  useEffect(() => {\n    let timer: ReturnType<typeof setTimeout>;\n\n    const scheduleNextFetch = () => {\n      const jitter = Math.floor(Math.random() * 60000);\n      timer = setTimeout(() => {\n        if (!document.hidden) {\n          refreshAll();\n        }\n        scheduleNextFetch();\n      }, 600000 + jitter);\n    };\n\n    scheduleNextFetch();\n    return () => clearTimeout(timer);\n  }, []);\n\n  const totalDevices = data.summary.totalDevices;\n  const activeFaultCount = data.summary.warningDevices + data.summary.severeDevices;\n  const healthRows = useMemo(\n    () => data.healthDistribution.filter(item => item.count > 0 || ['正常', '关注', '警告', '严重'].includes(item.level)),\n    [data.healthDistribution],\n  );\n\n  const faultColumns: ColumnsType<PriorityFault> = [\n    {\n      title: '级别',\n      dataIndex: 'level',\n      width: 86,\n      render: level => <Tag color={levelColor[level as LevelName]}>{level}</Tag>,\n    },\n    {\n      title: '设备',\n      dataIndex: 'device_name',\n      width: 180,\n      render: (_, record) => (\n        <Space direction=\"vertical\" size={0}>\n          <Text strong>{record.device_name}</Text>\n          <Text type=\"secondary\">{record.device_code}</Text>\n        </Space>\n      ),\n    },\n    {\n      title: '测点',\n      dataIndex: 'sn',\n      width: 150,\n    },\n    {\n      title: '诊断项',\n      dataIndex: 'metric_label',\n      width: 120,\n    },\n    {\n      title: '结论',\n      dataIndex: 'conclusion',\n      render: value => <Text>{value}</Text>,\n    },\n    {\n      title: '位置',\n      dataIndex: 'area',\n      width: 120,\n    },\n    {\n      title: '采集耗时',\n      dataIndex: 'duration_ms',\n      width: 110,\n      render: formatDuration,\n    },\n    {\n      title: '最近活动',\n      dataIndex: 'last_activity_at',\n      width: 180,\n      render: formatTime,\n    },\n  ];\n\n  return (\n    <PageContainer\n      title=\"设备运行总览\"\n      subTitle={`最近上报：${formatTime(data.summary.latestReportTs)}`}\n      extra={\n        <Button icon={<ReloadOutlined />} onClick={refreshAll} loading={loading || calendarLoading}>\n          刷新\n        </Button>\n      }\n    >\n      <StatisticCard.Group direction=\"row\" gutter={16}>\n        <StatisticCard loading={loading} statistic={{ title: '设备总数', value: totalDevices, suffix: '台' }} />\n        <StatisticCard\n          loading={loading}\n          statistic={{ title: '正常运行', value: data.summary.normalDevices, suffix: '台', status: 'success' }}\n        />\n        <StatisticCard\n          loading={loading}\n          statistic={{ title: '故障设备', value: data.summary.faultyDevices, suffix: '台', status: 'error' }}\n        />\n        <StatisticCard\n          loading={loading}\n          statistic={{ title: '严重/警告', value: activeFaultCount, suffix: '台', status: 'warning' }}\n        />\n        <StatisticCard\n          loading={loading}\n          statistic={{ title: '未覆盖', value: data.summary.unconfiguredDevices, suffix: '台' }}\n        />\n      </StatisticCard.Group>\n\n      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>\n        <Col xs={24} xl={15}>\n          <ProCard title=\"设备状态\" bordered headerBordered loading={loading}>\n            {healthRows.length ? (\n              <Space direction=\"vertical\" size={14} style={{ width: '100%' }}>\n                {healthRows.map(item => (\n                  <div key={item.level}>\n                    <Space style={{ width: '100%', justifyContent: 'space-between' }}>\n                      <Space>\n                        <Badge status={levelStatus[item.level]} />\n                        <Text>{item.level}</Text>\n                      </Space>\n                      <Text strong>{item.count} 台</Text>\n                    </Space>\n                    <Progress\n                      percent={percentOf(item.count, totalDevices)}\n                      showInfo={false}\n                      strokeColor={levelColor[item.level]}\n                    />\n                  </div>\n                ))}\n              </Space>\n            ) : (\n              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />\n            )}\n          </ProCard>\n        </Col>\n\n        <Col xs={24} xl={9}>\n          <ProCard title=\"通讯活跃\" bordered headerBordered loading={loading}>\n            <StatisticCard.Group direction=\"row\">\n              <Statistic title=\"在线测点\" value={data.communication.onlineSensors} suffix=\"个\" />\n              <Statistic title=\"离线测点\" value={data.communication.offlineSensors} suffix=\"个\" status=\"warning\" />\n            </StatisticCard.Group>\n            <Space direction=\"vertical\" size={8} style={{ width: '100%', marginTop: 16 }}>\n              <Space style={{ width: '100%', justifyContent: 'space-between' }}>\n                <Text type=\"secondary\">平均采集耗时</Text>\n                <Text strong>{formatDuration(data.communication.avgDurationMs)}</Text>\n              </Space>\n              <Space style={{ width: '100%', justifyContent: 'space-between' }}>\n                <Text type=\"secondary\">最长采集耗时</Text>\n                <Text strong>{formatDuration(data.communication.maxDurationMs)}</Text>\n              </Space>\n              <Space style={{ width: '100%', justifyContent: 'space-between' }}>\n                <Text type=\"secondary\">最近活动</Text>\n                <Text strong>{formatTime(data.communication.latestActivityAt)}</Text>\n              </Space>\n            </Space>\n          </ProCard>\n        </Col>\n      </Row>\n\n      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>\n        <Col xs={24} xl={14}>\n          <ProCard title=\"故障设备优先级\" bordered headerBordered loading={loading}>\n            <Table<PriorityFault>\n              rowKey={record => `${record.id}-${record.device_id}-${record.sn}`}\n              columns={faultColumns}\n              dataSource={data.priorityFaults}\n              pagination={{ pageSize: 8 }}\n              size=\"middle\"\n            />\n          </ProCard>\n        </Col>\n\n        <Col xs={24} xl={10}>\n          <ProCard title=\"诊断项分布\" bordered headerBordered loading={loading}>\n            <List\n              dataSource={data.diagnosisDistribution}\n              locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} /> }}\n              renderItem={item => (\n                <List.Item>\n                  <div style={{ width: '100%' }}>\n                    <Space style={{ width: '100%', justifyContent: 'space-between' }}>\n                      <Text>{item.label}</Text>\n                      <Text strong>{item.count} 项</Text>\n                    </Space>\n                    <Progress\n                      percent={percentOf(item.count, Math.max(data.summary.faultyDevices, 1))}\n                      showInfo={false}\n                      strokeColor={item.severe ? '#f5222d' : item.warning ? '#fa8c16' : '#faad14'}\n                    />\n                    <Space size={12}>\n                      <Text type=\"secondary\">关注 {item.attention}</Text>\n                      <Text type=\"secondary\">警告 {item.warning}</Text>\n                      <Text type=\"secondary\">严重 {item.severe}</Text>\n                    </Space>\n                  </div>\n                </List.Item>\n              )}\n            />\n          </ProCard>\n        </Col>\n      </Row>\n\n      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>\n        <Col xs={24} xl={10}>\n          <ProCard title=\"最近 7 天趋势\" bordered headerBordered loading={loading}>\n            <Space direction=\"vertical\" size={12} style={{ width: '100%' }}>\n              {data.trend.map(item => (\n                <Space key={item.date} style={{ width: '100%', justifyContent: 'space-between' }}>\n                  <Text type=\"secondary\">{item.date.slice(5)}</Text>\n                  <Progress\n                    percent={percentOf(item.total, Math.max(...data.trend.map(row => row.total), 1))}\n                    showInfo={false}\n                    strokeColor={item.severe ? '#f5222d' : item.warning ? '#fa8c16' : '#faad14'}\n                    style={{ flex: 1 }}\n                  />\n                  <Text strong style={{ width: 40, textAlign: 'right' }}>\n                    {item.total}\n                  </Text>\n                </Space>\n              ))}\n            </Space>\n          </ProCard>\n        </Col>\n\n        <Col xs={24} xl={14}>\n          <ProCard title=\"故障年历\" bordered headerBordered loading={calendarLoading}>\n            <CalendarHeatmap data={calendarData} loading={calendarLoading} />\n          </ProCard>\n        </Col>\n      </Row>\n    </PageContainer>\n  );\n};\n\nexport default DashboardOverview;\n",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport { PageContainer, ProCard, StatisticCard } from '@ant-design/pro-components';\nimport {\n  Badge,\n  Button,\n  Col,\n  Empty,\n  List,\n  Progress,\n  Row,\n  Space,\n  Table,\n  Tag,\n  Typography,\n  message,\n} from 'antd';\nimport { ReloadOutlined } from '@ant-design/icons';\nimport { request } from '@umijs/max';\nimport type { ColumnsType } from 'antd/es/table';\nimport CalendarHeatmap from './CalendarHeatmap';\n\nconst { Statistic } = StatisticCard;\nconst { Text } = Typography;\n\ntype LevelName = '正常' | '关注' | '警告' | '严重' | '离线' | '未检测' | '未配置';\n\ntype DashboardSummary = {\n  totalDevices: number;\n  onlineDevices: number;\n  normalDevices: number;\n  faultyDevices: number;\n  attentionDevices: number;\n  warningDevices: number;\n  severeDevices: number;\n  offlineDevices: number;\n  offlineSensors: number;\n  notCheckedDevices: number;\n  pendingDevices: number;\n  unconfiguredDevices: number;\n  latestReportTs?: number | null;\n};\n\ntype HealthDistributionItem = {\n  level: LevelName;\n  count: number;\n};\n\ntype DiagnosisDistributionItem = {\n  metric: string;\n  label: string;\n  count: number;\n  attention: number;\n  warning: number;\n  severe: number;\n};\n\ntype PriorityFault = {\n  id: string;\n  device_id: string;\n  device_name: string;\n  device_code: string;\n  sn: string;\n  area: string;\n  process: string;\n  level: LevelName;\n  metric: string;\n  metric_label: string;\n  conclusion: string;\n  report_ts?: number | null;\n  diagnosed_at?: string | null;\n  duration_ms?: number | null;\n  sequence?: number | null;\n  last_activity_at?: string | null;\n};\n\ntype CommunicationSummary = {\n  onlineSensors: number;\n  offlineSensors: number;\n  slowSensors: number;\n  avgDurationMs?: number | null;\n  maxDurationMs?: number | null;\n  latestActivityAt?: string | null;\n};\n\ntype TrendItem = {\n  date: string;\n  attention: number;\n  warning: number;\n  severe: number;\n  total: number;\n};\n\ntype DashboardWorkbenchData = {\n  summary: DashboardSummary;\n  healthDistribution: HealthDistributionItem[];\n  diagnosisDistribution: DiagnosisDistributionItem[];\n  priorityFaults: PriorityFault[];\n  communication: CommunicationSummary;\n  trend: TrendItem[];\n};\n\nconst emptyData: DashboardWorkbenchData = {\n  summary: {\n    totalDevices: 0,\n    onlineDevices: 0,\n    normalDevices: 0,\n    faultyDevices: 0,\n    attentionDevices: 0,\n    warningDevices: 0,\n    severeDevices: 0,\n    offlineDevices: 0,\n    offlineSensors: 0,\n    notCheckedDevices: 0,\n    pendingDevices: 0,\n    unconfiguredDevices: 0,\n  },\n  healthDistribution: [],\n  diagnosisDistribution: [],\n  priorityFaults: [],\n  communication: {\n    onlineSensors: 0,\n    offlineSensors: 0,\n    slowSensors: 0,\n  },\n  trend: [],\n};\n\nconst levelColor: Record<LevelName, string> = {\n  正常: '#52c41a',\n  关注: '#faad14',\n  警告: '#fa8c16',\n  严重: '#f5222d',\n  离线: '#8c8c8c',\n  未检测: '#1677ff',\n  未配置: '#bfbfbf',\n};\n\nconst levelStatus: Record<LevelName, 'success' | 'warning' | 'error' | 'default' | 'processing'> = {\n  正常: 'success',\n  关注: 'warning',\n  警告: 'warning',\n  严重: 'error',\n  离线: 'default',\n  未检测: 'processing',\n  未配置: 'default',\n};\n\nconst formatTime = (value?: string | number | null) => {\n  if (!value) return '-';\n  const date = typeof value === 'number' ? new Date(value) : new Date(value);\n  if (Number.isNaN(date.getTime())) return '-';\n  return date.toLocaleString();\n};\n\nconst formatDuration = (value?: number | null) => {\n  if (value === undefined || value === null) return '-';\n  if (value < 1000) return `${Math.round(value)} ms`;\n  return `${(value / 1000).toFixed(1)} s`;\n};\n\nconst percentOf = (value: number, total: number) => {\n  if (!total) return 0;\n  return Math.round((value / total) * 100);\n};\n\nconst DashboardOverview = () => {\n  const [loading, setLoading] = useState(true);\n  const [data, setData] = useState<DashboardWorkbenchData>(emptyData);\n  const [calendarData, setCalendarData] = useState<any>(null);\n  const [calendarLoading, setCalendarLoading] = useState(false);\n\n  const fetchDashboardData = async () => {\n    setLoading(true);\n    try {\n      const res = await request<DashboardWorkbenchData>('/api/v1/dashboard/workbench');\n      setData(res || emptyData);\n    } catch (error) {\n      message.error('获取仪表盘数据失败');\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  const fetchCalendarData = async () => {\n    setCalendarLoading(true);\n    try {\n      const res = await request<any>('/api/v1/dashboard/calendar');\n      setCalendarData(res);\n    } catch (error) {\n      message.error('获取年历数据失败');\n    } finally {\n      setCalendarLoading(false);\n    }\n  };\n\n  const refreshAll = () => {\n    fetchDashboardData();\n    fetchCalendarData();\n  };\n\n  useEffect(() => {\n    refreshAll();\n  }, []);\n\n  useEffect(() => {\n    let timer: ReturnType<typeof setTimeout>;\n\n    const scheduleNextFetch = () => {\n      const jitter = Math.floor(Math.random() * 60000);\n      timer = setTimeout(() => {\n        if (!document.hidden) {\n          refreshAll();\n        }\n        scheduleNextFetch();\n      }, 600000 + jitter);\n    };\n\n    scheduleNextFetch();\n    return () => clearTimeout(timer);\n  }, []);\n\n  const totalDevices = data.summary.totalDevices;\n  const activeFaultCount = data.summary.warningDevices + data.summary.severeDevices;\n  const pendingDevices =\n    data.summary.pendingDevices ?? data.summary.offlineDevices + data.summary.notCheckedDevices;\n  const healthRows = useMemo(\n    () => data.healthDistribution.filter(item => item.count > 0 || ['正常', '关注', '警告', '严重'].includes(item.level)),\n    [data.healthDistribution],\n  );\n\n  const faultColumns: ColumnsType<PriorityFault> = [\n    {\n      title: '级别',\n      dataIndex: 'level',\n      width: 86,\n      render: level => <Tag color={levelColor[level as LevelName]}>{level}</Tag>,\n    },\n    {\n      title: '设备',\n      dataIndex: 'device_name',\n      width: 180,\n      render: (_, record) => (\n        <Space direction=\"vertical\" size={0}>\n          <Text strong>{record.device_name}</Text>\n          <Text type=\"secondary\">{record.device_code}</Text>\n        </Space>\n      ),\n    },\n    {\n      title: '测点',\n      dataIndex: 'sn',\n      width: 150,\n    },\n    {\n      title: '诊断项',\n      dataIndex: 'metric_label',\n      width: 120,\n    },\n    {\n      title: '结论',\n      dataIndex: 'conclusion',\n      render: value => <Text>{value}</Text>,\n    },\n    {\n      title: '位置',\n      dataIndex: 'area',\n      width: 120,\n    },\n    {\n      title: '采集耗时',\n      dataIndex: 'duration_ms',\n      width: 110,\n      render: formatDuration,\n    },\n    {\n      title: '最近活动',\n      dataIndex: 'last_activity_at',\n      width: 180,\n      render: formatTime,\n    },\n  ];\n\n  return (\n    <PageContainer\n      title=\"设备运行总览\"\n      subTitle={`最近上报：${formatTime(data.summary.latestReportTs)}`}\n      extra={\n        <Button icon={<ReloadOutlined />} onClick={refreshAll} loading={loading || calendarLoading}>\n          刷新\n        </Button>\n      }\n    >\n      <StatisticCard.Group direction=\"row\" gutter={16}>\n        <StatisticCard loading={loading} statistic={{ title: '设备总数', value: totalDevices, suffix: '台' }} />\n        <StatisticCard\n          loading={loading}\n          statistic={{ title: '正常运行', value: data.summary.normalDevices, suffix: '台', status: 'success' }}\n        />\n        <StatisticCard\n          loading={loading}\n          statistic={{ title: '故障设备', value: data.summary.faultyDevices, suffix: '台', status: 'error' }}\n        />\n        <StatisticCard\n          loading={loading}\n          statistic={{ title: '待确认', value: pendingDevices, suffix: '台', status: 'processing' }}\n        />\n        <StatisticCard\n          loading={loading}\n          statistic={{ title: '严重/警告', value: activeFaultCount, suffix: '台', status: 'warning' }}\n        />\n        <StatisticCard\n          loading={loading}\n          statistic={{ title: '未覆盖', value: data.summary.unconfiguredDevices, suffix: '台' }}\n        />\n      </StatisticCard.Group>\n\n      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>\n        <Col xs={24} xl={15}>\n          <ProCard title=\"设备状态\" bordered headerBordered loading={loading}>\n            {healthRows.length ? (\n              <Space direction=\"vertical\" size={14} style={{ width: '100%' }}>\n                {healthRows.map(item => (\n                  <div key={item.level}>\n                    <Space style={{ width: '100%', justifyContent: 'space-between' }}>\n                      <Space>\n                        <Badge status={levelStatus[item.level]} />\n                        <Text>{item.level}</Text>\n                      </Space>\n                      <Text strong>{item.count} 台</Text>\n                    </Space>\n                    <Progress\n                      percent={percentOf(item.count, totalDevices)}\n                      showInfo={false}\n                      strokeColor={levelColor[item.level]}\n                    />\n                  </div>\n                ))}\n              </Space>\n            ) : (\n              <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />\n            )}\n          </ProCard>\n        </Col>\n\n        <Col xs={24} xl={9}>\n          <ProCard title=\"通讯活跃\" bordered headerBordered loading={loading}>\n            <StatisticCard.Group direction=\"row\">\n              <Statistic title=\"在线测点\" value={data.communication.onlineSensors} suffix=\"个\" />\n              <Statistic title=\"离线测点\" value={data.communication.offlineSensors} suffix=\"个\" status=\"warning\" />\n            </StatisticCard.Group>\n            <Space direction=\"vertical\" size={8} style={{ width: '100%', marginTop: 16 }}>\n              <Space style={{ width: '100%', justifyContent: 'space-between' }}>\n                <Text type=\"secondary\">平均采集耗时</Text>\n                <Text strong>{formatDuration(data.communication.avgDurationMs)}</Text>\n              </Space>\n              <Space style={{ width: '100%', justifyContent: 'space-between' }}>\n                <Text type=\"secondary\">最长采集耗时</Text>\n                <Text strong>{formatDuration(data.communication.maxDurationMs)}</Text>\n              </Space>\n              <Space style={{ width: '100%', justifyContent: 'space-between' }}>\n                <Text type=\"secondary\">最近活动</Text>\n                <Text strong>{formatTime(data.communication.latestActivityAt)}</Text>\n              </Space>\n            </Space>\n          </ProCard>\n        </Col>\n      </Row>\n\n      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>\n        <Col xs={24} xl={14}>\n          <ProCard title=\"故障设备优先级\" bordered headerBordered loading={loading}>\n            <Table<PriorityFault>\n              rowKey={record => `${record.id}-${record.device_id}-${record.sn}`}\n              columns={faultColumns}\n              dataSource={data.priorityFaults}\n              pagination={{ pageSize: 8 }}\n              size=\"middle\"\n            />\n          </ProCard>\n        </Col>\n\n        <Col xs={24} xl={10}>\n          <ProCard title=\"诊断项分布\" bordered headerBordered loading={loading}>\n            <List\n              dataSource={data.diagnosisDistribution}\n              locale={{ emptyText: <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} /> }}\n              renderItem={item => (\n                <List.Item>\n                  <div style={{ width: '100%' }}>\n                    <Space style={{ width: '100%', justifyContent: 'space-between' }}>\n                      <Text>{item.label}</Text>\n                      <Text strong>{item.count} 项</Text>\n                    </Space>\n                    <Progress\n                      percent={percentOf(item.count, Math.max(data.summary.faultyDevices, 1))}\n                      showInfo={false}\n                      strokeColor={item.severe ? '#f5222d' : item.warning ? '#fa8c16' : '#faad14'}\n                    />\n                    <Space size={12}>\n                      <Text type=\"secondary\">关注 {item.attention}</Text>\n                      <Text type=\"secondary\">警告 {item.warning}</Text>\n                      <Text type=\"secondary\">严重 {item.severe}</Text>\n                    </Space>\n                  </div>\n                </List.Item>\n              )}\n            />\n          </ProCard>\n        </Col>\n      </Row>\n\n      <Row gutter={[16, 16]} style={{ marginTop: 16 }}>\n        <Col xs={24} xl={10}>\n          <ProCard title=\"最近 7 天趋势\" bordered headerBordered loading={loading}>\n            <Space direction=\"vertical\" size={12} style={{ width: '100%' }}>\n              {data.trend.map(item => (\n                <Space key={item.date} style={{ width: '100%', justifyContent: 'space-between' }}>\n                  <Text type=\"secondary\">{item.date.slice(5)}</Text>\n                  <Progress\n                    percent={percentOf(item.total, Math.max(...data.trend.map(row => row.total), 1))}\n                    showInfo={false}\n                    strokeColor={item.severe ? '#f5222d' : item.warning ? '#fa8c16' : '#faad14'}\n                    style={{ flex: 1 }}\n                  />\n                  <Text strong style={{ width: 40, textAlign: 'right' }}>\n                    {item.total}\n                  </Text>\n                </Space>\n              ))}\n            </Space>\n          </ProCard>\n        </Col>\n\n        <Col xs={24} xl={14}>\n          <ProCard title=\"故障年历\" bordered headerBordered loading={calendarLoading}>\n            <CalendarHeatmap data={calendarData} loading={calendarLoading} />\n          </ProCard>\n        </Col>\n      </Row>\n    </PageContainer>\n  );\n};\n\nexport default DashboardOverview;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/client/tenant/src/pages/Dashboard/Overview/index.tsx"
     },

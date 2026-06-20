@@ -9,6 +9,7 @@ spectral centroid, and spectral entropy against recent normal history.
 import logging
 from typing import Any
 
+from app.handler.horizontal_compare import PeerThresholds, build_peer_item_conclusion, compare_peer_value
 from app.handler.vibration_common import (
     AXES,
     HISTORY_WINDOW_SIZE,
@@ -54,6 +55,29 @@ CENTROID_REL_SEVERE = 0.35
 ENTROPY_DELTA_ATTENTION = 0.05
 ENTROPY_DELTA_WARNING = 0.10
 ENTROPY_DELTA_SEVERE = 0.20
+PEER_FREQ_THRESHOLDS = PeerThresholds(
+    relative_attention=0.10,
+    relative_warning=0.20,
+    relative_severe=0.35,
+    absolute_attention=5.0,
+    absolute_warning=10.0,
+    absolute_severe=20.0,
+    absolute_mode=True,
+)
+PEER_AMP_THRESHOLDS = PeerThresholds(
+    relative_attention=0.50,
+    relative_warning=1.00,
+    relative_severe=2.00,
+    absolute_attention=0.02,
+    absolute_warning=0.05,
+    absolute_severe=0.10,
+)
+PEER_ENTROPY_THRESHOLDS = PeerThresholds(
+    absolute_attention=0.05,
+    absolute_warning=0.10,
+    absolute_severe=0.20,
+    absolute_mode=True,
+)
 
 
 def run_peak_structure_check(
@@ -105,6 +129,17 @@ def diagnose_peak_structure(
                     severe=FREQ_REL_SEVERE,
                     absolute=True,
                 ),
+                _peer_structure_conclusion(
+                    axis=axis,
+                    sn=sn,
+                    context=context,
+                    current_value=current_peak.get("freq_hz") if current_peak else None,
+                    field="peak1_freq_hz",
+                    name="主峰频率横向比较",
+                    normal_text="主峰频率相对同组设备未见明显偏离",
+                    warning_text="主峰频率相对同组设备偏离",
+                    thresholds=PEER_FREQ_THRESHOLDS,
+                ),
                 _relative_structure_conclusion(
                     axis=axis,
                     context=context,
@@ -118,6 +153,17 @@ def diagnose_peak_structure(
                     warning=AMP_REL_WARNING,
                     severe=AMP_REL_SEVERE,
                     absolute=False,
+                ),
+                _peer_structure_conclusion(
+                    axis=axis,
+                    sn=sn,
+                    context=context,
+                    current_value=current_peak.get("amp_g") if current_peak else None,
+                    field="peak1_amp_g",
+                    name="主峰幅值横向比较",
+                    normal_text="主峰幅值相对同组设备未见明显偏高",
+                    warning_text="主峰幅值相对同组设备偏高",
+                    thresholds=PEER_AMP_THRESHOLDS,
                 ),
                 _relative_structure_conclusion(
                     axis=axis,
@@ -133,7 +179,29 @@ def diagnose_peak_structure(
                     severe=CENTROID_REL_SEVERE,
                     absolute=True,
                 ),
+                _peer_structure_conclusion(
+                    axis=axis,
+                    sn=sn,
+                    context=context,
+                    current_value=freq_feature(payload, axis, "spectral_centroid_hz"),
+                    field="spectral_centroid_hz",
+                    name="频谱质心横向比较",
+                    normal_text="频谱质心相对同组设备未见明显偏离",
+                    warning_text="频谱质心相对同组设备偏离",
+                    thresholds=PEER_FREQ_THRESHOLDS,
+                ),
                 _entropy_conclusion(axis, payload, context, axis_history),
+                _peer_structure_conclusion(
+                    axis=axis,
+                    sn=sn,
+                    context=context,
+                    current_value=freq_feature(payload, axis, "spectral_entropy"),
+                    field="spectral_entropy",
+                    name="频谱熵横向比较",
+                    normal_text="频谱熵相对同组设备未见明显偏离",
+                    warning_text="频谱熵相对同组设备偏离",
+                    thresholds=PEER_ENTROPY_THRESHOLDS,
+                ),
             ]
         )
 
@@ -293,3 +361,34 @@ def _entropy_level(delta: float) -> str | None:
     if delta >= ENTROPY_DELTA_ATTENTION:
         return "关注"
     return None
+
+
+def _peer_structure_conclusion(
+    *,
+    axis: str,
+    sn: str,
+    context: dict[str, Any] | None,
+    current_value: float | None,
+    field: str,
+    name: str,
+    normal_text: str,
+    warning_text: str,
+    thresholds: PeerThresholds,
+) -> DiagnosisItemConclusion:
+    label = axis_label(axis, context)
+    result = compare_peer_value(
+        current_sn=sn,
+        current_value=current_value,
+        context=context,
+        field=field,
+        axis=axis,
+        same_direction=True,
+        thresholds=thresholds,
+    )
+    return build_peer_item_conclusion(
+        result=result,
+        name=f"{label}{name}",
+        normal_text=f"{label}{normal_text}",
+        warning_text=f"{label}{warning_text}",
+        thresholds=thresholds,
+    )

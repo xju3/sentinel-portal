@@ -118,6 +118,7 @@ class DiagnosisResultService:
         session: AsyncSession,
         result: Any,
         report_ts: int | None = None,
+        context: dict[str, Any] | None = None,
     ) -> DiagnosisResult:
         """Persist a temperature diagnosis result object.
 
@@ -128,6 +129,7 @@ class DiagnosisResultService:
             result,
             metric="temperature",
             report_ts=report_ts,
+            context=context,
         )
         return await DiagnosisResultService.create(session, data, items)
 
@@ -136,11 +138,13 @@ class DiagnosisResultService:
         session: AsyncSession,
         result: Any,
         report_ts: int | None = None,
+        context: dict[str, Any] | None = None,
     ) -> DiagnosisResult:
         """Persist a structured diagnosis result object with a `metric` attribute."""
         data, items = DiagnosisResultService.metric_result_to_record_data(
             result,
             report_ts=report_ts,
+            context=context,
         )
         return await DiagnosisResultService.create(session, data, items)
 
@@ -148,6 +152,7 @@ class DiagnosisResultService:
     async def save_metric_result_managed(
         result: Any,
         report_ts: int | None = None,
+        context: dict[str, Any] | None = None,
     ) -> Optional[DiagnosisResult]:
         """Persist a structured diagnosis result using an internally managed session."""
         if db_manager.SessionLocal is None:
@@ -160,6 +165,7 @@ class DiagnosisResultService:
                     session=session,
                     result=result,
                     report_ts=report_ts,
+                    context=context,
                 )
         except Exception as e:
             logger.error("Failed to save diagnosis result: %s", e)
@@ -169,6 +175,7 @@ class DiagnosisResultService:
     async def save_temperature_result_managed(
         result: Any,
         report_ts: int | None = None,
+        context: dict[str, Any] | None = None,
     ) -> Optional[DiagnosisResult]:
         """Persist a temperature diagnosis result using an internally managed session."""
         if db_manager.SessionLocal is None:
@@ -181,6 +188,7 @@ class DiagnosisResultService:
                     session=session,
                     result=result,
                     report_ts=report_ts,
+                    context=context,
                 )
         except Exception as e:
             logger.error("Failed to save temperature diagnosis result: %s", e)
@@ -190,11 +198,13 @@ class DiagnosisResultService:
     def temperature_result_to_record_data(
         result: Any,
         report_ts: int | None = None,
+        context: dict[str, Any] | None = None,
     ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         return DiagnosisResultService.metric_result_to_record_data(
             result,
             metric="temperature",
             report_ts=report_ts,
+            context=context,
         )
 
     @staticmethod
@@ -202,11 +212,13 @@ class DiagnosisResultService:
         result: Any,
         metric: str | None = None,
         report_ts: int | None = None,
+        context: dict[str, Any] | None = None,
     ) -> tuple[dict[str, Any], list[dict[str, Any]]]:
         conclusion = result.conclusion
         data = {
             "report_id": result.report_id,
             "sn": result.sn,
+            **_diagnosis_relation_ids(context),
             "metric": metric or result.metric,
             "level": conclusion.level,
             "triggered": bool(conclusion.triggered),
@@ -240,6 +252,26 @@ def _json_safe(value: Any) -> Any:
     if isinstance(value, dict):
         return {str(key): _json_safe(item) for key, item in value.items()}
     return str(value)
+
+
+def _diagnosis_relation_ids(context: dict[str, Any] | None) -> dict[str, Any]:
+    """Extract relational IDs from cached diagnosis context."""
+    if not isinstance(context, dict):
+        return {}
+
+    sensor = context.get("sensor") if isinstance(context.get("sensor"), dict) else {}
+    monitoring = context.get("monitoring") if isinstance(context.get("monitoring"), dict) else {}
+    device_inst = context.get("device_inst") if isinstance(context.get("device_inst"), dict) else {}
+    device_spec = context.get("device_spec") if isinstance(context.get("device_spec"), dict) else {}
+    device_category = context.get("device_category") if isinstance(context.get("device_category"), dict) else {}
+
+    return {
+        "sensor_id": sensor.get("id"),
+        "sensor_monitoring_id": monitoring.get("id"),
+        "device_inst_id": device_inst.get("id") or monitoring.get("device_inst_id"),
+        "device_spec_id": device_spec.get("id") or device_inst.get("device_spec_id"),
+        "device_category_id": device_category.get("id") or device_spec.get("device_category_id"),
+    }
 
 
 class PatrolDiagnosisRecordService:

@@ -10,6 +10,7 @@ from sqlalchemy import (
     Column,
     DateTime,
     Float,
+    ForeignKey,
     Integer,
     Numeric,
     SmallInteger,
@@ -224,7 +225,28 @@ class SensorThreshold(Base):
 
 
 class SensorTask(Base):
-    """Sensor task entity model"""
+    """Sensor task entity model.
+
+    action < 10 is reserved for existing system tasks:
+    1=config update, 2=firmware upgrade.
+
+    status values:
+    0=pending delivery, 2=dispatched/running, 1=complete.
+
+    action >= 10 is used for temporary collection tasks:
+    - 11..99: default-parameter dense collection. The code is T I:
+      T = focus type, I = interval minutes. Focus types are 1=general,
+      2=temperature, 3=RMS, 4=impact/spectrum.
+      Example: action=15, val=3 means collect full data every 5 minutes,
+      repeat 3 times.
+      Example: action=25, val=3 means collect full data every 5 minutes,
+      repeat 3 times with temperature as the server-side review focus.
+    - 1000..9999: IIS3DWB parameterized dense collection. The code is M RR I:
+      M = FFT points multiplier of 4096, RR = range_g as 02/04/08/16,
+      I = interval minutes. val is repeat count.
+      Example: action=2086, val=3 means 2*4096 points, 8g, every 6 minutes,
+      repeat 3 times.
+    """
 
     __tablename__ = "sensor_task"
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
@@ -232,6 +254,30 @@ class SensorTask(Base):
     sn = Column(String(255), nullable=False, index=True) # 传感器序列号
     action = Column(SmallInteger, nullable=False) # 动作类型
     val = Column(SmallInteger, nullable=False, default=0) # 执行多少次
+    remark = Column(Text, nullable=True) # 任务内容和发起原因说明
     status = Column(SmallInteger, nullable=False, default=1, comment="tiny(1) status") # 任务状态
     create_time = Column(DateTime, default=datetime.utcnow) # 任务创建时间
+    dispatched_at = Column(DateTime, nullable=True) # 任务下发时间
     complete_time = Column(DateTime, nullable=True) # 任务完成时间
+
+
+class SensorTaskReport(Base):
+    """Reports produced by one SensorTask execution.
+
+    Each task report records the upload report_id generated for a specific
+    task sequence. A task with val=3 is complete only after sequence 1, 2, and
+    3 have all been recorded.
+    """
+
+    __tablename__ = "sensor_task_report"
+    __table_args__ = (
+        UniqueConstraint("task_id", "sequence", name="uq_sensor_task_report_task_sequence"),
+    )
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    task_id = Column(Uuid(as_uuid=True), ForeignKey("sensor_task.id"), nullable=False, index=True)
+    sn = Column(String(255), nullable=False, index=True)
+    sequence = Column(SmallInteger, nullable=False, index=True)
+    report_id = Column(String(64), nullable=False, index=True)
+    ts_ms = Column(BigInteger, nullable=False, index=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)

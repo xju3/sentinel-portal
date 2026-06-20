@@ -18,6 +18,8 @@ logger = logging.getLogger(__name__)
 
 from pub.services.dependencies import get_session
 from pub.services.sensor_service import SensorTypeService, SensorDbService, SensorBatchService, SensorConfigService
+from pub.services.quick_dispatch_service import dispatch_quick_diagnosis_tasks
+from pub.services.sensor_task_service import dispatch_pending_sensor_tasks
 from pub.models.customer import Account
 from pub.models.sensor import Sensor, SensorBatch, SensorTask
 from pub.utils.exceptions import DomainException
@@ -223,14 +225,7 @@ async def list_sensor_tasks_by_sn(
     sn: str,
     session: AsyncSession = Depends(get_session),
 ):
-    stmt = (
-        select(SensorTask.id, SensorTask.action, SensorTask.val)
-        .where(SensorTask.sn == sn, SensorTask.status == 0)
-        .order_by(SensorTask.create_time.desc())
-    )
-    result = await session.execute(stmt)
-    rows = result.all()
-    return [{"id": str(row.id), "action": row.action, "val": row.val} for row in rows]
+    return await dispatch_pending_sensor_tasks(session, sn)
 
 
 @router.get("/config/{task_id}")
@@ -334,6 +329,7 @@ def _process_sensor_data_background(object_name: str, payload: dict):
 async def receive_sensor_data(
     background_tasks: BackgroundTasks,
     payload: dict = Body(...),
+    session: AsyncSession = Depends(get_session),
 ):
     """Receive processed sensor data and asynchronously store to MinIO"""
     sn = payload.get("sn")
@@ -354,10 +350,27 @@ async def receive_sensor_data(
         stored_payload = dict(payload)
         stored_payload["report_id"] = report_id
 
+        tasks: list[dict] = []
+        try:
+            tasks = await dispatch_quick_diagnosis_tasks(
+                session=session,
+                report_id=report_id,
+                sn=str(sn),
+                payload=stored_payload,
+            )
+        except Exception as quick_err:
+            logger.error(
+                "Failed to dispatch quick diagnosis tasks for sn=%s report_id=%s: %s",
+                sn,
+                report_id,
+                quick_err,
+                exc_info=True,
+            )
+
         # Add to background tasks to execute immediately after returning response
         background_tasks.add_task(_process_sensor_data_background, object_name, stored_payload)
 
-        return success({"path": object_name, "report_id": report_id})
+        return success(tasks)
     except Exception as e:
         logger.error(f"Error processing sensor data: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error processing data")

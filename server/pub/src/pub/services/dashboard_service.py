@@ -526,7 +526,10 @@ class DashboardService:
                     latest_report_ts = result.report_ts
 
                 score = DIAGNOSIS_LEVEL_SCORE.get(result.level, 0)
-                for device_id in sn_to_devices.get(sn, []):
+                linked_device_ids = [str(result.device_inst_id)] if result.device_inst_id else sn_to_devices.get(sn, [])
+                for device_id in linked_device_ids:
+                    if device_id not in device_states:
+                        continue
                     device_state = device_states[device_id]
                     device_state["has_diagnosis"] = True
                     current = device_state["diagnosis_score"]
@@ -556,7 +559,9 @@ class DashboardService:
                 elif result.level == "严重":
                     metric_info["severe"] += 1
 
-                for device_id in sn_to_devices.get(sn, []):
+                for device_id in linked_device_ids:
+                    if device_id not in device_states:
+                        continue
                     device = device_states[device_id]
                     comm = communication_states.get(sn)
                     priority_faults.append({
@@ -632,8 +637,10 @@ class DashboardService:
                 "attentionDevices": health_distribution["关注"],
                 "warningDevices": health_distribution["警告"],
                 "severeDevices": health_distribution["严重"],
+                "offlineDevices": health_distribution["离线"],
                 "offlineSensors": offline_sensors,
                 "notCheckedDevices": not_checked_devices,
+                "pendingDevices": health_distribution["离线"] + not_checked_devices,
                 "unconfiguredDevices": health_distribution["未配置"],
                 "latestReportTs": latest_report_ts,
             },

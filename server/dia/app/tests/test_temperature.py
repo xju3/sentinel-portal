@@ -161,4 +161,5 @@ def test_diagnosis_conclusion_is_normal_when_no_track_triggers():
         "短窗口",
         "长窗口",
         "单次检测温度抬升",
+        "同组温度横向比较",
     ]

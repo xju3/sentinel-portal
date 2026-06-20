@@ -5,6 +5,7 @@ from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from pub.models.sensor import SensorFirmware, SensorBatch, SensorTask
+from pub.services.sensor_task_service import SENSOR_TASK_OPEN_STATUSES, SENSOR_TASK_STATUS_PENDING
 
 logger = logging.getLogger(__name__)
 
@@ -61,17 +62,28 @@ class SensorFirmwareService:
         target_sns = {str(batch.sn + i) for batch in batches for i in range(batch.qty)}
 
         if target_sns:
-            # 3. 排除那些已经有一个正在进行中(status=0)且动作类型为固件升级(action=2)的 SN，防止重复创建任务
+            # 3. 排除已有未闭环固件升级任务的 SN，防止重复创建任务
             task_stmt = select(SensorTask.sn).where(
                 SensorTask.action == 2,
-                SensorTask.status == 0,
+                SensorTask.status.in_(SENSOR_TASK_OPEN_STATUSES),
                 SensorTask.sn.in_(target_sns)
             )
             existing_sns = set((await session.execute(task_stmt)).scalars().all())
             
             # 4. 创建新的升级任务
             tasks_to_create = [
-                SensorTask(name=f"Firmware Upgrade {firmware.version}", sn=sn, action=2, val=0, status=0, create_time=datetime.utcnow())
+                SensorTask(
+                    name=f"Firmware Upgrade {firmware.version}",
+                    sn=sn,
+                    action=2,
+                    val=0,
+                    remark=(
+                        f"任务内容: 固件升级到 {firmware.version}; "
+                        "发起原因: 后台发布新固件; 编码: action=2, val=0"
+                    ),
+                    status=SENSOR_TASK_STATUS_PENDING,
+                    create_time=datetime.utcnow(),
+                )
                 for sn in target_sns if sn not in existing_sns
             ]
             if tasks_to_create:

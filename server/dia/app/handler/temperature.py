@@ -53,6 +53,7 @@ from decimal import Decimal
 from math import sqrt
 from typing import Any
 
+from app.handler.horizontal_compare import PeerComparisonResult, PeerThresholds, compare_peer_value
 from app.handler.temperature_cache import (
     TEMPERATURE_CACHE_LIMIT,
     TemperatureCachePoint,
@@ -82,6 +83,14 @@ TREND_SIGMA_LIMIT = 3.0
 TREND_DRIFT_ATTENTION_DELTA_C = 1.5
 TREND_DRIFT_WARNING_DELTA_C = 3.0
 TREND_DRIFT_SEVERE_DELTA_C = 5.0
+PEER_TEMPERATURE_THRESHOLDS = PeerThresholds(
+    relative_attention=0.05,
+    relative_warning=0.10,
+    relative_severe=0.15,
+    absolute_attention=2.0,
+    absolute_warning=3.0,
+    absolute_severe=5.0,
+)
 LEVEL_NOT_CHECKED = "未检测"
 LEVEL_NORMAL = "正常"
 LEVEL_ATTENTION = "关注"
@@ -175,6 +184,7 @@ class TemperatureDiagnosisResult:
     short_term: ShortTermTemperatureResult
     short_window: ShortWindowTemperatureResult
     trend: TrendTemperatureResult
+    peer: PeerComparisonResult
     conclusion: TemperatureConclusion
 
 
@@ -183,6 +193,7 @@ def run_temperature_check(
     sn: str,
     current_temperature_c: float,
     current_ts_ms: int,
+    context: dict[str, Any] | None = None,
 ) -> TemperatureDiagnosisResult:
     """Run temperature diagnosis for the sensor that produced report_id."""
     # logger.info(
@@ -209,7 +220,7 @@ def run_temperature_check(
         TemperatureCachePoint(temp_c=current_temperature_c, ts_ms=current_ts_ms),
         limit=TEMPERATURE_CACHE_LIMIT,
     )
-    result = diagnose_temperature(sn, report_id, reports)
+    result = diagnose_temperature(sn, report_id, reports, context)
     _log_temperature_result(result)
     # logger.info(
     #     "Temperature diagnosis finished: report_id=%s sn=%s report_count=%s",
@@ -224,6 +235,7 @@ def diagnose_temperature(
     sn: str,
     report_id: str,
     reports: list[ReportTemperature],
+    context: dict[str, Any] | None = None,
 ) -> TemperatureDiagnosisResult:
     """Run short-term and trend temperature checks from unique report temperatures."""
     unique_reports = _dedupe_report_temperatures(reports)
@@ -237,11 +249,13 @@ def diagnose_temperature(
     short_term = check_short_term_temperature_rise(current, previous)
     short_window = check_short_window_temperature_rise(history_to_current)
     trend = check_temperature_trend(history_to_current)
+    peer = check_peer_temperature(sn, current, context)
     conclusion = build_temperature_conclusion(
         absolute=absolute,
         short_window=short_window,
         trend=trend,
         short_term=short_term,
+        peer=peer,
     )
     return TemperatureDiagnosisResult(
         sn=sn,
@@ -251,7 +265,22 @@ def diagnose_temperature(
         short_term=short_term,
         short_window=short_window,
         trend=trend,
+        peer=peer,
         conclusion=conclusion,
+    )
+
+
+def check_peer_temperature(
+    sn: str,
+    current: ReportTemperature | None,
+    context: dict[str, Any] | None,
+) -> PeerComparisonResult:
+    return compare_peer_value(
+        current_sn=sn,
+        current_value=current.temperature_c if current else None,
+        context=context,
+        field=TEMPERATURE_FIELD,
+        thresholds=PEER_TEMPERATURE_THRESHOLDS,
     )
 
 
@@ -427,6 +456,7 @@ def build_temperature_conclusion(
     short_window: ShortWindowTemperatureResult,
     trend: TrendTemperatureResult,
     short_term: ShortTermTemperatureResult,
+    peer: PeerComparisonResult,
 ) -> TemperatureConclusion:
     """Build the overall temperature conclusion from all diagnosis tracks."""
     items = [
@@ -434,6 +464,7 @@ def build_temperature_conclusion(
         _short_window_conclusion(short_window),
         _trend_conclusion(trend),
         _short_term_conclusion(short_term),
+        _peer_temperature_conclusion(peer),
     ]
     level = _highest_conclusion_level(items)
     triggered_items = [item for item in items if item.triggered]
@@ -921,6 +952,55 @@ def _short_term_conclusion(
             f"increase_ratio={_format_ratio(short_term.increase_ratio)}",
             f"attention_ratio={_format_ratio(SHORT_TERM_ATTENTION_RATIO)}",
         ],
+    )
+
+
+def _peer_temperature_conclusion(peer: PeerComparisonResult) -> TemperatureCheckConclusion:
+    name = "同组温度横向比较"
+    evidence = [
+        f"field={peer.field}",
+        f"enabled={peer.enabled}",
+        f"enough_data={peer.enough_data}",
+        f"reason={_format_optional_value(peer.reason)}",
+        f"current_temperature_c={_format_temperature_value(peer.current_value)}",
+        f"peer_count={peer.peer_count}",
+        f"peer_median_temperature_c={_format_temperature_value(peer.peer_median)}",
+        f"delta_c={_format_temperature_value(peer.delta)}",
+        f"relative_delta={_format_ratio(peer.relative_delta)}",
+        f"relative_attention={_format_ratio(PEER_TEMPERATURE_THRESHOLDS.relative_attention)}",
+        f"relative_warning={_format_ratio(PEER_TEMPERATURE_THRESHOLDS.relative_warning)}",
+        f"relative_severe={_format_ratio(PEER_TEMPERATURE_THRESHOLDS.relative_severe)}",
+        f"absolute_attention_c={_format_temperature_value(PEER_TEMPERATURE_THRESHOLDS.absolute_attention)}",
+        f"absolute_warning_c={_format_temperature_value(PEER_TEMPERATURE_THRESHOLDS.absolute_warning)}",
+        f"absolute_severe_c={_format_temperature_value(PEER_TEMPERATURE_THRESHOLDS.absolute_severe)}",
+    ]
+    if not peer.enabled or not peer.enough_data:
+        return TemperatureCheckConclusion(
+            name=name,
+            level=LEVEL_NOT_CHECKED,
+            triggered=False,
+            conclusion="同组温度横向比较数据不足",
+            evidence=evidence,
+        )
+    if peer.level is None:
+        return TemperatureCheckConclusion(
+            name=name,
+            level=LEVEL_NORMAL,
+            triggered=False,
+            conclusion="同组温度横向比较未见明显偏高",
+            evidence=[*evidence, "rule=peer_delta below attention threshold"],
+        )
+    return TemperatureCheckConclusion(
+        name=name,
+        level=peer.level,
+        triggered=True,
+        conclusion=(
+            f"同组温度横向比较偏高，当前温度 "
+            f"{_format_temperature_value(peer.current_value)}°C，"
+            f"同组中位数 {_format_temperature_value(peer.peer_median)}°C，"
+            f"偏高 {_format_temperature_value(peer.delta)}°C"
+        ),
+        evidence=[*evidence, "rule=peer_delta >= level threshold"],
     )
 
 

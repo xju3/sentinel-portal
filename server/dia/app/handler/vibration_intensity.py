@@ -8,6 +8,7 @@ This module evaluates overall vibration severity. The primary field is
 import logging
 from typing import Any
 
+from app.handler.horizontal_compare import PeerThresholds, build_peer_item_conclusion, compare_peer_value
 from app.handler.vibration_common import (
     AXES,
     LEVEL_ATTENTION,
@@ -50,6 +51,14 @@ ISO_VELOCITY_LIMITS: dict[tuple[int, int, int], tuple[float, float, float]] = {
     (2, 4, 2): (2.8, 7.1, 18.0),
 }
 DEFAULT_VELOCITY_LIMITS = (1.8, 4.5, 11.2)
+PEER_VELOCITY_THRESHOLDS = PeerThresholds(
+    relative_attention=0.10,
+    relative_warning=0.20,
+    relative_severe=0.35,
+    absolute_attention=0.5,
+    absolute_warning=1.0,
+    absolute_severe=2.0,
+)
 
 
 def run_vibration_intensity_check(
@@ -79,7 +88,10 @@ def diagnose_vibration_intensity(
         )
 
     thresholds, threshold_source = _velocity_thresholds(context)
-    items = [_axis_intensity_conclusion(axis, payload, context, thresholds, threshold_source) for axis in AXES]
+    items: list[DiagnosisItemConclusion] = []
+    for axis in AXES:
+        items.append(_axis_intensity_conclusion(axis, payload, context, thresholds, threshold_source))
+        items.append(_axis_peer_intensity_conclusion(axis, sn, payload, context))
     conclusion = build_metric_conclusion(METRIC_LABEL, items)
     return MetricDiagnosisResult(sn=sn, report_id=report_id, metric=METRIC, conclusion=conclusion)
 
@@ -134,6 +146,31 @@ def _axis_intensity_conclusion(
         triggered=True,
         conclusion=f"{label}振动速度有效值达到{level}范围",
         evidence=[*evidence, "rule=rms_vel_mm_s >= level threshold"],
+    )
+
+
+def _axis_peer_intensity_conclusion(
+    axis: str,
+    sn: str,
+    payload: dict[str, Any],
+    context: dict[str, Any] | None,
+) -> DiagnosisItemConclusion:
+    label = axis_label(axis, context)
+    result = compare_peer_value(
+        current_sn=sn,
+        current_value=time_feature(payload, axis, "rms_vel_mm_s"),
+        context=context,
+        field="rms_vel_mm_s",
+        axis=axis,
+        same_direction=True,
+        thresholds=PEER_VELOCITY_THRESHOLDS,
+    )
+    return build_peer_item_conclusion(
+        result=result,
+        name=f"{label}振动强度横向比较",
+        normal_text=f"{label}振动强度相对同组设备未见明显偏高",
+        warning_text=f"{label}振动强度相对同组设备偏高",
+        thresholds=PEER_VELOCITY_THRESHOLDS,
     )
 
 
