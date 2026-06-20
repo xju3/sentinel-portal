@@ -5,7 +5,7 @@ Sensor API contracts
 from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
-from pydantic import BaseModel, ConfigDict, Field, field_validator
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 # ==========================================
@@ -129,7 +129,7 @@ class SensorTaskCreate(BaseModel):
     sensor_id: UUID
     name: str = Field(min_length=1, max_length=255)
     action: int
-    val: int = Field(ge=1, le=32767)
+    val: int = Field(ge=0, le=32767)
     remark: Optional[str] = None
 
     @field_validator("name")
@@ -143,9 +143,15 @@ class SensorTaskCreate(BaseModel):
     @field_validator("action")
     @classmethod
     def validate_action(cls, value: int) -> int:
-        if 1 <= value <= 9 or 11 <= value <= 99 or 1000 <= value <= 9999:
+        if value in (0, 1, 3) or 11 <= value <= 99 or 1000 <= value <= 9999:
             return value
-        raise ValueError("action must be 1..9, 11..99, or 1000..9999")
+        raise ValueError("action must be 0, 1, 3, 11..99, or 1000..9999")
+
+    @model_validator(mode="after")
+    def validate_collection_repeat_count(self):
+        if self.action > 10 and self.val < 1:
+            raise ValueError("collection task val must be at least 1")
+        return self
 
 
 class SensorTaskResponse(BaseModel):
@@ -166,6 +172,36 @@ class SensorTaskResponse(BaseModel):
 class PagedSensorTaskResponse(BaseModel):
     items: List[SensorTaskResponse]
     total: int
+
+
+class SensorTaskCompleteRequest(BaseModel):
+    sn: str = Field(min_length=1, max_length=255)
+
+
+class SensorStatusCreate(BaseModel):
+    sn: str = Field(min_length=1, max_length=32)
+    ts_ms: int = Field(gt=0)
+    temperature: Optional[float] = None
+    rssi: Optional[float] = None
+    battery: Optional[float] = Field(None, ge=0, le=100)
+    lng: Optional[float] = Field(None, ge=-180, le=180)
+    lat: Optional[float] = Field(None, ge=-90, le=90)
+    active: bool = True
+    task_id: Optional[UUID] = None
+
+
+class SensorStatusResponse(BaseModel):
+    id: UUID
+    sn: str
+    ts: datetime
+    temperature: Optional[float] = None
+    rssi: Optional[float] = None
+    battery: Optional[float] = None
+    lng: Optional[float] = None
+    lat: Optional[float] = None
+    active: bool
+
+    model_config = ConfigDict(from_attributes=True)
 
 
 # ==========================================

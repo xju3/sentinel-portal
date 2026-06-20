@@ -20,9 +20,12 @@ from pub.services.dependencies import get_session
 from pub.services.sensor_service import SensorTypeService, SensorDbService, SensorBatchService, SensorConfigService
 from pub.services.quick_dispatch_service import dispatch_quick_diagnosis_tasks
 from pub.services.sensor_task_service import (
+    SYSTEM_ACTION_CONFIG_UPDATE,
+    complete_device_system_task,
     create_manual_sensor_task,
     dispatch_pending_sensor_tasks,
     list_sensor_tasks,
+    record_sensor_status,
 )
 from pub.models.customer import Account
 from pub.models.sensor import Sensor, SensorBatch, SensorTask
@@ -48,6 +51,9 @@ from pub.contract.sensors import (
     SensorTaskCreate,
     SensorTaskResponse,
     PagedSensorTaskResponse,
+    SensorTaskCompleteRequest,
+    SensorStatusCreate,
+    SensorStatusResponse,
 )
 
 router = APIRouter(prefix="/sensors", tags=["sensors"])
@@ -259,6 +265,25 @@ async def create_sensor_task_for_admin(
     return success(SensorTaskResponse.model_validate(task))
 
 
+@router.post("/tasks/{task_id}/complete")
+async def complete_sensor_system_task(
+    task_id: UUID,
+    item: SensorTaskCompleteRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    task = await complete_device_system_task(
+        session=session,
+        task_id=task_id,
+        sn=item.sn,
+    )
+    if task is None:
+        raise HTTPException(
+            status_code=404,
+            detail="Firmware or config task not found for sensor",
+        )
+    return success(SensorTaskResponse.model_validate(task))
+
+
 @router.get("/tasks/{sn}")
 async def list_sensor_tasks_by_sn(
     sn: str,
@@ -277,16 +302,25 @@ async def get_sensor_config_by_task(
     task = result.scalar_one_or_none()
     if not task:
         raise HTTPException(status_code=404, detail="Sensor task not found")
+    if task.action != SYSTEM_ACTION_CONFIG_UPDATE:
+        raise HTTPException(status_code=400, detail="Task is not a config update")
     config = await SensorConfigService.get_config_by_sn(session, task.sn)
     if config is None:
         raise HTTPException(status_code=404, detail="Sensor config not found")
 
-    task.status = 1
-    task.complete_time = datetime.utcnow()
-    await session.commit()
-
     return config
 
+
+@router.post("/status")
+async def receive_sensor_status(
+    item: SensorStatusCreate,
+    session: AsyncSession = Depends(get_session),
+):
+    try:
+        status = await record_sensor_status(session=session, **item.model_dump())
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return success(SensorStatusResponse.model_validate(status))
 
 
 @router.get("/{obj_id}")

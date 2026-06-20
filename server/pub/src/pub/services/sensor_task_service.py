@@ -1,12 +1,12 @@
 """
 Sensor task generation helpers.
 
-This module owns the action-code rules for temporary collection tasks. Existing
-system task codes below 10 are not changed here.
+This module owns task action rules and completion paths.
 
 Encoding rules:
-- action < 10: reserved system tasks, currently 1=config update and
-  2=firmware upgrade.
+- action=0: firmware upgrade, completed by the device callback API.
+- action=1: config update, completed by the device callback API.
+- action=3: device status report, completed with the status upload.
 - action 11..99: default-parameter dense collection, encoded as T I.
   T = focus type, I = interval minutes, val = repeat count.
   Focus types: 1=general, 2=temperature, 3=RMS, 4=impact/spectrum.
@@ -26,7 +26,7 @@ Encoding rules:
 from __future__ import annotations
 
 from dataclasses import dataclass
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import Literal
 from uuid import UUID
 
@@ -34,14 +34,19 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from pub.models.sensor import Sensor, SensorTask, SensorTaskReport
+from pub.models.sensor import Sensor, SensorStatus, SensorTask, SensorTaskReport
 
 SENSOR_TASK_STATUS_PENDING = 0
 SENSOR_TASK_STATUS_DONE = 1
 SENSOR_TASK_STATUS_DISPATCHED = 2
 SENSOR_TASK_OPEN_STATUSES = (SENSOR_TASK_STATUS_PENDING, SENSOR_TASK_STATUS_DISPATCHED)
+SYSTEM_ACTION_FIRMWARE_UPGRADE = 0
 SYSTEM_ACTION_CONFIG_UPDATE = 1
-SYSTEM_ACTION_FIRMWARE_UPGRADE = 2
+SYSTEM_ACTION_STATUS_REPORT = 3
+SYSTEM_ACTIONS_COMPLETED_BY_CALLBACK = (
+    SYSTEM_ACTION_FIRMWARE_UPGRADE,
+    SYSTEM_ACTION_CONFIG_UPDATE,
+)
 
 DEFAULT_DENSE_MIN_INTERVAL_MIN = 1
 DEFAULT_DENSE_MAX_INTERVAL_MIN = 9
@@ -257,6 +262,65 @@ async def create_manual_sensor_task(
     return task
 
 
+async def complete_device_system_task(
+    *,
+    session: AsyncSession,
+    task_id: UUID | str,
+    sn: str,
+) -> SensorTask | None:
+    """Complete an action 0/1 task after the device reports successful execution."""
+    task = await get_sensor_task_by_id(session, task_id)
+    if (
+        task is None
+        or task.sn != sn
+        or task.action not in SYSTEM_ACTIONS_COMPLETED_BY_CALLBACK
+    ):
+        return None
+    if task.status != SENSOR_TASK_STATUS_DONE:
+        _mark_sensor_task_done(task)
+        await session.commit()
+        await session.refresh(task)
+    return task
+
+
+async def record_sensor_status(
+    *,
+    session: AsyncSession,
+    sn: str,
+    ts_ms: int,
+    temperature: float | None = None,
+    rssi: float | None = None,
+    battery: float | None = None,
+    lng: float | None = None,
+    lat: float | None = None,
+    active: bool = True,
+    task_id: UUID | str | None = None,
+) -> SensorStatus:
+    """Persist device status and atomically complete its action=3 task."""
+    task = None
+    if task_id is not None:
+        task = await get_sensor_task_by_id(session, task_id)
+        if task is None or task.sn != sn or task.action != SYSTEM_ACTION_STATUS_REPORT:
+            raise ValueError("Status task not found or does not match sensor")
+
+    status = SensorStatus(
+        sn=sn,
+        ts=datetime.fromtimestamp(ts_ms / 1000.0, tz=timezone.utc).replace(tzinfo=None),
+        temperature=temperature,
+        rssi=rssi,
+        battery=battery,
+        lng=lng,
+        lat=lat,
+        active=active,
+    )
+    session.add(status)
+    if task is not None and task.status != SENSOR_TASK_STATUS_DONE:
+        _mark_sensor_task_done(task)
+    await session.commit()
+    await session.refresh(status)
+    return status
+
+
 async def create_default_dense_collection_task(
     *,
     session: AsyncSession,
@@ -366,6 +430,11 @@ async def record_sensor_task_report(
     task = await get_sensor_task_by_id(session, task_uuid)
     if task is None:
         return None
+    if task.sn != sn or task.action <= 10:
+        return None
+    expected_count = int(task.val or 0)
+    if expected_count < 1 or sequence > expected_count:
+        return None
     if task.status == SENSOR_TASK_STATUS_PENDING:
         task.status = SENSOR_TASK_STATUS_DISPATCHED
         task.dispatched_at = task.dispatched_at or datetime.utcnow()
@@ -389,7 +458,6 @@ async def record_sensor_task_report(
             if task is None:
                 return None
 
-    expected_count = int(task.val or 0)
     received_count = await count_sensor_task_reports(session, task_uuid, max_sequence=expected_count)
     if expected_count > 0 and received_count >= expected_count:
         task = await complete_sensor_task_by_id(session, task_uuid, commit=False)
@@ -442,12 +510,16 @@ async def complete_sensor_task_by_id(
     if task is None:
         return None
     if task.status != SENSOR_TASK_STATUS_DONE:
-        task.status = SENSOR_TASK_STATUS_DONE
-        task.complete_time = datetime.utcnow()
+        _mark_sensor_task_done(task)
         if commit:
             await session.commit()
             await session.refresh(task)
     return task
+
+
+def _mark_sensor_task_done(task: SensorTask) -> None:
+    task.status = SENSOR_TASK_STATUS_DONE
+    task.complete_time = datetime.utcnow()
 
 
 async def _get_sensor_task_report(

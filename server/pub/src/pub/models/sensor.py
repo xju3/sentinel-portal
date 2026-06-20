@@ -238,13 +238,13 @@ class SensorThreshold(Base):
 class SensorTask(Base):
     """Sensor task entity model.
 
-    action < 10 is reserved for existing system tasks:
-    1=config update, 2=firmware upgrade.
+    action < 10 is reserved for device system tasks:
+    0=firmware upgrade, 1=config update, 3=status report.
 
     status values:
     0=pending delivery, 2=dispatched/running, 1=complete.
 
-    action >= 10 is used for temporary collection tasks:
+    action > 10 is used for temporary collection tasks:
     - 11..99: default-parameter dense collection. The code is T I:
       T = focus type, I = interval minutes. Focus types are 1=general,
       2=temperature, 3=RMS, 4=impact/spectrum.

@@ -33,4 +33,4 @@ async def test_live_endpoint():
     async with AsyncClient(app=app, base_url="http://test") as client:
         response = await client.get("/api/v1/health/live")
         assert response.status_code == 200
-        assert response.json()["status"] == "alive"
+        assert response.json()["data"]["status"] == "alive"
