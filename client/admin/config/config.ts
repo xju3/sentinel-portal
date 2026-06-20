@@ -51,40 +51,52 @@ export default defineConfig({
       ],
     },
     {
-      path: '/sensor',
-      name: '设备管理',
+      path: '/production',
+      name: '生产管理',
       icon: 'RadarChartOutlined',
       routes: [
         {
-          path: '/sensor/type',
+          path: '/production/type',
           name: '型号规格',
           component: '@/pages/Sensor/Type',
         },
         {
-          path: '/sensor/batch',
+          path: '/production/batch',
           name: '生产批次',
           component: '@/pages/Sensor/Batch',
         },
         {
-          path: '/sensor/product',
+          path: '/production/product',
           name: '产品列表',
           component: '@/pages/Sensor/Product',
         },
+
         {
-          path: '/sensor/firmware',
+          path: '/production',
+          redirect: '/production/type',
+        },
+      ],
+    },
+     {
+      path: "/maintainance",
+      name: "维护管理",
+      icon: "ToolOutlined",
+      routes: [
+        {
+          path: '/maintainance/firmware',
           name: '固件升级',
           component: '@/pages/Sensor/Firmware',
         },
         {
-          path: '/sensor/sim-card',
+          path: '/maintainance/sim-card',
           name: 'SIM卡管理',
           component: '@/pages/SImCard',
         },
         {
-          path: '/sensor',
-          redirect: '/sensor/type',
+          path: '/maintainance',
+          redirect: '/maintainance/firmware',
         },
-      ],
+      ]
     },
     {
       path: '/',
