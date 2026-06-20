@@ -9,7 +9,7 @@ from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, Body
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import cast, List, Optional
+from typing import cast, List, Literal, Optional
 from uuid import UUID, uuid4
 from app.config import settings
 
@@ -19,7 +19,11 @@ logger = logging.getLogger(__name__)
 from pub.services.dependencies import get_session
 from pub.services.sensor_service import SensorTypeService, SensorDbService, SensorBatchService, SensorConfigService
 from pub.services.quick_dispatch_service import dispatch_quick_diagnosis_tasks
-from pub.services.sensor_task_service import dispatch_pending_sensor_tasks
+from pub.services.sensor_task_service import (
+    create_manual_sensor_task,
+    dispatch_pending_sensor_tasks,
+    list_sensor_tasks,
+)
 from pub.models.customer import Account
 from pub.models.sensor import Sensor, SensorBatch, SensorTask
 from pub.utils.exceptions import DomainException
@@ -41,6 +45,9 @@ from pub.contract.sensors import (
     SensorUpdate,
     SensorResponse,
     PagedSensorResponse,
+    SensorTaskCreate,
+    SensorTaskResponse,
+    PagedSensorTaskResponse,
 )
 
 router = APIRouter(prefix="/sensors", tags=["sensors"])
@@ -218,6 +225,38 @@ async def list_sensors_by_batch(
     if not batch:
         raise HTTPException(status_code=404, detail="SensorBatch not found")
     return success(await SensorDbService.get_by_batch_id(session, batch_id, skip, limit, sort_by, sort_order))
+
+
+@router.get("/tasks")
+async def list_sensor_tasks_for_admin(
+    current: int = Query(1, ge=1),
+    pageSize: int = Query(10, ge=1, le=100),
+    keyword: Optional[str] = Query(None),
+    status: Optional[Literal[0, 1, 2]] = Query(None),
+    session: AsyncSession = Depends(get_session),
+    _current_account: Account = Depends(get_current_account),
+):
+    items, total = await list_sensor_tasks(
+        session=session,
+        current=current,
+        page_size=pageSize,
+        keyword=keyword,
+        status=status,
+    )
+    return success(PagedSensorTaskResponse(items=items, total=total))
+
+
+@router.post("/tasks")
+async def create_sensor_task_for_admin(
+    item: SensorTaskCreate,
+    session: AsyncSession = Depends(get_session),
+    _current_account: Account = Depends(get_current_account),
+):
+    try:
+        task = await create_manual_sensor_task(session=session, **item.model_dump())
+    except ValueError as exc:
+        raise HTTPException(status_code=404, detail=str(exc)) from exc
+    return success(SensorTaskResponse.model_validate(task))
 
 
 @router.get("/tasks/{sn}")

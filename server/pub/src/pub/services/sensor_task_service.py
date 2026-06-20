@@ -34,7 +34,7 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from pub.models.sensor import SensorTask, SensorTaskReport
+from pub.models.sensor import Sensor, SensorTask, SensorTaskReport
 
 SENSOR_TASK_STATUS_PENDING = 0
 SENSOR_TASK_STATUS_DONE = 1
@@ -189,6 +189,65 @@ async def create_collection_task(
         action=spec.action,
         val=spec.val,
         remark=_task_remark(spec=spec, reason=reason),
+        status=SENSOR_TASK_STATUS_PENDING,
+        create_time=datetime.utcnow(),
+    )
+    session.add(task)
+    await session.commit()
+    await session.refresh(task)
+    return task
+
+
+async def list_sensor_tasks(
+    *,
+    session: AsyncSession,
+    current: int,
+    page_size: int,
+    keyword: str | None = None,
+    status: int | None = None,
+) -> tuple[list[SensorTask], int]:
+    """List tasks for administration without changing delivery state."""
+    stmt = select(SensorTask)
+    if keyword:
+        pattern = f"%{keyword.strip()}%"
+        stmt = stmt.where(
+            SensorTask.name.ilike(pattern) | SensorTask.sn.ilike(pattern)
+        )
+    if status is not None:
+        stmt = stmt.where(SensorTask.status == status)
+
+    count_stmt = select(func.count()).select_from(stmt.subquery())
+    total = int((await session.execute(count_stmt)).scalar_one() or 0)
+    tasks = (
+        await session.execute(
+            stmt.order_by(SensorTask.create_time.desc())
+            .offset((current - 1) * page_size)
+            .limit(page_size)
+        )
+    ).scalars().all()
+    return list(tasks), total
+
+
+async def create_manual_sensor_task(
+    *,
+    session: AsyncSession,
+    sensor_id: UUID,
+    name: str,
+    action: int,
+    val: int,
+    remark: str | None = None,
+) -> SensorTask:
+    """Create a pending task for a sensor selected by its database id."""
+    sensor = await session.get(Sensor, sensor_id)
+    if sensor is None:
+        raise ValueError("Sensor not found")
+
+    task = SensorTask(
+        name=name.strip(),
+        sn=sensor.sn,
+        action=action,
+        val=val,
+        remark=remark.strip() if remark else None,
         status=SENSOR_TASK_STATUS_PENDING,
         create_time=datetime.utcnow(),
     )

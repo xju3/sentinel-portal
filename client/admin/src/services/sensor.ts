@@ -35,10 +35,10 @@ export type PagedSensorResponse = {
   total: number;
 };
 
-export async function listSensors(current = 1, pageSize = 100) {
+export async function listSensors(current = 1, pageSize = 100, keyword?: string) {
   return request<PagedSensorResponse>('/api/v1/sensors', {
     method: 'GET',
-    params: { current, pageSize },
+    params: { current, pageSize, keyword },
   });
 }
 

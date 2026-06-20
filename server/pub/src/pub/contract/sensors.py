@@ -5,7 +5,7 @@ Sensor API contracts
 from datetime import datetime
 from typing import List, Optional
 from uuid import UUID
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, field_validator
 
 
 # ==========================================
@@ -119,6 +119,52 @@ class SensorResponse(BaseModel):
 
 class PagedSensorResponse(BaseModel):
     items: List[SensorResponse]
+    total: int
+
+
+# ==========================================
+# SensorTask
+# ==========================================
+class SensorTaskCreate(BaseModel):
+    sensor_id: UUID
+    name: str = Field(min_length=1, max_length=255)
+    action: int
+    val: int = Field(ge=1, le=32767)
+    remark: Optional[str] = None
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("name must be non-empty")
+        return value
+
+    @field_validator("action")
+    @classmethod
+    def validate_action(cls, value: int) -> int:
+        if 1 <= value <= 9 or 11 <= value <= 99 or 1000 <= value <= 9999:
+            return value
+        raise ValueError("action must be 1..9, 11..99, or 1000..9999")
+
+
+class SensorTaskResponse(BaseModel):
+    id: UUID
+    name: str
+    sn: str
+    action: int
+    val: int
+    remark: Optional[str] = None
+    status: int
+    create_time: datetime
+    dispatched_at: Optional[datetime] = None
+    complete_time: Optional[datetime] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class PagedSensorTaskResponse(BaseModel):
+    items: List[SensorTaskResponse]
     total: int
 
 

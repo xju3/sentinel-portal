@@ -93,6 +93,11 @@ export default defineConfig({
           component: '@/pages/SImCard',
         },
         {
+          path: '/maintainance/task',
+          name: '任务管理',
+          component: '@/pages/Sensor/Task',
+        },
+        {
           path: '/maintainance',
           redirect: '/maintainance/firmware',
         },

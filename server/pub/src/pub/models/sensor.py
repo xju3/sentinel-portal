@@ -130,16 +130,27 @@ class SensorBatch(Base):
 
 class SensorStatus(Base):
     """Sensor status entity model"""
+    """
+        sn: 传感器序列号，关联到Sensor表的sn字段
+        ts: 传感器状态记录的时间戳，单位为Unix毫秒
+        temperature: 当前MCU温度读数，单位为摄氏度
+        rssi: 传感器当前的信号强度指示，单位为dBm
+        battery: 传感器当前的电池电量百分比，范围为0-100
+        lng: 传感器当前所在位置的经度
+        lat: 传感器当前所在位置的纬度
+        active: 传感器当前是否处于活跃状态，true表示活跃
+    """
+    
 
     __tablename__ = "sensor_status"
-
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    sensor_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to sensors
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    sn = Column(String(32), nullable=False, index=True)  # Link to sensors
+    ts = Column(DateTime, default=datetime.utcnow)
     temperature = Column(Float, nullable=True)
-    humidity = Column(Float, nullable=True)
-    vibration = Column(Float, nullable=True)
+    rssi = Column(Float, nullable=True)
     battery = Column(Float, nullable=True)
+    lng = Column(Float, nullable=True) # Optional 4G station location info, e.g. 
+    lat = Column(Float, nullable=True) # Optional 4G station location info, e.g. 
     active = Column(Boolean, default=True)
 
 
@@ -255,7 +266,7 @@ class SensorTask(Base):
     action = Column(SmallInteger, nullable=False) # 动作类型
     val = Column(SmallInteger, nullable=False, default=0) # 执行多少次
     remark = Column(Text, nullable=True) # 任务内容和发起原因说明
-    status = Column(SmallInteger, nullable=False, default=1, comment="tiny(1) status") # 任务状态
+    status = Column(SmallInteger, nullable=False, default=0, comment="0=pending, 1=complete, 2=dispatched") # 任务状态
     create_time = Column(DateTime, default=datetime.utcnow) # 任务创建时间
     dispatched_at = Column(DateTime, nullable=True) # 任务下发时间
     complete_time = Column(DateTime, nullable=True) # 任务完成时间
