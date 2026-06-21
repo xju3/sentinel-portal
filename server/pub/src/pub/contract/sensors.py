@@ -184,7 +184,7 @@ class SensorStatusCreate(BaseModel):
     ts_ms: int = Field(gt=0)
     temperature: Optional[float] = None
     rssi: Optional[float] = None
-    battery: Optional[float] = Field(None, ge=0, le=100)
+    voltage: Optional[float] = Field(None, ge=0, le=100)
     active: bool = True
     task_id: Optional[UUID] = None
 
