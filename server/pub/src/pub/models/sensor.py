@@ -136,8 +136,6 @@ class SensorStatus(Base):
         temperature: 当前MCU温度读数，单位为摄氏度
         rssi: 传感器当前的信号强度指示，单位为dBm
         battery: 传感器当前的电池电量百分比，范围为0-100
-        lng: 传感器当前所在位置的经度
-        lat: 传感器当前所在位置的纬度
         active: 传感器当前是否处于活跃状态，true表示活跃
     """
     
@@ -149,8 +147,6 @@ class SensorStatus(Base):
     temperature = Column(Float, nullable=True)
     rssi = Column(Float, nullable=True)
     battery = Column(Float, nullable=True)
-    lng = Column(Float, nullable=True) # Optional 4G station location info, e.g. 
-    lat = Column(Float, nullable=True) # Optional 4G station location info, e.g. 
     active = Column(Boolean, default=True)
 
 

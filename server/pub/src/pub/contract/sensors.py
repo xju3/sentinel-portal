@@ -185,10 +185,16 @@ class SensorStatusCreate(BaseModel):
     temperature: Optional[float] = None
     rssi: Optional[float] = None
     battery: Optional[float] = Field(None, ge=0, le=100)
-    lng: Optional[float] = Field(None, ge=-180, le=180)
-    lat: Optional[float] = Field(None, ge=-90, le=90)
     active: bool = True
     task_id: Optional[UUID] = None
+
+    @model_validator(mode="before")
+    @classmethod
+    def _process_ts(cls, data):
+        if isinstance(data, dict):
+            if "ts_ms" not in data and "ts" in data:
+                data["ts_ms"] = int(data["ts"]) * 1000
+        return data
 
 
 class SensorStatusResponse(BaseModel):
@@ -198,8 +204,6 @@ class SensorStatusResponse(BaseModel):
     temperature: Optional[float] = None
     rssi: Optional[float] = None
     battery: Optional[float] = None
-    lng: Optional[float] = None
-    lat: Optional[float] = None
     active: bool
 
     model_config = ConfigDict(from_attributes=True)

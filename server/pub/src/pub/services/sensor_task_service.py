@@ -297,8 +297,6 @@ async def record_sensor_status(
     temperature: float | None = None,
     rssi: float | None = None,
     battery: float | None = None,
-    lng: float | None = None,
-    lat: float | None = None,
     active: bool = True,
     task_id: UUID | str | None = None,
 ) -> SensorStatus:
@@ -315,8 +313,6 @@ async def record_sensor_status(
         temperature=temperature,
         rssi=rssi,
         battery=battery,
-        lng=lng,
-        lat=lat,
         active=active,
     )
     session.add(status)
