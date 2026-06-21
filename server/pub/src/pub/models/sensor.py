@@ -292,3 +292,26 @@ class SensorTaskReport(Base):
     report_id = Column(String(64), nullable=False, index=True)
     ts_ms = Column(BigInteger, nullable=False, index=True)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+class DeviceFftRecord(Base):
+    """
+    Device FFT Record
+    Stores metadata for FFT files uploaded to MinIO via SensorTasks.
+    """
+    __tablename__ = "device_fft_record"
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    
+    task_id = Column(Uuid(as_uuid=True), nullable=False, index=True, unique=True, comment="Associated SensorTask ID, also the object_name in MinIO fft bucket")
+    
+    sn = Column(String(255), nullable=False, index=True, comment="Sensor SN")
+    sensor_id = Column(Uuid(as_uuid=True), nullable=True, index=True, comment="Sensor database ID")
+    device_inst_id = Column(Uuid(as_uuid=True), nullable=True, index=True, comment="Bound monitored device ID (DeviceInst)")
+    tenant_id = Column(Uuid(as_uuid=True), nullable=True, index=True, comment="Tenant ID")
+    
+    ts_ms = Column(BigInteger, nullable=False, index=True, comment="Collection timestamp (ms)")
+    fs_hz = Column(Integer, nullable=True, comment="Sampling rate (Hz)")
+    points = Column(Integer, nullable=True, comment="FFT points")
+    range_g = Column(Integer, nullable=True, comment="Range (g)")
+    
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)

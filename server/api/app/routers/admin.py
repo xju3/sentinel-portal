@@ -4,7 +4,7 @@ Admin management endpoints - for admin backend only, no tenant filtering
 
 import logging
 from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from uuid import UUID
@@ -111,11 +111,13 @@ async def delete_sensor_firmware(
 @router.post("/sensor-firmwares/{obj_id}/release")
 async def release_sensor_firmware(
     obj_id: UUID,
+    background_tasks: BackgroundTasks,
     session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
     try:
         firmware = await SensorFirmwareService.release_firmware(session, obj_id)
+        background_tasks.add_task(SensorFirmwareService._do_release_firmware_background, obj_id)
         return success(SensorFirmwareResponse.model_validate(firmware))
     except ValueError as e:
         raise HTTPException(status_code=400, detail=str(e))

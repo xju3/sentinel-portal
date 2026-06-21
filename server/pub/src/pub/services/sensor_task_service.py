@@ -630,3 +630,71 @@ def _require_int_range(name: str, value: int, minimum: int, maximum: int) -> Non
         raise TypeError(f"{name} must be an integer")
     if value < minimum or value > maximum:
         raise ValueError(f"{name} must be between {minimum} and {maximum}")
+
+
+import logging
+logger = logging.getLogger(__name__)
+
+async def process_fft_metadata_background(task_id: UUID | str) -> None:
+    """Parse FFT metadata from task action and store in DeviceFftRecord."""
+    from pub.database import db_manager
+    from pub.models.sensor import DeviceFftRecord, SensorMonitoring, SensorBatch
+
+    task_uuid = _parse_task_uuid(task_id)
+    if not task_uuid:
+        return
+
+    try:
+        async with db_manager.SessionLocal() as session:
+            task = await get_sensor_task_by_id(session, task_uuid)
+            if not task:
+                logger.error(f"FFT metadata process failed: SensorTask {task_uuid} not found")
+                return
+
+            # Ensure this is a parameterized FFT collection action
+            if task.action < PARAMETERIZED_MIN_ACTION:
+                logger.warning(f"FFT metadata process skipped: Task {task_uuid} action {task.action} is not parameterized FFT")
+                return
+
+            # Avoid duplicates
+            stmt_exist = select(DeviceFftRecord).where(DeviceFftRecord.task_id == task_uuid)
+            if (await session.execute(stmt_exist)).scalar_one_or_none():
+                logger.info(f"FFT metadata already exists for task {task_uuid}")
+                return
+
+            # Parse specs from action
+            fft_points_multiplier = task.action // 1000
+            range_g = (task.action // 10) % 100
+            points = fft_points_multiplier * FFT_POINTS_BASE
+
+            # Get relationships
+            stmt = select(SensorMonitoring).join(Sensor, Sensor.id == SensorMonitoring.sensor_id).where(Sensor.sn == task.sn)
+            monitoring = (await session.execute(stmt)).scalar_one_or_none()
+            
+            # Note: We need tenant_id. We can get it from DeviceInst or SensorBatch. 
+            # For now, we will leave tenant_id null if it's not directly accessible, or query it if needed.
+            # SensorBatch is linked from Sensor.
+            tenant_id = None
+            sensor_id = None
+            if monitoring:
+                sensor_id = monitoring.sensor_id
+                # Let's get tenant_id from SensorBatch
+                stmt_batch = select(SensorBatch.tenant_id).join(Sensor, Sensor.sensor_batch_id == SensorBatch.id).where(Sensor.sn == task.sn)
+                tenant_id = (await session.execute(stmt_batch)).scalar_one_or_none()
+
+            record = DeviceFftRecord(
+                task_id=task_uuid,
+                sn=task.sn,
+                sensor_id=sensor_id,
+                device_inst_id=monitoring.device_inst_id if monitoring else None,
+                tenant_id=tenant_id,
+                ts_ms=int(datetime.utcnow().timestamp() * 1000),  # fallback timestamp
+                fs_hz=26667,  # Default for IIS3DWB
+                points=points,
+                range_g=range_g
+            )
+            session.add(record)
+            await session.commit()
+            logger.info(f"Successfully processed FFT metadata for task {task_uuid}")
+    except Exception as e:
+        logger.error(f"Error processing FFT metadata for task {task_uuid}: {e}", exc_info=True)

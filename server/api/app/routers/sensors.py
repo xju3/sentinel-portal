@@ -451,6 +451,7 @@ async def receive_sensor_data(
 async def upload_sensor_fft_data(
     task_id: UUID,
     request: Request,
+    background_tasks: BackgroundTasks,
 ):
     body = await request.body()
     if not body:
@@ -467,5 +468,8 @@ async def upload_sensor_fft_data(
         )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to upload to MinIO: {str(e)}")
+
+    from pub.services.sensor_task_service import process_fft_metadata_background
+    background_tasks.add_task(process_fft_metadata_background, task_id)
 
     return success({"message": "FFT data uploaded successfully"})
