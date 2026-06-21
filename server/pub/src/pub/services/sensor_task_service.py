@@ -296,7 +296,7 @@ async def record_sensor_status(
     ts_ms: int,
     temperature: float | None = None,
     rssi: float | None = None,
-    battery: float | None = None,
+    voltage: float | None = None,
     active: bool = True,
     task_id: UUID | str | None = None,
 ) -> SensorStatus:
@@ -313,7 +313,7 @@ async def record_sensor_status(
         ts=datetime.fromtimestamp(ts_ms / 1000.0, tz=timezone.utc).replace(tzinfo=None),
         temperature=temperature,
         rssi=rssi,
-        battery=battery,
+        voltage=voltage,
         active=active,
     )
     session.add(status)
