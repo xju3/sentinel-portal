@@ -6,7 +6,7 @@ import logging
 import json
 import io
 from datetime import datetime, timezone, timedelta
-from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, Body
+from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, Body, Request
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import cast, List, Literal, Optional
@@ -265,9 +265,10 @@ async def create_sensor_task_for_admin(
     return success(SensorTaskResponse.model_validate(task))
 
 
-@router.post("/tasks/{task_id}/complete")
+@router.post("/tasks/{task_id}/complete/{status}")
 async def complete_sensor_system_task(
     task_id: UUID,
+    status: int,
     item: SensorTaskCompleteRequest,
     session: AsyncSession = Depends(get_session),
 ):
@@ -275,12 +276,10 @@ async def complete_sensor_system_task(
         session=session,
         task_id=task_id,
         sn=item.sn,
+        success=(status == 0),
     )
     if task is None:
-        raise HTTPException(
-            status_code=404,
-            detail="Firmware or config task not found for sensor",
-        )
+        raise HTTPException(status_code=404, detail="Task not found or not dispatchable by device")
     return success(SensorTaskResponse.model_validate(task))
 
 
@@ -447,3 +446,26 @@ async def receive_sensor_data(
     except Exception as e:
         logger.error(f"Error processing sensor data: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error processing data")
+
+@router.post("/tasks/{task_id}/fft")
+async def upload_sensor_fft_data(
+    task_id: UUID,
+    request: Request,
+):
+    body = await request.body()
+    if not body:
+        raise HTTPException(status_code=400, detail="Empty payload")
+
+    client = minio_manager.get_client()
+    try:
+        client.put_object(
+            bucket_name="fft",
+            object_name=str(task_id),
+            data=io.BytesIO(body),
+            length=len(body),
+            content_type="application/octet-stream",
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to upload to MinIO: {str(e)}")
+
+    return success({"message": "FFT data uploaded successfully"})

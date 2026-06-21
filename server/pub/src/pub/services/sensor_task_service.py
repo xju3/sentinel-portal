@@ -39,6 +39,7 @@ from pub.models.sensor import Sensor, SensorStatus, SensorTask, SensorTaskReport
 SENSOR_TASK_STATUS_PENDING = 0
 SENSOR_TASK_STATUS_DONE = 1
 SENSOR_TASK_STATUS_DISPATCHED = 2
+SENSOR_TASK_STATUS_FAILED = 3
 SENSOR_TASK_OPEN_STATUSES = (SENSOR_TASK_STATUS_PENDING, SENSOR_TASK_STATUS_DISPATCHED)
 SYSTEM_ACTION_FIRMWARE_UPGRADE = 0
 SYSTEM_ACTION_CONFIG_UPDATE = 1
@@ -267,8 +268,9 @@ async def complete_device_system_task(
     session: AsyncSession,
     task_id: UUID | str,
     sn: str,
+    success: bool = True,
 ) -> SensorTask | None:
-    """Complete an action 0/1 task after the device reports successful execution."""
+    """Complete an action 0/1 task after the device reports execution result."""
     task = await get_sensor_task_by_id(session, task_id)
     if (
         task is None
@@ -276,8 +278,12 @@ async def complete_device_system_task(
         or task.action not in SYSTEM_ACTIONS_COMPLETED_BY_CALLBACK
     ):
         return None
-    if task.status != SENSOR_TASK_STATUS_DONE:
-        _mark_sensor_task_done(task)
+    target_status = SENSOR_TASK_STATUS_DONE if success else SENSOR_TASK_STATUS_FAILED
+    if task.status != target_status:
+        if target_status == SENSOR_TASK_STATUS_DONE:
+            _mark_sensor_task_done(task)
+        else:
+            task.status = target_status
         await session.commit()
         await session.refresh(task)
     return task
@@ -371,13 +377,24 @@ async def create_iis3dwb_parameterized_collection_task(
     )
 
 
+import json
+
 def sensor_task_to_device_payload(task: SensorTask) -> dict:
     """Serialize a SensorTask in the compact shape expected by ESP32."""
-    return {
+    payload = {
         "id": str(task.id),
         "action": task.action,
         "val": task.val,
     }
+    if task.action == SYSTEM_ACTION_FIRMWARE_UPGRADE and task.remark:
+        try:
+            remark_data = json.loads(task.remark)
+            if "url" in remark_data:
+                payload["val"] = remark_data["url"]
+        except json.JSONDecodeError:
+            # fallback if it's not a JSON string, just to be safe
+            pass
+    return payload
 
 
 async def list_pending_sensor_tasks(session: AsyncSession, sn: str) -> list[SensorTask]:

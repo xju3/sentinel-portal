@@ -1,3 +1,4 @@
+import json
 import logging
 from typing import List, Optional
 from uuid import UUID
@@ -81,10 +82,10 @@ class SensorFirmwareService:
                     sn=sn,
                     action=SYSTEM_ACTION_FIRMWARE_UPGRADE,
                     val=0,
-                    remark=(
-                        f"任务内容: 固件升级到 {firmware.version}; "
-                        "发起原因: 后台发布新固件; 编码: action=0, val=0"
-                    ),
+                    remark=json.dumps({
+                        "url": firmware.file_url,
+                        "desc": f"任务内容: 固件升级到 {firmware.version}; 发起原因: 后台发布新固件"
+                    }, ensure_ascii=False),
                     status=SENSOR_TASK_STATUS_PENDING,
                     create_time=datetime.utcnow(),
                 )

@@ -124,6 +124,25 @@ class SensorDbService:
         result = await session.execute(fetch_stmt)
         items = list(result.scalars().all())
 
+        if items:
+            from pub.models.sensor import SensorStatus
+            from sqlalchemy import and_
+
+            sns = [item.sn for item in items]
+            subq = (
+                select(SensorStatus.sn, func.max(SensorStatus.ts).label("max_ts"))
+                .where(SensorStatus.sn.in_(sns))
+                .group_by(SensorStatus.sn)
+                .subquery()
+            )
+            status_stmt = select(SensorStatus).join(
+                subq, and_(SensorStatus.sn == subq.c.sn, SensorStatus.ts == subq.c.max_ts)
+            )
+            statuses = await session.execute(status_stmt)
+            status_map = {s.sn: s for s in statuses.scalars().all()}
+            for item in items:
+                item.latest_status = status_map.get(item.sn)
+
         return items, total
 
     @staticmethod

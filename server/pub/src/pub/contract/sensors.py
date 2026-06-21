@@ -110,6 +110,7 @@ class SensorResponse(BaseModel):
     active: bool
     sim_id: Optional[UUID] = None
     sim_card: Optional[SensorSimCardResponse] = None
+    latest_status: Optional[SensorStatusResponse] = None
     active_at: datetime
     created_at: datetime
     updated_at: datetime

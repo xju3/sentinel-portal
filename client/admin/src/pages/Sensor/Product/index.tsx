@@ -108,6 +108,23 @@ const SensorProductPage = () => {
       render: (_, row) => row.sim_card ? `${row.sim_card.number} (${row.sim_card.carrier})` : (row.sim_id || '-'),
     },
     {
+      title: '最新状态',
+      dataIndex: 'latest_status',
+      hideInSearch: true,
+      width: 200,
+      render: (_, row) => {
+        if (!row.latest_status) return '-';
+        const { temperature, battery, rssi, ts } = row.latest_status;
+        return (
+          <div style={{ display: 'flex', flexDirection: 'column', fontSize: '12px', lineHeight: '18px' }}>
+            <span>电量: {battery != null ? `${battery}%` : '-'} | 温度: {temperature != null ? `${temperature}℃` : '-'}</span>
+            <span>RSSI: {rssi != null ? `${rssi}dBm` : '-'}</span>
+            <span style={{ color: '#888' }}>更新于: {ts ? new Date(ts).toLocaleString() : '-'}</span>
+          </div>
+        );
+      },
+    },
+    {
       title: '激活时间',
       dataIndex: 'active_at',
       width: 180,

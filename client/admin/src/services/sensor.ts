@@ -20,6 +20,12 @@ export type Sensor = {
   created_at: string;
   updated_at: string;
   sensor_type_id?: string;
+  latest_status?: {
+    temperature?: number | null;
+    battery?: number | null;
+    rssi?: number | null;
+    ts?: string;
+  } | null;
 };
 
 export type SensorPayload = {
