@@ -146,7 +146,7 @@ class SensorStatus(Base):
     ts = Column(DateTime, default=datetime.utcnow)
     temperature = Column(Float, nullable=True)
     rssi = Column(Float, nullable=True)
-    battery = Column(Float, nullable=True)
+    voltage = Column(Float, nullable=True)
     active = Column(Boolean, default=True)
 
 
