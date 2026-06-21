@@ -304,8 +304,8 @@ async def record_sensor_status(
     task = None
     if task_id is not None:
         task = await get_sensor_task_by_id(session, task_id)
-        if task is None or task.sn != sn or task.action != SYSTEM_ACTION_STATUS_REPORT:
-            logger.warning(f"Status report included invalid or non-status task_id {task_id} for sn {sn}, ignoring task completion.")
+        if task is None or task.sn != sn:
+            logger.warning(f"Status report included invalid task_id {task_id} for sn {sn}, ignoring task completion.")
             task = None
 
     status = SensorStatus(
