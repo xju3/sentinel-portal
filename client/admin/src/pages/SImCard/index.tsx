@@ -103,6 +103,8 @@ const SimCardManager: React.FC = () => {
       title: '操作',
       dataIndex: 'option',
       valueType: 'option',
+      // fixed: 'right',
+      width: 120,
       render: (_, record) => [
         <a
           key="edit"
@@ -162,9 +164,9 @@ const SimCardManager: React.FC = () => {
         visible={modalVisible}
         onVisibleChange={setModalVisible}
         initialValues={
-          currentRow || { 
-            status: 1, 
-            data_plan: '300', 
+          currentRow || {
+            status: 1,
+            data_plan: '300',
             expires_at: dayjs().add(3, 'year').format('YYYY-MM-DD HH:mm:ss')
           }
         }
@@ -173,10 +175,10 @@ const SimCardManager: React.FC = () => {
       >
         <ProFormText rules={[{ required: true }]} name="number" label="SIM 卡号" />
         <ProFormText rules={[{ required: true }]} name="ccid" label="ICCID" />
-        <ProFormSelect 
-          rules={[{ required: true }]} 
-          name="carrier" 
-          label="运营商" 
+        <ProFormSelect
+          rules={[{ required: true }]}
+          name="carrier"
+          label="运营商"
           options={[
             { label: '联通', value: '联通' },
             { label: '电信', value: '电信' },

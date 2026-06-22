@@ -254,17 +254,16 @@ const SensorFirmwarePage = () => {
     {
       title: '操作',
       valueType: 'option',
+      // fixed: 'right',
       width: 160,
       render: (_, row) => [
-        <Button
+        <a
           key="edit"
-          size="small"
-          type="link"
-          disabled={row.status === 1}
+          style={row.status === 1 ? { color: 'rgba(0,0,0,0.25)', pointerEvents: 'none' } : {}}
           onClick={() => handleModalOpen(row)}
         >
           编辑
-        </Button>,
+        </a>,
         row.status === 0 ? (
           <Popconfirm
             key="release"
@@ -279,7 +278,7 @@ const SensorFirmwarePage = () => {
               }
             }}
           >
-            <Button type="link">发布</Button>
+            <a style={{ color: '#1677ff' }}>发布</a>
           </Popconfirm>
         ) : null,
         <Popconfirm
@@ -295,9 +294,9 @@ const SensorFirmwarePage = () => {
             }
           }}
         >
-          <Button danger size="small" type="link" disabled={row.status === 1}>
+          <a style={row.status === 1 ? { color: 'rgba(0,0,0,0.25)', pointerEvents: 'none' } : { color: 'red' }}>
             删除
-          </Button>
+          </a>
         </Popconfirm>,
       ],
     },

@@ -128,6 +128,29 @@ const SensorBatchPage = () => {
     return found ? `${found.name} (${found.code})` : id;
   };
 
+  const handleUpgradeStatus = async (row: SensorBatch) => {
+    const nextStatus = row.status + 1;
+    if (nextStatus > 3) return;
+    try {
+      setLoading(true);
+      await updateSensorBatch(row.id, {
+        code: row.code,
+        qty: row.qty,
+        sn: row.sn,
+        status: nextStatus,
+        description: row.description,
+        sensor_type_id: row.sensor_type_id,
+        tenant_id: row.tenant_id,
+      } as SensorBatchPayload & { tenant_id: string });
+      message.success(`已升级为: ${STATUS_MAP[nextStatus].text}`);
+      await loadRows();
+    } catch (error) {
+      message.error(toErrorMessage(error));
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const handleTenantChange = (tenantId: string) => {
     if (editing) return;
     const tenant = tenants.find((t) => t.id === tenantId);
@@ -150,7 +173,7 @@ const SensorBatchPage = () => {
     {
       title: '序号',
       valueType: 'indexBorder',
-      width: 68,
+      width: 40,
       hideInSearch: true,
       fixed: 'left',
     },
@@ -165,12 +188,12 @@ const SensorBatchPage = () => {
     {
       title: '批次',
       dataIndex: 'code',
-      width: 80,
+      width: 60,
     },
     {
       title: '型号',
       dataIndex: 'sensor_type_id',
-      width: 80,
+      width: 60,
       hideInSearch: true,
       render: (_, row) => getSensorTypeName(row.sensor_type_id),
     },
@@ -178,14 +201,14 @@ const SensorBatchPage = () => {
     {
       title: '序列号',
       dataIndex: 'sn',
-      width: 80,
+      width: 60,
       hideInSearch: true,
       render: (_, row) => <Tag>{row.sn}</Tag>,
     },
     {
       title: '数量',
       dataIndex: 'qty',
-      width: 80,
+      width: 60,
       hideInSearch: true,
       render: (_, row) => <Tag color="blue">{row.qty}</Tag>,
     },
@@ -209,7 +232,7 @@ const SensorBatchPage = () => {
     {
       title: '创建时间',
       dataIndex: 'created_at',
-      width: 180,
+      width: 150,
       valueType: 'dateTime',
       hideInSearch: true,
     },
@@ -224,17 +247,29 @@ const SensorBatchPage = () => {
     {
       title: '操作',
       valueType: 'option',
+      // fixed: 'right',
+      width: 160,
       render: (_, row) => [
-        <Button
+        <a
           key="edit"
-          type="link"
           onClick={() => {
             setEditing(row);
             setModalOpen(true);
           }}
         >
           编辑
-        </Button>,
+        </a>,
+        row.status < 3 && (
+          <Popconfirm
+            key="upgrade"
+            title={`确定要推进至【${STATUS_MAP[row.status + 1]?.text}】吗？`}
+            onConfirm={() => handleUpgradeStatus(row)}
+          >
+            <a style={{ color: '#faad14' }}>
+              推进
+            </a>
+          </Popconfirm>
+        ),
         <Popconfirm
           key="delete"
           title="确认删除该批次吗？"
@@ -248,9 +283,9 @@ const SensorBatchPage = () => {
             }
           }}
         >
-          <Button danger type="link">
+          <a style={{ color: 'red' }}>
             删除
-          </Button>
+          </a>
         </Popconfirm>,
       ],
     },
@@ -266,7 +301,7 @@ const SensorBatchPage = () => {
         loading={loading}
         columns={columns}
         dataSource={filteredRows}
-        scroll={{ x: 1400 }}
+        // scroll={{ x: 1400 }}
         search={{ labelWidth: 'auto' }}
         onSubmit={(values) => setQuery(values)}
         onReset={() => setQuery({})}
@@ -370,7 +405,10 @@ const SensorBatchPage = () => {
         <ProFormSelect
           name="status"
           label="状态"
-          options={STATUS_OPTIONS}
+          options={STATUS_OPTIONS.filter(opt => {
+            if (!editing) return opt.value === 0;
+            return opt.value === editing.status || opt.value === editing.status + 1;
+          })}
           rules={[{ required: true, message: '请选择状态' }]}
         />
         <ProFormSelect

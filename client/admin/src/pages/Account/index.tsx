@@ -140,28 +140,27 @@ const AccountPage = () => {
     {
       title: '操作',
       valueType: 'option',
-      width: 240,
+      // fixed: 'right',
+      width: 180,
       render: (_, row) => [
-        <Button
+        <a
           key="edit"
-          type="link"
           onClick={() => {
             setEditing(row);
             setModalOpen(true);
           }}
         >
           编辑
-        </Button>,
-        <Button
+        </a>,
+        <a
           key="password"
-          type="link"
           onClick={() => {
             setPasswordEditing(row);
             setPasswordModalOpen(true);
           }}
         >
           重置密码
-        </Button>,
+        </a>,
         <Popconfirm
           key="delete"
           title="确认删除该用户吗？"
@@ -175,9 +174,9 @@ const AccountPage = () => {
             }
           }}
         >
-          <Button danger type="link">
+          <a style={{ color: 'red' }}>
             删除
-          </Button>
+          </a>
         </Popconfirm>,
       ],
     },

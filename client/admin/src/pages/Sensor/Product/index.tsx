@@ -149,18 +149,18 @@ const SensorProductPage = () => {
     {
       title: '操作',
       valueType: 'option',
+      // fixed: 'right',
       width: 160,
       render: (_, row) => [
-        <Button
+        <a
           key="edit"
-          type="link"
           onClick={() => {
             setEditing(row);
             setModalOpen(true);
           }}
         >
           编辑
-        </Button>,
+        </a>,
         <Popconfirm
           key="delete"
           title="确认删除该传感器吗？"
@@ -174,9 +174,9 @@ const SensorProductPage = () => {
             }
           }}
         >
-          <Button danger type="link">
+          <a style={{ color: 'red' }}>
             删除
-          </Button>
+          </a>
         </Popconfirm>,
       ],
     },

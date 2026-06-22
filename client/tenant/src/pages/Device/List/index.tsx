@@ -283,19 +283,17 @@ const DeviceListPage = () => {
       align: 'center',
       render: (_, row) => (
         <Space size="small">
-          <Button
+          <a
             key="edit"
-            type="link"
             onClick={() => {
               setEditing(row);
               setModalOpen(true);
             }}
           >
             编辑
-          </Button>
-          <Button
+          </a>
+          <a
             key="copy"
-            type="link"
             onClick={() => {
               setEditing(row);
               setCopyMode(true);
@@ -303,7 +301,7 @@ const DeviceListPage = () => {
             }}
           >
             复制
-          </Button>
+          </a>
           <Popconfirm
             key="delete"
             title="确认删除该设备实例吗？"
@@ -317,9 +315,9 @@ const DeviceListPage = () => {
               }
             }}
           >
-            <Button danger type="link">
+            <a style={{ color: '#ff4d4f' }}>
               删除
-            </Button>
+            </a>
           </Popconfirm>
         </Space>
       ),

@@ -174,6 +174,7 @@ async def create_sensor_batch(
 async def update_sensor_batch(
     obj_id: UUID,
     item: SensorBatchUpdate,
+    background_tasks: BackgroundTasks,
     session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
@@ -182,7 +183,7 @@ async def update_sensor_batch(
         raise HTTPException(status_code=404, detail="SensorBatch not found")
 
     update_data = item.model_dump(exclude_unset=True)
-    return success(await SensorBatchService.update(session, db_obj, update_data))
+    return success(await SensorBatchService.update(session, db_obj, update_data, background_tasks))
 
 
 @router.delete("/batches/{obj_id}")

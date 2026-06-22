@@ -208,16 +208,15 @@ const MonitoringPointsPage = () => {
       align: 'center',
       render: (_, row) => (
         <Space size="middle">
-          <Button
+          <a
             key="edit"
-            type="link"
             onClick={() => {
               setEditing(row);
               setModalOpen(true);
             }}
           >
             编辑
-          </Button>
+          </a>
           <Popconfirm
             key="delete"
             title="确认删除该测点绑定吗？"
@@ -231,9 +230,9 @@ const MonitoringPointsPage = () => {
               }
             }}
           >
-            <Button danger type="link">
+            <a style={{ color: '#ff4d4f' }}>
               删除
-            </Button>
+            </a>
           </Popconfirm>
         </Space>
       ),

@@ -185,9 +185,9 @@ const TenantUsersPage = () => {
               okText="确认"
               cancelText="取消"
             >
-              <Button type="link" danger>
+              <a style={{ color: '#ff4d4f' }}>
                 删除
-              </Button>
+              </a>
             </Popconfirm>
           </Space>
         );

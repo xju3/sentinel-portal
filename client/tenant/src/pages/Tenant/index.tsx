@@ -262,20 +262,12 @@ const TenantPage = () => {
       align: 'center' as const,
       render: (_: any, record: AccountInfo) => (
         <Space>
-          <Button
-            type="link"
-            size="small"
-            onClick={() => handleToggleActive(record)}
-          >
+          <a onClick={() => handleToggleActive(record)}>
             {record.active ? '停用' : '启用'}
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            onClick={() => handlePasswordOpen(record)}
-          >
+          </a>
+          <a onClick={() => handlePasswordOpen(record)}>
             修改密码
-          </Button>
+          </a>
           <Popconfirm
             title="确认删除"
             description={`确定要删除用户 "${record.username}" 吗？`}
@@ -283,9 +275,9 @@ const TenantPage = () => {
             okText="确认"
             cancelText="取消"
           >
-            <Button type="link" size="small" danger>
+            <a style={{ color: '#ff4d4f' }}>
               删除
-            </Button>
+            </a>
           </Popconfirm>
         </Space>
       ),
