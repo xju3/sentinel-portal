@@ -25,6 +25,7 @@ from sqlalchemy.dialects.mysql import JSON as MySQLJSON
 
 from pub.models import Base
 
+
 class PatrolDiagnosticRecord(Base):
     """Patrol diagnostic result record"""
 
@@ -33,25 +34,37 @@ class PatrolDiagnosticRecord(Base):
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     sn = Column(String(255), nullable=False, index=True)
     metric = Column(String(64), nullable=False, default="temperature")
-    health_status = Column(SmallInteger, nullable=False, default=0, comment="0=正常, 1=需关注, 2=严重异常")
+    health_status = Column(
+        SmallInteger, nullable=False, default=0, comment="0=正常, 1=需关注, 2=严重异常"
+    )
     conclusion = Column(Text, nullable=True)
-    details = Column(MySQLJSON, nullable=True, comment="诊断详情列表: [{window, status, metric, desc}, ...]")
+    details = Column(
+        MySQLJSON,
+        nullable=True,
+        comment="诊断详情列表: [{window, status, metric, desc}, ...]",
+    )
     ts = Column(BigInteger, nullable=False, comment="诊断产生时的时间戳(Unix毫秒)")
     created_at = Column(DateTime, default=datetime.utcnow)
-    
+
+
 class SensorFirmware(Base):
     """Sensor firmware entity model"""
 
-    __tablename__ = "sensor_firmware"
+    __tablename__ = "firmware"
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     version = Column(String(64), nullable=False, unique=True)
     description = Column(Text)
     release_date = Column(DateTime, nullable=True)
     file_url = Column(String(255), nullable=False)
-    sensor_type_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to sensor_types
-    tenant_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Link to tenant for multi-tenant support
+    sensor_type_id = Column(
+        Uuid(as_uuid=True), nullable=False, index=True
+    )  # Link to sensor_types
+    tenant_id = Column(
+        Uuid(as_uuid=True), nullable=True, index=True
+    )  # Link to tenant for multi-tenant support
     status = Column(SmallInteger, default=0, comment="状态: 1=active, 0=inactive")
+
 
 class SensorType(Base):
     """Sensor type entity model"""
@@ -64,7 +77,8 @@ class SensorType(Base):
     network = Column(Integer, nullable=False, default=1)  # Network range in meters
     bluetooth = Column(Boolean, default=False)  # Bluetooth support
     description = Column(Text)
-    
+
+
 class SimCard(Base):
     """SIM card entity model"""
 
@@ -76,9 +90,12 @@ class SimCard(Base):
     carrier = Column(String(64), nullable=False)  # Mobile carrier
     data_plan = Column(String(64), nullable=False)  # Data plan details
     activated_at = Column(DateTime, nullable=True)  # SIM card activation date
-    expires_at = Column(DateTime, nullable=False) # SIM card service expiration date
+    expires_at = Column(DateTime, nullable=False)  # SIM card service expiration date
     # 可用服务时间, 例如 "2024-01-01 to 2024-12-31"
-    status = Column(SmallInteger, default=1, comment="tiny(1) status")  # SIM card status: 1=active, 0=inactive
+    status = Column(
+        SmallInteger, default=1, comment="tiny(1) status"
+    )  # SIM card status: 1=active, 0=inactive
+
 
 class Sensor(Base):
     """Sensor entity model"""
@@ -89,22 +106,30 @@ class Sensor(Base):
     sn = Column(String(255), nullable=False, index=True)
     description = Column(Text)
     active = Column(Boolean, default=True)
-    sim_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # SIM card number for cellular connectivity
+    sim_id = Column(
+        Uuid(as_uuid=True), nullable=True, index=True
+    )  # SIM card number for cellular connectivity
     active_at = Column(DateTime, default=datetime.utcnow)
     created_at = Column(DateTime, default=datetime.utcnow)
     updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
-    sensor_batch_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Optional link to sensor_batch for batch tracking
+    sensor_batch_id = Column(
+        Uuid(as_uuid=True), nullable=True, index=True
+    )  # Optional link to sensor_batch for batch tracking
 
     # Define the relationship to SimCard
     sim_card = relationship(
         "SimCard",
         primaryjoin="foreign(Sensor.sim_id) == SimCard.id",
-        backref=backref("sensor", uselist=False),  # 修正: 一张SIM卡同一时间只能绑定一个传感器
-        lazy="selectin",     # Eagerly load the related SimCard when querying Sensors
-        uselist=False        # A Sensor has at most one SimCard
+        backref=backref(
+            "sensor", uselist=False
+        ),  # 修正: 一张SIM卡同一时间只能绑定一个传感器
+        lazy="selectin",  # Eagerly load the related SimCard when querying Sensors
+        uselist=False,  # A Sensor has at most one SimCard
     )
+
     def __repr__(self):
         return f"<Sensor {self.id}: {self.sn}>"
+
 
 class SensorBatch(Base):
     """Sensor batch entity model"""
@@ -115,21 +140,29 @@ class SensorBatch(Base):
     code = Column(String(255), nullable=False, unique=True)
     qty = Column(Integer, nullable=False)
     description = Column(Text)
-    sn = Column(String(255), nullable=False, index=True)  # Common SN prefix for the batch
+    sn = Column(
+        String(255), nullable=False, index=True
+    )  # Common SN prefix for the batch
     status = Column(SmallInteger, default=1, comment="tiny(1) status")
-    sensor_type_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to sensor_types
-    tenant_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to tenant for multi-tenant support
+    sensor_type_id = Column(
+        Uuid(as_uuid=True), nullable=False, index=True
+    )  # Link to sensor_types
+    tenant_id = Column(
+        Uuid(as_uuid=True), nullable=False, index=True
+    )  # Link to tenant for multi-tenant support
     created_at = Column(DateTime, default=datetime.utcnow)
 
     sensor_type = relationship(
         "SensorType",
         primaryjoin="foreign(SensorBatch.sensor_type_id) == SensorType.id",
         lazy="selectin",
-        uselist=False
+        uselist=False,
     )
+
 
 class SensorStatus(Base):
     """Sensor status entity model"""
+
     """
         sn: 传感器序列号，关联到Sensor表的sn字段
         ts: 传感器状态记录的时间戳，单位为Unix毫秒
@@ -138,7 +171,6 @@ class SensorStatus(Base):
         voltage: 传感器当前的电池电压，单位为mV
         active: 传感器当前是否处于活跃状态，true表示活跃
     """
-    
 
     __tablename__ = "sensor_status"
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
@@ -150,10 +182,10 @@ class SensorStatus(Base):
     active = Column(Boolean, default=True)
 
 
-class SensorCommunicationState(Base):
+class CommunicationState(Base):
     """Latest communication state and sequence counter for one sensor."""
 
-    __tablename__ = "sensor_communication_state"
+    __tablename__ = "communication_state"
 
     sn = Column(String(255), primary_key=True)
     last_sequence = Column(BigInteger, nullable=False, default=0)
@@ -161,15 +193,19 @@ class SensorCommunicationState(Base):
     last_duration_ms = Column(Float, nullable=True)
     last_activity_at = Column(DateTime, nullable=True, index=True)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
+    updated_at = Column(
+        DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow
+    )
 
 
-class SensorCommunicationRecord(Base):
+class CommunicationRecord(Base):
     """One sensor data collection communication timing event."""
 
-    __tablename__ = "sensor_communication_record"
+    __tablename__ = "communication_record"
     __table_args__ = (
-        UniqueConstraint("sn", "sequence", name="uq_sensor_communication_record_sn_sequence"),
+        UniqueConstraint(
+            "sn", "sequence", name="uq_sensor_communication_record_sn_sequence"
+        ),
     )
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
@@ -179,17 +215,31 @@ class SensorCommunicationRecord(Base):
     sequence = Column(BigInteger, nullable=False, index=True)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
 
+
 class SensorMonitoring(Base):
     """Sensor monitoring entity model"""
 
     __tablename__ = "sensor_monitoring"
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    device_inst_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to device_insts
-    location_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Optional link to location for asset tracking
-    sensor_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Optional link to sensors
-    direction = Column(String(16), nullable=True)  # e.g. 'horizontal' or 'vertical' for sensor connections
-    anomaly = Column(SmallInteger, nullable=False, default=0, comment="异常类型: 0=正常, 1=震动异常, 2=温度异常, 3=震动与温度异常")
+    device_inst_id = Column(
+        Uuid(as_uuid=True), nullable=False, index=True
+    )  # Link to device_insts
+    location_id = Column(
+        Uuid(as_uuid=True), nullable=True, index=True
+    )  # Optional link to location for asset tracking
+    sensor_id = Column(
+        Uuid(as_uuid=True), nullable=True, index=True
+    )  # Optional link to sensors
+    direction = Column(
+        String(16), nullable=True
+    )  # e.g. 'horizontal' or 'vertical' for sensor connections
+    anomaly = Column(
+        SmallInteger,
+        nullable=False,
+        default=0,
+        comment="异常类型: 0=正常, 1=震动异常, 2=温度异常, 3=震动与温度异常",
+    )
     ts = Column(BigInteger, nullable=True, comment="异常发生时间戳(Unix毫秒)")
     status = Column(SmallInteger, default=1, comment="tiny(1) status")
 
@@ -197,20 +247,20 @@ class SensorMonitoring(Base):
         "Sensor",
         primaryjoin="foreign(SensorMonitoring.sensor_id) == Sensor.id",
         lazy="selectin",
-        uselist=False
+        uselist=False,
     )
     location = relationship(
         "Location",
         primaryjoin="foreign(SensorMonitoring.location_id) == Location.id",
         lazy="selectin",
-        uselist=False
+        uselist=False,
     )
     device_inst = relationship(
         "DeviceInst",
         primaryjoin="foreign(SensorMonitoring.device_inst_id) == DeviceInst.id",
         lazy="selectin",
         uselist=False,
-        overlaps="sensor_monitorings"
+        overlaps="sensor_monitorings",
     )
 
 
@@ -221,14 +271,20 @@ class SensorThreshold(Base):
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     code = Column(String(8), nullable=False, index=True)  # Link to sensor_types
-    metric = Column(SmallInteger, nullable=False)  # e.g. '1: temperature', '2. vibration'
-    rt_max_delta = Column(Numeric(10, 4), nullable=False)  # Real-time max delta threshold
+    metric = Column(
+        SmallInteger, nullable=False
+    )  # e.g. '1: temperature', '2. vibration'
+    rt_max_delta = Column(
+        Numeric(10, 4), nullable=False
+    )  # Real-time max delta threshold
     st_max_slope = Column(Numeric(10, 4), nullable=False)
     st_max_amplitude = Column(Numeric(10, 4), nullable=False)
     mt_max_slope = Column(Numeric(10, 4), nullable=False)
     mt_max_amplitude = Column(Numeric(10, 4), nullable=False)
     baseline = Column(Numeric(10, 4), nullable=False)
-    tenant_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to tenant for multi-tenant support
+    tenant_id = Column(
+        Uuid(as_uuid=True), nullable=False, index=True
+    )  # Link to tenant for multi-tenant support
 
 
 class SensorTask(Base):
@@ -257,15 +313,20 @@ class SensorTask(Base):
 
     __tablename__ = "sensor_task"
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    name = Column(String(255), nullable=False) # 任务名称
-    sn = Column(String(255), nullable=False, index=True) # 传感器序列号
-    action = Column(SmallInteger, nullable=False) # 动作类型
-    val = Column(SmallInteger, nullable=False, default=0) # 执行多少次
-    remark = Column(Text, nullable=True) # 任务内容和发起原因说明
-    status = Column(SmallInteger, nullable=False, default=0, comment="0=pending, 1=complete, 2=dispatched") # 任务状态
-    create_time = Column(DateTime, default=datetime.utcnow) # 任务创建时间
-    dispatched_at = Column(DateTime, nullable=True) # 任务下发时间
-    complete_time = Column(DateTime, nullable=True) # 任务完成时间
+    name = Column(String(255), nullable=False)  # 任务名称
+    sn = Column(String(255), nullable=False, index=True)  # 传感器序列号
+    action = Column(SmallInteger, nullable=False)  # 动作类型
+    val = Column(SmallInteger, nullable=False, default=0)  # 执行多少次
+    remark = Column(Text, nullable=True)  # 任务内容和发起原因说明
+    status = Column(
+        SmallInteger,
+        nullable=False,
+        default=0,
+        comment="0=pending, 1=complete, 2=dispatched",
+    )  # 任务状态
+    create_time = Column(DateTime, default=datetime.utcnow)  # 任务创建时间
+    dispatched_at = Column(DateTime, nullable=True)  # 任务下发时间
+    complete_time = Column(DateTime, nullable=True)  # 任务完成时间
 
 
 class SensorTaskReport(Base):
@@ -278,36 +339,59 @@ class SensorTaskReport(Base):
 
     __tablename__ = "sensor_task_report"
     __table_args__ = (
-        UniqueConstraint("task_id", "sequence", name="uq_sensor_task_report_task_sequence"),
+        UniqueConstraint(
+            "task_id", "sequence", name="uq_sensor_task_report_task_sequence"
+        ),
     )
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    task_id = Column(Uuid(as_uuid=True), ForeignKey("sensor_task.id"), nullable=False, index=True)
+    task_id = Column(
+        Uuid(as_uuid=True), ForeignKey("sensor_task.id"), nullable=False, index=True
+    )
     sn = Column(String(255), nullable=False, index=True)
     sequence = Column(SmallInteger, nullable=False, index=True)
     report_id = Column(String(64), nullable=False, index=True)
     ts_ms = Column(BigInteger, nullable=False, index=True)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
 
+
 class DeviceFftRecord(Base):
     """
     Device FFT Record
     Stores metadata for FFT files uploaded to MinIO via SensorTasks.
     """
+
     __tablename__ = "device_fft_record"
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    
-    task_id = Column(Uuid(as_uuid=True), nullable=False, index=True, unique=True, comment="Associated SensorTask ID, also the object_name in MinIO fft bucket")
-    
+
+    task_id = Column(
+        Uuid(as_uuid=True),
+        nullable=False,
+        index=True,
+        unique=True,
+        comment="Associated SensorTask ID, also the object_name in MinIO fft bucket",
+    )
+
     sn = Column(String(255), nullable=False, index=True, comment="Sensor SN")
-    sensor_id = Column(Uuid(as_uuid=True), nullable=True, index=True, comment="Sensor database ID")
-    device_inst_id = Column(Uuid(as_uuid=True), nullable=True, index=True, comment="Bound monitored device ID (DeviceInst)")
-    tenant_id = Column(Uuid(as_uuid=True), nullable=True, index=True, comment="Tenant ID")
-    
-    ts_ms = Column(BigInteger, nullable=False, index=True, comment="Collection timestamp (ms)")
+    sensor_id = Column(
+        Uuid(as_uuid=True), nullable=True, index=True, comment="Sensor database ID"
+    )
+    device_inst_id = Column(
+        Uuid(as_uuid=True),
+        nullable=True,
+        index=True,
+        comment="Bound monitored device ID (DeviceInst)",
+    )
+    tenant_id = Column(
+        Uuid(as_uuid=True), nullable=True, index=True, comment="Tenant ID"
+    )
+
+    ts_ms = Column(
+        BigInteger, nullable=False, index=True, comment="Collection timestamp (ms)"
+    )
     fs_hz = Column(Integer, nullable=True, comment="Sampling rate (Hz)")
     points = Column(Integer, nullable=True, comment="FFT points")
     range_g = Column(Integer, nullable=True, comment="Range (g)")
-    
+
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
