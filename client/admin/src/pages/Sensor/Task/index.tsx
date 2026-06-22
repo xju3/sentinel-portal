@@ -51,22 +51,22 @@ const SensorTaskPage = () => {
       width: 180,
     },
     {
-      title: '传感器 SN',
+      title: 'SN',
       dataIndex: 'sn',
       hideInSearch: true,
-      width: 180,
+      width: 100,
     },
     {
-      title: '动作编码',
+      title: '动作',
       dataIndex: 'action',
       hideInSearch: true,
-      width: 100,
+      width: 60,
     },
     {
-      title: '执行次数',
+      title: '次数',
       dataIndex: 'val',
       hideInSearch: true,
-      width: 100,
+      width: 60,
     },
     {
       title: '状态',
@@ -80,6 +80,7 @@ const SensorTaskPage = () => {
       dataIndex: 'remark',
       hideInSearch: true,
       ellipsis: true,
+      width: 160,
       render: (_, row) => row.remark || '-',
     },
     {
@@ -87,14 +88,14 @@ const SensorTaskPage = () => {
       dataIndex: 'create_time',
       valueType: 'dateTime',
       hideInSearch: true,
-      width: 180,
+      width: 150,
     },
     {
       title: '下发时间',
       dataIndex: 'dispatched_at',
       valueType: 'dateTime',
       hideInSearch: true,
-      width: 180,
+      width: 150,
       render: (_, row) => row.dispatched_at || '-',
     },
     {

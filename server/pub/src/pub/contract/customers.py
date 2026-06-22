@@ -18,6 +18,7 @@ class RegionResponse(BaseModel):
     county: Optional[str] = None
     level: Optional[int] = 1
     available: Optional[bool] = True
+    abbreviation: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 

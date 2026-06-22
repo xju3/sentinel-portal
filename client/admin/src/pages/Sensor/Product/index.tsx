@@ -72,12 +72,19 @@ const SensorProductPage = () => {
     {
       title: '序列号',
       dataIndex: 'sn',
-      width: 200,
+      width: 120,
+    },
+    {
+      title: 'SIM卡',
+      dataIndex: 'sim_id',
+      hideInSearch: true,
+      width: 160,
+      render: (_, row) => row.sim_card ? `${row.sim_card.number} (${row.sim_card.carrier})` : (row.sim_id || '-'),
     },
     {
       title: '状态',
       dataIndex: 'active',
-      width: 80,
+      width: 100,
       valueType: 'select',
       valueEnum: {
         true: { text: '在线', status: 'Success' },
@@ -102,16 +109,16 @@ const SensorProductPage = () => {
     },
 
     {
-      title: '绑定 SIM 卡',
-      dataIndex: 'sim_id',
+      title: '激活时间',
+      dataIndex: 'active_at',
+      width: 180,
+      valueType: 'dateTime',
       hideInSearch: true,
-      render: (_, row) => row.sim_card ? `${row.sim_card.number} (${row.sim_card.carrier})` : (row.sim_id || '-'),
     },
     {
       title: '最新状态',
       dataIndex: 'latest_status',
       hideInSearch: true,
-      width: 200,
       render: (_, row) => {
         if (!row.latest_status) return '-';
         const { temperature, battery, rssi, ts } = row.latest_status;
@@ -125,26 +132,20 @@ const SensorProductPage = () => {
       },
     },
     {
-      title: '激活时间',
-      dataIndex: 'active_at',
-      width: 180,
-      valueType: 'dateTime',
-      hideInSearch: true,
-    },
-    {
       title: '描述',
+      width: 120,
       dataIndex: 'description',
       ellipsis: true,
       hideInSearch: true,
       render: (_, row) => row.description || '-',
     },
-    {
-      title: '创建时间',
-      dataIndex: 'created_at',
-      width: 180,
-      valueType: 'dateTime',
-      hideInSearch: true,
-    },
+    // {
+    //   title: '创建时间',
+    //   dataIndex: 'created_at',
+    //   width: 180,
+    //   valueType: 'dateTime',
+    //   hideInSearch: true,
+    // },
     {
       title: '操作',
       valueType: 'option',

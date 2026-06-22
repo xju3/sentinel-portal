@@ -44,7 +44,7 @@ class SensorTypeResponse(BaseModel):
 class SensorBatchCreate(BaseModel):
     code: str
     qty: int
-    sn: int
+    sn: str
     status: int = 0
     description: Optional[str] = None
     sensor_type_id: UUID
@@ -53,7 +53,7 @@ class SensorBatchCreate(BaseModel):
 class SensorBatchUpdate(BaseModel):
     code: Optional[str] = None
     qty: Optional[int] = None
-    sn: Optional[int] = None
+    sn: Optional[str] = None
     status: Optional[int] = None
     description: Optional[str] = None
     sensor_type_id: Optional[UUID] = None
@@ -63,7 +63,7 @@ class SensorBatchResponse(BaseModel):
     id: UUID
     code: str
     qty: int
-    sn: int
+    sn: str
     status: int
     description: Optional[str] = None
     sensor_type_id: UUID

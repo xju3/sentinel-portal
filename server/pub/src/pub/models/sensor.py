@@ -115,7 +115,7 @@ class SensorBatch(Base):
     code = Column(String(255), nullable=False, unique=True)
     qty = Column(Integer, nullable=False)
     description = Column(Text)
-    sn = Column(Integer, nullable=False, index=True)  # Common SN prefix for the batch
+    sn = Column(String(255), nullable=False, index=True)  # Common SN prefix for the batch
     status = Column(SmallInteger, default=1, comment="tiny(1) status")
     sensor_type_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to sensor_types
     tenant_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to tenant for multi-tenant support

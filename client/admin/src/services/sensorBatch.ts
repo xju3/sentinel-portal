@@ -4,7 +4,7 @@ export type SensorBatch = {
   id: string;
   code: string;
   qty: number;
-  sn: number;
+  sn: string;
   status: number;
   description?: string;
   sensor_type_id: string;
@@ -15,7 +15,7 @@ export type SensorBatch = {
 export type SensorBatchPayload = {
   code: string;
   qty: number;
-  sn: number;
+  sn: string;
   status?: number;
   description?: string;
   sensor_type_id: string;

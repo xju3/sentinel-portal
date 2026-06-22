@@ -9,8 +9,9 @@ import {
   ProFormTextArea,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Popconfirm, Tag, message } from 'antd';
+import { Button, Popconfirm, Tag, message, Form } from 'antd';
 
+import { listProvinces, Region } from '@/services/region';
 import {
   SensorBatch,
   SensorBatchPayload,
@@ -52,6 +53,8 @@ const SensorBatchPage = () => {
   const [editing, setEditing] = useState<SensorBatch | null>(null);
   const [sensorTypes, setSensorTypes] = useState<SensorType[]>([]);
   const [tenants, setTenants] = useState<Tenant[]>([]);
+  const [provinces, setProvinces] = useState<Region[]>([]);
+  const [form] = Form.useForm<SensorBatchPayload & { tenant_id: string }>();
 
   const loadRows = async () => {
     setLoading(true);
@@ -80,10 +83,19 @@ const SensorBatchPage = () => {
     }
   };
 
+  const loadProvinces = async () => {
+    try {
+      setProvinces(await listProvinces());
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
   useEffect(() => {
     loadRows();
     loadSensorTypes();
     loadTenants();
+    loadProvinces();
   }, []);
 
   const filteredRows = useMemo(() => {
@@ -116,6 +128,24 @@ const SensorBatchPage = () => {
     return found ? `${found.name} (${found.code})` : id;
   };
 
+  const handleTenantChange = (tenantId: string) => {
+    if (editing) return;
+    const tenant = tenants.find((t) => t.id === tenantId);
+    if (tenant) {
+      const region = provinces.find((p) => p.id === tenant.region_id);
+      const abbr = region?.abbreviation || '';
+      const year = new Date().getFullYear().toString().slice(-2);
+      const prefix = `${year}${abbr}`;
+
+      const currentCode = form.getFieldValue('code') || '';
+      // Only set prefix if empty to avoid overwriting user input, 
+      // or replace it if it's currently just a different prefix (length <= 4)
+      if (!currentCode || currentCode.length <= 4) {
+        form.setFieldsValue({ code: prefix });
+      }
+    }
+  };
+
   const columns: ProColumns<SensorBatch>[] = [
     {
       title: '序号',
@@ -127,9 +157,15 @@ const SensorBatchPage = () => {
     {
       title: '所属租户',
       dataIndex: 'tenant_id',
-      width: 300,
+      width: 160,
+      ellipsis: true,
       hideInSearch: true,
       render: (_, row) => getTenantName(row.tenant_id),
+    },
+    {
+      title: '批次',
+      dataIndex: 'code',
+      width: 80,
     },
     {
       title: '型号',
@@ -138,11 +174,7 @@ const SensorBatchPage = () => {
       hideInSearch: true,
       render: (_, row) => getSensorTypeName(row.sensor_type_id),
     },
-    {
-      title: '批次',
-      dataIndex: 'code',
-      width: 80,
-    },
+
     {
       title: '序列号',
       dataIndex: 'sn',
@@ -161,6 +193,7 @@ const SensorBatchPage = () => {
       title: '状态',
       dataIndex: 'status',
       width: 80,
+      align: 'center',
       valueType: 'select',
       valueEnum: {
         0: { text: '计划中', status: 'Default' },
@@ -174,13 +207,6 @@ const SensorBatchPage = () => {
       },
     },
     {
-      title: '描述',
-      dataIndex: 'description',
-      ellipsis: true,
-      hideInSearch: true,
-      render: (_, row) => row.description || '-',
-    },
-    {
       title: '创建时间',
       dataIndex: 'created_at',
       width: 180,
@@ -188,9 +214,16 @@ const SensorBatchPage = () => {
       hideInSearch: true,
     },
     {
+      title: '描述',
+      dataIndex: 'description',
+      ellipsis: true,
+      width: 120,
+      hideInSearch: true,
+      render: (_, row) => row.description || '-',
+    },
+    {
       title: '操作',
       valueType: 'option',
-      width: 160,
       render: (_, row) => [
         <Button
           key="edit"
@@ -254,12 +287,14 @@ const SensorBatchPage = () => {
 
       <ModalForm<SensorBatchPayload & { tenant_id: string }>
         title={editing ? '编辑传感器批次' : '新建传感器批次'}
+        form={form}
         open={modalOpen}
         modalProps={{
           destroyOnHidden: true,
           onCancel: () => {
             setModalOpen(false);
             setEditing(null);
+            form.resetFields();
           },
         }}
         submitter={{
@@ -277,7 +312,7 @@ const SensorBatchPage = () => {
               sensor_type_id: editing.sensor_type_id,
               tenant_id: editing.tenant_id,
             }
-            : { qty: 0, sn: 0, status: 0 }
+            : { qty: 0, sn: '', status: 0 }
         }
         onFinish={async (values) => {
           setSaving(true);
@@ -285,7 +320,7 @@ const SensorBatchPage = () => {
             const payload: SensorBatchPayload & { tenant_id: string } = {
               code: values.code.trim(),
               qty: Number(values.qty ?? 0),
-              sn: Number(values.sn ?? 0),
+              sn: String(values.sn ?? '').trim(),
               status: Number(values.status ?? 0),
               description: values.description?.trim(),
               sensor_type_id: values.sensor_type_id,
@@ -301,6 +336,7 @@ const SensorBatchPage = () => {
             }
             setModalOpen(false);
             setEditing(null);
+            form.resetFields();
             await loadRows();
             return true;
           } catch (error) {
@@ -326,11 +362,9 @@ const SensorBatchPage = () => {
           fieldProps={{ precision: 0 }}
           rules={[{ required: true, message: '请输入数量' }]}
         />
-        <ProFormDigit
+        <ProFormText
           name="sn"
           label="序列号前缀"
-          min={0}
-          fieldProps={{ precision: 0 }}
           rules={[{ required: true, message: '请输入序列号前缀' }]}
         />
         <ProFormSelect
@@ -349,6 +383,9 @@ const SensorBatchPage = () => {
           name="tenant_id"
           label="所属租户"
           options={tenantOptions}
+          fieldProps={{
+            onChange: handleTenantChange,
+          }}
           rules={[{ required: true, message: '请选择所属租户' }]}
         />
         <ProFormTextArea

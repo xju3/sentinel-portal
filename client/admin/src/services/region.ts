@@ -8,6 +8,7 @@ export type Region = {
   county: string;
   level: number;
   available: boolean;
+  abbreviation?: string;
 };
 
 export async function listProvinces() {

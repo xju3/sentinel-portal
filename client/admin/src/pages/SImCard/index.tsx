@@ -10,6 +10,7 @@ import {
 } from '@ant-design/pro-components';
 import { Button, message, Popconfirm } from 'antd';
 import React, { useRef, useState } from 'react';
+import dayjs from 'dayjs';
 import { getSimCards, addSimCard, updateSimCard, removeSimCard, SimCardItem } from '@/services/simCard';
 
 const SimCardManager: React.FC = () => {
@@ -160,13 +161,28 @@ const SimCardManager: React.FC = () => {
         width="400px"
         visible={modalVisible}
         onVisibleChange={setModalVisible}
-        initialValues={currentRow || { status: 1 }}
+        initialValues={
+          currentRow || { 
+            status: 1, 
+            data_plan: '300', 
+            expires_at: dayjs().add(3, 'year').format('YYYY-MM-DD HH:mm:ss')
+          }
+        }
         onFinish={handleAddOrUpdate}
         modalProps={{ destroyOnClose: true }}
       >
         <ProFormText rules={[{ required: true }]} name="number" label="SIM 卡号" />
         <ProFormText rules={[{ required: true }]} name="ccid" label="ICCID" />
-        <ProFormText rules={[{ required: true }]} name="carrier" label="运营商" />
+        <ProFormSelect 
+          rules={[{ required: true }]} 
+          name="carrier" 
+          label="运营商" 
+          options={[
+            { label: '联通', value: '联通' },
+            { label: '电信', value: '电信' },
+            { label: '移动', value: '移动' },
+          ]}
+        />
         <ProFormText rules={[{ required: true }]} name="data_plan" label="数据套餐" />
         <ProFormDateTimePicker name="activated_at" label="激活时间" />
         <ProFormDateTimePicker rules={[{ required: true }]} name="expires_at" label="到期时间" />

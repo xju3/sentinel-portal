@@ -93,7 +93,7 @@ const MonitoringSensorsPage = () => {
     {
       title: '批次编码',
       dataIndex: 'code',
-      width: 180,
+      width: 120,
       sorter: true,
     },
     {
