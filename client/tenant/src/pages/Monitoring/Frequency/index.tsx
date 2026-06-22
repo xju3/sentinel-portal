@@ -29,10 +29,10 @@ type HealthCheckFreqFormValues = {
 const toErrorMessage = (error: unknown): string => {
   const e = error as
     | {
-        data?: { detail?: string };
-        info?: { errorMessage?: string };
-        message?: string;
-      }
+      data?: { detail?: string };
+      info?: { errorMessage?: string };
+      message?: string;
+    }
     | undefined;
   return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';
 };
@@ -107,25 +107,28 @@ const MonitoringFrequencyPage = () => {
       fixed: 'left',
     },
     {
-      title: '巡检频率(分钟)',
+      title: '巡检频率',
       dataIndex: 'patrol',
       width: 140,
       valueType: 'digit',
       sorter: (a, b) => Number(a.patrol) - Number(b.patrol),
+      render: (_, row) => `${row.patrol} 分钟`,
     },
     {
-      title: '诊断频率(分钟)',
+      title: '诊断频率',
       dataIndex: 'diagnosis',
       width: 140,
       valueType: 'digit',
       sorter: (a, b) => Number(a.diagnosis) - Number(b.diagnosis),
+      render: (_, row) => `${row.diagnosis} 分钟`,
     },
     {
-      title: '上报批次',
+      title: '上报频率',
       dataIndex: 'report',
       width: 120,
       valueType: 'digit',
       sorter: (a, b) => Number(a.report) - Number(b.report),
+      render: (_, row) => `累积${row.report} 次/上报`,
     },
     {
       title: '状态',
@@ -211,17 +214,17 @@ const MonitoringFrequencyPage = () => {
         initialValues={
           editing
             ? {
-                patrol: editing.patrol,
-                diagnosis: editing.diagnosis,
-                report: editing.report,
-                status: editing.status,
-              }
+              patrol: editing.patrol,
+              diagnosis: editing.diagnosis,
+              report: editing.report,
+              status: editing.status,
+            }
             : {
-                patrol: 60,
-                diagnosis: 1440,
-                report: 1,
-                status: true,
-              }
+              patrol: 60,
+              diagnosis: 1440,
+              report: 1,
+              status: true,
+            }
         }
         modalProps={{
           destroyOnHidden: true,

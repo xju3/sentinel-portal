@@ -88,13 +88,20 @@ class SensorDbService:
         return result.scalar_one_or_none()
 
     @staticmethod
-    async def get_by_batch_id(session: AsyncSession, batch_id: UUID, skip: int = 0, limit: int = 100) -> List[Sensor]:
+    async def get_by_batch_id(
+        session: AsyncSession, 
+        batch_id: UUID, 
+        skip: int = 0, 
+        limit: int = 100,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ) -> List[Sensor]:
         stmt = (
             select(Sensor)
             .where(Sensor.sensor_batch_id == batch_id)
-            .offset(skip)
-            .limit(limit)
         )
+        stmt = apply_sorting(stmt, Sensor, sort_by, sort_order)
+        stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return list(result.scalars().all())
 

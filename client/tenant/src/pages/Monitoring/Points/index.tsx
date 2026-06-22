@@ -36,10 +36,10 @@ type SensorMonitoringFormValues = {
 const toErrorMessage = (error: unknown): string => {
   const e = error as
     | {
-        data?: { detail?: string };
-        info?: { errorMessage?: string };
-        message?: string;
-      }
+      data?: { detail?: string };
+      info?: { errorMessage?: string };
+      message?: string;
+    }
     | undefined;
   return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';
 };
@@ -121,21 +121,21 @@ const MonitoringPointsPage = () => {
     {
       title: '设备实例',
       dataIndex: 'device_inst_id',
-      width: 220,
+      width: 160,
       render: (_, row) => row.device_inst ? [row.device_inst.code, row.device_inst.sn].filter(Boolean).join(' / ') : row.device_inst_id,
       sorter: true,
     },
     {
-      title: '故障测点',
+      title: '测点',
       dataIndex: 'location_id',
-      width: 180,
+      width: 80,
       render: (_, row) => row.location?.name || row.location_id || '-',
       sorter: true,
     },
     {
       title: '传感器',
       dataIndex: 'sensor_id',
-      width: 180,
+      width: 100,
       render: (_, row) => row.sensor?.sn || row.sensor_id || '-',
       sorter: true,
     },
@@ -143,7 +143,7 @@ const MonitoringPointsPage = () => {
     {
       title: '方向',
       dataIndex: 'direction',
-      width: 120,
+      width: 80,
       valueType: 'select',
       valueEnum: {
         horizontal: { text: '水平' },
@@ -161,7 +161,7 @@ const MonitoringPointsPage = () => {
       sorter: true,
     },
     {
-      title: '故障',
+      title: '故障类型',
       dataIndex: 'anomaly',
       width: 100,
       hideInSearch: true,
@@ -177,9 +177,9 @@ const MonitoringPointsPage = () => {
       sorter: true,
     },
     {
-      title: '时间',
+      title: '故障时间',
       dataIndex: 'ts',
-      width: 180,
+      width: 150,
       hideInSearch: true,
       render: (_: any, row: any) => {
         if (!row.ts) return '-';
@@ -191,7 +191,7 @@ const MonitoringPointsPage = () => {
     {
       title: '状态',
       dataIndex: 'status',
-      width: 100,
+      width: 80,
       valueType: 'select',
       valueEnum: {
         1: { text: '启用' },
@@ -277,15 +277,15 @@ const MonitoringPointsPage = () => {
         initialValues={
           editing
             ? {
-                device_inst_id: editing.device_inst_id,
-                location_id: editing.location_id || undefined,
-                sensor_id: editing.sensor_id || undefined,
-                direction: editing.direction || undefined,
-                status: Number(editing.status),
-              }
+              device_inst_id: editing.device_inst_id,
+              location_id: editing.location_id || undefined,
+              sensor_id: editing.sensor_id || undefined,
+              direction: editing.direction || undefined,
+              status: Number(editing.status),
+            }
             : {
-                status: 1,
-              }
+              status: 1,
+            }
         }
         modalProps={{
           destroyOnHidden: true,

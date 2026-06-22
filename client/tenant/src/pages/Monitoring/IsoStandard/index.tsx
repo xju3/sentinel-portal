@@ -80,10 +80,10 @@ type IsoStandardFormValues = {
 const toErrorMessage = (error: unknown): string => {
   const e = error as
     | {
-        data?: { detail?: string };
-        info?: { errorMessage?: string };
-        message?: string;
-      }
+      data?: { detail?: string };
+      info?: { errorMessage?: string };
+      message?: string;
+    }
     | undefined;
   return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';
 };
@@ -148,13 +148,13 @@ const IsoStandardPage = () => {
     {
       title: '标准代号',
       dataIndex: 'code',
-      width: 140,
+      width: 120,
       sorter: true,
     },
     {
       title: '版本',
       dataIndex: 'version',
-      width: 120,
+      width: 100,
       valueEnum: {
         1: { text: 'ISO-10816' },
         2: { text: 'ISO-20816' },
@@ -166,15 +166,9 @@ const IsoStandardPage = () => {
       ),
       sorter: true,
     },
+
     {
-      title: '类别',
-      dataIndex: 'category',
-      width: 160,
-      render: (_, row) => getCategoryLabel(row.version, row.category),
-      sorter: true,
-    },
-    {
-      title: '基础类型',
+      title: '安装基础',
       dataIndex: 'foundation',
       width: 120,
       valueEnum: {
@@ -187,8 +181,15 @@ const IsoStandardPage = () => {
       sorter: true,
     },
     {
+      title: '类别',
+      dataIndex: 'category',
+      render: (_, row) => getCategoryLabel(row.version, row.category),
+      sorter: true,
+    },
+    {
       title: '描述',
       dataIndex: 'description',
+      width: 180,
       ellipsis: true,
       render: (_, row) => row.description || '-',
     },
@@ -280,16 +281,16 @@ const IsoStandardPage = () => {
         initialValues={
           editing
             ? {
-                code: editing.code,
-                version: editing.version,
-                category: editing.category,
-                foundation: editing.foundation,
-                description: editing.description,
-              }
+              code: editing.code,
+              version: editing.version,
+              category: editing.category,
+              foundation: editing.foundation,
+              description: editing.description,
+            }
             : {
-                version: 1,
-                foundation: 1,
-              }
+              version: 1,
+              foundation: 1,
+            }
         }
         onFinish={async (values) => {
           const payload: IsoStandardPayload = {
@@ -394,9 +395,9 @@ const IsoStandardPage = () => {
             const options = isLocked
               ? [{ label: '不可用', value: 0 }]
               : [
-                  { label: '刚性基础', value: 1 },
-                  { label: '柔性基础', value: 2 },
-                ];
+                { label: '刚性基础', value: 1 },
+                { label: '柔性基础', value: 2 },
+              ];
             return (
               <ProFormSelect
                 name="foundation"

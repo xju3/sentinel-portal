@@ -47,10 +47,10 @@ type DeviceSpecFormValues = {
 const toErrorMessage = (error: unknown): string => {
   const e = error as
     | {
-        data?: { detail?: string };
-        info?: { errorMessage?: string };
-        message?: string;
-      }
+      data?: { detail?: string };
+      info?: { errorMessage?: string };
+      message?: string;
+    }
     | undefined;
   return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';
 };
@@ -223,38 +223,37 @@ const DeviceSpecPage = () => {
       sorter: (a, b) => (a.brand || '').localeCompare(b.brand || '', 'zh-CN'),
     },
     {
-      title: '电压(V)',
+      title: '电压',
       dataIndex: 'voltage',
-      width: 100,
+      width: 80,
       valueType: 'digit',
       sorter: (a, b) => Number(a.voltage) - Number(b.voltage),
     },
     {
-      title: '转速(RPM)',
+      title: '转速',
       dataIndex: 'rpm',
-      width: 100,
+      width: 80,
       valueType: 'digit',
       sorter: (a, b) => Number(a.rpm) - Number(b.rpm),
     },
     {
-      title: '供应商',
-      dataIndex: 'supplier_id',
-      width: 180,
-      render: (_, row) => row.supplier?.name || row.supplier_id,
-      sorter: (a, b) => {
-        const labelA = a.supplier?.name || '';
-        const labelB = b.supplier?.name || '';
-        return labelA.localeCompare(labelB, 'zh-CN');
-      },
-    },
-    {
       title: '分类',
       dataIndex: 'device_category_id',
-      width: 180,
+      width: 100,
       render: (_, row) => row.device_category?.name || row.device_category_id,
       sorter: (a, b) => {
         const labelA = a.device_category?.name || '';
         const labelB = b.device_category?.name || '';
+        return labelA.localeCompare(labelB, 'zh-CN');
+      },
+    },
+    {
+      title: '供应商',
+      dataIndex: 'supplier_id',
+      render: (_, row) => row.supplier?.name || row.supplier_id,
+      sorter: (a, b) => {
+        const labelA = a.supplier?.name || '';
+        const labelB = b.supplier?.name || '';
         return labelA.localeCompare(labelB, 'zh-CN');
       },
     },
@@ -349,15 +348,15 @@ const DeviceSpecPage = () => {
         initialValues={
           editing
             ? {
-                name: editing.name,
-                model: editing.model,
-                description: editing.description,
-                brand: editing.brand,
-                voltage: editing.voltage,
-                rpm: editing.rpm,
-                supplier_id: editing.supplier_id,
-                device_category_id: editing.device_category_id,
-              }
+              name: editing.name,
+              model: editing.model,
+              description: editing.description,
+              brand: editing.brand,
+              voltage: editing.voltage,
+              rpm: editing.rpm,
+              supplier_id: editing.supplier_id,
+              device_category_id: editing.device_category_id,
+            }
             : { voltage: 0, rpm: 0 }
         }
         onFinish={async (values) => {

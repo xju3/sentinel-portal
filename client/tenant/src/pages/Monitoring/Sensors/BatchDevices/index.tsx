@@ -82,13 +82,11 @@ const BatchDevicesPage = () => {
     {
       title: '传感器SN',
       dataIndex: 'sn',
-      width: 180,
       sorter: true,
     },
     {
       title: '设备状态',
       dataIndex: 'active',
-      width: 100,
       hideInSearch: true,
       render: (_, row) =>
         row.active === undefined ? '-' : row.active ? <Tag color="green">在线</Tag> : <Tag>离线</Tag>,
@@ -97,7 +95,6 @@ const BatchDevicesPage = () => {
     {
       title: '最近活跃',
       dataIndex: 'active_at',
-      width: 180,
       valueType: 'dateTime',
       hideInSearch: true,
       render: (_, row) => row.active_at || '-',
@@ -106,6 +103,7 @@ const BatchDevicesPage = () => {
     {
       title: '备注',
       dataIndex: 'description',
+      width: 120,
       ellipsis: true,
       hideInSearch: true,
       render: (_, row) => row.description || '-',
@@ -129,13 +127,13 @@ const BatchDevicesPage = () => {
         }}
         onSubmit={handleSearch}
         onReset={handleReset}
-      onChange={(pagination, filters, sorter: any) => {
-        const currentSort = sorter.order ? { field: sorter.field, order: sorter.order } : {};
-        setSort(currentSort);
-        // 分页参数如果有变化这里也能一同接收到，并传入 loadRows
-        loadRows(pagination.current || current, pagination.pageSize || pageSize, querySn, currentSort);
-      }}
-      options={{ reload: () => loadRows(current, pageSize, querySn, sort) }}
+        onChange={(pagination, filters, sorter: any) => {
+          const currentSort = sorter.order ? { field: sorter.field, order: sorter.order } : {};
+          setSort(currentSort);
+          // 分页参数如果有变化这里也能一同接收到，并传入 loadRows
+          loadRows(pagination.current || current, pagination.pageSize || pageSize, querySn, currentSort);
+        }}
+        options={{ reload: () => loadRows(current, pageSize, querySn, sort) }}
         optionsRender={renderRefSafeTableOptions}
         cardProps={{ bodyStyle: { paddingInline: 24 } }}
         toolBarRender={false}
@@ -148,7 +146,7 @@ const BatchDevicesPage = () => {
           onChange: (page, size) => {
             setCurrent(page);
             setPageSize(size);
-          loadRows(page, size, querySn, sort);
+            loadRows(page, size, querySn, sort);
           },
         }}
       />

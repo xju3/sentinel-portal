@@ -166,35 +166,7 @@ const DeviceListPage = () => {
       hideInSearch: true,
       fixed: 'left',
     },
-    {
-      title: '传感器测点',
-      hideInSearch: true,
-      width: 100,
-      render: (_, row: any) => {
-        const monitorings = row.sensor_monitorings || [];
-        if (!monitorings?.length) return '-';
-        return (
-          <Space size={[0, 4]} wrap>
-            {monitorings.map((m: any, idx: number) => {
-              const sn = m.sensor?.sn || '未知SN';
-              const loc = m.location?.name || '未知测点';
-              return (
-                <Tag
-                  color="blue"
-                  key={m.id || idx}
-                  style={{ cursor: sn !== '未知SN' ? 'pointer' : 'default' }}
-                  onClick={() => {
-                    if (sn !== '未知SN') {
-                      navigate(`/monitoring/sensors/${sn}/history?location=${encodeURIComponent(loc)}`);
-                    }
-                  }}
-                >{`${sn} / ${loc}`}</Tag>
-              );
-            })}
-          </Space>
-        );
-      },
-    },
+
     {
       title: '编号',
       dataIndex: 'code',
@@ -220,29 +192,51 @@ const DeviceListPage = () => {
     {
       title: '服役日期',
       dataIndex: 'purchase_date',
-      width: 140,
+      width: 100,
       valueType: 'date',
       sorter: true,
     },
     {
-      title: '可用年限(月)',
+      title: '年限',
       dataIndex: 'life_span',
-      width: 110,
+      width: 80,
       valueType: 'digit',
       sorter: true,
     },
+    {
+      title: '测点',
+      hideInSearch: true,
+      width: 60,
+      render: (_, row: any) => {
+        const monitorings = row.sensor_monitorings || [];
+        if (!monitorings?.length) return '-';
+        return (
+          <Space size={[0, 2]} wrap>
+            {monitorings.map((m: any, idx: number) => {
+              const sn = m.sensor?.sn || '未知SN';
+              const loc = m.location?.name || '未知测点';
+              return (
+                <Tag
+                  color="blue"
+                  key={m.id || idx}
+                  style={{ cursor: sn !== '未知SN' ? 'pointer' : 'default' }}
+                  onClick={() => {
+                    if (sn !== '未知SN') {
+                      navigate(`/monitoring/sensors/${sn}/history?location=${encodeURIComponent(loc)}`);
+                    }
+                  }}
+                >{`${loc}`}</Tag>
+              );
+            })}
+          </Space>
+        );
+      },
+    },
 
     {
-      title: '描述',
-      dataIndex: 'desc',
-      ellipsis: true,
-      render: (_, row) => row.desc || '-',
-      sorter: true,
-    },
-    {
-      title: '运行状态',
+      title: '状态',
       dataIndex: 'active',
-      width: 100,
+      width: 80,
       valueType: 'select',
       valueEnum: {
         1: { text: '运行中', status: 'Success' },
@@ -252,9 +246,9 @@ const DeviceListPage = () => {
       sorter: true,
     },
     {
-      title: '服役状态',
+      title: '服役',
       dataIndex: 'available',
-      width: 100,
+      width: 80,
       valueType: 'select',
       valueEnum: {
         1: { text: '服役中', status: 'Success' },
@@ -266,13 +260,20 @@ const DeviceListPage = () => {
     {
       title: '状态',
       dataIndex: 'status',
-      width: 100,
+      width: 60,
       valueType: 'select',
       valueEnum: {
         1: { text: '启用' },
         0: { text: '停用' },
       },
       render: (_, row) => (Number(row.status) === 1 ? '启用' : '停用'),
+      sorter: true,
+    },
+    {
+      title: '描述',
+      dataIndex: 'desc',
+      ellipsis: true,
+      render: (_, row) => row.desc || '-',
       sorter: true,
     },
     {
@@ -463,7 +464,7 @@ const DeviceListPage = () => {
             triggerText="选择规格"
             placeholder="请选择设备规格"
             valueLabel={
-              editing?.device_spec 
+              editing?.device_spec
                 ? `${editing.device_spec.name} / ${editing.device_spec.model}${editing.device_spec.brand ? ` / ${editing.device_spec.brand}` : ''}`
                 : editing?.device_spec_id
             }

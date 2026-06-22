@@ -140,19 +140,20 @@ const MonitoringSensorsPage = () => {
     {
       title: '描述',
       dataIndex: 'description',
+      width: 120,
       ellipsis: true,
       hideInSearch: true,
       render: (_, row) => row.description || '-',
       sorter: true,
     },
-    {
-      title: '创建时间',
-      dataIndex: 'created_at',
-      width: 180,
-      valueType: 'dateTime',
-      hideInSearch: true,
-      sorter: true,
-    },
+    // {
+    //   title: '创建时间',
+    //   dataIndex: 'created_at',
+    //   width: 180,
+    //   valueType: 'dateTime',
+    //   hideInSearch: true,
+    //   sorter: true,
+    // },
     {
       title: '操作',
       valueType: 'option',
