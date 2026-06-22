@@ -1,4 +1,7 @@
 from copy import deepcopy
+from uuid import UUID, uuid4
+
+import pytest
 
 from app.handler.quality import diagnose_quality
 from pub.services.diagnosis_service import DiagnosisResultService
@@ -48,6 +51,39 @@ def test_quality_accepts_ok_payload():
     assert data["level"] == "正常"
     assert data["report_ts"] == 123
     assert [item["name"] for item in items] == ["质量状态", "有效采样", "轴质量", "量程一致性"]
+
+
+def test_diagnosis_relation_ids_are_restored_from_cached_strings():
+    relation_ids = {name: uuid4() for name in (
+        "sensor_id",
+        "sensor_monitoring_id",
+        "device_inst_id",
+        "device_spec_id",
+        "device_category_id",
+    )}
+    context = {
+        "sensor": {"id": str(relation_ids["sensor_id"])},
+        "monitoring": {"id": str(relation_ids["sensor_monitoring_id"])},
+        "device_inst": {"id": str(relation_ids["device_inst_id"])},
+        "device_spec": {"id": str(relation_ids["device_spec_id"])},
+        "device_category": {"id": str(relation_ids["device_category_id"])},
+    }
+
+    result = diagnose_quality("r1", "STL26SH0001", _payload())
+    data, _ = DiagnosisResultService.metric_result_to_record_data(result, context=context)
+
+    assert {field: data[field] for field in relation_ids} == relation_ids
+    assert all(isinstance(data[field], UUID) for field in relation_ids)
+
+
+def test_diagnosis_relation_ids_reject_invalid_cached_uuid():
+    result = diagnose_quality("r1", "STL26SH0001", _payload())
+
+    with pytest.raises(ValueError, match="sensor_id"):
+        DiagnosisResultService.metric_result_to_record_data(
+            result,
+            context={"sensor": {"id": "not-a-uuid"}},
+        )
 
 
 def test_quality_rejects_non_ok_status():

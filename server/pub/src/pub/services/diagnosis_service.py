@@ -265,13 +265,26 @@ def _diagnosis_relation_ids(context: dict[str, Any] | None) -> dict[str, Any]:
     device_spec = context.get("device_spec") if isinstance(context.get("device_spec"), dict) else {}
     device_category = context.get("device_category") if isinstance(context.get("device_category"), dict) else {}
 
-    return {
+    relation_ids = {
         "sensor_id": sensor.get("id"),
         "sensor_monitoring_id": monitoring.get("id"),
         "device_inst_id": device_inst.get("id") or monitoring.get("device_inst_id"),
         "device_spec_id": device_spec.get("id") or device_inst.get("device_spec_id"),
         "device_category_id": device_category.get("id") or device_spec.get("device_category_id"),
     }
+    return {field: _optional_uuid(value, field) for field, value in relation_ids.items()}
+
+
+def _optional_uuid(value: Any, field: str) -> UUID | None:
+    """Convert a cached relation ID to the UUID type expected by SQLAlchemy."""
+    if value is None or value == "":
+        return None
+    if isinstance(value, UUID):
+        return value
+    try:
+        return UUID(str(value))
+    except (AttributeError, TypeError, ValueError) as exc:
+        raise ValueError(f"Invalid diagnosis context UUID for {field}: {value!r}") from exc
 
 
 class PatrolDiagnosisRecordService:
