@@ -11,7 +11,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pub.manager.database import db_manager
-from pub.models.sensor import Sensor, SensorCommunicationRecord, SensorCommunicationState
+from pub.models.sensor import CommunicationRecord, CommunicationState, Sensor
 
 logger = logging.getLogger(__name__)
 
@@ -37,7 +37,7 @@ class SensorCommunicationService:
     @staticmethod
     async def record_from_payload_managed(
         payload: dict[str, Any],
-    ) -> SensorCommunicationRecord | None:
+    ) -> CommunicationRecord | None:
         """Persist communication timing from a result JSON payload."""
         event = SensorCommunicationService.payload_to_event(payload)
         if event is None:
@@ -50,7 +50,7 @@ class SensorCommunicationService:
         sn: str,
         ts_ms: int,
         duration_ms: float,
-    ) -> SensorCommunicationRecord | None:
+    ) -> CommunicationRecord | None:
         """Persist communication timing using an internally managed session."""
         if db_manager.SessionLocal is None:
             raise RuntimeError("Database not initialized. Call db_manager.init() first.")
@@ -81,19 +81,19 @@ class SensorCommunicationService:
         sn: str,
         ts_ms: int,
         duration_ms: float,
-    ) -> SensorCommunicationRecord:
+    ) -> CommunicationRecord:
         """Create a communication record and update latest sensor activity."""
         now = datetime.utcnow()
         activity_at = datetime.utcfromtimestamp(ts_ms / 1000.0)
 
         result = await session.execute(
-            select(SensorCommunicationState)
-            .where(SensorCommunicationState.sn == sn)
+            select(CommunicationState)
+            .where(CommunicationState.sn == sn)
             .with_for_update()
         )
         state = result.scalar_one_or_none()
         if state is None:
-            state = SensorCommunicationState(sn=sn, last_sequence=0, created_at=now)
+            state = CommunicationState(sn=sn, last_sequence=0, created_at=now)
             session.add(state)
             await session.flush()
 
@@ -104,7 +104,7 @@ class SensorCommunicationService:
         state.last_activity_at = activity_at
         state.updated_at = now
 
-        record = SensorCommunicationRecord(
+        record = CommunicationRecord(
             sn=sn,
             ts_ms=ts_ms,
             duration_ms=duration_ms,

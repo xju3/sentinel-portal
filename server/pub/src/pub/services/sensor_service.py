@@ -720,9 +720,9 @@ class SensorConfigService:
                 config["mqtt_host"] = tenant.mqtt_server or "mqtt.api-server.icu"
                 config["api_host"] = tenant.api_server or "api.api-server.icu"
 
-        # 7. SensorType values (voltage, network)
+        # 7. SensorType values (battery, network)
         if sensor_type:
-            config["voltage"] = sensor_type.voltage
+            config["voltage"] = sensor_type.battery
             config["network"] = sensor_type.network
 
         # 8. WiFi credentials via ProcessDeviceItem → ProcessDevice → Area

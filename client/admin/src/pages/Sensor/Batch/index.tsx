@@ -160,12 +160,17 @@ const SensorBatchPage = () => {
       const year = new Date().getFullYear().toString().slice(-2);
       const prefix = `${year}${abbr}`;
 
-      const currentCode = form.getFieldValue('code') || '';
-      // Only set prefix if empty to avoid overwriting user input, 
-      // or replace it if it's currently just a different prefix (length <= 4)
-      if (!currentCode || currentCode.length <= 4) {
-        form.setFieldsValue({ code: prefix });
-      }
+      const tenantBatches = rows.filter((r) => r.tenant_id === tenantId);
+      let maxCode = 0;
+      tenantBatches.forEach((b) => {
+        const c = parseInt(b.code, 10);
+        if (!isNaN(c) && c > maxCode) {
+          maxCode = c;
+        }
+      });
+      const nextCode = String(maxCode + 1).padStart(2, '0');
+
+      form.setFieldsValue({ sn: prefix, code: nextCode });
     }
   };
 
@@ -193,7 +198,7 @@ const SensorBatchPage = () => {
     {
       title: '型号',
       dataIndex: 'sensor_type_id',
-      width: 60,
+      width: 120,
       hideInSearch: true,
       render: (_, row) => getSensorTypeName(row.sensor_type_id),
     },
@@ -250,16 +255,38 @@ const SensorBatchPage = () => {
       // fixed: 'right',
       width: 160,
       render: (_, row) => [
-        <a
-          key="edit"
-          onClick={() => {
-            setEditing(row);
-            setModalOpen(true);
-          }}
-        >
-          编辑
-        </a>,
-        row.status < 3 && (
+        row.status <= 1 && (
+          <a
+            key="edit"
+            onClick={() => {
+              setEditing(row);
+              setModalOpen(true);
+            }}
+          >
+            编辑
+          </a>),
+        row.status <= 1 && (
+          <Popconfirm
+            key="delete"
+            title="确认删除该批次吗？"
+            onConfirm={async () => {
+              try {
+                await deleteSensorBatch(row.id);
+                message.success('删除成功');
+                await loadRows();
+              } catch (error) {
+                message.error(toErrorMessage(error));
+              }
+            }}
+          >
+            <a style={{ color: 'red' }}>
+              删除
+            </a>
+          </Popconfirm>
+        ),
+
+
+        row.status >= 1 && (
           <Popconfirm
             key="upgrade"
             title={`确定要推进至【${STATUS_MAP[row.status + 1]?.text}】吗？`}
@@ -270,23 +297,6 @@ const SensorBatchPage = () => {
             </a>
           </Popconfirm>
         ),
-        <Popconfirm
-          key="delete"
-          title="确认删除该批次吗？"
-          onConfirm={async () => {
-            try {
-              await deleteSensorBatch(row.id);
-              message.success('删除成功');
-              await loadRows();
-            } catch (error) {
-              message.error(toErrorMessage(error));
-            }
-          }}
-        >
-          <a style={{ color: 'red' }}>
-            删除
-          </a>
-        </Popconfirm>,
       ],
     },
   ];
@@ -382,41 +392,6 @@ const SensorBatchPage = () => {
           }
         }}
       >
-        <ProFormText
-          name="code"
-          label="批次编码"
-          rules={[
-            { required: true, message: '请输入批次编码' },
-            { max: 255, message: '编码最多255个字符' },
-          ]}
-        />
-        <ProFormDigit
-          name="qty"
-          label="数量"
-          min={0}
-          fieldProps={{ precision: 0 }}
-          rules={[{ required: true, message: '请输入数量' }]}
-        />
-        <ProFormText
-          name="sn"
-          label="序列号前缀"
-          rules={[{ required: true, message: '请输入序列号前缀' }]}
-        />
-        <ProFormSelect
-          name="status"
-          label="状态"
-          options={STATUS_OPTIONS.filter(opt => {
-            if (!editing) return opt.value === 0;
-            return opt.value === editing.status || opt.value === editing.status + 1;
-          })}
-          rules={[{ required: true, message: '请选择状态' }]}
-        />
-        <ProFormSelect
-          name="sensor_type_id"
-          label="传感器型号"
-          options={sensorTypeOptions}
-          rules={[{ required: true, message: '请选择传感器型号' }]}
-        />
         <ProFormSelect
           name="tenant_id"
           label="所属租户"
@@ -426,6 +401,47 @@ const SensorBatchPage = () => {
           }}
           rules={[{ required: true, message: '请选择所属租户' }]}
         />
+
+        <ProFormText
+          name="sn"
+          label="序列号前缀"
+          disabled={true}
+          rules={[{ required: true, message: '请输入序列号前缀' }]}
+        />
+        <ProFormText
+          name="code"
+          label="批次编码"
+          disabled={true}
+          rules={[
+            { required: true, message: '请输入批次编码' },
+            { max: 255, message: '编码最多255个字符' },
+          ]}
+        />
+        <ProFormSelect
+          name="sensor_type_id"
+          label="传感器型号"
+          options={sensorTypeOptions}
+          rules={[{ required: true, message: '请选择传感器型号' }]}
+        />
+        <ProFormDigit
+          name="qty"
+          label="数量"
+          min={0}
+          fieldProps={{ precision: 0 }}
+          rules={[{ required: true, message: '请输入数量' }]}
+        />
+        <ProFormSelect
+          name="status"
+          label="状态"
+          disabled={true}
+          options={STATUS_OPTIONS.filter(opt => {
+            if (!editing) return opt.value === 0;
+            return opt.value === editing.status || opt.value === editing.status + 1;
+          })}
+          rules={[{ required: true, message: '请选择状态' }]}
+        />
+
+
         <ProFormTextArea
           name="description"
           label="描述"
