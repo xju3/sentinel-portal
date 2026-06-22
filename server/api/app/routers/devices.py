@@ -27,7 +27,8 @@ from pub.services.device_service import (
     ProcessDeviceItemService,
     SensorMonitoringService,
 )
-from pub.utils.decorators import rebuild_dashboard_cache, monitor_config_change
+from pub.decorators.dashboard_cache import rebuild_dashboard_cache
+from pub.decorators.config_change import monitor_config_change
 
 from app.utils.auth import get_current_account
 from app.utils.response import success

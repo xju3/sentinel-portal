@@ -29,8 +29,8 @@ from pub.services.sensor_task_service import (
 )
 from pub.models.customer import Account
 from pub.models.sensor import Sensor, SensorBatch, SensorTask
-from pub.utils.exceptions import DomainException
-from pub.utils.decorators import rebuild_dashboard_cache
+from pub.exceptions.domain_exception import DomainException
+from pub.decorators.dashboard_cache import rebuild_dashboard_cache
 
 from app.utils.auth import get_current_account
 from app.utils.response import success

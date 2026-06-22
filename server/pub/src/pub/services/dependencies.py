@@ -6,7 +6,7 @@ Provides database session dependency without exposing db_manager to routers.
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import AsyncGenerator
 
-from pub.database import db_manager
+from pub.manager.database import db_manager
 
 
 async def get_session() -> AsyncGenerator[AsyncSession, None]:

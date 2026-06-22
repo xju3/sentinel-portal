@@ -10,7 +10,7 @@ from sqlalchemy import select, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from pub.database import db_manager
+from pub.manager.database import db_manager
 from pub.models.sensor import Sensor, SensorCommunicationRecord, SensorCommunicationState
 
 logger = logging.getLogger(__name__)

@@ -122,7 +122,7 @@ const MonitoringPointsPage = () => {
       title: '设备实例',
       dataIndex: 'device_inst_id',
       width: 220,
-      render: (_, row) => row.device_inst ? `${row.device_inst.code} / ${row.device_inst.sn}` : row.device_inst_id,
+      render: (_, row) => row.device_inst ? [row.device_inst.code, row.device_inst.sn].filter(Boolean).join(' / ') : row.device_inst_id,
       sorter: true,
     },
     {
@@ -339,7 +339,7 @@ const MonitoringPointsPage = () => {
             placeholder="请选择设备实例"
             valueLabel={
               editing?.device_inst
-                ? `${editing.device_inst.code} / ${editing.device_inst.sn}`
+                ? [editing.device_inst.code, editing.device_inst.sn].filter(Boolean).join(' / ')
                 : editing?.device_inst_id
             }
             fetcher={async ({ current, pageSize, keyword }) => {
@@ -350,7 +350,7 @@ const MonitoringPointsPage = () => {
               { title: '编码', dataIndex: 'code', width: 160 },
               { title: '序列号', dataIndex: 'sn', width: 160 },
             ]}
-            getRecordLabel={(row) => `${row.code} / ${row.sn}`}
+            getRecordLabel={(row) => [row.code, row.sn].filter(Boolean).join(' / ')}
           />
         </ProForm.Item>
         <ProForm.Item

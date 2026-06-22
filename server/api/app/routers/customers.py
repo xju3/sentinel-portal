@@ -21,7 +21,8 @@ from pub.services.customer_service import (
     IsoStandardService,
 )
 from pub.services.dashboard_service import DashboardService
-from pub.utils.decorators import rebuild_dashboard_cache, monitor_config_change
+from pub.decorators.dashboard_cache import rebuild_dashboard_cache
+from pub.decorators.config_change import monitor_config_change
 from pub.models.customer import HealthCheckFreq, IsoStandard, Area, Tenant
 from pub.models.device import ProcessDevice
 

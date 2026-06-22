@@ -22,7 +22,7 @@ from dataclasses import dataclass
 from numbers import Real
 from typing import Any, cast
 
-from pub.database import redis_manager
+from pub.manager.database import redis_manager
 
 logger = logging.getLogger(__name__)
 

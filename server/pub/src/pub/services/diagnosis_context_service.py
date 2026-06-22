@@ -19,7 +19,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import aliased
 
-from pub.database import db_manager, redis_manager
+from pub.manager.database import db_manager, redis_manager
 from pub.models.customer import HealthCheckFreq, IsoStandard
 from pub.models.device import DeviceCategory, DeviceInst, DeviceSpec, Process, ProcessDevice, ProcessDeviceItem, ProcessItem
 from pub.models.sensor import Sensor, SensorMonitoring, SensorThreshold

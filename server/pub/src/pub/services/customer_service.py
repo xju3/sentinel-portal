@@ -19,7 +19,7 @@ from pub.models.customer import (
     HealthCheckFreq,
     IsoStandard,
 )
-from pub.utils.exceptions import DomainException
+from pub.exceptions.domain_exception import DomainException
 from pub.utils.sorting import apply_sorting
 
 from pub.models.sensor import SensorMonitoring, Sensor

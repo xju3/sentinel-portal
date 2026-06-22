@@ -290,7 +290,7 @@ async def bg_handle_config_change(
         new_data:    提交的 Pydantic 请求体
         old_values:  CUD 前抓取的旧值 dict
     """
-    from pub.database import db_manager
+    from pub.manager.database import db_manager
 
     init_sensitive_fields()
     sensitive = CONFIG_SENSITIVE_FIELDS.get(model_class, set())

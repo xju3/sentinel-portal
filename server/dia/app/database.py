@@ -3,7 +3,7 @@ Thin wrapper that re-exports shared database managers from pub.database.
 All imports from app.database will continue to work transparently.
 """
 
-from pub.database import (
+from pub.manager.database import (
     DatabaseManager,
     InfluxDBManager,
     MinIOManager,

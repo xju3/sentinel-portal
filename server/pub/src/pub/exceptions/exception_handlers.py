@@ -16,7 +16,7 @@ from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
 from pub.contract.common import ApiResponse
-from pub.utils.exceptions import DomainException
+from pub.exceptions.domain_exception import DomainException
 
 logger = logging.getLogger(__name__)
 

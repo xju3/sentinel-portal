@@ -387,7 +387,7 @@ def sensor_task_to_device_payload(task: SensorTask) -> dict:
         try:
             remark_data = json.loads(task.remark)
             if "url" in remark_data:
-                from pub.database import minio_manager
+                from pub.manager.database import minio_manager
                 payload["val"] = minio_manager.get_presigned_url(remark_data["url"])
         except json.JSONDecodeError:
             # fallback if it's not a JSON string, just to be safe
@@ -635,7 +635,7 @@ logger = logging.getLogger(__name__)
 
 async def process_fft_metadata_background(task_id: UUID | str) -> None:
     """Parse FFT metadata from task action and store in DeviceFftRecord."""
-    from pub.database import db_manager
+    from pub.manager.database import db_manager
     from pub.models.sensor import DeviceFftRecord, SensorMonitoring, SensorBatch
 
     task_uuid = _parse_task_uuid(task_id)

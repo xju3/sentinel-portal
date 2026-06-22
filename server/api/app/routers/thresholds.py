@@ -15,7 +15,8 @@ from pub.services.dependencies import get_session
 from pub.services.sensor_service import SensorThresholdService
 from pub.models.customer import Account
 from pub.models.sensor import SensorThreshold
-from pub.utils.decorators import rebuild_dashboard_cache, monitor_config_change
+from pub.decorators.dashboard_cache import rebuild_dashboard_cache
+from pub.decorators.config_change import monitor_config_change
 
 from app.utils.auth import get_current_account
 from pub.contract.sensors import (

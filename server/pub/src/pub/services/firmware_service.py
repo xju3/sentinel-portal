@@ -11,7 +11,7 @@ from pub.services.sensor_task_service import (
     SENSOR_TASK_STATUS_PENDING,
     SYSTEM_ACTION_FIRMWARE_UPGRADE,
 )
-from pub.database import db_manager
+from pub.manager.database import db_manager
 
 logger = logging.getLogger(__name__)
 

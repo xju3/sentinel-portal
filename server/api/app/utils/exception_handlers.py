@@ -5,7 +5,7 @@ This module exists for backward compatibility so that existing
 imports like `from app.utils.exception_handlers import ...` still work.
 """
 
-from pub.utils.exception_handlers import (  # noqa: F401
+from pub.exceptions.exception_handlers import (  # noqa: F401
     http_exception_handler,
     validation_exception_handler,
     domain_exception_handler,

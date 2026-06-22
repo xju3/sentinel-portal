@@ -11,7 +11,7 @@ from sqlalchemy import desc, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from pub.database import db_manager
+from pub.manager.database import db_manager
 from pub.models.diagnosis import DiagnosisResult, DiagnosisResultItem
 from pub.models.sensor import PatrolDiagnosticRecord, Sensor, SensorMonitoring
 
