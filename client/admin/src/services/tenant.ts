@@ -6,6 +6,7 @@ export type Tenant = {
   name: string;
   mqtt_server: string;
   api_server: string;
+  region_id: string;
   active: boolean;
 };
 
@@ -14,6 +15,7 @@ export type TenantPayload = {
   name: string;
   mqtt_server: string;
   api_server: string;
+  region_id: string;
   active?: boolean;
 };
 

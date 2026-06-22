@@ -9,6 +9,7 @@ from sqlalchemy.future import select
 from sqlalchemy import func, or_
 
 from pub.models.customer import (
+    Region,
     Tenant,
     TenantSensor,
     Supplier,
@@ -24,6 +25,14 @@ from pub.utils.sorting import apply_sorting
 
 from pub.models.sensor import SensorMonitoring, Sensor
 from pub.models.device import DeviceCategory, DeviceSpec, DeviceInst
+
+class RegionService:
+    @staticmethod
+    async def get_provinces(session: AsyncSession) -> List[Region]:
+        stmt = select(Region).where(Region.level == 1, Region.available == True)
+        result = await session.execute(stmt)
+        return result.scalars().all()
+
 
 class TenantService:
     @staticmethod

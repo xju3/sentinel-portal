@@ -5,11 +5,13 @@ import {
   ProColumns,
   ProFormText,
   ProFormSwitch,
+  ProFormSelect,
   ProTable,
 } from '@ant-design/pro-components';
 import { Button, Popconfirm, Switch, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 
+import { listProvinces } from '@/services/region';
 import {
   Tenant,
   TenantPayload,
@@ -208,6 +210,7 @@ const TenantPage = () => {
                 name: editing.name,
                 mqtt_server: editing.mqtt_server,
                 api_server: editing.api_server,
+                region_id: editing.region_id,
                 active: editing.active,
               }
             : { active: true, mqtt_server: 'mqtt.api-server.icu', api_server: 'api.api-server.icu' }
@@ -220,6 +223,7 @@ const TenantPage = () => {
               name: values.name.trim(),
               mqtt_server: values.mqtt_server.trim(),
               api_server: values.api_server.trim(),
+              region_id: values.region_id,
               active: values.active,
             };
 
@@ -273,6 +277,20 @@ const TenantPage = () => {
             { required: true, message: '请输入 API 服务器地址' },
             { max: 255, message: '地址最多255个字符' },
           ]}
+        />
+        <ProFormSelect
+          name="region_id"
+          label="省份"
+          rules={[{ required: true, message: '请选择省份' }]}
+          request={async () => {
+            try {
+              const res = await listProvinces();
+              return res.map((r) => ({ label: r.name, value: r.id }));
+            } catch (error) {
+              message.error('获取省份列表失败');
+              return [];
+            }
+          }}
         />
         <ProFormSwitch name="active" label="状态" />
       </ModalForm>

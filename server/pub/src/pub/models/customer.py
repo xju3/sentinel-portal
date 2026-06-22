@@ -22,9 +22,10 @@ class Region(Base):
     __tablename__ = "region"
     id = Column(String(16), primary_key=True, default=uuid.uuid4, index=True)
     name = Column(String(64), nullable=False)
-    province = Column(String(64), nullable=False)  # province code
-    prefecture = Column(String(64), nullable=False)  # prefectures code
-    county = Column(String(64), nullable=False)  # county code
+    province = Column(String(16), nullable=False)  # province code
+    prefecture = Column(String(16), nullable=False)  # prefectures code
+    county = Column(String(16), nullable=False)  # county code
+    cnt = Column(Integer, default=0, nullable=False)  # number of sensors.
     abbreviation = Column(String(16), nullable=True)
     parent_id = Column(
         String(16), nullable=True, index=True

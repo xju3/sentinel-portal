@@ -8,6 +8,21 @@ from pydantic import BaseModel, ConfigDict
 
 
 # ==========================================
+# Region
+# ==========================================
+class RegionResponse(BaseModel):
+    id: str
+    name: str
+    province: Optional[str] = None
+    prefecture: Optional[str] = None
+    county: Optional[str] = None
+    level: Optional[int] = 1
+    available: Optional[bool] = True
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+# ==========================================
 # Tenant
 # ==========================================
 class TenantCreate(BaseModel):
@@ -15,6 +30,7 @@ class TenantCreate(BaseModel):
     name: str
     mqtt_server: str = "mqtt.api-server.icu"
     api_server: str = "api.api-server.icu"
+    region_id: str
     active: Optional[bool] = True
 
 
@@ -23,6 +39,7 @@ class TenantUpdate(BaseModel):
     name: Optional[str] = None
     mqtt_server: Optional[str] = None
     api_server: Optional[str] = None
+    region_id: Optional[str] = None
     active: Optional[bool] = None
 
 
@@ -32,6 +49,7 @@ class TenantResponse(BaseModel):
     name: str
     mqtt_server: str
     api_server: str
+    region_id: str
     active: bool
 
     model_config = ConfigDict(from_attributes=True)

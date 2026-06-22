@@ -10,6 +10,7 @@ from uuid import UUID
 from pub.services.dependencies import get_session
 from pub.models.customer import Account as AccountModel
 from pub.services.customer_service import (
+    RegionService,
     TenantService,
     TenantSensorService,
     SupplierService,
@@ -30,6 +31,7 @@ from pub.models.device import ProcessDevice
 from app.utils.auth import get_current_account
 from app.utils.response import success
 from pub.contract.customers import (
+    RegionResponse,
     TenantCreate,
     TenantUpdate,
     TenantResponse,
@@ -62,6 +64,17 @@ from pub.contract.customers import (
 )
 
 router = APIRouter(tags=["customers"])
+
+
+# ==========================================
+# 1a. Region
+# ==========================================
+@router.get("/regions/provinces")
+async def list_provinces(
+    session: AsyncSession = Depends(get_session),
+):
+    provinces = await RegionService.get_provinces(session)
+    return success([RegionResponse.model_validate(r) for r in provinces])
 
 
 # ==========================================
