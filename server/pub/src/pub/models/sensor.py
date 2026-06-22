@@ -60,7 +60,7 @@ class SensorType(Base):
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     name = Column(String(100), nullable=False, unique=True)
-    voltage = Column(Integer, nullable=False, default=0)
+    battery = Column(Integer, nullable=False, default=0)
     network = Column(Integer, nullable=False, default=1)  # Network range in meters
     bluetooth = Column(Boolean, default=False)  # Bluetooth support
     description = Column(Text)
