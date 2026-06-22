@@ -60,7 +60,7 @@ class SensorType(Base):
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     name = Column(String(100), nullable=False, unique=True)
-    battery = Column(Integer, nullable=False, default=0)
+    voltage = Column(Integer, nullable=False, default=0)
     network = Column(Integer, nullable=False, default=1)  # Network range in meters
     bluetooth = Column(Boolean, default=False)  # Bluetooth support
     description = Column(Text)
@@ -135,7 +135,7 @@ class SensorStatus(Base):
         ts: 传感器状态记录的时间戳，单位为Unix毫秒
         temperature: 当前MCU温度读数，单位为摄氏度
         rssi: 传感器当前的信号强度指示，单位为dBm
-        battery: 传感器当前的电池电量百分比，范围为0-100
+        voltage: 传感器当前的电池电压，单位为mV
         active: 传感器当前是否处于活跃状态，true表示活跃
     """
     

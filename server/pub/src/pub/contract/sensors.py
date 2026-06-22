@@ -13,7 +13,7 @@ from pydantic import BaseModel, ConfigDict, Field, field_validator, model_valida
 # ==========================================
 class SensorTypeCreate(BaseModel):
     name: str
-    battery: Optional[int] = 0
+    voltage: Optional[int] = 0
     network: Optional[int] = 1
     bluetooth: Optional[bool] = False
     description: Optional[str] = None
@@ -21,7 +21,7 @@ class SensorTypeCreate(BaseModel):
 
 class SensorTypeUpdate(BaseModel):
     name: Optional[str] = None
-    battery: Optional[int] = None
+    voltage: Optional[int] = None
     network: Optional[int] = None
     bluetooth: Optional[bool] = None
     description: Optional[str] = None
@@ -30,7 +30,7 @@ class SensorTypeUpdate(BaseModel):
 class SensorTypeResponse(BaseModel):
     id: UUID
     name: str
-    battery: int
+    voltage: int
     network: int
     bluetooth: bool
     description: Optional[str] = None
@@ -203,7 +203,7 @@ class SensorStatusResponse(BaseModel):
     ts: datetime
     temperature: Optional[float] = None
     rssi: Optional[float] = None
-    battery: Optional[float] = None
+    voltage: Optional[float] = None
     active: bool
 
     model_config = ConfigDict(from_attributes=True)
@@ -268,7 +268,7 @@ class SensorConfigWifi(BaseModel):
 class SensorConfigResponse(BaseModel):
     iso: SensorConfigIso
     rpm: int = 0
-    battery: int = 0
+    voltage: int = 0
     host: str = ""
     patrol: int = 60
     diagnosis: int = 1440

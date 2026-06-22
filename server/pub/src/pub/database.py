@@ -314,6 +314,25 @@ class MinIOManager:
             raise RuntimeError("MinIO not initialized. Call init() first.")
         return self.client
 
+    def get_presigned_url(self, file_url: str, expires_hours: int = 24) -> str:
+        """Convert a public MinIO URL to a presigned GET URL."""
+        from urllib.parse import urlparse
+        from datetime import timedelta
+        try:
+            client = self.get_client()
+            parsed_url = urlparse(file_url)
+            path_parts = parsed_url.path.lstrip("/").split("/", 1)
+            if len(path_parts) == 2:
+                bucket_name, object_name = path_parts
+                return client.presigned_get_object(
+                    bucket_name,
+                    object_name,
+                    expires=timedelta(hours=expires_hours)
+                )
+        except Exception as e:
+            logger.warning(f"Failed to generate presigned URL for {file_url}: {e}")
+        return file_url
+
 
 # Global instances — created once, initialized by each service's startup
 db_manager = DatabaseManager()
