@@ -44,6 +44,11 @@ export default defineConfig({
           component: '@/pages/Dashboard/Overview',
         },
         {
+          path: '/dashboard/health',
+          name: '健康总览',
+          component: '@/pages/Dashboard/HealthDashboard',
+        },
+        {
           path: '/dashboard/monitoring',
           name: '监控',
           component: '@/pages/Dashboard/Monitoring',

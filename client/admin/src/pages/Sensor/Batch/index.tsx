@@ -286,7 +286,7 @@ const SensorBatchPage = () => {
         ),
 
 
-        row.status >= 1 && (
+        row.status < 3 && (
           <Popconfirm
             key="upgrade"
             title={`确定要推进至【${STATUS_MAP[row.status + 1]?.text}】吗？`}

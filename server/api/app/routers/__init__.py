@@ -7,7 +7,7 @@ Provides a helper to register all route modules on a FastAPI application.
 from fastapi import FastAPI
 
 from app.config import settings
-from app.routers import auth, health, sensors, devices, customers, admin, dashboard, thresholds, sensor_trends, sim_card
+from app.routers import auth, health, sensors, devices, customers, admin, dashboard, dashboard_health, thresholds, sensor_trends, sim_card
 
 
 def register_routers(app: FastAPI) -> None:
@@ -19,6 +19,7 @@ def register_routers(app: FastAPI) -> None:
     app.include_router(auth.router, prefix=settings.api_prefix)
     app.include_router(admin.router, prefix=settings.api_prefix)
     app.include_router(dashboard.router, prefix=settings.api_prefix)
+    app.include_router(dashboard_health.router, prefix=settings.api_prefix)
     app.include_router(thresholds.router, prefix=settings.api_prefix)
     app.include_router(sensor_trends.router, prefix=settings.api_prefix)
     app.include_router(sim_card.router, prefix=settings.api_prefix)
