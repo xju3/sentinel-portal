@@ -30,7 +30,7 @@ async def wx_callback_get(
         return Response(content="missing parameters")
         
     wx_service = get_wx_service()
-    if wx_service.verify_signature(signature, timestamp, nonce):
+    if wx_service.verify_signature(signature, timestamp, nonce, settings.wx_token):
         return Response(content=echostr)
     else:
         return Response(content="error")
