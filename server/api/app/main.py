@@ -50,6 +50,17 @@ async def root(request: Request):
         "docs": f"{request.base_url}docs",
     }
 
+import os
+from fastapi.responses import FileResponse
+
+@app.get("/MP_verify_ltw6GHMtM4LrSug3.txt", include_in_schema=False)
+async def wechat_verify():
+    """WeChat domain verification endpoint"""
+    file_path = os.path.join(os.path.dirname(__file__), "MP_verify_ltw6GHMtM4LrSug3.txt")
+    if os.path.exists(file_path):
+        return FileResponse(file_path)
+    return {"error": "Verification file not found"}
+
 if __name__ == "__main__":
     import uvicorn
 
