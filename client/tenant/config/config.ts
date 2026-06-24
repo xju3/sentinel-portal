@@ -8,6 +8,10 @@ export default defineConfig({
       target: process.env.API_PROXY_TARGET || 'http://127.0.0.1:8000',
       changeOrigin: true,
     },
+    '/MP_verify_ltw6GHMtM4LrSug3.txt': {
+      target: process.env.API_PROXY_TARGET || 'http://127.0.0.1:8000',
+      changeOrigin: true,
+    },
   },
   layout: {
     title: 'Portal',
