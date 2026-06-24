@@ -98,5 +98,6 @@ export async function checkWxBindStatus(sceneStr: string) {
   return request<{ code: number; message: string }>('/api/v1/wx/bind-status', {
     method: 'GET',
     params: { scene_str: sceneStr },
+    skipErrorHandler: true,
   });
 }

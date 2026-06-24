@@ -49,5 +49,6 @@ export async function checkWxLoginStatus(sceneStr: string) {
   return request<{ code?: number; data?: LoginResult; message?: string }>('/api/v1/wx/login-status', {
     method: 'GET',
     params: { scene_str: sceneStr },
+    skipErrorHandler: true,
   });
 }
