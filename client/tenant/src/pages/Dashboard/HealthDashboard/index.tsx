@@ -100,7 +100,7 @@ const HealthBar = ({ summary }: { summary: HealthSummary }) => {
     { key: 'warning', label: '警告', count: summary.warning, color: '#fa8c16' },
     { key: 'severe', label: '严重', count: summary.severe, color: '#f5222d' },
     { key: 'offline', label: '数据中断', count: summary.offline, color: '#8c8c8c' },
-    { key: 'unconfigured', label: '未覆盖', count: summary.unconfigured, color: '#d9d9d9' },
+    { key: 'unconfigured', label: '未配置', count: summary.unconfigured, color: '#d9d9d9' },
   ];
 
   return (

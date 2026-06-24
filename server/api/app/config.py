@@ -49,6 +49,10 @@ class Settings(BaseSettings):
     mqtt_client_id_unique: bool = True
     mqtt_protocol_version: str = "3.1.1"
 
+    # wx settings
+    wx_app_id: str = "your wx app id"
+    wx_app_secret: str = "your wx app secret"
+
     # Queue Configuration
     patrol_queue_length: int = 72
 

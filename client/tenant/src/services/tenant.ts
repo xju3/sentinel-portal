@@ -43,6 +43,7 @@ export type AccountInfo = {
   contact_id?: string | null;
   contact_name?: string | null;
   tenant_id: string;
+  wx_user_id?: string | null;
 };
 
 export type AccountCreatePayload = {
@@ -83,5 +84,19 @@ export async function updateTenantAccountPassword(accountId: string, payload: { 
 export async function deleteTenantAccount(accountId: string) {
   return request(`/api/v1/accounts/by-tenant/${accountId}`, {
     method: 'DELETE',
+  });
+}
+
+export async function getWxBindQrCode(accountId: string) {
+  return request<{ data: { ticket: string; scene_str: string; qr_url: string } }>('/api/v1/wx/bind-qrcode', {
+    method: 'GET',
+    params: { target_account_id: accountId },
+  });
+}
+
+export async function checkWxBindStatus(sceneStr: string) {
+  return request<{ code: number; message: string }>('/api/v1/wx/bind-status', {
+    method: 'GET',
+    params: { scene_str: sceneStr },
   });
 }

@@ -588,6 +588,21 @@ class AuthService:
         await session.commit()
 
     @staticmethod
+    async def get_account_by_wx_user_id(
+        session: AsyncSession, wx_user_id: str
+    ) -> Optional[Account]:
+        stmt = select(Account).where(Account.wx_user_id == wx_user_id)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def bind_account_wx(
+        session: AsyncSession, account: Account, wx_user_id: str
+    ) -> None:
+        account.wx_user_id = wx_user_id
+        await session.commit()
+
+    @staticmethod
     async def commit(session: AsyncSession) -> None:
         await session.commit()
 

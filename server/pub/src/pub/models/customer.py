@@ -128,6 +128,8 @@ class Account(Base):
     password = Column(String(255), nullable=False)
     active = Column(Boolean, default=True)
     admin = Column(Boolean, default=False, comment="Whether the account is an admin")
+    wx_access_token = Column(String(255), nullable=True)
+    wx_user_id = Column(String(255), nullable=True)
     contact_id = Column(
         Uuid(as_uuid=True), nullable=True, index=True
     )  # Optional link to contacts
