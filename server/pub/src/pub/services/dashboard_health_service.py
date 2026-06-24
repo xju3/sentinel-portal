@@ -99,9 +99,11 @@ class DashboardHealthService:
                         dev["diagnosis_score"] = score
                         dev["diagnosis_level"] = result.level
 
-                    if result.triggered:
+                    if score > 0:
                         label = METRIC_LABELS.get(result.metric, result.metric)
-                        dev["triggered_metrics"].add(label)
+                        current_metric_level = dev["triggered_metrics"].get(label)
+                        if not current_metric_level or score > LEVEL_SCORE.get(current_metric_level, 0):
+                            dev["triggered_metrics"][label] = result.level
 
         # 7. Query fault duration for triggered devices
         fault_device_ids = {
@@ -182,7 +184,7 @@ class DashboardHealthService:
                     "has_diagnosis": False,
                     "diagnosis_score": None,
                     "diagnosis_level": "未检测",
-                    "triggered_metrics": set(),
+                    "triggered_metrics": {},
                 }
             if row.sn:
                 devices[device_id]["sns"].add(row.sn)
@@ -351,6 +353,7 @@ class DashboardHealthService:
         # --- Problem distribution ---
         cat_dist: dict[str, dict[str, int]] = {}
         area_dist: dict[str, dict[str, int]] = {}
+        metric_dist: dict[str, dict[str, int]] = {}
 
         for dev in devices.values():
             score = LEVEL_SCORE.get(dev["diagnosis_level"], 0)
@@ -358,18 +361,25 @@ class DashboardHealthService:
                 continue
             level = dev["diagnosis_level"]
             level_key = {"关注": "attention", "警告": "warning", "严重": "severe"}.get(level)
-            if not level_key:
-                continue
+            
+            if level_key:
+                cat = dev["category"]
+                if cat not in cat_dist:
+                    cat_dist[cat] = {"attention": 0, "warning": 0, "severe": 0}
+                cat_dist[cat][level_key] += 1
 
-            cat = dev["category"]
-            if cat not in cat_dist:
-                cat_dist[cat] = {"attention": 0, "warning": 0, "severe": 0}
-            cat_dist[cat][level_key] += 1
+                area = dev["area"]
+                if area not in area_dist:
+                    area_dist[area] = {"attention": 0, "warning": 0, "severe": 0}
+                area_dist[area][level_key] += 1
 
-            area = dev["area"]
-            if area not in area_dist:
-                area_dist[area] = {"attention": 0, "warning": 0, "severe": 0}
-            area_dist[area][level_key] += 1
+            # Metric distribution uses individual metric levels
+            for metric_label, metric_level in dev["triggered_metrics"].items():
+                m_level_key = {"关注": "attention", "警告": "warning", "严重": "severe"}.get(metric_level)
+                if m_level_key:
+                    if metric_label not in metric_dist:
+                        metric_dist[metric_label] = {"attention": 0, "warning": 0, "severe": 0}
+                    metric_dist[metric_label][m_level_key] += 1
 
         def _sort_dist(dist: dict[str, dict[str, int]]) -> list[dict]:
             items = [{"name": name, **vals} for name, vals in dist.items()]
@@ -382,7 +392,12 @@ class DashboardHealthService:
         problem_distribution = {
             "byCategory": _sort_dist(cat_dist),
             "byArea": _sort_dist(area_dist),
+            "byMetric": _sort_dist(metric_dist),
         }
+
+        import json
+        with open('/tmp/debug_dist.json', 'w') as f:
+            json.dump(problem_distribution, f)
 
         # --- Fault device list ---
         now_dt = datetime.utcnow()

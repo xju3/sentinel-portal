@@ -50,6 +50,7 @@ type HealthDashboardData = {
   problemDistribution: {
     byCategory: DistributionItem[];
     byArea: DistributionItem[];
+    byMetric?: DistributionItem[];
   };
   faultDevices: FaultDevice[];
 };
@@ -98,7 +99,7 @@ const HealthBar = ({ summary }: { summary: HealthSummary }) => {
     { key: 'attention', label: '关注', count: summary.attention, color: '#faad14' },
     { key: 'warning', label: '警告', count: summary.warning, color: '#fa8c16' },
     { key: 'severe', label: '严重', count: summary.severe, color: '#f5222d' },
-    { key: 'offline', label: '离线', count: summary.offline, color: '#8c8c8c' },
+    { key: 'offline', label: '数据中断', count: summary.offline, color: '#8c8c8c' },
     { key: 'unconfigured', label: '未覆盖', count: summary.unconfigured, color: '#d9d9d9' },
   ];
 
@@ -250,7 +251,7 @@ const emptyData: HealthDashboardData = {
     offline: 0,
     unconfigured: 0,
   },
-  problemDistribution: { byCategory: [], byArea: [] },
+  problemDistribution: { byCategory: [], byArea: [], byMetric: [] },
   faultDevices: [],
 };
 
@@ -411,7 +412,7 @@ const HealthDashboard = () => {
           />
           <StatisticCard
             statistic={{
-              title: '离线',
+              title: '数据中断',
               value: summary.offline,
               suffix: '台',
               status: summary.offline > 0 ? 'warning' : 'default',
@@ -427,16 +428,22 @@ const HealthDashboard = () => {
 
       {/* ── Section 2: Problem distribution ── */}
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
-        <Col xs={24} lg={12}>
+        <Col xs={24} lg={8}>
           <DistributionTags
             title="按设备分类"
             data={data.problemDistribution.byCategory}
           />
         </Col>
-        <Col xs={24} lg={12}>
+        <Col xs={24} lg={8}>
           <DistributionTags
             title="按车间/区域"
             data={data.problemDistribution.byArea}
+          />
+        </Col>
+        <Col xs={24} lg={8}>
+          <DistributionTags
+            title="按诊断项分布"
+            data={data.problemDistribution.byMetric || []}
           />
         </Col>
       </Row>
