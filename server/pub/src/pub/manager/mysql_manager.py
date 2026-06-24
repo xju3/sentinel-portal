@@ -9,6 +9,7 @@ from pub.models import Base, import_all_models
 
 logger = logging.getLogger(__name__)
 
+
 class DatabaseManager:
     """Manager for MySQL database connections"""
 
@@ -58,7 +59,16 @@ class DatabaseManager:
             await self._ensure_diagnosis_result_relation_columns(conn)
             await self._ensure_sensor_task_columns(conn)
             await self._normalize_legacy_firmware_task_actions(conn)
+            await self._ensure_account_wx_user_id(conn)
         self._schema_ready = True
+
+    async def _ensure_account_wx_user_id(self, conn) -> None:
+        """Add wx_user_id column to account table if missing."""
+        exists = await conn.execute(text("SHOW COLUMNS FROM account LIKE 'wx_user_id'"))
+        if exists.first() is None:
+            await conn.execute(
+                text("ALTER TABLE account ADD COLUMN wx_user_id VARCHAR(255) NULL")
+            )
 
     async def _ensure_diagnosis_result_relation_columns(self, conn) -> None:
         """Add relation columns introduced after the diagnosis_result table existed."""
@@ -76,7 +86,9 @@ class DatabaseManager:
             )
             if exists.first() is None:
                 await conn.execute(
-                    text(f"ALTER TABLE diagnosis_result ADD COLUMN {column} CHAR(32) NULL")
+                    text(
+                        f"ALTER TABLE diagnosis_result ADD COLUMN {column} CHAR(32) NULL"
+                    )
                 )
 
             index_name = f"ix_diagnosis_result_{column}"
