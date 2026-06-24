@@ -23,6 +23,8 @@ import {
   updateCurrentTenant,
   updateTenantAccount,
   updateTenantAccountPassword,
+  getWxBindQrCode,
+  checkWxBindStatus,
   type AccountInfo,
   type TenantInfo,
 } from '@/services/tenant';
@@ -45,6 +47,9 @@ const TenantPage = () => {
   const [accountsLoading, setAccountsLoading] = useState(false);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [createSubmitting, setCreateSubmitting] = useState(false);
+  const [bindModalOpen, setBindModalOpen] = useState(false);
+  const [qrUrl, setQrUrl] = useState('');
+  const [sceneStr, setSceneStr] = useState('');
   const [createForm] = Form.useForm();
 
   // 获取公司信息
@@ -79,6 +84,36 @@ const TenantPage = () => {
     fetchTenant();
     fetchAccounts();
   }, []);
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout;
+    if (bindModalOpen && sceneStr) {
+      timer = setInterval(async () => {
+        try {
+          const res = await checkWxBindStatus(sceneStr);
+          if (res.code === 200) {
+            message.success('微信绑定成功');
+            setBindModalOpen(false);
+            setSceneStr('');
+            fetchAccounts();
+          }
+        } catch (e) {}
+      }, 2000);
+    }
+    return () => clearInterval(timer);
+  }, [bindModalOpen, sceneStr]);
+
+  const handleBindWx = async (record: AccountInfo) => {
+    try {
+      const res = await getWxBindQrCode(record.id);
+      setQrUrl(res.data.qr_url);
+      setSceneStr(res.data.scene_str);
+      setBindModalOpen(true);
+    } catch (error: any) {
+      const detail = error?.data?.detail || '获取绑定二维码失败';
+      message.error(String(detail));
+    }
+  };
 
   // 编辑公司信息
   const handleEdit = () => {
@@ -243,6 +278,17 @@ const TenantPage = () => {
       sorter: (a: any, b: any) => Number(a.admin) - Number(b.admin),
     },
     {
+      title: '微信绑定',
+      dataIndex: 'wx_user_id',
+      key: 'wx_user_id',
+      width: 100,
+      render: (wx_user_id: string | null | undefined) => (
+        <Tag color={wx_user_id ? 'blue' : 'default'}>
+          {wx_user_id ? '已绑定' : '未绑定'}
+        </Tag>
+      ),
+    },
+    {
       title: '状态',
       dataIndex: 'active',
       key: 'active',
@@ -262,6 +308,7 @@ const TenantPage = () => {
       align: 'center' as const,
       render: (_: any, record: AccountInfo) => (
         <Space>
+          <a onClick={() => handleBindWx(record)}>绑定微信</a>
           <a onClick={() => handleToggleActive(record)}>
             {record.active ? '停用' : '启用'}
           </a>
@@ -458,6 +505,30 @@ const TenantPage = () => {
             <Input.Password placeholder="请输入密码" />
           </Form.Item>
         </Form>
+      </Modal>
+
+      {/* 绑定微信弹窗 */}
+      <Modal
+        title="绑定微信"
+        open={bindModalOpen}
+        footer={null}
+        onCancel={() => {
+          setBindModalOpen(false);
+          setSceneStr('');
+        }}
+        width={320}
+        destroyOnClose
+      >
+        <div style={{ textAlign: 'center', padding: '20px 0' }}>
+          {qrUrl ? (
+            <>
+              <img src={qrUrl} alt="微信二维码" style={{ width: 200, height: 200 }} />
+              <div style={{ marginTop: 16, color: '#666' }}>请使用微信扫描上方二维码进行绑定</div>
+            </>
+          ) : (
+            <div>加载中...</div>
+          )}
+        </div>
       </Modal>
     </PageContainer>
   );

@@ -74,7 +74,7 @@ const TenantUsersPage = () => {
             setSceneStr('');
             fetchAccounts();
           }
-        } catch (e) {}
+        } catch (e) { }
       }, 2000);
     }
     return () => clearInterval(timer);
@@ -144,7 +144,7 @@ const TenantUsersPage = () => {
 
   const columns = [
     {
-      title: '用户名',
+      title: '用户名1',
       dataIndex: 'username',
       key: 'username',
       width: 180,
