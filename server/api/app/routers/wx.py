@@ -8,6 +8,9 @@ from app.config import settings
 from app.database import redis_manager
 from app.utils.auth import get_current_account
 from pub.models.customer import Account
+from pub.utils.jwt_token import create_access_token
+from pub.contract.auth import LoginResponse
+from app.utils.response import success
 
 router = APIRouter(tags=["wx"])
 
@@ -119,4 +122,79 @@ async def get_bind_status(
             
             return {"code": 200, "message": "success"}
     
+    return {"code": 202, "message": "waiting"}
+
+@router.get("/wx/login-qrcode")
+async def get_login_qrcode():
+    """Generate a QR code ticket for WeChat login"""
+    wx_service = get_wx_service()
+    scene_str = f"login_{uuid.uuid4().hex[:8]}"
+    ticket = await wx_service.create_qr_code(scene_str)
+    
+    return success({
+        "ticket": ticket,
+        "scene_str": scene_str,
+        "qr_url": f"https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket={ticket}"
+    })
+
+@router.get("/wx/login-status")
+async def get_login_status(
+    scene_str: str = Query(...),
+    session: AsyncSession = Depends(get_session)
+):
+    """Poll the login status"""
+    redis_client = redis_manager.get_client()
+    if not redis_client:
+        raise HTTPException(status_code=500, detail="Redis not configured")
+        
+    wx_user_id = redis_client.get(f"wx_scan_{scene_str}")
+    if wx_user_id:
+        account = await AuthService.get_account_by_wx_user_id(session, wx_user_id)
+        if not account:
+            # Clean up redis
+            redis_client.delete(f"wx_scan_{scene_str}")
+            # Instead of HTTP error, we return 404 code so frontend can show specific message without throwing global error if possible.
+            # But standard is HTTPException. Let's use it.
+            raise HTTPException(status_code=404, detail="此微信号没有绑定相应平台账号")
+            
+        # Clean up redis
+        redis_client.delete(f"wx_scan_{scene_str}")
+            
+        tenant_name = None
+        contact_name = None
+        tenant = await AuthService.get_tenant_by_id(session, account.tenant_id)
+        if tenant:
+            tenant_name = str(tenant.name)
+            
+        if account.contact_id:
+            contact = await AuthService.get_contact_by_id(session, account.contact_id)
+            if contact:
+                contact_name = str(contact.name)
+
+        expires_in = settings.jwt_access_token_expires_minutes * 60
+        access_token = create_access_token(
+            subject=str(account.id),
+            tenant_id=str(account.tenant_id),
+            username=account.username,
+            jwt_secret_key=settings.jwt_secret_key,
+            admin=account.admin,
+            contact_id=str(account.contact_id) if account.contact_id else None,
+            flag=account.flag,
+            expires_minutes=settings.jwt_access_token_expires_minutes,
+        )
+
+        return success(LoginResponse(
+            access_token=access_token,
+            token_type="Bearer",
+            expires_in=expires_in,
+            account_id=account.id,
+            username=account.username,
+            tenant_id=account.tenant_id,
+            tenant_name=tenant_name,
+            contact_id=account.contact_id,
+            contact_name=contact_name,
+            flag=account.flag,
+        ))
+    
+    # Still waiting
     return {"code": 202, "message": "waiting"}
