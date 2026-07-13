@@ -11,12 +11,15 @@ from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import cast, List, Literal, Optional
 from uuid import UUID, uuid4
+import asyncio
 from app.config import settings
 
 logger = logging.getLogger(__name__)
 
 
 from pub.services.dependencies import get_session
+from pub.services.diagnosis_service import DiagnosisRecordService
+from pub.services.diagnosis_context_service import DiagnosisContextService
 from pub.services.sensor_service import SensorTypeService, SensorDbService, SensorBatchService, SensorConfigService
 from pub.services.quick_dispatch_service import dispatch_quick_diagnosis_tasks
 from pub.services.sensor_task_service import (
@@ -376,21 +379,49 @@ async def delete_sensor(
 # 4. Data Collection Endpoint
 # ==========================================
 def _process_sensor_data_background(object_name: str, payload: dict):
-    """Background task to upload data to MinIO and notify via MQTT"""
-    # 1. 调用通用的 MinIO 上传工具
-    success = upload_json_to_minio_sync(
+    # Backward compatibility stub, now implemented in async function below
+    pass
+
+async def _process_sensor_data_background_async(object_name: str, payload: dict, report_id: str):
+    """Background task to upload data to MinIO, create DiagnosisRecord, and notify via MQTT"""
+    # 1. 调用通用的 MinIO 上传工具 (在线程池中执行防止阻塞)
+    success = await asyncio.to_thread(
+        upload_json_to_minio_sync,
         minio_client=minio_manager.client,
         bucket_name="json",
         object_name=object_name,
         payload=payload
     )
     
-    # 2. 成功存入 MinIO 后，执行业务强相关的 MQTT 通知
     if success:
+        # 2. 存入 MinIO 后，异步建档 (DiagnosisRecord)
+        sn = payload.get("sn")
+        ts_ms = payload.get("ts_ms")
+        try:
+            # 获取拓扑上下文
+            context = await DiagnosisContextService.get_by_sn_managed(sn)
+            record = await DiagnosisRecordService.create_managed(
+                report_id=report_id,
+                sn=sn,
+                report_ts=ts_ms,
+                payload=payload,
+                context=context,
+            )
+            if not record:
+                logger.warning(f"Failed to create DiagnosisRecord in background for {object_name}")
+                return
+                
+            if record.quality_status == 1:
+                logger.info(f"Data quality for {object_name} is unusable, skipping DIA trigger.")
+                return
+        except Exception as db_err:
+            logger.error(f"Failed to create DiagnosisRecord for {object_name}: {db_err}")
+            return
+
+        # 3. 建档彻底落库后，执行业务强相关的 MQTT 通知，触发 DIA 计算
         try:
             mqtt_payload = json.dumps({"bucket": "json", "path": object_name})
-            
-            if api_mqtt_manager.publish(settings.mqtt_topic, mqtt_payload):
+            if await asyncio.to_thread(api_mqtt_manager.publish, settings.mqtt_topic, mqtt_payload):
                 logger.info(f"Published to MQTT topic '{settings.mqtt_topic}': {mqtt_payload}")
         except Exception as mqtt_err:
             logger.error(f"Failed to publish MQTT message for {object_name}: {mqtt_err}")
@@ -406,21 +437,24 @@ async def receive_sensor_data(
 ):
     """Receive processed sensor data and asynchronously store to MinIO"""
     sn = payload.get("sn")
-    ts_ms = payload.get("ts_ms")
 
-    if not sn or not ts_ms:
-        raise HTTPException(status_code=400, detail="Missing 'sn' or 'ts_ms' in payload")
+    if not sn:
+        raise HTTPException(status_code=400, detail="Missing 'sn' in payload")
 
     try:
-        # Convert timestamp (ms) to UTC+8
-        dt_utc = datetime.fromtimestamp(ts_ms / 1000.0, tz=timezone.utc)
+        # Use the server receive time; devices no longer need to report ts_ms.
+        dt_utc = datetime.now(timezone.utc)
+        ts_ms = int(dt_utc.timestamp() * 1000)
         tz_utc_8 = timezone(timedelta(hours=8))
         dt_utc8 = dt_utc.astimezone(tz_utc_8)
 
         # Format paths: {sn}/{YYYY}/{MM}/{DD}/{HH}-{mm}-{ss}.json
         object_name = f"{sn}/{dt_utc8.strftime('%Y/%m/%d/%H-%M-%S')}.json"
-        report_id = str(uuid4())
+
+        # 优先使用 payload 中自带的 report_id (如 result.json 中提供的)，如果没有再兜底生成
+        report_id = payload.get("report_id") or str(uuid4())
         stored_payload = dict(payload)
+        stored_payload["ts_ms"] = ts_ms
         stored_payload["report_id"] = report_id
 
         tasks: list[dict] = []
@@ -441,7 +475,7 @@ async def receive_sensor_data(
             )
 
         # Add to background tasks to execute immediately after returning response
-        background_tasks.add_task(_process_sensor_data_background, object_name, stored_payload)
+        background_tasks.add_task(_process_sensor_data_background_async, object_name, stored_payload, report_id)
 
         return success(tasks)
     except Exception as e:

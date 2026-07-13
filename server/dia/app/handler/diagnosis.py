@@ -10,10 +10,9 @@ from typing import Any
 from app.handler.energy_impact import run_energy_impact_check
 from app.handler.peak_structure import run_peak_structure_check
 from app.handler.quick_history_cache import record_quick_diagnosis_snapshot
-from app.handler.quality import run_quality_check
 from app.handler.temperature import run_temperature_check
 from app.handler.vibration_intensity import run_vibration_intensity_check
-from pub.services.diagnosis_service import DiagnosisResultService
+from pub.services.diagnosis_service import DiagnosisResultService, DiagnosisRecordService
 from pub.services.diagnosis_context_service import DiagnosisContextService
 
 logger = logging.getLogger(__name__)
@@ -72,36 +71,8 @@ def run_diagnosis(
         )
     context = _load_diagnosis_context(sn)
 
-    quality_result = run_quality_check(report_id, sn, payload)
-    saved_quality_result = asyncio.run(
-        DiagnosisResultService.save_metric_result_managed(
-            quality_result,
-            report_ts=current_ts_ms,
-            context=context,
-        )
-    )
-    if saved_quality_result is None:
-        logger.warning(
-            "Quality diagnosis result was not saved: report_id=%s sn=%s",
-            report_id,
-            sn,
-        )
-    else:
-        logger.debug(
-            "Quality diagnosis result saved: report_id=%s sn=%s diagnosis_result_id=%s",
-            report_id,
-            sn,
-            saved_quality_result.id,
-        )
-
-    if not quality_result.usable:
-        logger.warning(
-            "Skipping downstream diagnosis because data quality is not usable: report_id=%s sn=%s level=%s",
-            report_id,
-            sn,
-            quality_result.conclusion.level,
-        )
-        return
+    # Quality has already been checked at the API layer.
+    # We only reach here if quality_status == 0 (usable data).
 
     result = run_temperature_check(
         report_id,
@@ -159,6 +130,32 @@ def run_diagnosis(
                 vibration_result.metric,
                 saved_vibration_result.id,
             )
+
+    all_results = [result] + vibration_results
+    level_order = {"严重": 4, "警告": 3, "关注": 2, "正常": 1, "未检测": 0}
+    
+    highest_level = "正常"
+    is_anomaly = False
+    max_score = 0
+    
+    for r in all_results:
+        lvl = r.conclusion.level
+        score = level_order.get(lvl, 0)
+        if score > max_score:
+            max_score = score
+            highest_level = lvl
+        if r.conclusion.triggered:
+            is_anomaly = True
+
+    asyncio.run(
+        DiagnosisRecordService.update_status_managed(
+            report_id=report_id,
+            status="COMPLETED",
+            overall_level=highest_level,
+            is_anomaly=is_anomaly,
+        )
+    )
+
     logger.debug("Diagnosis job finished for report_id=%s sn=%s", report_id, sn)
 
 
