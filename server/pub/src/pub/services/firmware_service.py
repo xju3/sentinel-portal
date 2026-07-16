@@ -109,6 +109,7 @@ class SensorFirmwareService:
                                 val=0,
                                 remark=json.dumps({
                                     "url": firmware.file_url,
+                                    "version": firmware.version,
                                     "desc": f"任务内容: 固件升级到 {firmware.version}; 发起原因: 后台发布新固件"
                                 }, ensure_ascii=False),
                                 status=SENSOR_TASK_STATUS_PENDING,

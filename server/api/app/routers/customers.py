@@ -77,6 +77,23 @@ async def list_provinces(
     return success([RegionResponse.model_validate(r) for r in provinces])
 
 
+@router.get("/regions/{parent_id}/children")
+async def list_region_children(
+    parent_id: str,
+    session: AsyncSession = Depends(get_session),
+):
+    children = await RegionService.get_children(session, parent_id)
+    return success([RegionResponse.model_validate(r) for r in children])
+
+
+@router.get("/regions/tree")
+async def list_region_tree(
+    session: AsyncSession = Depends(get_session),
+):
+    tree = await RegionService.get_region_tree_2level(session)
+    return success(tree)
+
+
 # ==========================================
 # 1b. Current Tenant (authenticated) - MUST be defined before /tenants/{tenant_id}
 # ==========================================

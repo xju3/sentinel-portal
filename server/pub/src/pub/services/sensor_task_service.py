@@ -388,7 +388,11 @@ def sensor_task_to_device_payload(task: SensorTask) -> dict:
             remark_data = json.loads(task.remark)
             if "url" in remark_data:
                 from pub.manager.database import minio_manager
-                payload["val"] = minio_manager.get_presigned_url(remark_data["url"])
+                presigned_url = minio_manager.get_presigned_url(remark_data["url"])
+                if "version" in remark_data:
+                    separator = "&" if "?" in presigned_url else "?"
+                    presigned_url = f"{presigned_url}{separator}ver={remark_data['version']}"
+                payload["val"] = presigned_url
         except json.JSONDecodeError:
             # fallback if it's not a JSON string, just to be safe
             pass

@@ -16,3 +16,9 @@ export async function listProvinces() {
     method: 'GET',
   });
 }
+
+export async function getRegionTree() {
+  return request<any[]>('/api/v1/regions/tree', {
+    method: 'GET',
+  });
+}

@@ -5,13 +5,14 @@ import {
   ProColumns,
   ProFormText,
   ProFormSwitch,
+  ProFormCascader,
   ProFormSelect,
   ProTable,
 } from '@ant-design/pro-components';
 import { Button, Popconfirm, Switch, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 
-import { listProvinces } from '@/services/region';
+import { listProvinces, getRegionTree } from '@/services/region';
 import {
   Tenant,
   TenantPayload,
@@ -35,6 +36,7 @@ const TenantPage = () => {
   const [rows, setRows] = useState<Tenant[]>([]);
   const [query, setQuery] = useState<Record<string, any>>({});
   const [editing, setEditing] = useState<Tenant | null>(null);
+  const [regionTree, setRegionTree] = useState<any[]>([]);
 
   const loadRows = async () => {
     setLoading(true);
@@ -49,6 +51,7 @@ const TenantPage = () => {
 
   useEffect(() => {
     loadRows();
+    getRegionTree().then(setRegionTree).catch(() => message.error('获取地区信息失败'));
   }, []);
 
   const filteredRows = useMemo(() => {
@@ -210,7 +213,19 @@ const TenantPage = () => {
                 name: editing.name,
                 mqtt_server: editing.mqtt_server,
                 api_server: editing.api_server,
-                region_id: editing.region_id,
+                region_id: (() => {
+                  for (const prov of regionTree) {
+                    if (prov.children) {
+                      for (const city of prov.children) {
+                        if (city.value === editing.region_id) {
+                          return [prov.value, city.value];
+                        }
+                      }
+                    }
+                    if (prov.value === editing.region_id) return [prov.value];
+                  }
+                  return [editing.region_id];
+                })(),
                 active: editing.active,
               }
             : { active: true, mqtt_server: 'mqtt.api-server.icu', api_server: 'api.api-server.icu' }
@@ -223,7 +238,7 @@ const TenantPage = () => {
               name: values.name.trim(),
               mqtt_server: values.mqtt_server.trim(),
               api_server: values.api_server.trim(),
-              region_id: values.region_id,
+              region_id: Array.isArray(values.region_id) ? values.region_id[values.region_id.length - 1] : values.region_id,
               active: values.active,
             };
 
@@ -278,18 +293,13 @@ const TenantPage = () => {
             { max: 255, message: '地址最多255个字符' },
           ]}
         />
-        <ProFormSelect
+        <ProFormCascader
           name="region_id"
-          label="省份"
-          rules={[{ required: true, message: '请选择省份' }]}
-          request={async () => {
-            try {
-              const res = await listProvinces();
-              return res.map((r) => ({ label: r.name, value: r.id }));
-            } catch (error) {
-              message.error('获取省份列表失败');
-              return [];
-            }
+          label="省市"
+          rules={[{ required: true, message: '请选择省市' }]}
+          fieldProps={{
+            options: regionTree,
+            changeOnSelect: true,
           }}
         />
         <ProFormSwitch name="active" label="状态" />
