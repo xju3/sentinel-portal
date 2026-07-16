@@ -393,10 +393,10 @@ async def sensor_task_to_device_payload(session: AsyncSession, task: SensorTask)
                 sensor_type_id=ctx.get("sensor_type_id")
             )
             if firmware_info:
-                from pub.manager.database import minio_manager
-                presigned_url = minio_manager.get_presigned_url(
-                    firmware_info["file_url"],
-                    extra_query_params={"ver": firmware_info['version']}
+                presigned_url = SensorOTAContextService.get_cached_presigned_url(
+                    firmware_id=firmware_info["id"],
+                    file_url=firmware_info["file_url"],
+                    version=firmware_info["version"]
                 )
                 payload["val"] = presigned_url
             else:

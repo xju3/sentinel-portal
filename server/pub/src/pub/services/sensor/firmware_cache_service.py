@@ -13,6 +13,7 @@ logger = logging.getLogger(__name__)
 class SensorOTAContextService:
     SN_CONTEXT_PREFIX = "sensor_context:sn:"
     FIRMWARE_PREFIX = "firmware:active:"
+    PRESIGNED_URL_PREFIX = "firmware:url:"
 
     @staticmethod
     def _get_redis():
@@ -219,3 +220,33 @@ class SensorOTAContextService:
         except Exception as e:
             logger.error(f"Failed during database fallback for active firmware: {e}", exc_info=True)
             return None
+
+    @classmethod
+    def get_cached_presigned_url(cls, firmware_id: str, file_url: str, version: str) -> str:
+        """获取签名URL，使用 Redis 缓存 20 小时以复用"""
+        client = cls._get_redis()
+        key = f"{cls.PRESIGNED_URL_PREFIX}{firmware_id}"
+        
+        if client:
+            try:
+                cached_url = client.get(key)
+                if cached_url:
+                    return cached_url
+            except Exception as e:
+                logger.error(f"Failed to read presigned url cache: {e}")
+
+        # 生成新的 URL，有效期 24 小时
+        from pub.manager.database import minio_manager
+        new_url = minio_manager.get_presigned_url(
+            file_url,
+            extra_query_params={"ver": version}
+        )
+        
+        # 缓存 20 小时，留出 4 小时的冗余给设备下载
+        if client:
+            try:
+                client.setex(key, 20 * 3600, new_url)
+            except Exception as e:
+                logger.error(f"Failed to cache presigned url: {e}")
+                
+        return new_url
