@@ -4,7 +4,7 @@ Admin management endpoints - for admin backend only, no tenant filtering
 
 import logging
 from datetime import timedelta
-from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks
+from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, UploadFile, File, Form
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List
 from uuid import UUID
@@ -163,3 +163,47 @@ async def get_presigned_upload_url(
     except Exception as e:
         logger.error(f"Failed to generate presigned URL: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail=f"Failed to generate upload URL: {str(e)}")
+
+
+@router.post("/sensor-firmwares/upload-direct")
+async def upload_firmware_file_direct(
+    version: str = Form(...),
+    file: UploadFile = File(...),
+    current_account: Account = Depends(get_current_account),
+):
+    """Upload a firmware file directly through the backend to avoid CORS/mixed-content issues on the client side."""
+    client = minio_manager.get_client()
+    bucket_name = "ota"
+    
+    # Build the object name: version/filename
+    object_name = f"{version}/{file.filename}"
+    
+    try:
+        # Ensure the bucket exists
+        if not client.bucket_exists(bucket_name):
+            client.make_bucket(bucket_name)
+            logger.info(f"Created MinIO bucket: {bucket_name}")
+            
+        # Read file to memory for upload (firmware files are typically small, 1-10MB)
+        file_bytes = await file.read()
+        import io
+        
+        client.put_object(
+            bucket_name,
+            object_name,
+            io.BytesIO(file_bytes),
+            length=len(file_bytes),
+            content_type=file.content_type
+        )
+        
+        # Construct the file URL (public access URL)
+        endpoint = settings.minio_endpoint
+        file_url = f"http://{endpoint}/{bucket_name}/{object_name}"
+        
+        return success({
+            "file_url": file_url,
+            "object_name": object_name
+        })
+    except Exception as e:
+        logger.error(f"Failed to upload firmware file: {e}", exc_info=True)
+        raise HTTPException(status_code=500, detail=f"Failed to upload file: {str(e)}")

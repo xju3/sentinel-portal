@@ -96,3 +96,19 @@ export async function getPresignedUploadUrl(
     ...(options || {}),
   });
 }
+
+export async function uploadFirmwareDirect(
+  version: string,
+  file: File,
+  options?: { [key: string]: any },
+) {
+  const formData = new FormData();
+  formData.append('version', version);
+  formData.append('file', file);
+  return request<{ file_url: string; object_name: string }>('/api/v1/admin/sensor-firmwares/upload-direct', {
+    method: 'POST',
+    data: formData,
+    requestType: 'form',
+    ...(options || {}),
+  });
+}

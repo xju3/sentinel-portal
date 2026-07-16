@@ -20,6 +20,7 @@ import {
   querySensorFirmwareList,
   updateSensorFirmware,
   getPresignedUploadUrl,
+  uploadFirmwareDirect,
   PresignedUploadResponse,
   releaseSensorFirmware,
 } from '@/services/sensorFirmware';
@@ -130,23 +131,16 @@ const SensorFirmwarePage = () => {
   const doUploadFile = async (version: string, file: File): Promise<PresignedUploadResponse | null> => {
     setUploading(true);
     try {
-      // 1. Get presigned upload URL from backend
-      const res = await getPresignedUploadUrl(version, file.name);
+      // Upload file directly to backend proxy to avoid CORS and mixed-content issues
+      const res = await uploadFirmwareDirect(version, file);
       const uploadInfo = (res as any)?.data ?? res;
 
-      // 2. Upload file directly to MinIO using the presigned URL
-      const uploadRes = await fetch(uploadInfo.presigned_url, {
-        method: 'PUT',
-        body: file,
-        headers: { 'Content-Type': file.type || 'application/octet-stream' },
-      });
-
-      if (!uploadRes.ok) {
-        throw new Error(`Upload failed with status ${uploadRes.status}`);
-      }
-
       message.success('文件上传成功');
-      return uploadInfo;
+      return {
+        presigned_url: '', // No longer used but kept for type compatibility
+        file_url: uploadInfo.file_url,
+        object_name: uploadInfo.object_name,
+      };
     } catch (error) {
       message.error(toErrorMessage(error));
       return null;
