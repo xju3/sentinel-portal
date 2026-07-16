@@ -92,6 +92,23 @@ const TenantPage = () => {
       width: 200,
     },
     {
+      title: '所在地区',
+      dataIndex: 'region_id',
+      width: 150,
+      renderText: (val: string) => {
+        if (!val) return '-';
+        for (const prov of regionTree) {
+          if (prov.value === val) return prov.label;
+          if (prov.children) {
+            for (const city of prov.children) {
+              if (city.value === val) return `${prov.label} / ${city.label}`;
+            }
+          }
+        }
+        return val;
+      },
+    },
+    {
       title: 'MQTT 服务器',
       dataIndex: 'mqtt_server',
       width: 200,
