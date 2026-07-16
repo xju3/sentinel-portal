@@ -15,12 +15,27 @@ from influxdb_client.client.query_api import QueryApi
 
 from pub.manager.database import influxdb_manager, db_manager
 from fastapi import BackgroundTasks
-from pub.models.sensor import SensorType, Sensor, SensorBatch, SensorThreshold, SensorMonitoring, SimCard
-from pub.models.device import DeviceInst, DeviceSpec, DeviceCategory, ProcessDeviceItem, ProcessDevice
+from pub.models.sensor import (
+    SensorType,
+    Sensor,
+    SensorBatch,
+    SensorThreshold,
+    SensorMonitoring,
+    SimCard,
+)
+from pub.models.device import (
+    DeviceInst,
+    DeviceSpec,
+    DeviceCategory,
+    ProcessDeviceItem,
+    ProcessDevice,
+)
 from pub.models.customer import Tenant, Area, HealthCheckFreq, IsoStandard, Region
 from pub.exceptions.domain_exception import DomainException
 from pub.utils.sorting import apply_sorting
+
 logger = logging.getLogger(__name__)
+
 
 class SimCardService:
     @staticmethod
@@ -39,21 +54,24 @@ class SimCardService:
         from pub.models.sensor import Sensor
 
         base_stmt = select(SimCard)
+        if not sort_by:
+            sort_by = "iccid"
+            if sort_order == "ascend":
+                sort_order = "descend"
         base_stmt = apply_sorting(base_stmt, SimCard, sort_by, sort_order)
-        
+
         if keyword:
             like = f"%{keyword}%"
             base_stmt = base_stmt.where(
-                (SimCard.ccid.ilike(like)) | (SimCard.carrier.ilike(like))
+                (SimCard.iccid.ilike(like)) | (SimCard.carrier.ilike(like))
             )
-            
+
         if status is not None:
             base_stmt = base_stmt.where(SimCard.status == status)
-            
+
         if unbound_only:
-            # 左连接 Sensor 表，筛选出尚未绑定任何传感器的 SIM 卡
-            base_stmt = base_stmt.outerjoin(Sensor, Sensor.sim_id == SimCard.id).where(Sensor.id.is_(None))
-            
+            base_stmt = base_stmt.where(SimCard.bound == 0)
+
         if unactivated_only:
             base_stmt = base_stmt.where(SimCard.activated_at.is_(None))
 
@@ -76,11 +94,38 @@ class SimCardService:
 
     @staticmethod
     async def create(session: AsyncSession, data: dict) -> SimCard:
+        data.pop("ccid", None)  # Ensure ccid is not passed
         db_obj = SimCard(**data)
         session.add(db_obj)
         await session.commit()
         await session.refresh(db_obj)
         return db_obj
+
+    @staticmethod
+    async def create_batch(session: AsyncSession, data: dict) -> List[SimCard]:
+        prefix = data.pop("prefix")
+        suffix = data.pop("suffix", "")
+        start_num_str = data.pop("start_num")
+        end_num_str = data.pop("end_num")
+
+        start_num = int(start_num_str)
+        end_num = int(end_num_str)
+        num_len = len(start_num_str)
+
+        db_objs = []
+        for i in range(start_num, end_num + 1):
+            num_str = str(i).zfill(num_len)
+            iccid = f"{prefix}{num_str}{suffix}"
+            item_data = data.copy()
+            item_data.pop("ccid", None)  # Ensure ccid is not passed to SimCard
+            item_data["iccid"] = iccid
+            db_objs.append(SimCard(**item_data))
+
+        session.add_all(db_objs)
+        await session.commit()
+        for obj in db_objs:
+            await session.refresh(obj)
+        return db_objs
 
     @staticmethod
     async def update(session: AsyncSession, db_obj: SimCard, data: dict) -> SimCard:

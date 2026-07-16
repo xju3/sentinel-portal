@@ -8,6 +8,7 @@ from sqlalchemy import (
     BigInteger,
     Boolean,
     Column,
+    Date,
     DateTime,
     Float,
     ForeignKey,
@@ -85,15 +86,18 @@ class SimCard(Base):
     __tablename__ = "sim_card"
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    ccid = Column(String(64), nullable=False, unique=True)  # SIM card ICCID
+    iccid = Column(String(64), nullable=False, unique=True)  # SIM card ICCID
     carrier = Column(String(64), nullable=False)  # Mobile carrier
     data_plan = Column(String(64), nullable=False)  # Data plan details
-    activated_at = Column(DateTime, nullable=True)  # SIM card activation date
-    expires_at = Column(DateTime, nullable=False)  # SIM card service expiration date
+    activated_at = Column(Date, nullable=True)  # SIM card activation date
+    expires_at = Column(Date, nullable=False)  # SIM card service expiration date
     # 可用服务时间, 例如 "2024-01-01 to 2024-12-31"
     status = Column(
         SmallInteger, default=1, comment="tiny(1) status"
     )  # SIM card status: 1=active, 0=inactive
+    bound = Column(
+        SmallInteger, default=0, comment="0=未绑定, 1=已绑定"
+    )
 
 
 class Sensor(Base):

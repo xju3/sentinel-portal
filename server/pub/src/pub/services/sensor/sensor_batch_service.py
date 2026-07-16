@@ -20,6 +20,8 @@ from pub.models.device import DeviceInst, DeviceSpec, DeviceCategory, ProcessDev
 from pub.models.customer import Tenant, Area, HealthCheckFreq, IsoStandard, Region
 from pub.exceptions.domain_exception import DomainException
 from pub.utils.sorting import apply_sorting
+from pub.services.sensor.sensor_db_service import SensorDbService
+
 logger = logging.getLogger(__name__)
 
 class SensorBatchService:

@@ -40,62 +40,49 @@ const SensorTaskPage = () => {
 
   const columns: ProColumns<SensorTask>[] = [
     {
+      title: '序号',
+      valueType: 'indexBorder',
+      width: 68,
+      hideInSearch: true,
+      fixed: 'left',
+    },
+    {
       title: '任务名称 / 传感器',
       dataIndex: 'keyword',
       hideInTable: true,
+      ellipsis: true,
+      width: 80,
     },
     {
       title: '任务名称',
       dataIndex: 'name',
       hideInSearch: true,
-      width: 180,
+      ellipsis: true,
+      width: 100,
     },
     {
       title: 'SN',
       dataIndex: 'sn',
       hideInSearch: true,
-      width: 100,
-    },
-    {
-      title: '动作',
-      dataIndex: 'action',
-      hideInSearch: true,
-      width: 60,
-    },
-    {
-      title: '次数',
-      dataIndex: 'val',
-      hideInSearch: true,
-      width: 60,
-    },
-    {
-      title: '状态',
-      dataIndex: 'status',
-      valueType: 'select',
-      valueEnum: statusValueEnum,
-      width: 100,
-    },
-    {
-      title: '任务说明',
-      dataIndex: 'remark',
-      hideInSearch: true,
       ellipsis: true,
-      width: 160,
-      render: (_, row) => row.remark || '-',
+      width: 100,
     },
+
     {
       title: '创建时间',
       dataIndex: 'create_time',
       valueType: 'dateTime',
+      ellipsis: true,
       hideInSearch: true,
-      width: 150,
+      width: 160,
     },
     {
       title: '下发时间',
       dataIndex: 'dispatched_at',
       valueType: 'dateTime',
       hideInSearch: true,
-      width: 150,
+      ellipsis: true,
+      width: 160,
       render: (_, row) => row.dispatched_at || '-',
     },
     {
@@ -103,8 +90,35 @@ const SensorTaskPage = () => {
       dataIndex: 'complete_time',
       valueType: 'dateTime',
       hideInSearch: true,
-      width: 180,
+      ellipsis: true,
+      width: 160,
       render: (_, row) => row.complete_time || '-',
+    },
+    {
+      title: '动作',
+      dataIndex: 'action',
+      width: 60,
+      hideInSearch: true,
+    },
+    {
+      title: '次数',
+      dataIndex: 'val',
+      width: 60,
+      hideInSearch: true,
+    },
+    {
+      title: '状态',
+      dataIndex: 'status',
+      valueType: 'select',
+      width: 80,
+      valueEnum: statusValueEnum,
+    },
+    {
+      title: '任务说明',
+      dataIndex: 'remark',
+      hideInSearch: true,
+      ellipsis: true,
+      render: (_, row) => row.remark || '-',
     },
   ];
 
@@ -114,7 +128,6 @@ const SensorTaskPage = () => {
         rowKey="id"
         actionRef={actionRef}
         columns={columns}
-        scroll={{ x: 1300 }}
         search={{ labelWidth: 'auto' }}
         request={async (params) => {
           try {

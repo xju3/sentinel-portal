@@ -192,12 +192,12 @@ const SensorFirmwarePage = () => {
     {
       title: '版本号',
       dataIndex: 'version',
-      width: 160,
+      width: 80,
     },
     {
       title: '文件',
       dataIndex: 'file_url',
-      width: 160,
+      width: 100,
       ellipsis: true,
       hideInSearch: true,
       render: (_, row) => (
@@ -210,22 +210,22 @@ const SensorFirmwarePage = () => {
     {
       title: '传感器类型',
       dataIndex: 'sensor_type_id',
-      width: 160,
+      width: 120,
       hideInSearch: true,
       render: (_, row) => sensorTypeMap.get(row.sensor_type_id) || row.sensor_type_id || '-',
     },
     {
       title: '租户',
       dataIndex: 'tenant_id',
-      width: 160,
+      width: 200,
       hideInSearch: true,
       render: (_, row) =>
         row.tenant_id ? tenantMap.get(row.tenant_id) || row.tenant_id : '-',
     },
     {
-      title: '发布日志',
+      title: '发布日期',
       dataIndex: 'release_date',
-      width: 120,
+      width: 100,
       hideInSearch: true,
       render: (_, row) => (row.release_date ? row.release_date.split('T')[0] : '-'),
     },
@@ -244,7 +244,7 @@ const SensorFirmwarePage = () => {
           <Tag color="default">禁用</Tag>
         ),
     },
-        {
+    {
       title: '描述',
       dataIndex: 'description',
       ellipsis: true,
@@ -254,8 +254,8 @@ const SensorFirmwarePage = () => {
     {
       title: '操作',
       valueType: 'option',
-      // fixed: 'right',
-      width: 160,
+      fixed: 'right',
+      width: 120,
       render: (_, row) => [
         <a
           key="edit"
@@ -312,7 +312,6 @@ const SensorFirmwarePage = () => {
         loading={loading}
         columns={columns}
         dataSource={filteredRows}
-        scroll={{ x: 1200 }}
         search={{
           labelWidth: 'auto',
           defaultCollapsed: false,
@@ -352,17 +351,17 @@ const SensorFirmwarePage = () => {
         initialValues={
           editing
             ? {
-                version: editing.version,
-                description: editing.description,
-                release_date: editing.release_date,
-                file_url: editing.file_url,
-                sensor_type_id: editing.sensor_type_id,
-                tenant_id: editing.tenant_id,
-                status: editing.status,
-              }
+              version: editing.version,
+              description: editing.description,
+              release_date: editing.release_date,
+              file_url: editing.file_url,
+              sensor_type_id: editing.sensor_type_id,
+              tenant_id: editing.tenant_id,
+              status: editing.status,
+            }
             : {
-                status: 1,
-              }
+              status: 1,
+            }
         }
         onFinish={async (values) => {
           setSaving(true);
@@ -579,7 +578,7 @@ const SensorFirmwarePage = () => {
         />
         <ProFormDatePicker
           name="release_date"
-          label="发布日志"
+          label="发布日期"
         />
         <ProFormSelect
           name="status"

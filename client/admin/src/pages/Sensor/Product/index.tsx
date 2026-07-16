@@ -78,8 +78,8 @@ const SensorProductPage = () => {
       title: 'SIM卡',
       dataIndex: 'sim_id',
       hideInSearch: true,
-      width: 160,
-      render: (_, row) => row.sim_card ? `${row.sim_card.number} (${row.sim_card.carrier})` : (row.sim_id || '-'),
+      width: 260,
+      render: (_, row) => row.sim_card ? `${row.sim_card.iccid} (${row.sim_card.carrier})` : (row.sim_id || '-'),
     },
     {
       title: '状态',
@@ -192,7 +192,6 @@ const SensorProductPage = () => {
         loading={loading}
         columns={columns}
         dataSource={filteredRows}
-        scroll={{ x: 900 }}
         search={{ labelWidth: 'auto' }}
         onSubmit={(values) => setQuery(values)}
         onReset={() => setQuery({})}
@@ -283,10 +282,10 @@ const SensorProductPage = () => {
           placeholder="请选择要绑定的 SIM 卡（可选）"
           request={async () => {
             try {
-              // 请求接口：只显示 status=1 (正常) 且 unbound_only=true (尚未分配) 且 unactivated_only=true (未激活) 的 SIM 卡
-              const res = await getSimCards({ pageSize: 1000, status: 1, unbound_only: true, unactivated_only: true });
+              // 请求接口：只显示 status=1 (正常) 且 unbound_only=true (尚未分配) 的 SIM 卡
+              const res = await getSimCards({ pageSize: 1000, status: 1, unbound_only: true });
               const options = (res?.list || []).map((item: any) => ({
-                label: `${item.number} (${item.carrier})`,
+                label: `${item.iccid} (${item.carrier})`,
                 value: item.id,
               }));
 
@@ -295,7 +294,7 @@ const SensorProductPage = () => {
                 const currentSim = editing.sim_card;
                 if (!options.find((opt: any) => opt.value === currentSim.id)) {
                   options.unshift({
-                    label: `${currentSim.number} (${currentSim.carrier}) - 当前绑定`,
+                    label: `${currentSim.iccid} (${currentSim.carrier}) - 当前绑定`,
                     value: currentSim.id,
                   });
                 }

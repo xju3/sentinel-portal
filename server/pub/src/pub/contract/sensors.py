@@ -92,13 +92,13 @@ class SensorUpdate(BaseModel):
 
 class SensorSimCardResponse(BaseModel):
     id: UUID
-    number: str
-    ccid: str
+    iccid: str
     carrier: str
     data_plan: str
     activated_at: Optional[datetime] = None
     expires_at: datetime
     status: int
+    bound: int = 0
 
     model_config = ConfigDict(from_attributes=True)
 

@@ -2,12 +2,13 @@ import { request } from '@umijs/max';
 
 export interface SimCardItem {
   id: string;
-  ccid: string;
+  iccid: string;
   carrier: string;
   data_plan: string;
   activated_at?: string;
   expires_at: string;
   status: number;
+  bound: number;
 }
 
 /** 获取 SIM 卡列表 */
@@ -33,6 +34,14 @@ export async function getSimCards(params: {
 /** 创建 SIM 卡 */
 export async function addSimCard(data: Partial<SimCardItem>) {
   return request('/api/v1/sim-cards/', {
+    method: 'POST',
+    data,
+  });
+}
+
+/** 批量创建 SIM 卡 */
+export async function addSimCardBatch(data: any) {
+  return request('/api/v1/sim-cards/batch', {
     method: 'POST',
     data,
   });

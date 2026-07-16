@@ -155,7 +155,8 @@ const SensorBatchPage = () => {
     if (editing) return;
     const tenant = tenants.find((t) => t.id === tenantId);
     if (tenant) {
-      const region = provinces.find((p) => p.id === tenant.region_id);
+      const provinceId = tenant.region_id ? tenant.region_id.slice(0, 2) : '';
+      const region = provinces.find((p) => p.id === provinceId);
       const abbr = region?.abbreviation || '';
       const year = new Date().getFullYear().toString().slice(-2);
       const prefix = `${year}${abbr}`;

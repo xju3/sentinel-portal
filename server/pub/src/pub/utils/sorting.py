@@ -10,7 +10,7 @@ This module maps the frontend request to safe SQLAlchemy order_by clauses.
 
 from typing import Any
 from sqlalchemy import asc, desc, Select
-from sqlalchemy.sql.elements import ColumnElement
+from sqlalchemy.orm.attributes import QueryableAttribute
 
 
 def apply_sorting(
@@ -23,7 +23,7 @@ def apply_sorting(
     Safely apply an ORDER BY clause to a SQLAlchemy SELECT statement.
 
     Only applies sorting when sort_by matches an actual column on model_class
-    and is a valid ColumnElement. Otherwise returns the original statement unchanged.
+    and is a valid QueryableAttribute. Otherwise returns the original statement unchanged.
 
     Args:
         stmt:        Existing SQLAlchemy select statement.
@@ -38,7 +38,7 @@ def apply_sorting(
         return stmt
 
     col = getattr(model_class, sort_by, None)
-    if col is None or not isinstance(col, ColumnElement):
+    if col is None or not isinstance(col, QueryableAttribute):
         # Ignore unknown / non-column fields silently to avoid 500 errors
         return stmt
 

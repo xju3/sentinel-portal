@@ -1,6 +1,6 @@
 from typing import Any, Optional, List
 from uuid import UUID
-from datetime import datetime
+from datetime import datetime, date
 from fastapi import APIRouter, Depends, HTTPException, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import BaseModel, ConfigDict
@@ -12,16 +12,28 @@ from app.utils.response import success
 
 router = APIRouter(prefix="/sim-cards", tags=["SIM Cards"])
 
+from pydantic import BaseModel, ConfigDict, field_validator
+
 # ==========================================
 # Pydantic Schemas (数据交互模型)
 # ==========================================
 class SimCardBase(BaseModel):
-    ccid: str
+    iccid: str
     carrier: str
     data_plan: str
     status: int = 1
-    activated_at: Optional[datetime] = None
-    expires_at: datetime
+    bound: int = 0
+    activated_at: Optional[date] = None
+    expires_at: date
+
+    @field_validator("activated_at", "expires_at", mode="before")
+    @classmethod
+    def parse_datetime_to_date(cls, v):
+        if isinstance(v, datetime):
+            return v.date()
+        if isinstance(v, str) and len(v) > 10:
+            return v[:10]
+        return v
 
 class SimCardCreate(SimCardBase):
     pass
@@ -30,8 +42,20 @@ class SimCardUpdate(SimCardBase):
     # 更新时所有字段均可选
     pass
 
+class SimCardBatchCreate(BaseModel):
+    prefix: str
+    suffix: str = ""
+    start_num: str
+    end_num: str
+    carrier: str
+    data_plan: str
+    status: int = 1
+    activated_at: Optional[date] = None
+    expires_at: date
+
 class SimCardOut(SimCardBase):
     id: UUID
+    bound: int = 0
     model_config = ConfigDict(from_attributes=True)
 
 @router.get("/")
@@ -42,8 +66,8 @@ async def get_sim_cards_paged(
     status: Optional[int] = Query(None, description="状态筛选(1=正常, 0=停用)"),
     unbound_only: bool = Query(False, description="仅查询未绑定的 SIM 卡"),
     unactivated_only: bool = Query(False, description="仅查询未激活(activated_at为空)的 SIM 卡"),
-    sort_by: Optional[str] = Query(None, description="排序字段"),
-    sort_order: str = Query("ascend", description="排序方向"),
+    sort_by: Optional[str] = Query("iccid", description="排序字段"),
+    sort_order: str = Query("descend", description="排序方向"),
     session: AsyncSession = Depends(db_manager.get_session)
 ) -> Any:
     """获取 SIM 卡分页列表，用于管理界面的表格展示"""
@@ -69,6 +93,15 @@ async def create_sim_card(
     # exclude_unset=True 能确保只传递实际有值的属性
     sim_card = await SimCardService.create(session, data.model_dump(exclude_unset=True))
     return success(SimCardOut.model_validate(sim_card).model_dump(mode='json'))
+
+@router.post("/batch")
+async def create_sim_card_batch(
+    data: SimCardBatchCreate,
+    session: AsyncSession = Depends(db_manager.get_session)
+) -> Any:
+    """批量创建新 SIM 卡记录"""
+    sim_cards = await SimCardService.create_batch(session, data.model_dump(exclude_unset=True))
+    return success([SimCardOut.model_validate(sc).model_dump(mode='json') for sc in sim_cards])
 
 @router.put("/{obj_id}")
 async def update_sim_card(

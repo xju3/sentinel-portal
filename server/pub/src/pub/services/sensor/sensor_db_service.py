@@ -74,6 +74,12 @@ class SensorDbService:
         from sqlalchemy import func
 
         base_stmt = select(Sensor)
+        
+        if not sort_by:
+            sort_by = "sn"
+            if sort_order == "ascend":
+                sort_order = "descend"
+                
         base_stmt = apply_sorting(base_stmt, Sensor, sort_by, sort_order)
         if keyword:
             like = f"%{keyword}%"
@@ -117,9 +123,11 @@ class SensorDbService:
         # 绑定 SIM 卡时，自动更新激活时间和状态
         if db_obj.sim_id:
             sim_card = await session.get(SimCard, db_obj.sim_id)
-            if sim_card and sim_card.activated_at is None:
-                sim_card.activated_at = datetime.utcnow()
-                sim_card.status = 1
+            if sim_card:
+                sim_card.bound = 1
+                if sim_card.activated_at is None:
+                    sim_card.activated_at = datetime.utcnow()
+                    sim_card.status = 1
 
         await session.commit()
         await session.refresh(db_obj)
@@ -142,13 +150,22 @@ class SensorDbService:
         for key, value in data.items():
             setattr(db_obj, key, value)
 
-        # 如果更换或新绑定了 SIM 卡，自动更新激活时间和状态
         new_sim_id = db_obj.sim_id
+
+        # 解绑旧 SIM 卡
+        if old_sim_id and old_sim_id != new_sim_id:
+            old_sim = await session.get(SimCard, old_sim_id)
+            if old_sim:
+                old_sim.bound = 0
+
+        # 绑定新 SIM 卡
         if new_sim_id and new_sim_id != old_sim_id:
             sim_card = await session.get(SimCard, new_sim_id)
-            if sim_card and sim_card.activated_at is None:
-                sim_card.activated_at = datetime.utcnow()
-                sim_card.status = 1
+            if sim_card:
+                sim_card.bound = 1
+                if sim_card.activated_at is None:
+                    sim_card.activated_at = datetime.utcnow()
+                    sim_card.status = 1
 
         await session.commit()
         await session.refresh(db_obj)
