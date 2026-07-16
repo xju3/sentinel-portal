@@ -12,8 +12,8 @@ from uuid import UUID
 logger = logging.getLogger(__name__)
 
 from app.utils.response import success
-from pub.services.dependencies import get_session
-from pub.services.sensor_service import SensorBatchService
+from pub.services import get_session
+from pub.services import SensorBatchService
 from pub.models.customer import Account
 from app.utils.auth import get_current_account
 from pub.contract.admin import SensorBatchResponse
@@ -24,7 +24,7 @@ from pub.contract.admin_firmware import (
     PresignedUploadRequest,
     PresignedUploadResponse,
 )
-from pub.services.firmware_service import SensorFirmwareService
+from pub.services import SensorFirmwareService
 from app.database import minio_manager
 from app.config import settings
 

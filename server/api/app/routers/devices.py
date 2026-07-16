@@ -9,14 +9,14 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional, cast
 from uuid import UUID
 
-from pub.services.dependencies import get_session
+from pub.services import get_session
 from pub.models.customer import Account as AccountModel, TenantSensor
 from pub.models.device import DeviceCategory, DeviceInst, DeviceSpec, ProcessDevice, ProcessDeviceItem
 from pub.models.sensor import SensorMonitoring
-from pub.services.customer_service import LocationService
+from pub.services import LocationService
 
 
-from pub.services.device_service import (
+from pub.services import (
     IsoStandardService,
     DeviceCategoryService,
     DeviceSpecService,

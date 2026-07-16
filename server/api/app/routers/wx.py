@@ -1,9 +1,9 @@
 import uuid
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Query
 from sqlalchemy.ext.asyncio import AsyncSession
-from pub.services.dependencies import get_session
-from pub.services.customer_service import AuthService
-from pub.services.wx_service import WxService
+from pub.services import get_session
+from pub.services import AuthService
+from pub.services import WxService
 from app.config import settings
 from app.database import redis_manager
 from app.utils.auth import get_current_account

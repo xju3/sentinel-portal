@@ -11,8 +11,8 @@ from uuid import UUID
 logger = logging.getLogger(__name__)
 
 from app.utils.response import success
-from pub.services.dependencies import get_session
-from pub.services.sensor_service import SensorThresholdService
+from pub.services import get_session
+from pub.services import SensorThresholdService
 from pub.models.customer import Account
 from pub.models.sensor import SensorThreshold
 from pub.decorators.dashboard_cache import rebuild_dashboard_cache

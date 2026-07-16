@@ -15,12 +15,10 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from pub.services.quick_history_cache import (
-    QuickDiagnosisSnapshot,
-    build_quick_diagnosis_snapshot,
+from pub.services.diagnosis.quick_history_cache import (
     get_last_regular_snapshot,
 )
-from pub.services.sensor_task_service import (
+from pub.services.sensor.sensor_task_service import (
     DEFAULT_DENSE_FOCUS_GENERAL,
     SensorTaskSpec,
     build_default_dense_collection_spec,
@@ -28,6 +26,10 @@ from pub.services.sensor_task_service import (
     create_collection_task,
     dispatch_pending_sensor_tasks,
     record_sensor_task_report,
+)
+from pub.services.diagnosis.quick_history_cache import (
+    QuickDiagnosisSnapshot,
+    build_quick_diagnosis_snapshot,
 )
 
 logger = logging.getLogger(__name__)

@@ -4,7 +4,7 @@ from uuid import UUID, uuid4
 import pytest
 
 from app.handler.quality import diagnose_quality
-from pub.services.diagnosis_service import DiagnosisResultService
+from pub.services import DiagnosisResultService
 
 
 def _payload() -> dict:

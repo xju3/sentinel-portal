@@ -7,7 +7,7 @@ import pytest
 from pub.contract.sensors import SensorTaskCreate
 from pub.models import import_all_models
 from pub.models.sensor import Sensor
-from pub.services.sensor_task_service import (
+from pub.services import (
     SENSOR_TASK_STATUS_DONE,
     complete_device_system_task,
     create_manual_sensor_task,

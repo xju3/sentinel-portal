@@ -7,7 +7,7 @@ from pydantic import BaseModel, ConfigDict
 
 # 依赖于您的实际项目结构，如果 db_manager 中存在 get_session 则使用该方式注入
 from pub.manager.database import db_manager
-from pub.services.sensor_service import SimCardService
+from pub.services import SimCardService
 from app.utils.response import success
 
 router = APIRouter(prefix="/sim-cards", tags=["SIM Cards"])

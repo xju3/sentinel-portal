@@ -2,8 +2,8 @@ from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from pub.services.dependencies import get_session
-from pub.services.sensor_service import SensorService
+from pub.services import get_session
+from pub.services import SensorService
 from pub.contract.common import ApiResponse
 
 router = APIRouter(tags=["Sensor Trends"])

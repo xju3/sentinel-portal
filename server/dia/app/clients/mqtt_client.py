@@ -13,7 +13,7 @@ from app.database import minio_manager
 from pub.clients.mqtt import MQTTManager
 from pub.clients.minio import download_json_from_minio_sync
 from app.handler.diagnosis import start_diagnosis_async
-from pub.services.communication_service import SensorCommunicationService
+from pub.services import SensorCommunicationService
 
 logger = logging.getLogger(__name__)
 

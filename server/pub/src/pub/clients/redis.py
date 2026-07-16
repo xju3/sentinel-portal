@@ -14,7 +14,7 @@ import redis
 
 from app.config import settings
 from app.database import redis_manager, db_manager
-from pub.services.customer_service import HealthCheckFreqService
+from pub.services import HealthCheckFreqService
 
 logger = logging.getLogger(__name__)
 

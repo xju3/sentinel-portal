@@ -4,7 +4,7 @@ import pytest
 
 from pub.contract.sensors import SensorTypeCreate, SensorTypeUpdate
 from pub.models.sensor import SensorType
-from pub.services.sensor_service import SensorTypeService
+from pub.services import SensorTypeService
 
 
 def test_sensor_type_contracts_use_battery_field():

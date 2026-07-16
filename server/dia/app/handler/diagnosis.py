@@ -12,8 +12,8 @@ from app.handler.peak_structure import run_peak_structure_check
 from app.handler.quick_history_cache import record_quick_diagnosis_snapshot
 from app.handler.temperature import run_temperature_check
 from app.handler.vibration_intensity import run_vibration_intensity_check
-from pub.services.diagnosis_service import DiagnosisResultService, DiagnosisRecordService
-from pub.services.diagnosis_context_service import DiagnosisContextService
+from pub.services import DiagnosisResultService, DiagnosisRecordService
+from pub.services import DiagnosisContextService
 
 logger = logging.getLogger(__name__)
 

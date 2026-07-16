@@ -1,4 +1,4 @@
-from pub.services.quick_dispatch_service import build_quick_dispatch_plan
+from pub.services import build_quick_dispatch_plan
 
 
 def _payload(

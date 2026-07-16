@@ -7,9 +7,9 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from typing import cast,  List, Optional
 from uuid import UUID
 
-from pub.services.dependencies import get_session
+from pub.services import get_session
 from pub.models.customer import Account as AccountModel
-from pub.services.customer_service import (
+from pub.services import (
     RegionService,
     TenantService,
     TenantSensorService,
@@ -21,7 +21,7 @@ from pub.services.customer_service import (
     HealthCheckFreqService,
     IsoStandardService,
 )
-from pub.services.dashboard_service import DashboardService
+from pub.services import DashboardService
 from pub.decorators.dashboard_cache import rebuild_dashboard_cache
 from pub.decorators.config_change import monitor_config_change
 from pub.models.customer import HealthCheckFreq, IsoStandard, Area, Tenant

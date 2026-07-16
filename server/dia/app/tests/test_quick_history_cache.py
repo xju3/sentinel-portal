@@ -1,6 +1,6 @@
 import json
 
-from pub.services.quick_history_cache import (
+from pub.services import (
     build_quick_diagnosis_snapshot,
     record_quick_diagnosis_snapshot,
 )

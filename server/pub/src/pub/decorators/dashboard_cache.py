@@ -4,7 +4,7 @@ from functools import wraps
 from uuid import UUID
 from typing import Optional
 
-from pub.services.dashboard_service import DashboardService
+from pub.services import DashboardService
 
 logger = logging.getLogger(__name__)
 

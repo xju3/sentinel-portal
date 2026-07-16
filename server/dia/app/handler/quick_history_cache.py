@@ -1,6 +1,6 @@
 """Compatibility wrapper for the shared quick-history Redis helpers."""
 
-from pub.services.quick_history_cache import (
+from pub.services import (
     QUICK_HISTORY_KEY_PREFIX,
     QUICK_HISTORY_LIMIT,
     QUICK_LAST_REGULAR_KEY_PREFIX,

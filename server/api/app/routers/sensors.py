@@ -17,12 +17,12 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 
 
-from pub.services.dependencies import get_session
-from pub.services.diagnosis_service import DiagnosisRecordService
-from pub.services.diagnosis_context_service import DiagnosisContextService
-from pub.services.sensor_service import SensorTypeService, SensorDbService, SensorBatchService, SensorConfigService
-from pub.services.quick_dispatch_service import dispatch_quick_diagnosis_tasks
-from pub.services.sensor_task_service import (
+from pub.services import get_session
+from pub.services import DiagnosisRecordService
+from pub.services import DiagnosisContextService
+from pub.services import SensorTypeService, SensorDbService, SensorBatchService, SensorConfigService
+from pub.services import dispatch_quick_diagnosis_tasks
+from pub.services import (
     SYSTEM_ACTION_CONFIG_UPDATE,
     complete_device_system_task,
     create_manual_sensor_task,
@@ -526,7 +526,7 @@ async def upload_sensor_fft_data(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to upload to MinIO: {str(e)}")
 
-    from pub.services.sensor_task_service import process_fft_metadata_background
+    from pub.services import process_fft_metadata_background
     background_tasks.add_task(process_fft_metadata_background, task_id)
 
     return success({"message": "FFT data uploaded successfully"})

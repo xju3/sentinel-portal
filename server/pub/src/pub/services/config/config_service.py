@@ -180,8 +180,8 @@ async def create_config_tasks(session: AsyncSession, sns: List[str]) -> None:
     """
     from datetime import datetime
     from pub.models.sensor import SensorTask
-    from pub.services.sensor_task_service import (
-        SENSOR_TASK_OPEN_STATUSES,
+    from pub.services.sensor.sensor_task_service import (
+        SENSOR_TASK_STATUS_OPEN,
         SENSOR_TASK_STATUS_PENDING,
     )
 
@@ -342,7 +342,7 @@ async def bg_handle_config_change(
                     f"受影响传感器 SN: {affected_sns}"
                 )
                 # 4. Invalidate diagnosis context cache before downstream diagnosis uses stale metadata.
-                from pub.services.diagnosis_context_service import DiagnosisContextService
+                from pub.services.diagnosis.diagnosis_context_service import DiagnosisContextService
 
                 await DiagnosisContextService.invalidate_by_sns(affected_sns)
 

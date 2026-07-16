@@ -6,7 +6,7 @@ from datetime import datetime
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from pub.models.sensor import SensorFirmware, SensorBatch, SensorTask, Sensor
-from pub.services.sensor_task_service import (
+from pub.services.sensor.sensor_task_service import (
     SENSOR_TASK_OPEN_STATUSES,
     SENSOR_TASK_STATUS_PENDING,
     SYSTEM_ACTION_FIRMWARE_UPGRADE,
