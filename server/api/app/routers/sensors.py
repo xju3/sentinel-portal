@@ -458,10 +458,8 @@ async def receive_sensor_data(
             except (TypeError, ValueError):
                 patrol_minutes = 0
             if patrol_minutes <= 0:
-                raise HTTPException(
-                    status_code=400,
-                    detail=f"Patrol frequency is not configured for sensor '{sn}'",
-                )
+                logger.warning(f"Patrol frequency is not configured for sensor '{sn}'")
+                patrol_minutes = 0
             dt_utc -= timedelta(minutes=patrol_minutes * seq)
 
         ts_ms = int(dt_utc.timestamp() * 1000)

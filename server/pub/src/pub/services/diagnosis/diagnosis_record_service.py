@@ -14,6 +14,7 @@ from sqlalchemy.orm import selectinload
 from pub.manager.database import db_manager
 from pub.models.diagnosis import DiagnosisRecord, DiagnosisResult, DiagnosisResultItem
 from pub.models.sensor import PatrolDiagnosticRecord, Sensor, SensorMonitoring
+from pub.services.diagnosis.diagnosis_result_service import _diagnosis_relation_ids, _parse_quality_status
 
 logger = logging.getLogger(__name__)
 
