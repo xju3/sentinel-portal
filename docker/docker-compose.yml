@@ -53,6 +53,7 @@ services:
       dockerfile: docker/client/Dockerfile
       args:
         APP_NAME: tenant
+        NPM_REGISTRY: ${NPM_REGISTRY:-https://registry.npmmirror.com}
     restart: unless-stopped
     ports:
       - "3010:80"
@@ -68,6 +69,7 @@ services:
       dockerfile: docker/client/Dockerfile
       args:
         APP_NAME: admin
+        NPM_REGISTRY: ${NPM_REGISTRY:-https://registry.npmmirror.com}
     restart: unless-stopped
     ports:
       - "3020:80"
