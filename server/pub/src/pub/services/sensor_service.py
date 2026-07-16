@@ -226,7 +226,7 @@ class SimCardService:
         if keyword:
             like = f"%{keyword}%"
             base_stmt = base_stmt.where(
-                (SimCard.number.ilike(like)) | (SimCard.ccid.ilike(like)) | (SimCard.carrier.ilike(like))
+                (SimCard.ccid.ilike(like)) | (SimCard.carrier.ilike(like))
             )
             
         if status is not None:

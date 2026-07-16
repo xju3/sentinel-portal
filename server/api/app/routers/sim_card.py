@@ -16,7 +16,6 @@ router = APIRouter(prefix="/sim-cards", tags=["SIM Cards"])
 # Pydantic Schemas (数据交互模型)
 # ==========================================
 class SimCardBase(BaseModel):
-    number: str
     ccid: str
     carrier: str
     data_plan: str

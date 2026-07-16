@@ -56,12 +56,7 @@ const SimCardManager: React.FC = () => {
       title: '关键字查询',
       dataIndex: 'keyword',
       hideInTable: true,
-      tooltip: '支持按卡号、ICCID、运营商搜索',
-    },
-    {
-      title: 'SIM 卡号',
-      dataIndex: 'number',
-      search: false,
+      tooltip: '支持按ICCID、运营商搜索',
     },
     {
       title: 'ICCID',
@@ -173,7 +168,6 @@ const SimCardManager: React.FC = () => {
         onFinish={handleAddOrUpdate}
         modalProps={{ destroyOnClose: true }}
       >
-        <ProFormText rules={[{ required: true }]} name="number" label="SIM 卡号" />
         <ProFormText rules={[{ required: true }]} name="ccid" label="ICCID" />
         <ProFormSelect
           rules={[{ required: true }]}

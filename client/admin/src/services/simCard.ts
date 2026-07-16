@@ -2,7 +2,6 @@ import { request } from '@umijs/max';
 
 export interface SimCardItem {
   id: string;
-  number: string;
   ccid: string;
   carrier: string;
   data_plan: string;

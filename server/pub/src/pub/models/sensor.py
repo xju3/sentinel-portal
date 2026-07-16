@@ -85,7 +85,6 @@ class SimCard(Base):
     __tablename__ = "sim_card"
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    number = Column(String(20), nullable=False, unique=True)  # SIM card number
     ccid = Column(String(64), nullable=False, unique=True)  # SIM card ICCID
     carrier = Column(String(64), nullable=False)  # Mobile carrier
     data_plan = Column(String(64), nullable=False)  # Data plan details
