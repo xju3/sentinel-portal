@@ -21,6 +21,7 @@ from pub.models.customer import Tenant, Area, HealthCheckFreq, IsoStandard, Regi
 from pub.exceptions.domain_exception import DomainException
 from pub.utils.sorting import apply_sorting
 from pub.services.sensor.sensor_db_service import SensorDbService
+from pub.services.sensor.firmware_cache_service import SensorOTAContextService
 
 logger = logging.getLogger(__name__)
 
@@ -157,11 +158,23 @@ class SensorBatchService:
                 # 批量生成传感器
                 await SensorDbService.create_batch(session, items)
                 
+                # 缓存基础数据到 Redis
+                sns_data_for_cache = [
+                    {
+                        "sn": item["sn"],
+                        "tenant_id": batch.tenant_id,
+                        "sensor_type_id": batch.sensor_type_id,
+                        "sensor_batch_id": batch.id
+                    }
+                    for item in items
+                ]
+                await SensorOTAContextService.cache_sensor_context(sns_data_for_cache)
+                
                 # 更新 region 的 cnt
                 region.cnt = (region.cnt or 0) + qty
                 session.add(region)
                 await session.commit()
-                logger.info(f"Successfully generated {qty} sensors for batch {batch.code}")
+                logger.info(f"Successfully generated {qty} sensors for batch {batch.code} and cached context in Redis")
             except Exception as e:
                 await session.rollback()
                 logger.error(f"Failed to generate sensors for batch {batch_id}: {e}")

@@ -35,6 +35,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pub.models.sensor import Sensor, SensorStatus, SensorTask, SensorTaskReport
+from pub.services.sensor.firmware_cache_service import SensorOTAContextService
 
 SENSOR_TASK_STATUS_PENDING = 0
 SENSOR_TASK_STATUS_DONE = 1
@@ -376,26 +377,34 @@ async def create_iis3dwb_parameterized_collection_task(
 
 import json
 
-def sensor_task_to_device_payload(task: SensorTask) -> dict:
+async def sensor_task_to_device_payload(session: AsyncSession, task: SensorTask) -> dict | None:
     """Serialize a SensorTask in the compact shape expected by ESP32."""
     payload = {
         "id": str(task.id),
         "action": task.action,
         "val": task.val,
     }
-    if task.action == SYSTEM_ACTION_FIRMWARE_UPGRADE and task.remark:
-        try:
-            remark_data = json.loads(task.remark)
-            if "url" in remark_data:
+    if task.action == SYSTEM_ACTION_FIRMWARE_UPGRADE:
+        ctx = await SensorOTAContextService.get_sensor_context(session, task.sn)
+        if ctx:
+            firmware_info = await SensorOTAContextService.get_active_firmware(
+                session=session,
+                tenant_id=ctx.get("tenant_id"), 
+                sensor_type_id=ctx.get("sensor_type_id")
+            )
+            if firmware_info:
                 from pub.manager.database import minio_manager
-                presigned_url = minio_manager.get_presigned_url(remark_data["url"])
-                if "version" in remark_data:
-                    separator = "&" if "?" in presigned_url else "?"
-                    presigned_url = f"{presigned_url}{separator}ver={remark_data['version']}"
+                presigned_url = minio_manager.get_presigned_url(
+                    firmware_info["file_url"],
+                    extra_query_params={"ver": firmware_info['version']}
+                )
                 payload["val"] = presigned_url
-        except json.JSONDecodeError:
-            # fallback if it's not a JSON string, just to be safe
-            pass
+            else:
+                logger.info(f"Skipping firmware task {task.id} for {task.sn}: firmware not active or not found")
+                return None
+        else:
+            logger.warning(f"Skipping firmware task {task.id} for {task.sn}: SN context not found in cache")
+            return None
     return payload
 
 
@@ -418,12 +427,21 @@ async def dispatch_pending_sensor_tasks(session: AsyncSession, sn: str) -> list[
     tasks = await list_pending_sensor_tasks(session, sn)
     if not tasks:
         return []
+        
     now = datetime.utcnow()
+    payloads = []
+    
     for task in tasks:
-        task.status = SENSOR_TASK_STATUS_DISPATCHED
-        task.dispatched_at = now
-    await session.commit()
-    return [sensor_task_to_device_payload(task) for task in tasks]
+        payload = await sensor_task_to_device_payload(session, task)
+        if payload is not None:
+            task.status = SENSOR_TASK_STATUS_DISPATCHED
+            task.dispatched_at = now
+            payloads.append(payload)
+            
+    if payloads:
+        await session.commit()
+        
+    return payloads
 
 
 async def record_sensor_task_report(

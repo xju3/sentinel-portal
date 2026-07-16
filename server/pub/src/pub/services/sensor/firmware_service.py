@@ -12,6 +12,7 @@ from pub.services.sensor.sensor_task_service import (
     SYSTEM_ACTION_FIRMWARE_UPGRADE,
 )
 from pub.manager.database import db_manager
+from pub.services.sensor.firmware_cache_service import SensorOTAContextService
 
 logger = logging.getLogger(__name__)
 
@@ -36,16 +37,35 @@ class SensorFirmwareService:
 
     @staticmethod
     async def update(session: AsyncSession, db_obj: SensorFirmware, data: dict):
+        old_status = db_obj.status
         for field, value in data.items():
             setattr(db_obj, field, value)
         await session.commit()
         await session.refresh(db_obj)
+        
+        # If status changed to inactive, remove cache
+        if old_status == 1 and db_obj.status == 0:
+            await SensorOTAContextService.remove_active_firmware(
+                tenant_id=db_obj.tenant_id,
+                sensor_type_id=db_obj.sensor_type_id
+            )
+        
         return db_obj
 
     @staticmethod
     async def delete(session: AsyncSession, db_obj: SensorFirmware):
+        is_active = db_obj.status == 1
+        tenant_id = db_obj.tenant_id
+        sensor_type_id = db_obj.sensor_type_id
+        
         await session.delete(db_obj)
         await session.commit()
+        
+        if is_active:
+            await SensorOTAContextService.remove_active_firmware(
+                tenant_id=tenant_id,
+                sensor_type_id=sensor_type_id
+            )
 
     @staticmethod
     async def release_firmware(session: AsyncSession, firmware_id: UUID) -> SensorFirmware:
@@ -62,6 +82,16 @@ class SensorFirmwareService:
         firmware.release_date = datetime.utcnow()
         await session.commit()
         await session.refresh(firmware)
+        
+        # 缓存最新固件
+        await SensorOTAContextService.cache_active_firmware(
+            tenant_id=firmware.tenant_id,
+            sensor_type_id=firmware.sensor_type_id,
+            firmware_id=firmware.id,
+            file_url=firmware.file_url,
+            version=firmware.version
+        )
+        
         return firmware
 
     @staticmethod
@@ -107,11 +137,7 @@ class SensorFirmwareService:
                                 sn=sn,
                                 action=SYSTEM_ACTION_FIRMWARE_UPGRADE,
                                 val=0,
-                                remark=json.dumps({
-                                    "url": firmware.file_url,
-                                    "version": firmware.version,
-                                    "desc": f"任务内容: 固件升级到 {firmware.version}; 发起原因: 后台发布新固件"
-                                }, ensure_ascii=False),
+                                remark=f"任务内容: 固件升级到 {firmware.version}; 发起原因: 后台发布新固件",
                                 status=SENSOR_TASK_STATUS_PENDING,
                                 create_time=datetime.utcnow(),
                             )

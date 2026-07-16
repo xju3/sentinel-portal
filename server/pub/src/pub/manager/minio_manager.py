@@ -67,7 +67,7 @@ class MinIOManager:
             raise RuntimeError("MinIO not initialized. Call init() first.")
         return self.client
 
-    def get_presigned_url(self, file_url: str, expires_hours: int = 24) -> str:
+    def get_presigned_url(self, file_url: str, expires_hours: int = 24, extra_query_params: dict = None) -> str:
         """Convert a public MinIO URL to a presigned GET URL."""
         from urllib.parse import urlparse
         from datetime import timedelta
@@ -80,7 +80,8 @@ class MinIOManager:
                 return client.presigned_get_object(
                     bucket_name,
                     object_name,
-                    expires=timedelta(hours=expires_hours)
+                    expires=timedelta(hours=expires_hours),
+                    extra_query_params=extra_query_params
                 )
         except Exception as e:
             logger.warning(f"Failed to generate presigned URL for {file_url}: {e}")
