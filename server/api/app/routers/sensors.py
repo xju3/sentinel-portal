@@ -437,13 +437,33 @@ async def receive_sensor_data(
 ):
     """Receive processed sensor data and asynchronously store to MinIO"""
     sn = payload.get("sn")
+    seq = payload.get("seq", 0)
 
     if not sn:
         raise HTTPException(status_code=400, detail="Missing 'sn' in payload")
+    if type(seq) is not int or seq < 0:
+        raise HTTPException(status_code=400, detail="'seq' must be a non-negative integer")
 
     try:
-        # Use the server receive time; devices no longer need to report ts_ms.
+        # The newest sample uses receive time. Backlogged samples are spaced by
+        # the sensor's configured patrol interval, loaded through the existing
+        # per-SN Redis read-through cache.
         dt_utc = datetime.now(timezone.utc)
+        if seq > 0:
+            context = await DiagnosisContextService.get_by_sn(session, str(sn))
+            health_check = context.get("health_check") if context else None
+            patrol = health_check.get("patrol") if health_check else None
+            try:
+                patrol_minutes = float(patrol)
+            except (TypeError, ValueError):
+                patrol_minutes = 0
+            if patrol_minutes <= 0:
+                raise HTTPException(
+                    status_code=400,
+                    detail=f"Patrol frequency is not configured for sensor '{sn}'",
+                )
+            dt_utc -= timedelta(minutes=patrol_minutes * seq)
+
         ts_ms = int(dt_utc.timestamp() * 1000)
         tz_utc_8 = timezone(timedelta(hours=8))
         dt_utc8 = dt_utc.astimezone(tz_utc_8)
@@ -478,6 +498,8 @@ async def receive_sensor_data(
         background_tasks.add_task(_process_sensor_data_background_async, object_name, stored_payload, report_id)
 
         return success(tasks)
+    except HTTPException:
+        raise
     except Exception as e:
         logger.error(f"Error processing sensor data: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error processing data")
