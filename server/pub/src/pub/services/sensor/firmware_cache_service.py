@@ -237,10 +237,8 @@ class SensorOTAContextService:
 
         # 生成新的 URL，有效期 24 小时
         from pub.manager.database import minio_manager
-        new_url = minio_manager.get_presigned_url(
-            file_url,
-            extra_query_params={"ver": version}
-        )
+        base_url = minio_manager.get_presigned_url(file_url)
+        new_url = f"{base_url}&ver={version}" if "?" in base_url else f"{base_url}?ver={version}"
         
         # 缓存 20 小时，留出 4 小时的冗余给设备下载
         if client:
