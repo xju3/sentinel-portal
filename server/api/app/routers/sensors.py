@@ -437,30 +437,20 @@ async def receive_sensor_data(
 ):
     """Receive processed sensor data and asynchronously store to MinIO"""
     sn = payload.get("sn")
-    seq = payload.get("seq", 0)
+    delay = payload.get("delay", 0)
 
     if not sn:
         raise HTTPException(status_code=400, detail="Missing 'sn' in payload")
-    if type(seq) is not int or seq < 0:
-        raise HTTPException(status_code=400, detail="'seq' must be a non-negative integer")
 
     try:
-        # The newest sample uses receive time. Backlogged samples are spaced by
-        # the sensor's configured patrol interval, loaded through the existing
-        # per-SN Redis read-through cache.
+        delay = max(0.0, float(delay))
+    except (TypeError, ValueError):
+        delay = 0.0
+
+    try:
         dt_utc = datetime.now(timezone.utc)
-        if seq > 0:
-            context = await DiagnosisContextService.get_by_sn(session, str(sn))
-            health_check = context.get("health_check") if context else None
-            patrol = health_check.get("patrol") if health_check else None
-            try:
-                patrol_minutes = float(patrol)
-            except (TypeError, ValueError):
-                patrol_minutes = 0
-            if patrol_minutes <= 0:
-                logger.warning(f"Patrol frequency is not configured for sensor '{sn}'")
-                patrol_minutes = 0
-            dt_utc -= timedelta(minutes=patrol_minutes * seq)
+        if delay > 0:
+            dt_utc -= timedelta(seconds=delay)
 
         ts_ms = int(dt_utc.timestamp() * 1000)
         tz_utc_8 = timezone(timedelta(hours=8))
