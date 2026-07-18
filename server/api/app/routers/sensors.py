@@ -57,6 +57,7 @@ from pub.contract.sensors import (
     SensorTaskCompleteRequest,
     SensorStatusCreate,
     SensorStatusResponse,
+    SensorBindingResponse,
 )
 
 router = APIRouter(prefix="/sensors", tags=["sensors"])
@@ -207,6 +208,15 @@ async def delete_sensor_batch(
 # ==========================================
 # 3. Sensor
 # ==========================================
+@router.get("/binding/{sn}")
+async def get_sensor_binding(
+    sn: str,
+    session: AsyncSession = Depends(get_session),
+):
+    device_id = await SensorDbService.get_binding_by_sn(session, sn)
+    return success(SensorBindingResponse(device_id=device_id))
+
+
 @router.get("")
 async def list_sensors(
     current: int = Query(1, ge=1),

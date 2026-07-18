@@ -276,3 +276,8 @@ class SensorConfigResponse(BaseModel):
     network: int = 1
     wifi: SensorConfigWifi
     configured: bool = False
+
+
+class SensorBindingResponse(BaseModel):
+    device_id: Optional[UUID] = None
+

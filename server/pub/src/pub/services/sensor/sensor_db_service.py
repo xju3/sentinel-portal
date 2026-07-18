@@ -44,6 +44,17 @@ class SensorDbService:
         return result.scalar_one_or_none()
 
     @staticmethod
+    async def get_binding_by_sn(session: AsyncSession, sn: str) -> Optional[UUID]:
+        from pub.models.sensor import SensorMonitoring
+        stmt = (
+            select(SensorMonitoring.device_inst_id)
+            .join(Sensor, Sensor.id == SensorMonitoring.sensor_id)
+            .where(Sensor.sn == sn)
+        )
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
     async def get_by_batch_id(
         session: AsyncSession, 
         batch_id: UUID, 
