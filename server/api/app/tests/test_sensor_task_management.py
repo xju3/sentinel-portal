@@ -1,10 +1,12 @@
+from datetime import datetime
 from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
 
 import pytest
 
-from pub.contract.sensors import SensorTaskCreate
+from app.routers import sensors as sensors_router
+from pub.contract.sensors import SensorTaskCompleteRequest, SensorTaskCreate
 from pub.models import import_all_models
 from pub.models.sensor import Sensor
 from pub.services import (
@@ -17,6 +19,46 @@ from pub.services import (
 )
 
 import_all_models()
+
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize(("status", "expected_success"), [(1, True), (0, False)])
+async def test_complete_sensor_system_task_status_mapping(
+    monkeypatch, status, expected_success
+):
+    task_id = uuid4()
+    task = SimpleNamespace(
+        id=task_id,
+        name="update_binding",
+        sn="STL26SH0001",
+        action=3,
+        val=0,
+        remark=None,
+        status=1 if expected_success else 3,
+        create_time=datetime.now(),
+        dispatched_at=None,
+        complete_time=None,
+    )
+    captured = {}
+
+    async def fake_complete_device_system_task(**kwargs):
+        captured.update(kwargs)
+        return task
+
+    monkeypatch.setattr(
+        sensors_router,
+        "complete_device_system_task",
+        fake_complete_device_system_task,
+    )
+
+    await sensors_router.complete_sensor_system_task(
+        task_id=task_id,
+        status=status,
+        item=SensorTaskCompleteRequest(sn=task.sn),
+        session=Mock(),
+    )
+
+    assert captured["success"] is expected_success
 
 
 @pytest.mark.asyncio
@@ -81,7 +123,7 @@ async def test_list_sensor_tasks_does_not_change_task_state():
 
 @pytest.mark.parametrize(
     "field,value",
-    [("action", 2), ("action", 10), ("action", 100), ("action", 10000), ("val", -1)],
+    [("action", 10), ("action", 100), ("action", 10000), ("val", -1)],
 )
 def test_sensor_task_create_rejects_invalid_action_and_val(field, value):
     payload = {
@@ -142,8 +184,30 @@ async def test_complete_device_system_task_validates_sn_and_action():
 
 
 @pytest.mark.asyncio
-async def test_complete_device_system_task_rejects_status_task():
+async def test_complete_device_system_task_accepts_binding_task():
     task = SimpleNamespace(id=uuid4(), sn="STL26SH0001", action=3, status=2)
+    result = Mock()
+    result.scalar_one_or_none.return_value = task
+    session = Mock()
+    session.execute = AsyncMock(return_value=result)
+    session.commit = AsyncMock()
+    session.refresh = AsyncMock()
+
+    completed = await complete_device_system_task(
+        session=session,
+        task_id=task.id,
+        sn=task.sn,
+    )
+
+    assert completed is task
+    assert task.status == SENSOR_TASK_STATUS_DONE
+    assert task.complete_time is not None
+    session.commit.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_complete_device_system_task_rejects_status_task():
+    task = SimpleNamespace(id=uuid4(), sn="STL26SH0001", action=2, status=2)
     result = Mock()
     result.scalar_one_or_none.return_value = task
     session = Mock()
@@ -228,7 +292,7 @@ async def test_feature_report_cannot_complete_another_sensor_task():
 @pytest.mark.asyncio
 async def test_status_report_persists_and_completes_matching_status_task():
     task_id = uuid4()
-    task = SimpleNamespace(id=task_id, sn="STL26SH0001", action=3, status=2, complete_time=None)
+    task = SimpleNamespace(id=task_id, sn="STL26SH0001", action=2, status=2, complete_time=None)
     result = Mock()
     result.scalar_one_or_none.return_value = task
     session = Mock()
@@ -242,7 +306,7 @@ async def test_status_report_persists_and_completes_matching_status_task():
         ts_ms=1780814415097,
         temperature=42.5,
         rssi=-78,
-        battery=91,
+        voltage=91,
         task_id=task_id,
     )
 

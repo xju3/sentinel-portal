@@ -50,6 +50,7 @@ SYSTEM_ACTION_UPDATE_BINDING = 3
 SYSTEM_ACTIONS_COMPLETED_BY_CALLBACK = (
     SYSTEM_ACTION_FIRMWARE_UPGRADE,
     SYSTEM_ACTION_CONFIG_UPDATE,
+    SYSTEM_ACTION_UPDATE_BINDING,
 )
 
 DEFAULT_DENSE_MIN_INTERVAL_MIN = 1
@@ -273,7 +274,7 @@ async def complete_device_system_task(
     sn: str,
     success: bool = True,
 ) -> SensorTask | None:
-    """Complete an action 0/1 task after the device reports execution result."""
+    """Complete an action 0/1/3 task after the device reports execution result."""
     task = await get_sensor_task_by_id(session, task_id)
     if (
         task is None
@@ -303,11 +304,15 @@ async def record_sensor_status(
     active: bool = True,
     task_id: UUID | str | None = None,
 ) -> SensorStatus:
-    """Persist device status and atomically complete its action=3 task."""
+    """Persist device status and atomically complete its action=2 task."""
     task = None
     if task_id is not None:
         task = await get_sensor_task_by_id(session, task_id)
-        if task is None or task.sn != sn:
+        if (
+            task is None
+            or task.sn != sn
+            or task.action != SYSTEM_ACTION_STATUS_REPORT
+        ):
             logger.warning(f"Status report included invalid task_id {task_id} for sn {sn}, ignoring task completion.")
             task = None
 

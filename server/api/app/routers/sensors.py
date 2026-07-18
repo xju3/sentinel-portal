@@ -6,10 +6,10 @@ import logging
 import json
 import io
 from datetime import datetime, timezone, timedelta
-from fastapi import APIRouter, Depends, HTTPException, Query, BackgroundTasks, Body, Request
+from fastapi import APIRouter, Depends, HTTPException, Query, Path, BackgroundTasks, Body, Request
 from sqlalchemy import select, func
 from sqlalchemy.ext.asyncio import AsyncSession
-from typing import cast, List, Literal, Optional
+from typing import Annotated, cast, List, Literal, Optional
 from uuid import UUID, uuid4
 import asyncio
 from app.config import settings
@@ -282,7 +282,7 @@ async def create_sensor_task_for_admin(
 @router.post("/tasks/{task_id}/complete/{status}")
 async def complete_sensor_system_task(
     task_id: UUID,
-    status: int,
+    status: Annotated[int, Path(ge=0, le=1)],
     item: SensorTaskCompleteRequest,
     session: AsyncSession = Depends(get_session),
 ):
@@ -290,7 +290,7 @@ async def complete_sensor_system_task(
         session=session,
         task_id=task_id,
         sn=item.sn,
-        success=(status == 0),
+        success=(status == 1),
     )
     if task is None:
         raise HTTPException(status_code=404, detail="Task not found or not dispatchable by device")
