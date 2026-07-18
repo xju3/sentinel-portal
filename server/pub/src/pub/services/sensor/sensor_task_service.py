@@ -6,7 +6,8 @@ This module owns task action rules and completion paths.
 Encoding rules:
 - action=0: firmware upgrade, completed by the device callback API.
 - action=1: config update, completed by the device callback API.
-- action=3: device status report, completed with the status upload.
+- action=2: device status report, completed with the status upload.
+- action=3: update binding info, triggering the device to fetch binding status.
 - action 11..99: default-parameter dense collection, encoded as T I.
   T = focus type, I = interval minutes, val = repeat count.
   Focus types: 1=general, 2=temperature, 3=RMS, 4=impact/spectrum.
@@ -45,6 +46,7 @@ SENSOR_TASK_OPEN_STATUSES = (SENSOR_TASK_STATUS_PENDING, SENSOR_TASK_STATUS_DISP
 SYSTEM_ACTION_FIRMWARE_UPGRADE = 0
 SYSTEM_ACTION_CONFIG_UPDATE = 1
 SYSTEM_ACTION_STATUS_REPORT = 2
+SYSTEM_ACTION_UPDATE_BINDING = 3
 SYSTEM_ACTIONS_COMPLETED_BY_CALLBACK = (
     SYSTEM_ACTION_FIRMWARE_UPGRADE,
     SYSTEM_ACTION_CONFIG_UPDATE,

@@ -144,9 +144,9 @@ class SensorTaskCreate(BaseModel):
     @field_validator("action")
     @classmethod
     def validate_action(cls, value: int) -> int:
-        if value in (0, 1, 3) or 11 <= value <= 99 or 1000 <= value <= 9999:
+        if value in (0, 1, 2, 3) or 11 <= value <= 99 or 1000 <= value <= 9999:
             return value
-        raise ValueError("action must be 0, 1, 3, 11..99, or 1000..9999")
+        raise ValueError("action must be 0, 1, 2, 3, 11..99, or 1000..9999")
 
     @model_validator(mode="after")
     def validate_collection_repeat_count(self):

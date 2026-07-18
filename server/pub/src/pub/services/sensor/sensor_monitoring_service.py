@@ -112,14 +112,49 @@ class SensorMonitoringService:
 
     @staticmethod
     async def update(session: AsyncSession, db_obj, data: dict):
+        old_sensor_id = db_obj.sensor_id
+        old_device_inst_id = db_obj.device_inst_id
+        old_status = db_obj.status
+
         for key, value in data.items():
             setattr(db_obj, key, value)
+            
+        from pub.services.sensor.sensor_task_service import create_manual_sensor_task, SYSTEM_ACTION_UPDATE_BINDING
+        
+        # 只要关键的绑定信息（传感器、设备、状态）发生了改变，就对所有涉及到的传感器下发任务
+        if old_sensor_id != db_obj.sensor_id or old_device_inst_id != db_obj.device_inst_id or old_status != db_obj.status:
+            sensors_to_notify = set()
+            if old_sensor_id:
+                sensors_to_notify.add(old_sensor_id)
+            if db_obj.sensor_id:
+                sensors_to_notify.add(db_obj.sensor_id)
+                
+            for sid in sensors_to_notify:
+                await create_manual_sensor_task(
+                    session=session,
+                    sensor_id=sid,
+                    name="update_binding",
+                    action=SYSTEM_ACTION_UPDATE_BINDING,
+                    val=0,
+                    remark="Monitoring relation updated",
+                )
+
         await session.commit()
         await session.refresh(db_obj)
         return db_obj
 
     @staticmethod
     async def delete(session: AsyncSession, db_obj) -> None:
+        if db_obj.sensor_id:
+            from pub.services.sensor.sensor_task_service import create_manual_sensor_task, SYSTEM_ACTION_UPDATE_BINDING
+            await create_manual_sensor_task(
+                session=session,
+                sensor_id=db_obj.sensor_id,
+                name="update_binding",
+                action=SYSTEM_ACTION_UPDATE_BINDING,
+                val=0,
+                remark="Monitoring deleted",
+            )
         await session.delete(db_obj)
         await session.commit()
 

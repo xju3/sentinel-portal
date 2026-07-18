@@ -46,10 +46,16 @@ class SensorDbService:
     @staticmethod
     async def get_binding_by_sn(session: AsyncSession, sn: str) -> Optional[UUID]:
         from pub.models.sensor import SensorMonitoring
+        from sqlalchemy import and_
         stmt = (
             select(SensorMonitoring.device_inst_id)
             .join(Sensor, Sensor.id == SensorMonitoring.sensor_id)
-            .where(Sensor.sn == sn)
+            .where(
+                and_(
+                    Sensor.sn == sn,
+                    SensorMonitoring.status == 1
+                )
+            )
         )
         result = await session.execute(stmt)
         return result.scalar_one_or_none()
