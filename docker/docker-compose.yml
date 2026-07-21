@@ -172,7 +172,7 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /opt/docker/redis/config
+      device: /opt/docker/redis/conf
       o: bind
   emqx_data:
     driver: local
@@ -184,7 +184,7 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /opt/docker/emqx/log
+      device: /opt/docker/emqx/logs
       o: bind
   mysql_data:
     driver: local
@@ -196,13 +196,13 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /opt/docker/mysql/config
+      device: /opt/docker/mysql/conf
       o: bind
   mysql_log:
     driver: local
     driver_opts:
       type: none
-      device: /opt/docker/mysql/log
+      device: /opt/docker/mysql/logs
       o: bind
   influxdb_data:
     driver: local
@@ -214,17 +214,17 @@ volumes:
     driver: local
     driver_opts:
       type: none
-      device: /opt/docker/influxdb/config
+      device: /opt/docker/influxdb/conf
       o: bind
   influxdb_log:
     driver: local
     driver_opts:
       type: none
-      device: /opt/docker/influxdb/log
+      device: /opt/docker/influxdb/logs
       o: bind
   telegraf_config:
     driver: local
     driver_opts:
       type: none
-      device: /opt/docker/telegraf/config
+      device: /opt/docker/telegraf/conf
       o: bind
