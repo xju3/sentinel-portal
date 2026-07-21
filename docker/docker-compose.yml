@@ -79,8 +79,8 @@ services:
       - "9000:9000"
       - "9001:9001"
     environment:
-      - MINIO_ROOT_USER=admin
-      - MINIO_ROOT_PASSWORD=Qw7!pL9z@eX2#vRt
+      - MINIO_ROOT_USER=${MINIO_ROOT_USER:-admin}
+      - MINIO_ROOT_PASSWORD=${MINIO_ROOT_PASSWORD}
       - TZ=Asia/Shanghai
     volumes:
       - minio_data:/data
@@ -139,7 +139,7 @@ services:
       - "8083:8083"
       - "18083:18083"
     environment:
-      - "EMQX_DASHBOARD__ADMIN_PASSWORD=admin123"
+      - "EMQX_DASHBOARD__ADMIN_PASSWORD=${EMQX_DASHBOARD__ADMIN_PASSWORD:-admin123}"
       - "TZ=Asia/Shanghai"
     volumes:
       - emqx_data:/opt/emqx/data
@@ -150,10 +150,10 @@ services:
     restart: always
     container_name: mysql8
     environment:
-      MYSQL_DATABASE: 'sentinel'
-      MYSQL_ROOT_PASSWORD: 'cncyadu78df7d8a8'
-      MYSQL_USER: 'sentinel'
-      MYSQL_PASSWORD: '7fd8cuda8dfd'
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-sentinel}
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_USER: ${MYSQL_USER:-sentinel}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
       TZ: 'Asia/Shanghai'
     ports:
       - '3306:3306'
