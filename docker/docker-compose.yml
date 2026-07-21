@@ -92,8 +92,8 @@ services:
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/opt/docker/redis/data
-      - redis_conf:/opt/docker/redis/config
+      - redis_data:/data
+      - redis_conf:/etc/redis
     environment:
       - REDIS_PORT=6379
       - REDIS_DATABASES=16
