@@ -159,6 +159,9 @@ services:
       - /etc/timezone:/etc/timezone:ro
     privileged: true
 volumes:
+  api_venv:
+  dia_venv:
+  minio_data:
   redis_data:
     driver: local
     driver_opts:
