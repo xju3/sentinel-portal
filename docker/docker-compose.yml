@@ -81,6 +81,7 @@ services:
     environment:
       - MINIO_ROOT_USER=admin
       - MINIO_ROOT_PASSWORD=Qw7!pL9z@eX2#vRt
+      - TZ=Asia/Shanghai
     volumes:
       - minio_data:/data
     command: server /data --console-address ":9001"
@@ -96,12 +97,15 @@ services:
     environment:
       - REDIS_PORT=6379
       - REDIS_DATABASES=16
+      - TZ=Asia/Shanghai
     restart: on-failure
   telegraf:
     image: telegraf:latest
     container_name: telegraf
     ports:
       - "7009:7009" # 暴露给 ESP32-S3 发送 HTTP POST 请求的端口
+    environment:
+      - TZ=Asia/Shanghai
     volumes:
       # 将当前目录下的配置文件只读挂载到容器内
       - telegraf_conf:/etc/telegraf:ro
@@ -121,6 +125,7 @@ services:
       DOCKER_INFLUXDB_INIT_ORG: ${INFLUXDB_ORG:-myorg}
       DOCKER_INFLUXDB_INIT_BUCKET: ${INFLUXDB_BUCKET:-mybucket}
       DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUXDB_TOKEN:-mytoken}
+      TZ: "Asia/Shanghai"
     volumes:
       - influxdb_data:/var/lib/influxdb2
       - influxdb_conf:/etc/influxdb2
@@ -134,6 +139,7 @@ services:
       - "18083:18083"
     environment:
       - "EMQX_DASHBOARD__ADMIN_PASSWORD=admin123"
+      - "TZ=Asia/Shanghai"
     volumes:
       - emqx_data:/opt/emqx/data
       - emqx_logs:/opt/emqx/log
@@ -147,6 +153,7 @@ services:
       MYSQL_ROOT_PASSWORD: 'cncyadu78df7d8a8'
       MYSQL_USER: 'sentinel'
       MYSQL_PASSWORD: '7fd8cuda8dfd'
+      TZ: 'Asia/Shanghai'
     ports:
       - '3306:3306'
     expose:
