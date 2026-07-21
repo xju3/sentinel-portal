@@ -14,12 +14,7 @@ x-python-app: &python-app
   env_file:
     - ../.env
   command: >
-    sh -c "pip install uv -i $${UV_INDEX_URL} &&
-    uv sync --package $${APP_PACKAGE} --no-dev &&
-    uv run --package $${APP_PACKAGE} python -m uvicorn app.main:app
-    --app-dir /app/server/$${APP_PACKAGE}
-    --host 0.0.0.0 --port 8000 --reload
-    --reload-dir /app/server/$${APP_PACKAGE}/app --reload-dir /app/server/pub/src"
+    sh -c "pip install uv -i $${UV_INDEX_URL} && uv sync --package $${APP_PACKAGE} --no-dev && uv run --package $${APP_PACKAGE} python -m uvicorn app.main:app --app-dir /app/server/$${APP_PACKAGE} --host 0.0.0.0 --port 8000 --reload --reload-dir /app/server/$${APP_PACKAGE}/app --reload-dir /app/server/pub/src"
 
 services:
   api:
@@ -77,7 +72,156 @@ services:
       - api
     environment:
       TZ: "Asia/Shanghai"
-
+  minio:
+    image: minio/minio:latest
+    container_name: minio
+    ports:
+      - "9000:9000"
+      - "9001:9001"
+    environment:
+      - MINIO_ROOT_USER=admin
+      - MINIO_ROOT_PASSWORD=Qw7!pL9z@eX2#vRt
+    volumes:
+      - minio_data:/data
+    command: server /data --console-address ":9001"
+    restart: on-failure
+  redis:
+    container_name: redis
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/opt/docker/redis/data
+      - redis_conf:/opt/docker/redis/config
+    environment:
+      - REDIS_PORT=6379
+      - REDIS_DATABASES=16
+    restart: on-failure
+  telegraf:
+    image: telegraf:latest
+    container_name: telegraf
+    ports:
+      - "7009:7009" # 暴露给 ESP32-S3 发送 HTTP POST 请求的端口
+    volumes:
+      # 将当前目录下的配置文件只读挂载到容器内
+      - telegraf_config:/etc/telegraf/telegraf.conf:ro
+    depends_on:
+      - influxdb # 确保 InfluxDB 先启动
+    restart: always
+  influxdb:
+    image: influxdb:2.7 # Pinned to a specific 2.x version for stability
+    container_name: influxdb2
+    restart: unless-stopped
+    ports:
+      - "8086:8086" # Default InfluxDB UI and API port
+    environment:
+      DOCKER_INFLUXDB_INIT_MODE: setup
+      DOCKER_INFLUXDB_INIT_USERNAME: ${INFLUXDB_USER:-admin}
+      DOCKER_INFLUXDB_INIT_PASSWORD: ${INFLUXDB_PASSWORD:-adminpassword}
+      DOCKER_INFLUXDB_INIT_ORG: ${INFLUXDB_ORG:-myorg}
+      DOCKER_INFLUXDB_INIT_BUCKET: ${INFLUXDB_BUCKET:-mybucket}
+      DOCKER_INFLUXDB_INIT_ADMIN_TOKEN: ${INFLUXDB_TOKEN:-mytoken}
+    volumes:
+      - influxdb_data:/var/lib/influxdb2
+      - influxdb_conf:/etc/influxdb2
+  emqx:
+    image: emqx/emqx:5.4.1
+    container_name: mqtt-broker
+    ports:
+      - "1883:1883"
+      - "8883:8883"
+      - "8083:8083"
+      - "18083:18083"
+    environment:
+      - "EMQX_DASHBOARD__ADMIN_PASSWORD=admin123"
+    volumes:
+      - emqx_data:/opt/emqx/data
+      - emqx_log:/opt/emqx/log
+    restart: always
+  mysql:
+    image: mysql:8.0.34
+    restart: always
+    container_name: mysql8
+    environment:
+      MYSQL_DATABASE: 'sentinel'
+      MYSQL_ROOT_PASSWORD: 'cncyadu78df7d8a8'
+      MYSQL_USER: 'sentinel'
+      MYSQL_PASSWORD: '7fd8cuda8dfd'
+    ports:
+      - '3306:3306'
+    expose:
+      - '3306'
+    volumes:
+      - mysql_log:/var/log/mysql
+      - mysql_data:/var/lib/mysql
+      - mysql_conf:/etc/mysql/conf.d/my.cnf
+      - /etc/localtime:/etc/localtime:ro
+      - /etc/timezone:/etc/timezone:ro
+    privileged: true
 volumes:
-  api_venv:
-  dia_venv:
+  redis_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /opt/docker/redis/data
+      o: bind
+  redis_conf:
+    driver: local
+    driver_opts:
+      type: none
+      device: /opt/docker/redis/config
+      o: bind
+  emqx_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /opt/docker/emqx/data
+      o: bind
+  emqx_log:
+    driver: local
+    driver_opts:
+      type: none
+      device: /opt/docker/emqx/log
+      o: bind
+  mysql_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /opt/docker/mysql/data
+      o: bind
+  mysql_conf:
+    driver: local
+    driver_opts:
+      type: none
+      device: /opt/docker/mysql/config
+      o: bind
+  mysql_log:
+    driver: local
+    driver_opts:
+      type: none
+      device: /opt/docker/mysql/log
+      o: bind
+  influxdb_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /opt/docker/influxdb/data
+      o: bind
+  influxdb_conf:
+    driver: local
+    driver_opts:
+      type: none
+      device: /opt/docker/influxdb/config
+      o: bind
+  influxdb_log:
+    driver: local
+    driver_opts:
+      type: none
+      device: /opt/docker/influxdb/log
+      o: bind
+  telegraf_config:
+    driver: local
+    driver_opts:
+      type: none
+      device: /opt/docker/telegraf/config
+      o: bind
