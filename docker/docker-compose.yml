@@ -104,7 +104,7 @@ services:
       - "7009:7009" # 暴露给 ESP32-S3 发送 HTTP POST 请求的端口
     volumes:
       # 将当前目录下的配置文件只读挂载到容器内
-      - telegraf_config:/etc/telegraf/telegraf.conf:ro
+      - telegraf_conf:/etc/telegraf/telegraf.conf:ro
     depends_on:
       - influxdb # 确保 InfluxDB 先启动
     restart: always
@@ -136,7 +136,7 @@ services:
       - "EMQX_DASHBOARD__ADMIN_PASSWORD=admin123"
     volumes:
       - emqx_data:/opt/emqx/data
-      - emqx_log:/opt/emqx/log
+      - emqx_logs:/opt/emqx/log
     restart: always
   mysql:
     image: mysql:8.0.34
@@ -152,7 +152,7 @@ services:
     expose:
       - '3306'
     volumes:
-      - mysql_log:/var/log/mysql
+      - mysql_logs:/var/log/mysql
       - mysql_data:/var/lib/mysql
       - mysql_conf:/etc/mysql/conf.d/my.cnf
       - /etc/localtime:/etc/localtime:ro
@@ -161,7 +161,18 @@ services:
 volumes:
   api_venv:
   dia_venv:
+  minio_logs:
+    driver: local
+    driver_opts:
+      type: none
+      device: /opt/docker/minio/logs
+      o: bind
   minio_data:
+    driver: local
+    driver_opts:
+      type: none
+      device: /opt/docker/minio/data
+      o: bind
   redis_data:
     driver: local
     driver_opts:
@@ -180,7 +191,7 @@ volumes:
       type: none
       device: /opt/docker/emqx/data
       o: bind
-  emqx_log:
+  emqx_logs:
     driver: local
     driver_opts:
       type: none
@@ -198,7 +209,7 @@ volumes:
       type: none
       device: /opt/docker/mysql/conf
       o: bind
-  mysql_log:
+  mysql_logs:
     driver: local
     driver_opts:
       type: none
@@ -216,13 +227,13 @@ volumes:
       type: none
       device: /opt/docker/influxdb/conf
       o: bind
-  influxdb_log:
+  influxdb_logs:
     driver: local
     driver_opts:
       type: none
       device: /opt/docker/influxdb/logs
       o: bind
-  telegraf_config:
+  telegraf_conf:
     driver: local
     driver_opts:
       type: none
