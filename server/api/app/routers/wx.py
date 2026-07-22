@@ -293,23 +293,17 @@ async def get_login_status(
     return {"code": 202, "message": "waiting"}
 
 class SendMsgRequest(BaseModel):
-    account_id: str
+    wx_open_id: str
     message_text: str
 
 @router.post("/wx/test-send-msg")
 async def test_send_msg(
-    req: SendMsgRequest,
-    session: AsyncSession = Depends(get_session)
+    req: SendMsgRequest
 ):
     """Test sending a customer service message to a specific user"""
-    # Get account
-    account = await AuthService.get_account(session, req.account_id)
-    if not account or not account.wx_user_id:
-        raise HTTPException(status_code=400, detail="此账号不存在或尚未绑定微信")
-        
     wx_service = get_wx_service()
     try:
-        await wx_service.send_custom_message(account.wx_user_id, req.message_text)
+        await wx_service.send_custom_message(req.wx_open_id, req.message_text)
         return success({"message": "消息发送成功"})
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"消息发送失败: {str(e)}")
