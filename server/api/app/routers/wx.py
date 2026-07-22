@@ -93,7 +93,7 @@ async def wx_message_post(
         
         msg_type = data.get("MsgType")
         event = data.get("Event")
-        event_key = data.get("EventKey", "")
+        event_key = data.get("EventKey") or ""
         from_user = data.get("FromUserName")
         to_user = data.get("ToUserName")
         
