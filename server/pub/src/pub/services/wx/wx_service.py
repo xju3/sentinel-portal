@@ -71,6 +71,30 @@ class WxService:
                 logger.error(f"Failed to create WeChat QR code: {data}")
                 raise Exception(f"WeChat API error: {data.get('errmsg')}")
 
+    async def send_custom_message(self, to_user_openid: str, text: str) -> bool:
+        """Send a customer service text message to a specific user"""
+        access_token = await self.get_access_token()
+        url = f"https://api.weixin.qq.com/cgi-bin/message/custom/send?access_token={access_token}"
+        
+        payload = {
+            "touser": to_user_openid,
+            "msgtype": "text",
+            "text": {
+                "content": text
+            }
+        }
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            
+            if data.get("errcode") == 0:
+                return True
+            else:
+                logger.error(f"Failed to send WeChat custom message: {data}")
+                raise Exception(f"WeChat API error: {data.get('errmsg')}")
+
     @staticmethod
     def verify_signature(signature: str, timestamp: str, nonce: str, token: str = "sentinel_wx_token") -> bool:
         """Verify the WeChat server signature"""

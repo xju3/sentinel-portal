@@ -53,6 +53,7 @@ class Settings(BaseSettings):
     wx_app_id: str = "your wx app id"
     wx_app_secret: str = "your wx app secret"
     wx_token: str = "your wx token"
+    wx_encoding_aes_key: str = ""
 
     # Queue Configuration
     patrol_queue_length: int = 72

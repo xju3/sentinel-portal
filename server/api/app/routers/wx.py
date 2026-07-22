@@ -11,6 +11,9 @@ from pub.models.customer import Account
 from pub.utils.jwt_token import create_access_token
 from pub.contract.auth import LoginResponse
 from app.utils.response import success
+from pydantic import BaseModel
+import xml.etree.ElementTree as ET
+from pub.services.wx.crypto import WXBizMsgCrypt
 
 router = APIRouter(tags=["wx"])
 
@@ -67,6 +70,82 @@ async def wx_callback_post(
             
         reply_msg = wx_service.create_xml_reply(from_user, to_user, "操作成功！请返回网页端查看。")
         return Response(content=reply_msg, media_type="application/xml")
+        
+    return Response(content="success")
+
+@router.get("/wx/message")
+async def wx_message_get(
+    signature: str = Query(None),
+    timestamp: str = Query(None),
+    nonce: str = Query(None),
+    echostr: str = Query(None)
+):
+    """WeChat server verification endpoint (Secure mode)"""
+    if not all([signature, timestamp, nonce, echostr]):
+        return Response(content="missing parameters")
+        
+    wx_service = get_wx_service()
+    if wx_service.verify_signature(signature, timestamp, nonce, settings.wx_token):
+        return Response(content=echostr)
+    else:
+        return Response(content="error")
+
+@router.post("/wx/message")
+async def wx_message_post(
+    request: Request,
+    msg_signature: str = Query(None),
+    timestamp: str = Query(None),
+    nonce: str = Query(None),
+    session: AsyncSession = Depends(get_session)
+):
+    """Handle WeChat XML events in Secure Mode"""
+    xml_data = await request.body()
+    wx_service = get_wx_service()
+    
+    if not settings.wx_encoding_aes_key:
+        return Response(content="server missing EncodingAESKey", status_code=500)
+        
+    crypt = WXBizMsgCrypt(
+        token=settings.wx_token,
+        encoding_aes_key=settings.wx_encoding_aes_key,
+        app_id=settings.wx_app_id
+    )
+    
+    try:
+        # Parse outer XML to get Encrypt field
+        outer_xml = ET.fromstring(xml_data)
+        encrypt = outer_xml.find("Encrypt").text
+    except Exception as e:
+        return Response(content="invalid xml", status_code=400)
+        
+    try:
+        # Decrypt
+        decrypted_xml_str = crypt.decrypt(encrypt, msg_signature, timestamp, nonce)
+    except Exception as e:
+        return Response(content="decryption failed", status_code=403)
+        
+    # Now we have the real XML
+    data = wx_service.parse_xml_event(decrypted_xml_str.encode('utf-8'))
+    
+    msg_type = data.get("MsgType")
+    event = data.get("Event")
+    event_key = data.get("EventKey", "")
+    from_user = data.get("FromUserName")
+    to_user = data.get("ToUserName")
+    
+    scene_str = event_key
+    if event == "subscribe" and scene_str.startswith("qrscene_"):
+        scene_str = scene_str[8:]
+        
+    if msg_type == "event" and event in ["SCAN", "subscribe"] and scene_str:
+        redis_client = redis_manager.get_client()
+        if redis_client:
+            redis_client.setex(f"wx_scan_{scene_str}", 300, from_user)
+            
+        reply_xml_str = wx_service.create_xml_reply(from_user, to_user, "操作成功！请返回网页端查看。")
+        # Encrypt the reply
+        encrypted_reply = crypt.generate_encrypted_xml_response(reply_xml_str, nonce)
+        return Response(content=encrypted_reply, media_type="application/xml")
         
     return Response(content="success")
 
@@ -198,3 +277,25 @@ async def get_login_status(
     
     # Still waiting
     return {"code": 202, "message": "waiting"}
+
+class SendMsgRequest(BaseModel):
+    account_id: str
+    message_text: str
+
+@router.post("/wx/test-send-msg")
+async def test_send_msg(
+    req: SendMsgRequest,
+    session: AsyncSession = Depends(get_session)
+):
+    """Test sending a customer service message to a specific user"""
+    # Get account
+    account = await AuthService.get_account(session, req.account_id)
+    if not account or not account.wx_user_id:
+        raise HTTPException(status_code=400, detail="此账号不存在或尚未绑定微信")
+        
+    wx_service = get_wx_service()
+    try:
+        await wx_service.send_custom_message(account.wx_user_id, req.message_text)
+        return success({"message": "消息发送成功"})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"消息发送失败: {str(e)}")
