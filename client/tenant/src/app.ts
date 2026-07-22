@@ -50,8 +50,12 @@ export const request: RequestConfig = {
 
         // Unwrap the ApiResponse: replace response.data with body.data
         // so that request<T>() returns the data field directly
-        if (body && body.code === 0 && body.data !== undefined) {
-          response.data = body.data;
+        if (body && (body.code === 0 || body.code === 200)) {
+          response.data = body.data !== undefined ? body.data : body;
+          response.data.success = true;
+        } else if (body && body.code === 202) {
+          response.data = body;
+          response.data.success = true;
         }
       } catch (e) {
         // If parsing fails, fall back to HTTP status check
