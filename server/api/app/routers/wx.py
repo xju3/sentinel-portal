@@ -113,66 +113,75 @@ async def wx_message_post(
     session: AsyncSession = Depends(get_session)
 ):
     """Handle WeChat XML events in Secure Mode"""
-    xml_data = await request.body()
-    wx_service = get_wx_service()
-    
-    if not settings.wx_encoding_aes_key:
-        return Response(content="server missing EncodingAESKey", status_code=500)
-        
-    crypt = WXBizMsgCrypt(
-        token=settings.wx_token,
-        encoding_aes_key=settings.wx_encoding_aes_key,
-        app_id=settings.wx_app_id
-    )
-    
     try:
-        # Parse outer XML to get Encrypt field
-        outer_xml = ET.fromstring(xml_data)
-        encrypt = outer_xml.find("Encrypt").text
-    except Exception as e:
-        return Response(content="invalid xml", status_code=400)
+        xml_data = await request.body()
+        wx_service = get_wx_service()
         
-    try:
-        # Decrypt
-        decrypted_xml_str = crypt.decrypt(encrypt, msg_signature, timestamp, nonce)
-    except Exception as e:
-        return Response(content="decryption failed", status_code=403)
-        
-    # Now we have the real XML
-    data = wx_service.parse_xml_event(decrypted_xml_str.encode('utf-8'))
-    
-    logger.info(f"Received WeChat message (Secure): {data}")
-    print(f"Received WeChat message (Secure): {data}")
-    
-    msg_type = data.get("MsgType")
-    event = data.get("Event")
-    event_key = data.get("EventKey", "")
-    from_user = data.get("FromUserName")
-    to_user = data.get("ToUserName")
-    
-    account = await AuthService.get_account_by_wx_user_id(session, from_user)
-    if account:
-        logger.info(f"Sender Identity: System User '{account.username}' (Account ID: {account.id})")
-        print(f"Sender Identity: System User '{account.username}' (Account ID: {account.id})")
-    else:
-        logger.info(f"Sender Identity: Unbound WeChat User (OpenID: {from_user})")
-        print(f"Sender Identity: Unbound WeChat User (OpenID: {from_user})")
-    
-    scene_str = event_key
-    if event == "subscribe" and scene_str.startswith("qrscene_"):
-        scene_str = scene_str[8:]
-        
-    if msg_type == "event" and event in ["SCAN", "subscribe"] and scene_str:
-        redis_client = redis_manager.get_client()
-        if redis_client:
-            redis_client.setex(f"wx_scan_{scene_str}", 300, from_user)
+        if not settings.wx_encoding_aes_key:
+            logger.error("Missing wx_encoding_aes_key in settings!")
+            print("Missing wx_encoding_aes_key in settings!")
+            return Response(content="server missing EncodingAESKey", status_code=500)
             
-        reply_xml_str = wx_service.create_xml_reply(from_user, to_user, "操作成功！请返回网页端查看。")
-        # Encrypt the reply
-        encrypted_reply = crypt.generate_encrypted_xml_response(reply_xml_str, nonce)
-        return Response(content=encrypted_reply, media_type="application/xml")
+        crypt = WXBizMsgCrypt(
+            token=settings.wx_token,
+            encoding_aes_key=settings.wx_encoding_aes_key,
+            app_id=settings.wx_app_id
+        )
         
-    return Response(content="success")
+        try:
+            # Parse outer XML to get Encrypt field
+            outer_xml = ET.fromstring(xml_data)
+            encrypt = outer_xml.find("Encrypt").text
+        except Exception as e:
+            logger.error(f"Failed to parse outer XML: {e}")
+            return Response(content="invalid xml", status_code=400)
+            
+        try:
+            # Decrypt
+            decrypted_xml_str = crypt.decrypt(encrypt, msg_signature, timestamp, nonce)
+        except Exception as e:
+            logger.error(f"Decryption failed: {e}")
+            return Response(content="decryption failed", status_code=403)
+            
+        # Now we have the real XML
+        data = wx_service.parse_xml_event(decrypted_xml_str.encode('utf-8'))
+        
+        logger.info(f"Received WeChat message (Secure): {data}")
+        print(f"Received WeChat message (Secure): {data}")
+        
+        msg_type = data.get("MsgType")
+        event = data.get("Event")
+        event_key = data.get("EventKey", "")
+        from_user = data.get("FromUserName")
+        to_user = data.get("ToUserName")
+        
+        account = await AuthService.get_account_by_wx_user_id(session, from_user)
+        if account:
+            logger.info(f"Sender Identity: System User '{account.username}' (Account ID: {account.id})")
+            print(f"Sender Identity: System User '{account.username}' (Account ID: {account.id})")
+        else:
+            logger.info(f"Sender Identity: Unbound WeChat User (OpenID: {from_user})")
+            print(f"Sender Identity: Unbound WeChat User (OpenID: {from_user})")
+        
+        scene_str = event_key
+        if event == "subscribe" and scene_str.startswith("qrscene_"):
+            scene_str = scene_str[8:]
+            
+        if msg_type == "event" and event in ["SCAN", "subscribe"] and scene_str:
+            redis_client = redis_manager.get_client()
+            if redis_client:
+                redis_client.setex(f"wx_scan_{scene_str}", 300, from_user)
+                
+            reply_xml_str = wx_service.create_xml_reply(from_user, to_user, "操作成功！请返回网页端查看。")
+            # Encrypt the reply
+            encrypted_reply = crypt.generate_encrypted_xml_response(reply_xml_str, nonce)
+            return Response(content=encrypted_reply, media_type="application/xml")
+            
+        return Response(content="success")
+    except Exception as e:
+        logger.error(f"Unexpected error in wx_message_post: {e}", exc_info=True)
+        print(f"Unexpected error in wx_message_post: {e}")
+        return Response(content=f"Internal Server Error: {str(e)}", status_code=500)
 
 @router.get("/wx/bind-qrcode")
 async def get_bind_qrcode(
