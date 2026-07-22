@@ -175,14 +175,15 @@ async def get_bind_qrcode(
 
     wx_service = get_wx_service()
     scene_str = f"bind_{target_account_id}_{uuid.uuid4().hex[:8]}"
-    ticket = await wx_service.create_qr_code(scene_str)
+    ticket, url = await wx_service.create_qr_code(scene_str)
     
     return {
         "code": 200,
         "data": {
             "ticket": ticket,
             "scene_str": scene_str,
-            "qr_url": f"https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket={ticket}"
+            "qr_url": url,
+            "qr_img_url": f"https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket={ticket}"
         }
     }
 
@@ -227,12 +228,13 @@ async def get_login_qrcode():
     """Generate a QR code ticket for WeChat login"""
     wx_service = get_wx_service()
     scene_str = f"login_{uuid.uuid4().hex[:8]}"
-    ticket = await wx_service.create_qr_code(scene_str)
+    ticket, url = await wx_service.create_qr_code(scene_str)
     
     return success({
         "ticket": ticket,
         "scene_str": scene_str,
-        "qr_url": f"https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket={ticket}"
+        "qr_url": url,
+        "qr_img_url": f"https://mp.weixin.qq.com/cgi-bin/showqrcode?ticket={ticket}"
     })
 
 @router.get("/wx/login-status")

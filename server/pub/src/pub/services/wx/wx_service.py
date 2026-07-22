@@ -66,7 +66,7 @@ class WxService:
             data = response.json()
             
             if "ticket" in data:
-                return data["ticket"]
+                return data["ticket"], data["url"]
             else:
                 logger.error(f"Failed to create WeChat QR code: {data}")
                 raise Exception(f"WeChat API error: {data.get('errmsg')}")

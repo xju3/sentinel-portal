@@ -11,7 +11,8 @@
     "@ant-design/pro-table": "^3.21.0",
     "@umijs/max": "^4.5.1",
     "antd": "^5.29.3",
-    "echarts": "^6.1.0"
+    "echarts": "^6.1.0",
+    "qrcode.react": "^4.2.0"
   },
   "overrides": {
     "rc-resize-observer": "^1.4.3"
