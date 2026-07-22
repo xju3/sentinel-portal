@@ -54,12 +54,21 @@ import os
 from fastapi.responses import FileResponse
 
 @app.get("/MP_verify_AsWmjqUREJty1rV6.txt", include_in_schema=False)
-async def wechat_verify_new():
-    """WeChat domain verification endpoint (new)"""
+async def wechat_verify_1():
+    """WeChat domain verification endpoint (new) 公众号"""
     file_path = os.path.join(os.path.dirname(__file__), "MP_verify_AsWmjqUREJty1rV6.txt")
     if os.path.exists(file_path):
         return FileResponse(file_path)
     return {"error": "Verification file not found"}
+
+@app.get("/MP_verify_QjmFtxhbT6IeTaTp.txt", include_in_schema=False)
+async def wechat_verify_2():
+    """WeChat domain verification endpoint (new), 服务号"""
+    file_path = os.path.join(os.path.dirname(__file__), "MP_verify_QjmFtxhbT6IeTaTp.txt")
+    if os.path.exists(file_path):
+        return FileResponse(file_path)
+    return {"error": "Verification file not found"}
+
 
 if __name__ == "__main__":
     import uvicorn
