@@ -1,11 +1,13 @@
 import { Link, useNavigate } from '@umijs/max';
-import { PageContainer, ProCard, ProForm, ProFormText } from '@ant-design/pro-components';
-import { Alert, Button, Space, Typography, message, Modal } from 'antd';
-import { WechatOutlined } from '@ant-design/icons';
+import { ProForm, ProFormText } from '@ant-design/pro-components';
+import { Button, Space, message, Modal } from 'antd';
+import { WechatOutlined, UserOutlined, LockOutlined, LogoutOutlined, AppstoreOutlined } from '@ant-design/icons';
+import { QRCodeCanvas } from 'qrcode.react';
 import { useEffect, useState } from 'react';
 
 import { login, getWxLoginQrCode, checkWxLoginStatus, type LoginResult } from '@/services/auth';
 import { clearSession, getSession, saveSession } from '@/utils/session';
+import styles from './index.less';
 
 type LoginFormValues = {
   username: string;
@@ -38,8 +40,9 @@ const LoginPage = () => {
         try {
           const res = await checkWxLoginStatus(wxSceneStr);
           // If the backend returns success code and data contains access_token
-          if (res?.data && (res.data as any).access_token) {
-            const loginData = res.data as LoginResult;
+          const data = (res as any)?.data || res;
+          if (data && data.access_token) {
+            const loginData = data as LoginResult;
             saveSession(loginData);
             setSession(loginData);
             message.success('登录成功');
@@ -48,8 +51,6 @@ const LoginPage = () => {
             navigate('/');
           }
         } catch (error: any) {
-          // umi request throws an error for non-2xx status codes (like 404)
-          // The backend returns 404 with detail="此微信号没有绑定相应平台账号"
           if (error?.response?.status === 404 || (error?.data && error.data.detail)) {
             message.error(error?.data?.detail || '此微信号没有绑定相应平台账号');
             setWxModalOpen(false);
@@ -64,123 +65,180 @@ const LoginPage = () => {
   const handleWxLoginClick = async () => {
     try {
       const res = await getWxLoginQrCode();
-      setWxQrUrl(res.data.qr_url);
-      setWxSceneStr(res.data.scene_str);
+      const data = (res as any).data || res;
+      if (!data || !data.qr_url) {
+        throw new Error('未获取到二维码数据');
+      }
+      setWxQrUrl(data.qr_url);
+      setWxSceneStr(data.scene_str);
       setWxModalOpen(true);
-    } catch (e) {
-      message.error('获取微信登录二维码失败');
+    } catch (e: any) {
+      console.error(e);
+      message.error('获取微信登录二维码失败: ' + (e.message || '未知错误'));
     }
   };
 
   return (
-    <PageContainer title="账号登录" content="使用用户名和密码登录平台。" ghost>
-      <ProCard colSpan={12} style={{ maxWidth: 560, margin: '0 auto' }}>
-        {session ? (
-          <Alert
-            type="success"
-            showIcon
-            message="当前已登录"
-            description={
-              <Space direction="vertical" size={4}>
-                <Typography.Text>用户名: {session.username}</Typography.Text>
-                <Space>
-                  <Button type="primary" onClick={() => navigate('/dashboard/overview')}>
-                    进入主应用
-                  </Button>
-                  <Button onClick={handleLogout}>退出登录</Button>
-                </Space>
+    <div className={styles.container}>
+      <div className={styles.bgElements}>
+        <div className={styles.glowingOrb1} />
+        <div className={styles.glowingOrb2} />
+        <div className={styles.grid} />
+      </div>
+      
+      <div className={styles.loginWrapper}>
+        <div className={styles.loginBox}>
+          {session ? (
+            <div className={styles.sessionBox}>
+              <div className={styles.header}>
+                <h2>欢迎回来</h2>
+                <p>当前已登录为: <strong style={{ color: '#fff' }}>{session.username}</strong></p>
+              </div>
+              <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                <Button 
+                  type="primary" 
+                  size="large" 
+                  block 
+                  icon={<AppstoreOutlined />} 
+                  onClick={() => navigate('/dashboard/overview')}
+                >
+                  进入主应用
+                </Button>
+                <Button 
+                  size="large" 
+                  block 
+                  ghost
+                  icon={<LogoutOutlined />} 
+                  onClick={handleLogout}
+                  style={{ borderColor: 'rgba(255,255,255,0.2)', color: '#fff' }}
+                >
+                  退出登录
+                </Button>
               </Space>
-            }
-          />
-        ) : (
-          <>
-            <ProForm<LoginFormValues>
-              submitter={{
-                searchConfig: {
-                  submitText: '登录',
-                },
-              }}
-              onFinish={async (values) => {
-                try {
-                  const res = await login({
-                    username: values.username,
-                    password: values.password,
-                  });
-                  saveSession(res);
-                  setSession(res);
-                  message.success('登录成功');
-                  navigate('/');
-                  return true;
-                } catch (error: any) {
-                  const detail =
-                    error?.data?.detail || error?.info?.errorMessage || '登录失败，请检查用户名和密码';
-                  message.error(String(detail));
-                  return false;
-                }
-              }}
-            >
-              <ProFormText
-                name="username"
-                label="用户名"
-                placeholder="请输入用户名"
-                rules={[{ required: true, message: '请输入用户名' }]}
-              />
+            </div>
+          ) : (
+            <>
+              <div className={styles.header}>
+                <h1>Sentinel Platform</h1>
+                <p>欢迎登录 Sentinel 系统，掌控您的资源</p>
+              </div>
+              <ProForm<LoginFormValues>
+                submitter={{
+                  searchConfig: {
+                    submitText: '登 录',
+                  },
+                  submitButtonProps: {
+                    size: 'large',
+                    style: { width: '100%' },
+                  },
+                  resetButtonProps: {
+                    style: { display: 'none' },
+                  },
+                }}
+                onFinish={async (values) => {
+                  try {
+                    const res = await login({
+                      username: values.username,
+                      password: values.password,
+                    });
+                    const data = (res as any).data || res;
+                    saveSession(data);
+                    setSession(data);
+                    message.success('登录成功');
+                    navigate('/');
+                    return true;
+                  } catch (error: any) {
+                    const detail =
+                      error?.data?.detail || error?.info?.errorMessage || '登录失败，请检查用户名和密码';
+                    message.error(String(detail));
+                    return false;
+                  }
+                }}
+              >
+                <ProFormText
+                  name="username"
+                  placeholder="请输入用户名"
+                  fieldProps={{
+                    size: 'large',
+                    prefix: <UserOutlined />,
+                  }}
+                  rules={[{ required: true, message: '请输入用户名' }]}
+                />
 
-              <ProFormText.Password
-                name="password"
-                label="密码"
-                placeholder="请输入密码"
-                rules={[{ required: true, message: '请输入密码' }]}
-              />
-            </ProForm>
+                <ProFormText.Password
+                  name="password"
+                  placeholder="请输入密码"
+                  fieldProps={{
+                    size: 'large',
+                    prefix: <LockOutlined />,
+                  }}
+                  rules={[{ required: true, message: '请输入密码' }]}
+                />
+              </ProForm>
 
-            <Alert
-              type="info"
-              showIcon
-              message="还没有账号？"
-              description={
-                <Typography.Text>
-                  请先前往 <Link to="/register">注册页</Link> 创建账号。
-                </Typography.Text>
-              }
-              style={{ marginBottom: 16 }}
-            />
+              <div className={styles.divider}>
+                <span>或</span>
+              </div>
+                
+              <Button
+                block
+                className={styles.wxLoginBtn}
+                icon={<WechatOutlined />}
+                onClick={handleWxLoginClick}
+              >
+                微信扫码快捷登录
+              </Button>
 
-            <Button
-              block
-              icon={<WechatOutlined />}
-              onClick={handleWxLoginClick}
-              style={{ backgroundColor: '#07c160', color: '#fff', borderColor: '#07c160' }}
-            >
-              微信扫码登录
-            </Button>
-          </>
-        )}
-      </ProCard>
+              <div className={styles.registerHint}>
+                还没有账号? <Link to="/register">立即注册</Link>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
 
       <Modal
-        title="微信扫码登录"
+        title={null}
         open={wxModalOpen}
         footer={null}
         onCancel={() => {
           setWxModalOpen(false);
           setWxSceneStr('');
         }}
-        width={320}
+        width={360}
         destroyOnClose
+        centered
+        styles={{
+          content: {
+            backgroundColor: '#111827',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+          },
+        }}
+        closeIcon={<span style={{ color: '#9ca3af', fontSize: 16 }}>✕</span>}
       >
-        <div style={{ textAlign: 'center', padding: '20px 0' }}>
+        <div style={{ textAlign: 'center', padding: '30px 0 10px' }}>
+          <h2 style={{ color: '#fff', fontSize: 20, marginBottom: 24, fontWeight: 600 }}>微信扫码登录</h2>
           {wxQrUrl ? (
             <>
-              <img src={wxQrUrl} alt="微信登录二维码" style={{ width: 200, height: 200 }} />
-              <div style={{ marginTop: 16, color: '#666' }}>请使用微信扫描上方二维码登录</div>
+              <div style={{ background: '#fff', padding: 12, borderRadius: 12, display: 'inline-block' }}>
+                <QRCodeCanvas 
+                  value={wxQrUrl} 
+                  size={200} 
+                  level="H"
+                  imageSettings={{ src: '/logo.png', height: 44, width: 44, excavate: true }} 
+                />
+              </div>
+              <div style={{ marginTop: 24, color: '#9ca3af', fontSize: 15 }}>
+                请使用 <span style={{ color: '#10d36b', fontWeight: 600 }}>微信</span> 扫描上方二维码
+              </div>
             </>
           ) : (
-            <div>加载中...</div>
+            <div style={{ padding: '60px 0', color: '#9ca3af' }}>加载二维码中...</div>
           )}
         </div>
       </Modal>
-    </PageContainer>
+    </div>
   );
 };
 

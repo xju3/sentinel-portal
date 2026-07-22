@@ -367,12 +367,13 @@ const TenantUsersPage = () => {
               <QRCodeCanvas 
                 value={qrUrl} 
                 size={200} 
+                level="H"
                 imageSettings={{ src: '/logo.png', height: 40, width: 40, excavate: true }} 
               />
               <div style={{ marginTop: 16, color: '#333', fontSize: 16, fontWeight: 'bold' }}>
                 {bindUser?.username}
               </div>
-              <div style={{ marginTop: 8, color: '#666' }}>请使用微信扫描上方二维码进行绑定</div>
+              <div style={{ marginTop: 8, color: '#666' }}>请【{bindUser?.username}】使用微信扫描上方二维码进行绑定</div>
             </>
           ) : (
             <div>加载中...</div>

@@ -32,7 +32,6 @@ export const request: RequestConfig = {
       // Parse the unified ApiResponse body from axios response.data
       try {
         const body = response.data;
-        console.log(body);
 
         // Check for unauthorized (code === 401)
         if (body && body.code === 401) {
@@ -48,14 +47,15 @@ export const request: RequestConfig = {
           message.error(body.message || `Error (code: ${body.code})`);
         }
 
+        // Add success field so umi doesn't pop up default errors
+        if (body && (body.code === 0 || body.code === 200 || body.code === 202)) {
+          body.success = true;
+        }
+
         // Unwrap the ApiResponse: replace response.data with body.data
         // so that request<T>() returns the data field directly
-        if (body && (body.code === 0 || body.code === 200)) {
-          response.data = body.data !== undefined ? body.data : body;
-          response.data.success = true;
-        } else if (body && body.code === 202) {
-          response.data = body;
-          response.data.success = true;
+        if (body && body.code === 0 && body.data !== undefined) {
+          response.data = body.data;
         }
       } catch (e) {
         // If parsing fails, fall back to HTTP status check

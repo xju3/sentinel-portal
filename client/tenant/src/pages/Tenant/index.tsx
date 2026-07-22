@@ -1,5 +1,6 @@
 import { EditOutlined, PlusOutlined } from '@ant-design/icons';
-import { PageContainer, ProCard } from '@ant-design/pro-components';
+import { PageContainer, ProCard, ProColumns, ProTable } from '@ant-design/pro-components';
+import { QRCodeCanvas } from 'qrcode.react';
 import {
   Button,
   Descriptions,
@@ -50,6 +51,7 @@ const TenantPage = () => {
   const [bindModalOpen, setBindModalOpen] = useState(false);
   const [qrUrl, setQrUrl] = useState('');
   const [sceneStr, setSceneStr] = useState('');
+  const [bindUser, setBindUser] = useState<AccountInfo | null>(null);
   const [createForm] = Form.useForm();
 
   // 获取公司信息
@@ -108,6 +110,7 @@ const TenantPage = () => {
       const res = await getWxBindQrCode(record.id);
       setQrUrl(res.data.qr_url);
       setSceneStr(res.data.scene_str);
+      setBindUser(record);
       setBindModalOpen(true);
     } catch (error: any) {
       const detail = error?.data?.detail || '获取绑定二维码失败';
@@ -515,6 +518,7 @@ const TenantPage = () => {
         onCancel={() => {
           setBindModalOpen(false);
           setSceneStr('');
+          setBindUser(null);
         }}
         width={320}
         destroyOnClose
@@ -522,8 +526,16 @@ const TenantPage = () => {
         <div style={{ textAlign: 'center', padding: '20px 0' }}>
           {qrUrl ? (
             <>
-              <img src={qrUrl} alt="微信二维码" style={{ width: 200, height: 200 }} />
-              <div style={{ marginTop: 16, color: '#666' }}>请使用微信扫描上方二维码进行绑定</div>
+              <QRCodeCanvas 
+                value={qrUrl} 
+                size={200} 
+                level="H"
+                imageSettings={{ src: '/logo.png', height: 40, width: 40, excavate: true }} 
+              />
+              <div style={{ marginTop: 16, color: '#333', fontSize: 16, fontWeight: 'bold' }}>
+                {bindUser?.username}
+              </div>
+              <div style={{ marginTop: 8, color: '#666' }}>请【{bindUser?.username}】使用微信扫描上方二维码进行绑定</div>
             </>
           ) : (
             <div>加载中...</div>
