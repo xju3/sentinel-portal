@@ -27,65 +27,7 @@ def get_wx_service() -> WxService:
         redis_client=redis_manager.get_client()
     )
 
-@router.get("/wx/callback")
-async def wx_callback_get(
-    signature: str = Query(None),
-    timestamp: str = Query(None),
-    nonce: str = Query(None),
-    echostr: str = Query(None)
-):
-    """WeChat server verification endpoint"""
-    if not all([signature, timestamp, nonce, echostr]):
-        return Response(content="missing parameters")
-        
-    wx_service = get_wx_service()
-    if wx_service.verify_signature(signature, timestamp, nonce, settings.wx_token):
-        return Response(content=echostr)
-    else:
-        return Response(content="error")
 
-@router.post("/wx/callback")
-async def wx_callback_post(
-    request: Request,
-    session: AsyncSession = Depends(get_session)
-):
-    """Handle WeChat XML events"""
-    xml_data = await request.body()
-    wx_service = get_wx_service()
-    data = wx_service.parse_xml_event(xml_data)
-    
-    logger.info(f"Received WeChat message (Plain): {data}")
-    print(f"Received WeChat message (Plain): {data}")
-    
-    msg_type = data.get("MsgType")
-    event = data.get("Event")
-    event_key = data.get("EventKey", "")
-    from_user = data.get("FromUserName")
-    to_user = data.get("ToUserName")
-    
-    account = await AuthService.get_account_by_wx_user_id(session, from_user)
-    if account:
-        logger.info(f"Sender Identity: System User '{account.username}' (Account ID: {account.id})")
-        print(f"Sender Identity: System User '{account.username}' (Account ID: {account.id})")
-    else:
-        logger.info(f"Sender Identity: Unbound WeChat User (OpenID: {from_user})")
-        print(f"Sender Identity: Unbound WeChat User (OpenID: {from_user})")
-    
-    # EventKey for SCAN is "scene_str". For subscribe it is "qrscene_scene_str"
-    scene_str = event_key
-    if event == "subscribe" and scene_str.startswith("qrscene_"):
-        scene_str = scene_str[8:]
-        
-    if msg_type == "event" and event in ["SCAN", "subscribe"] and scene_str:
-        redis_client = redis_manager.get_client()
-        # if scene_str is bind_xyz, we record that the user scanned it with their from_user (wx_user_id)
-        if redis_client:
-            redis_client.setex(f"wx_scan_{scene_str}", 300, from_user) # Keep status for 5 mins
-            
-        reply_msg = wx_service.create_xml_reply(from_user, to_user, "操作成功！请返回网页端查看。")
-        return Response(content=reply_msg, media_type="application/xml")
-        
-    return Response(content="success")
 
 @router.get("/wx/message")
 async def wx_message_get(
@@ -174,6 +116,12 @@ async def wx_message_post(
                 
             reply_xml_str = wx_service.create_xml_reply(from_user, to_user, "操作成功！请返回网页端查看。")
             # Encrypt the reply
+            encrypted_reply = crypt.generate_encrypted_xml_response(reply_xml_str, nonce)
+            return Response(content=encrypted_reply, media_type="application/xml")
+            
+        if msg_type == "event" and event == "subscribe" and not scene_str:
+            welcome_text = "欢迎关注上海朗湖智能科技！\n在这里您可以随时掌握设备健康状态，接收实时报警信息。"
+            reply_xml_str = wx_service.create_xml_reply(from_user, to_user, welcome_text)
             encrypted_reply = crypt.generate_encrypted_xml_response(reply_xml_str, nonce)
             return Response(content=encrypted_reply, media_type="application/xml")
             
