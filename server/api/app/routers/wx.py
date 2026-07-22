@@ -1,4 +1,7 @@
 import uuid
+import logging
+
+logger = logging.getLogger(__name__)
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 from pub.services import get_session
@@ -51,11 +54,22 @@ async def wx_callback_post(
     wx_service = get_wx_service()
     data = wx_service.parse_xml_event(xml_data)
     
+    logger.info(f"Received WeChat message (Plain): {data}")
+    print(f"Received WeChat message (Plain): {data}")
+    
     msg_type = data.get("MsgType")
     event = data.get("Event")
     event_key = data.get("EventKey", "")
     from_user = data.get("FromUserName")
     to_user = data.get("ToUserName")
+    
+    account = await AuthService.get_account_by_wx_user_id(session, from_user)
+    if account:
+        logger.info(f"Sender Identity: System User '{account.username}' (Account ID: {account.id})")
+        print(f"Sender Identity: System User '{account.username}' (Account ID: {account.id})")
+    else:
+        logger.info(f"Sender Identity: Unbound WeChat User (OpenID: {from_user})")
+        print(f"Sender Identity: Unbound WeChat User (OpenID: {from_user})")
     
     # EventKey for SCAN is "scene_str". For subscribe it is "qrscene_scene_str"
     scene_str = event_key
@@ -127,11 +141,22 @@ async def wx_message_post(
     # Now we have the real XML
     data = wx_service.parse_xml_event(decrypted_xml_str.encode('utf-8'))
     
+    logger.info(f"Received WeChat message (Secure): {data}")
+    print(f"Received WeChat message (Secure): {data}")
+    
     msg_type = data.get("MsgType")
     event = data.get("Event")
     event_key = data.get("EventKey", "")
     from_user = data.get("FromUserName")
     to_user = data.get("ToUserName")
+    
+    account = await AuthService.get_account_by_wx_user_id(session, from_user)
+    if account:
+        logger.info(f"Sender Identity: System User '{account.username}' (Account ID: {account.id})")
+        print(f"Sender Identity: System User '{account.username}' (Account ID: {account.id})")
+    else:
+        logger.info(f"Sender Identity: Unbound WeChat User (OpenID: {from_user})")
+        print(f"Sender Identity: Unbound WeChat User (OpenID: {from_user})")
     
     scene_str = event_key
     if event == "subscribe" and scene_str.startswith("qrscene_"):
