@@ -46,6 +46,48 @@ async def wx_message_get(
     else:
         return Response(content="error")
 
+async def handle_wx_event_message(wx_service: WxService, data: dict, from_user: str, to_user: str) -> str:
+    """Handle event messages (subscribe, unsubscribe, scan, etc.) and return plain reply XML or empty string."""
+    event = data.get("Event")
+    event_key = data.get("EventKey") or ""
+    
+    if event == "subscribe":
+        scene_str = event_key
+        if scene_str.startswith("qrscene_"):
+            scene_str = scene_str[8:]
+            
+        if scene_str:
+            # Scanned QR code to subscribe
+            redis_client = redis_manager.get_client()
+            if redis_client:
+                redis_client.setex(f"wx_scan_{scene_str}", 300, from_user)
+            return wx_service.create_xml_reply(from_user, to_user, "操作成功！请返回网页端查看。")
+        else:
+            # Normal subscribe
+            welcome_text = "欢迎关注上海朗湖智能科技！\n在这里您可以随时掌握设备健康状态，接收实时报警信息。"
+            return wx_service.create_xml_reply(from_user, to_user, welcome_text)
+            
+    elif event == "SCAN":
+        scene_str = event_key
+        if scene_str:
+            redis_client = redis_manager.get_client()
+            if redis_client:
+                redis_client.setex(f"wx_scan_{scene_str}", 300, from_user)
+            return wx_service.create_xml_reply(from_user, to_user, "操作成功！请返回网页端查看。")
+            
+    elif event == "unsubscribe":
+        logger.info(f"User {from_user} unsubscribed.")
+        return ""
+        
+    return ""
+
+async def handle_wx_text_message(wx_service: WxService, data: dict, from_user: str, to_user: str) -> str:
+    """Handle normal text messages and return plain reply XML or empty string."""
+    content = data.get("Content", "")
+    logger.info(f"User {from_user} sent text: {content}")
+    # 可以在这里添加自动回复功能，目前默认忽略返回空串
+    return ""
+
 @router.post("/wx/message")
 async def wx_message_post(
     request: Request,
@@ -92,8 +134,6 @@ async def wx_message_post(
         print(f"Received WeChat message (Secure): {data}")
         
         msg_type = data.get("MsgType")
-        event = data.get("Event")
-        event_key = data.get("EventKey") or ""
         from_user = data.get("FromUserName")
         to_user = data.get("ToUserName")
         
@@ -104,24 +144,16 @@ async def wx_message_post(
         else:
             logger.info(f"Sender Identity: Unbound WeChat User (OpenID: {from_user})")
             print(f"Sender Identity: Unbound WeChat User (OpenID: {from_user})")
-        
-        scene_str = event_key
-        if event == "subscribe" and scene_str.startswith("qrscene_"):
-            scene_str = scene_str[8:]
             
-        if msg_type == "event" and event in ["SCAN", "subscribe"] and scene_str:
-            redis_client = redis_manager.get_client()
-            if redis_client:
-                redis_client.setex(f"wx_scan_{scene_str}", 300, from_user)
-                
-            reply_xml_str = wx_service.create_xml_reply(from_user, to_user, "操作成功！请返回网页端查看。")
-            # Encrypt the reply
-            encrypted_reply = crypt.generate_encrypted_xml_response(reply_xml_str, nonce)
-            return Response(content=encrypted_reply, media_type="application/xml")
+        reply_xml_str = ""
+        if msg_type == "event":
+            reply_xml_str = await handle_wx_event_message(wx_service, data, from_user, to_user)
+        elif msg_type == "text":
+            reply_xml_str = await handle_wx_text_message(wx_service, data, from_user, to_user)
+        else:
+            logger.info(f"Unhandled message type: {msg_type}")
             
-        if msg_type == "event" and event == "subscribe" and not scene_str:
-            welcome_text = "欢迎关注上海朗湖智能科技！\n在这里您可以随时掌握设备健康状态，接收实时报警信息。"
-            reply_xml_str = wx_service.create_xml_reply(from_user, to_user, welcome_text)
+        if reply_xml_str:
             encrypted_reply = crypt.generate_encrypted_xml_response(reply_xml_str, nonce)
             return Response(content=encrypted_reply, media_type="application/xml")
             
