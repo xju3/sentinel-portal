@@ -9,6 +9,6 @@
 **/build
 data
 logs
-*.bin
-*.json
-*.sqlite
+/*.bin
+/*.json
+/*.sqlite
