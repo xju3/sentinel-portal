@@ -44,7 +44,7 @@ export const request: RequestConfig = {
         }
 
         // For other error codes, show error message
-        if (body && body.code !== 0 && body.code !== undefined) {
+        if (body && body.code !== 0 && body.code !== 200 && body.code !== 202 && body.code !== undefined) {
           message.error(body.message || `Error (code: ${body.code})`);
         }
 
