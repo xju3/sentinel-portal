@@ -206,7 +206,12 @@ async def get_bind_status(
             raise HTTPException(status_code=403, detail="Permission denied")
             
         # Update database
-        db_account = await AuthService.get_account(session, account_id_str)
+        try:
+            account_uuid = uuid.UUID(account_id_str)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid account ID format")
+            
+        db_account = await AuthService.get_account(session, account_uuid)
         if db_account:
             await AuthService.bind_account_wx(session, db_account, wx_user_id)
             
