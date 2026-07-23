@@ -186,11 +186,35 @@ export default defineConfig({
     },
 
     {
-      path: '/tenant',
-      name: '公司信息',
+      path: '/org',
+      name: '组织架构',
       icon: 'TeamOutlined',
-      hideInMenu: true,
-      component: '@/pages/Tenant',
+      routes: [
+        {
+          path: '/org/tenant',
+          name: '公司信息',
+          component: '@/pages/Org/Tenant',
+        },
+        {
+          path: '/org/departments',
+          name: '部门资料',
+          component: '@/pages/Org/Departments',
+        },
+        {
+          path: '/org/employees',
+          name: '员工资料',
+          component: '@/pages/Org/Employees',
+        },
+        {
+          path: '/org/users',
+          name: '系统用户',
+          component: '@/pages/Org/SystemUsers',
+        },
+        {
+          path: '/org',
+          redirect: '/org/tenant',
+        },
+      ],
     },
 
     {

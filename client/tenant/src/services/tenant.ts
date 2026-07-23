@@ -44,14 +44,20 @@ export type AccountInfo = {
   contact_name?: string | null;
   tenant_id: string;
   wx_user_id?: string | null;
+  email?: string | null;
+  mobile?: string | null;
+  employee_id?: string | null;
 };
 
-export type AccountCreatePayload = {
-  contact_name: string;
+export type TenantAccountCreatePayload = {
   username: string;
-  password: string;
-  flag?: number;
+  password?: string;
+  flag: number;
   active?: boolean;
+  contact_name?: string;
+  email?: string;
+  mobile?: string;
+  employee_id?: string;
 };
 
 export async function listTenantAccounts() {
@@ -60,7 +66,7 @@ export async function listTenantAccounts() {
   });
 }
 
-export async function createTenantAccount(payload: AccountCreatePayload) {
+export async function createTenantAccount(payload: TenantAccountCreatePayload) {
   return request<AccountInfo>('/api/v1/accounts/by-tenant', {
     method: 'POST',
     data: payload,

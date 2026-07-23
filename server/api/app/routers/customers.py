@@ -513,6 +513,7 @@ async def create_tenant_account(
         contact_id=account.contact_id,
         contact_name=contact.name,
         tenant_id=account.tenant_id,
+        employee_id=account.employee_id,
     ))
 
 

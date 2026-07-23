@@ -13,3 +13,4 @@ def import_all_models() -> None:
     from pub.models import device as device  # noqa: F401
     from pub.models import diagnosis as diagnosis  # noqa: F401
     from pub.models import sensor as sensor  # noqa: F401
+    from pub.models import org as org  # noqa: F401

@@ -142,10 +142,14 @@ class AccountResponse(BaseModel):
     username: str
     flag: int
     active: bool
-    admin: Optional[bool] = False
+    admin: bool
     contact_id: Optional[UUID] = None
     contact_name: Optional[str] = None
     tenant_id: UUID
+    wx_user_id: Optional[str] = None
+    email: Optional[str] = None
+    mobile: Optional[str] = None
+    employee_id: Optional[UUID] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -156,6 +160,7 @@ class TenantAccountCreate(BaseModel):
     password: str
     flag: Optional[int] = 2
     active: Optional[bool] = True
+    employee_id: Optional[UUID] = None
 
 
 class AdminAccountCreate(BaseModel):
