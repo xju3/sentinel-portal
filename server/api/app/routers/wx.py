@@ -46,10 +46,36 @@ async def wx_message_get(
     else:
         return Response(content="error")
 
-async def handle_wx_event_message(wx_service: WxService, data: dict, from_user: str, to_user: str) -> str:
+async def handle_wx_event_message(wx_service: WxService, data: dict, from_user: str, to_user: str, session: AsyncSession) -> str:
     """Handle event messages (subscribe, unsubscribe, scan, etc.) and return plain reply XML or empty string."""
     event = data.get("Event")
     event_key = data.get("EventKey") or ""
+    
+    async def process_scene(scene: str) -> str:
+        redis_client = redis_manager.get_client()
+        if not redis_client:
+            return ""
+            
+        if scene.startswith("bind_"):
+            existing_account = await AuthService.get_account_by_wx_user_id(session, from_user)
+            target_account_id = scene.split("_")[1]
+            if existing_account and str(existing_account.id) != target_account_id:
+                return wx_service.create_xml_reply(from_user, to_user, "绑定失败：此微信已被其他账号绑定，请勿重复绑定！")
+            else:
+                redis_client.setex(f"wx_scan_{scene}", 300, from_user)
+                return wx_service.create_xml_reply(from_user, to_user, "扫码成功！请返回网页端完成绑定。")
+                
+        elif scene.startswith("login_"):
+            existing_account = await AuthService.get_account_by_wx_user_id(session, from_user)
+            if not existing_account:
+                return wx_service.create_xml_reply(from_user, to_user, "登录失败：此微信尚未绑定任何系统账号！")
+            else:
+                redis_client.setex(f"wx_scan_{scene}", 300, from_user)
+                return wx_service.create_xml_reply(from_user, to_user, "扫码成功！正在登录系统...")
+                
+        else:
+            redis_client.setex(f"wx_scan_{scene}", 300, from_user)
+            return wx_service.create_xml_reply(from_user, to_user, "操作成功！请返回网页端查看。")
     
     if event == "subscribe":
         scene_str = event_key
@@ -58,10 +84,7 @@ async def handle_wx_event_message(wx_service: WxService, data: dict, from_user: 
             
         if scene_str:
             # Scanned QR code to subscribe
-            redis_client = redis_manager.get_client()
-            if redis_client:
-                redis_client.setex(f"wx_scan_{scene_str}", 300, from_user)
-            return wx_service.create_xml_reply(from_user, to_user, "操作成功！请返回网页端查看。")
+            return await process_scene(scene_str)
         else:
             # Normal subscribe
             welcome_text = "欢迎关注上海朗湖智能科技！\n在这里您可以随时掌握设备健康状态，接收实时报警信息。"
@@ -70,10 +93,7 @@ async def handle_wx_event_message(wx_service: WxService, data: dict, from_user: 
     elif event == "SCAN":
         scene_str = event_key
         if scene_str:
-            redis_client = redis_manager.get_client()
-            if redis_client:
-                redis_client.setex(f"wx_scan_{scene_str}", 300, from_user)
-            return wx_service.create_xml_reply(from_user, to_user, "操作成功！请返回网页端查看。")
+            return await process_scene(scene_str)
             
     elif event == "unsubscribe":
         logger.info(f"User {from_user} unsubscribed.")
@@ -147,7 +167,7 @@ async def wx_message_post(
             
         reply_xml_str = ""
         if msg_type == "event":
-            reply_xml_str = await handle_wx_event_message(wx_service, data, from_user, to_user)
+            reply_xml_str = await handle_wx_event_message(wx_service, data, from_user, to_user, session)
         elif msg_type == "text":
             reply_xml_str = await handle_wx_text_message(wx_service, data, from_user, to_user)
         else:
@@ -203,9 +223,15 @@ async def get_bind_status(
         # Binding successful
         account_id_str = scene_str.split("_")[1]
         
-        if not current_account.admin and str(current_account.id) != account_id_str:
-            raise HTTPException(status_code=403, detail="Permission denied")
+        # if not current_account.admin and str(current_account.id) != account_id_str:
+        #     raise HTTPException(status_code=403, detail="Permission denied")
             
+        # 校验微信是否已被其他账号绑定
+        existing_account = await AuthService.get_account_by_wx_user_id(session, wx_user_id)
+        if existing_account and str(existing_account.id) != account_id_str:
+            redis_client.delete(f"wx_scan_{scene_str}")
+            raise HTTPException(status_code=400, detail="此微信号已绑定其他账号，请勿重复绑定")
+        
         # Update database
         try:
             account_uuid = uuid.UUID(account_id_str)
@@ -218,7 +244,6 @@ async def get_bind_status(
             
             # Clean up redis
             redis_client.delete(f"wx_scan_{scene_str}")
-            
             return {"code": 200, "message": "success"}
     
     return {"code": 202, "message": "waiting"}
