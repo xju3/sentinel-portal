@@ -61,6 +61,7 @@ class DatabaseManager:
             await self._ensure_sensor_task_columns(conn)
             await self._normalize_legacy_firmware_task_actions(conn)
             await self._ensure_account_wx_user_id(conn)
+            await self._ensure_employee_wx_user_id(conn)
         self._schema_ready = True
 
     async def _ensure_account_wx_user_id(self, conn) -> None:
@@ -69,6 +70,14 @@ class DatabaseManager:
         if exists.first() is None:
             await conn.execute(
                 text("ALTER TABLE account ADD COLUMN wx_user_id VARCHAR(255) NULL")
+            )
+
+    async def _ensure_employee_wx_user_id(self, conn) -> None:
+        """Add wx_user_id column to employee table if missing."""
+        exists = await conn.execute(text("SHOW COLUMNS FROM employee LIKE 'wx_user_id'"))
+        if exists.first() is None:
+            await conn.execute(
+                text("ALTER TABLE employee ADD COLUMN wx_user_id VARCHAR(255) NULL COMMENT 'WeChat User ID'")
             )
 
     async def _migrate_diagnosis_records(self, conn) -> None:

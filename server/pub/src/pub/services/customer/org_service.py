@@ -35,9 +35,30 @@ class DepartmentService:
         return result.scalar_one_or_none()
 
     @staticmethod
+    async def _ensure_leader_in_department(session: AsyncSession, dept: Department) -> None:
+        if not dept.leader_id:
+            return
+            
+        stmt = select(EmployeeDepartment).where(
+            EmployeeDepartment.employee_id == dept.leader_id,
+            EmployeeDepartment.department_id == dept.id
+        )
+        result = await session.execute(stmt)
+        if not result.scalars().first():
+            session.add(EmployeeDepartment(
+                employee_id=dept.leader_id,
+                department_id=dept.id,
+                tenant_id=dept.tenant_id
+            ))
+
+    @staticmethod
     async def create_department(session: AsyncSession, data: dict) -> Department:
         db_dept = Department(**data)
         session.add(db_dept)
+        await session.flush()
+        
+        await DepartmentService._ensure_leader_in_department(session, db_dept)
+        
         await session.commit()
         await session.refresh(db_dept)
         return db_dept
@@ -46,6 +67,10 @@ class DepartmentService:
     async def update_department(session: AsyncSession, db_dept: Department, data: dict) -> Department:
         for key, value in data.items():
             setattr(db_dept, key, value)
+            
+        await session.flush()
+        await DepartmentService._ensure_leader_in_department(session, db_dept)
+        
         await session.commit()
         await session.refresh(db_dept)
         return db_dept
@@ -53,6 +78,23 @@ class DepartmentService:
     @staticmethod
     async def delete_department(session: AsyncSession, db_dept: Department) -> None:
         await session.delete(db_dept)
+        await session.commit()
+
+    @staticmethod
+    async def update_department_members(session: AsyncSession, dept_id: UUID, tenant_id: UUID, employee_ids: List[UUID]) -> None:
+        # Delete existing members
+        await session.execute(
+            delete(EmployeeDepartment).where(EmployeeDepartment.department_id == dept_id)
+        )
+        
+        # Add new members
+        for emp_id in employee_ids:
+            session.add(EmployeeDepartment(
+                employee_id=emp_id,
+                department_id=dept_id,
+                tenant_id=tenant_id
+            ))
+            
         await session.commit()
 
 class EmployeeService:
@@ -112,4 +154,26 @@ class EmployeeService:
     @staticmethod
     async def delete_employee(session: AsyncSession, db_emp: Employee) -> None:
         await session.delete(db_emp)
+        await session.commit()
+
+    @staticmethod
+    async def get_employee_by_wx_user_id(
+        session: AsyncSession, wx_user_id: str
+    ) -> Optional[Employee]:
+        stmt = select(Employee).where(Employee.wx_user_id == wx_user_id)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def bind_employee_wx(
+        session: AsyncSession, employee: Employee, wx_user_id: str
+    ) -> None:
+        employee.wx_user_id = wx_user_id
+        await session.commit()
+
+    @staticmethod
+    async def unbind_employee_wx(
+        session: AsyncSession, employee: Employee
+    ) -> None:
+        employee.wx_user_id = None
         await session.commit()

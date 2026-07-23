@@ -22,6 +22,7 @@ import {
   updateTenantAccountPassword,
   getWxBindQrCode,
   checkWxBindStatus,
+  unbindTenantAccountWx,
   type AccountInfo,
 } from '@/services/tenant';
 
@@ -96,6 +97,17 @@ const SystemUsers = () => {
       setBindModalOpen(true);
     } catch (error: any) {
       const detail = error?.data?.detail || '获取绑定二维码失败';
+      message.error(String(detail));
+    }
+  };
+
+  const handleUnbindWx = async (record: AccountInfo) => {
+    try {
+      await unbindTenantAccountWx(record.id);
+      message.success('微信已解绑');
+      fetchAccounts();
+    } catch (error: any) {
+      const detail = error?.data?.detail || '解绑微信失败';
       message.error(String(detail));
     }
   };
@@ -227,24 +239,34 @@ const SystemUsers = () => {
     {
       title: '微信绑定',
       key: 'wx_bind',
-      width: 150,
+      width: 100,
       render: (_: any, record: AccountInfo) => (
         record.wx_user_id ? (
           <Tag color="success">已绑定</Tag>
         ) : (
-          <Space>
-            <Tag color="default">未绑定</Tag>
-            {!record.admin && <a onClick={() => handleBindWx(record)}>去绑定</a>}
-          </Space>
+          <Tag color="default">未绑定</Tag>
         )
       ),
     },
     {
       title: '操作',
       key: 'action',
-      width: 250,
+      width: 320,
       render: (_: any, record: AccountInfo) => (
         <Space>
+          {record.wx_user_id ? (
+            <Popconfirm
+              title="确认解绑"
+              description="确定要解除该账号与微信的绑定吗？"
+              onConfirm={() => handleUnbindWx(record)}
+              okText="确认"
+              cancelText="取消"
+            >
+              <a>解绑微信</a>
+            </Popconfirm>
+          ) : (
+            <a onClick={() => handleBindWx(record)}>绑定微信</a>
+          )}
           <a
             onClick={() => {
               setCurrentAccount(record);

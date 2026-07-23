@@ -107,3 +107,9 @@ export async function checkWxBindStatus(sceneStr: string) {
     skipErrorHandler: true,
   });
 }
+
+export async function unbindTenantAccountWx(accountId: string) {
+  return request(`/api/v1/accounts/by-tenant/${accountId}/unbind-wx`, {
+    method: 'POST',
+  });
+}

@@ -103,6 +103,13 @@ class AccountService:
         return db_account
 
     @staticmethod
+    async def unbind_account_wx(session: AsyncSession, db_account: Account) -> Account:
+        db_account.wx_user_id = None
+        await session.commit()
+        await session.refresh(db_account)
+        return db_account
+
+    @staticmethod
     async def delete_account(session: AsyncSession, db_account: Account) -> None:
         await session.delete(db_account)
         await session.commit()

@@ -1,5 +1,6 @@
 import { PageContainer, ProCard, ProForm, ProFormText } from '@ant-design/pro-components';
-import { message } from 'antd';
+import { Button, Descriptions, message, Space } from 'antd';
+import { EditOutlined } from '@ant-design/icons';
 import { useEffect, useState } from 'react';
 
 import {
@@ -11,6 +12,7 @@ import {
 const TenantPage = () => {
   const [tenant, setTenant] = useState<TenantInfo | null>(null);
   const [loading, setLoading] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
 
   const fetchTenant = async () => {
     setLoading(true);
@@ -37,6 +39,7 @@ const TenantPage = () => {
         api_server: values.api_server,
       });
       message.success('公司信息更新成功');
+      setIsEdit(false);
       fetchTenant();
       return true;
     } catch (error: any) {
@@ -49,17 +52,39 @@ const TenantPage = () => {
 
   return (
     <PageContainer title="公司信息" ghost>
-      <ProCard loading={loading}>
-        {tenant && (
+      <ProCard 
+        loading={loading}
+        title={!isEdit && "基本资料"}
+        extra={
+          !isEdit && (
+            <Button type="primary" icon={<EditOutlined />} onClick={() => setIsEdit(true)}>
+              编辑信息
+            </Button>
+          )
+        }
+      >
+        {tenant && !isEdit && (
+          <Descriptions column={1} bordered>
+            <Descriptions.Item label="公司编码">{tenant.code}</Descriptions.Item>
+            <Descriptions.Item label="公司名称">{tenant.name}</Descriptions.Item>
+            <Descriptions.Item label="MQTT 服务器">{tenant.mqtt_server || '-'}</Descriptions.Item>
+            <Descriptions.Item label="API 服务器">{tenant.api_server || '-'}</Descriptions.Item>
+          </Descriptions>
+        )}
+
+        {tenant && isEdit && (
           <ProForm
             onFinish={handleFinish}
             initialValues={tenant}
             submitter={{
+              render: (props, dom) => (
+                <Space>
+                  {dom[1]}
+                  <Button onClick={() => setIsEdit(false)}>取消</Button>
+                </Space>
+              ),
               searchConfig: {
                 submitText: '保存修改',
-              },
-              resetButtonProps: {
-                style: { display: 'none' },
               },
             }}
             layout="vertical"

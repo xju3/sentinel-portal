@@ -21,6 +21,9 @@ class DepartmentUpdate(BaseModel):
     parent_id: Optional[UUID] = None
     active: Optional[bool] = None
 
+class DepartmentMembersUpdate(BaseModel):
+    employee_ids: List[UUID]
+
 class DepartmentResponse(DepartmentBase):
     id: UUID
     tenant_id: UUID
@@ -49,6 +52,7 @@ class EmployeeResponse(EmployeeBase):
     id: UUID
     tenant_id: UUID
     department_ids: Optional[List[UUID]] = None
+    wx_user_id: Optional[str] = None
 
     class Config:
         from_attributes = True

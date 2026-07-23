@@ -20,6 +20,7 @@ export interface EmployeeInfo {
   tenant_id: string;
   active: boolean;
   department_ids?: string[];
+  wx_user_id?: string;
 }
 
 export async function listDepartments(params?: {
@@ -54,6 +55,13 @@ export async function deleteDepartment(id: string) {
   });
 }
 
+export async function updateDepartmentMembers(id: string, employee_ids: string[]) {
+  return request(`/api/v1/departments/${id}/members`, {
+    method: 'POST',
+    data: { employee_ids },
+  });
+}
+
 export async function listEmployees(params?: {
   skip?: number;
   limit?: number;
@@ -83,5 +91,25 @@ export async function updateEmployee(id: string, data: Partial<EmployeeInfo>) {
 export async function deleteEmployee(id: string) {
   return request(`/api/v1/employees/${id}`, {
     method: 'DELETE',
+  });
+}
+
+export async function unbindEmployeeWx(id: string) {
+  return request(`/api/v1/employees/${id}/unbind-wx`, {
+    method: 'POST',
+  });
+}
+
+export async function getEmpBindQrCode(employeeId: string) {
+  return request('/api/v1/wx/empbind-qrcode', {
+    method: 'GET',
+    params: { target_employee_id: employeeId },
+  });
+}
+
+export async function getEmpBindStatus(sceneStr: string) {
+  return request('/api/v1/wx/empbind-status', {
+    method: 'GET',
+    params: { scene_str: sceneStr },
   });
 }

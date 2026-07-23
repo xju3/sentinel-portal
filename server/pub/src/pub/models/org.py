@@ -52,6 +52,7 @@ class Employee(Base):
     mobile = Column(String(20), nullable=True)
     tenant_id = Column(Uuid(as_uuid=True), nullable=False, index=True)
     active = Column(Boolean, default=True)
+    wx_user_id = Column(String(255), nullable=True, comment="WeChat User ID")
 
     # Relationships
     departments = relationship("Department", secondary="employee_department", back_populates="employees")
