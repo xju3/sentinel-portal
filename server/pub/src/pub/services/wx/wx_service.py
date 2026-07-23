@@ -95,6 +95,32 @@ class WxService:
                 logger.error(f"Failed to send WeChat custom message: {data}")
                 raise Exception(f"WeChat API error: {data.get('errmsg')}")
 
+    async def send_template_message(self, to_user_openid: str, template_id: str, data: Dict[str, Any], url: Optional[str] = None, miniprogram: Optional[Dict[str, str]] = None) -> bool:
+        """Send a template message to a specific user"""
+        access_token = await self.get_access_token()
+        api_url = f"https://api.weixin.qq.com/cgi-bin/message/template/send?access_token={access_token}"
+        
+        payload = {
+            "touser": to_user_openid,
+            "template_id": template_id,
+            "data": data
+        }
+        if url:
+            payload["url"] = url
+        if miniprogram:
+            payload["miniprogram"] = miniprogram
+            
+        async with httpx.AsyncClient() as client:
+            response = await client.post(api_url, json=payload)
+            response.raise_for_status()
+            res_data = response.json()
+            
+            if res_data.get("errcode") == 0:
+                return True
+            else:
+                logger.error(f"Failed to send WeChat template message: {res_data}")
+                raise Exception(f"WeChat API error: {res_data.get('errmsg')}")
+
     @staticmethod
     def verify_signature(signature: str, timestamp: str, nonce: str, token: str = "sentinel_wx_token") -> bool:
         """Verify the WeChat server signature"""

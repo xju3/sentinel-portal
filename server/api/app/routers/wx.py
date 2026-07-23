@@ -314,3 +314,43 @@ async def test_send_msg(
         return success({"message": "消息发送成功"})
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"消息发送失败: {str(e)}")
+
+class SendTemplateRequest(BaseModel):
+    wx_open_id: str
+
+@router.post("/wx/test-send-template")
+async def test_send_template(
+    req: SendTemplateRequest
+):
+    """Test sending a template message to a specific user"""
+    wx_service = get_wx_service()
+    try:
+        from datetime import datetime
+        current_time = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+        template_id = "gkcCWWRQrMMvypWKQypnfcA3dlU4CM3m9uhzmxKe6KE"
+        data = {
+            "character_string11": {
+                "value": "DEV-TEST-001"
+            },
+            "thing2": {
+                "value": "测试告警传感器"
+            },
+            "time3": {
+                "value": current_time
+            },
+            "thing18": {
+                "value": "测试触发的模拟故障"
+            },
+            "phrase20": {
+                "value": "严重"
+            }
+        }
+        await wx_service.send_template_message(
+            to_user_openid=req.wx_open_id, 
+            template_id=template_id, 
+            data=data,
+            url="https://langhu.ai" # 填写实际的详情页面链接
+        )
+        return success({"message": "模板消息发送成功"})
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"模板消息发送失败: {str(e)}")
