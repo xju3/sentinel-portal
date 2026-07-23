@@ -35,6 +35,9 @@ export type ProcessDevice = {
   sn: string;
   area_id?: string | null;
   status: number;
+  employees?: { id: string; name: string }[] | null;
+  process?: { id: string; name: string; code: string };
+  area?: { id: string; name: string };
 };
 
 export type ProcessDevicePayload = {
@@ -180,6 +183,13 @@ export async function updateProcessDevice(id: string, payload: Partial<ProcessDe
 export async function deleteProcessDevice(id: string) {
   return request<{ message: string }>(`/api/v1/process-devices/${id}`, {
     method: 'DELETE',
+  });
+}
+
+export async function updateProcessDeviceEmployees(id: string, employee_ids: string[]) {
+  return request(`/api/v1/process-devices/${id}/employees`, {
+    method: 'POST',
+    data: { employee_ids },
   });
 }
 

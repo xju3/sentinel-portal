@@ -11,6 +11,7 @@ export type DeviceInst = {
   status: number;
   active: number;
   available: number;
+  device_spec?: { id: string; name: string; model: string; brand: string };
 };
 
 export type DeviceInstPayload = {

@@ -163,8 +163,66 @@ from pub.services.common.crud_factory import get_crud_service
 
 ProcessService = get_crud_service(Process)
 ProcessItemService = get_crud_service(ProcessItem)
-ProcessDeviceService = get_crud_service(ProcessDevice)
 ProcessDeviceItemService = get_crud_service(ProcessDeviceItem)
+
+_ProcessDeviceCRUD = get_crud_service(ProcessDevice)
+
+class ProcessDeviceService(_ProcessDeviceCRUD):
+    @staticmethod
+    async def get_all(
+        session: AsyncSession,
+        skip: int,
+        limit: int,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+    ) -> List[ProcessDevice]:
+        from sqlalchemy.orm import selectinload
+        stmt = select(ProcessDevice)
+        stmt = apply_sorting(stmt, ProcessDevice, sort_by, sort_order)
+        stmt = stmt.options(selectinload(ProcessDevice.employees))
+        stmt = stmt.options(selectinload(ProcessDevice.process))
+        stmt = stmt.options(selectinload(ProcessDevice.area))
+        stmt = stmt.offset(skip).limit(limit)
+        result = await session.execute(stmt)
+        return result.scalars().all()
+
+    @staticmethod
+    async def get_by_id(session: AsyncSession, obj_id: UUID) -> Optional[ProcessDevice]:
+        from sqlalchemy.orm import selectinload
+        stmt = select(ProcessDevice).where(ProcessDevice.id == obj_id)
+        stmt = stmt.options(selectinload(ProcessDevice.employees))
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+    @staticmethod
+    async def update_members(
+        session: AsyncSession,
+        tenant_id: UUID,
+        db_obj: ProcessDevice,
+        employee_ids: List[UUID],
+    ) -> None:
+        from pub.models.device import ProcessDeviceEmployee
+        from sqlalchemy import delete
+        from datetime import datetime
+
+        # Delete existing associations
+        await session.execute(
+            delete(ProcessDeviceEmployee).where(
+                ProcessDeviceEmployee.process_device_id == db_obj.id
+            )
+        )
+
+        # Insert new associations explicitly
+        for emp_id in employee_ids:
+            new_mapping = ProcessDeviceEmployee(
+                process_device_id=db_obj.id,
+                employee_id=emp_id,
+                trans_date=datetime.utcnow(),
+                status=True,
+            )
+            session.add(new_mapping)
+
+        await session.commit()
+        await session.refresh(db_obj)
 
 # Backward-compatible aliases for legacy router names.
 DeviceComboSpecService = ProcessService

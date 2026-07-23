@@ -38,6 +38,7 @@ from pub.contract.devices import (
     IsoStandardResponse,
     DeviceCategoryCreate,
     DeviceCategoryUpdate,
+    DeviceCategoryMembersUpdate,
     HealthCheckFreqBrief,
     DeviceCategoryResponse,
     PagedCountResponse,
@@ -178,6 +179,34 @@ def _serialize_device_category(
             if freq_obj is not None
             else None
         ),
+        "employees": [
+            {"id": e.id, "name": e.name} for e in getattr(item, "employees", [])
+        ] if hasattr(item, "employees") else None,
+        "iso_standard": (
+            {
+                "id": getattr(item, "iso_standard").id,
+                "code": getattr(item, "iso_standard").code,
+                "version": getattr(item, "iso_standard").version,
+            }
+            if hasattr(item, "iso_standard") and getattr(item, "iso_standard") is not None
+            else None
+        ),
+        "vib_threshold": (
+            {
+                "id": getattr(item, "vib_threshold").id,
+                "code": getattr(item, "vib_threshold").code,
+            }
+            if hasattr(item, "vib_threshold") and getattr(item, "vib_threshold") is not None
+            else None
+        ),
+        "temp_threshold": (
+            {
+                "id": getattr(item, "temp_threshold").id,
+                "code": getattr(item, "temp_threshold").code,
+            }
+            if hasattr(item, "temp_threshold") and getattr(item, "temp_threshold") is not None
+            else None
+        )
     }
 
 
@@ -317,6 +346,22 @@ async def update_device_category(
         [updated_freq_id],
     )
     return success(_serialize_device_category(updated, freq_map.get(updated_freq_id)))
+
+
+@router.post("/device-categories/{obj_id}/employees")
+async def update_device_category_employees(
+    obj_id: UUID,
+    item: DeviceCategoryMembersUpdate,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    db_obj = await DeviceCategoryService.get_by_id(session, tenant_id, obj_id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="DeviceCategory not found")
+
+    await DeviceCategoryService.update_members(session, tenant_id, db_obj, item.employee_ids)
+    return success({"message": "Employees updated successfully"})
 
 
 @router.delete("/device-categories/{obj_id}")
@@ -653,6 +698,22 @@ async def update_process_device(
     update_data = item.model_dump(exclude_unset=True)
     result = await ProcessDeviceService.update(session, db_obj, update_data)
     return success(result)
+
+
+@router.post("/process-devices/{obj_id}/employees")
+async def update_process_device_employees(
+    obj_id: UUID,
+    item: DeviceCategoryMembersUpdate,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    db_obj = await ProcessDeviceService.get_by_id(session, obj_id)
+    if not db_obj:
+        raise HTTPException(status_code=404, detail="ProcessDevice not found")
+
+    await ProcessDeviceService.update_members(session, tenant_id, db_obj, item.employee_ids)
+    return success({"message": "Employees updated successfully"})
 
 
 @router.delete("/process-devices/{obj_id}")

@@ -136,7 +136,6 @@ const BatchDevicesPage = () => {
         options={{ reload: () => loadRows(current, pageSize, querySn, sort) }}
         optionsRender={renderRefSafeTableOptions}
         cardProps={{ bodyStyle: { paddingInline: 24 } }}
-        toolBarRender={false}
         pagination={{
           current,
           pageSize,

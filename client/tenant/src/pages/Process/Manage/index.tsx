@@ -7,11 +7,12 @@ import {
   ProFormText,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Modal, Popconfirm, Select, Space, Tag, message } from 'antd';
+import { Button, Modal, Popconfirm, Select, Space, Tag, Tooltip, Transfer, message } from 'antd';
 
 import { Area, listAllAreas } from '@/services/area';
 import { DeviceInst, listAllDeviceInsts } from '@/services/deviceInst';
 import { DeviceSpec, listAllDeviceSpecs } from '@/services/deviceSpec';
+import { listEmployees } from '@/services/org';
 import {
   createProcessDevice,
   createProcessDeviceItem,
@@ -21,6 +22,7 @@ import {
   listAllProcessDevices,
   listAllProcessItems,
   listAllProcesses,
+  updateProcessDeviceEmployees,
   Process,
   ProcessDevice,
   ProcessDeviceItem,
@@ -70,42 +72,30 @@ const ProcessManagePage = () => {
   const [query, setQuery] = useState<Record<string, any>>({});
   const [rows, setRows] = useState<ProcessDevice[]>([]);
 
-  const [processes, setProcesses] = useState<Process[]>([]);
   const [processItems, setProcessItems] = useState<ProcessItem[]>([]);
   const [deviceSpecs, setDeviceSpecs] = useState<DeviceSpec[]>([]);
   const [deviceInsts, setDeviceInsts] = useState<DeviceInst[]>([]);
   const [processDeviceItems, setProcessDeviceItems] = useState<ProcessDeviceItem[]>([]);
-  const [areas, setAreas] = useState<Area[]>([]);
 
   const [configOpen, setConfigOpen] = useState(false);
   const [currentInstance, setCurrentInstance] = useState<ProcessDevice | null>(null);
   const [configSelections, setConfigSelections] = useState<Record<string, string[]>>({});
   const [configSaving, setConfigSaving] = useState(false);
 
-  const processMap = useMemo(() => new Map(processes.map((item) => [item.id, item])), [processes]);
+  const [employeeModalOpen, setEmployeeModalOpen] = useState(false);
+  const [currentProcessDevice, setCurrentProcessDevice] = useState<ProcessDevice | null>(null);
+  const [allEmployees, setAllEmployees] = useState<{ key: string; title: string; description: string }[]>([]);
+  const [targetKeys, setTargetKeys] = useState<string[]>([]);
+  const [employeeLoading, setEmployeeLoading] = useState(false);
+
   const specMap = useMemo(() => new Map(deviceSpecs.map((item) => [item.id, item])), [deviceSpecs]);
   const instMap = useMemo(() => new Map(deviceInsts.map((item) => [item.id, item])), [deviceInsts]);
-  const areaMap = useMemo(() => new Map(areas.map((item) => [item.id, item.name])), [areas]);
 
   const loadAll = async () => {
     setLoading(true);
     try {
-      const [instances, templates, templateItems, specs, insts, instanceItems, areaRows] = await Promise.all([
-        listAllProcessDevices(),
-        listAllProcesses(),
-        listAllProcessItems(),
-        listAllDeviceSpecs(),
-        listAllDeviceInsts(),
-        listAllProcessDeviceItems(),
-        listAllAreas(),
-      ]);
+      const instances = await listAllProcessDevices();
       setRows(instances);
-      setProcesses(templates);
-      setProcessItems(templateItems);
-      setDeviceSpecs(specs);
-      setDeviceInsts(insts);
-      setProcessDeviceItems(instanceItems);
-      setAreas(areaRows);
     } catch (error) {
       message.error(toErrorMessage(error));
     } finally {
@@ -153,7 +143,7 @@ const ProcessManagePage = () => {
       }
       return true;
     });
-  }, [areaMap, processMap, query, rows]);
+  }, [query, rows]);
 
   const currentTemplateItems = useMemo(() => {
     if (!currentInstance?.process_id) {
@@ -169,28 +159,84 @@ const ProcessManagePage = () => {
     return processDeviceItems.filter((item) => item.process_device_id === currentInstance.id);
   }, [currentInstance?.id, processDeviceItems]);
 
-  const initializeConfigSelections = (instance: ProcessDevice) => {
-    const templateRows = processItems.filter((item) => item.process_id === instance.process_id);
-    const itemRows = processDeviceItems.filter((item) => item.process_device_id === instance.id);
+  const handleOpenEmployeeModal = async (record: ProcessDevice) => {
+    setCurrentProcessDevice(record);
+    setTargetKeys((record.employees || []).map((e: any) => e.id));
+    setEmployeeModalOpen(true);
+    setEmployeeLoading(true);
+    try {
+      const data = await listEmployees({ skip: 0, limit: 1000 });
+      setAllEmployees(
+        (data || []).map((emp: any) => ({
+          key: emp.id,
+          title: emp.name,
+          description: emp.code,
+        })),
+      );
+    } catch (e) {
+      message.error(toErrorMessage(e));
+    } finally {
+      setEmployeeLoading(false);
+    }
+  };
 
-    const grouped = new Map<string, string[]>();
-    itemRows.forEach((item) => {
-      const inst = instMap.get(item.device_inst_id);
-      if (!inst) {
-        return;
-      }
-      const list = grouped.get(inst.device_spec_id) || [];
-      list.push(inst.id);
-      grouped.set(inst.device_spec_id, list);
-    });
+  const handleSaveEmployees = async () => {
+    if (!currentProcessDevice) return;
+    setEmployeeLoading(true);
+    try {
+      await updateProcessDeviceEmployees(currentProcessDevice.id, targetKeys);
+      message.success('员工分配成功');
+      setEmployeeModalOpen(false);
+      loadAll();
+    } catch (e) {
+      message.error(toErrorMessage(e));
+    } finally {
+      setEmployeeLoading(false);
+    }
+  };
 
-    const selections: Record<string, string[]> = {};
-    templateRows.forEach((row) => {
-      const all = grouped.get(row.device_spec_id) || [];
-      selections[row.id] = all.slice(0, row.qty);
-      grouped.set(row.device_spec_id, all.slice(row.qty));
-    });
-    setConfigSelections(selections);
+  const handleOpenConfigModal = async (instance: ProcessDevice) => {
+    setCurrentInstance(instance);
+    
+    // Fetch configuration options on demand
+    try {
+      const [templateRows, itemRows, allSpecs, allInsts] = await Promise.all([
+        listAllProcessItems(),
+        listAllProcessDeviceItems(),
+        listAllDeviceSpecs(),
+        listAllDeviceInsts(),
+      ]);
+      setProcessItems(templateRows);
+      setProcessDeviceItems(itemRows);
+      setDeviceSpecs(allSpecs);
+      setDeviceInsts(allInsts);
+
+      const instMapLocal = new Map(allInsts.map((item) => [item.id, item]));
+      const instanceTemplateRows = templateRows.filter((item) => item.process_id === instance.process_id);
+      const instanceItemRows = itemRows.filter((item) => item.process_device_id === instance.id);
+
+      const grouped = new Map<string, string[]>();
+      instanceItemRows.forEach((item) => {
+        const inst = instMapLocal.get(item.device_inst_id);
+        if (!inst) {
+          return;
+        }
+        const list = grouped.get(inst.device_spec_id) || [];
+        list.push(inst.id);
+        grouped.set(inst.device_spec_id, list);
+      });
+
+      const selections: Record<string, string[]> = {};
+      instanceTemplateRows.forEach((row) => {
+        const all = grouped.get(row.device_spec_id) || [];
+        selections[row.id] = all.slice(0, row.qty);
+        grouped.set(row.device_spec_id, all.slice(row.qty));
+      });
+      setConfigSelections(selections);
+      setConfigOpen(true);
+    } catch (e) {
+      message.error(toErrorMessage(e));
+    }
   };
 
   const columns: ProColumns<ProcessDevice>[] = [
@@ -200,20 +246,20 @@ const ProcessManagePage = () => {
     {
       title: '工段模板',
       dataIndex: 'process_id',
-      render: (_, row) => processMap.get(row.process_id)?.name || row.process_id,
+      render: (_, row) => row.process?.name || row.process_id,
       sorter: (a, b) => {
-        const labelA = processMap.get(a.process_id)?.name || '';
-        const labelB = processMap.get(b.process_id)?.name || '';
+        const labelA = a.process?.name || '';
+        const labelB = b.process?.name || '';
         return labelA.localeCompare(labelB, 'zh-CN');
       },
     },
     {
       title: '工作区域',
       dataIndex: 'area_id',
-      render: (_, row) => (row.area_id ? areaMap.get(row.area_id) || row.area_id : '-'),
+      render: (_, row) => row.area?.name || row.area_id || '-',
       sorter: (a, b) => {
-        const labelA = a.area_id ? areaMap.get(a.area_id) || '' : '';
-        const labelB = b.area_id ? areaMap.get(b.area_id) || '' : '';
+        const labelA = a.area?.name || '';
+        const labelB = b.area?.name || '';
         return labelA.localeCompare(labelB, 'zh-CN');
       },
     },
@@ -226,22 +272,40 @@ const ProcessManagePage = () => {
       sorter: (a, b) => Number(a.status) - Number(b.status),
     },
     {
+      title: '负责员工',
+      dataIndex: 'employees',
+      hideInSearch: true,
+      render: (_, row) => {
+        const list = row.employees || [];
+        if (list.length === 0) return '-';
+        return (
+          <Tooltip title={list.map((e) => e.name).join('，')}>
+            <Tag color="blue">{list.length} 人</Tag>
+          </Tooltip>
+        );
+      },
+    },
+    {
       title: '操作',
       valueType: 'option',
-      width: OPERATION_COL_WIDTH,
+      width: 200,
       fixed: 'right',
       align: 'center',
       render: (_, row) => (
         <Space size="middle">
           <a
             key="config"
-            onClick={() => {
-              setCurrentInstance(row);
-              initializeConfigSelections(row);
-              setConfigOpen(true);
-            }}
+            onClick={() => handleOpenConfigModal(row)}
           >
             配置
+          </a>
+          <a
+            key="employee"
+            onClick={() => {
+              handleOpenEmployeeModal(row);
+            }}
+          >
+            微信员工
           </a>
           <a
             key="edit"
@@ -273,15 +337,6 @@ const ProcessManagePage = () => {
       ),
     },
   ];
-
-  const processOptions = useMemo(
-    () => processes.map((item) => ({ label: `${item.code} - ${item.name}`, value: item.id })),
-    [processes],
-  );
-  const areaOptions = useMemo(
-    () => areas.map((item) => ({ label: item.name, value: item.id })),
-    [areas],
-  );
 
   return (
     <PageContainer title="工段管理">
@@ -377,10 +432,21 @@ const ProcessManagePage = () => {
         <ProFormSelect
           name="process_id"
           label="工段模板"
-          options={processOptions}
+          request={async () => {
+            const list = await listAllProcesses();
+            return list.map((item) => ({ label: `${item.code} - ${item.name}`, value: item.id }));
+          }}
           rules={[{ required: true, message: '请选择工段模板' }]}
         />
-        <ProFormSelect name="area_id" label="工作区域" options={areaOptions} allowClear />
+        <ProFormSelect
+          name="area_id"
+          label="工作区域"
+          request={async () => {
+            const list = await listAllAreas();
+            return list.map((item) => ({ label: item.name, value: item.id }));
+          }}
+          allowClear
+        />
         <ProFormSelect
           name="status"
           label="状态"
@@ -475,7 +541,7 @@ const ProcessManagePage = () => {
             const options = deviceInsts
               .filter((item) => item.device_spec_id === row.device_spec_id)
               .map((item) => ({
-                label: `${item.code} / ${item.sn}`,
+                label: `${item.code} - ${item.name}`,
                 value: item.id,
                 disabled: selectedInOthers.has(item.id),
               }));
@@ -509,6 +575,26 @@ const ProcessManagePage = () => {
             );
           })}
         </Space>
+      </Modal>
+
+      <Modal
+        title="分配员工"
+        open={employeeModalOpen}
+        onCancel={() => setEmployeeModalOpen(false)}
+        onOk={handleSaveEmployees}
+        confirmLoading={employeeLoading}
+        width={600}
+        destroyOnClose
+      >
+        <Transfer
+          dataSource={allEmployees}
+          titles={['可选员工', '已选员工']}
+          targetKeys={targetKeys}
+          onChange={(newTargetKeys) => setTargetKeys(newTargetKeys as string[])}
+          render={(item) => `${item.title} (${item.description})`}
+          listStyle={{ width: 250, height: 300 }}
+          showSearch
+        />
       </Modal>
     </PageContainer>
   );

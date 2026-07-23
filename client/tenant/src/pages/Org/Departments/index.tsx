@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { PlusOutlined, SearchOutlined } from '@ant-design/icons';
-import { ProCard, PageContainer } from '@ant-design/pro-components';
+import { PlusOutlined, SearchOutlined, ReloadOutlined } from '@ant-design/icons';
+import { ProCard, PageContainer, ProTable } from '@ant-design/pro-components';
 import { Button, Form, Input, Modal, Space, Table, Tag, message, Popconfirm, TreeSelect, Tree, Transfer } from 'antd';
 import { DepartmentInfo, listDepartments, createDepartment, updateDepartment, deleteDepartment, listEmployees, EmployeeInfo, updateDepartmentMembers } from '@/services/org';
 
@@ -261,24 +261,27 @@ const Departments: React.FC = () => {
 
   return (
     <PageContainer title="部门资料" ghost>
-      <ProCard
-        title="部门列表"
-        extra={
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => handleCreate()}>
+      <ProTable<DepartmentInfo>
+        headerTitle="部门列表"
+        dataSource={treeData}
+        columns={columns as any}
+        rowKey="id"
+        loading={loading}
+        pagination={false}
+        size="small"
+        search={false}
+        onChange={handleTableChange}
+        options={{
+          reload: () => { fetchDepartments(tableParams); fetchEmployees(); },
+          setting: true,
+          density: true,
+        }}
+        toolBarRender={() => [
+          <Button key="create" type="primary" icon={<PlusOutlined />} onClick={() => handleCreate()}>
             新增部门
           </Button>
-        }
-      >
-        <Table
-          dataSource={treeData}
-          columns={columns}
-          rowKey="id"
-          loading={loading}
-          pagination={false}
-          size="small"
-          onChange={handleTableChange}
-        />
-      </ProCard>
+        ]}
+      />
 
       {/* Member Management Modal */}
       <Modal

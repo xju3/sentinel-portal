@@ -3,12 +3,33 @@ Device data models
 """
 
 import uuid
-from sqlalchemy import Column, String, Date, Uuid, Integer, SmallInteger, Float, Boolean, Text
+from datetime import datetime
+from sqlalchemy import Column, String, Date, DateTime, Uuid, Integer, SmallInteger, Float, Boolean, Text
 from sqlalchemy.orm import relationship
 
 from pub.models import Base
 
 from pub.models.customer import IsoStandard, HealthCheckFreq, Supplier, Area
+
+class DeviceCategoryEmployee(Base):
+    """Many-to-many relationship between DeviceCategory and Employee"""
+    __tablename__ = "device_category_employee"
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    device_category_id = Column(Uuid(as_uuid=True), nullable=False, index=True)
+    employee_id = Column(Uuid(as_uuid=True), nullable=False, index=True)
+    trans_date = Column(DateTime, default=datetime.utcnow)
+    status = Column(Boolean, default=True)
+
+class ProcessDeviceEmployee(Base):
+    """Many-to-many relationship between ProcessDevice and Employee for alarms"""
+    __tablename__ = "process_device_employee"
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    process_device_id = Column(Uuid(as_uuid=True), nullable=False, index=True)
+    employee_id = Column(Uuid(as_uuid=True), nullable=False, index=True)
+    trans_date = Column(DateTime, default=datetime.utcnow)
+    status = Column(Boolean, default=True)
 
 
 class DeviceCategory(Base):
@@ -31,6 +52,13 @@ class DeviceCategory(Base):
     temp_threshold = relationship("SensorThreshold", primaryjoin="foreign(DeviceCategory.temp_threshold_id) == SensorThreshold.id", lazy="selectin", uselist=False)
     health_check_freq = relationship("HealthCheckFreq", primaryjoin="foreign(DeviceCategory.health_check_freq_id) == HealthCheckFreq.id", lazy="selectin", uselist=False)
     iso_standard = relationship("IsoStandard", primaryjoin="foreign(DeviceCategory.iso_standard_id) == IsoStandard.id", lazy="selectin", uselist=False)
+    employees = relationship(
+        "Employee",
+        secondary="device_category_employee",
+        primaryjoin="foreign(DeviceCategoryEmployee.device_category_id) == DeviceCategory.id",
+        secondaryjoin="foreign(DeviceCategoryEmployee.employee_id) == Employee.id",
+        backref="device_categories"
+    )
 
 class DeviceSpec(Base):
     """Device specification entity model"""
@@ -126,6 +154,13 @@ class ProcessDevice(Base):
 
     process = relationship("Process", primaryjoin="foreign(ProcessDevice.process_id) == Process.id", lazy="selectin", uselist=False)
     area = relationship("Area", primaryjoin="foreign(ProcessDevice.area_id) == Area.id", lazy="selectin", uselist=False)
+    employees = relationship(
+        "Employee",
+        secondary="process_device_employee",
+        primaryjoin="foreign(ProcessDeviceEmployee.process_device_id) == ProcessDevice.id",
+        secondaryjoin="foreign(ProcessDeviceEmployee.employee_id) == Employee.id",
+        backref="process_devices"
+    )
 
     def __repr__(self):
         return f"<ProcessDevice {self.id}: {self.code} - {self.sn}>"

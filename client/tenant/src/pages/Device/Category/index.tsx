@@ -8,9 +8,11 @@ import {
   ProFormText,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Popconfirm, Space, message } from 'antd';
+import { Button, Popconfirm, Space, message, Tag, Tooltip, Modal, Transfer } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import type { TransferProps } from 'antd';
 import EntityPicker from '@/components/EntityPicker';
+import { EmployeeInfo, listEmployees } from '@/services/org';
 
 import {
   DeviceCategory,
@@ -22,6 +24,7 @@ import {
   listIsoStandards,
   queryDeviceCategories,
   updateDeviceCategory,
+  updateDeviceCategoryEmployees,
 } from '@/services/deviceCategory';
 import { listSensorThresholds } from '@/services/sensorThreshold';
 
@@ -94,11 +97,15 @@ const DeviceCategoryPage = () => {
   const [tableLoading, setTableLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [query, setQuery] = useState<Record<string, any>>({});
   const [editing, setEditing] = useState<DeviceCategory | null>(null);
   const [createChildParent, setCreateChildParent] = useState<DeviceCategory | null>(null);
 
   const [categories, setCategories] = useState<DeviceCategory[]>([]);
-  const [query, setQuery] = useState<Record<string, any>>({});
+  const [employees, setEmployees] = useState<{ id: string; name: string; email?: string; mobile?: string }[]>([]);
+  const [transferModalOpen, setTransferModalOpen] = useState(false);
+  const [currentCategory, setCurrentCategory] = useState<DeviceCategory | null>(null);
+  const [targetKeys, setTargetKeys] = useState<TransferProps['targetKeys']>([]);
   const [healthFreqOptions, setHealthFreqOptions] = useState<
     { label: string; value: string }[]
   >([]);
@@ -170,49 +177,8 @@ const DeviceCategoryPage = () => {
     }
   };
 
-  const loadReferences = async () => {
-    try {
-      const [freqs, isos, thresholds] = await Promise.all([
-        listHealthCheckFreqs(),
-        listIsoStandards(),
-        listSensorThresholds(),
-      ]);
-      setHealthFreqOptions(
-        (freqs || []).map((item) => ({
-          value: item.id,
-          label: `巡检${item.patrol}m / 诊断${item.diagnosis}m / 上报${item.report}`,
-        })),
-      );
-      setIsoOptions(
-        (isos || []).map((item) => ({
-          value: item.id,
-          label: `${item.code} (ISO-${item.version === 1 ? '10816' : '20816'})`,
-        })),
-      );
-      setVibThresholdOptions(
-        (thresholds || [])
-          .filter((item) => item.metric === 1)
-          .map((item) => ({
-            value: item.id,
-            label: `${item.code} - 振动阀值`,
-          })),
-      );
-      setTempThresholdOptions(
-        (thresholds || [])
-          .filter((item) => item.metric === 2)
-          .map((item) => ({
-            value: item.id,
-            label: `${item.code} - 温度阀值`,
-          })),
-      );
-    } catch (error) {
-      message.error(toErrorMessage(error));
-    }
-  };
-
   useEffect(() => {
     loadCategories();
-    loadReferences();
   }, []);
 
   const columns: ProColumns<CategoryTreeRow>[] = [
@@ -245,29 +211,15 @@ const DeviceCategoryPage = () => {
       title: '振动阀值',
       dataIndex: 'vib_threshold_id',
       ellipsis: true,
-      render: (_, row) =>
-        row.vib_threshold_id
-          ? thresholdLabelMap.get(row.vib_threshold_id) || row.vib_threshold_id
-          : '-',
-      sorter: (a, b) => {
-        const labelA = a.vib_threshold_id ? thresholdLabelMap.get(a.vib_threshold_id) || '' : '';
-        const labelB = b.vib_threshold_id ? thresholdLabelMap.get(b.vib_threshold_id) || '' : '';
-        return labelA.localeCompare(labelB, 'zh-CN');
-      },
+      render: (_, row) => row.vib_threshold?.code || '-',
+      sorter: (a, b) => (a.vib_threshold?.code || '').localeCompare(b.vib_threshold?.code || '', 'zh-CN'),
     },
     {
       title: '温度阀值',
       dataIndex: 'temp_threshold_id',
       ellipsis: true,
-      render: (_, row) =>
-        row.temp_threshold_id
-          ? thresholdLabelMap.get(row.temp_threshold_id) || row.temp_threshold_id
-          : '-',
-      sorter: (a, b) => {
-        const labelA = a.temp_threshold_id ? thresholdLabelMap.get(a.temp_threshold_id) || '' : '';
-        const labelB = b.temp_threshold_id ? thresholdLabelMap.get(b.temp_threshold_id) || '' : '';
-        return labelA.localeCompare(labelB, 'zh-CN');
-      },
+      render: (_, row) => row.temp_threshold?.code || '-',
+      sorter: (a, b) => (a.temp_threshold?.code || '').localeCompare(b.temp_threshold?.code || '', 'zh-CN'),
     },
     {
       title: '监测频率',
@@ -275,9 +227,7 @@ const DeviceCategoryPage = () => {
       ellipsis: true,
       render: (_, row) => {
         const freq = row.health_check_freq;
-        if (!freq) {
-          return row.health_check_freq_id;
-        }
+        if (!freq) return row.health_check_freq_id;
         return `巡检${freq.patrol}m / 诊断${freq.diagnosis}m / 上报${freq.report}`;
       },
       sorter: (a, b) => {
@@ -292,11 +242,27 @@ const DeviceCategoryPage = () => {
       title: 'ISO',
       dataIndex: 'iso_standard_id',
       ellipsis: true,
-      render: (_, row) =>
-        row.iso_standard_id
-          ? isoLabelMap.get(row.iso_standard_id) || row.iso_standard_id
-          : '-',
-      sorter: (a, b) => (a.iso_standard_id || '').localeCompare(b.iso_standard_id || '', 'zh-CN'),
+      render: (_, row) => {
+        const iso = row.iso_standard;
+        return iso ? `${iso.code} (ISO-${iso.version === 1 ? '10816' : '20816'})` : '-';
+      },
+      sorter: (a, b) => (a.iso_standard?.code || '').localeCompare(b.iso_standard?.code || '', 'zh-CN'),
+    },
+    {
+      title: '负责员工',
+      key: 'employees',
+      render: (_, row) => {
+        const emps = row.employees || [];
+        if (emps.length === 0) {
+          return <Tag color="default">无</Tag>;
+        }
+        const names = emps.map(e => e.name).join(', ');
+        return (
+          <Tooltip title={names}>
+            <Tag color="blue">{emps.length} 名负责员工</Tag>
+          </Tooltip>
+        );
+      },
     },
     {
       title: '备注',
@@ -332,6 +298,20 @@ const DeviceCategoryPage = () => {
             }}
           >
             编辑
+          </a>
+          <a
+            key="employees"
+            onClick={async () => {
+              setCurrentCategory(row);
+              setTargetKeys((row.employees || []).map(e => e.id));
+              setTransferModalOpen(true);
+              if (employees.length === 0) {
+                const emps = await listEmployees();
+                setEmployees(emps || []);
+              }
+            }}
+          >
+            负责员工
           </a>
           <Popconfirm
             key="delete"
@@ -532,11 +512,51 @@ const DeviceCategoryPage = () => {
           name="health_check_freq_id"
           label="巡检频率"
           rules={[{ required: true, message: '请选择巡检频率' }]}
-          options={healthFreqOptions}
+          request={async () => {
+            const freqs = await listHealthCheckFreqs();
+            return (freqs || []).map((item) => ({
+              value: item.id,
+              label: `巡检${item.patrol}m / 诊断${item.diagnosis}m / 上报${item.report}`,
+            }));
+          }}
         />
-        <ProFormSelect name="iso_standard_id" label="ISO标准" options={isoOptions} />
-        <ProFormSelect name="vib_threshold_id" label="振动阀值" options={vibThresholdOptions} />
-        <ProFormSelect name="temp_threshold_id" label="温度阀值" options={tempThresholdOptions} />
+        <ProFormSelect
+          name="iso_standard_id"
+          label="ISO标准"
+          request={async () => {
+            const isos = await listIsoStandards();
+            return (isos || []).map((item) => ({
+              value: item.id,
+              label: `${item.code} (ISO-${item.version === 1 ? '10816' : '20816'})`,
+            }));
+          }}
+        />
+        <ProFormSelect
+          name="vib_threshold_id"
+          label="振动阀值"
+          request={async () => {
+            const thresholds = await listSensorThresholds();
+            return (thresholds || [])
+              .filter((item) => item.metric === 1)
+              .map((item) => ({
+                value: item.id,
+                label: `${item.code} - 振动阀值`,
+              }));
+          }}
+        />
+        <ProFormSelect
+          name="temp_threshold_id"
+          label="温度阀值"
+          request={async () => {
+            const thresholds = await listSensorThresholds();
+            return (thresholds || [])
+              .filter((item) => item.metric === 2)
+              .map((item) => ({
+                value: item.id,
+                label: `${item.code} - 温度阀值`,
+              }));
+          }}
+        />
         <ProForm.Item name="parent_id" label="上级分类">
           <EntityPicker<DeviceCategory>
             placeholder="可选，点击选择上级分类"
@@ -569,6 +589,53 @@ const DeviceCategoryPage = () => {
           />
         </ProForm.Item>
       </ModalForm>
+
+      {/* 负责员工配置弹窗 */}
+      <Modal
+        title={`设置负责员工 - ${currentCategory?.name}`}
+        open={transferModalOpen}
+        onCancel={() => {
+          setTransferModalOpen(false);
+          setCurrentCategory(null);
+          setTargetKeys([]);
+        }}
+        onOk={async () => {
+          if (!currentCategory) return;
+          setSaving(true);
+          try {
+            await updateDeviceCategoryEmployees(currentCategory.id, targetKeys as string[]);
+            message.success('负责员工设置成功');
+            setTransferModalOpen(false);
+            setCurrentCategory(null);
+            setTargetKeys([]);
+            await loadCategories();
+          } catch (error) {
+            message.error(toErrorMessage(error));
+          } finally {
+            setSaving(false);
+          }
+        }}
+        confirmLoading={saving}
+        width={700}
+        destroyOnClose
+      >
+        <Transfer
+          dataSource={employees.map(emp => ({
+            key: emp.id,
+            title: `${emp.name} (${emp.mobile || '无手机号'})`,
+            description: emp.name,
+          }))}
+          showSearch
+          listStyle={{
+            width: 300,
+            height: 400,
+          }}
+          targetKeys={targetKeys}
+          onChange={(newTargetKeys) => setTargetKeys(newTargetKeys)}
+          render={item => item.title}
+          titles={['可选员工', '已选负责员工']}
+        />
+      </Modal>
     </PageContainer>
   );
 };

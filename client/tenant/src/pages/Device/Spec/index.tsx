@@ -98,24 +98,11 @@ const DeviceSpecPage = () => {
   const [editing, setEditing] = useState<DeviceSpec | null>(null);
   const [query, setQuery] = useState<Record<string, any>>({});
 
-  const [categories, setCategories] = useState<DeviceCategory[]>([]);
-  const [suppliers, setSuppliers] = useState<Supplier[]>([]);
-
-  const categoryMap = useMemo(
-    () => new Map(categories.map((item) => [item.id, item.name])),
-    [categories],
-  );
-  const supplierMap = useMemo(
-    () => new Map(suppliers.map((item) => [item.id, item.name])),
-    [suppliers],
-  );
-
-  const categoryTreeData = useMemo(() => buildCategoryTree(categories), [categories]);
-
   const loadRows = async () => {
     setLoading(true);
     try {
-      setRows(await listAllDeviceSpecs());
+      const specs = await listAllDeviceSpecs();
+      setRows(specs);
     } catch (error) {
       message.error(toErrorMessage(error));
     } finally {
@@ -140,7 +127,7 @@ const DeviceSpecPage = () => {
         return false;
       }
       if (query.supplier_id) {
-        const supplierName = supplierMap.get(row.supplier_id) || '';
+        const supplierName = row.supplier?.name || '';
         const hit =
           norm(supplierName).includes(norm(query.supplier_id)) ||
           norm(row.supplier_id).includes(norm(query.supplier_id));
@@ -149,7 +136,7 @@ const DeviceSpecPage = () => {
         }
       }
       if (query.device_category_id) {
-        const categoryName = categoryMap.get(row.device_category_id) || '';
+        const categoryName = row.device_category?.name || '';
         const hit =
           norm(categoryName).includes(norm(query.device_category_id)) ||
           norm(row.device_category_id).includes(norm(query.device_category_id));
@@ -240,7 +227,7 @@ const DeviceSpecPage = () => {
       title: '分类',
       dataIndex: 'device_category_id',
       width: 100,
-      render: (_, row) => row.device_category?.name || row.device_category_id,
+      render: (_, row) => row.device_category?.name || '-',
       sorter: (a, b) => {
         const labelA = a.device_category?.name || '';
         const labelB = b.device_category?.name || '';
@@ -250,7 +237,7 @@ const DeviceSpecPage = () => {
     {
       title: '供应商',
       dataIndex: 'supplier_id',
-      render: (_, row) => row.supplier?.name || row.supplier_id,
+      render: (_, row) => row.supplier?.name || '-',
       sorter: (a, b) => {
         const labelA = a.supplier?.name || '';
         const labelB = b.supplier?.name || '';
@@ -412,7 +399,7 @@ const DeviceSpecPage = () => {
             placeholder="请点击选择供应商"
             modalTitle="选择供应商"
             triggerText="选择"
-            valueLabel={editing ? supplierMap.get(editing.supplier_id) : undefined}
+            valueLabel={editing?.supplier?.name}
             columns={supplierPickerColumns}
             getRecordLabel={(record) => record.name}
             fetcher={({ current, pageSize, keyword }) =>
@@ -429,13 +416,8 @@ const DeviceSpecPage = () => {
             placeholder="请点击选择设备分类"
             modalTitle="选择设备分类"
             triggerText="选择"
-            valueLabel={editing ? categoryMap.get(editing.device_category_id) : undefined}
+            valueLabel={editing?.device_category?.name}
             columns={categoryPickerColumns}
-            treeData={categoryTreeData}
-            treeColumns={[
-              { title: '分类名称', dataIndex: 'name' },
-              { title: '描述', dataIndex: 'description', render: (_, row) => row.description || '-' },
-            ]}
             getRecordLabel={(record) => record.name}
             fetcher={({ current, pageSize, keyword }) =>
               queryDeviceCategories({ current, pageSize, keyword })

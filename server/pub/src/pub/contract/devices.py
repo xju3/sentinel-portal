@@ -73,6 +73,32 @@ class HealthCheckFreqBrief(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class DeviceCategoryMembersUpdate(BaseModel):
+    employee_ids: List[UUID]
+
+
+class EmployeeBrief(BaseModel):
+    id: UUID
+    name: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class IsoStandardBrief(BaseModel):
+    id: UUID
+    code: str
+    version: int
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class SensorThresholdBrief(BaseModel):
+    id: UUID
+    code: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class DeviceCategoryResponse(BaseModel):
     id: UUID
     name: str
@@ -84,6 +110,10 @@ class DeviceCategoryResponse(BaseModel):
     vib_threshold_id: Optional[UUID] = None
     temp_threshold_id: Optional[UUID] = None
     health_check_freq: Optional[HealthCheckFreqBrief] = None
+    iso_standard: Optional[IsoStandardBrief] = None
+    vib_threshold: Optional[SensorThresholdBrief] = None
+    temp_threshold: Optional[SensorThresholdBrief] = None
+    employees: Optional[List[EmployeeBrief]] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -117,6 +147,20 @@ class DeviceSpecUpdate(BaseModel):
     device_category_id: Optional[UUID] = None
 
 
+class SupplierBrief(BaseModel):
+    id: UUID
+    name: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class DeviceCategoryBrief(BaseModel):
+    id: UUID
+    name: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class DeviceSpecResponse(BaseModel):
     id: UUID
     name: str
@@ -127,6 +171,8 @@ class DeviceSpecResponse(BaseModel):
     rpm: int
     supplier_id: UUID
     device_category_id: UUID
+    supplier: Optional[SupplierBrief] = None
+    device_category: Optional[DeviceCategoryBrief] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -154,6 +200,15 @@ class DeviceInstUpdate(BaseModel):
     status: Optional[int] = None
 
 
+class DeviceSpecBrief(BaseModel):
+    id: UUID
+    name: str
+    model: str
+    brand: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
 class DeviceInstResponse(BaseModel):
     id: UUID
     name: str
@@ -163,6 +218,7 @@ class DeviceInstResponse(BaseModel):
     life_span: int
     desc: str
     status: int
+    device_spec: Optional[DeviceSpecBrief] = None
 
     model_config = ConfigDict(from_attributes=True)
 
@@ -237,6 +293,15 @@ class ProcessDeviceUpdate(BaseModel):
     status: Optional[int] = None
 
 
+class ProcessBrief(BaseModel):
+    id: UUID
+    name: str
+    code: str
+
+class AreaBrief(BaseModel):
+    id: UUID
+    name: str
+
 class ProcessDeviceResponse(BaseModel):
     id: UUID
     code: str
@@ -244,8 +309,12 @@ class ProcessDeviceResponse(BaseModel):
     sn: str
     area_id: Optional[UUID] = None
     status: int
+    employees: Optional[List[EmployeeBrief]] = None
+    process: Optional[ProcessBrief] = None
+    area: Optional[AreaBrief] = None
 
     model_config = ConfigDict(from_attributes=True)
+
 
 
 # ==========================================

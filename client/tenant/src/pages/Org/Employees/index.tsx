@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
-import { PlusOutlined } from '@ant-design/icons';
-import { ProCard, PageContainer } from '@ant-design/pro-components';
+import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
+import { ProCard, PageContainer, ProTable } from '@ant-design/pro-components';
 import { Button, Form, Input, Modal, Space, Table, Tag, message, Popconfirm, TreeSelect } from 'antd';
 import { QRCodeCanvas } from 'qrcode.react';
 import { EmployeeInfo, listEmployees, createEmployee, updateEmployee, deleteEmployee, listDepartments, DepartmentInfo, unbindEmployeeWx, getEmpBindQrCode, getEmpBindStatus } from '@/services/org';
@@ -276,24 +276,27 @@ const Employees: React.FC = () => {
 
   return (
     <PageContainer title="员工资料" ghost>
-      <ProCard
-        title="员工列表"
-        extra={
-          <Button type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
+      <ProTable<EmployeeInfo>
+        headerTitle="员工列表"
+        dataSource={employees}
+        columns={columns as any}
+        rowKey="id"
+        loading={loading}
+        pagination={{ pageSize: 10 }}
+        size="small"
+        search={false}
+        onChange={handleTableChange}
+        options={{
+          reload: () => { fetchEmployees(tableParams); fetchDependencies(); },
+          setting: true,
+          density: true,
+        }}
+        toolBarRender={() => [
+          <Button key="create" type="primary" icon={<PlusOutlined />} onClick={handleCreate}>
             新增员工
           </Button>
-        }
-      >
-        <Table
-          dataSource={employees}
-          columns={columns}
-          rowKey="id"
-          loading={loading}
-          pagination={{ pageSize: 10 }}
-          size="small"
-          onChange={handleTableChange}
-        />
-      </ProCard>
+        ]}
+      />
 
       {/* 微信绑定弹窗 */}
       <Modal

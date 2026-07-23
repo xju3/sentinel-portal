@@ -1,5 +1,5 @@
-import { PlusOutlined } from '@ant-design/icons';
-import { PageContainer, ProCard } from '@ant-design/pro-components';
+import { PlusOutlined, ReloadOutlined } from '@ant-design/icons';
+import { PageContainer, ProCard, ProTable } from '@ant-design/pro-components';
 import { QRCodeCanvas } from 'qrcode.react';
 import {
   Button,
@@ -304,23 +304,26 @@ const SystemUsers = () => {
 
   return (
     <PageContainer title="系统用户" ghost>
-      <ProCard
-        title="系统用户"
-        extra={
-          <Button type="primary" icon={<PlusOutlined />} onClick={() => setCreateModalOpen(true)}>
+      <ProTable<AccountInfo>
+        headerTitle="系统用户"
+        dataSource={accounts}
+        columns={columns as any}
+        rowKey="id"
+        loading={accountsLoading}
+        pagination={false}
+        size="small"
+        search={false}
+        options={{
+          reload: () => fetchAccounts(),
+          setting: true,
+          density: true,
+        }}
+        toolBarRender={() => [
+          <Button key="create" type="primary" icon={<PlusOutlined />} onClick={() => setCreateModalOpen(true)}>
             新增账号
           </Button>
-        }
-      >
-        <Table
-          dataSource={accounts}
-          columns={columns}
-          rowKey="id"
-          loading={accountsLoading}
-          pagination={false}
-          size="small"
-        />
-      </ProCard>
+        ]}
+      />
 
       {/* 修改密码弹窗 */}
       <Modal

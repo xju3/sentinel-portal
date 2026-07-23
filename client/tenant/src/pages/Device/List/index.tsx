@@ -66,19 +66,6 @@ const DeviceListPage = () => {
   const [query, setQuery] = useState<Record<string, any>>({});
   const [editing, setEditing] = useState<DeviceInst | null>(null);
   const [copyMode, setCopyMode] = useState(false);
-  const [specs, setSpecs] = useState<DeviceSpec[]>([]);
-
-
-  const specMap = useMemo(
-    () =>
-      new Map(
-        specs.map((item) => [
-          item.id,
-          `${item.name} / ${item.model}${item.brand ? ` / ${item.brand}` : ''}`,
-        ]),
-      ),
-    [specs],
-  );
 
   const loadRows = async () => {
     setLoading(true);
@@ -185,7 +172,7 @@ const DeviceListPage = () => {
       width: 260,
       render: (_, row: any) => {
         const spec = row.device_spec;
-        return spec ? `${spec.name} / ${spec.model}${spec.brand ? ` / ${spec.brand}` : ''}` : row.device_spec_id;
+        return spec ? `${spec.name} / ${spec.model}${spec.brand ? ` / ${spec.brand}` : ''}` : '-';
       },
       sorter: true,
     },
@@ -466,7 +453,7 @@ const DeviceListPage = () => {
             valueLabel={
               editing?.device_spec
                 ? `${editing.device_spec.name} / ${editing.device_spec.model}${editing.device_spec.brand ? ` / ${editing.device_spec.brand}` : ''}`
-                : editing?.device_spec_id
+                : undefined
             }
             fetcher={queryDeviceSpecs}
             columns={specPickerColumns}

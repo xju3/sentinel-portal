@@ -195,7 +195,6 @@ const MonitoringSensorsPage = () => {
         options={{ reload: () => loadRows(current, pageSize, sort) }}
         optionsRender={renderRefSafeTableOptions}
         cardProps={{ bodyStyle: { paddingInline: 24 } }}
-        toolBarRender={false}
         pagination={{
           current,
           pageSize,
