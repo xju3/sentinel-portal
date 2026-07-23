@@ -478,6 +478,8 @@ async def list_tenant_accounts(
             contact_id=a.contact_id,
             contact_name=contact_map.get(a.contact_id) if a.contact_id else None,
             tenant_id=a.tenant_id,
+            wx_user_id=a.wx_user_id,
+            employee_id=a.employee_id,
         )
         response.append(resp)
     return success(response)
@@ -514,6 +516,7 @@ async def create_tenant_account(
         contact_name=contact.name,
         tenant_id=account.tenant_id,
         employee_id=account.employee_id,
+        wx_user_id=account.wx_user_id,
     ))
 
 
@@ -567,6 +570,24 @@ async def delete_tenant_account(
 
     await AccountService.delete_account(session, db_account)
     return success({"message": "Account deleted successfully"})
+
+
+@router.post("/accounts/by-tenant/{account_id}/unbind-wx")
+async def unbind_tenant_account_wx(
+    account_id: UUID,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    """Unbind WeChat from an account belonging to the current tenant"""
+    db_account = await AccountService.get_tenant_account(session, account_id, cast(UUID, current_account.tenant_id))
+    if not db_account:
+        raise HTTPException(status_code=404, detail="Account not found")
+
+    if not db_account.wx_user_id:
+        return success({"message": "Account is not bound to WeChat"})
+
+    await AccountService.unbind_account_wx(session, db_account)
+    return success({"message": "WeChat unbound successfully"})
 
 
 @router.get("/accounts")

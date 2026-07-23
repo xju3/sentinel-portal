@@ -17,6 +17,7 @@ from pub.contract.org import (
     DepartmentCreate,
     DepartmentUpdate,
     DepartmentResponse,
+    DepartmentMembersUpdate,
     EmployeeCreate,
     EmployeeUpdate,
     EmployeeResponse,
@@ -93,6 +94,27 @@ async def update_department(
     update_data = department.model_dump(exclude_unset=True)
     dept = await DepartmentService.update_department(session, db_dept, update_data)
     return success(DepartmentResponse.model_validate(dept))
+
+@router.post("/departments/{dept_id}/members")
+async def update_department_members_api(
+    dept_id: UUID,
+    members: DepartmentMembersUpdate,
+    session: AsyncSession = Depends(get_session),
+    current_account: AccountModel = Depends(get_current_account),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    db_dept = await DepartmentService.get_department(session, dept_id)
+    if not db_dept or db_dept.tenant_id != tenant_id:
+        raise HTTPException(status_code=404, detail="Department not found")
+    
+    await DepartmentService.update_department_members(session, dept_id, tenant_id, members.employee_ids)
+    
+    # Leader might have been removed, but let's assume the admin knows what they are doing.
+    # Alternatively we could re-run _ensure_leader_in_department.
+    await DepartmentService._ensure_leader_in_department(session, db_dept)
+    await session.commit()
+    
+    return success({"message": "Department members updated successfully"})
 
 @router.delete("/departments/{dept_id}")
 async def delete_department(
@@ -191,3 +213,20 @@ async def delete_employee(
     
     await EmployeeService.delete_employee(session, db_emp)
     return success({"message": "Employee deleted successfully"})
+
+@router.post("/employees/{emp_id}/unbind-wx")
+async def unbind_employee_wx(
+    emp_id: UUID,
+    session: AsyncSession = Depends(get_session),
+    current_account: AccountModel = Depends(get_current_account),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    db_emp = await EmployeeService.get_employee(session, emp_id)
+    if not db_emp or db_emp.tenant_id != tenant_id:
+        raise HTTPException(status_code=404, detail="Employee not found")
+        
+    if not db_emp.wx_user_id:
+        return success({"message": "Employee is not bound to WeChat"})
+        
+    await EmployeeService.unbind_employee_wx(session, db_emp)
+    return success({"message": "WeChat unbound successfully"})

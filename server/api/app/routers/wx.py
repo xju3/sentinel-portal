@@ -7,6 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pub.services import get_session
 from pub.services import AuthService
 from pub.services import WxService
+from pub.services.customer.org_service import EmployeeService
 from app.config import settings
 from app.database import redis_manager
 from app.utils.auth import get_current_account
@@ -64,6 +65,15 @@ async def handle_wx_event_message(wx_service: WxService, data: dict, from_user: 
             else:
                 redis_client.setex(f"wx_scan_{scene}", 300, from_user)
                 return wx_service.create_xml_reply(from_user, to_user, "扫码成功！请返回网页端完成绑定。")
+                
+        elif scene.startswith("empbind_"):
+            existing_employee = await EmployeeService.get_employee_by_wx_user_id(session, from_user)
+            target_employee_id = scene.split("_")[1]
+            if existing_employee and str(existing_employee.id) != target_employee_id:
+                return wx_service.create_xml_reply(from_user, to_user, "绑定失败：此微信已被其他员工绑定，请勿重复绑定！")
+            else:
+                redis_client.setex(f"wx_scan_{scene}", 300, from_user)
+                return wx_service.create_xml_reply(from_user, to_user, "扫码成功！请返回网页端完成员工绑定。")
                 
         elif scene.startswith("login_"):
             existing_account = await AuthService.get_account_by_wx_user_id(session, from_user)
@@ -207,6 +217,25 @@ async def get_bind_qrcode(
         }
     }
 
+@router.get("/wx/empbind-qrcode")
+async def get_empbind_qrcode(
+    target_employee_id: str = Query(...),
+    current_account: Account = Depends(get_current_account),
+):
+    """Generate a QR code ticket for binding WeChat to an employee"""
+    wx_service = get_wx_service()
+    scene_str = f"empbind_{target_employee_id}_{uuid.uuid4().hex[:8]}"
+    ticket, url = await wx_service.create_qr_code(scene_str)
+    
+    return {
+        "code": 200,
+        "data": {
+            "ticket": ticket,
+            "url": url,
+            "scene_str": scene_str
+        }
+    }
+
 @router.get("/wx/bind-status")
 async def get_bind_status(
     scene_str: str = Query(...),
@@ -243,6 +272,40 @@ async def get_bind_status(
             await AuthService.bind_account_wx(session, db_account, wx_user_id)
             
             # Clean up redis
+            redis_client.delete(f"wx_scan_{scene_str}")
+            return {"code": 200, "message": "success"}
+    
+    return {"code": 202, "message": "waiting"}
+
+@router.get("/wx/empbind-status")
+async def get_empbind_status(
+    scene_str: str = Query(...),
+    current_account: Account = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session)
+):
+    """Poll the employee binding status"""
+    redis_client = redis_manager.get_client()
+    if not redis_client:
+        raise HTTPException(status_code=500, detail="Redis not configured")
+        
+    wx_user_id = redis_client.get(f"wx_scan_{scene_str}")
+    if wx_user_id:
+        employee_id_str = scene_str.split("_")[1]
+            
+        existing_employee = await EmployeeService.get_employee_by_wx_user_id(session, wx_user_id)
+        if existing_employee and str(existing_employee.id) != employee_id_str:
+            redis_client.delete(f"wx_scan_{scene_str}")
+            raise HTTPException(status_code=400, detail="此微信号已绑定其他员工，请勿重复绑定")
+        
+        try:
+            employee_uuid = uuid.UUID(employee_id_str)
+        except ValueError:
+            raise HTTPException(status_code=400, detail="Invalid employee ID format")
+            
+        db_emp = await EmployeeService.get_employee(session, employee_uuid)
+        if db_emp:
+            await EmployeeService.bind_employee_wx(session, db_emp, wx_user_id)
+            
             redis_client.delete(f"wx_scan_{scene_str}")
             return {"code": 200, "message": "success"}
     
