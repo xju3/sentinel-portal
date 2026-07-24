@@ -10,6 +10,7 @@ from pub.services import WxService
 from pub.services.customer.org_service import EmployeeService
 from app.config import settings
 from app.database import redis_manager
+from pub.utils.redis_keys import REDIS_KEY_WX_SCAN
 from app.utils.auth import get_current_account
 from pub.models.customer import Account
 from pub.utils.jwt_token import create_access_token
@@ -63,7 +64,7 @@ async def handle_wx_event_message(wx_service: WxService, data: dict, from_user: 
             if existing_account and str(existing_account.id) != target_account_id:
                 return wx_service.create_xml_reply(from_user, to_user, "绑定失败：此微信已被其他账号绑定，请勿重复绑定！")
             else:
-                redis_client.setex(f"wx_scan_{scene}", 300, from_user)
+                redis_client.setex(REDIS_KEY_WX_SCAN.format(scene=scene), 300, from_user)
                 return wx_service.create_xml_reply(from_user, to_user, "扫码成功！请返回网页端完成绑定。")
                 
         elif scene.startswith("empbind_"):
@@ -72,7 +73,7 @@ async def handle_wx_event_message(wx_service: WxService, data: dict, from_user: 
             if existing_employee and str(existing_employee.id) != target_employee_id:
                 return wx_service.create_xml_reply(from_user, to_user, "绑定失败：此微信已被其他员工绑定，请勿重复绑定！")
             else:
-                redis_client.setex(f"wx_scan_{scene}", 300, from_user)
+                redis_client.setex(REDIS_KEY_WX_SCAN.format(scene=scene), 300, from_user)
                 return wx_service.create_xml_reply(from_user, to_user, "扫码成功！请返回网页端完成员工绑定。")
                 
         elif scene.startswith("login_"):
@@ -80,11 +81,11 @@ async def handle_wx_event_message(wx_service: WxService, data: dict, from_user: 
             if not existing_account:
                 return wx_service.create_xml_reply(from_user, to_user, "登录失败：此微信尚未绑定任何系统账号！")
             else:
-                redis_client.setex(f"wx_scan_{scene}", 300, from_user)
+                redis_client.setex(REDIS_KEY_WX_SCAN.format(scene=scene), 300, from_user)
                 return wx_service.create_xml_reply(from_user, to_user, "扫码成功！正在登录系统...")
                 
         else:
-            redis_client.setex(f"wx_scan_{scene}", 300, from_user)
+            redis_client.setex(REDIS_KEY_WX_SCAN.format(scene=scene), 300, from_user)
             return wx_service.create_xml_reply(from_user, to_user, "操作成功！请返回网页端查看。")
     
     if event == "subscribe":
@@ -247,7 +248,7 @@ async def get_bind_status(
     if not redis_client:
         raise HTTPException(status_code=500, detail="Redis not configured")
         
-    wx_user_id = redis_client.get(f"wx_scan_{scene_str}")
+    wx_user_id = redis_client.get(REDIS_KEY_WX_SCAN.format(scene=scene_str))
     if wx_user_id:
         # Binding successful
         account_id_str = scene_str.split("_")[1]
@@ -258,7 +259,7 @@ async def get_bind_status(
         # 校验微信是否已被其他账号绑定
         existing_account = await AuthService.get_account_by_wx_user_id(session, wx_user_id)
         if existing_account and str(existing_account.id) != account_id_str:
-            redis_client.delete(f"wx_scan_{scene_str}")
+            redis_client.delete(REDIS_KEY_WX_SCAN.format(scene=scene_str))
             raise HTTPException(status_code=400, detail="此微信号已绑定其他账号，请勿重复绑定")
         
         # Update database
@@ -272,7 +273,7 @@ async def get_bind_status(
             await AuthService.bind_account_wx(session, db_account, wx_user_id)
             
             # Clean up redis
-            redis_client.delete(f"wx_scan_{scene_str}")
+            redis_client.delete(REDIS_KEY_WX_SCAN.format(scene=scene_str))
             return {"code": 200, "message": "success"}
     
     return {"code": 202, "message": "waiting"}
@@ -288,13 +289,13 @@ async def get_empbind_status(
     if not redis_client:
         raise HTTPException(status_code=500, detail="Redis not configured")
         
-    wx_user_id = redis_client.get(f"wx_scan_{scene_str}")
+    wx_user_id = redis_client.get(REDIS_KEY_WX_SCAN.format(scene=scene_str))
     if wx_user_id:
         employee_id_str = scene_str.split("_")[1]
             
         existing_employee = await EmployeeService.get_employee_by_wx_user_id(session, wx_user_id)
         if existing_employee and str(existing_employee.id) != employee_id_str:
-            redis_client.delete(f"wx_scan_{scene_str}")
+            redis_client.delete(REDIS_KEY_WX_SCAN.format(scene=scene_str))
             raise HTTPException(status_code=400, detail="此微信号已绑定其他员工，请勿重复绑定")
         
         try:
@@ -306,7 +307,7 @@ async def get_empbind_status(
         if db_emp:
             await EmployeeService.bind_employee_wx(session, db_emp, wx_user_id)
             
-            redis_client.delete(f"wx_scan_{scene_str}")
+            redis_client.delete(REDIS_KEY_WX_SCAN.format(scene=scene_str))
             return {"code": 200, "message": "success"}
     
     return {"code": 202, "message": "waiting"}
@@ -335,18 +336,18 @@ async def get_login_status(
     if not redis_client:
         raise HTTPException(status_code=500, detail="Redis not configured")
         
-    wx_user_id = redis_client.get(f"wx_scan_{scene_str}")
+    wx_user_id = redis_client.get(REDIS_KEY_WX_SCAN.format(scene=scene_str))
     if wx_user_id:
         account = await AuthService.get_account_by_wx_user_id(session, wx_user_id)
         if not account:
             # Clean up redis
-            redis_client.delete(f"wx_scan_{scene_str}")
+            redis_client.delete(REDIS_KEY_WX_SCAN.format(scene=scene_str))
             # Instead of HTTP error, we return 404 code so frontend can show specific message without throwing global error if possible.
             # But standard is HTTPException. Let's use it.
             raise HTTPException(status_code=404, detail="此微信号没有绑定相应平台账号")
             
         # Clean up redis
-        redis_client.delete(f"wx_scan_{scene_str}")
+        redis_client.delete(REDIS_KEY_WX_SCAN.format(scene=scene_str))
             
         tenant_name = None
         contact_name = None

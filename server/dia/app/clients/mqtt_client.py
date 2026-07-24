@@ -9,7 +9,8 @@ from typing import Any
 
 from app.clients.influxdb_client import send_vibration_features_to_telegraf
 from app.config import settings
-from app.database import minio_manager
+from app.database import minio_manager, redis_manager
+from pub.utils.redis_keys import REDIS_KEY_SENSOR_META
 from pub.clients.mqtt import MQTTManager
 from pub.clients.minio import download_json_from_minio_sync
 from app.handler.diagnosis import start_diagnosis_async
@@ -58,14 +59,36 @@ class DiaMqttClient:
         try:
             data = json.loads(payload.decode("utf-8"))
             # logger.info(f"Parsed notification payload: {data}")
-            bucket_name = self._require_notification_value(data, "bucket")
-            object_name = self._require_notification_value(data, "path")
-
-            sensor_payload = download_json_from_minio_sync(
-                minio_client=minio_manager.get_client(),
-                bucket_name=bucket_name,
-                object_name=object_name,
-            )
+            if "bucket" in data and "path" in data:
+                bucket_name = self._require_notification_value(data, "bucket")
+                object_name = self._require_notification_value(data, "path")
+    
+                sensor_payload = download_json_from_minio_sync(
+                    minio_client=minio_manager.get_client(),
+                    bucket_name=bucket_name,
+                    object_name=object_name,
+                )
+            else:
+                # Raw sensor data directly uploaded via MQTT
+                sensor_payload = data
+                bucket_name = "mqtt_raw"
+                object_name = "direct"
+                
+                sn = sensor_payload.get("sensor_sn") or sensor_payload.get("sn")
+                if sn:
+                    if "sn" in sensor_payload:
+                        del sensor_payload["sn"]
+                    sensor_payload["sensor_sn"] = sn
+                    
+                    redis_client = redis_manager.get_client()
+                    if redis_client:
+                        meta_str = redis_client.get(REDIS_KEY_SENSOR_META.format(sn=sn))
+                        if meta_str:
+                            try:
+                                meta = json.loads(meta_str)
+                                sensor_payload.update(meta)
+                            except Exception as e:
+                                logger.error(f"Failed to parse sensor metadata from redis for {sn}: {e}")
             try:
                 communication_record = asyncio.run(
                     SensorCommunicationService.record_from_payload_managed(sensor_payload)

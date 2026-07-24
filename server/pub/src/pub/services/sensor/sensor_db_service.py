@@ -61,6 +61,47 @@ class SensorDbService:
         return result.scalar_one_or_none()
 
     @staticmethod
+    async def get_sensor_metadata_for_cache(session: AsyncSession, sn: str) -> Optional[dict]:
+        from pub.models.sensor import SensorMonitoring
+        from pub.models.device import DeviceInst, DeviceSpec
+        from pub.models.customer import Tenant
+        from sqlalchemy import and_
+
+        stmt = (
+            select(
+                Sensor.id.label("sensor_id"),
+                SensorMonitoring.location_id,
+                DeviceInst.tenant_id,
+                Tenant.region_id,
+                DeviceSpec.device_category_id,
+                DeviceInst.process_device_id,
+            )
+            .join(SensorMonitoring, Sensor.id == SensorMonitoring.sensor_id)
+            .outerjoin(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
+            .outerjoin(Tenant, DeviceInst.tenant_id == Tenant.id)
+            .outerjoin(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
+            .where(
+                and_(
+                    Sensor.sn == sn,
+                    SensorMonitoring.status == 1
+                )
+            )
+        )
+        result = await session.execute(stmt)
+        row = result.first()
+        if not row:
+            return None
+        
+        return {
+            "sensor_id": str(row.sensor_id) if row.sensor_id else None,
+            "location_id": str(row.location_id) if row.location_id else None,
+            "tenant_id": str(row.tenant_id) if row.tenant_id else None,
+            "region_id": row.region_id,
+            "device_category_id": str(row.device_category_id) if row.device_category_id else None,
+            "process_device_id": str(row.process_device_id) if row.process_device_id else None,
+        }
+
+    @staticmethod
     async def get_by_batch_id(
         session: AsyncSession, 
         batch_id: UUID, 

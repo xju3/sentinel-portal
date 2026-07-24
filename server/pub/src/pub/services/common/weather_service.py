@@ -62,7 +62,7 @@ class WeatherService:
                         # 5. Save to Redis for diagnosis context
                         if redis_client:
                             cache_key = f"dia:ambient_temperature:{region.id}"
-                            await asyncio.to_thread(redis_client.set, cache_key, str(temp_celsius))
+                            await asyncio.to_thread(redis_client.set, cache_key, str(temp_celsius), ex=7200)
                             logger.debug("Updated ambient temp for region %s to %sC", region.id, temp_celsius)
                     else:
                         logger.error("Unexpected response from Open-Meteo for region %s: %s", region.id, data)

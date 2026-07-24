@@ -30,17 +30,17 @@ from .sensor.firmware_service import SensorFirmwareService
 from .sensor.communication_service import SensorCommunicationService
 from .sensor.sensor_task_service import *
 
-from .diagnosis.diagnosis_record_service import DiagnosisRecordService
-from .diagnosis.diagnosis_result_service import DiagnosisResultService
-from .diagnosis.patrol_diagnosis_record_service import PatrolDiagnosisRecordService
-from .diagnosis.diagnosis_context_service import DiagnosisContextService
-from .diagnosis.quick_history_cache import *
+# from .diagnosis.diagnosis_record_service import DiagnosisRecordService
+# from .diagnosis.diagnosis_result_service import DiagnosisResultService
+# from .diagnosis.patrol_diagnosis_record_service import PatrolDiagnosisRecordService
+# from .diagnosis.diagnosis_context_service import DiagnosisContextService
+# from .diagnosis.quick_history_cache import *
 
-from .dashboard.dashboard_health_service import DashboardHealthService
-from .dashboard.dashboard_service import DashboardService
+# from .dashboard.dashboard_health_service import DashboardHealthService
+# from .dashboard.dashboard_service import DashboardService
 
 from .wx.wx_service import WxService
-from .dispatch.quick_dispatch_service import *
+# from .dispatch.quick_dispatch_service import *
 from .config.config_service import *
 from .common.crud_factory import *
 from .dependencies import *

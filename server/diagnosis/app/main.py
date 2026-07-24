@@ -15,8 +15,9 @@ logger = logging.getLogger(__name__)
 
 import asyncio
 from contextlib import asynccontextmanager
-from pub.manager.database import db_manager
+from pub.manager.database import db_manager, redis_manager, influxdb_manager
 from pub.services.common.weather_service import WeatherService
+from app.config import settings
 
 async def weather_fetch_loop():
     while True:
@@ -33,6 +34,11 @@ async def weather_fetch_loop():
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
+    logger.info("Initializing databases...")
+    await db_manager.init(settings.mysql_url, settings.debug)
+    redis_manager.init(settings.redis_url)
+    influxdb_manager.init(settings.influx_url, settings.influx_token, settings.influx_org, settings.influx_bucket)
+
     logger.info("Starting background tasks...")
     weather_task = asyncio.create_task(weather_fetch_loop())
     yield
@@ -43,6 +49,11 @@ async def lifespan(app: FastAPI):
         await weather_task
     except asyncio.CancelledError:
         pass
+        
+    logger.info("Closing databases...")
+    await db_manager.close()
+    redis_manager.close()
+    influxdb_manager.close()
 
 app = FastAPI(
     title="Diagnosis API",

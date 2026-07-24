@@ -37,7 +37,8 @@ from pub.decorators.dashboard_cache import rebuild_dashboard_cache
 
 from app.utils.auth import get_current_account
 from app.utils.response import success
-from app.database import minio_manager
+from app.database import minio_manager, redis_manager
+from pub.utils.redis_keys import REDIS_KEY_SENSOR_META
 from app.clients.mqtt import api_mqtt_manager
 from pub.clients.minio import upload_json_to_minio_sync
 from pub.contract.sensors import (
@@ -214,6 +215,13 @@ async def get_sensor_binding(
     session: AsyncSession = Depends(get_session),
 ):
     device_id = await SensorDbService.get_binding_by_sn(session, sn)
+    
+    meta_data = await SensorDbService.get_sensor_metadata_for_cache(session, sn)
+    if meta_data:
+        redis_client = redis_manager.get_client()
+        if redis_client:
+            redis_client.set(REDIS_KEY_SENSOR_META.format(sn=sn), json.dumps(meta_data))
+
     return success(SensorBindingResponse(device_id=device_id))
 
 
@@ -476,6 +484,21 @@ async def receive_sensor_data(
         # 优先使用 payload 中自带的 report_id (如 result.json 中提供的)，如果没有再兜底生成
         report_id = payload.get("report_id") or str(uuid4())
         stored_payload = dict(payload)
+        
+        if "sn" in stored_payload:
+            del stored_payload["sn"]
+        stored_payload["sensor_sn"] = sn
+        
+        redis_client = redis_manager.get_client()
+        if redis_client:
+            meta_str = redis_client.get(REDIS_KEY_SENSOR_META.format(sn=sn))
+            if meta_str:
+                try:
+                    meta = json.loads(meta_str)
+                    stored_payload.update(meta)
+                except Exception as e:
+                    logger.error(f"Failed to parse sensor metadata from redis for {sn}: {e}")
+
         stored_payload["ts_ms"] = ts_ms
         stored_payload["report_id"] = report_id
 
