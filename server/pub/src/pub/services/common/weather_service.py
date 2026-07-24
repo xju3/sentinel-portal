@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from pub.models.customer import Tenant, Region
 from pub.models.weather import Temperature
 from pub.manager.database import redis_manager
+from pub.utils.redis_keys import REDIS_KEY_DIA_AMBIENT_TEMP
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +62,7 @@ class WeatherService:
                         
                         # 5. Save to Redis for diagnosis context
                         if redis_client:
-                            cache_key = f"dia:ambient_temperature:{region.id}"
+                            cache_key = REDIS_KEY_DIA_AMBIENT_TEMP.format(region_id=region.id)
                             await asyncio.to_thread(redis_client.set, cache_key, str(temp_celsius), ex=7200)
                             logger.debug("Updated ambient temp for region %s to %sC", region.id, temp_celsius)
                     else:

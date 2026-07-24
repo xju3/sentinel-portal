@@ -29,7 +29,7 @@ async def weather_fetch_loop():
         except Exception as e:
             logger.error("Error in weather fetch loop: %s", str(e))
         
-        await asyncio.sleep(3600)  # 1 hour
+        await asyncio.sleep(3600 * 6)  # 1 hour
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
