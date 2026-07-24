@@ -492,6 +492,12 @@ async def receive_sensor_data(
         redis_client = redis_manager.get_client()
         if redis_client:
             meta_str = redis_client.get(REDIS_KEY_SENSOR_META.format(sn=sn))
+            if not meta_str:
+                meta_data = await SensorDbService.get_sensor_metadata_for_cache(session, sn)
+                if meta_data:
+                    meta_str = json.dumps(meta_data)
+                    redis_client.set(REDIS_KEY_SENSOR_META.format(sn=sn), meta_str)
+                    
             if meta_str:
                 try:
                     meta = json.loads(meta_str)

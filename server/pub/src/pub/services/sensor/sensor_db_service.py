@@ -101,6 +101,12 @@ class SensorDbService:
             "process_device_id": str(row.process_device_id) if row.process_device_id else None,
         }
 
+    @classmethod
+    async def get_sensor_metadata_for_cache_managed(cls, sn: str) -> Optional[dict]:
+        from pub.manager.database import db_manager
+        async with db_manager.session_maker() as session:
+            return await cls.get_sensor_metadata_for_cache(session, sn)
+
     @staticmethod
     async def get_by_batch_id(
         session: AsyncSession, 

@@ -11,7 +11,7 @@ class Settings(BaseSettings):
     debug: bool = False
 
     model_config = SettingsConfigDict(
-        env_file=("../api/.env", "../../.env", ".env", Path.home() / ".env"),
+        env_file=("../api/.env", "../../.env", ".env"),
         env_file_encoding="utf-8",
         extra="ignore",
     )

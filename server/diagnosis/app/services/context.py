@@ -14,10 +14,9 @@ from pub.manager.database import db_manager, redis_manager
 from pub.models.customer import HealthCheckFreq, IsoStandard, Tenant
 from pub.models.device import DeviceCategory, DeviceInst, DeviceSpec, Process, ProcessDevice, ProcessDeviceItem, ProcessItem
 from pub.models.sensor import Sensor, SensorMonitoring, SensorThreshold
+from pub.utils.redis_keys import REDIS_KEY_DIA_PEER_GROUP, REDIS_KEY_DIA_DEVICE_CONTEXT
 
 logger = logging.getLogger(__name__)
-
-DEVICE_CONTEXT_CACHE_PREFIX = "dia:device_context:"
 
 class DeviceContextService:
     """
@@ -60,11 +59,9 @@ class DeviceContextService:
                 HealthCheckFreq,
                 VibThreshold,
                 TempThreshold,
-                Tenant,
             )
             .outerjoin(DeviceSpec, DeviceSpec.id == DeviceInst.device_spec_id)
             .outerjoin(DeviceCategory, DeviceCategory.id == DeviceSpec.device_category_id)
-            .outerjoin(Tenant, Tenant.id == DeviceCategory.tenant_id)
             .outerjoin(IsoStandard, IsoStandard.id == DeviceCategory.iso_standard_id)
             .outerjoin(HealthCheckFreq, HealthCheckFreq.id == DeviceCategory.health_check_freq_id)
             .outerjoin(VibThreshold, VibThreshold.id == DeviceCategory.vib_threshold_id)
@@ -84,7 +81,6 @@ class DeviceContextService:
             health_check,
             vib_threshold,
             temp_threshold,
-            tenant,
         ) = row
 
         # 2. Fetch ALL measuring points (SensorMonitoring) for this device
@@ -108,17 +104,6 @@ class DeviceContextService:
                 "sensor_sn": sensor.sn if sensor else None,
             })
 
-        ambient_temperature = None
-        if tenant and tenant.region_id:
-            client = _get_redis_client()
-            if client:
-                try:
-                    raw_temp = await asyncio.to_thread(client.get, f"dia:ambient_temperature:{tenant.region_id}")
-                    if raw_temp:
-                        ambient_temperature = float(raw_temp)
-                except Exception as e:
-                    logger.warning("Failed to fetch ambient temperature from Redis: %s", str(e))
-
         return _json_safe({
             "device_id": str(device_inst.id),
             "device_inst": _device_inst_context(device_inst),
@@ -130,7 +115,6 @@ class DeviceContextService:
                 "vibration": _threshold_context(vib_threshold),
                 "temperature": _threshold_context(temp_threshold),
             },
-            "ambient_temperature": ambient_temperature,
             "measuring_points": measuring_points,
             "configured": device_inst is not None and device_category is not None,
             "cached_at": datetime.utcnow().isoformat(),
@@ -141,7 +125,8 @@ class DeviceContextService:
         client = _get_redis_client()
         if client is None: return None
         try:
-            raw = await asyncio.to_thread(client.get, f"{DEVICE_CONTEXT_CACHE_PREFIX}{device_id}")
+            key = REDIS_KEY_DIA_DEVICE_CONTEXT.format(device_id=device_id)
+            raw = await asyncio.to_thread(client.get, key)
             if not raw: return None
             return json.loads(raw)
         except Exception as e:
@@ -153,13 +138,67 @@ class DeviceContextService:
         client = _get_redis_client()
         if client is None: return
         try:
+            key = REDIS_KEY_DIA_DEVICE_CONTEXT.format(device_id=device_id)
             await asyncio.to_thread(
                 client.set,
-                f"{DEVICE_CONTEXT_CACHE_PREFIX}{device_id}",
+                key,
                 json.dumps(_json_safe(context), ensure_ascii=False),
             )
         except Exception as e:
             logger.warning("Failed to write context cache for device_id=%s: %s", device_id, e)
+
+    @staticmethod
+    async def get_peer_group_managed(process_device_id: str, device_category_id: str) -> list[dict[str, Any]]:
+        """Fetch the peer group from Redis, or build it from DB and cache it."""
+        if not process_device_id or not device_category_id:
+            return []
+            
+        client = _get_redis_client()
+        cache_key = REDIS_KEY_DIA_PEER_GROUP.format(process_device_id=process_device_id, device_category_id=device_category_id)
+        
+        if client:
+            try:
+                raw = await asyncio.to_thread(client.get, cache_key)
+                if raw:
+                    return json.loads(raw)
+            except Exception as e:
+                logger.warning("Failed to read peer group cache: %s", e)
+                
+        if db_manager.SessionLocal is None:
+            return []
+            
+        import uuid
+        try:
+            pd_uuid = uuid.UUID(process_device_id)
+            dc_uuid = uuid.UUID(device_category_id)
+        except Exception:
+            return []
+            
+        async with db_manager.SessionLocal() as session:
+            # Join ProcessDeviceItem -> DeviceInst -> SensorMonitoring to get all location_ids
+            # Ensure they share the same device_category_id
+            stmt = (
+                select(SensorMonitoring.location_id, DeviceInst.id.label("device_inst_id"))
+                .join(DeviceInst, DeviceInst.id == SensorMonitoring.device_inst_id)
+                .join(DeviceSpec, DeviceSpec.id == DeviceInst.device_spec_id)
+                .join(ProcessDeviceItem, ProcessDeviceItem.device_inst_id == DeviceInst.id)
+                .where(
+                    ProcessDeviceItem.process_device_id == pd_uuid,
+                    DeviceSpec.device_category_id == dc_uuid,
+                    SensorMonitoring.status == 1
+                )
+            )
+            rows = (await session.execute(stmt)).all()
+            
+            peers = [{"location_id": str(r.location_id), "device_inst_id": str(r.device_inst_id)} for r in rows if r.location_id]
+            
+            if client and peers:
+                try:
+                    await asyncio.to_thread(client.set, cache_key, json.dumps(peers, ensure_ascii=False), ex=86400) # Cache for 1 day
+                except Exception as e:
+                    logger.warning("Failed to write peer group cache: %s", e)
+            
+            return peers
 
 def _get_redis_client() -> Any | None:
     try:
@@ -189,4 +228,14 @@ def _device_spec_context(obj): return {"id": obj.id, "name": obj.name, "model": 
 def _device_category_context(obj): return {"id": obj.id, "name": obj.name} if obj else None
 def _iso_context(obj): return {"id": obj.id, "code": obj.code} if obj else None
 def _health_check_context(obj): return {"id": obj.id, "patrol": obj.patrol} if obj else None
-def _threshold_context(obj): return {"id": obj.id, "code": obj.code, "rt_max_delta": obj.rt_max_delta, "baseline": obj.baseline, "st_max_slope": obj.st_max_slope} if obj else None
+def _threshold_context(obj): 
+    return {
+        "id": obj.id, 
+        "code": obj.code, 
+        "rt_max_delta": obj.rt_max_delta, 
+        "baseline": obj.baseline, 
+        "st_max_slope": obj.st_max_slope,
+        "st_max_amplitude": obj.st_max_amplitude,
+        "mt_max_slope": obj.mt_max_slope,
+        "mt_max_amplitude": obj.mt_max_amplitude
+    } if obj else None

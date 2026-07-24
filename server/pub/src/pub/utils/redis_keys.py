@@ -27,3 +27,21 @@ REDIS_KEY_WX_SCAN = "wx_scan_{scene}"
 # 过期时间: 永久 (目前不考虑强一致性)
 # 作用: 在传感器拉取绑定信息时查询并缓存这些元数据。当传感器上传原始数据时，快速从 Redis 补全数据的上下文属性。
 REDIS_KEY_SENSOR_META = "sensor_meta:{sn}"
+
+# ==========================================
+# 诊断相关 (Diagnosis)
+# ==========================================
+
+# 区域环境温度缓存 Key
+# 格式: dia:ambient_temperature:{region_id}
+# 存储内容: 区域实时环境温度 (float)
+REDIS_KEY_DIA_AMBIENT_TEMP = "dia:ambient_temperature:{region_id}"
+
+# 同组设备缓存 Key
+# 格式: dia:peer_group:{process_device_id}:{device_category_id}
+# 存储内容: 包含 location_id 等信息的 JSON 列表
+REDIS_KEY_DIA_PEER_GROUP = "dia:peer_group:{process_device_id}:{device_category_id}"
+
+# 诊断设备上下文缓存 Key
+# 格式: dia:device_context:{device_id}
+REDIS_KEY_DIA_DEVICE_CONTEXT = "dia:device_context:{device_id}"

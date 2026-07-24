@@ -9,24 +9,44 @@ def severity_to_level(severity: str) -> int:
     mapping = {"ok": 0, "normal": 0, "info": 0, "attention": 1, "abnormal": 2, "warning": 3, "critical": 4}
     return mapping.get(severity.lower(), 0)
 
-async def dispatch_diagnosis_trigger(device_id: str, location_id: str, report_id: str, current_temp: float, trigger_ts: int) -> None:
-    logger.info("TRIGGER DIAGNOSIS: Executing diagnosis for device_id=%s", device_id)
+async def dispatch_diagnosis_trigger(report: DeviceDiagnosticReport) -> None:
+    logger.info("TRIGGER DIAGNOSIS: Executing diagnosis for device_id=%s", report.device_id)
     try:
         import uuid
+        import asyncio
         from app.services.context import DeviceContextService
         from app.handler.temperature import TemperatureDiagnosis
-        from pub.manager.database import db_manager
+        from pub.manager.database import db_manager, redis_manager
         from pub.models.diagnosis import Diagnosis, DiagnosisItem
+        from pub.utils.redis_keys import REDIS_KEY_DIA_AMBIENT_TEMP
         
-        device_uuid = uuid.UUID(device_id)
-        location_uuid = uuid.UUID(location_id)
+        device_uuid = uuid.UUID(report.device_id)
+        location_uuid = uuid.UUID(report.location_id)
         
-        context = await DeviceContextService.get_by_device_id_managed(device_uuid)
+        context = await DeviceContextService.get_by_device_id_managed(report.device_id)
         if not context:
-            logger.warning("No context found for device_id=%s, skipping diagnosis.", device_id)
+            logger.warning("No context found for device_id=%s, skipping diagnosis.", report.device_id)
             return
             
-        result = await TemperatureDiagnosis.analyze(device_id, location_id, current_temp, context)
+        # Inject dynamic context from payload
+        ambient_temperature = None
+        if report.region_id:
+            client = redis_manager.get_client()
+            if client:
+                try:
+                    key = REDIS_KEY_DIA_AMBIENT_TEMP.format(region_id=report.region_id)
+                    raw_temp = await asyncio.to_thread(client.get, key)
+                    if raw_temp:
+                        ambient_temperature = float(raw_temp)
+                except Exception as e:
+                    logger.warning("Failed to fetch ambient temperature from Redis: %s", e)
+        context["ambient_temperature"] = ambient_temperature
+        
+        # Inject Peer Group
+        peer_group = await DeviceContextService.get_peer_group_managed(report.process_device_id, report.device_category_id)
+        context["peer_group"] = {"enabled": True, "members": peer_group}
+            
+        result = await TemperatureDiagnosis.analyze(report.device_id, report.location_id, report.temperature_c or 0.0, context)
         level = severity_to_level(result.get("severity", "info"))
         
         async with db_manager.SessionLocal() as session:
@@ -34,7 +54,7 @@ async def dispatch_diagnosis_trigger(device_id: str, location_id: str, report_id
                 diag_record = Diagnosis(
                     device_id=device_uuid,
                     location_id=location_uuid,
-                    report_id=report_id,
+                    report_id=report.report_id,
                     overall_level=level
                 )
                 session.add(diag_record)
@@ -45,7 +65,7 @@ async def dispatch_diagnosis_trigger(device_id: str, location_id: str, report_id
                     metric_id=0, # Temperature
                     level=level,
                     description=result.get("reason"),
-                    evidence={"ratio": result.get("ratio"), "peer_median": result.get("peer_median"), "effective_rise": result.get("effective_rise")}
+                    evidence=result.get("evidence", {})
                 )
                 session.add(item)
         logger.info("Successfully persisted diagnosis results to MySQL: level=%s, reason=%s", level, result.get("reason"))
@@ -109,13 +129,7 @@ async def process_incoming_report(report: DeviceDiagnosticReport) -> None:
             "Batch complete (total=0) for device_id=%s. Triggering background diagnosis.",
             report.device_id,
         )
-        await dispatch_diagnosis_trigger(
-            device_id=report.device_id,
-            location_id=report.location_id,
-            report_id=report.report_id,
-            current_temp=report.temperature_c or 0.0,
-            trigger_ts=report.ts_ms,
-        )
+        await dispatch_diagnosis_trigger(report)
     else:
         logger.debug(
             "Data buffered. Waiting for %s more packets before triggering diagnosis for device_id=%s",

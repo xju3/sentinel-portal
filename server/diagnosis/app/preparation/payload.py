@@ -41,6 +41,10 @@ class DeviceDiagnosticReport(BaseModel):
     device_id: str
     location_id: str
     report_id: str
+    region_id: str | None = None
+    tenant_id: str | None = None
+    process_device_id: str | None = None
+    device_category_id: str | None = None
     delay: int = 0
     total: int = 0
     ts_ms: int = Field(..., description="Actual data sampling/measurement timestamp in Unix milliseconds")
