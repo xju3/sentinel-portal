@@ -37,8 +37,9 @@ class DeviceDiagnosticReport(BaseModel):
     """
     schema_version: int | None = None
     sensor_sn: str
-    sensor_id: str | None = None
+    sensor_id: str
     device_id: str
+    location_id: str
     report_id: str
     delay: int = 0
     total: int = 0

@@ -269,6 +269,10 @@ class SensorMonitoring(Base):
 
 class SensorThreshold(Base):
     """Sensor threshold entity model"""
+    """
+        此表用于存储传感器的阈值配置，
+        包括实时最大变化量、短期最大斜率、短期最大振幅、中期最大斜率、中期最大振幅和基线值等参数。
+    """
 
     __tablename__ = "sensor_threshold"
 
@@ -279,12 +283,12 @@ class SensorThreshold(Base):
     )  # e.g. '1: temperature', '2. vibration'
     rt_max_delta = Column(
         Numeric(10, 4), nullable=False
-    )  # Real-time max delta threshold
-    st_max_slope = Column(Numeric(10, 4), nullable=False)
-    st_max_amplitude = Column(Numeric(10, 4), nullable=False)
-    mt_max_slope = Column(Numeric(10, 4), nullable=False)
-    mt_max_amplitude = Column(Numeric(10, 4), nullable=False)
-    baseline = Column(Numeric(10, 4), nullable=False)
+    )  # Real-time max delta threshold, 与上次比较的最大变化量阈值
+    st_max_slope = Column(Numeric(10, 4), nullable=False) # short term max slope threshold, 短期最大斜率阈值
+    st_max_amplitude = Column(Numeric(10, 4), nullable=False) # short term max amplitude threshold, 短期最大振幅阈值
+    mt_max_slope = Column(Numeric(10, 4), nullable=False) # mid term max slope threshold, 中期最大斜率阈值
+    mt_max_amplitude = Column(Numeric(10, 4), nullable=False) # mid term max amplitude threshold, 中期最大振幅阈值
+    baseline = Column(Numeric(10, 4), nullable=False) # baseline value, 基线值
     tenant_id = Column(
         Uuid(as_uuid=True), nullable=False, index=True
     )  # Link to tenant for multi-tenant support

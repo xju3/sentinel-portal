@@ -1,9 +1,10 @@
 {
     "schema_version": 2,
-    "sn": "26SH00001",
-    "sensor_id": "",
+    "sensor_sn": "26SH00001",
+    "sensor_id": "90e66858-69ad-4560-b6ab-1d4dfce6dff0",
     "device_id": "d382b38d-3d8c-411b-9a5f-baed94fe444b",
     "report_id": "cab08d39-bb6a-4405-b977-44f8c7947d92",
+    "location_id": "90123456-1234-5678-1234-567812345678",
     "delay": 0,
     "total": 0,
     "ts_ms": 1784612273583,

@@ -13,10 +13,42 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
+import asyncio
+from contextlib import asynccontextmanager
+from pub.manager.database import db_manager
+from pub.services.common.weather_service import WeatherService
+
+async def weather_fetch_loop():
+    while True:
+        try:
+            logger.info("Starting scheduled ambient temperature fetch.")
+            if db_manager.SessionLocal:
+                async with db_manager.SessionLocal() as session:
+                    await WeatherService.fetch_and_store_ambient_temperatures(session)
+        except Exception as e:
+            logger.error("Error in weather fetch loop: %s", str(e))
+        
+        await asyncio.sleep(3600)  # 1 hour
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    logger.info("Starting background tasks...")
+    weather_task = asyncio.create_task(weather_fetch_loop())
+    yield
+    # Shutdown
+    logger.info("Cancelling background tasks...")
+    weather_task.cancel()
+    try:
+        await weather_task
+    except asyncio.CancelledError:
+        pass
+
 app = FastAPI(
     title="Diagnosis API",
     description="New device-centric diagnosis ingestion and execution service.",
     version="1.0.0",
+    lifespan=lifespan,
 )
 
 @app.post("/api/v1/diagnosis/ingest")
@@ -26,7 +58,7 @@ async def ingest_report(report: DeviceDiagnosticReport):
     In a production setup with MQTT, this logic would also be triggered by the MQTT consumer.
     """
     try:
-        process_incoming_report(report)
+        await process_incoming_report(report)
         return {"status": "success", "message": "Report processed successfully"}
     except Exception as e:
         logger.error("Failed to process report: %s", str(e), exc_info=True)

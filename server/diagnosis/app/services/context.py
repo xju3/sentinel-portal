@@ -11,7 +11,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import aliased
 
 from pub.manager.database import db_manager, redis_manager
-from pub.models.customer import HealthCheckFreq, IsoStandard
+from pub.models.customer import HealthCheckFreq, IsoStandard, Tenant
 from pub.models.device import DeviceCategory, DeviceInst, DeviceSpec, Process, ProcessDevice, ProcessDeviceItem, ProcessItem
 from pub.models.sensor import Sensor, SensorMonitoring, SensorThreshold
 
@@ -60,9 +60,11 @@ class DeviceContextService:
                 HealthCheckFreq,
                 VibThreshold,
                 TempThreshold,
+                Tenant,
             )
             .outerjoin(DeviceSpec, DeviceSpec.id == DeviceInst.device_spec_id)
             .outerjoin(DeviceCategory, DeviceCategory.id == DeviceSpec.device_category_id)
+            .outerjoin(Tenant, Tenant.id == DeviceCategory.tenant_id)
             .outerjoin(IsoStandard, IsoStandard.id == DeviceCategory.iso_standard_id)
             .outerjoin(HealthCheckFreq, HealthCheckFreq.id == DeviceCategory.health_check_freq_id)
             .outerjoin(VibThreshold, VibThreshold.id == DeviceCategory.vib_threshold_id)
@@ -82,6 +84,7 @@ class DeviceContextService:
             health_check,
             vib_threshold,
             temp_threshold,
+            tenant,
         ) = row
 
         # 2. Fetch ALL measuring points (SensorMonitoring) for this device
@@ -105,6 +108,17 @@ class DeviceContextService:
                 "sensor_sn": sensor.sn if sensor else None,
             })
 
+        ambient_temperature = None
+        if tenant and tenant.region_id:
+            client = _get_redis_client()
+            if client:
+                try:
+                    raw_temp = await asyncio.to_thread(client.get, f"dia:ambient_temperature:{tenant.region_id}")
+                    if raw_temp:
+                        ambient_temperature = float(raw_temp)
+                except Exception as e:
+                    logger.warning("Failed to fetch ambient temperature from Redis: %s", str(e))
+
         return _json_safe({
             "device_id": str(device_inst.id),
             "device_inst": _device_inst_context(device_inst),
@@ -116,6 +130,7 @@ class DeviceContextService:
                 "vibration": _threshold_context(vib_threshold),
                 "temperature": _threshold_context(temp_threshold),
             },
+            "ambient_temperature": ambient_temperature,
             "measuring_points": measuring_points,
             "configured": device_inst is not None and device_category is not None,
             "cached_at": datetime.utcnow().isoformat(),
@@ -174,4 +189,4 @@ def _device_spec_context(obj): return {"id": obj.id, "name": obj.name, "model": 
 def _device_category_context(obj): return {"id": obj.id, "name": obj.name} if obj else None
 def _iso_context(obj): return {"id": obj.id, "code": obj.code} if obj else None
 def _health_check_context(obj): return {"id": obj.id, "patrol": obj.patrol} if obj else None
-def _threshold_context(obj): return {"id": obj.id, "code": obj.code, "rt_max_delta": obj.rt_max_delta} if obj else None
+def _threshold_context(obj): return {"id": obj.id, "code": obj.code, "rt_max_delta": obj.rt_max_delta, "baseline": obj.baseline, "st_max_slope": obj.st_max_slope} if obj else None

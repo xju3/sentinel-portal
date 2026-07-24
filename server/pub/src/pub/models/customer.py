@@ -32,6 +32,8 @@ class Region(Base):
     )  # For hierarchical region structure
     level = Column(Integer, nullable=False, default=1)
     available = Column(Boolean, default=True)
+    lat = Column(Numeric(10, 6), nullable=True)  # latitude
+    lng = Column(Numeric(10, 6), nullable=True)  # longitude
 
     def __repr__(self):
         return f"<Region {self.id}: {self.name}>"

@@ -28,6 +28,7 @@ dependencies = [
     "protobuf>=6.33.6",
     "pandas>=3.0.3",
     "fastapi>=0.115.0",
+    "httpx>=0.25.2",
 ]
 
 [tool.hatch.build.targets.wheel]
