@@ -392,7 +392,7 @@ def _process_sensor_data_background(object_name: str, payload: dict):
     # Backward compatibility stub, now implemented in async function below
     pass
 
-async def _process_sensor_data_background_async(object_name: str, payload: dict, report_id: str):
+async def _process_sensor_data_background_async(object_name: str, payload: dict, report_id: str, total: int = 0):
     """Background task to upload data to MinIO, create DiagnosisRecord, and notify via MQTT"""
     # 1. 调用通用的 MinIO 上传工具 (在线程池中执行防止阻塞)
     success = await asyncio.to_thread(
@@ -405,7 +405,7 @@ async def _process_sensor_data_background_async(object_name: str, payload: dict,
     
     if success:
         # 2. 存入 MinIO 后，异步建档 (DiagnosisRecord)
-        sn = payload.get("sn")
+        sn = payload.get("sensor_sn") or payload.get("sn")
         ts_ms = payload.get("ts_ms")
         try:
             # 获取拓扑上下文
@@ -430,9 +430,12 @@ async def _process_sensor_data_background_async(object_name: str, payload: dict,
 
         # 3. 建档彻底落库后，执行业务强相关的 MQTT 通知，触发 DIA 计算
         try:
-            mqtt_payload = json.dumps({"bucket": "json", "path": object_name})
-            if await asyncio.to_thread(api_mqtt_manager.publish, settings.mqtt_topic, mqtt_payload):
-                logger.info(f"Published to MQTT topic '{settings.mqtt_topic}': {mqtt_payload}")
+            if int(total) == 0:
+                mqtt_payload = json.dumps({"bucket": "json", "path": object_name})
+                if await asyncio.to_thread(api_mqtt_manager.publish, settings.mqtt_topic, mqtt_payload):
+                    logger.info(f"Published to MQTT topic '{settings.mqtt_topic}': {mqtt_payload}")
+            else:
+                logger.info(f"Skipping DIA trigger for {object_name} because total={total}")
         except Exception as mqtt_err:
             logger.error(f"Failed to publish MQTT message for {object_name}: {mqtt_err}")
     else:
@@ -446,8 +449,9 @@ async def receive_sensor_data(
     session: AsyncSession = Depends(get_session),
 ):
     """Receive processed sensor data and asynchronously store to MinIO"""
-    sn = payload.get("sn")
+    sn = payload.get("sensor_sn") or payload.get("sn")
     delay = payload.get("delay", 0)
+    total = payload.get("total", 0)
 
     if not sn:
         raise HTTPException(status_code=400, detail="Missing 'sn' in payload")
@@ -493,7 +497,7 @@ async def receive_sensor_data(
             )
 
         # Add to background tasks to execute immediately after returning response
-        background_tasks.add_task(_process_sensor_data_background_async, object_name, stored_payload, report_id)
+        background_tasks.add_task(_process_sensor_data_background_async, object_name, stored_payload, report_id, total)
 
         return success(tasks)
     except HTTPException:

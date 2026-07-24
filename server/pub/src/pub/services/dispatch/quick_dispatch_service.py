@@ -22,7 +22,6 @@ from pub.services.sensor.sensor_task_service import (
     DEFAULT_DENSE_FOCUS_GENERAL,
     SensorTaskSpec,
     build_default_dense_collection_spec,
-    build_iis3dwb_parameterized_collection_spec,
     create_collection_task,
     dispatch_pending_sensor_tasks,
     record_sensor_task_report,
@@ -42,8 +41,6 @@ TEMPERATURE_RELATIVE_DELTA = 0.15
 RMS_ABSOLUTE_MM_S = 4.5
 RMS_DELTA_MM_S = 1.0
 RMS_RELATIVE_DELTA = 0.35
-PARAMETERIZED_FFT_POINTS_MULTIPLIER = 2
-ALLOWED_IIS3DWB_RANGES = (2, 4, 8, 16)
 
 
 @dataclass(frozen=True)
@@ -139,10 +136,6 @@ def build_quick_dispatch_plan(
     reasons: list[str] = []
     needs_default_dense_collection = False
 
-    clipping_reason = _clipping_reason(current)
-    if clipping_reason:
-        reasons.append(clipping_reason)
-
     temperature_reason = _temperature_reason(current, last_regular)
     if temperature_reason:
         reasons.append(temperature_reason)
@@ -155,10 +148,6 @@ def build_quick_dispatch_plan(
 
     if not reasons:
         return QuickDispatchPlan(spec=None, reasons=[], skipped_reason="no quick trigger")
-
-    parameterized_spec = _parameterized_spec_for_clipping(current)
-    if parameterized_spec is not None:
-        return QuickDispatchPlan(spec=parameterized_spec, reasons=reasons)
 
     if not needs_default_dense_collection:
         return QuickDispatchPlan(spec=None, reasons=[], skipped_reason="no dispatchable trigger")
@@ -229,36 +218,6 @@ def _rms_reason(
     return None
 
 
-def _clipping_reason(current: QuickDiagnosisSnapshot) -> str | None:
-    quality = current.quality
-    if not isinstance(quality, dict) or quality.get("clipped") is not True:
-        return None
-    return (
-        "IIS3DWB采样削峰，需要提高量程复采: "
-        f"range_g={current.range_g}, requested_range_g={current.requested_range_g}, "
-        f"clip_axes={quality.get('clip_axes')}, total_clip_count={quality.get('total_clip_count')}"
-    )
-
-
-def _parameterized_spec_for_clipping(current: QuickDiagnosisSnapshot) -> SensorTaskSpec | None:
-    quality = current.quality
-    if not isinstance(quality, dict) or quality.get("clipped") is not True:
-        return None
-    next_range = _next_iis3dwb_range(current.range_g or current.requested_range_g)
-    if next_range is None:
-        logger.warning(
-            "Quick dispatch clipping found no higher IIS3DWB range: sn=%s range_g=%s requested_range_g=%s",
-            current.sn,
-            current.range_g,
-            current.requested_range_g,
-        )
-        return None
-    return build_iis3dwb_parameterized_collection_spec(
-        fft_points_multiplier=PARAMETERIZED_FFT_POINTS_MULTIPLIER,
-        range_g=next_range,
-        interval_minutes=QUICK_INTERVAL_MINUTES,
-        repeat_count=QUICK_REPEAT_COUNT,
-    )
 
 
 def _payload_task_id(payload: dict[str, Any]) -> str:
@@ -290,15 +249,6 @@ def _payload_ts_ms(payload: dict[str, Any]) -> int:
     return 0
 
 
-def _next_iis3dwb_range(current_range: float | None) -> int | None:
-    if current_range is None:
-        return 8
-    current = int(current_range)
-    if current < 8:
-        return 8
-    if current < 16:
-        return 16
-    return None
 
 
 def _max_rms(values: dict[str, float]) -> float | None:
