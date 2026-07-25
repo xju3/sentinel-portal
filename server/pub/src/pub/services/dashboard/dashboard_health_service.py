@@ -16,26 +16,34 @@ from sqlalchemy import and_, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pub.models.device import DeviceCategory, DeviceInst, DeviceSpec, ProcessDevice, ProcessDeviceItem
-from pub.models.diagnosis import DiagnosisResult
+from pub.models.diagnosis import Diagnosis, DiagnosisItem
 from pub.models.customer import Area
 from pub.models.sensor import CommunicationState, Sensor, SensorMonitoring
 
 logger = logging.getLogger(__name__)
 
+INT_TO_LEVEL = {
+    0: "正常",
+    1: "关注",
+    2: "异常",
+    3: "警告",
+    4: "严重",
+}
+
 LEVEL_SCORE = {
     "未检测": -1,
     "正常": 0,
     "关注": 1,
-    "警告": 2,
-    "严重": 3,
+    "异常": 2,
+    "警告": 3,
+    "严重": 4,
 }
 
 METRIC_LABELS = {
-    "quality": "数据质量",
-    "temperature": "温度",
-    "vibration_intensity": "振动强度",
-    "energy_impact": "能量冲击",
-    "peak_structure": "主频结构",
+    0: "温度",
+    1: "振动(X轴)",
+    2: "振动(Y轴)",
+    3: "振动(Z轴)",
 }
 
 OFFLINE_AFTER_MS = 24 * 60 * 60 * 1000
@@ -58,9 +66,10 @@ class DashboardHealthService:
                 monitored_sns.add(sn)
                 sn_to_devices.setdefault(sn, []).append(dev["device_id"])
 
-        # 3. Query latest diagnosis results per (sn, metric)
+        # 3. Query latest diagnosis results per (device_id, metric)
+        device_ids = {UUID(d) for d in devices.keys()}
         latest_results = await DashboardHealthService._query_latest_diagnosis(
-            session, monitored_sns
+            session, device_ids
         )
 
         # 4. Query communication states for online/offline
@@ -81,29 +90,29 @@ class DashboardHealthService:
                         devices[device_id]["online"] = True
 
         # 6. Assign diagnosis level to each device & collect triggered metrics
-        for sn, metric_results in latest_results.items():
-            for result in metric_results.values():
-                score = LEVEL_SCORE.get(result.level, 0)
-                linked_ids = (
-                    [str(result.device_inst_id)]
-                    if result.device_inst_id
-                    else sn_to_devices.get(sn, [])
-                )
-                for device_id in linked_ids:
-                    if device_id not in devices:
-                        continue
-                    dev = devices[device_id]
-                    dev["has_diagnosis"] = True
-                    current_score = dev["diagnosis_score"]
-                    if current_score is None or score > current_score:
-                        dev["diagnosis_score"] = score
-                        dev["diagnosis_level"] = result.level
+        for dev_id, metric_results in latest_results.items():
+            for metric_id, (diag, item) in metric_results.items():
+                level_str = INT_TO_LEVEL.get(item.level, "正常")
+                score = LEVEL_SCORE.get(level_str, 0)
+                
+                if dev_id not in devices:
+                    continue
+                dev = devices[dev_id]
+                dev["has_diagnosis"] = True
+                current_score = dev["diagnosis_score"]
+                
+                # Check overall diagnosis level first (using diag.overall_level)
+                overall_level_str = INT_TO_LEVEL.get(diag.overall_level, "正常")
+                overall_score = LEVEL_SCORE.get(overall_level_str, 0)
+                if current_score is None or overall_score > current_score:
+                    dev["diagnosis_score"] = overall_score
+                    dev["diagnosis_level"] = overall_level_str
 
-                    if score > 0:
-                        label = METRIC_LABELS.get(result.metric, result.metric)
-                        current_metric_level = dev["triggered_metrics"].get(label)
-                        if not current_metric_level or score > LEVEL_SCORE.get(current_metric_level, 0):
-                            dev["triggered_metrics"][label] = result.level
+                if score > 0:
+                    label = METRIC_LABELS.get(metric_id, str(metric_id))
+                    current_metric_level = dev["triggered_metrics"].get(label)
+                    if not current_metric_level or score > LEVEL_SCORE.get(current_metric_level, 0):
+                        dev["triggered_metrics"][label] = level_str
 
         # 7. Query fault duration for triggered devices
         fault_device_ids = {
@@ -111,14 +120,11 @@ class DashboardHealthService:
             for dev in devices.values()
             if LEVEL_SCORE.get(dev["diagnosis_level"], 0) > 0
         }
-        fault_sns = set()
-        for dev_id in fault_device_ids:
-            fault_sns.update(devices[dev_id]["sns"])
         first_triggered_map = await DashboardHealthService._query_first_triggered(
-            session, fault_sns
+            session, fault_device_ids
         )
         previous_level_map = await DashboardHealthService._query_previous_levels(
-            session, fault_sns
+            session, fault_device_ids
         )
 
         # 8. Assemble response
@@ -194,36 +200,38 @@ class DashboardHealthService:
 
     @staticmethod
     async def _query_latest_diagnosis(
-        session: AsyncSession, sns: set[str]
-    ) -> dict[str, dict[str, DiagnosisResult]]:
-        """Get latest DiagnosisResult per (sn, metric)."""
-        if not sns:
+        session: AsyncSession, device_ids: set[UUID]
+    ) -> dict[str, dict[int, tuple[Diagnosis, DiagnosisItem]]]:
+        """Get latest DiagnosisItem per (device_id, metric_id)."""
+        if not device_ids:
             return {}
         ranked = (
             select(
-                DiagnosisResult.id.label("id"),
+                DiagnosisItem.id.label("id"),
                 func.row_number()
                 .over(
-                    partition_by=(DiagnosisResult.sn, DiagnosisResult.metric),
+                    partition_by=(Diagnosis.device_id, DiagnosisItem.metric_id),
                     order_by=(
-                        desc(DiagnosisResult.report_ts),
-                        desc(DiagnosisResult.diagnosed_at),
+                        desc(Diagnosis.diagnosed_at),
                     ),
                 )
                 .label("row_num"),
             )
-            .where(DiagnosisResult.sn.in_(list(sns)))
+            .join(Diagnosis, DiagnosisItem.diagnosis_id == Diagnosis.id)
+            .where(Diagnosis.device_id.in_(list(device_ids)))
             .subquery()
         )
         stmt = (
-            select(DiagnosisResult)
-            .join(ranked, DiagnosisResult.id == ranked.c.id)
+            select(Diagnosis, DiagnosisItem)
+            .join(DiagnosisItem, DiagnosisItem.diagnosis_id == Diagnosis.id)
+            .join(ranked, DiagnosisItem.id == ranked.c.id)
             .where(ranked.c.row_num == 1)
         )
-        rows = (await session.execute(stmt)).scalars().all()
-        latest: dict[str, dict[str, DiagnosisResult]] = {}
-        for result in rows:
-            latest.setdefault(result.sn, {})[result.metric] = result
+        rows = (await session.execute(stmt)).all()
+        latest = {}
+        for diag, item in rows:
+            dev_id_str = str(diag.device_id)
+            latest.setdefault(dev_id_str, {})[item.metric_id] = (diag, item)
         return latest
 
     @staticmethod
@@ -238,77 +246,67 @@ class DashboardHealthService:
 
     @staticmethod
     async def _query_first_triggered(
-        session: AsyncSession, sns: set[str]
+        session: AsyncSession, device_ids: set[str]
     ) -> dict[str, datetime]:
-        """Get earliest triggered diagnosis time per SN (for duration calculation)."""
-        if not sns:
+        """Get earliest triggered diagnosis time per device (for duration calculation)."""
+        if not device_ids:
             return {}
+        uuid_ids = [UUID(d) for d in device_ids]
         stmt = (
             select(
-                DiagnosisResult.sn,
-                func.min(DiagnosisResult.diagnosed_at).label("first_at"),
+                Diagnosis.device_id,
+                func.min(Diagnosis.diagnosed_at).label("first_at"),
             )
             .where(
-                DiagnosisResult.sn.in_(list(sns)),
-                DiagnosisResult.triggered.is_(True),
+                Diagnosis.device_id.in_(uuid_ids),
+                Diagnosis.overall_level > 0,
             )
-            .group_by(DiagnosisResult.sn)
+            .group_by(Diagnosis.device_id)
         )
         rows = await session.execute(stmt)
-        return {row.sn: row.first_at for row in rows if row.first_at}
+        return {str(row.device_id): row.first_at for row in rows if row.first_at}
 
     @staticmethod
     async def _query_previous_levels(
-        session: AsyncSession, sns: set[str]
+        session: AsyncSession, device_ids: set[str]
     ) -> dict[str, str]:
-        """Get the second-latest diagnosis level per SN to determine trend.
-
-        Compare the latest report's max level with the previous report's max level.
-        """
-        if not sns:
+        """Get the second-latest diagnosis level per device to determine trend."""
+        if not device_ids:
             return {}
-
-        # Get the two most recent distinct report_ts per SN
+        uuid_ids = [UUID(d) for d in device_ids]
+        
         ranked = (
             select(
-                DiagnosisResult.sn,
-                DiagnosisResult.report_ts,
-                DiagnosisResult.level,
+                Diagnosis.device_id,
+                Diagnosis.overall_level,
                 func.row_number()
                 .over(
-                    partition_by=DiagnosisResult.sn,
-                    order_by=(
-                        desc(DiagnosisResult.report_ts),
-                        desc(DiagnosisResult.diagnosed_at),
-                    ),
+                    partition_by=Diagnosis.device_id,
+                    order_by=(desc(Diagnosis.diagnosed_at)),
                 )
                 .label("row_num"),
             )
-            .where(DiagnosisResult.sn.in_(list(sns)))
+            .where(Diagnosis.device_id.in_(uuid_ids))
             .subquery()
         )
-
-        # Get all results where row_num corresponds to the 2nd report cycle
-        # (i.e., results 6-10 if each cycle has 5 metrics)
-        # Simplified: get all non-latest report_ts results and pick the max level
+        
         stmt = (
             select(
-                ranked.c.sn,
-                ranked.c.level,
+                ranked.c.device_id,
+                ranked.c.overall_level,
             )
-            .where(ranked.c.row_num > 5, ranked.c.row_num <= 10)
+            .where(ranked.c.row_num == 2)
         )
         rows = await session.execute(stmt)
-
-        # Take the max level per SN from the previous cycle
+        
         prev: dict[str, int] = {}
         for row in rows:
-            score = LEVEL_SCORE.get(row.level, 0)
-            if row.sn not in prev or score > prev[row.sn]:
-                prev[row.sn] = score
-
-        score_to_level = {v: k for k, v in LEVEL_SCORE.items()}
-        return {sn: score_to_level.get(s, "未检测") for sn, s in prev.items()}
+            dev_str = str(row.device_id)
+            score = row.overall_level
+            if dev_str not in prev or score > prev[dev_str]:
+                prev[dev_str] = score
+                
+        return {d: INT_TO_LEVEL.get(s, "未检测") for d, s in prev.items()}
 
     # ------------------------------------------------------------------
     # Assemble
@@ -408,12 +406,8 @@ class DashboardHealthService:
             if score <= 0 or not dev["online"]:
                 continue
 
-            # Duration: find earliest triggered time across this device's SNs
-            earliest_trigger = None
-            for sn in dev["sns"]:
-                ft = first_triggered_map.get(sn)
-                if ft and (earliest_trigger is None or ft < earliest_trigger):
-                    earliest_trigger = ft
+            # Duration: find earliest triggered time across this device
+            earliest_trigger = first_triggered_map.get(dev["device_id"])
 
             duration_hours = None
             if earliest_trigger:
@@ -421,12 +415,8 @@ class DashboardHealthService:
                 duration_hours = round(delta.total_seconds() / 3600, 1)
 
             # Trend: compare current level with previous cycle's level
-            prev_max_score = -1
-            for sn in dev["sns"]:
-                prev_level = previous_level_map.get(sn, "未检测")
-                ps = LEVEL_SCORE.get(prev_level, -1)
-                if ps > prev_max_score:
-                    prev_max_score = ps
+            prev_level = previous_level_map.get(dev["device_id"], "未检测")
+            prev_max_score = LEVEL_SCORE.get(prev_level, -1)
 
             if prev_max_score < 0 or prev_max_score == score:
                 trending = "stable"

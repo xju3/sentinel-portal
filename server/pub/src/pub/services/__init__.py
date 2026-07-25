@@ -36,8 +36,8 @@ from .sensor.sensor_task_service import *
 # from .diagnosis.diagnosis_context_service import DiagnosisContextService
 # from .diagnosis.quick_history_cache import *
 
-# from .dashboard.dashboard_health_service import DashboardHealthService
-# from .dashboard.dashboard_service import DashboardService
+from .dashboard.dashboard_health_service import DashboardHealthService
+from .dashboard.dashboard_service import DashboardService
 
 from .wx.wx_service import WxService
 # from .dispatch.quick_dispatch_service import *
