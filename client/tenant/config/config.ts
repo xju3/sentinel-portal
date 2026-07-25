@@ -184,7 +184,6 @@ export default defineConfig({
         },
       ],
     },
-
     {
       path: '/org',
       name: '组织架构',
