@@ -63,7 +63,7 @@ class SensorDbService:
     @staticmethod
     async def get_sensor_metadata_for_cache(session: AsyncSession, sn: str) -> Optional[dict]:
         from pub.models.sensor import SensorMonitoring
-        from pub.models.device import DeviceInst, DeviceSpec
+        from pub.models.device import DeviceInst, DeviceSpec, DeviceCategory
         from pub.models.customer import Tenant
         from sqlalchemy import and_
 
@@ -71,15 +71,16 @@ class SensorDbService:
             select(
                 Sensor.id.label("sensor_id"),
                 SensorMonitoring.location_id,
-                DeviceInst.tenant_id,
+                DeviceCategory.tenant_id,
                 Tenant.region_id,
                 DeviceSpec.device_category_id,
                 DeviceInst.process_device_id,
             )
             .join(SensorMonitoring, Sensor.id == SensorMonitoring.sensor_id)
             .outerjoin(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
-            .outerjoin(Tenant, DeviceInst.tenant_id == Tenant.id)
             .outerjoin(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
+            .outerjoin(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+            .outerjoin(Tenant, DeviceCategory.tenant_id == Tenant.id)
             .where(
                 and_(
                     Sensor.sn == sn,
