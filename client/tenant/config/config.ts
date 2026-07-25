@@ -186,7 +186,7 @@ export default defineConfig({
     },
     {
       path: '/org',
-      name: '组织架构',
+      name: '组织机构',
       icon: 'TeamOutlined',
       routes: [
         {
