@@ -16,9 +16,11 @@ async def dispatch_diagnosis_trigger(report: DeviceDiagnosticReport) -> None:
         import asyncio
         from app.services.context import DeviceContextService
         from app.handler.temperature import TemperatureDiagnosis
+        from app.handler.vibration import VibrationDiagnosis
         from pub.manager.database import db_manager, redis_manager
         from pub.models.diagnosis import Diagnosis, DiagnosisItem
-        from pub.utils.redis_keys import REDIS_KEY_DIA_AMBIENT_TEMP
+        from pub.models.sensor import SensorTask
+        from pub.utils.redis_keys import REDIS_KEY_DIA_AMBIENT_TEMP, REDIS_KEY_TASK_SEQ
         
         device_uuid = uuid.UUID(report.device_id)
         location_uuid = uuid.UUID(report.location_id)
@@ -46,29 +48,108 @@ async def dispatch_diagnosis_trigger(report: DeviceDiagnosticReport) -> None:
         peer_group = await DeviceContextService.get_peer_group_managed(report.process_device_id, report.device_category_id)
         context["peer_group"] = {"enabled": True, "members": peer_group}
             
-        result = await TemperatureDiagnosis.analyze(report.device_id, report.location_id, report.temperature_c or 0.0, context)
-        level = severity_to_level(result.get("severity", "info"))
+        # Temperature Diagnosis
+        temp_result = await TemperatureDiagnosis.analyze(report.device_id, report.location_id, report.temperature_c or 0.0, context)
+        temp_level = severity_to_level(temp_result.get("severity", "info"))
+        
+        # Vibration Diagnosis (Extract max rms_vel_mm_s)
+        max_rms_vel = 0.0
+        if report.axis_features:
+            max_rms_vel = max((axis.time.rms_vel_mm_s or 0.0) for axis in report.axis_features.values() if axis.time)
+        vib_result = await VibrationDiagnosis.analyze(report.device_id, report.location_id, max_rms_vel, context)
+        vib_level = severity_to_level(vib_result.get("severity", "info"))
+        
+        overall_level = max(temp_level, vib_level)
         
         async with db_manager.SessionLocal() as session:
             async with session.begin():
+                resampling_flag = 0
+                trigger_fft = False
+                
+                redis_client = redis_manager.get_client()
+                
+                # 1. Update Sequence Tracking & Evaluate Resampling Status
+                if report.task_id:
+                    seq_key = REDIS_KEY_TASK_SEQ.format(task_id=report.task_id)
+                    seq_str = await asyncio.to_thread(redis_client.get, seq_key) if redis_client else None
+                    if seq_str:
+                        seq = int(seq_str) + 1
+                        await asyncio.to_thread(redis_client.setex, seq_key, 86400, seq)
+                        
+                        if seq < 3:
+                            resampling_flag = 1
+                            vib_result["evidence"]["confirmation_status"] = f"resampling_pass_{seq}"
+                        else:
+                            resampling_flag = 0
+                            vib_result["evidence"]["confirmation_status"] = "confirmed"
+                            if vib_level >= 2:
+                                trigger_fft = True
+                else:
+                    # Initial Trigger Check
+                    if vib_level >= 2 and vib_result.get("requires_resampling"):
+                        resampling_flag = 1
+                        vib_result["evidence"]["confirmation_status"] = "pending_confirmation"
+                        
+                        new_task = SensorTask(
+                            name="Vibration Re-sampling (Auto)",
+                            sn=report.sensor_sn,
+                            action=53,
+                            val=3,
+                            remark="Vibration anomaly triggered resampling",
+                            status=0
+                        )
+                        session.add(new_task)
+                        await session.flush()
+                        
+                        if redis_client:
+                            seq_key = REDIS_KEY_TASK_SEQ.format(task_id=new_task.id)
+                            await asyncio.to_thread(redis_client.setex, seq_key, 86400, 1)
+
+                if trigger_fft:
+                    fft_task = SensorTask(
+                        name="FFT Data Collection (Auto)",
+                        sn=report.sensor_sn,
+                        action=908,  # Default 8G FFT for now
+                        val=0,
+                        remark="Confirmed anomaly triggered FFT",
+                        status=0
+                    )
+                    session.add(fft_task)
+
+                # 2. Persist Diagnosis
                 diag_record = Diagnosis(
                     device_id=device_uuid,
                     location_id=location_uuid,
                     report_id=report.report_id,
-                    overall_level=level
+                    overall_level=overall_level,
+                    resampling=resampling_flag
                 )
                 session.add(diag_record)
                 await session.flush()
                 
-                item = DiagnosisItem(
+                # Temperature Item
+                item_temp = DiagnosisItem(
                     diagnosis_id=diag_record.id,
                     metric_id=0, # Temperature
-                    level=level,
-                    description=result.get("reason"),
-                    evidence=result.get("evidence", {})
+                    level=temp_level,
+                    resampling=resampling_flag,
+                    description=temp_result.get("reason"),
+                    evidence=temp_result.get("evidence", {})
                 )
-                session.add(item)
-        logger.info("Successfully persisted diagnosis results to MySQL: level=%s, reason=%s", level, result.get("reason"))
+                session.add(item_temp)
+                
+                # Vibration Item
+                item_vib = DiagnosisItem(
+                    diagnosis_id=diag_record.id,
+                    metric_id=1, # Vibration
+                    level=vib_level,
+                    resampling=resampling_flag,
+                    description=vib_result.get("reason"),
+                    evidence=vib_result.get("evidence", {})
+                )
+                session.add(item_vib)
+                
+        logger.info("Successfully persisted diagnosis results to MySQL: overall_level=%s", overall_level)
     except Exception as e:
         logger.error("Failed to execute diagnosis trigger: %s", str(e), exc_info=True)
 
@@ -108,9 +189,20 @@ async def process_incoming_report(report: DeviceDiagnosticReport) -> None:
         rms_y = report.axis_features["Y"].time.rms_acc_g if "Y" in report.axis_features and report.axis_features["Y"].time else 0.0
         rms_z = report.axis_features["Z"].time.rms_acc_g if "Z" in report.axis_features and report.axis_features["Z"].time else 0.0
         
+        rms_vel_x = report.axis_features["X"].time.rms_vel_mm_s if "X" in report.axis_features and report.axis_features["X"].time else 0.0
+        rms_vel_y = report.axis_features["Y"].time.rms_vel_mm_s if "Y" in report.axis_features and report.axis_features["Y"].time else 0.0
+        rms_vel_z = report.axis_features["Z"].time.rms_vel_mm_s if "Z" in report.axis_features and report.axis_features["Z"].time else 0.0
+        
         if rms_x is not None: point = point.field("rms_x", float(rms_x))
         if rms_y is not None: point = point.field("rms_y", float(rms_y))
         if rms_z is not None: point = point.field("rms_z", float(rms_z))
+        
+        if rms_vel_x is not None: point = point.field("rms_vel_x", float(rms_vel_x))
+        if rms_vel_y is not None: point = point.field("rms_vel_y", float(rms_vel_y))
+        if rms_vel_z is not None: point = point.field("rms_vel_z", float(rms_vel_z))
+        
+        max_rms_vel = max(float(rms_vel_x or 0), float(rms_vel_y or 0), float(rms_vel_z or 0))
+        point = point.field("max_rms_vel", max_rms_vel)
         
         if rms_x is not None and rms_y is not None and rms_z is not None:
             rms_m = math.sqrt(rms_x**2 + rms_y**2 + rms_z**2)

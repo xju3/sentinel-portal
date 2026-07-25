@@ -224,7 +224,7 @@ def _json_safe(value: Any) -> Any:
     return str(value)
 
 def _device_inst_context(obj): return {"id": obj.id, "name": obj.name, "code": obj.code} if obj else None
-def _device_spec_context(obj): return {"id": obj.id, "name": obj.name, "model": obj.model} if obj else None
+def _device_spec_context(obj): return {"id": obj.id, "name": obj.name, "model": obj.model, "rpm": obj.rpm} if obj else None
 def _device_category_context(obj): return {"id": obj.id, "name": obj.name} if obj else None
 def _iso_context(obj): return {"id": obj.id, "code": obj.code} if obj else None
 def _health_check_context(obj): return {"id": obj.id, "patrol": obj.patrol} if obj else None

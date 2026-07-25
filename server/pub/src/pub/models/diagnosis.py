@@ -13,9 +13,11 @@ from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
+    Float,
     Uuid,
 )
 from sqlalchemy.dialects.mysql import JSON as MySQLJSON
+from sqlalchemy.dialects.mysql import TINYINT
 from sqlalchemy.orm import relationship
 
 from pub.models import Base
@@ -38,6 +40,9 @@ class Diagnosis(Base):
     
     # MAX of all item levels (0: Normal, 1: Attention, 2: Abnormal, 3: Warning, 4: Critical)
     overall_level = Column(Integer, nullable=False, default=0, index=True)
+    
+    # 0 for final confirmation, 1 for intermediate resampling records
+    resampling = Column(TINYINT(1), nullable=False, default=0, index=True, comment="是否处于复采确认中")
     
     diagnosed_at = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
@@ -71,6 +76,9 @@ class DiagnosisItem(Base):
     # 0: Normal, 1: Attention, 2: Abnormal, 3: Warning, 4: Critical
     level = Column(Integer, nullable=False, default=0, index=True)
     
+    # 0 for final confirmation, 1 for intermediate resampling records
+    resampling = Column(TINYINT(1), nullable=False, default=0, index=True, comment="是否处于复采确认中")
+    
     # Human readable fault description
     description = Column(String(255), nullable=True)
     
@@ -81,3 +89,31 @@ class DiagnosisItem(Base):
 
     # Relationships
     diagnosis = relationship("Diagnosis", back_populates="items")
+
+
+class DiagnosisFft(Base):
+    """
+    Independent table for FFT analysis conclusions.
+    Linked to the final resampling action that triggered the FFT.
+    """
+
+    __tablename__ = "diagnosis_fft"
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    
+    # Links to the Diagnosis/report_id of the final resampling task that confirmed the anomaly
+    report_id = Column(String(128), nullable=False, index=True)
+    
+    # The SensorTask (action=9xx) that generated the FFT data
+    fft_task_id = Column(Uuid(as_uuid=True), nullable=False, index=True)
+    
+    # Physical fault code or conclusion string (e.g. "UB", "BPFO")
+    conclusion = Column(String(255), nullable=True)
+    
+    # Confidence level 0.0 ~ 1.0 to handle algorithmic uncertainty
+    confidence = Column(Float, nullable=True)
+    
+    # Detailed evidence (e.g. matched frequencies, amplitudes)
+    details = Column(MySQLJSON, nullable=True)
+
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)

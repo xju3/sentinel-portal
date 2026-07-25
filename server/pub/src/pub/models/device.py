@@ -177,3 +177,28 @@ class ProcessDeviceItem(Base):
     process_device_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to process_devices
 
     device_inst = relationship("DeviceInst", primaryjoin="foreign(ProcessDeviceItem.device_inst_id) == DeviceInst.id", lazy="selectin", uselist=False)
+
+class DeviceBaseline(Base):
+    """
+    Dynamic health baseline for the device to track degradation over time.
+    Calculated periodically (e.g. 7-day median) and used for relative thresholding.
+    """
+
+    __tablename__ = "device_baseline"
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    device_inst_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # physical device instance
+    metric_name = Column(String(64), nullable=False, index=True)  # e.g., 'vibration_rms'
+    baseline_value = Column(Float, nullable=False, default=0.0)
+    
+    # Lifecycle tracking for historical tracing
+    effective_from = Column(DateTime, nullable=False, default=datetime.utcnow, index=True)
+    effective_to = Column(DateTime, nullable=True, index=True)  # NULL means currently active
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+    device_inst = relationship(
+        "DeviceInst",
+        primaryjoin="foreign(DeviceBaseline.device_inst_id) == DeviceInst.id",
+        lazy="selectin",
+        uselist=False
+    )

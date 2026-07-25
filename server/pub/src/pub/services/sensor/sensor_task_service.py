@@ -723,5 +723,23 @@ async def process_fft_metadata_background(task_id: UUID | str) -> None:
             session.add(record)
             await session.commit()
             logger.info(f"Successfully processed FFT metadata for task {task_uuid}")
+            
+            # Trigger Node 2: FFT Parsing and Physical Diagnosis Engine
+            try:
+                import sys
+                from pathlib import Path
+                server_path = Path(__file__).parent.parent.parent.parent.parent.parent
+                if str(server_path) not in sys.path:
+                    sys.path.append(str(server_path))
+                    
+                from diagnosis.app.preparation.fft_parser import FftParser
+                from diagnosis.app.handler.fft_analyzer import FftAnalyzer
+                
+                fft_data = FftParser.parse_from_minio(str(task_uuid))
+                if fft_data:
+                    await FftAnalyzer.analyze_and_save(str(task_uuid), fft_data)
+            except Exception as inner_e:
+                logger.error(f"Failed to execute FFT diagnostic engine for task {task_uuid}: {inner_e}", exc_info=True)
+                
     except Exception as e:
         logger.error(f"Error processing FFT metadata for task {task_uuid}: {e}", exc_info=True)
