@@ -214,7 +214,9 @@ async def get_sensor_binding(
     sn: str,
     session: AsyncSession = Depends(get_session),
 ):
-    device_id = await SensorDbService.get_binding_by_sn(session, sn)
+    binding = await SensorDbService.get_binding_by_sn(session, sn)
+    device_id = binding.get("device_id") if binding else None
+    rpm = binding.get("rpm") if binding else None
     
     meta_data = await SensorDbService.get_sensor_metadata_for_cache(session, sn)
     if meta_data:
@@ -222,7 +224,7 @@ async def get_sensor_binding(
         if redis_client:
             redis_client.set(REDIS_KEY_SENSOR_META.format(sn=sn), json.dumps(meta_data))
 
-    return success(SensorBindingResponse(device_id=device_id))
+    return success(SensorBindingResponse(device_id=device_id, rpm=rpm))
 
 
 @router.get("")

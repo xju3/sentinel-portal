@@ -44,12 +44,15 @@ class SensorDbService:
         return result.scalar_one_or_none()
 
     @staticmethod
-    async def get_binding_by_sn(session: AsyncSession, sn: str) -> Optional[UUID]:
+    async def get_binding_by_sn(session: AsyncSession, sn: str) -> Optional[dict]:
         from pub.models.sensor import SensorMonitoring
+        from pub.models.device import DeviceInst, DeviceSpec
         from sqlalchemy import and_
         stmt = (
-            select(SensorMonitoring.device_inst_id)
+            select(SensorMonitoring.device_inst_id, DeviceSpec.rpm)
             .join(Sensor, Sensor.id == SensorMonitoring.sensor_id)
+            .outerjoin(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
+            .outerjoin(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
             .where(
                 and_(
                     Sensor.sn == sn,
@@ -58,7 +61,13 @@ class SensorDbService:
             )
         )
         result = await session.execute(stmt)
-        return result.scalar_one_or_none()
+        row = result.first()
+        if not row:
+            return None
+        return {
+            "device_id": row.device_inst_id,
+            "rpm": row.rpm
+        }
 
     @staticmethod
     async def get_sensor_metadata_for_cache(session: AsyncSession, sn: str) -> Optional[dict]:

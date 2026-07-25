@@ -280,4 +280,5 @@ class SensorConfigResponse(BaseModel):
 
 class SensorBindingResponse(BaseModel):
     device_id: Optional[UUID] = None
+    rpm: Optional[int] = None
 
