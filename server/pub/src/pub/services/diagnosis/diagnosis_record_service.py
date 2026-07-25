@@ -3,23 +3,29 @@ Diagnosis service - business logic for patrol diagnosis record operations
 """
 
 import logging
-import time
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 from uuid import UUID
+from datetime import datetime
 
-from sqlalchemy import desc, select
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.orm import selectinload
 
 from pub.manager.database import db_manager
-from pub.models.diagnosis import DiagnosisRecord, DiagnosisResult, DiagnosisResultItem
-from pub.models.sensor import PatrolDiagnosticRecord, Sensor, SensorMonitoring
-from pub.services.diagnosis.diagnosis_result_service import _diagnosis_relation_ids, _parse_quality_status
+from pub.models.diagnosis import Diagnosis
 
 logger = logging.getLogger(__name__)
 
+def _parse_quality_status(quality: Any) -> int:
+    """Parse the raw quality object to determine the integer quality_status (0=usable, 1=unusable)."""
+    if not isinstance(quality, dict):
+        return 1
+    status = quality.get("status")
+    if status == 0 or status == "ok":
+        return 0
+    return 1
+
 class DiagnosisRecordService:
-    """Service for managing the parent DiagnosisRecord."""
+    """Service for managing the parent Diagnosis."""
 
     @staticmethod
     async def create_managed(
@@ -28,42 +34,41 @@ class DiagnosisRecordService:
         report_ts: int,
         payload: dict[str, Any],
         context: dict[str, Any] | None = None,
-    ) -> Optional[DiagnosisRecord]:
-        """Create a new DiagnosisRecord using an internally managed session."""
+    ) -> Optional[Diagnosis]:
+        """Create a new Diagnosis using an internally managed session."""
         if db_manager.SessionLocal is None:
             raise RuntimeError("Database not initialized.")
+            
+        if not context or "monitoring" not in context or not context["monitoring"]:
+            logger.warning(f"No monitoring context for sn {sn}, skipping diagnosis record creation.")
+            return None
 
         try:
             await db_manager.ensure_schema()
             async with db_manager.SessionLocal() as session:
-                relation_ids = _diagnosis_relation_ids(context)
+                monitoring = context["monitoring"]
+                device_id = monitoring.get("device_inst_id")
+                location_id = monitoring.get("location_id")
                 
+                if not device_id or not location_id:
+                    logger.warning(f"Missing device_id or location_id for sn {sn}, skipping diagnosis record creation.")
+                    return None
+
                 quality_status = _parse_quality_status(payload.get("quality"))
                 
-                # If quality is unusable, immediately terminate the workflow state
-                initial_status = "COMPLETED" if quality_status == 1 else "PROCESSING"
-                initial_level = "严重" if quality_status == 1 else None
-                initial_anomaly = True if quality_status == 1 else False
+                # If quality is unusable (1), we might consider it as level 4 (Critical) or just skip
+                initial_level = 4 if quality_status == 1 else 0
+                
+                diagnosed_at = datetime.fromtimestamp(report_ts / 1000.0) if report_ts else datetime.utcnow()
 
-                record = DiagnosisRecord(
-                    id=UUID(report_id),
-                    sn=sn,
-                    report_ts=report_ts,
-                    schema_version=payload.get("schema_version"),
-                    sample_type=payload.get("sample_type"),
-                    temperature_c=payload.get("temperature_c"),
-                    fs_hz=payload.get("fs_hz"),
-                    requested_range_g=payload.get("requested_range_g"),
-                    range_g=payload.get("range_g"),
-                    points=payload.get("points"),
-                    duration_ms=payload.get("duration_ms"),
-                    task_id=payload.get("task_id"),
-                    quality_status=quality_status,
-                    quality_attempts=payload.get("quality", {}).get("attempts") if isinstance(payload.get("quality"), dict) else None,
-                    status=initial_status,
+                record = Diagnosis(
+                    id=UUID(report_id) if report_id else None,
+                    device_id=UUID(str(device_id)),
+                    location_id=UUID(str(location_id)),
+                    report_id=report_id,
                     overall_level=initial_level,
-                    is_anomaly=initial_anomaly,
-                    **relation_ids,
+                    resampling=0,
+                    diagnosed_at=diagnosed_at,
                 )
                 session.add(record)
                 await session.commit()
@@ -77,23 +82,21 @@ class DiagnosisRecordService:
     async def update_status_managed(
         report_id: str,
         status: str,
-        overall_level: str | None = None,
+        overall_level: int | None = None,
         is_anomaly: bool = False,
     ) -> bool:
-        """Update the status of an existing DiagnosisRecord."""
+        """Update the status of an existing Diagnosis."""
         if db_manager.SessionLocal is None:
             return False
             
         try:
             async with db_manager.SessionLocal() as session:
-                stmt = select(DiagnosisRecord).where(DiagnosisRecord.id == UUID(report_id))
+                stmt = select(Diagnosis).where(Diagnosis.id == UUID(report_id))
                 result = await session.execute(stmt)
                 record = result.scalar_one_or_none()
                 if record:
-                    record.status = status
                     if overall_level is not None:
                         record.overall_level = overall_level
-                    record.is_anomaly = is_anomaly
                     await session.commit()
                     return True
                 return False
