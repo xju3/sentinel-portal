@@ -34,7 +34,7 @@ services:
     container_name: stl-dia
     environment:
       <<: *python-env
-      APP_PACKAGE: dia
+      APP_PACKAGE: diagnosis
     ports:
       - "3091:8000"
     volumes:
