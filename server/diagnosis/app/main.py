@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 import asyncio
 from contextlib import asynccontextmanager
-from pub.manager.database import db_manager, redis_manager, influxdb_manager
+from pub.manager.database import db_manager, redis_manager, influxdb_manager, minio_manager
 from pub.services.common.weather_service import WeatherService
 from app.config import settings
 from app.clients.mqtt import dia_mqtt_manager, set_main_loop
@@ -39,6 +39,13 @@ async def lifespan(app: FastAPI):
     await db_manager.init(settings.mysql_url, settings.debug)
     redis_manager.init(settings.redis_url)
     influxdb_manager.init(settings.influx_url, settings.influx_token, settings.influx_org, settings.influx_bucket)
+    minio_manager.init(
+        settings.minio_endpoint,
+        settings.minio_access_key,
+        settings.minio_secret_key,
+        settings.minio_secure,
+        settings.minio_bucket,
+    )
 
     logger.info("Initializing MQTT client...")
     set_main_loop(asyncio.get_running_loop())
@@ -59,6 +66,7 @@ async def lifespan(app: FastAPI):
     await db_manager.close()
     redis_manager.close()
     influxdb_manager.close()
+    minio_manager.close()
 
     logger.info("Closing MQTT client...")
     dia_mqtt_manager.close()

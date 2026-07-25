@@ -9,6 +9,23 @@ class Settings(BaseSettings):
     influx_org: str = "myorg"
     influx_bucket: str = "sentinel-accel-raw-data"
     debug: bool = False
+    
+    # MinIO
+    minio_endpoint: str = "host_name_or_ip_address:9000"
+    minio_access_key: str = "your_minio_access_key"
+    minio_secret_key: str = "your_minio_secret_key"
+    minio_secure: bool = False
+    minio_bucket: str = "fft"
+
+    # MQTT Configuration
+    mqtt_host: str = "host_name_or_ip_address"
+    mqtt_port: int = 1883
+    mqtt_topic: str = "sentinel"
+    mqtt_username: str = "your_mqtt_username"
+    mqtt_password: str = "your_mqtt_password"
+    mqtt_client_id: str = "sentinel-dia-client"
+    mqtt_client_id_unique: bool = True
+    mqtt_protocol_version: str = "3.1.1"
 
     model_config = SettingsConfigDict(
         env_file=("../api/.env", "../../.env", ".env"),
