@@ -86,6 +86,7 @@ class SensorDbService:
                 Tenant.region_id,
                 DeviceSpec.device_category_id,
                 ProcessDeviceItem.process_device_id,
+                DeviceSpec.rpm,
             )
             .join(SensorMonitoring, Sensor.id == SensorMonitoring.sensor_id)
             .outerjoin(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
@@ -114,6 +115,7 @@ class SensorDbService:
             "region_id": row.region_id,
             "device_category_id": str(row.device_category_id) if row.device_category_id else None,
             "process_device_id": str(row.process_device_id) if row.process_device_id else None,
+            "rpm": row.rpm,
         }
 
     @classmethod

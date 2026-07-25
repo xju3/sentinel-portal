@@ -503,7 +503,7 @@ async def receive_sensor_data(
             if meta_str:
                 try:
                     meta = json.loads(meta_str)
-                    stored_payload.update(meta)
+                    stored_payload["sensor_meta"] = meta
                 except Exception as e:
                     logger.error(f"Failed to parse sensor metadata from redis for {sn}: {e}")
 
