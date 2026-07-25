@@ -1,4 +1,4 @@
--python-env: &python-env
+x-python-env: &python-env
   UV_INDEX_URL: ${UV_INDEX_URL:-https://mirrors.aliyun.com/pypi/simple/}
   UV_LINK_MODE: copy
   PYTHONDONTWRITEBYTECODE: "1"
