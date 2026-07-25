@@ -1,4 +1,4 @@
-x-python-env: &python-env
+-python-env: &python-env
   UV_INDEX_URL: ${UV_INDEX_URL:-https://mirrors.aliyun.com/pypi/simple/}
   UV_LINK_MODE: copy
   PYTHONDONTWRITEBYTECODE: "1"
@@ -41,13 +41,13 @@ services:
       - ../server:/app/server
       - dia_venv:/app/server/.venv
 
-  tenant:
-    container_name: stl-tenant
+  portal:
+    container_name: stl-portal
     build:
       context: ..
       dockerfile: docker/client/Dockerfile
       args:
-        APP_NAME: tenant
+        APP_NAME: portal
         NPM_REGISTRY: ${NPM_REGISTRY:-https://registry.npmmirror.com}
     restart: unless-stopped
     ports:
