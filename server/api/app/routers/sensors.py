@@ -429,7 +429,7 @@ async def _process_sensor_data_background_async(object_name: str, payload: dict,
                 logger.warning(f"Failed to create DiagnosisRecord in background for {object_name}")
                 return
                 
-            if record.quality_status == 1:
+            if record.overall_level == 4:
                 logger.info(f"Data quality for {object_name} is unusable, skipping DIA trigger.")
                 return
         except Exception as db_err:
