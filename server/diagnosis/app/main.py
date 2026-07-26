@@ -18,7 +18,11 @@ from contextlib import asynccontextmanager
 from pub.manager.database import db_manager, redis_manager, influxdb_manager, minio_manager
 from pub.services.common.weather_service import WeatherService
 from app.config import settings
-from app.clients.mqtt import dia_mqtt_manager, set_main_loop
+from app.clients.mqtt import dia_mqtt_manager
+from app.clients.stream_worker import run_stream_worker, _ensure_consumer_group
+
+# 并发 Worker 数量，控制 MySQL/InfluxDB 并发压力
+WORKER_COUNT = 3
 
 async def weather_fetch_loop():
     while True:
@@ -48,11 +52,18 @@ async def lifespan(app: FastAPI):
     )
 
     logger.info("Initializing MQTT client...")
-    set_main_loop(asyncio.get_running_loop())
     dia_mqtt_manager.init()
+
+    logger.info("Initializing Redis Stream consumer group...")
+    _ensure_consumer_group()
 
     logger.info("Starting background tasks...")
     weather_task = asyncio.create_task(weather_fetch_loop())
+    worker_tasks = [
+        asyncio.create_task(run_stream_worker(f"worker-{i}"))
+        for i in range(WORKER_COUNT)
+    ]
+    logger.info("Started %d stream worker(s).", WORKER_COUNT)
     yield
     # Shutdown
     logger.info("Cancelling background tasks...")
@@ -61,6 +72,11 @@ async def lifespan(app: FastAPI):
         await weather_task
     except asyncio.CancelledError:
         pass
+
+    logger.info("Shutting down stream workers...")
+    for task in worker_tasks:
+        task.cancel()
+    await asyncio.gather(*worker_tasks, return_exceptions=True)
         
     logger.info("Closing databases...")
     await db_manager.close()

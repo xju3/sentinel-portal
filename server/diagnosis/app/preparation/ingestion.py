@@ -1,3 +1,4 @@
+import asyncio
 import logging
 from typing import Any
 
@@ -179,7 +180,7 @@ async def process_incoming_report(report: DeviceDiagnosticReport) -> None:
         
         point = Point("vibration_feature") \
             .tag("sn", report.sensor_sn) \
-            .tag("location_id", report.location_id) \
+            .tag("location_id", report.location_id or "") \
             .tag("device_id", report.device_id)
             
         if report.temperature_c is not None:
@@ -211,7 +212,12 @@ async def process_incoming_report(report: DeviceDiagnosticReport) -> None:
         point = point.time(report.ts_ms, write_precision="ms")
         
         logger.info("Persisting to InfluxDB: %s", point.to_line_protocol())
-        write_api.write(bucket=influxdb_manager.bucket, org=influxdb_manager.org, record=point)
+        await asyncio.to_thread(
+            write_api.write,
+            bucket=influxdb_manager.bucket,
+            org=influxdb_manager.org,
+            record=point,
+        )
     except Exception as e:
         logger.error("Failed to insert raw waveform data into InfluxDB: %s", str(e), exc_info=True)
 

@@ -1,0 +1,166 @@
+{
+    "schema_version": 2,
+    "sensor_sn": "26SH00001",
+    "device_id": "d382b38d-3d8c-411b-9a5f-baed94fe444b",
+    "temperature_c": 32.6,
+    "fs_hz": 26667,
+    "requested_range_g": 2,
+    "range_g": 2,
+    "points": 16384,
+    "task_id": "",
+    "sample_type": "normal",
+    "duration_ms": 6382,
+    "quality": {
+        "status": 0,
+        "auto_range": false
+    },
+    "axis_features": {
+        "X": {
+            "time": {
+                "mean_g": -0.712,
+                "rms_acc_g": 0.011,
+                "peak_acc_g": 0.043,
+                "peak_to_peak_acc_g": 0.083,
+                "rms_vel_mm_s": 0.25,
+                "crest_factor": 4.01,
+                "kurtosis": 2.89
+            },
+            "freq": {
+                "peaks": [
+                    {
+                        "freq_hz": 253.9,
+                        "amp_g": 0.0006
+                    },
+                    {
+                        "freq_hz": 341.8,
+                        "amp_g": 0.0006
+                    },
+                    {
+                        "freq_hz": 512.7,
+                        "amp_g": 0.0006
+                    },
+                    {
+                        "freq_hz": 2690.5,
+                        "amp_g": 0.0005
+                    },
+                    {
+                        "freq_hz": 3966.5,
+                        "amp_g": 0.0005
+                    }
+                ],
+                "spectral_centroid_hz": 2469.3,
+                "spectral_entropy": 0.95
+            },
+            "band_energy_ratio": {
+                "0_100": 0.023,
+                "100_500": 0.088,
+                "500_1000": 0.109,
+                "1000_2000": 0.202,
+                "2000_5000": 0.577
+            }
+        },
+        "Y": {
+            "time": {
+                "mean_g": -0.745,
+                "rms_acc_g": 0.01,
+                "peak_acc_g": 0.04,
+                "peak_to_peak_acc_g": 0.077,
+                "rms_vel_mm_s": 0.17,
+                "crest_factor": 3.81,
+                "kurtosis": 3.01
+            },
+            "freq": {
+                "peaks": [
+                    {
+                        "freq_hz": 244.1,
+                        "amp_g": 0.0006
+                    },
+                    {
+                        "freq_hz": 1881.5,
+                        "amp_g": 0.0006
+                    },
+                    {
+                        "freq_hz": 4212.3,
+                        "amp_g": 0.0006
+                    },
+                    {
+                        "freq_hz": 11.4,
+                        "amp_g": 0.0006
+                    },
+                    {
+                        "freq_hz": 1126.3,
+                        "amp_g": 0.0006
+                    }
+                ],
+                "spectral_centroid_hz": 2471.6,
+                "spectral_entropy": 0.954
+            },
+            "band_energy_ratio": {
+                "0_100": 0.022,
+                "100_500": 0.087,
+                "500_1000": 0.103,
+                "1000_2000": 0.204,
+                "2000_5000": 0.584
+            }
+        },
+        "Z": {
+            "time": {
+                "mean_g": -0.149,
+                "rms_acc_g": 0.012,
+                "peak_acc_g": 0.046,
+                "peak_to_peak_acc_g": 0.091,
+                "rms_vel_mm_s": 0.3,
+                "crest_factor": 3.79,
+                "kurtosis": 3.02
+            },
+            "freq": {
+                "peaks": [
+                    {
+                        "freq_hz": 1165.4,
+                        "amp_g": 0.0008
+                    },
+                    {
+                        "freq_hz": 4218.8,
+                        "amp_g": 0.0008
+                    },
+                    {
+                        "freq_hz": 529,
+                        "amp_g": 0.0008
+                    },
+                    {
+                        "freq_hz": 2249.4,
+                        "amp_g": 0.0008
+                    },
+                    {
+                        "freq_hz": 4485.7,
+                        "amp_g": 0.0008
+                    }
+                ],
+                "spectral_centroid_hz": 2495.4,
+                "spectral_entropy": 0.967
+            },
+            "band_energy_ratio": {
+                "0_100": 0.02,
+                "100_500": 0.084,
+                "500_1000": 0.101,
+                "1000_2000": 0.197,
+                "2000_5000": 0.598
+            }
+        }
+    },
+    "delay": 0,
+    "total": 0,
+    "sensor_meta": {
+        "sensor_id": "b0b473ed-2ed5-489c-8ca9-df9368f81e03",
+        "sensor_sn": "26SH00001",
+        "device_id": "d382b38d-3d8c-411b-9a5f-baed94fe444b",
+        "location_id": "4117d855-b325-472e-8de9-243acb95270b",
+        "tenant_id": "b9515e9c-379a-4525-bfc0-0766bfcc5aa4",
+        "region_id": "3101",
+        "device_category_id": "bd298533-1603-41a9-a2de-5a8e00bc8a2c",
+        "process_device_id": "8fe631e6-d6c1-4211-b64e-d4cb73719662",
+        "rpm": 2920
+    },
+    "ts_ms": 1785027207241,
+    "report_id": "edf18006-c80a-41bb-baf3-a1098de649af"
+}

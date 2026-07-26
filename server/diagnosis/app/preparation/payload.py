@@ -1,4 +1,4 @@
-from typing import Any, Dict, List
+from typing import Dict, List
 from pydantic import BaseModel, Field
 
 class TimeFeature(BaseModel):
@@ -31,20 +31,15 @@ class DataQuality(BaseModel):
     status: int
     auto_range: bool
 
+
 class DeviceDiagnosticReport(BaseModel):
     """
     The top-level payload structure received from the edge/hardware.
     """
     schema_version: int | None = None
     sensor_sn: str
-    sensor_id: str
     device_id: str
-    location_id: str
     report_id: str
-    region_id: str | None = None
-    tenant_id: str | None = None
-    process_device_id: str | None = None
-    device_category_id: str | None = None
     delay: int = 0
     total: int = 0
     ts_ms: int = Field(..., description="Actual data sampling/measurement timestamp in Unix milliseconds")
@@ -57,8 +52,16 @@ class DeviceDiagnosticReport(BaseModel):
     points: int | None = None
     duration_ms: float | None = Field(None, description="Active processing and 4G module startup time before upload (battery/performance metric)")
     
-    # Metadata
-    schema_version: int | None = None
+    # Device identity metadata (flattened from sensor_meta at ingest time)
+    sensor_id: str | None = None
+    location_id: str | None = None
+    tenant_id: str | None = None
+    region_id: str | None = None
+    device_category_id: str | None = None
+    process_device_id: str | None = None
+    rpm: float | None = None
+    
+    # Payload metadata
     sample_type: str | None = None
     task_id: str | None = None
     quality: DataQuality | None = None

@@ -503,7 +503,10 @@ async def receive_sensor_data(
             if meta_str:
                 try:
                     meta = json.loads(meta_str)
-                    stored_payload["sensor_meta"] = meta
+                    # 展平 meta 字段到顶层，跳过顶层已有的 device_id / sensor_sn
+                    for key, value in meta.items():
+                        if key not in stored_payload:
+                            stored_payload[key] = value
                 except Exception as e:
                     logger.error(f"Failed to parse sensor metadata from redis for {sn}: {e}")
 
