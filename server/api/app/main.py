@@ -70,13 +70,15 @@ async def wechat_verify_2():
     return {"error": "Verification file not found"}
 
 
-if __name__ == "__main__":
+def start_server():
     import uvicorn
-
     uvicorn.run(
         "app.main:app",
         host=settings.host,
-        port=settings.port,
+        port=3010,
         reload=settings.debug,
         log_level="debug" if settings.debug else "info",
     )
+
+if __name__ == "__main__":
+    start_server()

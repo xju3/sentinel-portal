@@ -3,7 +3,8 @@ from typing import Any
 import time
 
 from app.services.context import DeviceContextService
-from app.services.trend_cache import TrendCacheService
+from pub.services.trend_cache import TrendCacheService
+from app.services.baseline_service import BaselineService
 
 logger = logging.getLogger(__name__)
 

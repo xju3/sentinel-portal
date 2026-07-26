@@ -5,6 +5,7 @@ Handles startup (initializing DB, Redis, InfluxDB, MinIO, MQTT)
 and shutdown (gracefully closing all connections) for the FastAPI application.
 """
 
+import asyncio
 import logging
 from contextlib import asynccontextmanager
 
@@ -13,10 +14,23 @@ from fastapi import FastAPI
 from app.clients.mqtt import api_mqtt_manager
 from app.config import settings
 from app.database import db_manager, redis_manager, influxdb_manager, minio_manager
+from pub.services.common.weather_service import WeatherService
 from app.utils import setup_logging
 
 logger = logging.getLogger(__name__)
 
+
+async def weather_fetch_loop():
+    while True:
+        try:
+            logger.debug("Starting scheduled ambient temperature fetch.")
+            if db_manager.SessionLocal:
+                async with db_manager.SessionLocal() as session:
+                    await WeatherService.fetch_and_store_ambient_temperatures(session)
+        except Exception as e:
+            logger.error("Error in weather fetch loop: %s", str(e))
+        
+        await asyncio.sleep(3600 * 6)  # 6 hours
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -58,6 +72,9 @@ async def lifespan(app: FastAPI):
         )
         api_mqtt_manager.init()
         logger.info("All services initialized successfully")
+
+        logger.debug("Starting background tasks...")
+        weather_task = asyncio.create_task(weather_fetch_loop())
     except Exception as e:
         logger.error(f"Startup failed: {e}")
         raise
@@ -68,6 +85,13 @@ async def lifespan(app: FastAPI):
     # Shutdown
     # ==============================
     logger.info("Shutting down application")
+
+    logger.debug("Cancelling background tasks...")
+    weather_task.cancel()
+    try:
+        await weather_task
+    except asyncio.CancelledError:
+        pass
 
     # db_manager.close() is async, the rest are sync
     try:

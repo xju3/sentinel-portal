@@ -13,9 +13,10 @@ class RedisManager:
     def init(self, redis_url: str) -> None:
         """Initialize Redis connection"""
         try:
-            self.client = redis.from_url(redis_url, decode_responses=True)
-            self.health_check()
-            # logger.info("Redis connection initialized successfully")
+            self.client = redis.from_url(redis_url, decode_responses=True, socket_timeout=3.0)
+            if not self.health_check():
+                raise ConnectionError("Redis health check returned False")
+            logger.info("Redis connection initialized successfully")
         except Exception as e:
             logger.error(f"Failed to initialize Redis: {e}")
             raise

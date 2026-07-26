@@ -414,40 +414,30 @@ async def _process_sensor_data_background_async(object_name: str, payload: dict,
     )
     
     if success:
-        # 2. 存入 MinIO 后，异步建档 (DiagnosisRecord)
-        sn = payload.get("sensor_sn") or payload.get("sn")
-        ts_ms = payload.get("ts_ms")
+        # 2. 存入 MinIO 后，将事件压入 Redis Stream，交由 persistence 服务进行数据持久化
         try:
-            # 获取拓扑上下文
-            context = await DiagnosisContextService.get_by_sn_managed(sn)
-            record = await DiagnosisRecordService.create_managed(
-                report_id=report_id,
-                sn=sn,
-                report_ts=ts_ms,
-                payload=payload,
-                context=context,
+            from pub.manager.database import redis_manager
+            from pub.utils.redis_keys import REDIS_STREAM_PERSISTENCE_INGEST
+            
+            redis_client = redis_manager.get_client()
+            await asyncio.to_thread(
+                redis_client.xadd,
+                REDIS_STREAM_PERSISTENCE_INGEST,
+                {"bucket": "json", "path": object_name},
+                maxlen=5000,
+                approximate=True,
             )
-            if not record:
-                logger.warning(f"Failed to create DiagnosisRecord in background for {object_name}")
-                return
-                
-            if record.overall_level == 4:
-                logger.info(f"Data quality for {object_name} is unusable, skipping DIA trigger.")
-                return
-        except Exception as db_err:
-            logger.error(f"Failed to create DiagnosisRecord for {object_name}: {db_err}")
-            return
-
-        # 3. 建档彻底落库后，执行业务强相关的 MQTT 通知，触发 DIA 计算
+            logger.info(f"Published to Redis Stream '{REDIS_STREAM_PERSISTENCE_INGEST}' for {object_name}")
+        except Exception as err:
+            logger.error(f"Failed to publish to Redis Stream for {object_name}: {err}")
+            
+        # 3. Notify via MQTT (for diagnosis service and others)
         try:
-            if int(total) == 0:
-                mqtt_payload = json.dumps({"bucket": "json", "path": object_name})
-                if await asyncio.to_thread(api_mqtt_manager.publish, settings.mqtt_topic, mqtt_payload):
-                    logger.info(f"Published to MQTT topic '{settings.mqtt_topic}': {mqtt_payload}")
-            else:
-                logger.info(f"Skipping DIA trigger for {object_name} because total={total}")
-        except Exception as mqtt_err:
-            logger.error(f"Failed to publish MQTT message for {object_name}: {mqtt_err}")
+            mqtt_payload = json.dumps({"bucket": "json", "path": object_name})
+            api_mqtt_manager.publish(settings.mqtt_topic, mqtt_payload)
+            logger.info(f"Published to MQTT '{settings.mqtt_topic}' for {object_name}")
+        except Exception as err:
+            logger.error(f"Failed to publish to MQTT for {object_name}: {err}")
     else:
         logger.error(f"Failed to upload data to MinIO for {object_name}")
 

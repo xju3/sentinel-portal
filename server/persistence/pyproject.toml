@@ -1,7 +1,7 @@
 [project]
-name = "diagnosis"
+name = "persistence"
 version = "0.1.0"
-description = "Add your description here"
+description = "Persistence Microservice for storing raw diagnostic reports to MySQL and InfluxDB"
 readme = "README.md"
 requires-python = ">=3.14"
 dependencies = [
@@ -18,21 +18,10 @@ dependencies = [
     "python-dotenv==1.0.0",
     "python-multipart==0.0.6",
     "aiofiles==23.2.1",
-    "pytest==7.4.3",
-    "pytest-asyncio==0.21.1",
     "httpx==0.25.2",
     "aiomysql>=0.3.2",
     "greenlet>=3.5.0",
     "cryptography>=48.0.0",
-    "protobuf>=6.33.6",
-    "grpcio-tools>=1.80.0",
-    "paho-mqtt>=2.1.0",
-    "numpy>=2.4.6",
-    "scipy>=1.17.1",
-    "matplotlib>=3.10.9",
-    "pandas>=3.0.3",
-    "scikit-learn>=1.8.0",
-    "seaborn>=0.13.2",
     "orjson>=3.11.9",
     "pub",
 ]

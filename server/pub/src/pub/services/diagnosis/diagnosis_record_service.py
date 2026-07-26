@@ -11,7 +11,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pub.manager.database import db_manager
-from pub.models.diagnosis import Diagnosis
+from pub.models.diagnosis import DiagnosisRecord
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +25,7 @@ def _parse_quality_status(quality: Any) -> int:
     return 1
 
 class DiagnosisRecordService:
-    """Service for managing the parent Diagnosis."""
+    """Service for managing the parent DiagnosisRecord."""
 
     @staticmethod
     async def create_managed(
@@ -34,8 +34,8 @@ class DiagnosisRecordService:
         report_ts: int,
         payload: dict[str, Any],
         context: dict[str, Any] | None = None,
-    ) -> Optional[Diagnosis]:
-        """Create a new Diagnosis using an internally managed session."""
+    ) -> Optional[DiagnosisRecord]:
+        """Create a new DiagnosisRecord using an internally managed session."""
         if db_manager.SessionLocal is None:
             raise RuntimeError("Database not initialized.")
             
@@ -48,27 +48,31 @@ class DiagnosisRecordService:
             async with db_manager.SessionLocal() as session:
                 monitoring = context["monitoring"]
                 device_id = monitoring.get("device_inst_id")
-                location_id = monitoring.get("location_id")
                 
-                if not device_id or not location_id:
-                    logger.warning(f"Missing device_id or location_id for sn {sn}, skipping diagnosis record creation.")
-                    return None
-
-                quality_status = _parse_quality_status(payload.get("quality"))
-                
-                # If quality is unusable (1), we might consider it as level 4 (Critical) or just skip
-                initial_level = 4 if quality_status == 1 else 0
-                
-                diagnosed_at = datetime.fromtimestamp(report_ts / 1000.0) if report_ts else datetime.utcnow()
-
-                record = Diagnosis(
+                record = DiagnosisRecord(
                     id=UUID(report_id) if report_id else None,
-                    device_id=UUID(str(device_id)),
-                    location_id=UUID(str(location_id)),
-                    report_id=report_id,
-                    overall_level=initial_level,
-                    resampling=0,
-                    diagnosed_at=diagnosed_at,
+                    schema_version=payload.get("schema_version"),
+                    sensor_sn=payload.get("sensor_sn") or sn,
+                    device_id=UUID(payload.get("device_id")) if payload.get("device_id") else None,
+                    temperature_c=payload.get("temperature_c"),
+                    fs_hz=payload.get("fs_hz"),
+                    requested_range_g=payload.get("requested_range_g"),
+                    range_g=payload.get("range_g"),
+                    points=payload.get("points"),
+                    task_id=payload.get("task_id"),
+                    sample_type=payload.get("sample_type"),
+                    duration_ms=payload.get("duration_ms"),
+                    quality=payload.get("quality"),
+                    delay=payload.get("delay"),
+                    total=payload.get("total"),
+                    sensor_id=UUID(payload.get("sensor_id")) if payload.get("sensor_id") else None,
+                    location_id=UUID(payload.get("location_id")) if payload.get("location_id") else None,
+                    tenant_id=UUID(payload.get("tenant_id")) if payload.get("tenant_id") else None,
+                    region_id=payload.get("region_id"),
+                    device_category_id=UUID(payload.get("device_category_id")) if payload.get("device_category_id") else None,
+                    process_device_id=UUID(payload.get("process_device_id")) if payload.get("process_device_id") else None,
+                    rpm=payload.get("rpm"),
+                    ts_ms=report_ts
                 )
                 session.add(record)
                 await session.commit()

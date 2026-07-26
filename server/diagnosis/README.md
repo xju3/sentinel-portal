@@ -35,3 +35,36 @@
 - **运行环境**：使用 `server/.venv` 中的 Python 执行环境。
 - **数据库连接**：需要读取 `server/api/.env`（或根目录 `.env`）来完成数据库初始化，初始化由 FastAPI `lifespan` 完成，或在测试脚本中手动调用。
 - **联调测试**：可以通过根目录的 `test_script.py` 对整个 `ingestion.py` 的数据解析、InfluxDB 写入、MySQL 诊断结果生成进行端到端的贯穿测试。
+
+## 已知风险 (Known Risks)
+
+### Redis Stream 消息丢失场景
+
+MQTT 入口数据经由 Redis Stream（`dia:stream:ingest`）缓冲后由 Worker 消费，存在以下两类丢失路径：
+
+#### 风险一：Stream 容量上限裁剪（主动设计，可调）
+`mqtt.py` 中 `xadd` 配置了 `maxlen=5000`，当消息积压超过上限时，**Redis 会自动裁剪最旧的消息**，被裁剪的消息永久丢失。
+
+- **触发条件**：Worker 处理速度长期跟不上 MQTT 推送速度，积压持续增长超过 5000 条。
+- **调整方式**：修改 `app/clients/mqtt.py` 中的 `STREAM_MAXLEN` 常量。
+- **监控命令**：`redis-cli xlen dia:stream:ingest`
+
+#### 风险二：PEL 消息永久滞留（当前缺陷，需修复）
+
+消息被 Worker 从 Stream 取出后，若处理过程中抛出异常（MinIO 不可达、Pydantic 校验失败、数据库写入失败）或进程崩溃，该消息不会被 ACK，转入 PEL（Pending Entry List）。
+
+**当前代码存在缺陷**：Worker 主循环使用 `xreadgroup(..., {stream: ">"})` 模式，`">"` 只读取未分配的新消息，**PEL 中的消息对 Worker 是隐形的**，重启后也不会被重新处理，导致永久滞留。
+
+- **触发条件**：任何处理异常或进程异常退出。
+- **排查命令**：`redis-cli xpending dia:stream:ingest dia:workers - + 10`
+- **修复方向**：在 Worker 启动阶段或独立定时任务中，使用 `xautoclaim` 将超时未 ACK 的 PEL 消息重新认领处理（Redis 6.2+ 支持）：
+  ```python
+  client.xautoclaim(
+      "dia:stream:ingest",
+      "dia:workers",
+      worker_id,
+      min_idle_time=300_000,  # 超过 5 分钟未 ACK 即视为需要重试
+      start_id="0-0",
+      count=WORKER_BATCH_SIZE,
+  )
+  ```

@@ -31,7 +31,6 @@ class DataQuality(BaseModel):
     status: int
     auto_range: bool
 
-
 class DeviceDiagnosticReport(BaseModel):
     """
     The top-level payload structure received from the edge/hardware.
@@ -68,3 +67,21 @@ class DeviceDiagnosticReport(BaseModel):
     
     # The actual feature data per axis
     axis_features: Dict[str, AxisFeature] = Field(default_factory=dict, description="Pre-computed features for X, Y, Z axes")
+
+class DiagnosisTriggerPayload(BaseModel):
+    report_id: str
+    schema_version: str | None = "1.0"
+    sensor_sn: str
+    device_id: str
+    temperature_c: float | None = None
+    max_rms_vel: float
+    task_id: str | None = None
+    delay: int | None = 0
+    total: int
+    sensor_id: str | None = None
+    location_id: str
+    tenant_id: str | None = None
+    region_id: str | None = None
+    device_category_id: str | None = None
+    process_device_id: str | None = None
+    ts_ms: int

@@ -2,7 +2,7 @@ import asyncio
 import logging
 from typing import Any
 
-from app.preparation.payload import DeviceDiagnosticReport
+from pub.models.report import DiagnosisTriggerPayload
 
 logger = logging.getLogger(__name__)
 
@@ -10,7 +10,7 @@ def severity_to_level(severity: str) -> int:
     mapping = {"ok": 0, "normal": 0, "info": 0, "attention": 1, "abnormal": 2, "warning": 3, "critical": 4}
     return mapping.get(severity.lower(), 0)
 
-async def dispatch_diagnosis_trigger(report: DeviceDiagnosticReport) -> None:
+async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> None:
     logger.info("TRIGGER DIAGNOSIS: Executing diagnosis for device_id=%s", report.device_id)
     try:
         import uuid
@@ -53,10 +53,8 @@ async def dispatch_diagnosis_trigger(report: DeviceDiagnosticReport) -> None:
         temp_result = await TemperatureDiagnosis.analyze(report.device_id, report.location_id, report.temperature_c or 0.0, context)
         temp_level = severity_to_level(temp_result.get("severity", "info"))
         
-        # Vibration Diagnosis (Extract max rms_vel_mm_s)
-        max_rms_vel = 0.0
-        if report.axis_features:
-            max_rms_vel = max((axis.time.rms_vel_mm_s or 0.0) for axis in report.axis_features.values() if axis.time)
+        # Vibration Diagnosis (Use max_rms_vel provided by persistence payload)
+        max_rms_vel = report.max_rms_vel
         vib_result = await VibrationDiagnosis.analyze(report.device_id, report.location_id, max_rms_vel, context)
         vib_level = severity_to_level(vib_result.get("severity", "info"))
         
@@ -117,7 +115,7 @@ async def dispatch_diagnosis_trigger(report: DeviceDiagnosticReport) -> None:
                     )
                     session.add(fft_task)
 
-                # 2. Persist Diagnosis
+                # 2. Persist Diagnosis (Insert new results)
                 diag_record = Diagnosis(
                     device_id=device_uuid,
                     location_id=location_uuid,
@@ -154,11 +152,11 @@ async def dispatch_diagnosis_trigger(report: DeviceDiagnosticReport) -> None:
     except Exception as e:
         logger.error("Failed to execute diagnosis trigger: %s", str(e), exc_info=True)
 
-async def process_incoming_report(report: DeviceDiagnosticReport) -> None:
+async def process_incoming_report(report: DiagnosisTriggerPayload) -> None:
     """
     Process an incoming diagnostic report from the edge/hardware.
     """
-    logger.info(
+    logger.debug(
         "Received report: id=%s, device_id=%s, sensor_sn=%s, ts_ms=%s, delay=%s, total=%s",
         report.report_id,
         report.device_id,
@@ -168,69 +166,56 @@ async def process_incoming_report(report: DeviceDiagnosticReport) -> None:
         report.total,
     )
 
-    # 1. Store the raw/time-series data.
-    try:
-        from pub.manager.database import influxdb_manager
-        from influxdb_client import Point
-        from influxdb_client.client.write_api import SYNCHRONOUS
-        import math
+    # 1. (Removed) InfluxDB writing is now handled by the 'persistence' application.
 
-        client = influxdb_manager.get_client()
-        write_api = client.write_api(write_options=SYNCHRONOUS)
-        
-        point = Point("vibration_feature") \
-            .tag("sn", report.sensor_sn) \
-            .tag("location_id", report.location_id or "") \
-            .tag("device_id", report.device_id)
+    # 2. Burst processing & Check if we should trigger diagnosis.
+    from pub.manager.database import redis_manager
+    redis_client = redis_manager.get_client()
+    burst_head_key = f"dia:burst:head:{report.device_id}"
+    
+    target_report = report
+    
+    if report.total > 0:
+        existing = await asyncio.to_thread(redis_client.get, burst_head_key)
+        should_update = True
+        if existing:
+            try:
+                existing_report = DiagnosisTriggerPayload.model_validate_json(existing)
+                # Keep the report with the largest ts_ms (most recent sampling time)
+                if report.ts_ms <= existing_report.ts_ms:
+                    should_update = False
+            except Exception:
+                pass # Invalid cache, overwrite it
+                
+        if should_update:
+            await asyncio.to_thread(redis_client.setex, burst_head_key, 3600, report.model_dump_json())
             
-        if report.temperature_c is not None:
-            point = point.field("temperature", float(report.temperature_c))
-        
-        rms_x = report.axis_features["X"].time.rms_acc_g if "X" in report.axis_features and report.axis_features["X"].time else 0.0
-        rms_y = report.axis_features["Y"].time.rms_acc_g if "Y" in report.axis_features and report.axis_features["Y"].time else 0.0
-        rms_z = report.axis_features["Z"].time.rms_acc_g if "Z" in report.axis_features and report.axis_features["Z"].time else 0.0
-        
-        rms_vel_x = report.axis_features["X"].time.rms_vel_mm_s if "X" in report.axis_features and report.axis_features["X"].time else 0.0
-        rms_vel_y = report.axis_features["Y"].time.rms_vel_mm_s if "Y" in report.axis_features and report.axis_features["Y"].time else 0.0
-        rms_vel_z = report.axis_features["Z"].time.rms_vel_mm_s if "Z" in report.axis_features and report.axis_features["Z"].time else 0.0
-        
-        if rms_x is not None: point = point.field("rms_x", float(rms_x))
-        if rms_y is not None: point = point.field("rms_y", float(rms_y))
-        if rms_z is not None: point = point.field("rms_z", float(rms_z))
-        
-        if rms_vel_x is not None: point = point.field("rms_vel_x", float(rms_vel_x))
-        if rms_vel_y is not None: point = point.field("rms_vel_y", float(rms_vel_y))
-        if rms_vel_z is not None: point = point.field("rms_vel_z", float(rms_vel_z))
-        
-        max_rms_vel = max(float(rms_vel_x or 0), float(rms_vel_y or 0), float(rms_vel_z or 0))
-        point = point.field("max_rms_vel", max_rms_vel)
-        
-        if rms_x is not None and rms_y is not None and rms_z is not None:
-            rms_m = math.sqrt(rms_x**2 + rms_y**2 + rms_z**2)
-            point = point.field("rms_m", float(rms_m))
-            
-        point = point.time(report.ts_ms, write_precision="ms")
-        
-        logger.info("Persisting to InfluxDB: %s", point.to_line_protocol())
-        await asyncio.to_thread(
-            write_api.write,
-            bucket=influxdb_manager.bucket,
-            org=influxdb_manager.org,
-            record=point,
-        )
-    except Exception as e:
-        logger.error("Failed to insert raw waveform data into InfluxDB: %s", str(e), exc_info=True)
-
-    # 2. Check if we should trigger diagnosis.
-    if report.total == 0:
-        logger.info(
-            "Batch complete (total=0) for device_id=%s. Triggering background diagnosis.",
-            report.device_id,
-        )
-        await dispatch_diagnosis_trigger(report)
-    else:
         logger.debug(
             "Data buffered. Waiting for %s more packets before triggering diagnosis for device_id=%s",
             report.total,
             report.device_id,
         )
+    else:
+        # report.total == 0
+        existing = await asyncio.to_thread(redis_client.get, burst_head_key)
+        if existing:
+            try:
+                existing_report = DiagnosisTriggerPayload.model_validate_json(existing)
+                # Ensure the cached report is actually newer than this total=0 report
+                if existing_report.ts_ms > report.ts_ms:
+                    target_report = existing_report
+                    logger.info(
+                        "Using cached burst head (ts_ms=%s, total=%s) instead of current total=0 report (ts_ms=%s) for diagnosis.",
+                        existing_report.ts_ms, existing_report.total, report.ts_ms
+                    )
+            except Exception as e:
+                logger.warning("Failed to parse cached burst head: %s", e)
+            
+            # Clear the cache since the burst is complete
+            await asyncio.to_thread(redis_client.delete, burst_head_key)
+        
+        logger.debug(
+            "Batch complete (total=0) for device_id=%s. Triggering background diagnosis.",
+            report.device_id,
+        )
+        await dispatch_diagnosis_trigger(target_report)

@@ -58,6 +58,9 @@ dev = [
 [tool.hatch.build.targets.wheel]
 packages = ["app"]
 
+[project.scripts]
+start = "app.main:start_server"
+
 [tool.uv]
 managed = true
 package = false

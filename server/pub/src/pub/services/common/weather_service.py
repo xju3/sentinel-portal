@@ -74,7 +74,7 @@ class WeatherService:
         # Commit all new temperature records
         try:
             await session.commit()
-            logger.info("Ambient temperatures successfully fetched and stored.")
+            logger.debug("Ambient temperatures successfully fetched and stored.")
         except Exception as e:
             await session.rollback()
             logger.error("Failed to commit ambient temperatures to database: %s", str(e))

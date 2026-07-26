@@ -2,14 +2,14 @@
     "schema_version": 2,
     "sensor_sn": "26SH00001",
     "device_id": "d382b38d-3d8c-411b-9a5f-baed94fe444b",
-    "temperature_c": 28,
+    "temperature_c": 31.8,
     "fs_hz": 26667,
     "requested_range_g": 2,
     "range_g": 2,
-    "points": 32768,
+    "points": 16384,
     "task_id": "",
     "sample_type": "normal",
-    "duration_ms": 6664,
+    "duration_ms": 6254,
     "quality": {
         "status": 0,
         "auto_range": false
@@ -17,149 +17,146 @@
     "axis_features": {
         "X": {
             "time": {
-                "mean_g": 0.56,
+                "mean_g": 0.354,
                 "rms_acc_g": 0.011,
-                "peak_acc_g": 0.047,
-                "peak_to_peak_acc_g": 0.089,
-                "rms_vel_mm_s": 0.36,
-                "crest_factor": 4.17,
-                "kurtosis": 3.01
+                "peak_acc_g": 0.055,
+                "peak_to_peak_acc_g": 0.099,
+                "rms_vel_mm_s": 0.53,
+                "crest_factor": 4.86,
+                "kurtosis": 3.02
             },
             "freq": {
                 "peaks": [
                     {
-                        "freq_hz": 23.6,
-                        "amp_g": 0.0009
+                        "freq_hz": 24.4,
+                        "amp_g": 0.0016
                     },
                     {
-                        "freq_hz": 13,
-                        "amp_g": 0.0008
+                        "freq_hz": 16.3,
+                        "amp_g": 0.0015
                     },
                     {
-                        "freq_hz": 15.5,
-                        "amp_g": 0.0007
+                        "freq_hz": 9.8,
+                        "amp_g": 0.0013
                     },
                     {
-                        "freq_hz": 5.7,
-                        "amp_g": 0.0007
+                        "freq_hz": 35.8,
+                        "amp_g": 0.0011
                     },
                     {
                         "freq_hz": 39.1,
-                        "amp_g": 0.0007
+                        "amp_g": 0.0011
                     }
                 ],
-                "spectral_centroid_hz": 2381.4,
-                "spectral_entropy": 0.939
+                "spectral_centroid_hz": 2402.2,
+                "spectral_entropy": 0.918
             },
             "band_energy_ratio": {
-                "0_100": 0.088,
-                "100_500": 0.12,
-                "500_1000": 0.097,
-                "1000_2000": 0.173,
-                "2000_5000": 0.523
+                "0_100": 0.152,
+                "100_500": 0.083,
+                "500_1000": 0.087,
+                "1000_2000": 0.174,
+                "2000_5000": 0.504
             }
         },
         "Y": {
             "time": {
-                "mean_g": 0.158,
-                "rms_acc_g": 0.011,
-                "peak_acc_g": 0.051,
-                "peak_to_peak_acc_g": 0.095,
-                "rms_vel_mm_s": 0.39,
-                "crest_factor": 4.8,
+                "mean_g": -0.136,
+                "rms_acc_g": 0.012,
+                "peak_acc_g": 0.05,
+                "peak_to_peak_acc_g": 0.094,
+                "rms_vel_mm_s": 1.26,
+                "crest_factor": 4.22,
                 "kurtosis": 3.01
             },
             "freq": {
                 "peaks": [
                     {
-                        "freq_hz": 15.5,
-                        "amp_g": 0.0006
+                        "freq_hz": 11.4,
+                        "amp_g": 0.004
                     },
                     {
-                        "freq_hz": 3585.7,
-                        "amp_g": 0.0005
+                        "freq_hz": 8.1,
+                        "amp_g": 0.0032
                     },
                     {
-                        "freq_hz": 19.5,
-                        "amp_g": 0.0005
+                        "freq_hz": 4.9,
+                        "amp_g": 0.0022
                     },
                     {
-                        "freq_hz": 191.2,
-                        "amp_g": 0.0005
+                        "freq_hz": 21.2,
+                        "amp_g": 0.0013
                     },
                     {
-                        "freq_hz": 36.6,
-                        "amp_g": 0.0005
+                        "freq_hz": 1.6,
+                        "amp_g": 0.0012
                     }
                 ],
-                "spectral_centroid_hz": 2477.6,
-                "spectral_entropy": 0.956
+                "spectral_centroid_hz": 2309.3,
+                "spectral_entropy": 0.808
             },
             "band_energy_ratio": {
-                "0_100": 0.031,
-                "100_500": 0.084,
-                "500_1000": 0.102,
-                "1000_2000": 0.196,
-                "2000_5000": 0.586
+                "0_100": 0.364,
+                "100_500": 0.065,
+                "500_1000": 0.076,
+                "1000_2000": 0.119,
+                "2000_5000": 0.376
             }
         },
         "Z": {
             "time": {
-                "mean_g": -0.702,
-                "rms_acc_g": 0.013,
-                "peak_acc_g": 0.057,
+                "mean_g": -0.919,
+                "rms_acc_g": 0.012,
+                "peak_acc_g": 0.058,
                 "peak_to_peak_acc_g": 0.107,
-                "rms_vel_mm_s": 0.86,
-                "crest_factor": 4.34,
+                "rms_vel_mm_s": 0.35,
+                "crest_factor": 4.73,
                 "kurtosis": 3.01
             },
             "freq": {
                 "peaks": [
                     {
-                        "freq_hz": 48.8,
-                        "amp_g": 0.0019
+                        "freq_hz": 43.9,
+                        "amp_g": 0.001
+                    },
+                    {
+                        "freq_hz": 6.5,
+                        "amp_g": 0.0009
+                    },
+                    {
+                        "freq_hz": 2778.4,
+                        "amp_g": 0.0009
+                    },
+                    {
+                        "freq_hz": 4575.3,
+                        "amp_g": 0.0009
                     },
                     {
                         "freq_hz": 27.7,
-                        "amp_g": 0.0016
-                    },
-                    {
-                        "freq_hz": 14.6,
-                        "amp_g": 0.0015
-                    },
-                    {
-                        "freq_hz": 39.1,
-                        "amp_g": 0.0015
-                    },
-                    {
-                        "freq_hz": 24.4,
-                        "amp_g": 0.0014
+                        "amp_g": 0.0009
                     }
                 ],
-                "spectral_centroid_hz": 2463.8,
-                "spectral_entropy": 0.973
+                "spectral_centroid_hz": 2477.6,
+                "spectral_entropy": 0.966
             },
             "band_energy_ratio": {
-                "0_100": 0.064,
+                "0_100": 0.032,
                 "100_500": 0.08,
-                "500_1000": 0.096,
-                "1000_2000": 0.19,
-                "2000_5000": 0.57
+                "500_1000": 0.102,
+                "1000_2000": 0.199,
+                "2000_5000": 0.587
             }
         }
     },
     "delay": 0,
     "total": 0,
-    "sensor_meta": {
-        "sensor_id": "b0b473ed-2ed5-489c-8ca9-df9368f81e03",
-        "sensor_sn": "26SH00001",
-        "device_id": "d382b38d-3d8c-411b-9a5f-baed94fe444b",
-        "location_id": "4117d855-b325-472e-8de9-243acb95270b",
-        "tenant_id": "b9515e9c-379a-4525-bfc0-0766bfcc5aa4",
-        "region_id": "3101",
-        "device_category_id": "bd298533-1603-41a9-a2de-5a8e00bc8a2c",
-        "process_device_id": "8fe631e6-d6c1-4211-b64e-d4cb73719662"
-    },
-    "ts_ms": 1784971448152,
-    "report_id": "3304982f-6c5d-4270-8f88-0f744cbc6504"
+    "sensor_id": "b0b473ed-2ed5-489c-8ca9-df9368f81e03",
+    "location_id": "4117d855-b325-472e-8de9-243acb95270b",
+    "tenant_id": "b9515e9c-379a-4525-bfc0-0766bfcc5aa4",
+    "region_id": "3101",
+    "device_category_id": "bd298533-1603-41a9-a2de-5a8e00bc8a2c",
+    "process_device_id": "8fe631e6-d6c1-4211-b64e-d4cb73719662",
+    "rpm": 2920,
+    "ts_ms": 1785033782513,
+    "report_id": "8df0c0ef-62c4-4b33-8ec5-f9a00dff5baa"
 }

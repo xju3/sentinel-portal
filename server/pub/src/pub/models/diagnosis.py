@@ -15,6 +15,7 @@ from sqlalchemy import (
     String,
     Float,
     Uuid,
+    BigInteger,
 )
 from sqlalchemy.dialects.mysql import JSON as MySQLJSON
 from sqlalchemy.dialects.mysql import TINYINT
@@ -22,6 +23,45 @@ from sqlalchemy.orm import relationship
 
 from pub.models import Base
 
+class DiagnosisRecord(Base):
+    """
+    Metadata record for the raw incoming diagnostic JSON report.
+    This tracks the payload's summary info independently of the algorithm results.
+    """
+    __tablename__ = "diagnosis_record"
+    
+    # Matching data.json top-level fields
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    schema_version = Column(Integer, nullable=True)
+    sensor_sn = Column(String(255), nullable=False, index=True)
+    device_id = Column(Uuid(as_uuid=True), nullable=True, index=True)
+    temperature_c = Column(Float, nullable=True)
+    fs_hz = Column(Integer, nullable=True)
+    requested_range_g = Column(Integer, nullable=True)
+    range_g = Column(Integer, nullable=True)
+    points = Column(Integer, nullable=True)
+    task_id = Column(String(128), nullable=True)
+    sample_type = Column(String(64), nullable=True)
+    duration_ms = Column(Integer, nullable=True)
+    
+    quality = Column(MySQLJSON, nullable=True, comment="Raw quality object")
+    
+    delay = Column(Integer, nullable=True, default=0)
+    total = Column(Integer, nullable=True, default=0)
+    
+    sensor_id = Column(Uuid(as_uuid=True), nullable=True, index=True)
+    location_id = Column(Uuid(as_uuid=True), nullable=True, index=True)
+    tenant_id = Column(Uuid(as_uuid=True), nullable=True, index=True)
+    region_id = Column(String(64), nullable=True, index=True)
+    device_category_id = Column(Uuid(as_uuid=True), nullable=True, index=True)
+    process_device_id = Column(Uuid(as_uuid=True), nullable=True, index=True)
+    
+    rpm = Column(Float, nullable=True)
+    ts_ms = Column(BigInteger, nullable=False, index=True)
+    
+    # System fields
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(DateTime, nullable=False, default=datetime.utcnow, onupdate=datetime.utcnow)
 
 class Diagnosis(Base):
     """
@@ -53,7 +93,6 @@ class Diagnosis(Base):
         back_populates="diagnosis",
         cascade="all, delete-orphan",
     )
-
 
 class DiagnosisItem(Base):
     """
@@ -89,7 +128,6 @@ class DiagnosisItem(Base):
 
     # Relationships
     diagnosis = relationship("Diagnosis", back_populates="items")
-
 
 class DiagnosisFft(Base):
     """

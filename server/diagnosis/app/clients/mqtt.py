@@ -2,7 +2,7 @@ import logging
 import json
 from pub.clients.mqtt import MQTTManager
 from pub.manager.database import redis_manager
-from pub.utils.redis_keys import REDIS_STREAM_DIA_INGEST
+from pub.utils.redis_keys import REDIS_STREAM_DIAGNOSIS_TRIGGER
 from app.config import settings
 
 logger = logging.getLogger(__name__)
@@ -42,7 +42,7 @@ def on_mqtt_message(client, userdata, msg):
 
         redis_client = redis_manager.get_client()
         redis_client.xadd(
-            REDIS_STREAM_DIA_INGEST,
+            REDIS_STREAM_DIAGNOSIS_TRIGGER,
             {"bucket": bucket, "path": path},
             maxlen=STREAM_MAXLEN,
             approximate=True,

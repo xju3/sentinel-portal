@@ -54,14 +54,15 @@ REDIS_KEY_DIA_PEER_GROUP = "dia:peer_group:{process_device_id}:{device_category_
 REDIS_KEY_DIA_DEVICE_CONTEXT = "dia:device_context:{device_id}"
 
 # ==========================================
-# 诊断任务流 (Diagnosis Stream)
+# 任务流 (Data Pipelines)
 # ==========================================
 
-# 诊断入库任务 Stream Key
+# 持久化入库任务 Stream Key (api -> persistence)
 # 存储内容: { "bucket": str, "path": str }
-# 由 MQTT on_message 回调写入，由 Stream Worker 消费
-# maxlen 由 stream_worker.py 的 STREAM_MAXLEN 控制
-REDIS_STREAM_DIA_INGEST = "dia:stream:ingest"
+REDIS_STREAM_PERSISTENCE_INGEST = "stream:persistence:ingest"
+REDIS_STREAM_PERSISTENCE_GROUP = "persistence:workers"
 
-# Stream Consumer Group 名称
-REDIS_STREAM_DIA_GROUP = "dia:workers"
+# 诊断触发任务 Stream Key (persistence -> diagnosis)
+# 存储内容: { "bucket": str, "path": str }
+REDIS_STREAM_DIAGNOSIS_TRIGGER = "stream:diagnosis:trigger"
+REDIS_STREAM_DIAGNOSIS_GROUP = "diagnosis:workers"

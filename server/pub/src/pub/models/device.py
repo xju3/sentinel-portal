@@ -31,7 +31,6 @@ class ProcessDeviceEmployee(Base):
     trans_date = Column(DateTime, default=datetime.utcnow)
     status = Column(Boolean, default=True)
 
-
 class DeviceCategory(Base):
     """Device category entity model"""
 
@@ -82,7 +81,6 @@ class DeviceSpec(Base):
     def __repr__(self):
         return f"<DeviceSpec {self.id}: {self.name} - {self.model}>"
 
-
 class DeviceInst(Base):
     """Device instance entity model"""
 
@@ -113,7 +111,6 @@ class DeviceInst(Base):
         uselist=True
     )
 
-
 class Process(Base):
     """Device combo specification entity model"""
 
@@ -126,7 +123,6 @@ class Process(Base):
 
     status = Column(SmallInteger, default=1, comment="tiny(1) status")
 
-
 class ProcessItem(Base):
     """Process item entity model"""
 
@@ -138,7 +134,6 @@ class ProcessItem(Base):
     qty = Column(Integer, nullable=False, default=1)
 
     device_spec = relationship("DeviceSpec", primaryjoin="foreign(ProcessItem.device_spec_id) == DeviceSpec.id", lazy="selectin", uselist=False)
-
 
 class ProcessDevice(Base):
     """Process device entity model"""

@@ -8,7 +8,7 @@ sys.path.append("../pub/src")
 
 from app.config import settings
 from pub.manager.database import db_manager, redis_manager, influxdb_manager
-from app.preparation.payload import DeviceDiagnosticReport
+from pub.models.report import DeviceDiagnosticReport
 from app.preparation.ingestion import process_incoming_report
 
 async def init_dbs():

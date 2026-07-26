@@ -2,7 +2,7 @@ import logging
 from typing import Any
 from dataclasses import dataclass
 
-from app.services.trend_cache import TrendCacheService
+from pub.services.trend_cache import TrendCacheService
 from app.services.baseline_service import BaselineService
 
 logger = logging.getLogger(__name__)
