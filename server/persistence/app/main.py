@@ -26,13 +26,16 @@ async def lifespan(app: FastAPI):
         endpoint=settings.minio_endpoint,
         access_key=settings.minio_access_key,
         secret_key=settings.minio_secret_key,
+        secure=settings.minio_secure,
+        bucket=settings.minio_bucket,
     )
     
     logger.info("Initializing InfluxDB manager...")
     influxdb_manager.init(
-        influx_url=settings.influxdb_url,
-        influx_token=settings.influxdb_token,
-        influx_org=settings.influxdb_org,
+        influx_url=settings.influx_url,
+        influx_token=settings.influx_token,
+        influx_org=settings.influx_org,
+        influx_bucket=settings.influx_bucket,
     )
 
     # Start stream workers

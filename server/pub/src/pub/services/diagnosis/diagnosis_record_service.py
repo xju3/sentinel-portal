@@ -49,11 +49,17 @@ class DiagnosisRecordService:
                 monitoring = context["monitoring"]
                 device_id = monitoring.get("device_inst_id")
                 
+                sensor_ctx = context.get("sensor") or {}
+                device_inst = context.get("device_inst") or {}
+                device_category = context.get("device_category") or {}
+                peer_group = context.get("peer_group") or {}
+                process_device = peer_group.get("process_device") or {} if peer_group else {}
+                
                 record = DiagnosisRecord(
                     id=UUID(report_id) if report_id else None,
                     schema_version=payload.get("schema_version"),
-                    sensor_sn=payload.get("sensor_sn") or sn,
-                    device_id=UUID(payload.get("device_id")) if payload.get("device_id") else None,
+                    sensor_sn=sensor_ctx.get("sn") or payload.get("sensor_sn") or sn,
+                    device_id=UUID(device_inst.get("id")) if device_inst.get("id") else None,
                     temperature_c=payload.get("temperature_c"),
                     fs_hz=payload.get("fs_hz"),
                     requested_range_g=payload.get("requested_range_g"),
@@ -65,12 +71,12 @@ class DiagnosisRecordService:
                     quality=payload.get("quality"),
                     delay=payload.get("delay"),
                     total=payload.get("total"),
-                    sensor_id=UUID(payload.get("sensor_id")) if payload.get("sensor_id") else None,
-                    location_id=UUID(payload.get("location_id")) if payload.get("location_id") else None,
-                    tenant_id=UUID(payload.get("tenant_id")) if payload.get("tenant_id") else None,
+                    sensor_id=UUID(sensor_ctx.get("id")) if sensor_ctx.get("id") else None,
+                    location_id=UUID(monitoring.get("location_id")) if monitoring.get("location_id") else None,
+                    tenant_id=UUID(device_category.get("tenant_id")) if device_category.get("tenant_id") else None,
                     region_id=payload.get("region_id"),
-                    device_category_id=UUID(payload.get("device_category_id")) if payload.get("device_category_id") else None,
-                    process_device_id=UUID(payload.get("process_device_id")) if payload.get("process_device_id") else None,
+                    device_category_id=UUID(device_category.get("id")) if device_category.get("id") else None,
+                    process_device_id=UUID(process_device.get("id")) if process_device.get("id") else None,
                     rpm=payload.get("rpm"),
                     ts_ms=report_ts
                 )

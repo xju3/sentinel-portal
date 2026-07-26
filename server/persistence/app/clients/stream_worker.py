@@ -21,12 +21,16 @@ _workers = []
 async def _process_stream_message(bucket: str, path: str) -> bool:
     try:
         # 1. Fetch JSON from MinIO
-        data_bytes = await minio_manager.get_object(bucket, path)
-        if not data_bytes:
+        from pub.clients.minio import download_json_from_minio_sync
+        payload = await asyncio.to_thread(
+            download_json_from_minio_sync,
+            minio_manager.get_client(),
+            bucket,
+            path
+        )
+        if not payload:
             logger.error(f"Failed to fetch {path} from MinIO")
             return False
-            
-        payload = json.loads(data_bytes.decode("utf-8"))
         report = DeviceDiagnosticReport(**payload)
         
         sn = payload.get("sensor_sn") or payload.get("sn")
