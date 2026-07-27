@@ -3,7 +3,7 @@
 /// <reference types="@ant-design/pro-components" />
 /// <reference types="antd" />
 
-    import type { ProLayoutProps, HeaderProps } from "/Users/tju/Workspace/PDI/Sentinel/Codes/platform/client/tenant/node_modules/@ant-design/pro-components";
+    import type { ProLayoutProps, HeaderProps } from "/Users/tju/Workspace/LH.朗湖科技/Sentinel/Codes/Platform/client/portal/node_modules/@ant-design/pro-components";
     type InitDataType = any;
 
     import type { IConfigFromPlugins } from '@@/core/pluginConfig';

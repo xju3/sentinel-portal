@@ -6,6 +6,13 @@ import {
   ArrowUpOutlined,
   MinusOutlined,
   ReloadOutlined,
+  CheckCircleFilled,
+  InfoCircleFilled,
+  InfoCircleOutlined,
+  ExclamationCircleFilled,
+  WarningFilled,
+  FireFilled,
+  DashboardOutlined,
 } from '@ant-design/icons';
 import { request } from '@umijs/max';
 import type { ColumnsType } from 'antd/es/table';
@@ -19,6 +26,7 @@ type HealthSummary = {
   total: number;
   normal: number;
   attention: number;
+  abnormal: number;
   warning: number;
   severe: number;
   offline: number;
@@ -60,8 +68,9 @@ type HealthDashboardData = {
 const levelColor: Record<string, string> = {
   正常: '#52c41a',
   关注: '#faad14',
-  警告: '#fa8c16',
-  严重: '#f5222d',
+  异常: '#fa8c16',
+  警告: '#f5222d',
+  严重: '#a8071a',
 };
 
 const trendIcon: Record<string, React.ReactNode> = {
@@ -86,75 +95,6 @@ const formatDuration = (hours: number | null) => {
   const remainHours = Math.round(hours % 24);
   if (remainHours === 0) return `${days}天`;
   return `${days}天${remainHours}小时`;
-};
-
-// ── HealthBar component ────────────────────────────────
-
-const HealthBar = ({ summary }: { summary: HealthSummary }) => {
-  const monitored = summary.total - summary.unconfigured;
-  const online = monitored - summary.offline;
-
-  const segments = [
-    { key: 'normal', label: '正常', count: summary.normal, color: '#52c41a' },
-    { key: 'attention', label: '关注', count: summary.attention, color: '#faad14' },
-    { key: 'warning', label: '警告', count: summary.warning, color: '#fa8c16' },
-    { key: 'severe', label: '严重', count: summary.severe, color: '#f5222d' },
-    { key: 'offline', label: '数据中断', count: summary.offline, color: '#8c8c8c' },
-    { key: 'unconfigured', label: '未配置', count: summary.unconfigured, color: '#d9d9d9' },
-  ];
-
-  return (
-    <div>
-      {/* Proportion bar */}
-      <div
-        style={{
-          display: 'flex',
-          height: 22,
-          borderRadius: 4,
-          overflow: 'hidden',
-          marginBottom: 12,
-          background: '#f0f0f0',
-        }}
-      >
-        {segments
-          .filter(s => s.count > 0)
-          .map(s => (
-            <Tooltip key={s.key} title={`${s.label}: ${s.count}台`}>
-              <div
-                style={{
-                  width: `${(s.count / summary.total) * 100}%`,
-                  background: s.color,
-                  minWidth: s.count > 0 ? 3 : 0,
-                  transition: 'width 0.3s ease',
-                }}
-              />
-            </Tooltip>
-          ))}
-      </div>
-
-      {/* Legend */}
-      <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
-        {segments.map(s => (
-          <Space key={s.key} size={4}>
-            <div
-              style={{
-                width: 10,
-                height: 10,
-                borderRadius: 2,
-                background: s.color,
-              }}
-            />
-            <Text type="secondary" style={{ fontSize: 13 }}>
-              {s.label}
-            </Text>
-            <Text strong style={{ fontSize: 13 }}>
-              {s.count}
-            </Text>
-          </Space>
-        ))}
-      </div>
-    </div>
-  );
 };
 
 // ── DistributionTags component ────────────────────────
@@ -239,13 +179,14 @@ const DistributionTags = ({
   );
 };
 
-import CalendarHeatmap from '../Overview/CalendarHeatmap';
+import CalendarHeatmap from '../components/CalendarHeatmap';
 
 const emptyData: HealthDashboardData = {
   healthSummary: {
     total: 0,
     normal: 0,
     attention: 0,
+    abnormal: 0,
     warning: 0,
     severe: 0,
     offline: 0,
@@ -307,14 +248,14 @@ const HealthDashboard = () => {
   }, []);
 
   const { healthSummary: summary } = data;
-  const faultCount = summary.attention + summary.warning + summary.severe;
+  const faultCount = summary.attention + summary.abnormal + summary.warning + summary.severe;
 
   const faultColumns: ColumnsType<FaultDevice> = [
     {
       title: '等级',
       dataIndex: 'level',
       width: 76,
-      render: level => <Tag color={levelColor[level]}>{level}</Tag>,
+      render: level => <Tag color={levelColor[level]}>{level === '严重' ? '危险' : level}</Tag>,
     },
     {
       title: '趋势',
@@ -379,6 +320,29 @@ const HealthDashboard = () => {
     },
   ];
 
+  const healthMetrics = [
+    { 
+      key: 'severe', title: '危险', value: summary.severe, color: '#ffffff', bg: 'linear-gradient(135deg, #cb2d3e 0%, #ef473a 100%)', icon: <FireFilled />,
+      desc: '诊断算法评估：指标动态负荷占比突破 70% 甚至触及绝对红线，或发生秒级瞬态突变，随时可能引发停机事故。'
+    },
+    { 
+      key: 'warning', title: '警告', value: summary.warning, color: '#ffffff', bg: 'linear-gradient(135deg, #ec008c 0%, #fc6767 100%)', icon: <WarningFilled />,
+      desc: '诊断算法评估：指标动态负荷占比达 40%~70%，趋势劣化或横向偏离被高倍率放大，处于带病运行状态。'
+    },
+    { 
+      key: 'abnormal', title: '异常', value: summary.abnormal, color: '#ffffff', bg: 'linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%)', icon: <ExclamationCircleFilled />,
+      desc: '诊断算法评估：指标动态负荷占比达 20%~40%，或设备出现 24/72 小时历史趋势恶化、同规格对等组横向偏离。'
+    },
+    { 
+      key: 'attention', title: '关注', value: summary.attention, color: '#ffffff', bg: 'linear-gradient(135deg, #f2c94c 0%, #f2994a 100%)', icon: <InfoCircleFilled />,
+      desc: '诊断算法评估：指标动态负荷占比达 10%~20%，存在轻微波动，作为后续趋势劣化的敏感度基点。'
+    },
+    { 
+      key: 'normal', title: '正常', value: summary.normal, color: '#ffffff', bg: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)', icon: <CheckCircleFilled />,
+      desc: '诊断算法评估：指标动态负荷占比 < 10%，且未触发任何长短期劣化趋势或横向同组偏离，运行平稳。'
+    },
+  ];
+
   return (
     <PageContainer
       title="健康总览"
@@ -388,39 +352,109 @@ const HealthDashboard = () => {
         </Button>
       }
     >
+      <style>{`
+        .health-card {
+          transition: all 0.3s ease;
+          border: 1px solid rgba(255, 255, 255, 0.4);
+        }
+        .health-card:hover {
+          transform: translateY(-4px);
+          box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+        }
+      `}</style>
       {/* ── Section 1: Health summary ── */}
-      <ProCard loading={loading} bordered headerBordered>
-        <StatisticCard.Group direction="row" gutter={16}>
-          <StatisticCard
-            statistic={{ title: '设备总数', value: summary.total, suffix: '台' }}
-          />
-          <StatisticCard
-            statistic={{
-              title: '异常设备',
-              value: faultCount,
-              suffix: '台',
-              status: faultCount > 0 ? 'error' : 'success',
-            }}
-          />
-          <StatisticCard
-            statistic={{
-              title: '正常运行',
-              value: summary.normal,
-              suffix: '台',
-              status: 'success',
-            }}
-          />
-          <StatisticCard
-            statistic={{
-              title: '数据中断',
-              value: summary.offline,
-              suffix: '台',
-              status: summary.offline > 0 ? 'warning' : 'default',
-            }}
-          />
-        </StatisticCard.Group>
-        <div style={{ marginTop: 16 }}>
-          <HealthBar summary={summary} />
+      <ProCard
+        title={
+          <Space>
+            <DashboardOutlined style={{ color: '#1890ff', fontSize: 18 }} />
+            <span style={{ fontSize: 16, fontWeight: 600, color: '#262626' }}>设备健康分布</span>
+          </Space>
+        }
+        loading={loading}
+        bordered
+        headerBordered
+        style={{ background: '#fafafa', marginBottom: 24 }}
+      >
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+          {healthMetrics.map(item => {
+            const isZero = item.value === undefined || item.value === null || item.value === 0;
+            const cardBg = isZero ? '#f5f5f5' : item.bg;
+            const textColor = isZero ? '#bfbfbf' : '#ffffff';
+            const titleColor = isZero ? '#8c8c8c' : '#ffffff';
+            const iconColor = isZero ? '#d9d9d9' : '#ffffff';
+            const watermarkColor = isZero ? '#000000' : '#ffffff';
+            const watermarkOpacity = isZero ? 0.03 : 0.15;
+            const shadow = isZero ? 'none' : '0 1px 2px rgba(0,0,0,0.1)';
+            const border = isZero ? '1px dashed #e8e8e8' : '1px solid rgba(255, 255, 255, 0.4)';
+
+            return (
+              <div
+                key={item.key}
+                className="health-card"
+                style={{
+                  background: cardBg,
+                  borderRadius: 12,
+                  padding: '20px 24px',
+                  position: 'relative',
+                  overflow: 'hidden',
+                  boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
+                  cursor: 'pointer',
+                  height: '100%',
+                  border: border,
+                }}
+              >
+                <div style={{ position: 'relative', zIndex: 1 }}>
+                  <Space size={8} style={{ color: titleColor, fontSize: 16, fontWeight: 'bold', marginBottom: 12, textShadow: shadow }}>
+                    <span style={{ color: iconColor }}>{item.icon}</span>
+                    <span>
+                      {item.title}
+                      <Tooltip title={item.desc} overlayInnerStyle={{ width: 200 }}>
+                        <InfoCircleOutlined style={{ fontSize: 14, color: isZero ? '#d9d9d9' : 'rgba(255,255,255,0.7)', marginLeft: 6, cursor: 'help' }} />
+                      </Tooltip>
+                    </span>
+                  </Space>
+                  <div style={{ fontSize: 36, fontWeight: '900', color: textColor, lineHeight: 1, textShadow: shadow }}>
+                    {isZero ? 0 : item.value} <span style={{ fontSize: 14, fontWeight: 'normal', color: isZero ? '#d9d9d9' : 'rgba(255,255,255,0.85)' }}>台</span>
+                  </div>
+                </div>
+                {/* Background Icon Watermark */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    right: -15,
+                    bottom: -20,
+                    fontSize: 100,
+                    color: watermarkColor,
+                    opacity: watermarkOpacity,
+                    zIndex: 0,
+                    transform: 'rotate(-15deg)',
+                  }}
+                >
+                  {item.icon}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        <div style={{ borderTop: '1px solid #f0f0f0', paddingTop: 16, display: 'flex', justifyContent: 'flex-end' }}>
+          <Space size="large" split={<span style={{ color: '#e8e8e8' }}>|</span>}>
+            <Space size={4}>
+              <Text type="secondary">设备总数:</Text>
+              <Text strong style={{ fontSize: 16, color: '#595959' }}>{summary.total}</Text>
+              <Text type="secondary">台</Text>
+            </Space>
+            <Space size={4}>
+              <Text type="secondary">已接入监测:</Text>
+              <Text strong style={{ fontSize: 16, color: '#1890ff' }}>{summary.total - summary.unconfigured}</Text>
+              <Text type="secondary">台</Text>
+            </Space>
+            <Space size={4}>
+              <Text type="secondary">待接入监测:</Text>
+              <Text strong style={{ fontSize: 16, color: '#bfbfbf' }}>{summary.unconfigured}</Text>
+              <Text type="secondary">台</Text>
+            </Space>
+          </Space>
         </div>
       </ProCard>
 

@@ -49,6 +49,11 @@ class DeviceContextService:
         VibThreshold = aliased(SensorThreshold)
         TempThreshold = aliased(SensorThreshold)
 
+        try:
+            device_uuid = UUID(device_id) if isinstance(device_id, str) else device_id
+        except ValueError:
+            return None
+
         # 1. Fetch core device information
         stmt_device = (
             select(
@@ -66,7 +71,7 @@ class DeviceContextService:
             .outerjoin(HealthCheckFreq, HealthCheckFreq.id == DeviceCategory.health_check_freq_id)
             .outerjoin(VibThreshold, VibThreshold.id == DeviceCategory.vib_threshold_id)
             .outerjoin(TempThreshold, TempThreshold.id == DeviceCategory.temp_threshold_id)
-            .where(DeviceInst.id == device_id)
+            .where(DeviceInst.id == device_uuid)
             .limit(1)
         )
         row = (await session.execute(stmt_device)).first()
@@ -88,7 +93,7 @@ class DeviceContextService:
             select(SensorMonitoring, Sensor)
             .outerjoin(Sensor, Sensor.id == SensorMonitoring.sensor_id)
             .where(
-                SensorMonitoring.device_inst_id == device_id,
+                SensorMonitoring.device_inst_id == device_uuid,
                 SensorMonitoring.status == 1
             )
         )

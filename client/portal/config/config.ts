@@ -42,11 +42,7 @@ export default defineConfig({
       name: '仪表盘',
       icon: 'DashboardOutlined',
       routes: [
-        {
-          path: '/dashboard/overview',
-          name: '概览',
-          component: '@/pages/Dashboard/Overview',
-        },
+
         {
           path: '/dashboard/health',
           name: '健康总览',
@@ -54,12 +50,12 @@ export default defineConfig({
         },
         {
           path: '/dashboard/monitoring',
-          name: '监控',
+          name: '异常设备',
           component: '@/pages/Dashboard/Monitoring',
         },
         {
           path: '/dashboard',
-          redirect: '/dashboard/welcome',
+          redirect: '/dashboard/health',
         },
       ],
     },
@@ -228,7 +224,7 @@ export default defineConfig({
     },
     {
       path: '/',
-      redirect: '/dashboard/overview',
+      redirect: '/dashboard/health',
     },
   ],
 });

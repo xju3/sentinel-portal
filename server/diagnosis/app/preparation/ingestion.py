@@ -21,7 +21,7 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> None:
         from pub.manager.database import db_manager, redis_manager
         from pub.models.diagnosis import Diagnosis, DiagnosisItem
         from pub.models.sensor import SensorTask
-        from pub.utils.redis_keys import REDIS_KEY_DIA_AMBIENT_TEMP, REDIS_KEY_TASK_SEQ
+        from pub.utils.redis_keys import REDIS_KEY_DIA_AMBIENT_TEMP, REDIS_KEY_TASK_SEQ, REDIS_KEY_DIA_HEALTH_STATUS
         
         device_uuid = uuid.UUID(report.device_id)
         location_uuid = uuid.UUID(report.location_id)
@@ -147,6 +147,13 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> None:
                     evidence=vib_result.get("evidence", {})
                 )
                 session.add(item_vib)
+                
+        # 3. Update Health Status Cache
+        if redis_client:
+            try:
+                await asyncio.to_thread(redis_client.hset, REDIS_KEY_DIA_HEALTH_STATUS, str(device_uuid), overall_level)
+            except Exception as e:
+                logger.error("Failed to update health status cache: %s", e)
                 
         logger.info("Successfully persisted diagnosis results to MySQL: overall_level=%s", overall_level)
     except Exception as e:

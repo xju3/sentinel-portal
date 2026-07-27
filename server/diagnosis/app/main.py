@@ -15,7 +15,6 @@ logger = setup_logging(debug=settings.debug)
 import asyncio
 from contextlib import asynccontextmanager
 from pub.manager.database import db_manager, redis_manager, influxdb_manager, minio_manager
-from app.clients.mqtt import dia_mqtt_manager
 from app.clients.stream_worker import run_stream_worker, _ensure_consumer_group
 
 # 并发 Worker 数量，控制 MySQL/InfluxDB 并发压力
@@ -36,8 +35,6 @@ async def lifespan(app: FastAPI):
         settings.minio_bucket,
     )
 
-    logger.debug("Initializing MQTT client...")
-    dia_mqtt_manager.init()
 
     logger.debug("Initializing Redis Stream consumer group...")
     _ensure_consumer_group()
@@ -63,8 +60,6 @@ async def lifespan(app: FastAPI):
     influxdb_manager.close()
     minio_manager.close()
 
-    logger.debug("Closing MQTT client...")
-    dia_mqtt_manager.close()
 
 app = FastAPI(
     title="Diagnosis API",

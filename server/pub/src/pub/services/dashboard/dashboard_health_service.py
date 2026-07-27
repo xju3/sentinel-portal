@@ -66,18 +66,12 @@ class DashboardHealthService:
                 monitored_sns.add(sn)
                 sn_to_devices.setdefault(sn, []).append(dev["device_id"])
 
-        # 3. Query latest diagnosis results per (device_id, metric)
-        device_ids = {UUID(d) for d in devices.keys()}
-        latest_results = await DashboardHealthService._query_latest_diagnosis(
-            session, device_ids
-        )
-
-        # 4. Query communication states for online/offline
+        # 3. Query communication states for online/offline
         comm_states = await DashboardHealthService._query_comm_states(
             session, monitored_sns
         )
 
-        # 5. Determine online status per device
+        # 4. Determine online status per device
         now_ms = int(datetime.utcnow().timestamp() * 1000)
         for sn in monitored_sns:
             comm = comm_states.get(sn)
@@ -89,43 +83,102 @@ class DashboardHealthService:
                     if is_online:
                         devices[device_id]["online"] = True
 
-        # 6. Assign diagnosis level to each device & collect triggered metrics
-        for dev_id, metric_results in latest_results.items():
-            for metric_id, (diag, item) in metric_results.items():
-                level_str = INT_TO_LEVEL.get(item.level, "正常")
-                score = LEVEL_SCORE.get(level_str, 0)
+        # 5. Fetch overall level from Redis cache for all monitored devices
+        from pub.manager.database import redis_manager
+        from pub.utils.redis_keys import REDIS_KEY_DIA_HEALTH_STATUS
+        import asyncio
+        
+        redis_client = redis_manager.get_client()
+        fault_device_ids = set()
+        
+        if redis_client and devices:
+            device_ids_list = list(devices.keys())
+            try:
+                # Convert string IDs (which may lack hyphens) to standard UUID strings with hyphens
+                from uuid import UUID
+                redis_query_keys = [str(UUID(d)) for d in device_ids_list]
                 
+                cached_levels = await asyncio.to_thread(redis_client.hmget, REDIS_KEY_DIA_HEALTH_STATUS, *redis_query_keys)
+                missing_device_ids = []
+                
+                for dev_id, level_str in zip(device_ids_list, cached_levels):
+                    if level_str is not None:
+                        dev = devices[dev_id]
+                        overall_score = int(level_str)
+                        overall_level_str = INT_TO_LEVEL.get(overall_score, "正常")
+                        dev["has_diagnosis"] = True
+                        dev["diagnosis_score"] = overall_score
+                        dev["diagnosis_level"] = overall_level_str
+                        
+                        if overall_score > 0:
+                            fault_device_ids.add(dev_id)
+                    else:
+                        missing_device_ids.append(dev_id)
+                        
+                # Handle cache misses: query DB and write back to Redis
+                if missing_device_ids:
+                    missing_uuids = {UUID(d) for d in missing_device_ids}
+                    missing_results = await DashboardHealthService._query_latest_diagnosis(
+                        session, missing_uuids
+                    )
+                    
+                    redis_updates = {}
+                    for dev_id in missing_device_ids:
+                        dev = devices[dev_id]
+                        metric_results = missing_results.get(dev_id, {})
+                        
+                        max_score = 0
+                        for diag, item in metric_results.values():
+                            if item.level > max_score:
+                                max_score = item.level
+                                
+                        overall_level_str = INT_TO_LEVEL.get(max_score, "正常")
+                        dev["has_diagnosis"] = True
+                        dev["diagnosis_score"] = max_score
+                        dev["diagnosis_level"] = overall_level_str
+                        
+                        if max_score > 0:
+                            fault_device_ids.add(dev_id)
+                            
+                        # Use standard UUID string with hyphens for Redis key consistency
+                        redis_updates[str(UUID(dev_id))] = max_score
+                        
+                    if redis_updates:
+                        for k, v in redis_updates.items():
+                            await asyncio.to_thread(redis_client.hset, REDIS_KEY_DIA_HEALTH_STATUS, k, v)
+            except Exception as e:
+                logger.error("Failed to fetch health status from Redis: %s", e)
+
+        # 6. For fault devices, query detailed metrics, duration, and trend
+        latest_results = {}
+        first_triggered_map = {}
+        previous_level_map = {}
+        
+        if fault_device_ids:
+            fault_uuids = {UUID(d) for d in fault_device_ids}
+            latest_results = await DashboardHealthService._query_latest_diagnosis(
+                session, fault_uuids
+            )
+            first_triggered_map = await DashboardHealthService._query_first_triggered(
+                session, fault_device_ids
+            )
+            previous_level_map = await DashboardHealthService._query_previous_levels(
+                session, fault_device_ids
+            )
+            
+            # Apply triggered metrics for fault devices
+            for dev_id, metric_results in latest_results.items():
                 if dev_id not in devices:
                     continue
                 dev = devices[dev_id]
-                dev["has_diagnosis"] = True
-                current_score = dev["diagnosis_score"]
-                
-                # Check overall diagnosis level first (using diag.overall_level)
-                overall_level_str = INT_TO_LEVEL.get(diag.overall_level, "正常")
-                overall_score = LEVEL_SCORE.get(overall_level_str, 0)
-                if current_score is None or overall_score > current_score:
-                    dev["diagnosis_score"] = overall_score
-                    dev["diagnosis_level"] = overall_level_str
-
-                if score > 0:
-                    label = METRIC_LABELS.get(metric_id, str(metric_id))
-                    current_metric_level = dev["triggered_metrics"].get(label)
-                    if not current_metric_level or score > LEVEL_SCORE.get(current_metric_level, 0):
-                        dev["triggered_metrics"][label] = level_str
-
-        # 7. Query fault duration for triggered devices
-        fault_device_ids = {
-            dev["device_id"]
-            for dev in devices.values()
-            if LEVEL_SCORE.get(dev["diagnosis_level"], 0) > 0
-        }
-        first_triggered_map = await DashboardHealthService._query_first_triggered(
-            session, fault_device_ids
-        )
-        previous_level_map = await DashboardHealthService._query_previous_levels(
-            session, fault_device_ids
-        )
+                for metric_id, (diag, item) in metric_results.items():
+                    level_str = INT_TO_LEVEL.get(item.level, "正常")
+                    score = LEVEL_SCORE.get(level_str, 0)
+                    if score > 0:
+                        label = METRIC_LABELS.get(metric_id, str(metric_id))
+                        current_metric_level = dev["triggered_metrics"].get(label)
+                        if not current_metric_level or score > LEVEL_SCORE.get(current_metric_level, 0):
+                            dev["triggered_metrics"][label] = level_str
 
         # 8. Assemble response
         return DashboardHealthService._assemble_response(
@@ -322,7 +375,7 @@ class DashboardHealthService:
         now_ms: int,
     ) -> dict[str, Any]:
         # --- Health summary ---
-        counts = {"normal": 0, "attention": 0, "warning": 0, "severe": 0, "offline": 0, "unconfigured": 0}
+        counts = {"normal": 0, "attention": 0, "abnormal": 0, "warning": 0, "severe": 0, "offline": 0, "unconfigured": 0}
         monitored_count = 0
 
         for dev in devices.values():
@@ -332,12 +385,14 @@ class DashboardHealthService:
             monitored_count += 1
             if not dev["online"]:
                 counts["offline"] += 1
-                continue
+            
             level = dev["diagnosis_level"]
             if level == "严重":
                 counts["severe"] += 1
             elif level == "警告":
                 counts["warning"] += 1
+            elif level == "异常":
+                counts["abnormal"] += 1
             elif level == "关注":
                 counts["attention"] += 1
             else:
@@ -355,34 +410,34 @@ class DashboardHealthService:
 
         for dev in devices.values():
             score = LEVEL_SCORE.get(dev["diagnosis_level"], 0)
-            if score <= 0 or not dev["online"]:
+            if score <= 0:
                 continue
             level = dev["diagnosis_level"]
-            level_key = {"关注": "attention", "警告": "warning", "严重": "severe"}.get(level)
+            level_key = {"关注": "attention", "异常": "abnormal", "警告": "warning", "严重": "severe"}.get(level)
             
             if level_key:
                 cat = dev["category"]
                 if cat not in cat_dist:
-                    cat_dist[cat] = {"attention": 0, "warning": 0, "severe": 0}
+                    cat_dist[cat] = {"attention": 0, "abnormal": 0, "warning": 0, "severe": 0}
                 cat_dist[cat][level_key] += 1
 
                 area = dev["area"]
                 if area not in area_dist:
-                    area_dist[area] = {"attention": 0, "warning": 0, "severe": 0}
+                    area_dist[area] = {"attention": 0, "abnormal": 0, "warning": 0, "severe": 0}
                 area_dist[area][level_key] += 1
 
             # Metric distribution uses individual metric levels
             for metric_label, metric_level in dev["triggered_metrics"].items():
-                m_level_key = {"关注": "attention", "警告": "warning", "严重": "severe"}.get(metric_level)
+                m_level_key = {"关注": "attention", "异常": "abnormal", "警告": "warning", "严重": "severe"}.get(metric_level)
                 if m_level_key:
                     if metric_label not in metric_dist:
-                        metric_dist[metric_label] = {"attention": 0, "warning": 0, "severe": 0}
+                        metric_dist[metric_label] = {"attention": 0, "abnormal": 0, "warning": 0, "severe": 0}
                     metric_dist[metric_label][m_level_key] += 1
 
         def _sort_dist(dist: dict[str, dict[str, int]]) -> list[dict]:
             items = [{"name": name, **vals} for name, vals in dist.items()]
             items.sort(
-                key=lambda x: (x["severe"], x["warning"], x["attention"]),
+                key=lambda x: (x["severe"], x["warning"], x.get("abnormal", 0), x["attention"]),
                 reverse=True,
             )
             return items
@@ -403,7 +458,7 @@ class DashboardHealthService:
 
         for dev in devices.values():
             score = LEVEL_SCORE.get(dev["diagnosis_level"], 0)
-            if score <= 0 or not dev["online"]:
+            if score <= 0:
                 continue
 
             # Duration: find earliest triggered time across this device

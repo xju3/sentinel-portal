@@ -53,6 +53,12 @@ REDIS_KEY_DIA_PEER_GROUP = "dia:peer_group:{process_device_id}:{device_category_
 # 格式: dia:device_context:{device_id}
 REDIS_KEY_DIA_DEVICE_CONTEXT = "dia:device_context:{device_id}"
 
+# 设备健康状态缓存 Key
+# 格式: Hash 结构, 键为 dia:health:status, field 为 device_id, value 为 overall_level
+# 过期时间: 永久 (由诊断流程实时更新)
+# 作用: 提供给 Dashboard 快速查询当前所有设备的健康状态，避免在接口中查询全量最新诊断记录
+REDIS_KEY_DIA_HEALTH_STATUS = "dia:health:status"
+
 # ==========================================
 # 任务流 (Data Pipelines)
 # ==========================================
