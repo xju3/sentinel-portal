@@ -115,38 +115,41 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> None:
                     )
                     session.add(fft_task)
 
-                # 2. Persist Diagnosis (Insert new results)
-                diag_record = Diagnosis(
-                    device_id=device_uuid,
-                    location_id=location_uuid,
-                    report_id=report.report_id,
-                    overall_level=overall_level,
-                    resampling=resampling_flag
-                )
-                session.add(diag_record)
-                await session.flush()
-                
-                # Temperature Item
-                item_temp = DiagnosisItem(
-                    diagnosis_id=diag_record.id,
-                    metric_id=0, # Temperature
-                    level=temp_level,
-                    resampling=resampling_flag,
-                    description=temp_result.get("reason"),
-                    evidence=temp_result.get("evidence", {})
-                )
-                session.add(item_temp)
-                
-                # Vibration Item
-                item_vib = DiagnosisItem(
-                    diagnosis_id=diag_record.id,
-                    metric_id=1, # Vibration
-                    level=vib_level,
-                    resampling=resampling_flag,
-                    description=vib_result.get("reason"),
-                    evidence=vib_result.get("evidence", {})
-                )
-                session.add(item_vib)
+                # 2. Persist Diagnosis (仅异常结果落库；正常结论只更新 Redis，不写 MySQL)
+                if overall_level > 0:
+                    diag_record = Diagnosis(
+                        device_id=device_uuid,
+                        location_id=location_uuid,
+                        report_id=report.report_id,
+                        overall_level=overall_level,
+                        resampling=resampling_flag
+                    )
+                    session.add(diag_record)
+                    await session.flush()
+                    
+                    # Temperature Item（只在异常时写入）
+                    if temp_level > 0:
+                        item_temp = DiagnosisItem(
+                            diagnosis_id=diag_record.id,
+                            metric_id=0, # Temperature
+                            level=temp_level,
+                            resampling=resampling_flag,
+                            description=temp_result.get("reason"),
+                            evidence=temp_result.get("evidence", {})
+                        )
+                        session.add(item_temp)
+                    
+                    # Vibration Item（只在异常时写入）
+                    if vib_level > 0:
+                        item_vib = DiagnosisItem(
+                            diagnosis_id=diag_record.id,
+                            metric_id=1, # Vibration
+                            level=vib_level,
+                            resampling=resampling_flag,
+                            description=vib_result.get("reason"),
+                            evidence=vib_result.get("evidence", {})
+                        )
+                        session.add(item_vib)
                 
         # 3. Update Health Status Cache
         if redis_client:

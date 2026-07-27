@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { history } from '@umijs/max';
 import { PageContainer, ProCard, StatisticCard } from '@ant-design/pro-components';
 import { Button, Col, Empty, Row, Space, Table, Tag, Tooltip, Typography, message } from 'antd';
 import {
@@ -367,7 +368,7 @@ const HealthDashboard = () => {
         title={
           <Space>
             <DashboardOutlined style={{ color: '#1890ff', fontSize: 18 }} />
-            <span style={{ fontSize: 16, fontWeight: 600, color: '#262626' }}>设备健康分布</span>
+            <span style={{ fontSize: 16, fontWeight: 600, color: '#262626' }}>健康分布</span>
           </Space>
         }
         loading={loading}
@@ -391,6 +392,11 @@ const HealthDashboard = () => {
               <div
                 key={item.key}
                 className="health-card"
+                onClick={() => {
+                  if (!isZero && item.key !== 'normal') {
+                    history.push(`/dashboard/monitoring?level=${item.key}`);
+                  }
+                }}
                 style={{
                   background: cardBg,
                   borderRadius: 12,
@@ -398,7 +404,7 @@ const HealthDashboard = () => {
                   position: 'relative',
                   overflow: 'hidden',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
-                  cursor: 'pointer',
+                  cursor: (!isZero && item.key !== 'normal') ? 'pointer' : 'default',
                   height: '100%',
                   border: border,
                 }}
@@ -464,19 +470,19 @@ const HealthDashboard = () => {
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col xs={24} lg={8}>
           <DistributionTags
-            title="按设备分类"
+            title="设备分类视图"
             data={data.problemDistribution.byCategory}
           />
         </Col>
         <Col xs={24} lg={8}>
           <DistributionTags
-            title="按车间/区域"
+            title="车间区域视图"
             data={data.problemDistribution.byArea}
           />
         </Col>
         <Col xs={24} lg={8}>
           <DistributionTags
-            title="按诊断项分布"
+            title="诊断项视图"
             data={data.problemDistribution.byMetric || []}
           />
         </Col>

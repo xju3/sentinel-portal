@@ -94,12 +94,11 @@ class DashboardHealthService:
         if redis_client and devices:
             device_ids_list = list(devices.keys())
             try:
-                # Convert string IDs (which may lack hyphens) to standard UUID strings with hyphens
+                # Convert string IDs to standard UUID strings with hyphens
                 from uuid import UUID
                 redis_query_keys = [str(UUID(d)) for d in device_ids_list]
                 
                 cached_levels = await asyncio.to_thread(redis_client.hmget, REDIS_KEY_DIA_HEALTH_STATUS, *redis_query_keys)
-                missing_device_ids = []
                 
                 for dev_id, level_str in zip(device_ids_list, cached_levels):
                     if level_str is not None:
@@ -112,40 +111,9 @@ class DashboardHealthService:
                         
                         if overall_score > 0:
                             fault_device_ids.add(dev_id)
-                    else:
-                        missing_device_ids.append(dev_id)
-                        
-                # Handle cache misses: query DB and write back to Redis
-                if missing_device_ids:
-                    missing_uuids = {UUID(d) for d in missing_device_ids}
-                    missing_results = await DashboardHealthService._query_latest_diagnosis(
-                        session, missing_uuids
-                    )
-                    
-                    redis_updates = {}
-                    for dev_id in missing_device_ids:
-                        dev = devices[dev_id]
-                        metric_results = missing_results.get(dev_id, {})
-                        
-                        max_score = 0
-                        for diag, item in metric_results.values():
-                            if item.level > max_score:
-                                max_score = item.level
-                                
-                        overall_level_str = INT_TO_LEVEL.get(max_score, "正常")
-                        dev["has_diagnosis"] = True
-                        dev["diagnosis_score"] = max_score
-                        dev["diagnosis_level"] = overall_level_str
-                        
-                        if max_score > 0:
-                            fault_device_ids.add(dev_id)
-                            
-                        # Use standard UUID string with hyphens for Redis key consistency
-                        redis_updates[str(UUID(dev_id))] = max_score
-                        
-                    if redis_updates:
-                        for k, v in redis_updates.items():
-                            await asyncio.to_thread(redis_client.hset, REDIS_KEY_DIA_HEALTH_STATUS, k, v)
+                    # Cache miss: 设备尚未被诊断，或 Redis 重启后尚未恢复
+                    # 保持默认值 diagnosis_level="未检测"，不回源数据库
+                    # 理由：数据库只存异常记录，回源必然误判为异常
             except Exception as e:
                 logger.error("Failed to fetch health status from Redis: %s", e)
 
@@ -187,6 +155,7 @@ class DashboardHealthService:
             sn_to_devices=sn_to_devices,
             first_triggered_map=first_triggered_map,
             previous_level_map=previous_level_map,
+            latest_results=latest_results,
             now_ms=now_ms,
         )
 
@@ -372,6 +341,7 @@ class DashboardHealthService:
         sn_to_devices: dict[str, list[str]],
         first_triggered_map: dict[str, datetime],
         previous_level_map: dict[str, str],
+        latest_results: dict,
         now_ms: int,
     ) -> dict[str, Any]:
         # --- Health summary ---
@@ -448,9 +418,7 @@ class DashboardHealthService:
             "byMetric": _sort_dist(metric_dist),
         }
 
-        import json
-        with open('/tmp/debug_dist.json', 'w') as f:
-            json.dump(problem_distribution, f)
+
 
         # --- Fault device list ---
         now_dt = datetime.utcnow()
@@ -480,6 +448,36 @@ class DashboardHealthService:
             else:
                 trending = "improving"
 
+            # Build per-metric diagnosis detail
+            diagnosis_details = []
+            metric_results = latest_results.get(dev["device_id"], {})
+            for metric_id, (diag, item) in metric_results.items():
+                item_level_str = INT_TO_LEVEL.get(item.level, "正常")
+                item_score = LEVEL_SCORE.get(item_level_str, 0)
+                if item_score <= 0:
+                    continue
+                evidence = item.evidence or {}
+                diagnosis_details.append({
+                    "metricId": metric_id,
+                    "metricLabel": METRIC_LABELS.get(metric_id, str(metric_id)),
+                    "level": item_level_str,
+                    "levelScore": item_score,
+                    "description": item.description,
+                    "diagnosedAt": diag.diagnosed_at.isoformat() if diag.diagnosed_at else None,
+                    "evidence": {
+                        "ratio": evidence.get("vibration_budget_ratio") or evidence.get("thermal_budget_ratio"),
+                        "current": evidence.get("current"),
+                        "healthyMedian": evidence.get("healthy_median"),
+                        "peerMedian": evidence.get("peer_median"),
+                        "stSlope": evidence.get("st_slope"),
+                        "mtSlope": evidence.get("mt_slope"),
+                        "mutation": evidence.get("mutation"),
+                        "confirmationStatus": evidence.get("confirmation_status"),
+                    },
+                })
+            # Sort by severity desc
+            diagnosis_details.sort(key=lambda x: -x["levelScore"])
+
             fault_devices.append({
                 "deviceId": dev["device_id"],
                 "deviceName": dev["device_name"],
@@ -491,6 +489,7 @@ class DashboardHealthService:
                 "metrics": sorted(dev["triggered_metrics"]),
                 "durationHours": duration_hours,
                 "trending": trending,
+                "diagnosisDetails": diagnosis_details,
             })
 
         # Sort: worsening first, then by level desc, then by duration desc

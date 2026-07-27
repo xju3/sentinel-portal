@@ -110,7 +110,7 @@ class TemperatureDiagnosis:
             return {
                 "status": "alarm",
                 "severity": "critical",
-                "reason": f"Critical: Absolute temperature {current_temp:.1f}C exceeded baseline {baseline}C!",
+                "reason": f"Critical: Absolute temperature {current_temp:.1f}°C exceeded baseline {baseline}°C!",
                 "evidence": evidence
             }
 
@@ -126,7 +126,7 @@ class TemperatureDiagnosis:
                 return {
                     "status": "alarm",
                     "severity": "warning",
-                    "reason": f"Warning: Real-time mutation {mutation:.1f}C exceeds limit {rt_max_delta}C!",
+                    "reason": f"Warning: Real-time mutation {mutation:.1f}°C exceeds limit {rt_max_delta}°C!",
                     "evidence": evidence
                 }
 
@@ -137,13 +137,13 @@ class TemperatureDiagnosis:
             return {
                 "status": "ok",
                 "severity": "info",
-                "reason": f"Normal: Temperature {current_temp:.1f}C is within ambient baseline.",
+                "reason": f"Normal: Temperature {current_temp:.1f}°C is within ambient baseline.",
                 "evidence": evidence
             }
 
         status = "ok"
         severity = "info"
-        reason = f"Running normally at {current_temp:.1f}C"
+        reason = f"Running normally at {current_temp:.1f}°C"
 
         # --- THERMAL BUDGET RATIO ---
         # 计算热负荷预算占比作为定级系数
@@ -172,11 +172,11 @@ class TemperatureDiagnosis:
         if st_slope > st_max_slope:
             status = "alarm"
             severity = TemperatureDiagnosis._escalate(severity, context_severity)
-            reason = f"Violated Short-Term Slope: {st_slope:.1f}C/hour (limit {st_max_slope}). Dynamic Level: {severity}"
+            reason = f"Violated Short-Term Slope: {st_slope:.1f}°C/hour (limit {st_max_slope}). Dynamic Level: {severity}"
         elif st_amplitude > st_max_amplitude:
             status = "alarm"
             severity = TemperatureDiagnosis._escalate(severity, context_severity)
-            reason = f"Violated Short-Term Amplitude: {st_amplitude:.1f}C exceeds {st_max_amplitude}C. Dynamic Level: {severity}"
+            reason = f"Violated Short-Term Amplitude: {st_amplitude:.1f}°C exceeds {st_max_amplitude}°C. Dynamic Level: {severity}"
 
         # 5. Middle-Term (72h)
         mt_slope = TemperatureDiagnosis._calculate_slope(mt_trend)
@@ -187,11 +187,11 @@ class TemperatureDiagnosis:
             if mt_slope > mt_max_slope:
                 status = "alarm"
                 severity = TemperatureDiagnosis._escalate(severity, context_severity)
-                reason = f"Violated Mid-Term Slope: {mt_slope:.2f}C/hour (limit {mt_max_slope}). Dynamic Level: {severity}"
+                reason = f"Violated Mid-Term Slope: {mt_slope:.2f}°C/hour (limit {mt_max_slope}). Dynamic Level: {severity}"
             elif mt_amplitude > mt_max_amplitude:
                 status = "alarm"
                 severity = TemperatureDiagnosis._escalate(severity, context_severity)
-                reason = f"Violated Mid-Term Amplitude: {mt_amplitude:.1f}C exceeds {mt_max_amplitude}C. Dynamic Level: {severity}"
+                reason = f"Violated Mid-Term Amplitude: {mt_amplitude:.1f}°C exceeds {mt_max_amplitude}°C. Dynamic Level: {severity}"
 
         # --- HORIZONTAL STRATEGY ---
         peer_group = context.get("peer_group", {})
@@ -219,11 +219,11 @@ class TemperatureDiagnosis:
                     status = "alarm"
                     severity = TemperatureDiagnosis._escalate(severity, context_severity)
                     # For huge deviations, maybe bump up one extra level? Let's stick to context_severity as requested.
-                    reason = f"Horizontal Violation: Deviates {peer_deviation:.1f}C from peer median {peer_median:.1f}C. Dynamic Level: {severity}"
+                    reason = f"Horizontal Violation: Deviates {peer_deviation:.1f}°C from peer median {peer_median:.1f}°C. Dynamic Level: {severity}"
                 elif peer_deviation > 5.0 and severity == "info":
                     status = "alarm"
                     severity = TemperatureDiagnosis._escalate(severity, context_severity)
-                    reason = f"Horizontal Violation: Deviates {peer_deviation:.1f}C from peer median {peer_median:.1f}C. Dynamic Level: {severity}"
+                    reason = f"Horizontal Violation: Deviates {peer_deviation:.1f}°C from peer median {peer_median:.1f}°C. Dynamic Level: {severity}"
 
         return {
             "status": status,
