@@ -26,6 +26,9 @@ export default defineConfig({
   },
   model: {},
   request: {},
+  // Umi MFSU currently generates an invalid remote module for antd/reset.css
+  // in development, causing the whole application to fail before React mounts.
+  mfsu: false,
   routes: [
     {
       path: '/login',
@@ -35,6 +38,11 @@ export default defineConfig({
     {
       path: '/register',
       component: '@/pages/Register',
+      layout: false,
+    },
+    {
+      path: '/set-password',
+      component: '@/pages/SetPassword',
       layout: false,
     },
     {

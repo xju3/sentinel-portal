@@ -188,6 +188,8 @@ class DeviceInstCreate(BaseModel):
     life_span: Optional[int] = 0
     desc: str
     status: Optional[int] = 1
+    active: Optional[int] = 1
+    available: Optional[int] = 1
 
 
 class DeviceInstUpdate(BaseModel):
@@ -198,6 +200,8 @@ class DeviceInstUpdate(BaseModel):
     life_span: Optional[int] = None
     desc: Optional[str] = None
     status: Optional[int] = None
+    active: Optional[int] = None
+    available: Optional[int] = None
 
 
 class DeviceSpecBrief(BaseModel):
@@ -218,6 +222,8 @@ class DeviceInstResponse(BaseModel):
     life_span: int
     desc: str
     status: int
+    active: int
+    available: int
     device_spec: Optional[DeviceSpecBrief] = None
 
     model_config = ConfigDict(from_attributes=True)

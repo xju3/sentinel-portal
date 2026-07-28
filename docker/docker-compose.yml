@@ -20,6 +20,9 @@ services:
   api:
     <<: *python-app
     container_name: stl-api
+    env_file:
+      - ../.env
+      - ../server/api/.env
     environment:
       <<: *python-env
       APP_PACKAGE: api

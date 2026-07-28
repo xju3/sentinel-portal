@@ -4,7 +4,7 @@ export type RegisterPayload = {
   company_name: string;
   contact_name: string;
   phone: string;
-  email?: string;
+  email: string;
 };
 
 export type RegisterResult = {
@@ -12,8 +12,8 @@ export type RegisterResult = {
   contact_id: string;
   account_id: string;
   account_username: string;
-  login_channel: 'email' | 'mobile';
-  generated_password: string;
+  login_channel: 'email';
+  email_sent: boolean;
 };
 
 export async function registerTenant(payload: RegisterPayload) {

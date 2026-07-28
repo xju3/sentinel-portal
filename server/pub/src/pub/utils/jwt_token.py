@@ -24,25 +24,15 @@ def _b64url_decode(raw: str) -> bytes:
     return base64.urlsafe_b64decode(raw + padding)
 
 
-def create_access_token(
-    subject: str,
-    tenant_id: str,
-    username: str,
+def _encode_token(
+    payload: Dict[str, object],
     jwt_secret_key: str,
-    admin: bool = False,
-    contact_id: Optional[str] = None,
-    flag: int = 1,
-    expires_minutes: int = 1440,
+    expires_minutes: int,
 ) -> str:
     header = {"alg": "HS256", "typ": "JWT"}
     now = int(time.time())
-    payload = {
-        "sub": subject,
-        "tenant_id": tenant_id,
-        "username": username,
-        "admin": admin,
-        "contact_id": contact_id,
-        "flag": flag,
+    timed_payload = {
+        **payload,
         "iat": now,
         "exp": now + expires_minutes * 60,
     }
@@ -51,7 +41,9 @@ def create_access_token(
         json.dumps(header, separators=(",", ":"), ensure_ascii=True).encode("utf-8")
     )
     payload_encoded = _b64url_encode(
-        json.dumps(payload, separators=(",", ":"), ensure_ascii=True).encode("utf-8")
+        json.dumps(timed_payload, separators=(",", ":"), ensure_ascii=True).encode(
+            "utf-8"
+        )
     )
     signing_input = f"{header_encoded}.{payload_encoded}".encode("ascii")
 
@@ -62,6 +54,47 @@ def create_access_token(
     ).digest()
 
     return f"{header_encoded}.{payload_encoded}.{_b64url_encode(signature)}"
+
+
+def create_access_token(
+    subject: str,
+    tenant_id: str,
+    username: str,
+    jwt_secret_key: str,
+    admin: bool = False,
+    contact_id: Optional[str] = None,
+    flag: int = 1,
+    expires_minutes: int = 1440,
+) -> str:
+    return _encode_token(
+        {
+            "sub": subject,
+            "tenant_id": tenant_id,
+            "username": username,
+            "admin": admin,
+            "contact_id": contact_id,
+            "flag": flag,
+        },
+        jwt_secret_key,
+        expires_minutes,
+    )
+
+
+def create_password_setup_token(
+    subject: str,
+    nonce: str,
+    jwt_secret_key: str,
+    expires_minutes: int = 1440,
+) -> str:
+    return _encode_token(
+        {
+            "sub": subject,
+            "purpose": "password_setup",
+            "nonce": nonce,
+        },
+        jwt_secret_key,
+        expires_minutes,
+    )
 
 
 def decode_access_token(token: str, jwt_secret_key: str) -> Dict[str, object]:

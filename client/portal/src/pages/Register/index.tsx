@@ -11,19 +11,10 @@ const RegisterPage = () => {
   const navigate = useNavigate();
   const [result, setResult] = useState<RegisterResult | null>(null);
   const [loginAccount, setLoginAccount] = useState<string>('');
-  const [loginChannel, setLoginChannel] = useState<'email' | 'mobile'>('mobile');
 
   const updateLoginPreview = (values: Record<string, string | undefined>) => {
     const email = (values.email || '').trim();
-    const phone = (values.phone || '').trim();
-    if (email) {
-      setLoginChannel('email');
-      setLoginAccount(email.toLowerCase());
-      return;
-    }
-    const normalizedPhone = phone.replace(/\D/g, '');
-    setLoginChannel('mobile');
-    setLoginAccount(normalizedPhone);
+    setLoginAccount(email.toLowerCase());
   };
 
   return (
@@ -46,7 +37,7 @@ const RegisterPage = () => {
               <CheckCircleOutlined style={{ fontSize: 64, color: '#10b981', marginBottom: 24 }} />
               <h2>企业注册成功</h2>
               <p style={{ color: '#9ca3af', marginBottom: 32 }}>
-                系统已自动为您创建租户、联系人及管理员账号。
+                设置密码链接已发送至注册邮箱。
               </p>
               
               <div className={styles.accountInfoCard}>
@@ -55,17 +46,13 @@ const RegisterPage = () => {
                   <strong>{result.account_username}</strong>
                 </div>
                 <div className={styles.infoRow}>
-                  <span>临时密码</span>
-                  <strong style={{ color: '#60a5fa' }}>{result.generated_password}</strong>
-                </div>
-                <div className={styles.infoRow}>
                   <span>账号类型</span>
-                  <strong>{result.login_channel === 'email' ? '邮箱' : '手机号'}</strong>
+                  <strong>邮箱</strong>
                 </div>
               </div>
               
               <div className={styles.warningText}>
-                ⚠️ 请务必妥善保存上述临时密码，并在首次登录后立即修改。
+                请检查收件箱和垃圾邮件目录，并在 24 小时内设置登录密码。
               </div>
 
               <Button 
@@ -103,15 +90,17 @@ const RegisterPage = () => {
                       company_name: values.company_name,
                       contact_name: values.contact_name,
                       phone: values.phone,
-                      email: values.email?.trim() || undefined,
+                      email: values.email.trim(),
                     });
                     const data = (res as any)?.data || res;
                     setResult(data);
-                    message.success('注册成功，请妥善保存生成的临时密码');
+                    message.success('注册成功，设置密码链接已发送至邮箱');
                     return true;
                   } catch (error: any) {
-                    const detail = error?.data?.detail || '注册失败，请检查输入后重试';
-                    message.error(String(detail));
+                    if (!error?.businessErrorShown) {
+                      const detail = error?.data?.detail || error?.message || '注册失败，请检查输入后重试';
+                      message.error(String(detail));
+                    }
                     return false;
                   }
                 }}
@@ -161,12 +150,13 @@ const RegisterPage = () => {
                 <div style={{ marginBottom: 24 }}>
                   <ProFormText
                     name="email"
-                    placeholder="请输入电子邮件（可选填）"
+                    placeholder="请输入用于登录的电子邮件"
                     fieldProps={{
                       size: 'large',
                       prefix: <MailOutlined />,
                     }}
                     rules={[
+                      { required: true, message: '请输入电子邮件' },
                       { type: 'email', message: '电子邮件格式不正确' },
                     ]}
                   />
@@ -175,11 +165,11 @@ const RegisterPage = () => {
                 <div className={styles.previewBox}>
                   <div className={styles.previewTitle}>账户预览</div>
                   <div className={styles.previewContent}>
-                    当前将优先使用 
-                    <span className={loginChannel === 'email' ? styles.highlightEmail : styles.highlightPhone}>
+                    系统将使用
+                    <span className={styles.highlightEmail}>
                       {loginAccount || '尚未填写'}
                     </span>
-                    作为管理员登录账号
+                    作为管理员登录账号，并将设置密码链接发送至该邮箱
                   </div>
                 </div>
 

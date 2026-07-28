@@ -1,5 +1,6 @@
 from pathlib import Path
 from typing import List
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
@@ -57,6 +58,16 @@ class Settings(BaseSettings):
 
     # Queue Configuration
     patrol_queue_length: int = 72
+
+    # Registration Email
+    email_account: str = ""
+    email_passwd: str = ""
+    email_server: str = ""
+    email_port: int = 587
+    email_use_tls: bool = True
+    email_tls_verify: bool = True
+    portal_login_url: str = "https://portal.api-server.icu"
+    password_setup_token_expires_minutes: int = 1440
 
     model_config = SettingsConfigDict(
         env_file=(Path.home() / ".env", ".env"),

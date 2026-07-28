@@ -6,7 +6,7 @@ from uuid import UUID
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import func, or_
+from sqlalchemy import func, or_, update
 
 from pub.models.customer import (
     Region,
@@ -41,7 +41,7 @@ class AuthService:
     async def get_account_by_email(
         session: AsyncSession, email: str
     ) -> Optional[Account]:
-        stmt = select(Account).where(Account.email == email)
+        stmt = select(Account).where(Account.username == email)
         result = await session.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -57,7 +57,7 @@ class AuthService:
     async def get_account_by_mobile(
         session: AsyncSession, mobile: str
     ) -> Optional[Account]:
-        stmt = select(Account).where(Account.mobile == mobile)
+        stmt = select(Account).where(Account.username == mobile)
         result = await session.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -127,8 +127,7 @@ class AuthService:
 
         db_tenant = Tenant(**data)
         session.add(db_tenant)
-        await session.commit()
-        await session.refresh(db_tenant)
+        await session.flush()
         return db_tenant
 
     @staticmethod
@@ -151,6 +150,29 @@ class AuthService:
     ) -> None:
         account.password = new_password
         await session.commit()
+
+    @staticmethod
+    async def consume_password_setup(
+        session: AsyncSession,
+        account_id: UUID,
+        expected_password_marker: str,
+        new_password: str,
+    ) -> bool:
+        stmt = (
+            update(Account)
+            .where(
+                Account.id == account_id,
+                Account.password == expected_password_marker,
+                Account.active == True,  # noqa: E712
+            )
+            .values(password=new_password)
+        )
+        result = await session.execute(stmt)
+        if result.rowcount != 1:
+            await session.rollback()
+            return False
+        await session.commit()
+        return True
 
     @staticmethod
     async def get_account_by_wx_user_id(
@@ -179,7 +201,7 @@ class AuthService:
     async def register(
         session: AsyncSession,
         username: str,
-        email: Optional[str],
+        email: str,
         normalized_phone: str,
         company_name: str,
         contact_name: str,
@@ -188,7 +210,7 @@ class AuthService:
         tenant_code: str,
         tenant_mqtt_server: str,
         tenant_api_server: str,
-        random_password: str,
+        password_value: str,
     ) -> dict:
         """Complete registration business logic with all validations.
 
@@ -200,13 +222,12 @@ class AuthService:
             raise DomainException(code=409, message="account username already exists")
 
         # Check email uniqueness
-        if email:
-            existing_email = await AuthService.get_account_by_email(session, email)
-            if existing_email is not None:
-                raise DomainException(code=409, message="email already exists")
-            existing_contact_email = await AuthService.get_contact_by_email(session, email)
-            if existing_contact_email is not None:
-                raise DomainException(code=409, message="email already exists")
+        existing_email = await AuthService.get_account_by_email(session, email)
+        if existing_email is not None:
+            raise DomainException(code=409, message="email already exists")
+        existing_contact_email = await AuthService.get_contact_by_email(session, email)
+        if existing_contact_email is not None:
+            raise DomainException(code=409, message="email already exists")
 
         # Check phone uniqueness
         existing_mobile = await AuthService.get_account_by_mobile(session, normalized_phone)
@@ -235,9 +256,7 @@ class AuthService:
 
         account = await AuthService.create_account(session, {
             "username": username,
-            "password": random_password,
-            "email": email,
-            "mobile": normalized_phone,
+            "password": password_value,
             "flag": account_flag,
             "active": True,
             "admin": False,
@@ -251,5 +270,4 @@ class AuthService:
             "account_id": account.id,
             "account_username": account.username,
             "login_channel": login_channel,
-            "generated_password": random_password,
         }

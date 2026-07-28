@@ -23,6 +23,11 @@ export type ChangePasswordPayload = {
   new_password: string;
 };
 
+export type PasswordSetupPayload = {
+  token: string;
+  new_password: string;
+};
+
 export async function login(payload: LoginPayload) {
   return request<LoginResult>('/api/v1/auth/login', {
     method: 'POST',
@@ -32,6 +37,13 @@ export async function login(payload: LoginPayload) {
 
 export async function changePassword(payload: ChangePasswordPayload) {
   return request('/api/v1/auth/change-password', {
+    method: 'POST',
+    data: payload,
+  });
+}
+
+export async function setupInitialPassword(payload: PasswordSetupPayload) {
+  return request<{ message: string }>('/api/v1/auth/set-password', {
     method: 'POST',
     data: payload,
   });

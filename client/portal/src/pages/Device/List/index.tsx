@@ -266,7 +266,6 @@ const DeviceListPage = () => {
     {
       title: '操作',
       valueType: 'option',
-      width: OPERATION_COL_WIDTH,
       fixed: 'right',
       align: 'center',
       render: (_, row) => (
@@ -275,7 +274,7 @@ const DeviceListPage = () => {
             key="health-archive"
             onClick={() => navigate(`/device/${row.id}/health-archive`)}
           >
-            健康档案
+            档案
           </a>
           <a
             key="edit"
@@ -327,7 +326,6 @@ const DeviceListPage = () => {
         loading={loading}
         columns={columns}
         dataSource={filteredRows}
-        scroll={{ x: 1400 }}
         search={{ labelWidth: 'auto' }}
         onSubmit={(values) => setQuery(values)}
         onReset={() => setQuery({})}

@@ -7,6 +7,7 @@ import {
   Button,
   Card,
   Col,
+  Drawer,
   Empty,
   Row,
   Segmented,
@@ -44,6 +45,8 @@ const STATUS_META: Record<
 };
 
 const RANGE_OPTIONS = [
+  { label: '近 1 天', value: 1 },
+  { label: '近 3 天', value: 3 },
   { label: '近 7 天', value: 7 },
   { label: '近 30 天', value: 30 },
   { label: '近 90 天', value: 90 },
@@ -56,6 +59,8 @@ const INTERVAL_OPTIONS = [
   { label: '8 小时', value: 8 },
   { label: '24 小时', value: 24 },
 ];
+
+const WEEKDAY_LABELS = ['日', '一', '二', '三', '四', '五', '六'];
 
 const bucketTooltip = (bucket: HealthArchiveBucket) => {
   const meta = STATUS_META[bucket.status];
@@ -78,16 +83,23 @@ const DeviceHealthArchivePage = () => {
   const [intervalHours, setIntervalHours] = useState(1);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<DeviceHealthArchive | null>(null);
+  const [selectedDay, setSelectedDay] = useState<HealthArchiveBucket | null>(null);
+  const [dayDetail, setDayDetail] = useState<DeviceHealthArchive | null>(null);
+  const [dayDetailLoading, setDayDetailLoading] = useState(false);
+  const calendarMode = rangeDays >= 30;
 
   const loadData = useCallback(async () => {
     if (!deviceId) return;
     setLoading(true);
     try {
       const endAt = dayjs();
+      const startAt = calendarMode
+        ? endAt.startOf('day').subtract(rangeDays - 1, 'day')
+        : endAt.subtract(rangeDays, 'day');
       const result = await getDeviceHealthArchive(deviceId, {
-        startAt: endAt.subtract(rangeDays, 'day').toISOString(),
+        startAt: startAt.toISOString(),
         endAt: endAt.toISOString(),
-        intervalHours,
+        intervalHours: calendarMode ? 24 : intervalHours,
       });
       setData(result);
     } catch (error: any) {
@@ -95,22 +107,73 @@ const DeviceHealthArchivePage = () => {
     } finally {
       setLoading(false);
     }
-  }, [deviceId, intervalHours, rangeDays]);
+  }, [calendarMode, deviceId, intervalHours, rangeDays]);
 
   useEffect(() => {
     void loadData();
   }, [loadData]);
 
-  const axisLabels = useMemo(() => {
-    if (!data) return [];
-    return [
-      dayjs(data.range.startAt).format('YYYY-MM-DD HH:mm'),
-      dayjs(data.range.startAt)
-        .add((dayjs(data.range.endAt).diff(dayjs(data.range.startAt), 'minute') / 2), 'minute')
-        .format('YYYY-MM-DD HH:mm'),
-      dayjs(data.range.endAt).format('YYYY-MM-DD HH:mm'),
-    ];
-  }, [data]);
+  const orderedBuckets = useMemo(
+    () =>
+      data
+        ? [...data.buckets].sort(
+            (left, right) => dayjs(left.startAt).valueOf() - dayjs(right.startAt).valueOf(),
+          )
+        : [],
+    [data],
+  );
+
+  const bucketGroups = useMemo(() => {
+    const bucketsPerDay = Math.max(1, Math.floor(24 / intervalHours));
+    const groups: HealthArchiveBucket[][] = [];
+    for (let index = 0; index < orderedBuckets.length; index += bucketsPerDay) {
+      groups.push(orderedBuckets.slice(index, index + bucketsPerDay));
+    }
+    return groups;
+  }, [intervalHours, orderedBuckets]);
+
+  const calendarMonths = useMemo(() => {
+    const months = new Map<string, HealthArchiveBucket[]>();
+    for (const bucket of orderedBuckets) {
+      const key = dayjs(bucket.startAt).format('YYYY-MM');
+      const current = months.get(key) || [];
+      current.push(bucket);
+      months.set(key, current);
+    }
+    return Array.from(months.entries()).map(([key, buckets]) => ({
+      key,
+      label: dayjs(`${key}-01`).format('YYYY年M月'),
+      buckets,
+      leadingDays: dayjs(buckets[0].startAt).day(),
+      abnormalDays: buckets.filter((bucket) =>
+        ['attention', 'abnormal', 'warning', 'critical'].includes(bucket.status),
+      ).length,
+    }));
+  }, [orderedBuckets]);
+
+  const openDayDetail = useCallback(
+    async (bucket: HealthArchiveBucket) => {
+      if (!deviceId) return;
+      setSelectedDay(bucket);
+      setDayDetail(null);
+      setDayDetailLoading(true);
+      try {
+        const dayStart = dayjs(bucket.startAt).startOf('day');
+        setDayDetail(
+          await getDeviceHealthArchive(deviceId, {
+            startAt: dayStart.toISOString(),
+            endAt: dayStart.add(1, 'day').toISOString(),
+            intervalHours: 1,
+          }),
+        );
+      } catch (error: any) {
+        message.error(error?.data?.detail || error?.message || '当日健康明细加载失败');
+      } finally {
+        setDayDetailLoading(false);
+      }
+    },
+    [deviceId],
+  );
 
   return (
     <PageContainer
@@ -136,14 +199,18 @@ const DeviceHealthArchivePage = () => {
               onChange={(value) => setRangeDays(Number(value))}
             />
           </Space>
-          <Space>
-            <Typography.Text type="secondary">时间粒度</Typography.Text>
-            <Segmented
-              options={INTERVAL_OPTIONS}
-              value={intervalHours}
-              onChange={(value) => setIntervalHours(Number(value))}
-            />
-          </Space>
+          {calendarMode ? (
+            <Typography.Text type="secondary">按自然日汇总，每格代表一天</Typography.Text>
+          ) : (
+            <Space>
+              <Typography.Text type="secondary">时间粒度</Typography.Text>
+              <Segmented
+                options={INTERVAL_OPTIONS}
+                value={intervalHours}
+                onChange={(value) => setIntervalHours(Number(value))}
+              />
+            </Space>
+          )}
         </Space>
       </Card>
 
@@ -197,30 +264,88 @@ const DeviceHealthArchivePage = () => {
               />
             )}
 
-            <Card title={`健康时间轴 · ${data.range.intervalHours} 小时/格`}>
-              {data.buckets.length ? (
+            <Card
+              title={
+                calendarMode
+                  ? `设备健康日历 · ${rangeDays === 365 ? '近1年' : `近${rangeDays}天`}`
+                  : `健康时间轴 · ${data.range.intervalHours} 小时/格`
+              }
+            >
+              {orderedBuckets.length ? (
                 <>
-                  <div className={styles.timelineViewport}>
-                    <div className={styles.timeline}>
-                      {data.buckets.map((bucket) => (
-                        <Tooltip
-                          key={bucket.startAt}
-                          title={bucketTooltip(bucket)}
-                          placement="top"
-                        >
-                          <span
-                            className={`${styles.bucket} ${bucket.hasGap ? styles.gap : ''}`}
-                            style={{ background: STATUS_META[bucket.status].color }}
-                          />
-                        </Tooltip>
+                  {calendarMode ? (
+                    <div className={styles.calendarMonths}>
+                      {calendarMonths.map((month) => (
+                        <section className={styles.calendarMonth} key={month.key}>
+                          <div className={styles.monthHeader}>
+                            <Typography.Text strong>{month.label}</Typography.Text>
+                            <Typography.Text type={month.abnormalDays ? 'danger' : 'secondary'}>
+                              {month.abnormalDays}个异常日
+                            </Typography.Text>
+                          </div>
+                          <div className={styles.weekdayHeader}>
+                            {WEEKDAY_LABELS.map((label) => (
+                              <span key={label}>{label}</span>
+                            ))}
+                          </div>
+                          <div className={styles.monthGrid}>
+                            {Array.from({ length: month.leadingDays }, (_, index) => (
+                              <span className={styles.calendarPlaceholder} key={`empty-${index}`} />
+                            ))}
+                            {month.buckets.map((bucket) => (
+                              <Tooltip
+                                key={bucket.startAt}
+                                title={bucketTooltip(bucket)}
+                                placement="top"
+                              >
+                                <button
+                                  type="button"
+                                  aria-label={`${dayjs(bucket.startAt).format('YYYY-MM-DD')}，${STATUS_META[bucket.status].label}`}
+                                  className={`${styles.calendarDay} ${bucket.hasGap ? styles.gap : ''}`}
+                                  style={{ background: STATUS_META[bucket.status].color }}
+                                  onClick={() => void openDayDetail(bucket)}
+                                />
+                              </Tooltip>
+                            ))}
+                          </div>
+                        </section>
                       ))}
                     </div>
-                    <div className={styles.axis}>
-                      {axisLabels.map((label) => (
-                        <span key={label}>{label}</span>
-                      ))}
+                  ) : (
+                    <div className={styles.timelineViewport}>
+                      <div className={styles.timelineGroups}>
+                        {bucketGroups.map((group, groupIndex) => (
+                          <div className={styles.timelineRow} key={group[0].startAt}>
+                            <div className={styles.rowLabel}>
+                              <span>{dayjs(group[0].startAt).format('MM-DD HH:mm')}</span>
+                              <span className={styles.rowLabelSeparator}>至</span>
+                              <span>{dayjs(group[group.length - 1].endAt).format('MM-DD HH:mm')}</span>
+                            </div>
+                            <div
+                              className={styles.timeline}
+                              style={{
+                                gridTemplateColumns: `repeat(${group.length}, minmax(10px, 40px))`,
+                              }}
+                            >
+                              {group.map((bucket) => (
+                                <Tooltip
+                                  key={bucket.startAt}
+                                  title={bucketTooltip(bucket)}
+                                  placement="top"
+                                >
+                                  <span
+                                    aria-label={`第 ${groupIndex + 1} 组，${STATUS_META[bucket.status].label}`}
+                                    className={`${styles.bucket} ${bucket.hasGap ? styles.gap : ''}`}
+                                    style={{ background: STATUS_META[bucket.status].color }}
+                                  />
+                                </Tooltip>
+                              ))}
+                            </div>
+                          </div>
+                        ))}
+                      </div>
                     </div>
-                  </div>
+                  )}
                   <div className={styles.legend}>
                     {Object.entries(STATUS_META).map(([status, meta]) => (
                       <span className={styles.legendItem} key={status}>
@@ -242,6 +367,67 @@ const DeviceHealthArchivePage = () => {
           !loading && <Empty description="暂无设备健康档案" />
         )}
       </Spin>
+
+      <Drawer
+        rootClassName={styles.archiveDrawer}
+        title={
+          selectedDay
+            ? `${dayjs(selectedDay.startAt).format('YYYY年M月D日')} · 小时明细`
+            : '当日小时明细'
+        }
+        width={720}
+        open={selectedDay !== null}
+        onClose={() => {
+          setSelectedDay(null);
+          setDayDetail(null);
+        }}
+      >
+        <Spin spinning={dayDetailLoading}>
+          {dayDetail ? (
+            <>
+              <Row gutter={[12, 12]}>
+                <Col span={8}>
+                  <Statistic title="完成诊断" value={dayDetail.summary.diagnosedCount} suffix="次" />
+                </Col>
+                <Col span={8}>
+                  <Statistic
+                    title="异常诊断"
+                    value={dayDetail.summary.abnormalCount}
+                    valueStyle={{ color: '#cf1322' }}
+                    suffix="次"
+                  />
+                </Col>
+                <Col span={8}>
+                  <Statistic title="诊断缺口" value={dayDetail.summary.missedCount} suffix="次" />
+                </Col>
+              </Row>
+              <Typography.Title level={5} className={styles.dayDetailTitle}>
+                24小时状态
+                <Typography.Text type="secondary">（每格1小时，数字为完成诊断次数）</Typography.Text>
+              </Typography.Title>
+              <div className={styles.dayDetailTimeline}>
+                {dayDetail.buckets.map((bucket) => (
+                  <div className={styles.dayHour} key={bucket.startAt}>
+                    <span className={styles.dayHourLabel}>
+                      {dayjs(bucket.startAt).format('HH:00')}
+                    </span>
+                    <Tooltip title={bucketTooltip(bucket)}>
+                      <span
+                        className={`${styles.bucket} ${styles.dayHourBucket} ${bucket.hasGap ? styles.gap : ''}`}
+                        style={{ background: STATUS_META[bucket.status].color }}
+                      >
+                        {bucket.diagnosedCount > 0 ? bucket.diagnosedCount : ''}
+                      </span>
+                    </Tooltip>
+                  </div>
+                ))}
+              </div>
+            </>
+          ) : (
+            !dayDetailLoading && <Empty description="该日期没有健康记录" />
+          )}
+        </Spin>
+      </Drawer>
     </PageContainer>
   );
 };

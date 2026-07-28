@@ -36,15 +36,27 @@ export const request: RequestConfig = {
         // Check for unauthorized (code === 401)
         if (body && body.code === 401) {
           clearSession();
-          // Force page reload to login page, preventing any further data processing
-          window.location.href = '/login';
-          // Return a rejected promise so the caller's .catch() is triggered
-          return Promise.reject(new Error(body.message || 'Unauthorized'));
+          const errorMessage = body.message || 'Unauthorized';
+          const isLoginRequest = response.config?.url?.includes('/auth/login');
+          if (!isLoginRequest && window.location.pathname !== '/login') {
+            window.location.href = '/login';
+          }
+          return Promise.reject(Object.assign(new Error(errorMessage), {
+            code: body.code,
+            data: { detail: errorMessage },
+          }));
         }
 
-        // For other error codes, show error message
+        // Reject business errors even though the API transports them with HTTP 200.
         if (body && body.code !== 0 && body.code !== 200 && body.code !== 202 && body.code !== undefined) {
-          message.error(body.message || `Error (code: ${body.code})`);
+          const errorMessage = body.message || `Error (code: ${body.code})`;
+          message.error(errorMessage);
+          const businessError = Object.assign(new Error(errorMessage), {
+            code: body.code,
+            data: { detail: errorMessage },
+            businessErrorShown: true,
+          });
+          return Promise.reject(businessError);
         }
 
         // Add success field so umi doesn't pop up default errors
@@ -61,8 +73,14 @@ export const request: RequestConfig = {
         // If parsing fails, fall back to HTTP status check
         if (response.status === 401) {
           clearSession();
-          window.location.href = '/login';
-          return Promise.reject(new Error('Unauthorized'));
+          const isLoginRequest = response.config?.url?.includes('/auth/login');
+          if (!isLoginRequest && window.location.pathname !== '/login') {
+            window.location.href = '/login';
+          }
+          return Promise.reject(Object.assign(new Error('Unauthorized'), {
+            code: 401,
+            data: { detail: 'Unauthorized' },
+          }));
         }
       }
       return response;
@@ -70,7 +88,8 @@ export const request: RequestConfig = {
   ],
 };
 
-const PUBLIC_PATHS = ['/login', '/register'];
+const PUBLIC_PATHS = ['/login', '/register', '/set-password'];
+const GUEST_ONLY_PATHS = ['/login', '/register'];
 
 function hasSession() {
   return Boolean(getSession());
@@ -102,7 +121,7 @@ export const layout: RunTimeLayoutConfig = () => {
         history.push('/login');
         return;
       }
-      if (loggedIn && PUBLIC_PATHS.includes(pathname)) {
+      if (loggedIn && GUEST_ONLY_PATHS.includes(pathname)) {
         history.push('/dashboard/overview');
       }
     },

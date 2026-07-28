@@ -2,35 +2,42 @@
 Authentication and registration endpoints
 """
 
+import asyncio
+import hashlib
 import re
 import secrets
 import string
 from typing import Optional
+from urllib.parse import urlencode, urlsplit, urlunsplit
+from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException
-from sqlalchemy.ext.asyncio import AsyncSession
-
-from pub.models.customer import Account
-from pub.services import get_session
-from pub.services import AuthService
-from pub.utils.jwt_token import create_access_token
-
-from app.config import settings
-from pub.contract.common import ApiResponse
-from app.utils.auth import get_current_account
-from app.utils.response import success
 from pub.contract.auth import (
-    RegisterRequest,
-    RegisterResponse,
+    ChangePasswordRequest,
     LoginRequest,
     LoginResponse,
-    ChangePasswordRequest,
+    PasswordSetupRequest,
+    RegisterRequest,
+    RegisterResponse,
 )
+from pub.models.customer import Account
+from pub.services import AuthService, get_session
+from pub.utils.jwt_token import (
+    create_access_token,
+    create_password_setup_token,
+    decode_access_token,
+)
+from sqlalchemy.ext.asyncio import AsyncSession
+
+from app.clients.email import EmailDeliveryError, send_registration_email
+from app.config import settings
+from app.utils.auth import get_current_account
+from app.utils.response import success
 
 router = APIRouter(tags=["auth"])
 
 USERNAME_FLAG_EMAIL = 1
-USERNAME_FLAG_MOBILE = 2
+PASSWORD_SETUP_PREFIX = "!setup:"
 
 
 def _company_slug(company_name: str) -> str:
@@ -42,9 +49,15 @@ def _normalize_phone(phone: str) -> str:
     return re.sub(r"\D", "", phone)
 
 
-def _generate_password(length: int = 12) -> str:
-    alphabet = string.ascii_letters + string.digits
-    return "".join(secrets.choice(alphabet) for _ in range(length))
+def _password_setup_marker(nonce: str) -> str:
+    digest = hashlib.sha256(nonce.encode("utf-8")).hexdigest()
+    return f"{PASSWORD_SETUP_PREFIX}{digest}"
+
+
+def _build_password_setup_url(token: str) -> str:
+    portal = urlsplit(settings.portal_login_url)
+    query = urlencode({"token": token})
+    return urlunsplit((portal.scheme, portal.netloc, "/set-password", query, ""))
 
 
 async def _generate_unique_tenant_code(session: AsyncSession) -> str:
@@ -66,14 +79,15 @@ async def register(
     if not normalized_phone:
         raise HTTPException(status_code=400, detail="phone must include numbers")
 
-    username = payload.email or normalized_phone
-    login_channel = "email" if payload.email else "mobile"
-    account_flag = USERNAME_FLAG_EMAIL if payload.email else USERNAME_FLAG_MOBILE
+    username = payload.email
+    login_channel = "email"
+    account_flag = USERNAME_FLAG_EMAIL
 
     tenant_code = await _generate_unique_tenant_code(session)
     tenant_mqtt_server = f"mqtt.{_company_slug(payload.company_name)}.portal.local"
     tenant_api_server = f"api.{_company_slug(payload.company_name)}.portal.local"
-    random_password = _generate_password()
+    setup_nonce = secrets.token_urlsafe(32)
+    password_marker = _password_setup_marker(setup_nonce)
 
     try:
         result = await AuthService.register(
@@ -88,9 +102,28 @@ async def register(
             tenant_code=tenant_code,
             tenant_mqtt_server=tenant_mqtt_server,
             tenant_api_server=tenant_api_server,
-            random_password=random_password,
+            password_value=password_marker,
+        )
+        setup_token = create_password_setup_token(
+            subject=str(result["account_id"]),
+            nonce=setup_nonce,
+            jwt_secret_key=settings.jwt_secret_key,
+            expires_minutes=settings.password_setup_token_expires_minutes,
+        )
+        await asyncio.to_thread(
+            send_registration_email,
+            recipient=payload.email,
+            contact_name=payload.contact_name,
+            company_name=payload.company_name,
+            password_setup_url=_build_password_setup_url(setup_token),
         )
         await AuthService.commit(session)
+    except EmailDeliveryError as exc:
+        await AuthService.rollback(session)
+        raise HTTPException(
+            status_code=503,
+            detail="registration email could not be sent; no account was created",
+        ) from exc
     except Exception:
         await AuthService.rollback(session)
         raise
@@ -101,8 +134,42 @@ async def register(
         account_id=result["account_id"],
         account_username=result["account_username"],
         login_channel=result["login_channel"],
-        generated_password=result["generated_password"],
+        email_sent=True,
     ))
+
+
+@router.post("/auth/set-password")
+async def set_initial_password(
+    payload: PasswordSetupRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    try:
+        token_payload = decode_access_token(payload.token, settings.jwt_secret_key)
+        if token_payload.get("purpose") != "password_setup":
+            raise ValueError("invalid token purpose")
+        account_id = UUID(str(token_payload.get("sub")))
+        nonce = token_payload.get("nonce")
+        if not isinstance(nonce, str) or not nonce:
+            raise ValueError("invalid token nonce")
+    except (TypeError, ValueError) as exc:
+        raise HTTPException(
+            status_code=400,
+            detail="password setup link is invalid or expired",
+        ) from exc
+
+    consumed = await AuthService.consume_password_setup(
+        session,
+        account_id,
+        _password_setup_marker(nonce),
+        payload.new_password,
+    )
+    if not consumed:
+        raise HTTPException(
+            status_code=400,
+            detail="password setup link is invalid, expired, or already used",
+        )
+
+    return success({"message": "password set successfully"})
 
 
 @router.post("/auth/login")

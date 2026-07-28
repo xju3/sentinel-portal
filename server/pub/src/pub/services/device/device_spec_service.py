@@ -24,22 +24,56 @@ from pub.utils.sorting import apply_sorting
 
 class DeviceSpecService:
     @staticmethod
+    async def is_tenant_device_spec(
+        session: AsyncSession,
+        tenant_id: UUID,
+        device_spec_id: UUID,
+    ) -> bool:
+        stmt = (
+            select(DeviceSpec.id)
+            .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+            .where(
+                DeviceSpec.id == device_spec_id,
+                DeviceCategory.tenant_id == tenant_id,
+            )
+            .limit(1)
+        )
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none() is not None
+
+    @staticmethod
     async def get_all(
         session: AsyncSession,
+        tenant_id: UUID,
         skip: int,
         limit: int,
         sort_by: str | None = None,
         sort_order: str = "ascend",
     ) -> List[DeviceSpec]:
-        stmt = select(DeviceSpec)
+        stmt = (
+            select(DeviceSpec)
+            .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+            .where(DeviceCategory.tenant_id == tenant_id)
+        )
         stmt = apply_sorting(stmt, DeviceSpec, sort_by, sort_order or "ascend")
         stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return result.scalars().all()
 
     @staticmethod
-    async def get_by_id(session: AsyncSession, obj_id: UUID) -> Optional[DeviceSpec]:
-        stmt = select(DeviceSpec).where(DeviceSpec.id == obj_id)
+    async def get_by_id(
+        session: AsyncSession,
+        tenant_id: UUID,
+        obj_id: UUID,
+    ) -> Optional[DeviceSpec]:
+        stmt = (
+            select(DeviceSpec)
+            .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
+            .where(
+                DeviceSpec.id == obj_id,
+                DeviceCategory.tenant_id == tenant_id,
+            )
+        )
         result = await session.execute(stmt)
         return result.scalar_one_or_none()
 

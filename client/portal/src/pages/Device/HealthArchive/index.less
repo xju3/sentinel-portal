@@ -4,24 +4,50 @@
   }
 
   .timelineViewport {
-    overflow-x: auto;
     padding: 14px 4px 8px;
   }
 
-  .timeline {
+  .timelineGroups {
     display: flex;
-    min-width: 100%;
-    width: max-content;
-    gap: 3px;
-    align-items: stretch;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .timelineRow {
+    display: grid;
+    grid-template-columns: 170px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+  }
+
+  .rowLabel {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+    color: #595959;
+    font-size: 11px;
+    white-space: nowrap;
+  }
+
+  .rowLabelSeparator {
+    color: #bfbfbf;
+  }
+
+  .timeline {
+    display: grid;
+    width: 100%;
+    align-items: center;
+    justify-content: start;
+    gap: clamp(3px, 0.25vw, 6px);
   }
 
   .bucket {
-    width: 18px;
-    height: 44px;
-    flex: 0 0 18px;
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
     border: 1px solid transparent;
-    border-radius: 3px;
+    border-radius: 4px;
     cursor: default;
     transition: transform 0.15s ease, box-shadow 0.15s ease;
 
@@ -36,13 +62,62 @@
     box-shadow: inset 0 0 0 1px rgb(255 255 255 / 75%);
   }
 
-  .axis {
+  .calendarMonths {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+
+  .calendarMonth {
+    min-width: 0;
+    padding: 14px;
+    border: 1px solid #f0f0f0;
+    border-radius: 8px;
+    background: #fafafa;
+  }
+
+  .monthHeader {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    min-width: 520px;
-    margin-top: 8px;
-    color: #8c8c8c;
+    margin-bottom: 10px;
     font-size: 12px;
+  }
+
+  .weekdayHeader,
+  .monthGrid {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(14px, 1fr));
+    gap: 5px;
+  }
+
+  .weekdayHeader {
+    margin-bottom: 5px;
+    color: #8c8c8c;
+    font-size: 10px;
+    text-align: center;
+  }
+
+  .calendarDay,
+  .calendarPlaceholder {
+    width: 100%;
+    padding: 0;
+    aspect-ratio: 1;
+    border: 1px solid transparent;
+    border-radius: 4px;
+  }
+
+  .calendarDay {
+    cursor: pointer;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover,
+    &:focus-visible {
+      z-index: 1;
+      outline: none;
+      transform: scale(1.12);
+      box-shadow: 0 2px 8px rgb(0 0 0 / 22%);
+    }
   }
 
   .legend {
@@ -64,5 +139,71 @@
     width: 12px;
     height: 12px;
     border-radius: 3px;
+  }
+
+  @media (max-width: 768px) {
+    .timelineRow {
+      grid-template-columns: 1fr;
+      gap: 6px;
+    }
+
+    .rowLabel {
+      justify-content: flex-start;
+    }
+  }
+}
+
+.archiveDrawer {
+  .dayDetailTitle {
+    margin-top: 28px !important;
+    margin-bottom: 12px !important;
+
+    :global(.ant-typography) {
+      margin-left: 8px;
+      font-size: 12px;
+      font-weight: 400;
+    }
+  }
+
+  .dayDetailTimeline {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(32px, 1fr));
+    gap: 10px 8px;
+  }
+
+  .dayHour {
+    display: flex;
+    min-width: 0;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+  }
+
+  .dayHourLabel {
+    color: #8c8c8c;
+    font-size: 10px;
+  }
+
+  .bucket {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1;
+    border: 1px solid transparent;
+    border-radius: 4px;
+  }
+
+  .gap {
+    border-color: #434343;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 75%);
+  }
+
+  .dayHourBucket {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgb(0 0 0 / 35%);
   }
 }

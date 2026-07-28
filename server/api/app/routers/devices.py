@@ -19,6 +19,7 @@ from pub.services import (
     DeviceCategoryService,
     DeviceSpecService,
     DeviceInstService,
+    SupplierService,
     SensorMonitoringService,
     DashboardHealthService,
     DeviceHealthArchiveService,
@@ -87,6 +88,38 @@ async def _require_tenant_device_spec(
         device_spec_id,
     ):
         raise HTTPException(status_code=400, detail="Device spec is not owned by current tenant")
+
+
+async def _validate_device_spec_refs(
+    session: AsyncSession,
+    tenant_id: UUID,
+    data: dict,
+) -> None:
+    device_category_id = data.get("device_category_id")
+    if device_category_id is not None:
+        category = await DeviceCategoryService.get_by_id(
+            session,
+            tenant_id,
+            device_category_id,
+        )
+        if category is None:
+            raise HTTPException(
+                status_code=400,
+                detail="device_category_id is not owned by current tenant",
+            )
+
+    supplier_id = data.get("supplier_id")
+    if supplier_id is not None:
+        supplier = await SupplierService.get_supplier(
+            session,
+            tenant_id,
+            supplier_id,
+        )
+        if supplier is None:
+            raise HTTPException(
+                status_code=400,
+                detail="supplier_id is not owned by current tenant",
+            )
 
 
 async def _validate_sensor_monitoring_refs(
@@ -415,17 +448,30 @@ async def list_device_specs(
     limit: int = Query(10, ge=1, le=100),
     sort_by: Optional[str] = Query(None),
     sort_order: Optional[str] = Query("ascend"),
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    return success(await DeviceSpecService.get_all(session, skip, limit, sort_by, sort_order))
+    tenant_id = cast(UUID, current_account.tenant_id)
+    return success(
+        await DeviceSpecService.get_all(
+            session,
+            tenant_id,
+            skip,
+            limit,
+            sort_by,
+            sort_order,
+        )
+    )
 
 
 @router.get("/device-specs/{obj_id}")
 async def get_device_spec(
     obj_id: UUID,
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    obj = await DeviceSpecService.get_by_id(session, obj_id)
+    tenant_id = cast(UUID, current_account.tenant_id)
+    obj = await DeviceSpecService.get_by_id(session, tenant_id, obj_id)
     if not obj:
         raise HTTPException(status_code=404, detail="DeviceSpec not found")
     return success(obj)
@@ -435,9 +481,13 @@ async def get_device_spec(
 @rebuild_dashboard_cache()
 async def create_device_spec(
     item: DeviceSpecCreate,
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    return success(await DeviceSpecService.create(session, item.model_dump()))
+    tenant_id = cast(UUID, current_account.tenant_id)
+    data = item.model_dump()
+    await _validate_device_spec_refs(session, tenant_id, data)
+    return success(await DeviceSpecService.create(session, data))
 
 
 @router.put("/device-specs/{obj_id}")
@@ -446,13 +496,16 @@ async def create_device_spec(
 async def update_device_spec(
     obj_id: UUID,
     item: DeviceSpecUpdate,
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    db_obj = await DeviceSpecService.get_by_id(session, obj_id)
+    tenant_id = cast(UUID, current_account.tenant_id)
+    db_obj = await DeviceSpecService.get_by_id(session, tenant_id, obj_id)
     if not db_obj:
         raise HTTPException(status_code=404, detail="DeviceSpec not found")
 
     update_data = item.model_dump(exclude_unset=True)
+    await _validate_device_spec_refs(session, tenant_id, update_data)
     return success(await DeviceSpecService.update(session, db_obj, update_data))
 
 
@@ -460,9 +513,11 @@ async def update_device_spec(
 @rebuild_dashboard_cache()
 async def delete_device_spec(
     obj_id: UUID,
+    current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
-    db_obj = await DeviceSpecService.get_by_id(session, obj_id)
+    tenant_id = cast(UUID, current_account.tenant_id)
+    db_obj = await DeviceSpecService.get_by_id(session, tenant_id, obj_id)
     if not db_obj:
         raise HTTPException(status_code=404, detail="DeviceSpec not found")
 
