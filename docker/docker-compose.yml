@@ -11,6 +11,9 @@ x-python-app: &python-app
   extra_hosts:
     - "host.docker.internal:host-gateway"
   working_dir: /app/server
+  options:
+        max-size: "10k"  
+        max-file: "3" 
   env_file:
     - ../.env
   command: >
@@ -27,7 +30,7 @@ services:
       <<: *python-env
       APP_PACKAGE: api
     ports:
-      - "3010:8000"
+      - "3011:8000"
     volumes:
       - ../server:/app/server
       - api_venv:/app/server/.venv
@@ -51,7 +54,7 @@ services:
       <<: *python-env
       APP_PACKAGE: persistence
     ports:
-      - "3011:8000"
+      - "3013:8000"
     volumes:
       - ../server:/app/server
       - persistence_venv:/app/server/.venv
@@ -65,8 +68,11 @@ services:
         APP_NAME: portal
         NPM_REGISTRY: ${NPM_REGISTRY:-https://registry.npmmirror.com}
     restart: unless-stopped
+    options:
+        max-size: "10k"   
+        max-file: "3"
     ports:
-      - "3000:80"
+      - "3021:80"
     depends_on:
       - api
     environment:
@@ -82,9 +88,12 @@ services:
         NPM_REGISTRY: ${NPM_REGISTRY:-https://registry.npmmirror.com}
     restart: unless-stopped
     ports:
-      - "3020:80"
+      - "3022:80"
     depends_on:
       - api
+    options:
+        max-size: "10k"
+        max-file: "3"   
     environment:
       TZ: "Asia/Shanghai"
   minio:
