@@ -35,9 +35,9 @@ from pub.models.customer import Area, Tenant
 logger = logging.getLogger(__name__)
 
 # Redis key prefix for calendar daily cache
-CALENDAR_DAILY_PREFIX = "calendar:daily:"
+CALENDAR_DAILY_PREFIX = "dashboard:calendar:v1:daily:"
 # Redis key for the full calendar cache (past 12 months)
-CALENDAR_FULL_KEY = "calendar:full"
+CALENDAR_FULL_KEY = "dashboard:calendar:v1:full"
 # TTL for cached historical data (7 days)
 CALENDAR_CACHE_TTL = 604800
 
@@ -147,19 +147,20 @@ class DashboardService:
                 Diagnosis.diagnosed_at >= start_dt,
                 Diagnosis.diagnosed_at < end_dt,
                 Diagnosis.overall_level > 0,
+                Diagnosis.resampling == 0,
             )
         )
         result = await session.execute(stmt)
         return result.scalar() or 0
 
     @staticmethod
-    async def _get_cached_daily_count(date_str: str) -> Optional[int]:
+    async def _get_cached_daily_count(tenant_id: UUID, date_str: str) -> Optional[int]:
         """Get cached daily fault count from Redis."""
         client = DashboardService._get_redis_client()
         if not client:
             return None
         try:
-            key = f"{CALENDAR_DAILY_PREFIX}{date_str}"
+            key = f"{CALENDAR_DAILY_PREFIX}{tenant_id}:{date_str}"
             val = await asyncio.to_thread(client.get, key)
             if val is not None:
                 return int(val)
@@ -168,13 +169,15 @@ class DashboardService:
         return None
 
     @staticmethod
-    async def _set_cached_daily_count(date_str: str, count: int) -> None:
+    async def _set_cached_daily_count(
+        tenant_id: UUID, date_str: str, count: int
+    ) -> None:
         """Cache daily fault count to Redis."""
         client = DashboardService._get_redis_client()
         if not client:
             return
         try:
-            key = f"{CALENDAR_DAILY_PREFIX}{date_str}"
+            key = f"{CALENDAR_DAILY_PREFIX}{tenant_id}:{date_str}"
             await asyncio.to_thread(client.setex, key, CALENDAR_CACHE_TTL, count)
         except Exception as e:
             logger.debug(f"Failed to cache daily count for {date_str}: {e}")
@@ -213,7 +216,7 @@ class DashboardService:
 
         # Try to get full calendar data from Redis cache (excluding today)
         cached_data = await DashboardService._get_cached_full_calendar(
-            start_date, today
+            tenant_id, start_date, today
         )
 
         if cached_data:
@@ -255,6 +258,7 @@ class DashboardService:
                 Diagnosis.diagnosed_at >= start_dt,
                 Diagnosis.diagnosed_at < end_dt,
                 Diagnosis.overall_level > 0,
+                Diagnosis.resampling == 0,
             )
             .group_by(func.date(Diagnosis.diagnosed_at))
         )
@@ -315,25 +319,34 @@ class DashboardService:
         }
 
         # Cache the full result (excluding today's data which is always fresh)
-        await DashboardService._set_cached_full_calendar(result_data, today)
+        await DashboardService._set_cached_full_calendar(
+            tenant_id, result_data, today
+        )
 
         return result_data
 
     @staticmethod
-    def _get_cached_full_calendar_key(start_date: date, today: date) -> str:
+    def _get_cached_full_calendar_key(
+        tenant_id: UUID, start_date: date, today: date
+    ) -> str:
         """Generate cache key for full calendar data."""
-        return f"{CALENDAR_FULL_KEY}:{start_date.isoformat()}:{today.isoformat()}"
+        return (
+            f"{CALENDAR_FULL_KEY}:{tenant_id}:"
+            f"{start_date.isoformat()}:{today.isoformat()}"
+        )
 
     @staticmethod
     async def _get_cached_full_calendar(
-        start_date: date, today: date
+        tenant_id: UUID, start_date: date, today: date
     ) -> Optional[dict]:
         """Get full calendar data from Redis cache (excluding today)."""
         client = DashboardService._get_redis_client()
         if not client:
             return None
         try:
-            key = DashboardService._get_cached_full_calendar_key(start_date, today)
+            key = DashboardService._get_cached_full_calendar_key(
+                tenant_id, start_date, today
+            )
             val = await asyncio.to_thread(client.get, key)
             if val is not None:
                 return json.loads(val)
@@ -342,15 +355,19 @@ class DashboardService:
         return None
 
     @staticmethod
-    async def _set_cached_full_calendar(data: dict, today: date) -> None:
+    async def _set_cached_full_calendar(
+        tenant_id: UUID, data: dict, today: date
+    ) -> None:
         """Cache full calendar data to Redis (with today's count set to 0 for caching)."""
         client = DashboardService._get_redis_client()
         if not client:
             return
         try:
-            # Set today's count to 0 for caching (will be queried fresh each time)
+            cached_data = copy.deepcopy(data)
+            # Set today's count to 0 only in the cached copy. The first response
+            # must keep the real count returned by the database query.
             today_str = today.isoformat()
-            for month in data["months"]:
+            for month in cached_data["months"]:
                 for day in month["days"]:
                     if day["date"] == today_str:
                         day["count"] = 0
@@ -358,10 +375,15 @@ class DashboardService:
                         break
 
             key = DashboardService._get_cached_full_calendar_key(
-                date.fromisoformat(data["months"][0]["days"][0]["date"]), today
+                tenant_id,
+                date.fromisoformat(cached_data["months"][0]["days"][0]["date"]),
+                today,
             )
             await asyncio.to_thread(
-                client.setex, key, CALENDAR_CACHE_TTL, json.dumps(data)
+                client.setex,
+                key,
+                CALENDAR_CACHE_TTL,
+                json.dumps(cached_data),
             )
         except Exception as e:
             logger.debug(f"Failed to cache full calendar: {e}")

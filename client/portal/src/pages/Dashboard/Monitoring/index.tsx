@@ -51,7 +51,7 @@ type DiagnosisEvidence = {
 };
 
 type DiagnosisDetail = {
-  metricId: number;    // 0=温度, 1=振动X, 2=振动Y, 3=振动Z
+  metricId: number;    // 2=温度, 1=振动(综合), 10=振动X, 11=振动Y, 12=振动Z
   metricLabel: string;
   level: string;
   levelScore: number;
@@ -117,7 +117,7 @@ const TRENDING_CONFIG = {
 };
 
 // Is this metric temperature or vibration?
-const isTemperature = (metricId: number) => metricId === 0;
+const isTemperature = (metricId: number) => metricId === 2;
 
 const RATIO_THRESHOLDS = [
   { max: 0.10, label: '正常',  color: '#52c41a' },
@@ -192,10 +192,10 @@ const DetailDrawer = ({ dev, open, onClose }: {
     >
       {/* Device profile */}
       <Descriptions size="small" column={2} style={{ marginBottom: 20 }}>
-        <Descriptions.Item label="设备编号">{dev.deviceCode}</Descriptions.Item>
-        <Descriptions.Item label="设备分类">{dev.category}</Descriptions.Item>
-        <Descriptions.Item label="所属区域">{dev.area}</Descriptions.Item>
-        <Descriptions.Item label="持续时长">{formatDuration(dev.durationHours)}</Descriptions.Item>
+        <Descriptions.Item label="编号">{dev.deviceCode}</Descriptions.Item>
+        <Descriptions.Item label="分类">{dev.category}</Descriptions.Item>
+        <Descriptions.Item label="区域">{dev.area}</Descriptions.Item>
+        <Descriptions.Item label="持续">{formatDuration(dev.durationHours)}</Descriptions.Item>
         <Descriptions.Item label="趋势">
           <span style={{ color: trendCfg.color }}>
             {trendCfg.icon} {trendCfg.label}

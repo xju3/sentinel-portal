@@ -1,24 +1,63 @@
 import asyncio
 import json
+import time
 import uuid
 
-from pub.manager.database import minio_manager, redis_manager, influxdb_manager
+import redis as redis_lib
+from sqlalchemy import select
+
+from pub.manager.database import db_manager, minio_manager, redis_manager, influxdb_manager
 import logging
 from pub.utils.redis_keys import (
+    REDIS_KEY_PERSISTENCE_PROCESSED_REPORT,
+    REDIS_KEY_PERSISTENCE_PROCESSING_REPORT,
     REDIS_STREAM_PERSISTENCE_INGEST,
     REDIS_STREAM_PERSISTENCE_GROUP,
     REDIS_STREAM_DIAGNOSIS_TRIGGER,
 )
 from pub.services.diagnosis.diagnosis_context_service import DiagnosisContextService
 from pub.services.diagnosis.diagnosis_record_service import DiagnosisRecordService
+from pub.models.diagnosis import DiagnosisRecord
 from pub.models.report import DeviceDiagnosticReport
 
 from app.config import settings
 
 logger = logging.getLogger("persistence-stream")
 _workers = []
+_PROCESSING_LOCK_TTL_SECONDS = 300
+_PROCESSED_TTL_SECONDS = 30 * 24 * 3600
+_PENDING_MIN_IDLE_MS = 60_000
+_PENDING_SCAN_INTERVAL_SECONDS = 30
+
+
+async def _diagnosis_record_exists(report_id: str) -> bool:
+    async with db_manager.SessionLocal() as session:
+        statement = select(DiagnosisRecord.id).where(
+            DiagnosisRecord.id == uuid.UUID(report_id)
+        )
+        return (await session.execute(statement)).scalar_one_or_none() is not None
+
+
+def _create_worker_redis() -> redis_lib.Redis:
+    """为 stream worker 创建独立 Redis 连接。
+
+    xreadgroup 的 block 参数会长期占用 socket，必须与全局业务连接（redis_manager）隔离。
+    socket_timeout 设置为 block_ms + 3000ms，确保不会因超时误断阻塞等待。
+    """
+    socket_timeout = (settings.stream_block_ms / 1000) + 3.0
+    return redis_lib.from_url(
+        settings.redis_url,
+        decode_responses=True,
+        socket_timeout=socket_timeout,
+        socket_connect_timeout=3.0,
+        retry_on_timeout=True,
+        health_check_interval=30,
+    )
 
 async def _process_stream_message(bucket: str, path: str) -> bool:
+    redis_client = redis_manager.get_client()
+    processing_lock_key = None
+    lock_acquired = False
     try:
         # 1. Fetch JSON from MinIO
         from pub.clients.minio import download_json_from_minio_sync
@@ -32,6 +71,29 @@ async def _process_stream_message(bucket: str, path: str) -> bool:
             logger.error(f"Failed to fetch {path} from MinIO")
             return False
         report = DeviceDiagnosticReport(**payload)
+
+        processed_key = REDIS_KEY_PERSISTENCE_PROCESSED_REPORT.format(
+            report_id=report.report_id
+        )
+        if await asyncio.to_thread(redis_client.exists, processed_key):
+            logger.info("Skipping already persisted report_id=%s", report.report_id)
+            return True
+
+        processing_lock_key = REDIS_KEY_PERSISTENCE_PROCESSING_REPORT.format(
+            report_id=report.report_id
+        )
+        lock_acquired = bool(
+            await asyncio.to_thread(
+                redis_client.set,
+                processing_lock_key,
+                "1",
+                nx=True,
+                ex=_PROCESSING_LOCK_TTL_SECONDS,
+            )
+        )
+        if not lock_acquired:
+            logger.info("Report is already being persisted: report_id=%s", report.report_id)
+            return False
         
         sn = payload.get("sensor_sn") or payload.get("sn")
         ts_ms = payload.get("ts_ms")
@@ -47,7 +109,15 @@ async def _process_stream_message(bucket: str, path: str) -> bool:
                 context=context,
             )
             if not record:
-                logger.warning(f"Failed to create DiagnosisRecord for {path}")
+                # A retry after MySQL commit is safe: the report UUID already
+                # exists. A genuine write failure must not be acknowledged.
+                if not await _diagnosis_record_exists(str(report.report_id)):
+                    logger.error("Failed to persist DiagnosisRecord for %s", path)
+                    return False
+                logger.info(
+                    "DiagnosisRecord already exists for report_id=%s",
+                    report.report_id,
+                )
         else:
             logger.warning(f"No context found for SN {sn}, skipping MySQL insert.")
 
@@ -109,12 +179,11 @@ async def _process_stream_message(bucket: str, path: str) -> bool:
             if rms_m is not None:
                 metrics["rms_acc_g"] = rms_m
             if report.temperature_c is not None:
-                metrics["temperature"] = float(report.temperature_c)
+                metrics["temperature_c"] = float(report.temperature_c)
             await TrendCacheService.push_metrics(report.location_id, report.ts_ms, metrics)
 
         # 5. Trigger Diagnosis
         # Publish downstream to diagnosis module via lightweight payload
-        redis_client = redis_manager.get_client()
         trigger_payload = {
             "report_id": str(report.report_id),
             "schema_version": str(report.schema_version) if report.schema_version else "1.0",
@@ -140,15 +209,45 @@ async def _process_stream_message(bucket: str, path: str) -> bool:
             maxlen=settings.stream_maxlen,
             approximate=True,
         )
+        await asyncio.to_thread(
+            redis_client.set,
+            processed_key,
+            "1",
+            ex=_PROCESSED_TTL_SECONDS,
+        )
         
         logger.debug(f"Persisted {path} and triggered diagnosis stream.")
         return True
     except Exception as e:
         logger.error(f"Error processing message {path}: {e}", exc_info=True)
         return False
+    finally:
+        if lock_acquired and processing_lock_key:
+            try:
+                await asyncio.to_thread(redis_client.delete, processing_lock_key)
+            except Exception:
+                logger.warning(
+                    "Failed to release persistence lock for %s",
+                    processing_lock_key,
+                    exc_info=True,
+                )
+
+
+async def _claim_stale_messages(redis_client, group: str, consumer: str):
+    """Claim server-accepted messages left pending by a failed or dead worker."""
+    result = await asyncio.to_thread(
+        redis_client.xautoclaim,
+        REDIS_STREAM_PERSISTENCE_INGEST,
+        group,
+        consumer,
+        _PENDING_MIN_IDLE_MS,
+        "0-0",
+        count=settings.stream_worker_batch_size,
+    )
+    return result[1] if result and len(result) > 1 else []
 
 async def _worker_loop(worker_id: int):
-    redis_client = redis_manager.get_client()
+    redis_client = _create_worker_redis()  # 独立连接，不复用全局 redis_manager
     stream = REDIS_STREAM_PERSISTENCE_INGEST
     group = REDIS_STREAM_PERSISTENCE_GROUP
     consumer = f"worker-{worker_id}-{uuid.uuid4().hex[:8]}"
@@ -161,21 +260,29 @@ async def _worker_loop(worker_id: int):
             logger.error(f"Failed to create consumer group: {e}")
             
     logger.info(f"Persistence Stream Worker {consumer} started.")
-    
+    last_pending_scan = 0.0
+
     while True:
         try:
-            messages = await asyncio.to_thread(
-                redis_client.xreadgroup,
-                group,
-                consumer,
-                {stream: '>'},
-                count=settings.stream_worker_batch_size,
-                block=settings.stream_block_ms
-            )
-            
+            messages = []
+            now = time.monotonic()
+            if now - last_pending_scan >= _PENDING_SCAN_INTERVAL_SECONDS:
+                stale_messages = await _claim_stale_messages(redis_client, group, consumer)
+                messages = [(stream, stale_messages)] if stale_messages else []
+                last_pending_scan = now
+
             if not messages:
-                continue
-                
+                messages = await asyncio.to_thread(
+                    redis_client.xreadgroup,
+                    group,
+                    consumer,
+                    {stream: '>'},
+                    count=settings.stream_worker_batch_size,
+                    block=settings.stream_block_ms
+                )
+                if not messages:
+                    continue
+
             for stream_name, msg_list in messages:
                 for message_id, msg_data in msg_list:
                     bucket = msg_data.get("bucket")

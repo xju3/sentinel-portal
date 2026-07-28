@@ -1,7 +1,22 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { history } from '@umijs/max';
-import { PageContainer, ProCard, StatisticCard } from '@ant-design/pro-components';
-import { Button, Col, Empty, Row, Space, Table, Tag, Tooltip, Typography, message } from 'antd';
+import { PageContainer, ProCard } from '@ant-design/pro-components';
+import {
+  Button,
+  Col,
+  Descriptions,
+  Divider,
+  Drawer,
+  Empty,
+  Progress,
+  Row,
+  Space,
+  Table,
+  Tag,
+  Tooltip,
+  Typography,
+  message,
+} from 'antd';
 import {
   ArrowDownOutlined,
   ArrowUpOutlined,
@@ -14,11 +29,12 @@ import {
   WarningFilled,
   FireFilled,
   DashboardOutlined,
+  ClockCircleOutlined,
 } from '@ant-design/icons';
 import { request } from '@umijs/max';
 import type { ColumnsType } from 'antd/es/table';
+import CalendarHeatmap from '../components/CalendarHeatmap';
 
-const { Statistic } = StatisticCard;
 const { Text } = Typography;
 
 // ── Types ──────────────────────────────────────────────
@@ -30,6 +46,10 @@ type HealthSummary = {
   abnormal: number;
   warning: number;
   severe: number;
+  monitored: number;
+  diagnosed: number;
+  online: number;
+  uninspected: number;
   offline: number;
   unconfigured: number;
 };
@@ -37,8 +57,33 @@ type HealthSummary = {
 type DistributionItem = {
   name: string;
   attention: number;
+  abnormal: number;
   warning: number;
   severe: number;
+};
+
+type DiagnosisEvidence = {
+  ratio?: number | null;
+  current?: number | null;
+  healthyMedian?: number | null;
+  peerMedian?: number | null;
+  stSlope?: number | null;
+  mtSlope?: number | null;
+  mutation?: number | null;
+  confirmationStatus?: string | null;
+};
+
+type DiagnosisDetail = {
+  metricId: number;
+  metricLabel: string;
+  level: string;
+  levelScore: number;
+  description?: string | null;
+  diagnosedAt?: string | null;
+  occurrenceCount: number;
+  firstDetectedAt?: string | null;
+  lastDetectedAt?: string | null;
+  evidence: DiagnosisEvidence;
 };
 
 type FaultDevice = {
@@ -52,16 +97,34 @@ type FaultDevice = {
   metrics: string[];
   durationHours: number | null;
   trending: 'worsening' | 'stable' | 'improving';
+  issueState: 'new' | 'repeated' | 'worsening' | 'improving';
+  occurrenceCount: number;
+  firstDetectedAt?: string | null;
+  lastDetectedAt?: string | null;
+  diagnosisDetails: DiagnosisDetail[];
 };
 
 type HealthDashboardData = {
   healthSummary: HealthSummary;
+  issueSummary: {
+    new: number;
+    repeated: number;
+    worsening: number;
+    improving: number;
+    pendingConfirmation: number;
+  };
   problemDistribution: {
     byCategory: DistributionItem[];
     byArea: DistributionItem[];
     byMetric?: DistributionItem[];
   };
   faultDevices: FaultDevice[];
+  snapshot?: {
+    generatedAt: string;
+    stale: boolean;
+    refreshing: boolean;
+    source: string;
+  };
 };
 
 // ── Constants ──────────────────────────────────────────
@@ -88,14 +151,28 @@ const trendLabel: Record<string, string> = {
 
 // ── Helpers ────────────────────────────────────────────
 
-const formatDuration = (hours: number | null) => {
-  if (hours === null || hours === undefined) return '-';
-  if (hours < 1) return `${Math.round(hours * 60)}分钟`;
-  if (hours < 24) return `${Math.round(hours)}小时`;
-  const days = Math.floor(hours / 24);
-  const remainHours = Math.round(hours % 24);
-  if (remainHours === 0) return `${days}天`;
-  return `${days}天${remainHours}小时`;
+const issueStateLabel: Record<FaultDevice['issueState'], string> = {
+  new: '首次检出',
+  repeated: '重复检出',
+  worsening: '趋势恶化',
+  improving: '趋势好转',
+};
+
+const issueStateColor: Record<FaultDevice['issueState'], string> = {
+  new: 'blue',
+  repeated: 'gold',
+  worsening: 'red',
+  improving: 'green',
+};
+
+const formatDateTime = (value?: string | null) => {
+  if (!value) return '-';
+  return new Date(value).toLocaleString('zh-CN', {
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  });
 };
 
 // ── DistributionTags component ────────────────────────
@@ -130,7 +207,7 @@ const DistributionTags = ({
             bgColor = '#fff1f0';
             borderColor = '#ffa39e';
             textColor = '#cf1322';
-          } else if (item.warning > 0) {
+          } else if (item.warning > 0 || item.abnormal > 0) {
             bgColor = '#fff7e6';
             borderColor = '#ffd591';
             textColor = '#d46b08';
@@ -166,6 +243,11 @@ const DistributionTags = ({
                     <Tooltip title="警告">{item.warning}</Tooltip>
                   </div>
                 )}
+                {item.abnormal > 0 && (
+                  <div style={{ padding: '4px 8px', background: '#fff', color: '#fa541c', fontWeight: 600 }}>
+                    <Tooltip title="异常">{item.abnormal}</Tooltip>
+                  </div>
+                )}
                 {item.attention > 0 && (
                   <div style={{ padding: '4px 8px', background: '#fff', color: '#faad14', fontWeight: 600 }}>
                     <Tooltip title="关注">{item.attention}</Tooltip>
@@ -180,7 +262,138 @@ const DistributionTags = ({
   );
 };
 
-import CalendarHeatmap from '../components/CalendarHeatmap';
+const DiagnosisPreviewDrawer = ({
+  device,
+  open,
+  onClose,
+}: {
+  device: FaultDevice | null;
+  open: boolean;
+  onClose: () => void;
+}) => {
+  if (!device) return null;
+
+  return (
+    <Drawer
+      title={
+        <Space>
+          <span>{device.deviceName}</span>
+          <Tag color={levelColor[device.level]}>{device.level === '严重' ? '危险' : device.level}</Tag>
+        </Space>
+      }
+      width={560}
+      open={open}
+      onClose={onClose}
+      destroyOnClose
+      extra={
+        <Button
+          type="link"
+          onClick={() => history.push(`/dashboard/monitoring?level=${device.level === '严重' ? 'severe' : device.level === '警告' ? 'warning' : device.level === '异常' ? 'abnormal' : 'attention'}`)}
+        >
+          查看全部同等级设备
+        </Button>
+      }
+    >
+      <Descriptions size="small" column={2}>
+        <Descriptions.Item label="设备编号">{device.deviceCode || '-'}</Descriptions.Item>
+        <Descriptions.Item label="设备类型">{device.category}</Descriptions.Item>
+        <Descriptions.Item label="所属工艺段">{device.area}</Descriptions.Item>
+        <Descriptions.Item label="问题状态">
+          <Tag color={issueStateColor[device.issueState]}>
+            {issueStateLabel[device.issueState]}
+          </Tag>
+        </Descriptions.Item>
+        <Descriptions.Item label="首次检出">{formatDateTime(device.firstDetectedAt)}</Descriptions.Item>
+        <Descriptions.Item label="最近检出">{formatDateTime(device.lastDetectedAt)}</Descriptions.Item>
+        <Descriptions.Item label="累计检出">
+          {device.occurrenceCount > 0 ? `${device.occurrenceCount} 次` : '待最终确认'}
+        </Descriptions.Item>
+        <Descriptions.Item label="等级趋势">
+          <Space size={4}>
+            {trendIcon[device.trending]}
+            {trendLabel[device.trending]}
+          </Space>
+        </Descriptions.Item>
+      </Descriptions>
+
+      <Divider orientation="left">当前诊断依据</Divider>
+
+      {device.diagnosisDetails.length === 0 ? (
+        <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} description="诊断明细正在确认中" />
+      ) : (
+        device.diagnosisDetails.map(detail => {
+          const ratio = detail.evidence.ratio;
+          const isTemperature = detail.metricLabel.includes('温度');
+          return (
+            <div
+              key={`${detail.metricId}-${detail.diagnosedAt || ''}`}
+              style={{
+                border: '1px solid #f0f0f0',
+                borderLeft: `3px solid ${levelColor[detail.level] || '#8c8c8c'}`,
+                borderRadius: 8,
+                padding: 16,
+                marginBottom: 12,
+                background: '#fafafa',
+              }}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+                <Space>
+                  <Text strong>{detail.metricLabel}</Text>
+                  <Tag color={levelColor[detail.level]}>{detail.level === '严重' ? '危险' : detail.level}</Tag>
+                </Space>
+                <Text type="secondary" style={{ fontSize: 12 }}>
+                  <ClockCircleOutlined /> {formatDateTime(detail.diagnosedAt)}
+                </Text>
+              </div>
+
+              {detail.description && (
+                <div style={{ color: '#595959', lineHeight: 1.7, marginBottom: 10 }}>
+                  {detail.description}
+                </div>
+              )}
+
+              {ratio != null && (
+                <div style={{ marginBottom: 10 }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: 12 }}>
+                    <span>动态负荷占比</span>
+                    <strong>{(ratio * 100).toFixed(1)}%</strong>
+                  </div>
+                  <Progress
+                    percent={Math.min(100, Math.round(ratio * 100))}
+                    showInfo={false}
+                    size="small"
+                    strokeColor={levelColor[detail.level]}
+                  />
+                </div>
+              )}
+
+              <Descriptions size="small" column={2}>
+                {detail.evidence.current != null && (
+                  <Descriptions.Item label="当前值">
+                    {Number(detail.evidence.current).toFixed(3)} {isTemperature ? '°C' : 'mm/s'}
+                  </Descriptions.Item>
+                )}
+                {detail.evidence.healthyMedian != null && (
+                  <Descriptions.Item label="健康基准">
+                    {Number(detail.evidence.healthyMedian).toFixed(3)} {isTemperature ? '°C' : 'mm/s'}
+                  </Descriptions.Item>
+                )}
+                <Descriptions.Item label="历史检出">
+                  {detail.occurrenceCount > 0 ? `${detail.occurrenceCount} 次` : '待最终确认'}
+                </Descriptions.Item>
+                <Descriptions.Item label="确认状态">
+                  {detail.evidence.confirmationStatus && detail.evidence.confirmationStatus !== 'confirmed'
+                    ? <Tag color="processing">复采确认中</Tag>
+                    : <Tag color="success">当前结论</Tag>}
+                </Descriptions.Item>
+              </Descriptions>
+            </div>
+          );
+        })
+      )}
+    </Drawer>
+  );
+};
 
 const emptyData: HealthDashboardData = {
   healthSummary: {
@@ -190,8 +403,19 @@ const emptyData: HealthDashboardData = {
     abnormal: 0,
     warning: 0,
     severe: 0,
+    monitored: 0,
+    diagnosed: 0,
+    online: 0,
+    uninspected: 0,
     offline: 0,
     unconfigured: 0,
+  },
+  issueSummary: {
+    new: 0,
+    repeated: 0,
+    worsening: 0,
+    improving: 0,
+    pendingConfirmation: 0,
   },
   problemDistribution: { byCategory: [], byArea: [], byMetric: [] },
   faultDevices: [],
@@ -202,16 +426,33 @@ const HealthDashboard = () => {
   const [data, setData] = useState<HealthDashboardData>(emptyData);
   const [calendarData, setCalendarData] = useState<any>();
   const [calendarLoading, setCalendarLoading] = useState(true);
+  const [previewDevice, setPreviewDevice] = useState<FaultDevice | null>(null);
+  const refreshRetryRef = useRef(0);
+  const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
-  const fetchData = async () => {
-    setLoading(true);
+  const fetchData = async ({
+    force = false,
+    silent = false,
+  }: { force?: boolean; silent?: boolean } = {}) => {
+    if (!silent) setLoading(true);
     try {
-      const res = await request<HealthDashboardData>('/api/v1/dashboard/health');
+      const res = await request<HealthDashboardData>(
+        `/api/v1/dashboard/health${force ? '?refresh=true' : ''}`,
+      );
       setData(res || emptyData);
+      if (res?.snapshot?.refreshing && refreshRetryRef.current < 2) {
+        refreshRetryRef.current += 1;
+        clearTimeout(refreshTimerRef.current);
+        refreshTimerRef.current = setTimeout(() => {
+          fetchData({ silent: true });
+        }, 1500);
+      } else if (!res?.snapshot?.stale) {
+        refreshRetryRef.current = 0;
+      }
     } catch {
-      message.error('获取健康总览数据失败');
+      if (!silent) message.error('获取健康总览数据失败');
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -232,6 +473,7 @@ const HealthDashboard = () => {
   useEffect(() => {
     fetchData();
     fetchCalendarData();
+    return () => clearTimeout(refreshTimerRef.current);
   }, []);
 
   // Auto-refresh every 10 minutes
@@ -240,7 +482,7 @@ const HealthDashboard = () => {
     const schedule = () => {
       const jitter = Math.floor(Math.random() * 60000);
       timer = setTimeout(() => {
-        if (!document.hidden) fetchData();
+        if (!document.hidden) fetchData({ silent: true });
         schedule();
       }, 600000 + jitter);
     };
@@ -249,8 +491,6 @@ const HealthDashboard = () => {
   }, []);
 
   const { healthSummary: summary } = data;
-  const faultCount = summary.attention + summary.abnormal + summary.warning + summary.severe;
-
   const faultColumns: ColumnsType<FaultDevice> = [
     {
       title: '等级',
@@ -259,16 +499,16 @@ const HealthDashboard = () => {
       render: level => <Tag color={levelColor[level]}>{level === '严重' ? '危险' : level}</Tag>,
     },
     {
-      title: '趋势',
-      dataIndex: 'trending',
-      width: 80,
-      render: (trending: string) => (
-        <Tooltip title={trendLabel[trending]}>
-          <Space size={4}>
-            {trendIcon[trending]}
-            <span style={{ fontSize: 12 }}>{trendLabel[trending]}</span>
-          </Space>
-        </Tooltip>
+      title: '问题状态',
+      dataIndex: 'issueState',
+      width: 100,
+      render: (issueState: FaultDevice['issueState'], record) => (
+        <Space direction="vertical" size={2}>
+          <Tag color={issueStateColor[issueState]}>{issueStateLabel[issueState]}</Tag>
+          <Text type="secondary" style={{ fontSize: 11 }}>
+            {trendIcon[record.trending]} {trendLabel[record.trending]}
+          </Text>
+        </Space>
       ),
     },
     {
@@ -283,17 +523,17 @@ const HealthDashboard = () => {
       ),
     },
     {
-      title: '分类',
+      title: '设备类型',
       dataIndex: 'category',
       width: 120,
     },
     {
-      title: '车间',
+      title: '工艺段',
       dataIndex: 'area',
       width: 120,
     },
     {
-      title: '异常指标',
+      title: '当前问题',
       dataIndex: 'metrics',
       render: (metrics: string[]) =>
         metrics.length > 0
@@ -305,50 +545,66 @@ const HealthDashboard = () => {
           : <Text type="secondary">-</Text>,
     },
     {
-      title: '持续时间',
-      dataIndex: 'durationHours',
-      width: 120,
-      render: (hours: number | null) => {
-        const text = formatDuration(hours);
-        if (hours !== null && hours >= 168) {
-          return <Text type="danger" strong>{text}</Text>;
-        }
-        if (hours !== null && hours >= 24) {
-          return <Text style={{ color: '#fa8c16' }}>{text}</Text>;
-        }
-        return <Text>{text}</Text>;
-      },
+      title: '检出情况',
+      dataIndex: 'occurrenceCount',
+      width: 150,
+      render: (_, record) => (
+        <Space direction="vertical" size={0}>
+          <Text strong>
+            {record.occurrenceCount > 0 ? `累计 ${record.occurrenceCount} 次` : '待最终确认'}
+          </Text>
+          <Text type="secondary" style={{ fontSize: 11 }}>
+            最近 {formatDateTime(record.lastDetectedAt)}
+          </Text>
+        </Space>
+      ),
     },
   ];
 
   const healthMetrics = [
     { 
-      key: 'severe', title: '危险', value: summary.severe, color: '#ffffff', bg: 'linear-gradient(135deg, #cb2d3e 0%, #ef473a 100%)', icon: <FireFilled />,
+      key: 'severe', title: '危险', value: summary.severe, bg: 'linear-gradient(135deg, #cb2d3e 0%, #ef473a 100%)', icon: <FireFilled />, clickable: true,
       desc: '诊断算法评估：指标动态负荷占比突破 70% 甚至触及绝对红线，或发生秒级瞬态突变，随时可能引发停机事故。'
     },
     { 
-      key: 'warning', title: '警告', value: summary.warning, color: '#ffffff', bg: 'linear-gradient(135deg, #ec008c 0%, #fc6767 100%)', icon: <WarningFilled />,
+      key: 'warning', title: '警告', value: summary.warning, bg: 'linear-gradient(135deg, #ec008c 0%, #fc6767 100%)', icon: <WarningFilled />, clickable: true,
       desc: '诊断算法评估：指标动态负荷占比达 40%~70%，趋势劣化或横向偏离被高倍率放大，处于带病运行状态。'
     },
     { 
-      key: 'abnormal', title: '异常', value: summary.abnormal, color: '#ffffff', bg: 'linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%)', icon: <ExclamationCircleFilled />,
+      key: 'abnormal', title: '异常', value: summary.abnormal, bg: 'linear-gradient(135deg, #ff7e5f 0%, #feb47b 100%)', icon: <ExclamationCircleFilled />, clickable: true,
       desc: '诊断算法评估：指标动态负荷占比达 20%~40%，或设备出现 24/72 小时历史趋势恶化、同规格对等组横向偏离。'
     },
     { 
-      key: 'attention', title: '关注', value: summary.attention, color: '#ffffff', bg: 'linear-gradient(135deg, #f2c94c 0%, #f2994a 100%)', icon: <InfoCircleFilled />,
+      key: 'attention', title: '关注', value: summary.attention, bg: 'linear-gradient(135deg, #f2c94c 0%, #f2994a 100%)', icon: <InfoCircleFilled />, clickable: true,
       desc: '诊断算法评估：指标动态负荷占比达 10%~20%，存在轻微波动，作为后续趋势劣化的敏感度基点。'
     },
     { 
-      key: 'normal', title: '正常', value: summary.normal, color: '#ffffff', bg: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)', icon: <CheckCircleFilled />,
+      key: 'normal', title: '正常', value: summary.normal, bg: 'linear-gradient(135deg, #11998e 0%, #38ef7d 100%)', icon: <CheckCircleFilled />, clickable: false,
       desc: '诊断算法评估：指标动态负荷占比 < 10%，且未触发任何长短期劣化趋势或横向同组偏离，运行平稳。'
+    },
+    {
+      key: 'uninspected', title: '漏检', value: summary.uninspected, bg: 'linear-gradient(135deg, #8c8c8c 0%, #bfbfbf 100%)', icon: <InfoCircleOutlined />, clickable: false,
+      desc: '设备已接入监测，但还没有可用的最新诊断结论。该状态不会计入正常设备。'
     },
   ];
 
   return (
     <PageContainer
-      title="健康总览"
+      title="设备健康总览"
+      subTitle={
+        data.snapshot?.generatedAt
+          ? `数据生成于 ${new Date(data.snapshot.generatedAt).toLocaleString('zh-CN')}${data.snapshot.refreshing ? '，正在后台更新' : ''}`
+          : '当前设备健康状态与异常定位'
+      }
       extra={
-        <Button icon={<ReloadOutlined />} onClick={fetchData} loading={loading}>
+        <Button
+          icon={<ReloadOutlined />}
+          onClick={() => {
+            refreshRetryRef.current = 0;
+            fetchData({ force: true });
+          }}
+          loading={loading}
+        >
           刷新
         </Button>
       }
@@ -361,6 +617,21 @@ const HealthDashboard = () => {
         .health-card:hover {
           transform: translateY(-4px);
           box-shadow: 0 10px 20px rgba(0,0,0,0.08) !important;
+        }
+        .health-grid {
+          display: grid;
+          grid-template-columns: repeat(6, minmax(0, 1fr));
+          gap: 16px;
+        }
+        @media (max-width: 900px) {
+          .health-grid {
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+          }
+        }
+        @media (max-width: 600px) {
+          .health-grid {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
         }
       `}</style>
       {/* ── Section 1: Health summary ── */}
@@ -376,7 +647,7 @@ const HealthDashboard = () => {
         headerBordered
         style={{ background: '#fafafa', marginBottom: 24 }}
       >
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '16px' }}>
+        <div className="health-grid">
           {healthMetrics.map(item => {
             const isZero = item.value === undefined || item.value === null || item.value === 0;
             const cardBg = isZero ? '#f5f5f5' : item.bg;
@@ -393,7 +664,7 @@ const HealthDashboard = () => {
                 key={item.key}
                 className="health-card"
                 onClick={() => {
-                  if (!isZero && item.key !== 'normal') {
+                  if (!isZero && item.clickable) {
                     history.push(`/dashboard/monitoring?level=${item.key}`);
                   }
                 }}
@@ -404,7 +675,7 @@ const HealthDashboard = () => {
                   position: 'relative',
                   overflow: 'hidden',
                   boxShadow: '0 2px 8px rgba(0,0,0,0.02)',
-                  cursor: (!isZero && item.key !== 'normal') ? 'pointer' : 'default',
+                  cursor: (!isZero && item.clickable) ? 'pointer' : 'default',
                   height: '100%',
                   border: border,
                 }}
@@ -452,11 +723,21 @@ const HealthDashboard = () => {
             </Space>
             <Space size={4}>
               <Text type="secondary">已接入监测:</Text>
-              <Text strong style={{ fontSize: 16, color: '#1890ff' }}>{summary.total - summary.unconfigured}</Text>
+              <Text strong style={{ fontSize: 16, color: '#1890ff' }}>{summary.monitored}</Text>
               <Text type="secondary">台</Text>
             </Space>
             <Space size={4}>
-              <Text type="secondary">待接入监测:</Text>
+              <Text type="secondary">在线:</Text>
+              <Text strong style={{ fontSize: 16, color: '#52c41a' }}>{summary.online}</Text>
+              <Text type="secondary">台</Text>
+            </Space>
+            <Space size={4}>
+              <Text type="secondary">离线:</Text>
+              <Text strong style={{ fontSize: 16, color: summary.offline ? '#fa8c16' : '#8c8c8c' }}>{summary.offline}</Text>
+              <Text type="secondary">台</Text>
+            </Space>
+            <Space size={4}>
+              <Text type="secondary">未接入:</Text>
               <Text strong style={{ fontSize: 16, color: '#bfbfbf' }}>{summary.unconfigured}</Text>
               <Text type="secondary">台</Text>
             </Space>
@@ -464,25 +745,51 @@ const HealthDashboard = () => {
         </div>
       </ProCard>
 
-
+      <ProCard
+        title="当前异常特征"
+        subTitle="基于已落库诊断记录归纳；重复检出不等同于连续异常"
+        bordered
+        headerBordered
+        style={{ marginTop: 16 }}
+      >
+        <Row gutter={[16, 12]}>
+          {[
+            { label: '首次检出', value: data.issueSummary.new, color: '#1677ff' },
+            { label: '重复检出', value: data.issueSummary.repeated, color: '#d48806' },
+            { label: '趋势恶化', value: data.issueSummary.worsening, color: '#cf1322' },
+            { label: '趋势好转', value: data.issueSummary.improving, color: '#389e0d' },
+            { label: '复采确认中', value: data.issueSummary.pendingConfirmation, color: '#722ed1' },
+          ].map(item => (
+            <Col xs={12} sm={8} lg={4} flex="1 1 160px" key={item.label}>
+              <div style={{ padding: '12px 16px', borderRadius: 8, background: '#fafafa', border: '1px solid #f0f0f0' }}>
+                <Text type="secondary">{item.label}</Text>
+                <div style={{ marginTop: 4 }}>
+                  <Text strong style={{ fontSize: 26, color: item.color }}>{item.value}</Text>
+                  <Text type="secondary" style={{ marginLeft: 4 }}>台</Text>
+                </div>
+              </div>
+            </Col>
+          ))}
+        </Row>
+      </ProCard>
 
       {/* ── Section 2: Problem distribution ── */}
       <Row gutter={[16, 16]} style={{ marginTop: 16 }}>
         <Col xs={24} lg={8}>
           <DistributionTags
-            title="设备分类视图"
+            title="问题设备类型"
             data={data.problemDistribution.byCategory}
           />
         </Col>
         <Col xs={24} lg={8}>
           <DistributionTags
-            title="车间区域视图"
+            title="问题工艺段"
             data={data.problemDistribution.byArea}
           />
         </Col>
         <Col xs={24} lg={8}>
           <DistributionTags
-            title="诊断项视图"
+            title="问题诊断项"
             data={data.problemDistribution.byMetric || []}
           />
         </Col>
@@ -492,7 +799,8 @@ const HealthDashboard = () => {
 
       {/* ── Section 3: Fault devices ── */}
       <ProCard
-        title={`异常设备 (${data.faultDevices.length})`}
+        title={`当前异常设备 (${data.faultDevices.length})`}
+        subTitle="点击设备查看当前诊断依据"
         bordered
         headerBordered
         loading={loading}
@@ -505,6 +813,10 @@ const HealthDashboard = () => {
             dataSource={data.faultDevices}
             pagination={{ pageSize: 10 }}
             size="middle"
+            onRow={record => ({
+              onClick: () => setPreviewDevice(record),
+              style: { cursor: 'pointer' },
+            })}
           />
         ) : (
           <Empty
@@ -514,8 +826,21 @@ const HealthDashboard = () => {
         )}
       </ProCard>
 
-      {/* ── Section 3: Calendar Heatmap ── */}
-      <ProCard title="全年故障热力图" bordered headerBordered loading={calendarLoading} style={{ marginTop: 16 }}>
+      <DiagnosisPreviewDrawer
+        device={previewDevice}
+        open={previewDevice !== null}
+        onClose={() => setPreviewDevice(null)}
+      />
+
+      {/* ── Section 4: Calendar Heatmap ── */}
+      <ProCard
+        title="全年异常检出热力图"
+        subTitle="表示当天检出异常的设备数量，不等同于当天新发生故障"
+        bordered
+        headerBordered
+        loading={calendarLoading}
+        style={{ marginTop: 16 }}
+      >
         <CalendarHeatmap data={calendarData} loading={calendarLoading} />
       </ProCard>
     </PageContainer>

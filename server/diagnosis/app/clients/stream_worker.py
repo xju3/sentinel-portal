@@ -1,11 +1,14 @@
 import asyncio
 import json
 import logging
+import time
 
+import redis as redis_lib
 from pub.manager.database import redis_manager
 from pub.utils.redis_keys import REDIS_STREAM_DIAGNOSIS_TRIGGER, REDIS_STREAM_DIAGNOSIS_GROUP
 from pub.models.report import DiagnosisTriggerPayload
 from app.preparation.ingestion import process_incoming_report
+from app.config import settings
 
 logger = logging.getLogger(__name__)
 
@@ -16,9 +19,28 @@ BLOCK_MS = 2000
 # 全局最大并发诊断数（所有 worker 共享），防止数据库连接被打爆
 # 实际并发上限 = min(WORKER_COUNT * WORKER_BATCH_SIZE, MAX_CONCURRENT_DIAGNOSES)
 MAX_CONCURRENT_DIAGNOSES = 10
+PENDING_MIN_IDLE_MS = 60_000
+PENDING_SCAN_INTERVAL_SECONDS = 30
 
 # 全局信号量，在模块加载时创建
 _diagnosis_semaphore = asyncio.Semaphore(MAX_CONCURRENT_DIAGNOSES)
+
+
+def _create_worker_redis() -> redis_lib.Redis:
+    """为 stream worker 创建独立 Redis 连接。
+
+    xreadgroup 的 block 参数会长期占用 socket，必须与全局业务连接（redis_manager）隔离。
+    socket_timeout 设置为 BLOCK_MS + 3000ms，确保不会因超时误断阻塞等待。
+    """
+    socket_timeout = (BLOCK_MS / 1000) + 3.0
+    return redis_lib.from_url(
+        settings.redis_url,
+        decode_responses=True,
+        socket_timeout=socket_timeout,
+        socket_connect_timeout=3.0,
+        retry_on_timeout=True,
+        health_check_interval=30,
+    )
 
 
 def _ensure_consumer_group() -> None:
@@ -89,6 +111,20 @@ async def _handle_single_message(worker_id: str, client, msg_id: str, fields: di
             )
 
 
+async def _claim_stale_messages(client, worker_id: str):
+    """Claim server-accepted messages abandoned by a failed or dead consumer."""
+    result = await asyncio.to_thread(
+        client.xautoclaim,
+        REDIS_STREAM_DIAGNOSIS_TRIGGER,
+        REDIS_STREAM_DIAGNOSIS_GROUP,
+        worker_id,
+        PENDING_MIN_IDLE_MS,
+        "0-0",
+        count=WORKER_BATCH_SIZE,
+    )
+    return result[1] if result and len(result) > 1 else []
+
+
 async def run_stream_worker(worker_id: str) -> None:
     """
     单个 Stream Consumer Worker 的主循环。
@@ -97,23 +133,34 @@ async def run_stream_worker(worker_id: str) -> None:
     全局 Semaphore 保证总并发不超过 MAX_CONCURRENT_DIAGNOSES。
     """
     logger.debug("Stream worker '%s' started.", worker_id)
-    client = redis_manager.get_client()
+    client = _create_worker_redis()  # 独立连接，不复用全局 redis_manager
+    last_pending_scan = 0.0
 
     while True:
         try:
-            # xreadgroup 是阻塞调用，放入线程池避免阻塞 event loop
-            results = await asyncio.to_thread(
-                client.xreadgroup,
-                REDIS_STREAM_DIAGNOSIS_GROUP,
-                worker_id,
-                {REDIS_STREAM_DIAGNOSIS_TRIGGER: ">"},   # ">" 表示只读取未分配给任何 consumer 的新消息
-                count=WORKER_BATCH_SIZE,
-                block=BLOCK_MS,
-            )
+            results = []
+            now = time.monotonic()
+            if now - last_pending_scan >= PENDING_SCAN_INTERVAL_SECONDS:
+                stale_messages = await _claim_stale_messages(client, worker_id)
+                results = (
+                    [(REDIS_STREAM_DIAGNOSIS_TRIGGER, stale_messages)]
+                    if stale_messages
+                    else []
+                )
+                last_pending_scan = now
 
             if not results:
-                # 超时无新消息，继续循环
-                continue
+                # xreadgroup 是阻塞调用，放入线程池避免阻塞 event loop
+                results = await asyncio.to_thread(
+                    client.xreadgroup,
+                    REDIS_STREAM_DIAGNOSIS_GROUP,
+                    worker_id,
+                    {REDIS_STREAM_DIAGNOSIS_TRIGGER: ">"},   # ">" 表示只读取未分配给任何 consumer 的新消息
+                    count=WORKER_BATCH_SIZE,
+                    block=BLOCK_MS,
+                )
+                if not results:
+                    continue
 
             # results 格式: [(stream_name, [(msg_id, {field: value}), ...])]
             for _stream_name, messages in results:

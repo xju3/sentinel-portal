@@ -272,6 +272,12 @@ const DeviceListPage = () => {
       render: (_, row) => (
         <Space size="small">
           <a
+            key="health-archive"
+            onClick={() => navigate(`/device/${row.id}/health-archive`)}
+          >
+            健康档案
+          </a>
+          <a
             key="edit"
             onClick={() => {
               setEditing(row);

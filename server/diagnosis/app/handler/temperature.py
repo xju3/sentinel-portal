@@ -87,7 +87,13 @@ class TemperatureDiagnosis:
         return current_severity
 
     @staticmethod
-    async def analyze(device_id: str, location_id: str, current_temp: float, context: dict[str, Any]) -> dict[str, Any]:
+    async def analyze(
+        device_id: str,
+        location_id: str,
+        current_temp: float,
+        context: dict[str, Any],
+        current_ts_ms: int | None = None,
+    ) -> dict[str, Any]:
         logger.info("Running temperature diagnosis for device=%s, location=%s, temp=%.2f", 
                     device_id, location_id, current_temp)
 
@@ -115,10 +121,19 @@ class TemperatureDiagnosis:
             }
 
         trend_data = await TrendCacheService.get_recent_trend(location_id, "temperature_c")
+        if current_ts_ms is not None:
+            trend_data = [
+                point for point in trend_data
+                if point["ts_ms"] <= current_ts_ms
+            ]
+        previous_trend = [
+            point for point in trend_data
+            if current_ts_ms is None or point["ts_ms"] < current_ts_ms
+        ]
         
         # 2. Real-Time Mutation (Hardware fault detection)
-        if trend_data and len(trend_data) > 0:
-            last_temp = trend_data[-1]["value"]
+        if previous_trend:
+            last_temp = previous_trend[-1]["value"]
             mutation = abs(current_temp - last_temp)
             evidence["mutation"] = mutation
             evidence["last_temp"] = last_temp
@@ -157,7 +172,7 @@ class TemperatureDiagnosis:
         # --- VERTICAL STRATEGY ---
 
         # Filter trend data into 24h and 72h windows
-        now_ms = int(time.time() * 1000)
+        now_ms = current_ts_ms if current_ts_ms is not None else int(time.time() * 1000)
         ms_24h = 24 * 3600 * 1000
         ms_72h = 72 * 3600 * 1000
         

@@ -6,6 +6,7 @@ Refactored for device-centric and integer-encoded diagnostic architecture.
 
 import uuid
 from datetime import datetime
+from enum import IntEnum
 
 from sqlalchemy import (
     Column,
@@ -16,6 +17,7 @@ from sqlalchemy import (
     Float,
     Uuid,
     BigInteger,
+    Index,
 )
 from sqlalchemy.dialects.mysql import JSON as MySQLJSON
 from sqlalchemy.dialects.mysql import TINYINT
@@ -23,12 +25,35 @@ from sqlalchemy.orm import relationship
 
 from pub.models import Base
 
+
+class DiagnosisRecordStatus(IntEnum):
+    RECEIVED = 0
+    WAITING = 1
+    DIAGNOSED = 2
+    SKIPPED = 3
+    MISSED = 4
+
+
 class DiagnosisRecord(Base):
     """
     Metadata record for the raw incoming diagnostic JSON report.
     This tracks the payload's summary info independently of the algorithm results.
     """
     __tablename__ = "diagnosis_record"
+    __table_args__ = (
+        Index(
+            "idx_diagnosis_record_device_health_time",
+            "device_id",
+            "diagnosis_status",
+            "ts_ms",
+        ),
+        Index(
+            "idx_diagnosis_record_tenant_health_time",
+            "tenant_id",
+            "diagnosis_status",
+            "ts_ms",
+        ),
+    )
     
     # Matching data.json top-level fields
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
@@ -48,6 +73,22 @@ class DiagnosisRecord(Base):
     
     delay = Column(Integer, nullable=True, default=0)
     total = Column(Integer, nullable=True, default=0)
+    diagnosis_status = Column(
+        TINYINT(unsigned=True),
+        nullable=False,
+        default=DiagnosisRecordStatus.RECEIVED,
+        comment="0=RECEIVED,1=WAITING,2=DIAGNOSED,3=SKIPPED,4=MISSED",
+    )
+    overall_level = Column(
+        TINYINT(unsigned=True),
+        nullable=True,
+        comment="0=正常,1=关注,2=异常,3=告警,4=严重;NULL=未形成诊断",
+    )
+    diagnosed_at = Column(
+        DateTime,
+        nullable=True,
+        comment="实际完成诊断的UTC时间",
+    )
     
     sensor_id = Column(Uuid(as_uuid=True), nullable=True, index=True)
     location_id = Column(Uuid(as_uuid=True), nullable=True, index=True)

@@ -75,7 +75,13 @@ class VibrationDiagnosis:
         return current_severity
 
     @staticmethod
-    async def analyze(device_id: str, location_id: str, max_rms_vel: float, context: dict[str, Any]) -> dict[str, Any]:
+    async def analyze(
+        device_id: str,
+        location_id: str,
+        max_rms_vel: float,
+        context: dict[str, Any],
+        current_ts_ms: int | None = None,
+    ) -> dict[str, Any]:
         logger.info("Running vibration diagnosis for device=%s, location=%s, rms_vel=%.2f", 
                     device_id, location_id, max_rms_vel)
 
@@ -125,10 +131,19 @@ class VibrationDiagnosis:
             }
 
         trend_data = await TrendCacheService.get_recent_trend(location_id, "rms_vel_mm_s")
+        if current_ts_ms is not None:
+            trend_data = [
+                point for point in trend_data
+                if point["ts_ms"] <= current_ts_ms
+            ]
+        previous_trend = [
+            point for point in trend_data
+            if current_ts_ms is None or point["ts_ms"] < current_ts_ms
+        ]
         
         # 2. Real-Time Mutation Check (Mutation => Requires Resampling)
-        if trend_data and len(trend_data) > 0:
-            last_val = trend_data[-1]["value"]
+        if previous_trend:
+            last_val = previous_trend[-1]["value"]
             mutation = abs(max_rms_vel - last_val)
             evidence["mutation"] = mutation
             evidence["last_val"] = last_val

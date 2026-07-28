@@ -59,6 +59,20 @@ REDIS_KEY_DIA_DEVICE_CONTEXT = "dia:device_context:{device_id}"
 # 作用: 提供给 Dashboard 快速查询当前所有设备的健康状态，避免在接口中查询全量最新诊断记录
 REDIS_KEY_DIA_HEALTH_STATUS = "dia:health:status"
 
+# 延迟补传诊断状态，每台设备一份；补传完成或新周期开始时删除/替换，最长保留24小时。
+REDIS_KEY_DIA_BURST_STATE = "dia:burst:state:{device_id}"
+
+# 已完成诊断的报告幂等标记，防止 Redis Stream 重投造成重复诊断；保留30天。
+REDIS_KEY_DIA_DIAGNOSED_REPORT = "dia:diagnosed:report:{report_id}"
+
+# Dashboard 健康快照。
+# - snapshot: 每个租户一份完整 Dashboard JSON，避免页面打开时重复执行多表聚合。
+# - dirty: Hash，field 为 tenant_id，value 为最近一次诊断写入时间戳（毫秒）。
+#   诊断写入只标记快照过期，不删除旧快照；页面可以先返回旧数据，再在后台刷新。
+REDIS_KEY_DASHBOARD_HEALTH_SNAPSHOT = "dashboard:health:v1:snapshot:{tenant_id}"
+REDIS_KEY_DASHBOARD_HEALTH_DIRTY = "dashboard:health:v1:dirty"
+REDIS_KEY_DASHBOARD_HEALTH_REFRESH_LOCK = "dashboard:health:v1:refresh:{tenant_id}"
+
 # ==========================================
 # 任务流 (Data Pipelines)
 # ==========================================
@@ -67,6 +81,11 @@ REDIS_KEY_DIA_HEALTH_STATUS = "dia:health:status"
 # 存储内容: { "bucket": str, "path": str }
 REDIS_STREAM_PERSISTENCE_INGEST = "stream:persistence:ingest"
 REDIS_STREAM_PERSISTENCE_GROUP = "persistence:workers"
+
+# Persistence 报告级并发锁与完成标记。
+# processing 最长保留5分钟；processed 保留30天，避免重复持久化和重复触发诊断。
+REDIS_KEY_PERSISTENCE_PROCESSING_REPORT = "persistence:processing:{report_id}"
+REDIS_KEY_PERSISTENCE_PROCESSED_REPORT = "persistence:processed:{report_id}"
 
 # 诊断触发任务 Stream Key (persistence -> diagnosis)
 # 存储内容: { "bucket": str, "path": str }

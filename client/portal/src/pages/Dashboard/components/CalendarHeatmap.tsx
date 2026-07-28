@@ -85,21 +85,21 @@ const CalendarHeatmap = ({ data, loading }: CalendarHeatmapProps) => {
 
   // 计算统计数据
   const stats = useMemo(() => {
-    if (!data || !data.months) return { totalFaults: 0, totalDays: 0, maxCount: 0 };
+    if (!data || !data.months) return { faultDays: 0, totalDays: 0, maxCount: 0 };
 
-    let totalFaults = 0;
+    let faultDays = 0;
     let totalDays = 0;
     let maxCount = 0;
 
     for (const month of data.months) {
       for (const day of month.days) {
         totalDays++;
-        totalFaults += day.count;
+        if (day.count > 0) faultDays++;
         if (day.count > maxCount) maxCount = day.count;
       }
     }
 
-    return { totalFaults, totalDays, maxCount };
+    return { faultDays, totalDays, maxCount };
   }, [data]);
 
   // 生成过去 12 个月的所有日期（当前月前推 12 个月，包含当前月）
@@ -217,8 +217,8 @@ const CalendarHeatmap = ({ data, loading }: CalendarHeatmapProps) => {
       }
       const endCol = allColumns.length - 1;
 
-      // 计算该月故障总数
-      const totalFaults = month.days.reduce((sum, d) => sum + d.count, 0);
+      // 月份标签表示“发生过异常的天数”，而不是每日异常设备数之和。
+      const totalFaults = month.days.filter((day) => day.count > 0).length;
       monthColRanges.push({ start: startCol, end: endCol, totalFaults });
 
       if (mi < mergedMonths.length - 1) {
@@ -304,7 +304,7 @@ const CalendarHeatmap = ({ data, loading }: CalendarHeatmapProps) => {
         }}
       >
         <div style={{ fontSize: 13, color: '#333', fontWeight: 500 }}>
-           过去 <strong style={{ color: '#1890ff' }}>12</strong> 个月, <strong style={{ color: '#ff4d4f' }}>{stats.totalFaults}</strong> 监控日产生故障, 共 <strong style={{ color: '#1890ff' }}>{stats.totalDays}</strong> 天
+           过去 <strong style={{ color: '#1890ff' }}>12</strong> 个月，有 <strong style={{ color: '#ff4d4f' }}>{stats.faultDays}</strong> 个监控日检出异常，共 <strong style={{ color: '#1890ff' }}>{stats.totalDays}</strong> 个监控日
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 3 }}>
           <span style={{ fontSize: 11, color: '#999', marginRight: 4 }}>Less</span>

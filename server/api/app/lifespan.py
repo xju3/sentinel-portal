@@ -10,10 +10,13 @@ import logging
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from sqlalchemy import select
 
 from app.clients.mqtt import api_mqtt_manager
 from app.config import settings
 from app.database import db_manager, redis_manager, influxdb_manager, minio_manager
+from pub.models.customer import Tenant
+from pub.services import DashboardHealthService
 from pub.services.common.weather_service import WeatherService
 from app.utils import setup_logging
 
@@ -31,6 +34,20 @@ async def weather_fetch_loop():
             logger.error("Error in weather fetch loop: %s", str(e))
         
         await asyncio.sleep(3600 * 6)  # 6 hours
+
+
+async def warm_dashboard_snapshots() -> None:
+    """Warm missing/stale tenant snapshots after startup without blocking readiness."""
+    try:
+        if db_manager.SessionLocal is None:
+            return
+        async with db_manager.SessionLocal() as session:
+            tenant_ids = (await session.execute(select(Tenant.id))).scalars().all()
+        for tenant_id in tenant_ids:
+            await DashboardHealthService.warm_health_dashboard(tenant_id)
+    except Exception:
+        logger.exception("Dashboard snapshot warmup failed")
+
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
@@ -75,6 +92,7 @@ async def lifespan(app: FastAPI):
 
         logger.debug("Starting background tasks...")
         weather_task = asyncio.create_task(weather_fetch_loop())
+        dashboard_warmup_task = asyncio.create_task(warm_dashboard_snapshots())
     except Exception as e:
         logger.error(f"Startup failed: {e}")
         raise
@@ -88,8 +106,13 @@ async def lifespan(app: FastAPI):
 
     logger.debug("Cancelling background tasks...")
     weather_task.cancel()
+    dashboard_warmup_task.cancel()
     try:
         await weather_task
+    except asyncio.CancelledError:
+        pass
+    try:
+        await dashboard_warmup_task
     except asyncio.CancelledError:
         pass
 

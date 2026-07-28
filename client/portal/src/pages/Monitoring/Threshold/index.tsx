@@ -22,13 +22,13 @@ import {
 import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';
 
 const METRIC_MAP: Record<number, { text: string; color: string }> = {
-  1: { text: '温度', color: 'volcano' },
-  2: { text: '振动', color: 'geekblue' },
+  1: { text: '振动', color: 'geekblue' },
+  2: { text: '温度', color: 'volcano' },
 };
 
 const METRIC_OPTIONS = [
-  { label: '温度', value: 1 },
-  { label: '振动', value: 2 },
+  { label: '振动', value: 1 },
+  { label: '温度', value: 2 },
 ];
 
 type ThresholdFormValues = {
@@ -99,22 +99,20 @@ const MonitoringThresholdPage = () => {
       align: 'center',
     },
     {
-      title: '传感器型号',
+      title: '编号',
       dataIndex: 'code',
       align: 'center',
-      width: 120,
       render: (_, row) => <Tag>{row.code || '-'}</Tag>,
       sorter: (a, b) => (a.code || '').localeCompare(b.code || '', 'zh-CN'),
     },
     {
       title: '监测指标',
       dataIndex: 'metric',
-      width: 60,
       valueType: 'select',
       align: 'center',
-      valueEnum: {
-        1: { text: '温度', status: 'Default' },
-        2: { text: '振动', status: 'Default' },
+      valueEnum: { // ProTable 的 valueEnum 也需要同步更新
+        1: { text: '振动', status: 'Default' },
+        2: { text: '温度', status: 'Default' },
       },
       render: (_, row) => {
         const info = METRIC_MAP[row.metric] || { text: `${row.metric}`, color: 'default' };
@@ -123,59 +121,81 @@ const MonitoringThresholdPage = () => {
       sorter: (a, b) => Number(a.metric) - Number(b.metric),
     },
     {
-      title: '最大偏差(实时)',
+      title: '突变',
       dataIndex: 'rt_max_delta',
-      width: 100,
       hideInSearch: true,
       align: 'center',
-      render: (_, row) => row.rt_max_delta,
+      render: (_, row) => (
+        <span>{row.rt_max_delta} {row.metric === 1 ? 'mm/s' : '°C'}</span>
+      ),
       sorter: (a, b) => Number(a.rt_max_delta) - Number(b.rt_max_delta),
     },
     {
-      title: '短期(小时)',
+      title: '短期(24小时)',
       hideInSearch: true,
       children: [{
         title: '最大斜率',
         align: 'center',
         dataIndex: 'st_max_slope',
-        width: 60,
         hideInSearch: true,
+        render: (_, row) => (
+          <span style={{ whiteSpace: 'nowrap' }}>
+            {row.st_max_slope} {row.metric === 1 ? 'mm/s' : '°C'}
+            <sub style={{ marginLeft: 2, color: '#8c8c8c' }}>24h</sub>
+          </span>
+        ),
       },
       {
         title: '最大振幅',
         dataIndex: 'st_max_amplitude',
-        width: 60,
         align: 'center',
         hideInSearch: true,
+        render: (_, row) => (
+          <span style={{ whiteSpace: 'nowrap' }}>
+            {row.st_max_amplitude} {row.metric === 1 ? 'mm/s' : '°C'}
+            <sub style={{ marginLeft: 2, color: '#8c8c8c' }}>24h</sub>
+          </span>
+        ),
       },]
     },
 
     {
-      title: '中期(3天内)',
+      title: '中期(3天)',
       hideInSearch: true,
       children: [{
         title: '最大斜率',
         align: 'center',
         dataIndex: 'mt_max_slope',
-        width: 60,
         hideInSearch: true,
+        render: (_, row) => (
+          <span style={{ whiteSpace: 'nowrap' }}>
+            {row.mt_max_slope} {row.metric === 1 ? 'mm/s' : '°C'}
+            <sub style={{ marginLeft: 2, color: '#8c8c8c' }}>72h</sub>
+          </span>
+        ),
       },
       {
         title: '最大振幅',
         align: 'center',
         dataIndex: 'mt_max_amplitude',
-        width: 60,
         hideInSearch: true,
+        render: (_, row) => (
+          <span style={{ whiteSpace: 'nowrap' }}>
+            {row.mt_max_amplitude} {row.metric === 1 ? 'mm/s' : '°C'}
+            <sub style={{ marginLeft: 2, color: '#8c8c8c' }}>72h</sub>
+          </span>
+        ),
       },]
     },
 
     {
-      title: '基线值',
+      title: '阀值',
       dataIndex: 'baseline',
       align: 'center',
-      width: 60,
       hideInSearch: true,
-      sorter: (a, b) => Number(a.baseline) - Number(b.baseline),
+      render: (_, row) => (
+        <span>{row.baseline} {row.metric === 1 ? 'mm/s' : '°C'}</span>
+      ),
     },
     {
       title: '操作',
@@ -260,7 +280,7 @@ const MonitoringThresholdPage = () => {
               baseline: editing.baseline,
             }
             : {
-              metric: 1,
+              metric: 1, // 新建时默认选中“振动”
               rt_max_delta: 0,
               st_max_slope: 0,
               st_max_amplitude: 0,
@@ -314,9 +334,9 @@ const MonitoringThresholdPage = () => {
       >
         <ProFormText
           name="code"
-          label="传感器型号"
-          rules={[{ required: true, message: '请输入传感器型号' }]}
-          placeholder="请输入传感器型号编码"
+          label="编号"
+          rules={[{ required: true, message: '请输入编号' }]}
+          placeholder="请输入编号"
         />
         <ProFormSelect
           name="metric"
@@ -326,31 +346,31 @@ const MonitoringThresholdPage = () => {
         />
         <ProFormDigit
           name="rt_max_delta"
-          label="实时最大偏差"
+          label="突变容忍值"
           rules={[{ required: true, message: '请输入实时最大偏差' }]}
           fieldProps={{ precision: 4 }}
         />
         <ProFormDigit
           name="st_max_slope"
-          label="短时最大斜率"
+          label="短时最大斜率 (24h)"
           rules={[{ required: true, message: '请输入短时最大斜率' }]}
           fieldProps={{ precision: 4 }}
         />
         <ProFormDigit
           name="st_max_amplitude"
-          label="短时最大振幅"
+          label="短时最大振幅 (24h)"
           rules={[{ required: true, message: '请输入短时最大振幅' }]}
           fieldProps={{ precision: 4 }}
         />
         <ProFormDigit
           name="mt_max_slope"
-          label="中时最大斜率"
+          label="中时最大斜率 (72h)"
           rules={[{ required: true, message: '请输入中时最大斜率' }]}
           fieldProps={{ precision: 4 }}
         />
         <ProFormDigit
           name="mt_max_amplitude"
-          label="中时最大振幅"
+          label="中时最大振幅 (72h)"
           rules={[{ required: true, message: '请输入中时最大振幅' }]}
           fieldProps={{ precision: 4 }}
         />

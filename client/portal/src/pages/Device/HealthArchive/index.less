@@ -1,0 +1,68 @@
+.archivePage {
+  .summaryCard {
+    height: 100%;
+  }
+
+  .timelineViewport {
+    overflow-x: auto;
+    padding: 14px 4px 8px;
+  }
+
+  .timeline {
+    display: flex;
+    min-width: 100%;
+    width: max-content;
+    gap: 3px;
+    align-items: stretch;
+  }
+
+  .bucket {
+    width: 18px;
+    height: 44px;
+    flex: 0 0 18px;
+    border: 1px solid transparent;
+    border-radius: 3px;
+    cursor: default;
+    transition: transform 0.15s ease, box-shadow 0.15s ease;
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 3px 8px rgb(0 0 0 / 18%);
+    }
+  }
+
+  .gap {
+    border-color: #434343;
+    box-shadow: inset 0 0 0 1px rgb(255 255 255 / 75%);
+  }
+
+  .axis {
+    display: flex;
+    justify-content: space-between;
+    min-width: 520px;
+    margin-top: 8px;
+    color: #8c8c8c;
+    font-size: 12px;
+  }
+
+  .legend {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px;
+    margin-top: 16px;
+  }
+
+  .legendItem {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: #595959;
+    font-size: 12px;
+  }
+
+  .legendColor {
+    width: 12px;
+    height: 12px;
+    border-radius: 3px;
+  }
+}

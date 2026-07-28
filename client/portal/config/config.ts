@@ -111,6 +111,12 @@ export default defineConfig({
           component: '@/pages/Device/List',
         },
         {
+          path: '/device/:deviceId/health-archive',
+          name: '设备健康档案',
+          component: '@/pages/Device/HealthArchive',
+          hideInMenu: true,
+        },
+        {
           path: '/device',
           redirect: '/device/categories',
         },
