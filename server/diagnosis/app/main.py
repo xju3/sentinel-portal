@@ -23,9 +23,12 @@ WORKER_COUNT = 3
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup
-    logger.debug("Initializing databases...")
+    logger.debug(
+        "Initializing databases (diagnosis Redis DB %d)...",
+        settings.stream_redis_db,
+    )
     await db_manager.init(settings.mysql_url, settings.debug)
-    redis_manager.init(settings.redis_url)
+    redis_manager.init(settings.stream_redis_url)
     influxdb_manager.init(settings.influx_url, settings.influx_token, settings.influx_org, settings.influx_bucket)
     minio_manager.init(
         settings.minio_endpoint,

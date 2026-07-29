@@ -13,7 +13,7 @@ from app.preparation.ingestion import process_incoming_report
 
 async def init_dbs():
     await db_manager.init(settings.mysql_url, settings.debug)
-    redis_manager.init(settings.redis_url)
+    redis_manager.init(settings.stream_redis_url)
     influxdb_manager.init(settings.influx_url, settings.influx_token, settings.influx_org, settings.influx_bucket)
 
 def verify_influxdb(ts_ms):

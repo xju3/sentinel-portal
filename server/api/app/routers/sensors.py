@@ -38,7 +38,7 @@ from pub.decorators.dashboard_cache import rebuild_dashboard_cache
 
 from app.utils.auth import get_current_account
 from app.utils.response import success
-from app.database import minio_manager, redis_manager
+from app.database import minio_manager, redis_manager, stream_redis_manager
 from pub.utils.redis_keys import REDIS_KEY_SENSOR_META
 from app.clients.mqtt import api_mqtt_manager
 from pub.clients.minio import upload_json_to_minio_sync
@@ -416,10 +416,9 @@ async def _process_sensor_data_background_async(object_name: str, payload: dict,
     if success:
         # 2. 存入 MinIO 后，将事件压入 Redis Stream，交由 persistence 服务进行数据持久化
         try:
-            from pub.manager.database import redis_manager
             from pub.utils.redis_keys import REDIS_STREAM_PERSISTENCE_INGEST
             
-            redis_client = redis_manager.get_client()
+            redis_client = stream_redis_manager.get_client()
             await asyncio.to_thread(
                 redis_client.xadd,
                 REDIS_STREAM_PERSISTENCE_INGEST,

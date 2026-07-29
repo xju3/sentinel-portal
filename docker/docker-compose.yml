@@ -3,6 +3,7 @@ x-python-env: &python-env
   UV_LINK_MODE: copy
   PYTHONDONTWRITEBYTECODE: "1"
   PYTHONUNBUFFERED: "1"
+  STREAM_REDIS_DB: "11"
   TZ: "Asia/Shanghai"
 
 x-python-app: &python-app

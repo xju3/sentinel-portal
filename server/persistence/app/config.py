@@ -2,6 +2,7 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pub.utils.redis_url import redis_url_with_db
 
 load_dotenv()
 
@@ -16,6 +17,11 @@ class Settings(BaseSettings):
     )
 
     redis_url: str = os.getenv("REDIS_URL", "redis://:Stl123456@192.168.3.189:6379/0")
+    stream_redis_db: int = int(os.getenv("STREAM_REDIS_DB", "11"))
+
+    @property
+    def stream_redis_url(self) -> str:
+        return redis_url_with_db(self.redis_url, self.stream_redis_db)
 
     minio_endpoint: str = os.getenv("MINIO_ENDPOINT", "192.168.3.189:9000")
     minio_access_key: str = os.getenv("MINIO_ACCESS_KEY", "minioadmin")

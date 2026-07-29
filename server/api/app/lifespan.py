@@ -14,7 +14,13 @@ from sqlalchemy import select
 
 from app.clients.mqtt import api_mqtt_manager
 from app.config import settings
-from app.database import db_manager, redis_manager, influxdb_manager, minio_manager
+from app.database import (
+    db_manager,
+    redis_manager,
+    stream_redis_manager,
+    influxdb_manager,
+    minio_manager,
+)
 from pub.models.customer import Tenant
 from pub.services import DashboardHealthService
 from pub.services.common.weather_service import WeatherService
@@ -74,6 +80,7 @@ async def lifespan(app: FastAPI):
     try:
         await db_manager.init(settings.mysql_url, settings.debug)
         redis_manager.init(settings.redis_url)
+        stream_redis_manager.init(settings.stream_redis_url)
         influxdb_manager.init(
             settings.influx_url,
             settings.influx_token,
@@ -124,6 +131,7 @@ async def lifespan(app: FastAPI):
 
     for name, closer in (
         ("Redis", redis_manager.close),
+        ("Stream Redis", stream_redis_manager.close),
         ("InfluxDB", influxdb_manager.close),
         ("MinIO", minio_manager.close),
         ("MQTT", api_mqtt_manager.close),

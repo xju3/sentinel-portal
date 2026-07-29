@@ -34,7 +34,7 @@ def _create_worker_redis() -> redis_lib.Redis:
     """
     socket_timeout = (BLOCK_MS / 1000) + 3.0
     return redis_lib.from_url(
-        settings.redis_url,
+        settings.stream_redis_url,
         decode_responses=True,
         socket_timeout=socket_timeout,
         socket_connect_timeout=3.0,

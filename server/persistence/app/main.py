@@ -18,8 +18,8 @@ async def lifespan(app: FastAPI):
     logger.info("Initializing MySQL database...")
     await db_manager.init(mysql_url=settings.mysql_url, debug=(settings.log_level == "DEBUG"))
 
-    logger.info("Initializing Redis manager...")
-    redis_manager.init(redis_url=settings.redis_url)
+    logger.info("Initializing Redis manager on DB %d...", settings.stream_redis_db)
+    redis_manager.init(redis_url=settings.stream_redis_url)
 
     logger.info("Initializing MinIO manager...")
     minio_manager.init(

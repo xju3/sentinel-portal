@@ -14,6 +14,8 @@ from pub.manager.database import (
     minio_manager,
 )
 
+stream_redis_manager = RedisManager()
+
 __all__ = [
     "DatabaseManager",
     "RedisManager",
@@ -21,6 +23,7 @@ __all__ = [
     "MinIOManager",
     "db_manager",
     "redis_manager",
+    "stream_redis_manager",
     "influxdb_manager",
     "minio_manager",
 ]

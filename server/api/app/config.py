@@ -2,6 +2,7 @@ from pathlib import Path
 from typing import List
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from pub.utils.redis_url import redis_url_with_db
 
 
 class Settings(BaseSettings):
@@ -26,6 +27,12 @@ class Settings(BaseSettings):
 
     # Redis
     redis_url: str = "redis://host_name_or_ip_address:6379/0"
+    stream_redis_db: int = 11
+
+    @property
+    def stream_redis_url(self) -> str:
+        """Redis used only for the persistence/diagnosis data pipeline."""
+        return redis_url_with_db(self.redis_url, self.stream_redis_db)
 
     # InfluxDB
     influx_url: str = "http://host_name_or_ip_address:8086"
