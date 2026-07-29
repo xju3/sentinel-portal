@@ -6,7 +6,7 @@ from uuid import uuid4
 import pytest
 
 from app.routers import sensors as sensors_router
-from pub.contract.sensors import SensorTaskCompleteRequest, SensorTaskCreate
+from pub.contract.sensors import SensorTaskCreate
 from pub.models import import_all_models
 from pub.models.sensor import Sensor
 from pub.services import (
@@ -54,11 +54,11 @@ async def test_complete_sensor_system_task_status_mapping(
     await sensors_router.complete_sensor_system_task(
         task_id=task_id,
         status=status,
-        item=SensorTaskCompleteRequest(sn=task.sn),
         session=Mock(),
     )
 
     assert captured["success"] is expected_success
+    assert "sn" not in captured
 
 
 @pytest.mark.asyncio
@@ -161,7 +161,7 @@ def test_sensor_task_create_rejects_blank_name():
 
 
 @pytest.mark.asyncio
-async def test_complete_device_system_task_validates_sn_and_action():
+async def test_complete_device_system_task_uses_task_id_and_validates_action():
     task_id = uuid4()
     task = SimpleNamespace(id=task_id, sn="STL26SH0001", action=0, status=2, complete_time=None)
     result = Mock()
@@ -174,7 +174,6 @@ async def test_complete_device_system_task_validates_sn_and_action():
     completed = await complete_device_system_task(
         session=session,
         task_id=task_id,
-        sn="STL26SH0001",
     )
 
     assert completed is task
@@ -196,7 +195,6 @@ async def test_complete_device_system_task_accepts_binding_task():
     completed = await complete_device_system_task(
         session=session,
         task_id=task.id,
-        sn=task.sn,
     )
 
     assert completed is task
@@ -217,7 +215,6 @@ async def test_complete_device_system_task_rejects_status_task():
     completed = await complete_device_system_task(
         session=session,
         task_id=task.id,
-        sn=task.sn,
     )
 
     assert completed is None
@@ -225,18 +222,16 @@ async def test_complete_device_system_task_rejects_status_task():
 
 
 @pytest.mark.asyncio
-async def test_complete_device_system_task_rejects_another_sensor():
-    task = SimpleNamespace(id=uuid4(), sn="STL26SH0001", action=1, status=2)
+async def test_complete_device_system_task_rejects_missing_task():
     result = Mock()
-    result.scalar_one_or_none.return_value = task
+    result.scalar_one_or_none.return_value = None
     session = Mock()
     session.execute = AsyncMock(return_value=result)
     session.commit = AsyncMock()
 
     completed = await complete_device_system_task(
         session=session,
-        task_id=task.id,
-        sn="STL26SH9999",
+        task_id=uuid4(),
     )
 
     assert completed is None

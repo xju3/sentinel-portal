@@ -175,10 +175,6 @@ class PagedSensorTaskResponse(BaseModel):
     total: int
 
 
-class SensorTaskCompleteRequest(BaseModel):
-    sn: str = Field(min_length=1, max_length=255)
-
-
 class SensorStatusCreate(BaseModel):
     sn: str = Field(min_length=1, max_length=32)
     ts_ms: int = Field(gt=0)
@@ -281,4 +277,3 @@ class SensorConfigResponse(BaseModel):
 class SensorBindingResponse(BaseModel):
     device_id: Optional[UUID] = None
     rpm: Optional[int] = None
-

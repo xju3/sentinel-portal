@@ -271,16 +271,11 @@ async def complete_device_system_task(
     *,
     session: AsyncSession,
     task_id: UUID | str,
-    sn: str,
     success: bool = True,
 ) -> SensorTask | None:
     """Complete an action 0/1/3 task after the device reports execution result."""
     task = await get_sensor_task_by_id(session, task_id)
-    if (
-        task is None
-        or task.sn != sn
-        or task.action not in SYSTEM_ACTIONS_COMPLETED_BY_CALLBACK
-    ):
+    if task is None or task.action not in SYSTEM_ACTIONS_COMPLETED_BY_CALLBACK:
         return None
     target_status = SENSOR_TASK_STATUS_DONE if success else SENSOR_TASK_STATUS_FAILED
     if task.status != target_status:

@@ -56,7 +56,6 @@ from pub.contract.sensors import (
     SensorTaskCreate,
     SensorTaskResponse,
     PagedSensorTaskResponse,
-    SensorTaskCompleteRequest,
     SensorStatusCreate,
     SensorStatusResponse,
     SensorBindingResponse,
@@ -294,13 +293,11 @@ async def create_sensor_task_for_admin(
 async def complete_sensor_system_task(
     task_id: UUID,
     status: Annotated[int, Path(ge=0, le=1)],
-    item: SensorTaskCompleteRequest,
     session: AsyncSession = Depends(get_session),
 ):
     task = await complete_device_system_task(
         session=session,
         task_id=task_id,
-        sn=item.sn,
         success=(status == 1),
     )
     if task is None:
