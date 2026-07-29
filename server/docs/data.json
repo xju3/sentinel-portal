@@ -149,6 +149,7 @@
         }
     },
     "delay": 0,
+    "period": 1,
     "total": 0,
     "sensor_id": "b0b473ed-2ed5-489c-8ca9-df9368f81e03",
     "location_id": "4117d855-b325-472e-8de9-243acb95270b",

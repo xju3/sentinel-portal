@@ -7,12 +7,33 @@ from fastapi import HTTPException
 from app.routers import sensors
 
 
+@pytest.fixture(autouse=True)
+def mock_sensor_metadata_cache(monkeypatch):
+    redis_client = Mock()
+    redis_client.get.return_value = None
+    monkeypatch.setattr(
+        sensors.redis_manager,
+        "get_client",
+        Mock(return_value=redis_client),
+    )
+    monkeypatch.setattr(
+        sensors.SensorDbService,
+        "get_sensor_metadata_for_cache",
+        AsyncMock(return_value=None),
+    )
+
+
 @pytest.mark.asyncio
 async def test_receive_sensor_data_generates_ts_ms_when_device_omits_it(monkeypatch):
     dispatch = AsyncMock(return_value=[])
     monkeypatch.setattr(sensors, "dispatch_quick_diagnosis_tasks", dispatch)
     background_tasks = Mock()
-    payload = {"sn": "STL26SH0001", "seq": 0, "sample_type": "normal"}
+    payload = {
+        "sn": "STL26SH0001",
+        "delay": 0,
+        "period": 1,
+        "sample_type": "normal",
+    }
 
     response = await sensors.receive_sensor_data(
         background_tasks=background_tasks,
@@ -37,38 +58,33 @@ async def test_receive_sensor_data_generates_ts_ms_when_device_omits_it(monkeypa
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    ("patrol_minutes", "seq", "expected_age"),
+    ("period", "delay", "expected_age"),
     [
-        (60, 2, timedelta(hours=2)),
-        (30, 4, timedelta(hours=2)),
+        (1, 2, timedelta(minutes=2)),
+        (0.5, 4, timedelta(minutes=2)),
     ],
 )
-async def test_receive_sensor_data_backdates_by_seq_and_patrol_frequency(
+async def test_receive_sensor_data_backdates_by_delay_and_payload_period(
     monkeypatch,
-    patrol_minutes,
-    seq,
+    period,
+    delay,
     expected_age,
 ):
     dispatch = AsyncMock(return_value=[])
-    get_context = AsyncMock(
-        return_value={"health_check": {"patrol": patrol_minutes}}
-    )
     monkeypatch.setattr(sensors, "dispatch_quick_diagnosis_tasks", dispatch)
-    monkeypatch.setattr(sensors.DiagnosisContextService, "get_by_sn", get_context)
     background_tasks = Mock()
     session = Mock()
     received_at = datetime.now(timezone.utc)
 
     await sensors.receive_sensor_data(
         background_tasks=background_tasks,
-        payload={"sn": "STL26SH0001", "seq": seq},
+        payload={"sn": "STL26SH0001", "delay": delay, "period": period},
         session=session,
     )
 
     stored_payload = dispatch.await_args.kwargs["payload"]
     sample_time = datetime.fromtimestamp(stored_payload["ts_ms"] / 1000, timezone.utc)
     assert abs((received_at - sample_time - expected_age).total_seconds()) < 1
-    get_context.assert_awaited_once_with(session, "STL26SH0001")
 
     object_name = background_tasks.add_task.call_args.args[1]
     expected_path_time = sample_time.astimezone(timezone(timedelta(hours=8)))
@@ -76,48 +92,44 @@ async def test_receive_sensor_data_backdates_by_seq_and_patrol_frequency(
 
 
 @pytest.mark.asyncio
-async def test_receive_sensor_data_seq_zero_does_not_load_patrol_frequency(monkeypatch):
+async def test_receive_sensor_data_current_sample_does_not_require_period(monkeypatch):
     dispatch = AsyncMock(return_value=[])
-    get_context = AsyncMock()
     monkeypatch.setattr(sensors, "dispatch_quick_diagnosis_tasks", dispatch)
-    monkeypatch.setattr(sensors.DiagnosisContextService, "get_by_sn", get_context)
 
     await sensors.receive_sensor_data(
         background_tasks=Mock(),
-        payload={"sn": "STL26SH0001", "seq": 0},
+        payload={"sn": "STL26SH0001", "delay": 0},
         session=Mock(),
     )
 
-    get_context.assert_not_awaited()
+    stored_payload = dispatch.await_args.kwargs["payload"]
+    sample_time = datetime.fromtimestamp(stored_payload["ts_ms"] / 1000, timezone.utc)
+    assert abs((datetime.now(timezone.utc) - sample_time).total_seconds()) < 1
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("seq", [-1, 1.5, "2", True])
-async def test_receive_sensor_data_rejects_invalid_seq(seq):
+@pytest.mark.parametrize("delay", [-1, "2", True, float("nan")])
+async def test_receive_sensor_data_rejects_invalid_delay(delay):
     with pytest.raises(HTTPException) as exc_info:
         await sensors.receive_sensor_data(
             background_tasks=Mock(),
-            payload={"sn": "STL26SH0001", "seq": seq},
+            payload={"sn": "STL26SH0001", "delay": delay, "period": 1},
             session=Mock(),
         )
 
     assert exc_info.value.status_code == 400
+    assert "'delay'" in exc_info.value.detail
 
 
 @pytest.mark.asyncio
-async def test_receive_sensor_data_rejects_missing_patrol_frequency(monkeypatch):
-    monkeypatch.setattr(
-        sensors.DiagnosisContextService,
-        "get_by_sn",
-        AsyncMock(return_value={"health_check": None}),
-    )
-
+@pytest.mark.parametrize("period", [None, 0, -1, "1", True, float("nan")])
+async def test_receive_sensor_data_rejects_invalid_period_for_backfill(period):
     with pytest.raises(HTTPException) as exc_info:
         await sensors.receive_sensor_data(
             background_tasks=Mock(),
-            payload={"sn": "STL26SH0001", "seq": 1},
+            payload={"sn": "STL26SH0001", "delay": 1, "period": period},
             session=Mock(),
         )
 
     assert exc_info.value.status_code == 400
-    assert "Patrol frequency is not configured" in exc_info.value.detail
+    assert "'period'" in exc_info.value.detail

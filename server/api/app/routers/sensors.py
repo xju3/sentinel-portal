@@ -5,6 +5,7 @@ Sensor management endpoints
 import logging
 import json
 import io
+import math
 from datetime import datetime, timezone, timedelta
 from fastapi import APIRouter, Depends, HTTPException, Query, Path, BackgroundTasks, Body, Request
 from sqlalchemy import select, func
@@ -451,20 +452,35 @@ async def receive_sensor_data(
     """Receive processed sensor data and asynchronously store to MinIO"""
     sn = payload.get("sensor_sn") or payload.get("sn")
     delay = payload.get("delay", 0)
+    period = payload.get("period")
     total = payload.get("total", 0)
 
     if not sn:
         raise HTTPException(status_code=400, detail="Missing 'sn' in payload")
 
-    try:
-        delay = max(0.0, float(delay))
-    except (TypeError, ValueError):
-        delay = 0.0
+    if (
+        isinstance(delay, bool)
+        or not isinstance(delay, (int, float))
+        or not math.isfinite(delay)
+        or delay < 0
+    ):
+        raise HTTPException(status_code=400, detail="'delay' must be a non-negative number")
+
+    if delay > 0 and (
+        isinstance(period, bool)
+        or not isinstance(period, (int, float))
+        or not math.isfinite(period)
+        or period <= 0
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="'period' must be a positive number of minutes for backfilled data",
+        )
 
     try:
         dt_utc = datetime.now(timezone.utc)
         if delay > 0:
-            dt_utc -= timedelta(seconds=delay)
+            dt_utc -= timedelta(minutes=delay * period)
 
         ts_ms = int(dt_utc.timestamp() * 1000)
         tz_utc_8 = timezone(timedelta(hours=8))
