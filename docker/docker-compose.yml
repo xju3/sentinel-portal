@@ -12,7 +12,7 @@ x-python-app: &python-app
     - "host.docker.internal:host-gateway"
   working_dir: /app/server
   env_file:
-    - ../.env
+    - ../server/.env
   command: >
     sh -c "pip install uv -i $${UV_INDEX_URL} && uv sync --package $${APP_PACKAGE} --no-dev && uv run --package $${APP_PACKAGE} python -m uvicorn app.main:app --app-dir /app/server/$${APP_PACKAGE} --host 0.0.0.0 --port 8000 --reload --reload-dir /app/server/$${APP_PACKAGE}/app --reload-dir /app/server/pub/src"
 
@@ -20,9 +20,6 @@ services:
   api:
     <<: *python-app
     container_name: stl-api
-    env_file:
-      - ../.env
-      - ../server/api/.env
     environment:
       <<: *python-env
       APP_PACKAGE: api
