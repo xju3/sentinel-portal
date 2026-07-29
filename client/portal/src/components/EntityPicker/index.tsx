@@ -20,7 +20,8 @@ type PickerResult<T> = {
 
 type EntityPickerProps<T extends EntityRow> = {
   value?: string;
-  onChange?: (value?: string) => void;
+  onChange?: (value?: string, record?: T) => void;
+  onRecordChange?: (record?: T) => void;
   valueLabel?: string;
   placeholder?: string;
   modalTitle: string;
@@ -38,6 +39,7 @@ type EntityPickerProps<T extends EntityRow> = {
 function EntityPicker<T extends EntityRow>({
   value,
   onChange,
+  onRecordChange,
   valueLabel,
   placeholder = '请选择',
   modalTitle,
@@ -158,7 +160,8 @@ function EntityPicker<T extends EntityRow>({
           onClick={() => {
             setSelectedId(undefined);
             setSelectedLabel('');
-            onChange?.(undefined);
+            onChange?.(undefined, undefined);
+            onRecordChange?.(undefined);
           }}
           disabled={disabled || !value}
         >
@@ -190,7 +193,8 @@ function EntityPicker<T extends EntityRow>({
           if (selectedRow) {
             setSelectedLabel(getRecordLabel(selectedRow));
           }
-          onChange?.(selectedId);
+          onChange?.(selectedId, selectedRow);
+          onRecordChange?.(selectedRow);
           setOpen(false);
         }}
         okButtonProps={{ disabled: !selectedId }}

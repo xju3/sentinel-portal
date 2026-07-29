@@ -90,6 +90,7 @@ const buildCategoryTree = (rows: DeviceCategory[]): CategoryTreeRow[] => {
 };
 
 const DeviceSpecPage = () => {
+  const formRef = useRef<import('@ant-design/pro-components').ProFormInstance>();
 
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
@@ -320,6 +321,7 @@ const DeviceSpecPage = () => {
 
       <ModalForm<DeviceSpecFormValues>
         title={editing ? '编辑设备规格' : '新建设备规格'}
+        formRef={formRef}
         open={modalOpen}
         modalProps={{
           destroyOnHidden: true,
@@ -379,7 +381,12 @@ const DeviceSpecPage = () => {
       >
         <ProFormText name="name" label="规格名称" rules={[{ required: true, message: '请输入规格名称' }]} />
         <ProFormText name="model" label="型号" rules={[{ required: true, message: '请输入型号' }]} />
-        <ProFormText name="brand" label="品牌" rules={[{ required: true, message: '请输入品牌' }]} />
+        <ProFormText 
+          name="brand" 
+          label="品牌" 
+          rules={[{ required: true, message: '品牌将自动填写' }]} 
+          fieldProps={{ readOnly: true, placeholder: '选择供应商后自动填写' }}
+        />
         <ProFormDigit
           name="voltage"
           label="电压(V)"
@@ -405,6 +412,9 @@ const DeviceSpecPage = () => {
             fetcher={({ current, pageSize, keyword }) =>
               querySuppliers({ current, pageSize, keyword })
             }
+            onRecordChange={(record) => {
+              formRef.current?.setFieldsValue({ brand: record?.brand || '' });
+            }}
           />
         </ProForm.Item>
         <ProForm.Item
