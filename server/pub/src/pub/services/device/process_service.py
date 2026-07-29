@@ -41,6 +41,22 @@ class ProcessService:
         return result.scalar_one_or_none()
 
     @staticmethod
+    async def get_by_code(
+        session: AsyncSession,
+        tenant_id: UUID,
+        code: str,
+        exclude_id: UUID | None = None,
+    ) -> Optional[Process]:
+        stmt = select(Process).where(
+            Process.tenant_id == tenant_id,
+            Process.code == code,
+        )
+        if exclude_id is not None:
+            stmt = stmt.where(Process.id != exclude_id)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
     async def create(session: AsyncSession, data: dict) -> Process:
         db_obj = Process(**data)
         session.add(db_obj)

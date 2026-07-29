@@ -4,7 +4,7 @@ from uuid import uuid4
 
 import pytest
 from pub.models import import_all_models
-from pub.services import DeviceSpecService
+from pub.services import DeviceCategoryService, DeviceSpecService
 
 from app.routers import devices
 
@@ -92,3 +92,26 @@ async def test_device_spec_refs_must_belong_to_current_tenant(monkeypatch):
 
     assert exc_info.value.status_code == 400
     assert exc_info.value.detail == "supplier_id is not owned by current tenant"
+
+
+@pytest.mark.asyncio
+async def test_device_category_update_explicitly_loads_employees_before_serialization():
+    category = SimpleNamespace(name="旧名称")
+    session = Mock()
+    session.commit = AsyncMock()
+    session.refresh = AsyncMock()
+
+    updated = await DeviceCategoryService.update(
+        session,
+        category,
+        {"name": "新名称"},
+    )
+
+    assert updated is category
+    assert category.name == "新名称"
+    session.commit.assert_awaited_once()
+    assert session.refresh.await_args_list[0].args == (category,)
+    assert session.refresh.await_args_list[1].args == (category,)
+    assert session.refresh.await_args_list[1].kwargs == {
+        "attribute_names": ["employees"],
+    }

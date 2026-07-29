@@ -4,7 +4,19 @@ Device data models
 
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Date, DateTime, Uuid, Integer, SmallInteger, Float, Boolean, Text
+from sqlalchemy import (
+    Boolean,
+    Column,
+    Date,
+    DateTime,
+    Float,
+    Integer,
+    SmallInteger,
+    String,
+    Text,
+    UniqueConstraint,
+    Uuid,
+)
 from sqlalchemy.orm import relationship
 
 from pub.models import Base
@@ -89,9 +101,9 @@ class DeviceInst(Base):
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     name = Column(String(128), nullable=False, unique=True, index=True) # unique code for device instance, e.g. for QR code generation
     code = Column(String(64), nullable=False, unique=True, index=True)  # serial number for physical tracking
-    purchase_date = Column(Date, nullable=False) # purchase date for lifecycle management
+    purchase_date = Column(Date, nullable=True) # optional purchase date for lifecycle management
     life_span = Column(Integer, nullable=False, default=0)  # Expected lifespan in months
-    desc = Column(String(128), nullable=False) # description for device instance, e.g. installation location or specific notes
+    desc = Column(String(128), nullable=True) # optional notes for device instance
     status = Column(SmallInteger, default=1, comment="tiny(1) status")
     active = Column(SmallInteger, default=1, comment="设备是否运行")
     available = Column(SmallInteger, default=1, comment="设备是否可用, 如未分配或正在维修则不可用")
@@ -115,10 +127,13 @@ class Process(Base):
     """Device combo specification entity model"""
 
     __tablename__ = "process"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "code", name="uq_process_tenant_code"),
+    )
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    tenant_id = Column(Uuid(as_uuid=True), default=uuid.uuid4, index=False)
-    code = Column(String(8), nullable=False, unique=True, index=True)
+    tenant_id = Column(Uuid(as_uuid=True), nullable=False, default=uuid.uuid4)
+    code = Column(String(8), nullable=False)
     name = Column(String(64), nullable=False)
 
     status = Column(SmallInteger, default=1, comment="tiny(1) status")

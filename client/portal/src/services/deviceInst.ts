@@ -5,9 +5,9 @@ export type DeviceInst = {
   name: string;
   device_spec_id: string;
   code: string;
-  purchase_date: string;
+  purchase_date?: string | null;
   life_span: number;
-  desc: string;
+  desc?: string | null;
   status: number;
   active: number;
   available: number;
@@ -18,9 +18,9 @@ export type DeviceInstPayload = {
   name: string;
   device_spec_id: string;
   code: string;
-  purchase_date: string;
+  purchase_date?: string | null;
   life_span: number;
-  desc: string;
+  desc?: string | null;
   status: number;
   active: number;
   available: number;

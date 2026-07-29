@@ -184,9 +184,9 @@ class DeviceInstCreate(BaseModel):
     name: str
     device_spec_id: UUID
     code: str
-    purchase_date: date
+    purchase_date: Optional[date] = None
     life_span: Optional[int] = 0
-    desc: str
+    desc: Optional[str] = None
     status: Optional[int] = 1
     active: Optional[int] = 1
     available: Optional[int] = 1
@@ -218,9 +218,9 @@ class DeviceInstResponse(BaseModel):
     name: str
     device_spec_id: UUID
     code: str
-    purchase_date: date
+    purchase_date: Optional[date] = None
     life_span: int
-    desc: str
+    desc: Optional[str] = None
     status: int
     active: int
     available: int

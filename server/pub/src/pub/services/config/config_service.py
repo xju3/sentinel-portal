@@ -181,7 +181,7 @@ async def create_config_tasks(session: AsyncSession, sns: List[str]) -> None:
     from datetime import datetime
     from pub.models.sensor import SensorTask
     from pub.services.sensor.sensor_task_service import (
-        SENSOR_TASK_STATUS_OPEN,
+        SENSOR_TASK_OPEN_STATUSES,
         SENSOR_TASK_STATUS_PENDING,
     )
 

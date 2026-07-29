@@ -168,6 +168,11 @@ async def create_process(
     if supplied_tenant_id is not None and supplied_tenant_id != tenant_id:
         raise HTTPException(status_code=400, detail="tenant_id mismatch")
     data["tenant_id"] = tenant_id
+    if await ProcessService.get_by_code(session, tenant_id, data["code"]):
+        raise HTTPException(
+            status_code=400,
+            detail="Process code already exists for current tenant",
+        )
     return success(await ProcessService.create(session, data))
 
 
@@ -187,6 +192,16 @@ async def update_process(
     if "tenant_id" in data and data["tenant_id"] != tenant_id:
         raise HTTPException(status_code=400, detail="tenant_id cannot be changed")
     data.pop("tenant_id", None)
+    if "code" in data and await ProcessService.get_by_code(
+        session,
+        tenant_id,
+        data["code"],
+        exclude_id=obj_id,
+    ):
+        raise HTTPException(
+            status_code=400,
+            detail="Process code already exists for current tenant",
+        )
     return success(await ProcessService.update(session, db_obj, data))
 
 

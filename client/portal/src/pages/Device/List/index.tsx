@@ -31,12 +31,17 @@ type DeviceInstFormValues = {
   name: string;
   device_spec_id: string;
   code: string;
-  purchase_date: string | Dayjs;
+  purchase_date?: string | Dayjs;
   life_span: number;
-  desc: string;
+  desc?: string;
   status: number;
   active: number;
   available: number;
+};
+
+type DeviceSort = {
+  field?: string;
+  order?: 'ascend' | 'descend';
 };
 
 const toErrorMessage = (error: unknown): string => {
@@ -50,9 +55,12 @@ const toErrorMessage = (error: unknown): string => {
   return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';
 };
 
-const toApiDate = (value: string | Dayjs): string => {
+const toApiDate = (value?: string | Dayjs): string | null => {
+  if (!value) {
+    return null;
+  }
   if (typeof value === 'string') {
-    return value.trim();
+    return value.trim() || null;
   }
   return value.format('YYYY-MM-DD');
 };
@@ -64,6 +72,7 @@ const DeviceListPage = () => {
   const [saving, setSaving] = useState(false);
   const [rows, setRows] = useState<DeviceInst[]>([]);
   const [query, setQuery] = useState<Record<string, any>>({});
+  const [sort, setSort] = useState<DeviceSort>({});
   const [editing, setEditing] = useState<DeviceInst | null>(null);
   const [copyMode, setCopyMode] = useState(false);
 
@@ -130,6 +139,38 @@ const DeviceListPage = () => {
       return true;
     });
   }, [query, rows]);
+
+  const displayedRows = useMemo(() => {
+    if (!sort.field || !sort.order) {
+      return filteredRows;
+    }
+
+    const direction = sort.order === 'ascend' ? 1 : -1;
+    const valueOf = (row: DeviceInst): unknown => {
+      if (sort.field === 'device_spec_id') {
+        const spec = row.device_spec;
+        return spec ? `${spec.name} ${spec.model} ${spec.brand}` : '';
+      }
+      return row[sort.field as keyof DeviceInst];
+    };
+
+    return [...filteredRows].sort((left, right) => {
+      const leftValue = valueOf(left);
+      const rightValue = valueOf(right);
+      if (leftValue == null && rightValue == null) return 0;
+      if (leftValue == null) return 1;
+      if (rightValue == null) return -1;
+      if (typeof leftValue === 'number' && typeof rightValue === 'number') {
+        return (leftValue - rightValue) * direction;
+      }
+      return (
+        String(leftValue).localeCompare(String(rightValue), 'zh-CN', {
+          numeric: true,
+          sensitivity: 'base',
+        }) * direction
+      );
+    });
+  }, [filteredRows, sort]);
 
   const specPickerColumns: ColumnsType<DeviceSpec> = [
     { title: '名称', dataIndex: 'name' },
@@ -325,14 +366,22 @@ const DeviceListPage = () => {
         rowKey="id"
         loading={loading}
         columns={columns}
-        dataSource={filteredRows}
+        dataSource={displayedRows}
         search={{ labelWidth: 'auto' }}
         onSubmit={(values) => setQuery(values)}
         onReset={() => setQuery({})}
-        onChange={(pagination, filters, sorter: any) => {
-          const currentSort = sorter.order ? { field: sorter.field, order: sorter.order } : {};
-          setSort(currentSort);
-          loadRows(currentSort);
+        onChange={(_pagination, _filters, sorter: any) => {
+          const activeSorter = Array.isArray(sorter)
+            ? sorter.find((item) => item.order)
+            : sorter;
+          setSort(
+            activeSorter?.field && activeSorter.order
+              ? {
+                field: String(activeSorter.field),
+                order: activeSorter.order,
+              }
+              : {},
+          );
         }}
         options={{ reload: loadRows }}
         optionsRender={renderRefSafeTableOptions}
@@ -371,7 +420,7 @@ const DeviceListPage = () => {
               name: editing.name,
               device_spec_id: editing.device_spec_id,
               code: editing.code,
-              purchase_date: dayjs(editing.purchase_date),
+              purchase_date: editing.purchase_date ? dayjs(editing.purchase_date) : undefined,
               life_span: editing.life_span,
               desc: editing.desc,
               status: Number(editing.status),
@@ -383,7 +432,7 @@ const DeviceListPage = () => {
                 name: '',
                 device_spec_id: editing.device_spec_id,
                 code: editing.code,
-                purchase_date: dayjs(editing.purchase_date),
+                purchase_date: editing.purchase_date ? dayjs(editing.purchase_date) : undefined,
                 life_span: editing.life_span,
                 desc: editing.desc,
                 status: Number(editing.status),
@@ -406,7 +455,7 @@ const DeviceListPage = () => {
               code: values.code.trim(),
               purchase_date: toApiDate(values.purchase_date),
               life_span: Number(values.life_span ?? 0),
-              desc: values.desc.trim(),
+              desc: values.desc?.trim() || null,
               status: Number(values.status ?? 1),
               active: Number(values.active ?? 1),
               available: Number(values.available ?? 1),
@@ -434,16 +483,20 @@ const DeviceListPage = () => {
 
       >
         <ProFormText
+          name="code"
+          label="编号"
+          rules={[
+            { required: true, message: '请输入设备编号' },
+            { max: 36, message: '设备编号最多36个字符' },
+          ]}
+        />
+        <ProFormText
           name="name"
-          label="编码"
+          label="名称"
           rules={[
             { required: true, message: '请输入设备编码' },
             { max: 128, message: '设备编码最多128个字符' },
           ]}
-        />
-        <ProFormText
-          name="code"
-          label="序列号"
         />
         <ProForm.Item
           name="device_spec_id"

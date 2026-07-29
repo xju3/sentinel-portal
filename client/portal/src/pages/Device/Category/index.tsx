@@ -249,7 +249,7 @@ const DeviceCategoryPage = () => {
       sorter: (a, b) => (a.iso_standard?.code || '').localeCompare(b.iso_standard?.code || '', 'zh-CN'),
     },
     {
-      title: '负责员工',
+      title: '员工',
       key: 'employees',
       render: (_, row) => {
         const emps = row.employees || [];
@@ -274,7 +274,6 @@ const DeviceCategoryPage = () => {
     {
       title: '操作',
       valueType: 'option',
-      width: OPERATION_COL_WIDTH,
       fixed: 'right',
       align: 'center',
       render: (_, row) => (
@@ -311,7 +310,7 @@ const DeviceCategoryPage = () => {
               }
             }}
           >
-            负责员工
+            员工
           </a>
           <Popconfirm
             key="delete"
@@ -506,31 +505,7 @@ const DeviceCategoryPage = () => {
           }
         }}
       >
-        <ProFormText name="name" label="分类名称" rules={[{ required: true, message: '请输入分类名称' }]} />
-        <ProFormText name="description" label="备注" />
-        <ProFormSelect
-          name="health_check_freq_id"
-          label="巡检频率"
-          rules={[{ required: true, message: '请选择巡检频率' }]}
-          request={async () => {
-            const freqs = await listHealthCheckFreqs();
-            return (freqs || []).map((item) => ({
-              value: item.id,
-              label: `巡检${item.patrol}m / 诊断${item.diagnosis}m / 上报${item.report}`,
-            }));
-          }}
-        />
-        <ProFormSelect
-          name="iso_standard_id"
-          label="ISO标准"
-          request={async () => {
-            const isos = await listIsoStandards();
-            return (isos || []).map((item) => ({
-              value: item.id,
-              label: `${item.code} (ISO-${item.version === 1 ? '10816' : '20816'})`,
-            }));
-          }}
-        />
+        <ProFormText name="name" label="名称" rules={[{ required: true, message: '请选择分类' }]} />
         <ProFormSelect
           name="vib_threshold_id"
           label="振动阀值"
@@ -557,6 +532,30 @@ const DeviceCategoryPage = () => {
               }));
           }}
         />
+        <ProFormSelect
+          name="health_check_freq_id"
+          label="巡检频率"
+          rules={[{ required: true, message: '请选择巡检频率' }]}
+          request={async () => {
+            const freqs = await listHealthCheckFreqs();
+            return (freqs || []).map((item) => ({
+              value: item.id,
+              label: `巡检${item.patrol}m / 诊断${item.diagnosis}m / 上报${item.report}`,
+            }));
+          }}
+        />
+        <ProFormSelect
+          name="iso_standard_id"
+          label="ISO标准"
+          request={async () => {
+            const isos = await listIsoStandards();
+            return (isos || []).map((item) => ({
+              value: item.id,
+              label: `${item.code} (ISO-${item.version === 1 ? '10816' : '20816'})`,
+            }));
+          }}
+        />
+
         <ProForm.Item name="parent_id" label="上级分类">
           <EntityPicker<DeviceCategory>
             placeholder="可选，点击选择上级分类"
@@ -588,6 +587,7 @@ const DeviceCategoryPage = () => {
             }}
           />
         </ProForm.Item>
+        <ProFormText name="description" label="备注" />
       </ModalForm>
 
       {/* 负责员工配置弹窗 */}

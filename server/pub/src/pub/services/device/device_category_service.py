@@ -125,6 +125,7 @@ class DeviceCategoryService:
             setattr(db_obj, key, value)
         await session.commit()
         await session.refresh(db_obj)
+        await session.refresh(db_obj, attribute_names=["employees"])
         return db_obj
 
     @staticmethod

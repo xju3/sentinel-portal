@@ -10,6 +10,87 @@ from pub.models import Base, import_all_models
 logger = logging.getLogger(__name__)
 
 
+async def ensure_process_code_tenant_unique(conn) -> None:
+    """Replace the legacy global process.code index with a tenant-scoped one."""
+    if conn.dialect.name != "mysql":
+        return
+
+    index_count_sql = """
+        SELECT COUNT(*)
+        FROM information_schema.statistics
+        WHERE table_schema = DATABASE()
+          AND table_name = 'process'
+          AND index_name = :index_name
+    """
+    legacy_result = await conn.execute(
+        text(index_count_sql),
+        {"index_name": "ix_process_code"},
+    )
+    scoped_result = await conn.execute(
+        text(index_count_sql),
+        {"index_name": "uq_process_tenant_code"},
+    )
+    has_legacy_index = bool(legacy_result.scalar_one())
+    has_scoped_index = bool(scoped_result.scalar_one())
+
+    if has_legacy_index and not has_scoped_index:
+        await conn.execute(
+            text(
+                """
+                ALTER TABLE `process`
+                    DROP INDEX `ix_process_code`,
+                    ADD CONSTRAINT `uq_process_tenant_code`
+                        UNIQUE (`tenant_id`, `code`)
+                """
+            )
+        )
+    elif has_legacy_index:
+        await conn.execute(
+            text("ALTER TABLE `process` DROP INDEX `ix_process_code`")
+        )
+    elif not has_scoped_index:
+        await conn.execute(
+            text(
+                """
+                ALTER TABLE `process`
+                    ADD CONSTRAINT `uq_process_tenant_code`
+                        UNIQUE (`tenant_id`, `code`)
+                """
+            )
+        )
+
+
+async def ensure_device_inst_optional_fields(conn) -> None:
+    """Allow device instances to omit purchase date and notes."""
+    if conn.dialect.name != "mysql":
+        return
+
+    result = await conn.execute(
+        text(
+            """
+            SELECT column_name, is_nullable
+            FROM information_schema.columns
+            WHERE table_schema = DATABASE()
+              AND table_name = 'device_inst'
+              AND column_name IN ('purchase_date', 'desc')
+            """
+        )
+    )
+    nullable_by_column = {
+        row[0]: str(row[1]).upper() == "YES"
+        for row in result.fetchall()
+    }
+    alterations = []
+    if not nullable_by_column.get("purchase_date", False):
+        alterations.append("MODIFY COLUMN `purchase_date` DATE NULL")
+    if not nullable_by_column.get("desc", False):
+        alterations.append("MODIFY COLUMN `desc` VARCHAR(128) NULL")
+    if alterations:
+        await conn.execute(
+            text(f"ALTER TABLE `device_inst` {', '.join(alterations)}")
+        )
+
+
 class DatabaseManager:
     """Manager for MySQL database connections"""
 

@@ -21,6 +21,10 @@ from app.database import (
     influxdb_manager,
     minio_manager,
 )
+from pub.manager.mysql_manager import (
+    ensure_device_inst_optional_fields,
+    ensure_process_code_tenant_unique,
+)
 from pub.models.customer import Tenant
 from pub.services import DashboardHealthService
 from pub.services.common.weather_service import WeatherService
@@ -79,6 +83,9 @@ async def lifespan(app: FastAPI):
     logger.debug(f"Starting {settings.app_name} v{settings.app_version}")
     try:
         await db_manager.init(settings.mysql_url, settings.debug)
+        async with db_manager.engine.begin() as conn:
+            await ensure_process_code_tenant_unique(conn)
+            await ensure_device_inst_optional_fields(conn)
         redis_manager.init(settings.redis_url)
         stream_redis_manager.init(settings.stream_redis_url)
         influxdb_manager.init(
