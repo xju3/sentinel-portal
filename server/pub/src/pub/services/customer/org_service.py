@@ -106,8 +106,15 @@ class EmployeeService:
         limit: int = 100,
         sort_by: str | None = None,
         sort_order: str = "ascend",
+        has_wx_user_id: bool | None = None,
     ) -> List[Employee]:
         stmt = select(Employee).options(selectinload(Employee.departments)).where(Employee.tenant_id == tenant_id, Employee.active == True)
+        if has_wx_user_id is not None:
+            if has_wx_user_id:
+                stmt = stmt.where(Employee.wx_user_id.is_not(None))
+            else:
+                stmt = stmt.where(Employee.wx_user_id.is_(None))
+        
         stmt = apply_sorting(stmt, Employee, sort_by, sort_order)
         stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)

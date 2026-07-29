@@ -139,11 +139,12 @@ async def list_employees(
     limit: int = Query(100, ge=1, le=1000),
     sort_by: Optional[str] = None,
     sort_order: str = Query("ascend", pattern="^(ascend|descend)$"),
+    has_wx_user_id: Optional[bool] = None,
     session: AsyncSession = Depends(get_session),
     current_account: AccountModel = Depends(get_current_account),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
-    employees = await EmployeeService.get_employees(session, tenant_id, skip, limit, sort_by, sort_order)
+    employees = await EmployeeService.get_employees(session, tenant_id, skip, limit, sort_by, sort_order, has_wx_user_id)
     results = []
     for e in employees:
         resp = EmployeeResponse.model_validate(e)
