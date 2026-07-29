@@ -192,8 +192,9 @@ const DeviceSpecPage = () => {
       hideInSearch: true,
       fixed: 'left',
     },
+
     {
-      title: '规格名称',
+      title: '名称',
       dataIndex: 'name',
       width: 180,
       sorter: (a, b) => (a.name || '').localeCompare(b.name || '', 'zh-CN'),
@@ -203,12 +204,6 @@ const DeviceSpecPage = () => {
       dataIndex: 'model',
       width: 100,
       sorter: (a, b) => (a.model || '').localeCompare(b.model || '', 'zh-CN'),
-    },
-    {
-      title: '品牌',
-      dataIndex: 'brand',
-      width: 100,
-      sorter: (a, b) => (a.brand || '').localeCompare(b.brand || '', 'zh-CN'),
     },
     {
       title: '电压',
@@ -244,6 +239,12 @@ const DeviceSpecPage = () => {
         const labelB = b.supplier?.name || '';
         return labelA.localeCompare(labelB, 'zh-CN');
       },
+    },
+    {
+      title: '品牌',
+      dataIndex: 'brand',
+      width: 100,
+      sorter: (a, b) => (a.brand || '').localeCompare(b.brand || '', 'zh-CN'),
     },
     {
       title: '备注',
@@ -379,44 +380,7 @@ const DeviceSpecPage = () => {
           }
         }}
       >
-        <ProFormText name="name" label="规格名称" rules={[{ required: true, message: '请输入规格名称' }]} />
-        <ProFormText name="model" label="型号" rules={[{ required: true, message: '请输入型号' }]} />
-        <ProFormText 
-          name="brand" 
-          label="品牌" 
-          rules={[{ required: true, message: '品牌将自动填写' }]} 
-          fieldProps={{ readOnly: true, placeholder: '选择供应商后自动填写' }}
-        />
-        <ProFormDigit
-          name="voltage"
-          label="电压(V)"
-          min={0}
-          fieldProps={{ precision: 2 }}
-          rules={[{ required: true, message: '请输入电压' }]}
-        />
-        <ProFormDigit
-          name="rpm"
-          label="转速(RPM)"
-          min={0}
-          fieldProps={{ precision: 0 }}
-          rules={[{ required: true, message: '请输入转速' }]}
-        />
-        <ProForm.Item name="supplier_id" label="供应商" rules={[{ required: true, message: '请选择供应商' }]}>
-          <EntityPicker<Supplier>
-            placeholder="请点击选择供应商"
-            modalTitle="选择供应商"
-            triggerText="选择"
-            valueLabel={editing?.supplier?.name}
-            columns={supplierPickerColumns}
-            getRecordLabel={(record) => record.name}
-            fetcher={({ current, pageSize, keyword }) =>
-              querySuppliers({ current, pageSize, keyword })
-            }
-            onRecordChange={(record) => {
-              formRef.current?.setFieldsValue({ brand: record?.brand || '' });
-            }}
-          />
-        </ProForm.Item>
+        <ProFormText name="name" label="名称" rules={[{ required: true, message: '请输入规格名称' }]} />
         <ProForm.Item
           name="device_category_id"
           label="设备分类"
@@ -434,6 +398,45 @@ const DeviceSpecPage = () => {
             }
           />
         </ProForm.Item>
+        <ProForm.Item name="supplier_id" label="供应商" rules={[{ required: true, message: '请选择供应商' }]}>
+          <EntityPicker<Supplier>
+            placeholder="请点击选择供应商"
+            modalTitle="选择供应商"
+            triggerText="选择"
+            valueLabel={editing?.supplier?.name}
+            columns={supplierPickerColumns}
+            getRecordLabel={(record) => record.name}
+            fetcher={({ current, pageSize, keyword }) =>
+              querySuppliers({ current, pageSize, keyword })
+            }
+            onRecordChange={(record) => {
+              formRef.current?.setFieldsValue({ brand: record?.brand || '' });
+            }}
+          />
+        </ProForm.Item>
+        <ProFormDigit
+          name="rpm"
+          label="转速(RPM)"
+          min={0}
+          fieldProps={{ precision: 0 }}
+          rules={[{ required: true, message: '请输入转速' }]}
+        />
+        <ProFormDigit
+          name="voltage"
+          label="电压(V)"
+          min={0}
+          fieldProps={{ precision: 2 }}
+          rules={[{required: true,  message: '请输入电压' }]}
+        />
+
+        <ProFormText name="model" label="型号" rules={[{ message: '请输入型号' }]} />
+        <ProFormText
+          name="brand"
+          label="品牌"
+          disabled={true}
+          rules={[{ message: '品牌将自动填写' }]}
+          fieldProps={{ readOnly: true, placeholder: '选择供应商后自动填写' }}
+        />
         <ProFormText name="description" label="备注" />
       </ModalForm>
     </PageContainer>

@@ -67,6 +67,7 @@ export async function listEmployees(params?: {
   limit?: number;
   sort_by?: string;
   sort_order?: string;
+  has_wx_user_id?: boolean;
 }) {
   return request<EmployeeInfo[]>('/api/v1/employees', {
     method: 'GET',

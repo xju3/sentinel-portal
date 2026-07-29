@@ -305,7 +305,7 @@ const DeviceCategoryPage = () => {
               setTargetKeys((row.employees || []).map(e => e.id));
               setTransferModalOpen(true);
               if (employees.length === 0) {
-                const emps = await listEmployees();
+                const emps = await listEmployees({ has_wx_user_id: true });
                 setEmployees(emps || []);
               }
             }}

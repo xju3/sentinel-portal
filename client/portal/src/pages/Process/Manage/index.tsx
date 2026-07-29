@@ -165,7 +165,7 @@ const ProcessManagePage = () => {
     setEmployeeModalOpen(true);
     setEmployeeLoading(true);
     try {
-      const data = await listEmployees({ skip: 0, limit: 1000 });
+      const data = await listEmployees({ skip: 0, limit: 1000, has_wx_user_id: true });
       setAllEmployees(
         (data || []).map((emp: any) => ({
           key: emp.id,
