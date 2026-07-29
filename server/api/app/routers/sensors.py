@@ -62,6 +62,7 @@ from pub.contract.sensors import (
 )
 
 router = APIRouter(prefix="/sensors", tags=["sensors"])
+device_router = APIRouter(prefix="/sensors", tags=["sensors"])
 
 
 # ==========================================
@@ -289,7 +290,8 @@ async def create_sensor_task_for_admin(
     return success(SensorTaskResponse.model_validate(task))
 
 
-@router.post("/tasks/{task_id}/complete/{status}")
+@router.post("/{task_id}/complete/{status}")
+@device_router.post("/{task_id}/complete/{status}")
 async def complete_sensor_system_task(
     task_id: UUID,
     status: Annotated[int, Path(ge=0, le=1)],

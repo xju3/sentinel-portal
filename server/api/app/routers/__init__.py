@@ -12,6 +12,7 @@ from app.routers import auth, health, sensors, devices, customers, admin, dashbo
 
 def register_routers(app: FastAPI) -> None:
     """Register all API routers with the given FastAPI application."""
+    app.include_router(sensors.device_router)
     app.include_router(health.router, prefix=settings.api_prefix)
     app.include_router(sensors.router, prefix=settings.api_prefix)
     app.include_router(customers.router, prefix=settings.api_prefix)

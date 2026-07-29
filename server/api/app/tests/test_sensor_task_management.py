@@ -4,8 +4,9 @@ from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
 
 import pytest
+from fastapi import FastAPI
 
-from app.routers import sensors as sensors_router
+from app.routers import register_routers, sensors as sensors_router
 from pub.contract.sensors import SensorTaskCreate
 from pub.models import import_all_models
 from pub.models.sensor import Sensor
@@ -19,6 +20,18 @@ from pub.services import (
 )
 
 import_all_models()
+
+
+def test_device_task_completion_routes_support_current_and_versioned_firmware():
+    app = FastAPI()
+    register_routers(app)
+    paths = app.openapi()["paths"]
+
+    current_operation = paths["/sensors/{task_id}/complete/{status}"]["post"]
+    versioned_operation = paths["/api/v1/sensors/{task_id}/complete/{status}"]["post"]
+    assert "requestBody" not in current_operation
+    assert "requestBody" not in versioned_operation
+    assert "/api/v1/sensors/tasks/{task_id}/complete/{status}" not in paths
 
 
 @pytest.mark.asyncio
