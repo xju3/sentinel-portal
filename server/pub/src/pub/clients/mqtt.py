@@ -90,6 +90,35 @@ class MQTTManager:
             logger.error(f"MQTT publish exception: {topic}, error={e}")
             return False
 
+    def publish_confirmed(
+        self,
+        topic: str,
+        payload: str,
+        qos: int = 1,
+        timeout: float = 5.0,
+    ) -> bool:
+        """Publish and wait until the broker acknowledges the message."""
+        if self.client is None:
+            logger.error("MQTT client not initialized, cannot publish to %s", topic)
+            return False
+        try:
+            result = self.client.publish(topic, payload, qos=qos)
+            if result.rc != mqtt.MQTT_ERR_SUCCESS:
+                logger.error("MQTT publish failed: %s, rc=%s", topic, result.rc)
+                return False
+            result.wait_for_publish(timeout=timeout)
+            if not result.is_published():
+                logger.error(
+                    "MQTT publish acknowledgement timed out: %s",
+                    topic,
+                )
+                return False
+            logger.debug("MQTT publish acknowledged: %s", topic)
+            return True
+        except Exception as e:
+            logger.error("MQTT confirmed publish exception: %s, error=%s", topic, e)
+            return False
+
     def close(self) -> None:
         """Stop background loop and disconnect"""
         if self.client:

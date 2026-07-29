@@ -1,21 +1,24 @@
-import logging
+import asyncio
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
-from pydantic import ValidationError
 
+from pub.manager.database import (
+    db_manager,
+    influxdb_manager,
+    minio_manager,
+    redis_manager,
+)
 from pub.models.report import DeviceDiagnosticReport
-from app.preparation.ingestion import process_incoming_report
-
 from pub.utils.logger import setup_logging
+
+from app.clients.mqtt import diagnosis_mqtt_manager
+from app.clients.stream_worker import _ensure_consumer_group, run_stream_worker
 from app.config import settings
+from app.preparation.ingestion import process_incoming_report
 
 # Configure logging for the new service using shared pub setup
 logger = setup_logging(debug=settings.debug)
-
-import asyncio
-from contextlib import asynccontextmanager
-from pub.manager.database import db_manager, redis_manager, influxdb_manager, minio_manager
-from app.clients.stream_worker import run_stream_worker, _ensure_consumer_group
 
 # 并发 Worker 数量，控制 MySQL/InfluxDB 并发压力
 WORKER_COUNT = 3
@@ -38,6 +41,13 @@ async def lifespan(app: FastAPI):
         settings.minio_bucket,
     )
 
+    try:
+        diagnosis_mqtt_manager.init()
+    except Exception:
+        logger.error(
+            "Diagnosis MQTT publisher unavailable; diagnosis will continue",
+            exc_info=True,
+        )
 
     logger.debug("Initializing Redis Stream consumer group...")
     _ensure_consumer_group()
@@ -62,6 +72,7 @@ async def lifespan(app: FastAPI):
     redis_manager.close()
     influxdb_manager.close()
     minio_manager.close()
+    diagnosis_mqtt_manager.close()
 
 
 app = FastAPI(

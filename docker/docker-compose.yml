@@ -30,7 +30,7 @@ services:
       - ../server:/app/server
       - api_venv:/app/server/.venv
 
-  dia:
+  diagnosis:
     <<: *python-app
     container_name: stl-dia
     environment:
@@ -53,6 +53,20 @@ services:
     volumes:
       - ../server:/app/server
       - persistence_venv:/app/server/.venv
+
+  notification:
+    <<: *python-app
+    container_name: stl-notification
+    environment:
+      <<: *python-env
+      APP_PACKAGE: notification
+    volumes:
+      - ../server:/app/server
+      - notification_venv:/app/server/.venv
+    depends_on:
+      - emqx
+      - mysql
+      - redis
 
   portal:
     container_name: stl-portal
@@ -183,6 +197,7 @@ volumes:
   api_venv:
   dia_venv:
   persistence_venv:
+  notification_venv:
   minio_logs:
     driver: local
     driver_opts:

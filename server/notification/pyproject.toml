@@ -1,0 +1,35 @@
+[project]
+name = "notification"
+version = "0.1.0"
+description = "Independent MQTT-driven WeChat notification service"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi>=0.115.0",
+    "anyio>=4,<5",
+    "uvicorn[standard]==0.24.0",
+    "sqlalchemy>=2.0.36",
+    "pymysql[rsa]==1.1.0",
+    "redis==5.0.1",
+    "pydantic>=2.11.0",
+    "pydantic-settings==2.1.0",
+    "python-dotenv==1.0.0",
+    "pytest==7.4.3",
+    "pytest-asyncio==0.21.1",
+    "httpx==0.25.2",
+    "aiomysql>=0.3.2",
+    "greenlet>=3.5.0",
+    "cryptography>=48.0.0",
+    "paho-mqtt>=2.1.0",
+    "pub",
+]
+
+[tool.uv]
+managed = true
+package = false
+
+[project.scripts]
+start = "app.main:start_server"
+
+[tool.uv.sources]
+pub = { workspace = true }

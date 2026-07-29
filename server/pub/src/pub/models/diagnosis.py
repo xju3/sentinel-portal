@@ -10,6 +10,7 @@ from enum import IntEnum
 
 from sqlalchemy import (
     Column,
+    Date,
     DateTime,
     ForeignKey,
     Integer,
@@ -18,6 +19,7 @@ from sqlalchemy import (
     Uuid,
     BigInteger,
     Index,
+    UniqueConstraint,
 )
 from sqlalchemy.dialects.mysql import JSON as MySQLJSON
 from sqlalchemy.dialects.mysql import TINYINT
@@ -32,6 +34,13 @@ class DiagnosisRecordStatus(IntEnum):
     DIAGNOSED = 2
     SKIPPED = 3
     MISSED = 4
+
+
+class DiagnosisNotificationDeliveryStatus(IntEnum):
+    PENDING = 0
+    SENDING = 1
+    SENT = 2
+    FAILED = 3
 
 
 class DiagnosisRecord(Base):
@@ -196,3 +205,58 @@ class DiagnosisFft(Base):
     details = Column(MySQLJSON, nullable=True)
 
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+
+
+class DiagnosisNotificationDelivery(Base):
+    """Daily WeChat delivery ledger for diagnosis notification events."""
+
+    __tablename__ = "diagnosis_notification_delivery"
+    __table_args__ = (
+        UniqueConstraint(
+            "device_id",
+            "overall_level",
+            "employee_id",
+            "notification_date",
+            name="uq_diagnosis_notification_delivery_daily",
+        ),
+        Index("idx_diagnosis_notification_event", "event_id"),
+        Index("idx_diagnosis_notification_employee_status", "employee_id", "status"),
+        Index("idx_diagnosis_notification_date_status", "notification_date", "status"),
+    )
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    event_id = Column(Uuid(as_uuid=True), nullable=False, index=True)
+    diagnosis_id = Column(Uuid(as_uuid=True), nullable=False, index=True)
+    report_id = Column(Uuid(as_uuid=True), nullable=True, index=True)
+    device_id = Column(Uuid(as_uuid=True), nullable=False, index=True)
+    sensor_sn = Column(String(255), nullable=True, index=True)
+    device_category_id = Column(Uuid(as_uuid=True), nullable=True, index=True)
+    process_device_id = Column(Uuid(as_uuid=True), nullable=True, index=True)
+    overall_level = Column(
+        TINYINT(unsigned=True),
+        nullable=False,
+        comment="1=关注,2=异常,3=告警,4=严重",
+    )
+    employee_id = Column(Uuid(as_uuid=True), nullable=False, index=True)
+    wx_user_id = Column(String(255), nullable=False)
+    notification_date = Column(Date, nullable=False, index=True)
+    diagnosed_at = Column(
+        DateTime,
+        nullable=False,
+        comment="诊断完成时间(UTC)",
+    )
+    status = Column(
+        TINYINT(unsigned=True),
+        nullable=False,
+        default=DiagnosisNotificationDeliveryStatus.PENDING,
+        comment="0=PENDING,1=SENDING,2=SENT,3=FAILED",
+    )
+    sent_at = Column(DateTime, nullable=True)
+    last_error = Column(String(1024), nullable=True)
+    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
+    updated_at = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        onupdate=datetime.utcnow,
+    )

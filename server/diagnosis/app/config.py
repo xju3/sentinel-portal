@@ -32,6 +32,8 @@ class Settings(BaseSettings):
     mqtt_client_id: str = "sentinel-dia-client"
     mqtt_client_id_unique: bool = True
     mqtt_protocol_version: str = "3.1.1"
+    mqtt_notification_topic: str = "sentinel/notification/wechat"
+    mqtt_publish_timeout_seconds: float = 5.0
 
     model_config = SettingsConfigDict(
         env_file=("../api/.env", "../../.env", ".env"),

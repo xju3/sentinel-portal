@@ -176,7 +176,8 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
         vib_level = severity_to_level(vib_result.get("severity", "info"))
         
         overall_level = max(temp_level, vib_level)
-        
+
+        notification_event: dict[str, Any] | None = None
         async with db_manager.SessionLocal() as session:
             async with session.begin():
                 resampling_flag = 0
@@ -276,14 +277,47 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
                     raise RuntimeError(
                         f"DiagnosisRecord not found for report_id={report.report_id}"
                     )
+                diagnosed_at = datetime.now(timezone.utc)
                 source_record.diagnosis_status = int(
                     DiagnosisRecordStatus.DIAGNOSED
                 )
                 source_record.overall_level = overall_level
-                source_record.diagnosed_at = datetime.now(
-                    timezone.utc
-                ).replace(tzinfo=None)
-                
+                source_record.diagnosed_at = diagnosed_at.replace(tzinfo=None)
+
+                if overall_level > 0:
+                    notification_event = {
+                        "event_id": str(diag_record.id),
+                        "diagnosis_id": str(diag_record.id),
+                        "report_id": report.report_id,
+                        "device_id": str(device_uuid),
+                        "sensor_sn": report.sensor_sn,
+                        "overall_level": overall_level,
+                        "device_category_id": (
+                            str(source_record.device_category_id)
+                            if source_record.device_category_id
+                            else report.device_category_id
+                        ),
+                        "process_device_id": (
+                            str(source_record.process_device_id)
+                            if source_record.process_device_id
+                            else report.process_device_id
+                        ),
+                        "diagnosed_at": diagnosed_at.isoformat(),
+                    }
+
+        if notification_event is not None:
+            try:
+                from app.clients.mqtt import publish_notification_event
+
+                await publish_notification_event(notification_event)
+            except Exception:
+                logger.error(
+                    "Unexpected diagnosis notification publish failure: "
+                    "diagnosis_id=%s",
+                    notification_event["diagnosis_id"],
+                    exc_info=True,
+                )
+
         # 3. Update Health Status Cache
         if redis_client:
             try:

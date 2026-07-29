@@ -45,6 +45,7 @@ from .diagnosis.quick_history_cache import *
 from .dashboard.dashboard_health_service import DashboardHealthService
 from .dashboard.dashboard_service import DashboardService
 
+from .notification.notification_service import NotificationService
 from .wx.wx_service import WxService
 from .dispatch.quick_dispatch_service import *
 from .config.config_service import *
