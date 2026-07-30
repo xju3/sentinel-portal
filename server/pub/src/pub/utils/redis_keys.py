@@ -91,3 +91,5 @@ REDIS_KEY_PERSISTENCE_PROCESSED_REPORT = "persistence:processed:{report_id}"
 # 存储内容: { "bucket": str, "path": str }
 REDIS_STREAM_DIAGNOSIS_TRIGGER = "stream:diagnosis:trigger"
 REDIS_STREAM_DIAGNOSIS_GROUP = "diagnosis:workers"
+REDIS_STREAM_FFT_TRIGGER = "stream:diagnosis:fft"
+REDIS_STREAM_FFT_GROUP = "diagnosis:fft:workers"

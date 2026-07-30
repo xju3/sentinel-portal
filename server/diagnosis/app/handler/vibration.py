@@ -75,6 +75,52 @@ class VibrationDiagnosis:
         return current_severity
 
     @staticmethod
+    def _finish_evidence(
+        evidence: dict[str, Any],
+        *,
+        severity: str,
+        primary_rule: str | None,
+    ) -> dict[str, Any]:
+        evidence["result"] = {
+            "level": {
+                "ok": 0,
+                "normal": 0,
+                "info": 0,
+                "attention": 1,
+                "abnormal": 2,
+                "warning": 3,
+                "critical": 4,
+            }.get(severity, 0),
+            "primary_rule": primary_rule,
+            "triggered_rules": [
+                check["code"]
+                for check in evidence["checks"]
+                if check.get("triggered")
+            ],
+        }
+        return evidence
+
+    @staticmethod
+    def _window_summary(
+        trend_data: list[dict[str, Any]],
+        *,
+        hours: int,
+        current_val: float,
+        current_ts_ms: int | None,
+    ) -> dict[str, Any]:
+        values = [float(point["value"]) for point in trend_data]
+        if not values:
+            values = [current_val]
+        return {
+            "hours": hours,
+            "from_ts_ms": trend_data[0]["ts_ms"] if trend_data else current_ts_ms,
+            "to_ts_ms": current_ts_ms,
+            "sample_count": len(trend_data),
+            "min": min(values),
+            "max": max(values),
+        }
+
+    @staticmethod
     async def analyze(
         device_id: str,
         location_id: str,
@@ -98,7 +144,20 @@ class VibrationDiagnosis:
         mt_max_amplitude = float(thresholds.get("mt_max_amplitude", 4.0))
         mt_max_slope = float(thresholds.get("mt_max_slope", 0.5))
 
-        evidence = {"current": max_rms_vel, "healthy_median": healthy_median}
+        evidence: dict[str, Any] = {
+            "schema_version": 2,
+            "fault_type": "vibration",
+            "current": max_rms_vel,
+            "healthy_median": healthy_median,
+            "context": {
+                "current": max_rms_vel,
+                "healthy_median": healthy_median,
+                "baseline": baseline,
+                "unit": "mm/s",
+            },
+            "checks": [],
+            "peer": None,
+        }
         
         # Base Ratio calculation: (current - healthy) / (baseline - healthy)
         if baseline > healthy_median:
@@ -108,25 +167,58 @@ class VibrationDiagnosis:
         ratio = max(0.0, ratio) # 防止当前值低于健康中位数时出现负数
         
         evidence["vibration_budget_ratio"] = round(ratio, 4)
+        evidence["context"]["budget_ratio"] = round(ratio, 4)
         context_severity = VibrationDiagnosis._get_severity_from_ratio(ratio)
 
         # 1. Absolute Baseline Check
-        if max_rms_vel >= baseline:
+        baseline_triggered = max_rms_vel >= baseline
+        evidence["checks"].append(
+            {
+                "code": "vibration.absolute_baseline",
+                "label": "绝对振动阈值",
+                "observed": max_rms_vel,
+                "operator": ">=",
+                "threshold": baseline,
+                "unit": "mm/s",
+                "triggered": baseline_triggered,
+            }
+        )
+        if baseline_triggered:
             return {
                 "status": "alarm",
                 "severity": "critical",
                 "reason": f"Critical: Absolute vibration {max_rms_vel:.2f} mm/s exceeded baseline {baseline} mm/s!",
-                "evidence": evidence,
+                "evidence": VibrationDiagnosis._finish_evidence(
+                    evidence,
+                    severity="critical",
+                    primary_rule="vibration.absolute_baseline",
+                ),
                 "requires_resampling": True
             }
             
         # Warning Zone baseline check
-        if ratio >= 0.70:
+        warning_zone_triggered = ratio >= 0.70
+        evidence["checks"].append(
+            {
+                "code": "vibration.warning_zone",
+                "label": "振动阈值接近度",
+                "observed": round(ratio, 4),
+                "operator": ">=",
+                "threshold": 0.70,
+                "unit": "ratio",
+                "triggered": warning_zone_triggered,
+            }
+        )
+        if warning_zone_triggered:
             return {
                 "status": "alarm",
                 "severity": "warning",
                 "reason": f"Warning: Vibration {max_rms_vel:.2f} mm/s reached {ratio*100:.1f}% of baseline.",
-                "evidence": evidence,
+                "evidence": VibrationDiagnosis._finish_evidence(
+                    evidence,
+                    severity="warning",
+                    primary_rule="vibration.warning_zone",
+                ),
                 "requires_resampling": True
             }
 
@@ -147,12 +239,28 @@ class VibrationDiagnosis:
             mutation = abs(max_rms_vel - last_val)
             evidence["mutation"] = mutation
             evidence["last_val"] = last_val
-            if mutation > rt_max_delta:
+            mutation_triggered = mutation > rt_max_delta
+            evidence["checks"].append(
+                {
+                    "code": "vibration.realtime_mutation",
+                    "label": "实时振动突变",
+                    "observed": mutation,
+                    "operator": ">",
+                    "threshold": rt_max_delta,
+                    "unit": "mm/s",
+                    "triggered": mutation_triggered,
+                }
+            )
+            if mutation_triggered:
                 return {
                     "status": "alarm",
                     "severity": "warning",
                     "reason": f"Warning: Real-time mutation {mutation:.2f} mm/s exceeds limit {rt_max_delta} mm/s!",
-                    "evidence": evidence,
+                    "evidence": VibrationDiagnosis._finish_evidence(
+                        evidence,
+                        severity="warning",
+                        primary_rule="vibration.realtime_mutation",
+                    ),
                     "requires_resampling": True
                 }
 
@@ -180,7 +288,26 @@ class VibrationDiagnosis:
                 evidence["peer_median"] = peer_median
                 
                 # Check deviation (e.g. 5.0 mm/s)
-                if abs(max_rms_vel - peer_median) > 5.0:
+                peer_deviation = abs(max_rms_vel - peer_median)
+                peer_triggered = peer_deviation > 5.0
+                evidence["peer"] = {
+                    "median": peer_median,
+                    "deviation": peer_deviation,
+                    "threshold": 5.0,
+                    "sample_count": len(peer_values),
+                }
+                evidence["checks"].append(
+                    {
+                        "code": "vibration.peer_deviation",
+                        "label": "同类设备振动偏差",
+                        "observed": peer_deviation,
+                        "operator": ">",
+                        "threshold": 5.0,
+                        "unit": "mm/s",
+                        "triggered": peer_triggered,
+                    }
+                )
+                if peer_triggered:
                     severity = VibrationDiagnosis._escalate(severity, "abnormal")
                     alarm_reason = f"Peer deviation: current {max_rms_vel:.2f} mm/s differs from peer median {peer_median:.2f} mm/s."
                     
@@ -188,7 +315,11 @@ class VibrationDiagnosis:
                         "status": "alarm",
                         "severity": severity,
                         "reason": alarm_reason,
-                        "evidence": evidence,
+                        "evidence": VibrationDiagnosis._finish_evidence(
+                            evidence,
+                            severity=severity,
+                            primary_rule="vibration.peer_deviation",
+                        ),
                         "requires_resampling": True
                     }
 
@@ -204,6 +335,36 @@ class VibrationDiagnosis:
             st_amplitude = VibrationDiagnosis._calculate_amplitude(st_trend, max_rms_vel)
             evidence["st_slope"] = round(st_slope, 4)
             evidence["st_amplitude"] = round(st_amplitude, 4)
+            st_window = VibrationDiagnosis._window_summary(
+                st_trend,
+                hours=24,
+                current_val=max_rms_vel,
+                current_ts_ms=current_ts_ms,
+            )
+            evidence["checks"].extend(
+                [
+                    {
+                        "code": "vibration.short_term_slope",
+                        "label": "24小时振动斜率",
+                        "observed": round(st_slope, 4),
+                        "operator": "abs >",
+                        "threshold": st_max_slope,
+                        "unit": "mm/s/hour",
+                        "triggered": abs(st_slope) > st_max_slope,
+                        "window": st_window,
+                    },
+                    {
+                        "code": "vibration.short_term_amplitude",
+                        "label": "24小时振动振幅",
+                        "observed": round(st_amplitude, 4),
+                        "operator": ">",
+                        "threshold": st_max_amplitude,
+                        "unit": "mm/s",
+                        "triggered": st_amplitude > st_max_amplitude,
+                        "window": st_window,
+                    },
+                ]
+            )
             
             if abs(st_slope) > st_max_slope or st_amplitude > st_max_amplitude:
                 severity = VibrationDiagnosis._escalate(severity, context_severity)
@@ -213,24 +374,71 @@ class VibrationDiagnosis:
             mt_amplitude = VibrationDiagnosis._calculate_amplitude(mt_trend, max_rms_vel)
             evidence["mt_slope"] = round(mt_slope, 4)
             evidence["mt_amplitude"] = round(mt_amplitude, 4)
+            mt_window = VibrationDiagnosis._window_summary(
+                mt_trend,
+                hours=72,
+                current_val=max_rms_vel,
+                current_ts_ms=current_ts_ms,
+            )
+            evidence["checks"].extend(
+                [
+                    {
+                        "code": "vibration.middle_term_slope",
+                        "label": "72小时振动斜率",
+                        "observed": round(mt_slope, 4),
+                        "operator": "abs >",
+                        "threshold": mt_max_slope,
+                        "unit": "mm/s/hour",
+                        "triggered": abs(mt_slope) > mt_max_slope,
+                        "window": mt_window,
+                    },
+                    {
+                        "code": "vibration.middle_term_amplitude",
+                        "label": "72小时振动振幅",
+                        "observed": round(mt_amplitude, 4),
+                        "operator": ">",
+                        "threshold": mt_max_amplitude,
+                        "unit": "mm/s",
+                        "triggered": mt_amplitude > mt_max_amplitude,
+                        "window": mt_window,
+                    },
+                ]
+            )
             
             if not alarm_reason and (abs(mt_slope) > mt_max_slope or mt_amplitude > mt_max_amplitude):
                 severity = VibrationDiagnosis._escalate(severity, context_severity)
                 alarm_reason = "Violated Middle-Term trend."
 
         if alarm_reason:
+            if severity in {"ok", "normal", "info"}:
+                severity = "attention"
             return {
                 "status": "alarm",
                 "severity": severity,
                 "reason": alarm_reason,
-                "evidence": evidence,
+                "evidence": VibrationDiagnosis._finish_evidence(
+                    evidence,
+                    severity=severity,
+                    primary_rule=next(
+                        (
+                            check["code"]
+                            for check in evidence["checks"]
+                            if check.get("triggered")
+                        ),
+                        None,
+                    ),
+                ),
                 "requires_resampling": False
             }
 
         return {
             "status": "ok",
-            "severity": severity,
+            "severity": "info",
             "reason": f"Running normally at {max_rms_vel:.2f} mm/s",
-            "evidence": evidence,
+            "evidence": VibrationDiagnosis._finish_evidence(
+                evidence,
+                severity="info",
+                primary_rule=None,
+            ),
             "requires_resampling": False
         }

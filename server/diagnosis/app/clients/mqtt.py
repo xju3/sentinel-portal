@@ -39,10 +39,11 @@ async def publish_notification_event(event: dict[str, Any]) -> bool:
     if not published:
         logger.error(
             "Failed to publish diagnosis notification event: "
-            "event_id=%s diagnosis_id=%s device_id=%s level=%s",
+            "event_id=%s diagnosis_id=%s device_id=%s level=%s faults=%s",
             event.get("event_id"),
             event.get("diagnosis_id"),
             event.get("device_id"),
             event.get("overall_level"),
+            event.get("faults"),
         )
     return published

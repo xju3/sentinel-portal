@@ -24,9 +24,13 @@ class Settings(BaseSettings):
     wx_app_id: str = "your wx app id"
     wx_app_secret: str = "your wx app secret"
     wx_template_id: str = "gkcCWWRQrMMvypWKQypnfcA3dlU4CM3m9uhzmxKe6KE"
-    wx_template_url: str | None = "https://langhu.ai"
+    wx_template_url: str | None = (
+        "https://langhu.ai/api/v1/wx/diagnosis/entry"
+    )
 
     notification_timezone: str = "Asia/Shanghai"
+    notification_delivery_max_attempts: int = 3
+    notification_delivery_retry_seconds: float = 30.0
 
     model_config = SettingsConfigDict(
         env_file=(

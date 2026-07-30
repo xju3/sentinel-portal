@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import json
 import logging
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from typing import Any, Literal
 from uuid import UUID
 from zoneinfo import ZoneInfo
@@ -41,9 +41,15 @@ LEVEL_LABELS = {
     1: "关注",
     2: "异常",
     3: "告警",
-    4: "严重",
+    4: "危险",
+}
+FAULT_LABELS = {
+    "temperature": "温度",
+    "vibration": "振动",
+    "legacy_aggregate": "综合",
 }
 RouteSource = Literal["device_category", "process_device"]
+NotificationFaultType = Literal["temperature", "vibration", "legacy_aggregate"]
 
 
 def _ensure_utc(value: datetime) -> datetime:
@@ -56,7 +62,7 @@ def _utc_naive_now() -> datetime:
     return datetime.now(timezone.utc).replace(tzinfo=None)
 
 
-class DiagnosisNotificationEvent(BaseModel):
+class DiagnosisNotificationEventV1(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     event_id: UUID
@@ -85,6 +91,145 @@ class DiagnosisNotificationEvent(BaseModel):
     @property
     def notification_date(self) -> date:
         return self.diagnosed_at.astimezone(BEIJING_TZ).date()
+
+
+class DiagnosisNotificationFault(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    diagnosis_item_id: UUID | None = None
+    fault_type: Literal["temperature", "vibration"]
+    fault_level: int = Field(..., ge=1, le=4)
+
+
+class DiagnosisNotificationEventV2(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    schema_version: Literal[2]
+    event_id: UUID
+    diagnosis_id: UUID
+    report_id: UUID | None = None
+    device_id: UUID
+    sensor_sn: str
+    device_category_id: UUID | None = None
+    process_device_id: UUID | None = None
+    diagnosed_at: datetime
+    faults: tuple[DiagnosisNotificationFault, ...]
+
+    @field_validator("sensor_sn")
+    @classmethod
+    def _validate_sensor_sn(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("sensor_sn must not be empty")
+        return value
+
+    @field_validator("diagnosed_at", mode="after")
+    @classmethod
+    def _normalize_diagnosed_at(cls, value: datetime) -> datetime:
+        return _ensure_utc(value)
+
+
+class DiagnosisNotificationFaultEvent(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    source_schema_version: Literal[1, 2]
+    event_id: UUID
+    diagnosis_id: UUID
+    report_id: UUID | None = None
+    device_id: UUID
+    sensor_sn: str
+    diagnosed_at: datetime
+    device_category_id: UUID | None = None
+    process_device_id: UUID | None = None
+    fault_type: NotificationFaultType
+    fault_level: int = Field(..., ge=1, le=4)
+    diagnosis_item_id: UUID | None = None
+    overall_level: int | None = Field(default=None, ge=1, le=4)
+
+    @field_validator("sensor_sn")
+    @classmethod
+    def _validate_sensor_sn(cls, value: str) -> str:
+        value = value.strip()
+        if not value:
+            raise ValueError("sensor_sn must not be empty")
+        return value
+
+    @field_validator("diagnosed_at", mode="after")
+    @classmethod
+    def _normalize_diagnosed_at(cls, value: datetime) -> datetime:
+        return _ensure_utc(value)
+
+    @property
+    def notification_date(self) -> date:
+        return self.diagnosed_at.astimezone(BEIJING_TZ).date()
+
+    @property
+    def level_for_delivery(self) -> int:
+        return self.fault_level
+
+    @property
+    def fault_label(self) -> str:
+        return FAULT_LABELS.get(self.fault_type, "故障")
+
+    @classmethod
+    def from_v1(cls, payload: DiagnosisNotificationEventV1) -> "DiagnosisNotificationFaultEvent":
+        return cls(
+            source_schema_version=1,
+            event_id=payload.event_id,
+            diagnosis_id=payload.diagnosis_id,
+            report_id=payload.report_id,
+            device_id=payload.device_id,
+            sensor_sn=payload.sensor_sn,
+            diagnosed_at=payload.diagnosed_at,
+            device_category_id=payload.device_category_id,
+            process_device_id=payload.process_device_id,
+            fault_type="legacy_aggregate",
+            fault_level=payload.overall_level,
+            overall_level=payload.overall_level,
+        )
+
+    @classmethod
+    def from_v2(
+        cls,
+        payload: DiagnosisNotificationEventV2,
+        fault: DiagnosisNotificationFault,
+    ) -> "DiagnosisNotificationFaultEvent":
+        return cls(
+            source_schema_version=2,
+            event_id=payload.event_id,
+            diagnosis_id=payload.diagnosis_id,
+            report_id=payload.report_id,
+            device_id=payload.device_id,
+            sensor_sn=payload.sensor_sn,
+            diagnosed_at=payload.diagnosed_at,
+            device_category_id=payload.device_category_id,
+            process_device_id=payload.process_device_id,
+            diagnosis_item_id=fault.diagnosis_item_id,
+            fault_type=fault.fault_type,
+            fault_level=fault.fault_level,
+        )
+
+
+class DiagnosisNotificationEvent(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    schema_version: Literal[1, 2]
+    fault_events: tuple[DiagnosisNotificationFaultEvent, ...]
+
+    @property
+    def event_id(self) -> UUID:
+        return self.fault_events[0].event_id
+
+    @property
+    def diagnosis_id(self) -> UUID:
+        return self.fault_events[0].diagnosis_id
+
+    @property
+    def report_id(self) -> UUID | None:
+        return self.fault_events[0].report_id
+
+    def expanded_faults(self) -> tuple[DiagnosisNotificationFaultEvent, ...]:
+        return self.fault_events
 
 
 class NotificationRouteResolution(BaseModel):
@@ -139,8 +284,13 @@ class NotificationMessageContext(BaseModel):
     report_id: UUID | None = None
     device_id: UUID
     sensor_sn: str | None = None
-    overall_level: int
-    overall_level_label: str
+    diagnosis_item_id: UUID | None = None
+    fault_type: NotificationFaultType
+    fault_label: str
+    fault_level: int
+    fault_level_label: str
+    overall_level: int | None = None
+    overall_level_label: str | None = None
     diagnosed_at: datetime
     notification_date: date
     device_name: str | None = None
@@ -164,12 +314,28 @@ class NotificationService:
             payload = json.loads(payload)
         if not isinstance(payload, dict):
             raise ValueError("Diagnosis notification payload must be a JSON object")
-        return DiagnosisNotificationEvent.model_validate(payload)
+        schema_version = payload.get("schema_version", 1)
+        if schema_version == 1:
+            event_v1 = DiagnosisNotificationEventV1.model_validate(payload)
+            return DiagnosisNotificationEvent(
+                schema_version=1,
+                fault_events=(DiagnosisNotificationFaultEvent.from_v1(event_v1),),
+            )
+        if schema_version == 2:
+            event_v2 = DiagnosisNotificationEventV2.model_validate(payload)
+            return DiagnosisNotificationEvent(
+                schema_version=2,
+                fault_events=tuple(
+                    DiagnosisNotificationFaultEvent.from_v2(event_v2, fault)
+                    for fault in event_v2.faults
+                ),
+            )
+        raise ValueError(f"Unsupported diagnosis notification schema_version: {schema_version}")
 
     @staticmethod
     async def resolve_route_ids(
         session: AsyncSession,
-        event: DiagnosisNotificationEvent,
+        event: DiagnosisNotificationFaultEvent,
     ) -> NotificationRouteResolution:
         device_route = await NotificationService._route_ids_by_device_id(
             session,
@@ -244,7 +410,7 @@ class NotificationService:
     @staticmethod
     async def list_recipients(
         session: AsyncSession,
-        event: DiagnosisNotificationEvent,
+        event: DiagnosisNotificationFaultEvent,
     ) -> list[NotificationRecipient]:
         route = await NotificationService.resolve_route_ids(session, event)
         recipients: dict[UUID, NotificationRecipient] = {}
@@ -276,7 +442,9 @@ class NotificationService:
     @staticmethod
     async def prepare_delivery_targets(
         session: AsyncSession,
-        event: DiagnosisNotificationEvent,
+        event: DiagnosisNotificationFaultEvent,
+        *,
+        max_attempts: int = 3,
     ) -> list[NotificationDispatchTarget]:
         route = await NotificationService.resolve_route_ids(session, event)
         recipients = await NotificationService.list_recipients(session, event)
@@ -284,59 +452,108 @@ class NotificationService:
             return []
 
         notification_date = event.notification_date
-        insert_rows = [
-            {
-                "event_id": event.event_id,
-                "diagnosis_id": event.diagnosis_id,
-                "report_id": event.report_id,
-                "device_id": event.device_id,
-                "sensor_sn": event.sensor_sn,
-                "device_category_id": route.device_category_id,
-                "process_device_id": route.process_device_id,
-                "overall_level": event.overall_level,
-                "employee_id": recipient.employee_id,
-                "wx_user_id": recipient.wx_user_id,
-                "notification_date": notification_date,
-                "diagnosed_at": event.diagnosed_at.replace(tzinfo=None),
-                "status": int(DiagnosisNotificationDeliveryStatus.PENDING),
-            }
-            for recipient in recipients
-        ]
-        await session.execute(
-            mysql_insert(DiagnosisNotificationDelivery)
-            .values(insert_rows)
-            .prefix_with("IGNORE")
+        legacy_suppressed_deliveries = await NotificationService._legacy_suppressed_deliveries(
+            session,
+            event,
+            recipients,
         )
-        await session.commit()
-
-        delivery_rows = (
-            await session.execute(
-                select(DiagnosisNotificationDelivery).where(
-                    DiagnosisNotificationDelivery.device_id == event.device_id,
-                    DiagnosisNotificationDelivery.overall_level == event.overall_level,
-                    DiagnosisNotificationDelivery.notification_date == notification_date,
-                    DiagnosisNotificationDelivery.employee_id.in_(
-                        [recipient.employee_id for recipient in recipients]
-                    ),
-                )
+        active_recipients = [
+            recipient
+            for recipient in recipients
+            if recipient.employee_id not in legacy_suppressed_deliveries
+        ]
+        insert_rows = [
+            NotificationService._build_delivery_insert_row(
+                event=event,
+                route=route,
+                recipient=recipient,
+                notification_date=notification_date,
             )
-        ).scalars().all()
+            for recipient in active_recipients
+        ]
+        if insert_rows:
+            await session.execute(
+                mysql_insert(DiagnosisNotificationDelivery)
+                .values(insert_rows)
+                .prefix_with("IGNORE")
+            )
+            await session.commit()
+
+        delivery_rows = []
+        if active_recipients:
+            delivery_rows = (
+                await session.execute(
+                    select(DiagnosisNotificationDelivery).where(
+                        *NotificationService._delivery_identity_filters(
+                            event=event,
+                            notification_date=notification_date,
+                            employee_ids=[
+                                recipient.employee_id for recipient in active_recipients
+                            ],
+                        )
+                    )
+                )
+            ).scalars().all()
         deliveries = {row.employee_id: row for row in delivery_rows}
 
         targets: list[NotificationDispatchTarget] = []
         for recipient in recipients:
+            suppressed_delivery = legacy_suppressed_deliveries.get(recipient.employee_id)
+            if suppressed_delivery is not None:
+                targets.append(
+                    NotificationDispatchTarget(
+                        delivery_id=suppressed_delivery.id,
+                        employee_id=recipient.employee_id,
+                        employee_name=recipient.employee_name,
+                        wx_user_id=NotificationService._delivery_wx_user_id(
+                            suppressed_delivery,
+                            recipient.wx_user_id,
+                        ),
+                        status=DiagnosisNotificationDeliveryStatus(
+                            int(suppressed_delivery.status)
+                        ),
+                        should_send=False,
+                        skip_reason="legacy_aggregate_suppressed",
+                        route_sources=recipient.route_sources,
+                    )
+                )
+                continue
+
             delivery = deliveries.get(recipient.employee_id)
             if delivery is None:
                 continue
             status = DiagnosisNotificationDeliveryStatus(int(delivery.status))
-            should_send = status == DiagnosisNotificationDeliveryStatus.PENDING
-            skip_reason = None if should_send else status.name.lower()
+            attempt_count = int(getattr(delivery, "attempt_count", 0) or 0)
+            next_attempt_at = getattr(delivery, "next_attempt_at", None)
+            retryable = (
+                status == DiagnosisNotificationDeliveryStatus.FAILED
+                and attempt_count < max_attempts
+            )
+            retry_due = (
+                next_attempt_at is None
+                or next_attempt_at <= _utc_naive_now()
+            )
+            should_send = (
+                status == DiagnosisNotificationDeliveryStatus.PENDING
+                or (retryable and retry_due)
+            )
+            if should_send:
+                skip_reason = None
+            elif retryable:
+                skip_reason = "retry_wait"
+            elif status == DiagnosisNotificationDeliveryStatus.FAILED:
+                skip_reason = "retry_exhausted"
+            else:
+                skip_reason = status.name.lower()
             targets.append(
                 NotificationDispatchTarget(
                     delivery_id=delivery.id,
                     employee_id=recipient.employee_id,
                     employee_name=recipient.employee_name,
-                    wx_user_id=delivery.wx_user_id,
+                    wx_user_id=NotificationService._delivery_wx_user_id(
+                        delivery,
+                        recipient.wx_user_id,
+                    ),
                     status=status,
                     should_send=should_send,
                     skip_reason=skip_reason,
@@ -349,17 +566,31 @@ class NotificationService:
     async def mark_delivery_sending(
         session: AsyncSession,
         delivery_id: UUID,
+        *,
+        max_attempts: int = 3,
     ) -> bool:
+        now = _utc_naive_now()
         result = await session.execute(
             update(DiagnosisNotificationDelivery)
             .where(
                 DiagnosisNotificationDelivery.id == delivery_id,
-                DiagnosisNotificationDelivery.status
-                == int(DiagnosisNotificationDeliveryStatus.PENDING),
+                DiagnosisNotificationDelivery.status.in_(
+                    [
+                        int(DiagnosisNotificationDeliveryStatus.PENDING),
+                        int(DiagnosisNotificationDeliveryStatus.FAILED),
+                    ]
+                ),
+                DiagnosisNotificationDelivery.attempt_count < max_attempts,
+                (
+                    DiagnosisNotificationDelivery.next_attempt_at.is_(None)
+                    | (DiagnosisNotificationDelivery.next_attempt_at <= now)
+                ),
             )
             .values(
                 status=int(DiagnosisNotificationDeliveryStatus.SENDING),
-                updated_at=_utc_naive_now(),
+                attempt_count=DiagnosisNotificationDelivery.attempt_count + 1,
+                next_attempt_at=None,
+                updated_at=now,
             )
         )
         await session.commit()
@@ -392,7 +623,10 @@ class NotificationService:
         session: AsyncSession,
         delivery_id: UUID,
         error: str,
+        *,
+        retry_after_seconds: float = 30.0,
     ) -> bool:
+        now = _utc_naive_now()
         result = await session.execute(
             update(DiagnosisNotificationDelivery)
             .where(
@@ -403,7 +637,8 @@ class NotificationService:
             .values(
                 status=int(DiagnosisNotificationDeliveryStatus.FAILED),
                 last_error=(error or "")[:1024] or None,
-                updated_at=_utc_naive_now(),
+                next_attempt_at=now + timedelta(seconds=retry_after_seconds),
+                updated_at=now,
             )
         )
         await session.commit()
@@ -413,6 +648,7 @@ class NotificationService:
     async def get_message_context(
         session: AsyncSession,
         delivery_id: UUID,
+        event: DiagnosisNotificationFaultEvent | None = None,
     ) -> NotificationMessageContext | None:
         delivery = await session.get(DiagnosisNotificationDelivery, delivery_id)
         if delivery is None:
@@ -420,18 +656,12 @@ class NotificationService:
 
         diagnosed_at = _ensure_utc(delivery.diagnosed_at)
         sensor_sn = await NotificationService._sensor_sn_for_delivery(session, delivery)
-        event = DiagnosisNotificationEvent(
-            event_id=delivery.event_id,
-            diagnosis_id=delivery.diagnosis_id,
-            report_id=delivery.report_id,
-            device_id=delivery.device_id,
+        fault_event = event or NotificationService._fault_event_from_delivery(
+            delivery=delivery,
             sensor_sn=sensor_sn,
-            overall_level=int(delivery.overall_level),
-            device_category_id=delivery.device_category_id,
-            process_device_id=delivery.process_device_id,
             diagnosed_at=diagnosed_at,
         )
-        route = await NotificationService.resolve_route_ids(session, event)
+        route = await NotificationService.resolve_route_ids(session, fault_event)
 
         device_row = (
             await session.execute(
@@ -455,7 +685,11 @@ class NotificationService:
         diagnosis_items = await NotificationService._diagnosis_item_descriptions(
             session,
             delivery.diagnosis_id,
+            diagnosis_item_id=fault_event.diagnosis_item_id,
+            fault_type=fault_event.fault_type,
         )
+        overall_level = getattr(delivery, "overall_level", None)
+        overall_level_value = int(overall_level) if overall_level is not None else None
 
         return NotificationMessageContext(
             delivery_id=delivery.id,
@@ -464,8 +698,17 @@ class NotificationService:
             report_id=delivery.report_id,
             device_id=delivery.device_id,
             sensor_sn=sensor_sn,
-            overall_level=int(delivery.overall_level),
-            overall_level_label=LEVEL_LABELS.get(int(delivery.overall_level), "未知"),
+            diagnosis_item_id=fault_event.diagnosis_item_id,
+            fault_type=fault_event.fault_type,
+            fault_label=fault_event.fault_label,
+            fault_level=fault_event.fault_level,
+            fault_level_label=LEVEL_LABELS.get(fault_event.fault_level, "未知"),
+            overall_level=overall_level_value,
+            overall_level_label=(
+                LEVEL_LABELS.get(overall_level_value, "未知")
+                if overall_level_value is not None
+                else None
+            ),
             diagnosed_at=diagnosed_at,
             notification_date=delivery.notification_date,
             device_name=device_row.name if device_row else None,
@@ -479,6 +722,154 @@ class NotificationService:
             area_name=process_context["area_name"],
             diagnosis_items=diagnosis_items,
         )
+
+    @staticmethod
+    def _delivery_has_column(column_name: str) -> bool:
+        return column_name in DiagnosisNotificationDelivery.__table__.c
+
+    @staticmethod
+    def _delivery_wx_user_id(delivery: Any, fallback: str) -> str:
+        if NotificationService._delivery_has_column("recipient_wx_user_id"):
+            value = getattr(delivery, "recipient_wx_user_id", None)
+            if value:
+                return value
+        value = getattr(delivery, "wx_user_id", None)
+        return value or fallback
+
+    @staticmethod
+    def _fault_event_from_delivery(
+        delivery: Any,
+        sensor_sn: str,
+        diagnosed_at: datetime,
+    ) -> DiagnosisNotificationFaultEvent:
+        fault_type = (
+            getattr(delivery, "fault_type", None)
+            if NotificationService._delivery_has_column("fault_type")
+            else None
+        ) or "legacy_aggregate"
+        fault_level = (
+            getattr(delivery, "fault_level", None)
+            if NotificationService._delivery_has_column("fault_level")
+            else None
+        )
+        overall_level = getattr(delivery, "overall_level", None)
+        return DiagnosisNotificationFaultEvent(
+            source_schema_version=1 if fault_type == "legacy_aggregate" else 2,
+            event_id=delivery.event_id,
+            diagnosis_id=delivery.diagnosis_id,
+            report_id=delivery.report_id,
+            device_id=delivery.device_id,
+            sensor_sn=sensor_sn,
+            diagnosed_at=diagnosed_at,
+            device_category_id=delivery.device_category_id,
+            process_device_id=delivery.process_device_id,
+            diagnosis_item_id=(
+                getattr(delivery, "diagnosis_item_id", None)
+                if NotificationService._delivery_has_column("diagnosis_item_id")
+                else None
+            ),
+            fault_type=fault_type,
+            fault_level=int(fault_level or overall_level),
+            overall_level=int(overall_level) if overall_level is not None else None,
+        )
+
+    @staticmethod
+    def _build_delivery_insert_row(
+        *,
+        event: DiagnosisNotificationFaultEvent,
+        route: NotificationRouteResolution,
+        recipient: NotificationRecipient,
+        notification_date: date,
+    ) -> dict[str, Any]:
+        row: dict[str, Any] = {
+            "event_id": event.event_id,
+            "diagnosis_id": event.diagnosis_id,
+            "report_id": event.report_id,
+            "device_id": event.device_id,
+            "sensor_sn": event.sensor_sn,
+            "device_category_id": route.device_category_id,
+            "process_device_id": route.process_device_id,
+            "employee_id": recipient.employee_id,
+            "notification_date": notification_date,
+            "diagnosed_at": event.diagnosed_at.replace(tzinfo=None),
+            "status": int(DiagnosisNotificationDeliveryStatus.PENDING),
+        }
+        if NotificationService._delivery_has_column("overall_level"):
+            row["overall_level"] = event.level_for_delivery
+        if NotificationService._delivery_has_column("fault_type"):
+            row["fault_type"] = event.fault_type
+        if NotificationService._delivery_has_column("fault_level"):
+            row["fault_level"] = event.level_for_delivery
+        if NotificationService._delivery_has_column("diagnosis_item_id"):
+            row["diagnosis_item_id"] = event.diagnosis_item_id
+        if NotificationService._delivery_has_column("recipient_wx_user_id"):
+            row["recipient_wx_user_id"] = recipient.wx_user_id
+        elif NotificationService._delivery_has_column("wx_user_id"):
+            row["wx_user_id"] = recipient.wx_user_id
+        return row
+
+    @staticmethod
+    def _delivery_identity_filters(
+        *,
+        event: DiagnosisNotificationFaultEvent,
+        notification_date: date,
+        employee_ids: list[UUID],
+    ) -> list[Any]:
+        filters = [
+            DiagnosisNotificationDelivery.device_id == event.device_id,
+            DiagnosisNotificationDelivery.notification_date == notification_date,
+            DiagnosisNotificationDelivery.employee_id.in_(employee_ids),
+        ]
+        if (
+            NotificationService._delivery_has_column("fault_type")
+            and NotificationService._delivery_has_column("fault_level")
+        ):
+            filters.append(getattr(DiagnosisNotificationDelivery, "fault_type") == event.fault_type)
+            filters.append(
+                getattr(DiagnosisNotificationDelivery, "fault_level")
+                == event.level_for_delivery
+            )
+        elif NotificationService._delivery_has_column("overall_level"):
+            filters.append(
+                getattr(DiagnosisNotificationDelivery, "overall_level")
+                == event.level_for_delivery
+            )
+        return filters
+
+    @staticmethod
+    async def _legacy_suppressed_deliveries(
+        session: AsyncSession,
+        event: DiagnosisNotificationFaultEvent,
+        recipients: list[NotificationRecipient],
+    ) -> dict[UUID, Any]:
+        if event.fault_type == "legacy_aggregate" or not recipients:
+            return {}
+
+        filters = [
+            DiagnosisNotificationDelivery.device_id == event.device_id,
+            DiagnosisNotificationDelivery.notification_date == event.notification_date,
+            DiagnosisNotificationDelivery.employee_id.in_(
+                [recipient.employee_id for recipient in recipients]
+            ),
+        ]
+        if NotificationService._delivery_has_column("fault_type"):
+            filters.append(
+                getattr(DiagnosisNotificationDelivery, "fault_type")
+                == "legacy_aggregate"
+            )
+        level_column = (
+            getattr(DiagnosisNotificationDelivery, "fault_level")
+            if NotificationService._delivery_has_column("fault_level")
+            else getattr(DiagnosisNotificationDelivery, "overall_level")
+        )
+        filters.append(level_column == event.level_for_delivery)
+
+        rows = (
+            await session.execute(
+                select(DiagnosisNotificationDelivery).where(*filters)
+            )
+        ).scalars().all()
+        return {row.employee_id: row for row in rows}
 
     @staticmethod
     async def _route_ids_by_device_id(
@@ -736,12 +1127,27 @@ class NotificationService:
     async def _diagnosis_item_descriptions(
         session: AsyncSession,
         diagnosis_id: UUID,
+        diagnosis_item_id: UUID | None = None,
+        fault_type: NotificationFaultType = "legacy_aggregate",
     ) -> list[str]:
+        stmt = select(DiagnosisItem.description).where(
+            DiagnosisItem.diagnosis_id == diagnosis_id
+        )
+        if diagnosis_item_id is not None:
+            stmt = stmt.where(DiagnosisItem.id == diagnosis_item_id)
+        elif fault_type == "temperature":
+            if "fault_type" in DiagnosisItem.__table__.c:
+                stmt = stmt.where(getattr(DiagnosisItem, "fault_type") == "temperature")
+            else:
+                stmt = stmt.where(DiagnosisItem.metric_id == 0)
+        elif fault_type == "vibration":
+            if "fault_type" in DiagnosisItem.__table__.c:
+                stmt = stmt.where(getattr(DiagnosisItem, "fault_type") == "vibration")
+            else:
+                stmt = stmt.where(DiagnosisItem.metric_id.in_([1, 2, 3]))
         rows = (
             await session.execute(
-                select(DiagnosisItem.description)
-                .where(DiagnosisItem.diagnosis_id == diagnosis_id)
-                .order_by(DiagnosisItem.metric_id.asc(), DiagnosisItem.id.asc())
+                stmt.order_by(DiagnosisItem.metric_id.asc(), DiagnosisItem.id.asc())
             )
         ).scalars().all()
         descriptions: list[str] = []

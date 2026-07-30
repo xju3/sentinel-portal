@@ -67,6 +67,11 @@ class MinIOManager:
             raise RuntimeError("MinIO not initialized. Call init() first.")
         return self.client
 
+    @property
+    def bucket_name(self) -> str:
+        """Return the configured object bucket."""
+        return self._bucket or "fft"
+
     def get_presigned_url(self, file_url: str, expires_hours: int = 24, extra_query_params: dict = None) -> str:
         """Convert a public MinIO URL to a presigned GET URL."""
         from urllib.parse import urlparse

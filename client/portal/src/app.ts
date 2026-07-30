@@ -6,6 +6,17 @@ import { Divider, Space, Typography, message } from 'antd';
 import HeaderUserMenu from '@/components/HeaderUserMenu';
 import { clearSession, getSession } from '@/utils/session';
 
+const WX_DIAGNOSIS_ROUTE_PREFIX = '/wx/diagnosis/';
+const WX_DIAGNOSIS_API_PREFIX = '/api/v1/wx/diagnosis/';
+
+function isWxDiagnosisPath(pathname?: string | null) {
+  return Boolean(pathname && pathname.startsWith(WX_DIAGNOSIS_ROUTE_PREFIX));
+}
+
+function isWxDiagnosisApi(url?: string | null) {
+  return Boolean(url && url.includes(WX_DIAGNOSIS_API_PREFIX));
+}
+
 export const request: RequestConfig = {
   timeout: 10000,
   requestInterceptors: [
@@ -32,12 +43,20 @@ export const request: RequestConfig = {
       // Parse the unified ApiResponse body from axios response.data
       try {
         const body = response.data;
+        const requestUrl = response.config?.url;
+        const wxDiagnosisRequest = isWxDiagnosisApi(requestUrl);
 
         // Check for unauthorized (code === 401)
         if (body && body.code === 401) {
-          clearSession();
           const errorMessage = body.message || 'Unauthorized';
-          const isLoginRequest = response.config?.url?.includes('/auth/login');
+          if (wxDiagnosisRequest) {
+            return Promise.reject(Object.assign(new Error(errorMessage), {
+              code: body.code,
+              data: { detail: errorMessage },
+            }));
+          }
+          clearSession();
+          const isLoginRequest = requestUrl?.includes('/auth/login');
           if (!isLoginRequest && window.location.pathname !== '/login') {
             window.location.href = '/login';
           }
@@ -47,14 +66,24 @@ export const request: RequestConfig = {
           }));
         }
 
+        if (body && body.code === 403 && wxDiagnosisRequest) {
+          const errorMessage = body.message || 'Forbidden';
+          return Promise.reject(Object.assign(new Error(errorMessage), {
+            code: body.code,
+            data: { detail: errorMessage },
+          }));
+        }
+
         // Reject business errors even though the API transports them with HTTP 200.
         if (body && body.code !== 0 && body.code !== 200 && body.code !== 202 && body.code !== undefined) {
           const errorMessage = body.message || `Error (code: ${body.code})`;
-          message.error(errorMessage);
+          if (!wxDiagnosisRequest) {
+            message.error(errorMessage);
+          }
           const businessError = Object.assign(new Error(errorMessage), {
             code: body.code,
             data: { detail: errorMessage },
-            businessErrorShown: true,
+            businessErrorShown: !wxDiagnosisRequest,
           });
           return Promise.reject(businessError);
         }
@@ -71,6 +100,16 @@ export const request: RequestConfig = {
         }
       } catch (e) {
         // If parsing fails, fall back to HTTP status check
+        if (response.status === 401 || response.status === 403) {
+          const wxDiagnosisRequest = isWxDiagnosisApi(response.config?.url);
+          if (wxDiagnosisRequest) {
+            const detail = response.status === 403 ? 'Forbidden' : 'Unauthorized';
+            return Promise.reject(Object.assign(new Error(detail), {
+              code: response.status,
+              data: { detail },
+            }));
+          }
+        }
         if (response.status === 401) {
           clearSession();
           const isLoginRequest = response.config?.url?.includes('/auth/login');
@@ -82,6 +121,12 @@ export const request: RequestConfig = {
             data: { detail: 'Unauthorized' },
           }));
         }
+        if (response.status === 403) {
+          return Promise.reject(Object.assign(new Error('Forbidden'), {
+            code: 403,
+            data: { detail: 'Forbidden' },
+          }));
+        }
       }
       return response;
     },
@@ -90,6 +135,10 @@ export const request: RequestConfig = {
 
 const PUBLIC_PATHS = ['/login', '/register', '/set-password'];
 const GUEST_ONLY_PATHS = ['/login', '/register'];
+
+function isPublicPath(pathname: string) {
+  return PUBLIC_PATHS.includes(pathname) || isWxDiagnosisPath(pathname);
+}
 
 function hasSession() {
   return Boolean(getSession());
@@ -117,7 +166,7 @@ export const layout: RunTimeLayoutConfig = () => {
     onPageChange: () => {
       const pathname = history.location?.pathname || '/';
       const loggedIn = hasSession();
-      if (!loggedIn && !PUBLIC_PATHS.includes(pathname)) {
+      if (!loggedIn && !isPublicPath(pathname)) {
         history.push('/login');
         return;
       }

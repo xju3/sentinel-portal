@@ -62,6 +62,16 @@ class Settings(BaseSettings):
     wx_app_secret: str = "your wx app secret"
     wx_token: str = "your wx token"
     wx_encoding_aes_key: str = ""
+    wx_oauth_api_base_url: str = "https://api.weixin.qq.com"
+    wx_oauth_authorize_url: str = "https://open.weixin.qq.com/connect/oauth2/authorize"
+    wx_diagnosis_oauth_scope: str = "snsapi_base"
+    wx_diagnosis_cookie_name: str = "wx_diagnosis_access"
+    wx_diagnosis_cookie_ttl_seconds: int = 900
+    wx_diagnosis_state_ttl_seconds: int = 600
+    wx_diagnosis_cookie_secure: bool = True
+    wx_diagnosis_callback_url: str | None = (
+        "https://langhu.ai/api/v1/wx/diagnosis/callback"
+    )
 
     # Queue Configuration
     patrol_queue_length: int = 72
@@ -73,6 +83,7 @@ class Settings(BaseSettings):
     email_port: int = 587
     email_use_tls: bool = True
     email_tls_verify: bool = True
+    portal_base_url: str = "https://langhu.ai"
     portal_login_url: str = "https://portal.api-server.icu"
     password_setup_token_expires_minutes: int = 1440
 

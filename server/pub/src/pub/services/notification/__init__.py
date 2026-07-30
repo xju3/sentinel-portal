@@ -1,5 +1,6 @@
 from .notification_service import (
     DiagnosisNotificationEvent,
+    DiagnosisNotificationFaultEvent,
     NotificationDispatchTarget,
     NotificationMessageContext,
     NotificationRecipient,
@@ -9,6 +10,7 @@ from .notification_service import (
 
 __all__ = [
     "DiagnosisNotificationEvent",
+    "DiagnosisNotificationFaultEvent",
     "NotificationDispatchTarget",
     "NotificationMessageContext",
     "NotificationRecipient",

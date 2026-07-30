@@ -8,26 +8,21 @@ Encoding rules:
 - action=1: config update, completed by the device callback API.
 - action=2: device status report, completed with the status upload.
 - action=3: update binding info, triggering the device to fetch binding status.
-- action 11..99: default-parameter dense collection, encoded as T I.
+- action 11..98: default-parameter dense collection, encoded as T I.
   T = focus type, I = interval minutes, val = repeat count.
   Focus types: 1=general, 2=temperature, 3=RMS, 4=impact/spectrum.
   Example: action=15, val=3 -> collect full data every 5 minutes, repeat 3
   times.
   Example: action=25, val=3 -> collect full data every 5 minutes, repeat 3
   times with temperature as the server-side review focus.
-- action 1000..9999: IIS3DWB parameterized dense collection, encoded as M RR I.
-  M = FFT points multiplier of 4096.
-  RR = range_g, one of 02, 04, 08, 16.
-  I = interval minutes, 1..9.
-  val = repeat count.
-  Example: action=2086, val=3 -> 2*4096 FFT points, 8g range, every 6
-  minutes, repeat 3 times.
+- action=99: FFT collection. The device chooses FFT size and range locally.
 """
 
 from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timezone
+import logging
 from typing import Literal
 from uuid import UUID
 
@@ -35,7 +30,17 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from pub.models.sensor import Sensor, SensorStatus, SensorTask, SensorTaskReport
+from pub.manager.database import db_manager
+from pub.models.diagnosis import DiagnosisRecord
+from pub.models.sensor import (
+    DeviceFftRecord,
+    Sensor,
+    SensorBatch,
+    SensorMonitoring,
+    SensorStatus,
+    SensorTask,
+    SensorTaskReport,
+)
 from pub.services.sensor.firmware_cache_service import SensorOTAContextService
 
 SENSOR_TASK_STATUS_PENDING = 0
@@ -65,15 +70,14 @@ DEFAULT_DENSE_FOCUS_LABELS = {
     DEFAULT_DENSE_FOCUS_RMS: "RMS复核",
     DEFAULT_DENSE_FOCUS_IMPACT_SPECTRUM: "冲击/频谱复核",
 }
+FFT_COLLECTION_ACTION = 99
 
-PARAMETERIZED_MIN_ACTION = 1000
-FFT_POINTS_BASE = 4096
-ALLOWED_IIS3DWB_RANGE_G = {2, 4, 8, 16}
-PARAMETERIZED_MIN_INTERVAL_MIN = 1
-PARAMETERIZED_MAX_INTERVAL_MIN = 9
 MIN_REPEAT_COUNT = 1
 
-TaskKind = Literal["default_dense_collection", "iis3dwb_parameterized_collection"]
+TaskKind = Literal[
+    "default_dense_collection",
+    "fft_collection",
+]
 
 
 @dataclass(frozen=True)
@@ -112,59 +116,31 @@ def build_default_dense_collection_spec(
     )
 
 
-def build_iis3dwb_parameterized_collection_spec(
-    *,
-    fft_points_multiplier: int,
-    range_g: int,
-    interval_minutes: int,
-    repeat_count: int,
-) -> SensorTaskSpec:
-    """Build action/val for IIS3DWB parameterized dense collection."""
-    _require_int_range("fft_points_multiplier", fft_points_multiplier, 1, 9)
-    if range_g not in ALLOWED_IIS3DWB_RANGE_G:
-        raise ValueError("range_g must be one of 2, 4, 8, 16")
-    _require_int_range(
-        "interval_minutes",
-        interval_minutes,
-        PARAMETERIZED_MIN_INTERVAL_MIN,
-        PARAMETERIZED_MAX_INTERVAL_MIN,
-    )
-    _require_repeat_count(repeat_count)
-
-    action = fft_points_multiplier * 1000 + range_g * 10 + interval_minutes
+def build_fft_collection_spec() -> SensorTaskSpec:
+    """Build the parameter-free FFT collection command understood by devices."""
     return SensorTaskSpec(
-        action=action,
-        val=repeat_count,
-        kind="iis3dwb_parameterized_collection",
+        action=FFT_COLLECTION_ACTION,
+        val=0,
+        kind="fft_collection",
         description=(
-            f"IIS3DWB 参数化密集采集：FFT Points={fft_points_multiplier}*"
-            f"{FFT_POINTS_BASE}={fft_points_multiplier * FFT_POINTS_BASE}，"
-            f"量程={range_g}g，每 {interval_minutes} 分钟采集一次完整数据，"
-            f"重复 {repeat_count} 次"
+            "FFT 采集：设备根据转速和至少 20 圈采样要求自动决定点数，"
+            "并根据削峰情况自动选择量程"
         ),
     )
 
 
 def describe_collection_action(action: int, val: int) -> str:
     """Return a human-readable description for a collection task action."""
-    if 10 < action < 100:
+    if action == FFT_COLLECTION_ACTION:
+        return build_fft_collection_spec().description
+
+    if 10 < action < FFT_COLLECTION_ACTION:
         focus_type = action // 10
         interval = action % 10
         focus_label = DEFAULT_DENSE_FOCUS_LABELS.get(focus_type, f"未知重点({focus_type})")
         return (
             f"默认参数密集采集：重点={focus_label}，每 {interval} "
             f"分钟采集一次完整数据，重复 {val} 次"
-        )
-
-    if action >= PARAMETERIZED_MIN_ACTION:
-        fft_points_multiplier = action // 1000
-        range_g = (action // 10) % 100
-        interval_minutes = action % 10
-        return (
-            f"IIS3DWB 参数化密集采集：FFT Points={fft_points_multiplier}*"
-            f"{FFT_POINTS_BASE}={fft_points_multiplier * FFT_POINTS_BASE}，"
-            f"量程={range_g}g，每 {interval_minutes} 分钟采集一次完整数据，"
-            f"重复 {val} 次"
         )
 
     return f"系统任务：action={action}, val={val}"
@@ -351,29 +327,19 @@ async def create_default_dense_collection_task(
     )
 
 
-async def create_iis3dwb_parameterized_collection_task(
+async def create_fft_collection_task(
     *,
     session: AsyncSession,
     sn: str,
-    fft_points_multiplier: int,
-    range_g: int,
-    interval_minutes: int,
-    repeat_count: int,
     reason: str,
 ) -> SensorTask:
-    """Create an IIS3DWB parameterized dense collection task."""
-    spec = build_iis3dwb_parameterized_collection_spec(
-        fft_points_multiplier=fft_points_multiplier,
-        range_g=range_g,
-        interval_minutes=interval_minutes,
-        repeat_count=repeat_count,
-    )
+    """Create one parameter-free device-managed FFT collection task."""
     return await create_collection_task(
         session=session,
         sn=sn,
-        spec=spec,
+        spec=build_fft_collection_spec(),
         reason=reason,
-        name="iis3dwb_parameterized_collection",
+        name="fft_collection",
     )
 
 
@@ -480,11 +446,13 @@ async def record_sensor_task_report(
 
     existing = await _get_sensor_task_report(session, task_uuid, sequence)
     if existing is None:
+        report_uuid = await _resolve_report_uuid(session, report_id)
         report = SensorTaskReport(
             task_id=task_uuid,
             sn=sn,
             sequence=sequence,
             report_id=report_id,
+            report_uuid=report_uuid,
             ts_ms=ts_ms,
             created_at=datetime.utcnow(),
         )
@@ -580,6 +548,23 @@ def _parse_task_uuid(task_id: UUID | str) -> UUID | None:
         return None
 
 
+def _parse_report_uuid(report_id: str | None) -> UUID | None:
+    if not report_id:
+        return None
+    try:
+        return UUID(str(report_id))
+    except (TypeError, ValueError):
+        return None
+
+
+async def _resolve_report_uuid(session: AsyncSession, report_id: str) -> UUID | None:
+    report_uuid = _parse_report_uuid(report_id)
+    if report_uuid is None:
+        return None
+    stmt = select(DiagnosisRecord.id).where(DiagnosisRecord.id == report_uuid)
+    return (await session.execute(stmt)).scalar_one_or_none()
+
+
 async def find_equivalent_pending_collection_task(
     *,
     session: AsyncSession,
@@ -601,7 +586,7 @@ async def find_equivalent_pending_collection_task(
                 SensorTask.status.in_(SENSOR_TASK_OPEN_STATUSES),
                 SensorTask.val == spec.val,
                 SensorTask.action > 10,
-                SensorTask.action < 100,
+                SensorTask.action < FFT_COLLECTION_ACTION,
             )
             .order_by(SensorTask.create_time.desc())
         )
@@ -630,11 +615,9 @@ def _task_remark(*, spec: SensorTaskSpec, reason: str) -> str:
         f"任务内容: {spec.description}; "
         f"发起原因: {reason}; "
         f"编码: action={spec.action}, val={spec.val}; "
-        "编码规则: 11..99 表示默认参数密集采集, action=T I, "
+        "编码规则: 11..98 表示默认参数密集采集, action=T I, "
         "T=重点类型(1综合/2温度/3RMS/4冲击频谱), I=间隔分钟, "
-        "val=重复次数; 1000..9999 表示 IIS3DWB 参数化密集采集, "
-        "action=M RR I, M=4096 点倍数, RR=量程(02/04/08/16), "
-        "I=间隔分钟, val=重复次数"
+        "val=重复次数; action=99 表示设备自主参数的 FFT 采集"
     )
 
 
@@ -654,87 +637,100 @@ def _require_int_range(name: str, value: int, minimum: int, maximum: int) -> Non
         raise ValueError(f"{name} must be between {minimum} and {maximum}")
 
 
-import logging
 logger = logging.getLogger(__name__)
 
-async def process_fft_metadata_background(task_id: UUID | str) -> None:
-    """Parse FFT metadata from task action and store in DeviceFftRecord."""
-    from pub.manager.database import db_manager
-    from pub.models.sensor import DeviceFftRecord, SensorMonitoring, SensorBatch
-
+async def process_fft_metadata_background(task_id: UUID | str) -> bool:
+    """Read device-selected FFT metadata and run diagnosis for action=99."""
     task_uuid = _parse_task_uuid(task_id)
     if not task_uuid:
-        return
+        return False
 
     try:
         async with db_manager.SessionLocal() as session:
             task = await get_sensor_task_by_id(session, task_uuid)
             if not task:
                 logger.error(f"FFT metadata process failed: SensorTask {task_uuid} not found")
-                return
+                return False
 
-            # Ensure this is a parameterized FFT collection action
-            if task.action < PARAMETERIZED_MIN_ACTION:
-                logger.warning(f"FFT metadata process skipped: Task {task_uuid} action {task.action} is not parameterized FFT")
-                return
+            if task.action != FFT_COLLECTION_ACTION:
+                logger.warning(
+                    "FFT metadata process skipped: Task %s action %s is not FFT action 99",
+                    task_uuid,
+                    task.action,
+                )
+                return False
 
-            # Avoid duplicates
+            import sys
+            from pathlib import Path
+
+            server_path = Path(__file__).parent.parent.parent.parent.parent.parent
+            if str(server_path) not in sys.path:
+                sys.path.append(str(server_path))
+
+            from diagnosis.app.preparation.fft_parser import FftParser
+            from diagnosis.app.handler.fft_analyzer import FftAnalyzer
+
+            fft_data = FftParser.parse_from_minio(str(task_uuid))
+            if fft_data is None:
+                return False
+
             stmt_exist = select(DeviceFftRecord).where(DeviceFftRecord.task_id == task_uuid)
-            if (await session.execute(stmt_exist)).scalar_one_or_none():
-                logger.info(f"FFT metadata already exists for task {task_uuid}")
-                return
+            record = (await session.execute(stmt_exist)).scalar_one_or_none()
 
-            # Parse specs from action
-            fft_points_multiplier = task.action // 1000
-            range_g = (task.action // 10) % 100
-            points = fft_points_multiplier * FFT_POINTS_BASE
-
-            # Get relationships
-            stmt = select(SensorMonitoring).join(Sensor, Sensor.id == SensorMonitoring.sensor_id).where(Sensor.sn == task.sn)
+            stmt = (
+                select(SensorMonitoring)
+                .join(Sensor, Sensor.id == SensorMonitoring.sensor_id)
+                .where(Sensor.sn == task.sn)
+            )
             monitoring = (await session.execute(stmt)).scalar_one_or_none()
-            
-            # Note: We need tenant_id. We can get it from DeviceInst or SensorBatch. 
-            # For now, we will leave tenant_id null if it's not directly accessible, or query it if needed.
-            # SensorBatch is linked from Sensor.
+
             tenant_id = None
             sensor_id = None
             if monitoring:
                 sensor_id = monitoring.sensor_id
-                # Let's get tenant_id from SensorBatch
-                stmt_batch = select(SensorBatch.tenant_id).join(Sensor, Sensor.sensor_batch_id == SensorBatch.id).where(Sensor.sn == task.sn)
+                stmt_batch = (
+                    select(SensorBatch.tenant_id)
+                    .join(Sensor, Sensor.sensor_batch_id == SensorBatch.id)
+                    .where(Sensor.sn == task.sn)
+                )
                 tenant_id = (await session.execute(stmt_batch)).scalar_one_or_none()
 
-            record = DeviceFftRecord(
-                task_id=task_uuid,
-                sn=task.sn,
-                sensor_id=sensor_id,
-                device_inst_id=monitoring.device_inst_id if monitoring else None,
-                tenant_id=tenant_id,
-                ts_ms=int(datetime.utcnow().timestamp() * 1000),  # fallback timestamp
-                fs_hz=26667,  # Default for IIS3DWB
-                points=points,
-                range_g=range_g
-            )
-            session.add(record)
+            if record is None:
+                record = DeviceFftRecord(
+                    task_id=task_uuid,
+                    sn=task.sn,
+                    sensor_id=sensor_id,
+                    device_inst_id=monitoring.device_inst_id if monitoring else None,
+                    tenant_id=tenant_id,
+                    ts_ms=fft_data.timestamp_s * 1000,
+                    fs_hz=round(fft_data.fs),
+                    points=fft_data.points,
+                    range_g=fft_data.range_g,
+                )
+                session.add(record)
+            else:
+                logger.info("FFT metadata already exists for task %s", task_uuid)
             await session.commit()
             logger.info(f"Successfully processed FFT metadata for task {task_uuid}")
-            
-            # Trigger Node 2: FFT Parsing and Physical Diagnosis Engine
+
             try:
-                import sys
-                from pathlib import Path
-                server_path = Path(__file__).parent.parent.parent.parent.parent.parent
-                if str(server_path) not in sys.path:
-                    sys.path.append(str(server_path))
-                    
-                from diagnosis.app.preparation.fft_parser import FftParser
-                from diagnosis.app.handler.fft_analyzer import FftAnalyzer
-                
-                fft_data = FftParser.parse_from_minio(str(task_uuid))
-                if fft_data:
-                    await FftAnalyzer.analyze_and_save(str(task_uuid), fft_data)
+                completed = await FftAnalyzer.analyze_and_save(
+                    str(task_uuid),
+                    fft_data,
+                )
+                if not completed:
+                    return False
+                _mark_sensor_task_done(task)
+                await session.commit()
             except Exception as inner_e:
-                logger.error(f"Failed to execute FFT diagnostic engine for task {task_uuid}: {inner_e}", exc_info=True)
-                
+                logger.error(
+                    f"Failed to execute FFT diagnostic engine for task {task_uuid}: {inner_e}",
+                    exc_info=True,
+                )
+                return False
+
+            return True
+
     except Exception as e:
         logger.error(f"Error processing FFT metadata for task {task_uuid}: {e}", exc_info=True)
+        return False

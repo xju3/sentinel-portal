@@ -14,8 +14,13 @@ from pub.utils.logger import setup_logging
 
 from app.clients.mqtt import diagnosis_mqtt_manager
 from app.clients.stream_worker import _ensure_consumer_group, run_stream_worker
+from app.clients.fft_stream_worker import (
+    ensure_fft_consumer_group,
+    run_fft_stream_worker,
+)
 from app.config import settings
 from app.preparation.ingestion import process_incoming_report
+from app.services.notification_outbox import run_notification_outbox_dispatcher
 
 # Configure logging for the new service using shared pub setup
 logger = setup_logging(debug=settings.debug)
@@ -51,12 +56,25 @@ async def lifespan(app: FastAPI):
 
     logger.debug("Initializing Redis Stream consumer group...")
     _ensure_consumer_group()
+    ensure_fft_consumer_group()
 
     logger.debug("Starting background tasks...")
     worker_tasks = [
         asyncio.create_task(run_stream_worker(f"worker-{i}"))
         for i in range(WORKER_COUNT)
     ]
+    worker_tasks.append(
+        asyncio.create_task(
+            run_fft_stream_worker("fft-worker-0"),
+            name="diagnosis-fft-worker",
+        )
+    )
+    worker_tasks.append(
+        asyncio.create_task(
+            run_notification_outbox_dispatcher(),
+            name="diagnosis-notification-outbox",
+        )
+    )
     logger.debug("Started %d stream worker(s).", WORKER_COUNT)
     yield
     # Shutdown

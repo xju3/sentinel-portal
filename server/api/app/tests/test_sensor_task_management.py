@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
 
 import pytest
-from fastapi import FastAPI
+from fastapi import FastAPI, HTTPException
 
 from app.routers import register_routers, sensors as sensors_router
 from pub.contract.sensors import SensorTaskCreate
@@ -168,6 +168,21 @@ def test_sensor_task_create_rejects_collection_task_with_zero_val():
         SensorTaskCreate(sensor_id=uuid4(), name="特征采集", action=15, val=0)
 
 
+def test_sensor_task_create_accepts_only_parameter_free_fft_action():
+    payload = SensorTaskCreate(
+        sensor_id=uuid4(),
+        name="FFT采集",
+        action=99,
+        val=0,
+    )
+
+    assert payload.action == 99
+    assert payload.val == 0
+
+    with pytest.raises(ValueError):
+        SensorTaskCreate(sensor_id=uuid4(), name="旧FFT采集", action=2086, val=3)
+
+
 def test_sensor_task_create_rejects_blank_name():
     with pytest.raises(ValueError):
         SensorTaskCreate(sensor_id=uuid4(), name="   ", action=15, val=3)
@@ -298,6 +313,102 @@ async def test_feature_report_cannot_complete_another_sensor_task():
 
 
 @pytest.mark.asyncio
+async def test_record_sensor_task_report_links_existing_report_uuid():
+    task_id = uuid4()
+    report_uuid = uuid4()
+    task = SimpleNamespace(
+        id=task_id,
+        sn="STL26SH0001",
+        action=2086,
+        status=2,
+        val=3,
+        dispatched_at=None,
+        complete_time=None,
+    )
+    task_result = Mock()
+    task_result.scalar_one_or_none.return_value = task
+    existing_result = Mock()
+    existing_result.scalar_one_or_none.return_value = None
+    report_uuid_result = Mock()
+    report_uuid_result.scalar_one_or_none.return_value = report_uuid
+    count_result = Mock()
+    count_result.scalar_one.return_value = 1
+    session = Mock()
+    session.execute = AsyncMock(
+        side_effect=[
+            task_result,
+            existing_result,
+            report_uuid_result,
+            count_result,
+        ]
+    )
+    session.flush = AsyncMock()
+    session.commit = AsyncMock()
+    session.refresh = AsyncMock()
+
+    completed = await record_sensor_task_report(
+        session=session,
+        task_id=task_id,
+        sn=task.sn,
+        sequence=1,
+        report_id=str(report_uuid),
+        ts_ms=1780814415097,
+    )
+
+    assert completed is task
+    session.add.assert_called_once()
+    saved_report = session.add.call_args.args[0]
+    assert saved_report.report_uuid == report_uuid
+    session.commit.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_record_sensor_task_report_keeps_report_uuid_empty_for_non_uuid_report_id():
+    task_id = uuid4()
+    task = SimpleNamespace(
+        id=task_id,
+        sn="STL26SH0001",
+        action=2086,
+        status=2,
+        val=3,
+        dispatched_at=None,
+        complete_time=None,
+    )
+    task_result = Mock()
+    task_result.scalar_one_or_none.return_value = task
+    existing_result = Mock()
+    existing_result.scalar_one_or_none.return_value = None
+    count_result = Mock()
+    count_result.scalar_one.return_value = 1
+    session = Mock()
+    session.execute = AsyncMock(
+        side_effect=[
+            task_result,
+            existing_result,
+            count_result,
+        ]
+    )
+    session.flush = AsyncMock()
+    session.commit = AsyncMock()
+    session.refresh = AsyncMock()
+
+    completed = await record_sensor_task_report(
+        session=session,
+        task_id=task_id,
+        sn=task.sn,
+        sequence=1,
+        report_id="report-1",
+        ts_ms=1780814415097,
+    )
+
+    assert completed is task
+    session.add.assert_called_once()
+    saved_report = session.add.call_args.args[0]
+    assert saved_report.report_uuid is None
+    session.commit.assert_awaited_once()
+
+
+@pytest.mark.asyncio
 async def test_status_report_persists_and_completes_matching_status_task():
     task_id = uuid4()
     task = SimpleNamespace(id=task_id, sn="STL26SH0001", action=2, status=2, complete_time=None)
@@ -322,3 +433,66 @@ async def test_status_report_persists_and_completes_matching_status_task():
     assert status.sn == task.sn
     assert task.status == SENSOR_TASK_STATUS_DONE
     session.commit.assert_awaited_once()
+
+
+@pytest.mark.asyncio
+async def test_fft_upload_accepts_only_action_99_and_enqueues_diagnosis(monkeypatch):
+    task_id = uuid4()
+    task = SimpleNamespace(id=task_id, action=99)
+
+    class Session:
+        async def get(self, _model, key):
+            return task if key == task_id else None
+
+    class Request:
+        async def body(self):
+            return b"fft-binary"
+
+    minio_client = Mock()
+    redis_client = Mock()
+    monkeypatch.setattr(
+        sensors_router.minio_manager,
+        "get_client",
+        lambda: minio_client,
+    )
+    monkeypatch.setattr(
+        sensors_router.stream_redis_manager,
+        "get_client",
+        lambda: redis_client,
+    )
+
+    await sensors_router.upload_sensor_fft_data(
+        task_id=task_id,
+        request=Request(),
+        session=Session(),
+    )
+
+    minio_client.put_object.assert_called_once()
+    assert minio_client.put_object.call_args.kwargs["bucket_name"] == "fft"
+    assert minio_client.put_object.call_args.kwargs["object_name"] == str(task_id)
+    redis_client.xadd.assert_called_once_with(
+        "stream:diagnosis:fft",
+        {"task_id": str(task_id)},
+    )
+
+
+@pytest.mark.asyncio
+async def test_fft_upload_rejects_non_99_task():
+    task_id = uuid4()
+
+    class Session:
+        async def get(self, _model, _key):
+            return SimpleNamespace(id=task_id, action=98)
+
+    class Request:
+        async def body(self):
+            return b"fft-binary"
+
+    with pytest.raises(HTTPException) as exc_info:
+        await sensors_router.upload_sensor_fft_data(
+            task_id=task_id,
+            request=Request(),
+            session=Session(),
+        )
+
+    assert getattr(exc_info.value, "status_code", None) == 409

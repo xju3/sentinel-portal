@@ -1,3 +1,5 @@
+import pytest
+
 from pub.services import build_quick_dispatch_plan
 
 
@@ -92,28 +94,12 @@ def test_quick_dispatch_uses_general_dense_action_for_temperature_only():
     assert plan.spec.val == 3
 
 
-def test_quick_dispatch_uses_8g_parameterized_task_for_first_clipping():
-    plan = _plan(_payload(clipped=True, range_g=2), _last_regular())
-
-    assert plan.spec is not None
-    assert plan.spec.action == 2085
-    assert plan.spec.val == 3
-    assert "IIS3DWB" in plan.spec.description
-
-
-def test_quick_dispatch_uses_16g_parameterized_task_after_8g_clipping():
-    plan = _plan(_payload(clipped=True, range_g=8), _last_regular())
-
-    assert plan.spec is not None
-    assert plan.spec.action == 2165
-    assert plan.spec.val == 3
-
-
-def test_quick_dispatch_does_not_create_parameterized_task_above_16g():
-    plan = _plan(_payload(clipped=True, range_g=16), _last_regular())
+@pytest.mark.parametrize("range_g", [2, 8, 16])
+def test_quick_dispatch_does_not_override_device_auto_range(range_g):
+    plan = _plan(_payload(clipped=True, range_g=range_g), _last_regular())
 
     assert plan.spec is None
-    assert plan.skipped_reason == "no dispatchable trigger"
+    assert plan.skipped_reason == "no quick trigger"
 
 
 def test_quick_dispatch_skips_task_reports():

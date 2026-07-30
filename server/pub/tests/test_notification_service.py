@@ -13,6 +13,7 @@ from pub.models.diagnosis import (
 )
 from pub.services.notification.notification_service import (
     DiagnosisNotificationEvent,
+    DiagnosisNotificationFaultEvent,
     NotificationRecipient,
     NotificationRouteResolution,
     NotificationService,
@@ -65,15 +66,22 @@ class FakeSession:
         self.commit_calls += 1
 
 
-def _event() -> DiagnosisNotificationEvent:
-    return DiagnosisNotificationEvent.model_validate(
+def _event(
+    *,
+    fault_type: str = "legacy_aggregate",
+    fault_level: int = 3,
+) -> DiagnosisNotificationFaultEvent:
+    return DiagnosisNotificationFaultEvent.model_validate(
         {
+            "source_schema_version": 1 if fault_type == "legacy_aggregate" else 2,
             "event_id": str(uuid4()),
             "diagnosis_id": str(uuid4()),
             "report_id": str(uuid4()),
             "device_id": str(uuid4()),
             "sensor_sn": "SN-001",
-            "overall_level": 3,
+            "fault_type": fault_type,
+            "fault_level": fault_level,
+            "overall_level": fault_level if fault_type == "legacy_aggregate" else None,
             "device_category_id": str(uuid4()),
             "process_device_id": str(uuid4()),
             "diagnosed_at": "2026-07-29T16:05:00+00:00",
@@ -91,7 +99,8 @@ def test_delivery_model_has_daily_unique_constraint():
     constraint = unique_constraints[0]
     assert [column.name for column in constraint.columns] == [
         "device_id",
-        "overall_level",
+        "fault_type",
+        "fault_level",
         "employee_id",
         "notification_date",
     ]
@@ -102,6 +111,51 @@ def test_parse_event_normalizes_beijing_notification_date():
 
     assert event.diagnosed_at.isoformat() == "2026-07-29T16:05:00+00:00"
     assert event.notification_date == date(2026, 7, 30)
+
+
+def test_parse_event_dispatches_v1_and_v2():
+    v1 = NotificationService.parse_event(
+        {
+            "event_id": str(uuid4()),
+            "diagnosis_id": str(uuid4()),
+            "report_id": str(uuid4()),
+            "device_id": str(uuid4()),
+            "sensor_sn": "SN-001",
+            "overall_level": 3,
+            "diagnosed_at": "2026-07-29T16:05:00+00:00",
+        }
+    )
+    v2 = NotificationService.parse_event(
+        {
+            "schema_version": 2,
+            "event_id": str(uuid4()),
+            "diagnosis_id": str(uuid4()),
+            "report_id": str(uuid4()),
+            "device_id": str(uuid4()),
+            "sensor_sn": "SN-001",
+            "diagnosed_at": "2026-07-29T16:05:00+00:00",
+            "faults": [
+                {
+                    "diagnosis_item_id": str(uuid4()),
+                    "fault_type": "temperature",
+                    "fault_level": 2,
+                },
+                {
+                    "diagnosis_item_id": str(uuid4()),
+                    "fault_type": "vibration",
+                    "fault_level": 3,
+                },
+            ],
+        }
+    )
+
+    assert v1.schema_version == 1
+    assert [fault.fault_type for fault in v1.expanded_faults()] == ["legacy_aggregate"]
+    assert v2.schema_version == 2
+    assert [fault.fault_type for fault in v2.expanded_faults()] == [
+        "temperature",
+        "vibration",
+    ]
 
 
 @pytest.mark.asyncio
@@ -210,8 +264,8 @@ async def test_list_recipients_merges_employee_ids(monkeypatch):
 
 
 @pytest.mark.asyncio
-async def test_prepare_delivery_targets_keeps_failed_rows_out_of_send_queue(monkeypatch):
-    event = _event()
+async def test_prepare_delivery_targets_retries_failed_rows(monkeypatch):
+    event = _event(fault_type="vibration")
     employee_pending = uuid4()
     employee_failed = uuid4()
 
@@ -243,6 +297,7 @@ async def test_prepare_delivery_targets_keeps_failed_rows_out_of_send_queue(monk
     monkeypatch.setattr(NotificationService, "list_recipients", fake_list_recipients)
 
     responses = [
+        FakeExecuteResult(rows=[]),
         FakeExecuteResult(rowcount=2),
         FakeExecuteResult(
             rows=[
@@ -257,6 +312,8 @@ async def test_prepare_delivery_targets_keeps_failed_rows_out_of_send_queue(monk
                     employee_id=employee_failed,
                     wx_user_id="wx-failed",
                     status=int(DiagnosisNotificationDeliveryStatus.FAILED),
+                    attempt_count=1,
+                    next_attempt_at=None,
                 ),
             ]
         ),
@@ -269,14 +326,68 @@ async def test_prepare_delivery_targets_keeps_failed_rows_out_of_send_queue(monk
     assert session.commit_calls == 1
     assert target_map[employee_pending].should_send is True
     assert target_map[employee_pending].status == DiagnosisNotificationDeliveryStatus.PENDING
-    assert target_map[employee_failed].should_send is False
+    assert target_map[employee_failed].should_send is True
     assert target_map[employee_failed].status == DiagnosisNotificationDeliveryStatus.FAILED
-    assert target_map[employee_failed].skip_reason == "failed"
-    assert session.statements[0].table.name == "diagnosis_notification_delivery"
+    assert target_map[employee_failed].skip_reason is None
+    insert_stmt = next(
+        stmt for stmt in session.statements if hasattr(stmt, "table")
+    )
+    assert insert_stmt.table.name == "diagnosis_notification_delivery"
 
 
 @pytest.mark.asyncio
-async def test_mark_delivery_sending_guards_pending_state():
+async def test_prepare_delivery_targets_suppresses_v2_when_legacy_row_exists(monkeypatch):
+    event = _event(fault_type="temperature")
+    employee_id = uuid4()
+    legacy_delivery_id = uuid4()
+
+    async def fake_resolve_route_ids(*_args, **_kwargs):
+        return NotificationRouteResolution(
+            device_category_id=uuid4(),
+            process_device_id=uuid4(),
+            device_category_source="device",
+            process_device_source="device",
+        )
+
+    async def fake_list_recipients(*_args, **_kwargs):
+        return [
+            NotificationRecipient(
+                employee_id=employee_id,
+                employee_name="Legacy User",
+                wx_user_id="wx-legacy",
+                route_sources=("device_category",),
+            )
+        ]
+
+    monkeypatch.setattr(NotificationService, "resolve_route_ids", fake_resolve_route_ids)
+    monkeypatch.setattr(NotificationService, "list_recipients", fake_list_recipients)
+
+    session = FakeSession(
+        [
+            FakeExecuteResult(
+                rows=[
+                    SimpleNamespace(
+                        id=legacy_delivery_id,
+                        employee_id=employee_id,
+                        wx_user_id="wx-legacy",
+                        status=int(DiagnosisNotificationDeliveryStatus.SENT),
+                    )
+                ]
+            )
+        ]
+    )
+
+    targets = await NotificationService.prepare_delivery_targets(session, event)
+
+    assert session.commit_calls == 0
+    assert len(targets) == 1
+    assert targets[0].delivery_id == legacy_delivery_id
+    assert targets[0].should_send is False
+    assert targets[0].skip_reason == "legacy_aggregate_suppressed"
+
+
+@pytest.mark.asyncio
+async def test_mark_delivery_sending_claims_pending_or_failed_state():
     delivery_id = uuid4()
     session = FakeSession([FakeExecuteResult(rowcount=1)])
 
@@ -290,6 +401,7 @@ async def test_mark_delivery_sending_guards_pending_state():
     )
     assert claimed is True
     assert "UPDATE diagnosis_notification_delivery" in compiled
-    assert "status=0" in compiled or "status = 0" in compiled
+    assert "status IN (0, 3)" in compiled or "status IN (__[POSTCOMPILE_status_1])" in compiled
+    assert "attempt_count < 3" in compiled
     assert "WHERE diagnosis_notification_delivery.id" in compiled
     assert session.commit_calls == 1

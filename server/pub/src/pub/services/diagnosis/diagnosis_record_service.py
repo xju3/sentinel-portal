@@ -75,7 +75,7 @@ class DiagnosisRecordService:
                     requested_range_g=payload.get("requested_range_g"),
                     range_g=payload.get("range_g"),
                     points=payload.get("points"),
-                    task_id=payload.get("task_id"),
+                    task_id=payload.get("task_id") if payload.get("task_id") and str(payload.get("task_id")).strip() else None,
                     sample_type=payload.get("sample_type"),
                     duration_ms=payload.get("duration_ms"),
                     quality=payload.get("quality"),

@@ -87,6 +87,52 @@ class TemperatureDiagnosis:
         return current_severity
 
     @staticmethod
+    def _window_summary(
+        trend_data: list[dict[str, Any]],
+        *,
+        hours: int,
+        current_temp: float,
+        current_ts_ms: int,
+    ) -> dict[str, Any]:
+        values = [float(point["value"]) for point in trend_data]
+        if not values:
+            values = [current_temp]
+        return {
+            "hours": hours,
+            "from_ts_ms": trend_data[0]["ts_ms"] if trend_data else current_ts_ms,
+            "to_ts_ms": current_ts_ms,
+            "sample_count": len(trend_data),
+            "min": min(values),
+            "max": max(values),
+        }
+
+    @staticmethod
+    def _finish_evidence(
+        evidence: dict[str, Any],
+        *,
+        severity: str,
+        primary_rule: str | None,
+    ) -> dict[str, Any]:
+        evidence["result"] = {
+            "level": {
+                "ok": 0,
+                "normal": 0,
+                "info": 0,
+                "attention": 1,
+                "abnormal": 2,
+                "warning": 3,
+                "critical": 4,
+            }.get(severity, 0),
+            "primary_rule": primary_rule,
+            "triggered_rules": [
+                check["code"]
+                for check in evidence["checks"]
+                if check.get("triggered")
+            ],
+        }
+        return evidence
+
+    @staticmethod
     async def analyze(
         device_id: str,
         location_id: str,
@@ -107,17 +153,46 @@ class TemperatureDiagnosis:
         mt_max_slope = float(thresholds.get("mt_max_slope", 2.0))
 
         ambient_temp = context.get("ambient_temperature")
-        evidence = {"current": current_temp, "ambient": ambient_temp}
+        evidence: dict[str, Any] = {
+            "schema_version": 2,
+            "fault_type": "temperature",
+            "current": current_temp,
+            "ambient": ambient_temp,
+            "context": {
+                "current": current_temp,
+                "ambient": ambient_temp,
+                "baseline": baseline,
+                "unit": "°C",
+            },
+            "checks": [],
+            "peer": None,
+        }
 
         # --- PRE-GATEWAY FAULT CHECKS ---
         
         # 1. Absolute Baseline (Never allowed to exceed)
-        if current_temp >= baseline:
+        baseline_triggered = current_temp >= baseline
+        evidence["checks"].append(
+            {
+                "code": "temperature.absolute_baseline",
+                "label": "绝对温度阈值",
+                "observed": current_temp,
+                "operator": ">=",
+                "threshold": baseline,
+                "unit": "°C",
+                "triggered": baseline_triggered,
+            }
+        )
+        if baseline_triggered:
             return {
                 "status": "alarm",
                 "severity": "critical",
                 "reason": f"Critical: Absolute temperature {current_temp:.1f}°C exceeded baseline {baseline}°C!",
-                "evidence": evidence
+                "evidence": TemperatureDiagnosis._finish_evidence(
+                    evidence,
+                    severity="critical",
+                    primary_rule="temperature.absolute_baseline",
+                ),
             }
 
         trend_data = await TrendCacheService.get_recent_trend(location_id, "temperature_c")
@@ -137,12 +212,28 @@ class TemperatureDiagnosis:
             mutation = abs(current_temp - last_temp)
             evidence["mutation"] = mutation
             evidence["last_temp"] = last_temp
-            if mutation > rt_max_delta:
+            mutation_triggered = mutation > rt_max_delta
+            evidence["checks"].append(
+                {
+                    "code": "temperature.realtime_mutation",
+                    "label": "实时温度突变",
+                    "observed": mutation,
+                    "operator": ">",
+                    "threshold": rt_max_delta,
+                    "unit": "°C",
+                    "triggered": mutation_triggered,
+                }
+            )
+            if mutation_triggered:
                 return {
                     "status": "alarm",
                     "severity": "warning",
                     "reason": f"Warning: Real-time mutation {mutation:.1f}°C exceeds limit {rt_max_delta}°C!",
-                    "evidence": evidence
+                    "evidence": TemperatureDiagnosis._finish_evidence(
+                        evidence,
+                        severity="warning",
+                        primary_rule="temperature.realtime_mutation",
+                    ),
                 }
 
         # 3. Gateway Gatekeeper
@@ -153,7 +244,11 @@ class TemperatureDiagnosis:
                 "status": "ok",
                 "severity": "info",
                 "reason": f"Normal: Temperature {current_temp:.1f}°C is within ambient baseline.",
-                "evidence": evidence
+                "evidence": TemperatureDiagnosis._finish_evidence(
+                    evidence,
+                    severity="info",
+                    primary_rule=None,
+                ),
             }
 
         status = "ok"
@@ -167,6 +262,7 @@ class TemperatureDiagnosis:
             ratio = (current_temp - ambient_temp) / (baseline - ambient_temp)
         
         evidence["thermal_budget_ratio"] = ratio
+        evidence["context"]["budget_ratio"] = ratio
         context_severity = TemperatureDiagnosis._get_severity_from_ratio(ratio)
 
         # --- VERTICAL STRATEGY ---
@@ -183,6 +279,36 @@ class TemperatureDiagnosis:
         st_slope = TemperatureDiagnosis._calculate_slope(st_trend)
         st_amplitude = TemperatureDiagnosis._calculate_amplitude(st_trend, current_temp)
         evidence.update({"st_slope": st_slope, "st_amplitude": st_amplitude})
+        st_window = TemperatureDiagnosis._window_summary(
+            st_trend,
+            hours=24,
+            current_temp=current_temp,
+            current_ts_ms=now_ms,
+        )
+        evidence["checks"].extend(
+            [
+                {
+                    "code": "temperature.short_term_slope",
+                    "label": "24小时升温斜率",
+                    "observed": st_slope,
+                    "operator": ">",
+                    "threshold": st_max_slope,
+                    "unit": "°C/hour",
+                    "triggered": st_slope > st_max_slope,
+                    "window": st_window,
+                },
+                {
+                    "code": "temperature.short_term_amplitude",
+                    "label": "24小时温度振幅",
+                    "observed": st_amplitude,
+                    "operator": ">",
+                    "threshold": st_max_amplitude,
+                    "unit": "°C",
+                    "triggered": st_amplitude > st_max_amplitude,
+                    "window": st_window,
+                },
+            ]
+        )
         
         if st_slope > st_max_slope:
             status = "alarm"
@@ -197,6 +323,36 @@ class TemperatureDiagnosis:
         mt_slope = TemperatureDiagnosis._calculate_slope(mt_trend)
         mt_amplitude = TemperatureDiagnosis._calculate_amplitude(mt_trend, current_temp)
         evidence.update({"mt_slope": mt_slope, "mt_amplitude": mt_amplitude})
+        mt_window = TemperatureDiagnosis._window_summary(
+            mt_trend,
+            hours=72,
+            current_temp=current_temp,
+            current_ts_ms=now_ms,
+        )
+        evidence["checks"].extend(
+            [
+                {
+                    "code": "temperature.middle_term_slope",
+                    "label": "72小时升温斜率",
+                    "observed": mt_slope,
+                    "operator": ">",
+                    "threshold": mt_max_slope,
+                    "unit": "°C/hour",
+                    "triggered": mt_slope > mt_max_slope,
+                    "window": mt_window,
+                },
+                {
+                    "code": "temperature.middle_term_amplitude",
+                    "label": "72小时温度振幅",
+                    "observed": mt_amplitude,
+                    "operator": ">",
+                    "threshold": mt_max_amplitude,
+                    "unit": "°C",
+                    "triggered": mt_amplitude > mt_max_amplitude,
+                    "window": mt_window,
+                },
+            ]
+        )
         
         if status == "ok":
             if mt_slope > mt_max_slope:
@@ -230,6 +386,27 @@ class TemperatureDiagnosis:
                 evidence["peer_median"] = peer_median
                 
                 peer_deviation = current_temp - peer_median
+                peer_threshold = 10.0 if peer_deviation > 10.0 else 5.0
+                peer_triggered = peer_deviation > 10.0 or (
+                    peer_deviation > 5.0 and severity == "info"
+                )
+                evidence["peer"] = {
+                    "median": peer_median,
+                    "deviation": peer_deviation,
+                    "threshold": peer_threshold,
+                    "sample_count": len(peer_temps),
+                }
+                evidence["checks"].append(
+                    {
+                        "code": "temperature.peer_deviation",
+                        "label": "同类设备温度偏差",
+                        "observed": peer_deviation,
+                        "operator": ">",
+                        "threshold": peer_threshold,
+                        "unit": "°C",
+                        "triggered": peer_triggered,
+                    }
+                )
                 if peer_deviation > 10.0:
                     status = "alarm"
                     severity = TemperatureDiagnosis._escalate(severity, context_severity)
@@ -244,5 +421,16 @@ class TemperatureDiagnosis:
             "status": status,
             "severity": severity,
             "reason": reason,
-            "evidence": evidence
+            "evidence": TemperatureDiagnosis._finish_evidence(
+                evidence,
+                severity=severity,
+                primary_rule=next(
+                    (
+                        check["code"]
+                        for check in evidence["checks"]
+                        if check.get("triggered")
+                    ),
+                    None,
+                ),
+            ),
         }

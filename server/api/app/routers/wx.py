@@ -1,8 +1,10 @@
 import uuid
 import logging
+from uuid import UUID
 
 logger = logging.getLogger(__name__)
 from fastapi import APIRouter, Depends, HTTPException, Request, Response, Query
+from fastapi.responses import RedirectResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 from pub.services import get_session
 from pub.services import AuthService
@@ -10,9 +12,11 @@ from pub.services import WxService
 from pub.services.customer.org_service import EmployeeService
 from app.config import settings
 from app.database import redis_manager
+from app.services.wx_diagnosis_access_service import WxDiagnosisAccessService
 from pub.utils.redis_keys import REDIS_KEY_WX_SCAN
 from app.utils.auth import get_current_account
 from pub.models.customer import Account
+from pub.models.diagnosis import DiagnosisNotificationDelivery
 from pub.utils.jwt_token import create_access_token
 from pub.contract.auth import LoginResponse
 from app.utils.response import success
@@ -443,3 +447,50 @@ async def test_send_template(
         return success({"message": "模板消息发送成功"})
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"模板消息发送失败: {str(e)}")
+
+
+@router.get("/wx/diagnosis/entry")
+async def wx_diagnosis_entry(
+    request: Request,
+    delivery_id: UUID = Query(..., description="Notification delivery id"),
+    session: AsyncSession = Depends(get_session),
+):
+    delivery = await session.get(DiagnosisNotificationDelivery, delivery_id)
+    if delivery is None or delivery.report_id is None:
+        raise HTTPException(status_code=404, detail="Diagnosis delivery not found")
+    state = WxDiagnosisAccessService.create_signed_state(
+        delivery_id=delivery.id,
+        report_id=delivery.report_id,
+        fault_type=delivery.fault_type,
+    )
+    authorize_url = WxDiagnosisAccessService.build_oauth_authorize_url(
+        request=request,
+        state_token=state,
+    )
+    return RedirectResponse(authorize_url, status_code=302)
+
+
+@router.get("/wx/diagnosis/callback")
+async def wx_diagnosis_callback(
+    request: Request,
+    code: str = Query(...),
+    state: str = Query(...),
+    session: AsyncSession = Depends(get_session),
+):
+    result = await WxDiagnosisAccessService.authorize_callback(
+        session=session,
+        request=request,
+        code=code,
+        state_token=state,
+    )
+    response = RedirectResponse(result.redirect_url, status_code=302)
+    response.set_cookie(
+        key=settings.wx_diagnosis_cookie_name,
+        value=result.cookie_value,
+        max_age=result.cookie_max_age,
+        httponly=True,
+        secure=settings.wx_diagnosis_cookie_secure,
+        samesite="lax",
+        path=result.cookie_path,
+    )
+    return response

@@ -6,7 +6,7 @@ import pytest
 
 from app.clients.mqtt import IncomingMqttMessage
 from app.config import Settings
-from app.services.notification_service import LocalNotificationService, NotificationEvent
+from app.services.notification_service import LocalNotificationService
 from app.services.worker import NotificationWorker
 
 
@@ -27,7 +27,7 @@ def build_payload() -> bytes:
 @pytest.mark.asyncio
 async def test_worker_acks_after_successful_processing():
     service = SimpleNamespace(
-        parse_event=Mock(side_effect=NotificationEvent.model_validate_json),
+        parse_event=Mock(side_effect=LocalNotificationService.parse_event),
         process_event=AsyncMock(return_value={"status": "processed"}),
     )
     worker = NotificationWorker(service)
@@ -51,7 +51,7 @@ async def test_worker_acks_after_successful_processing():
 @pytest.mark.asyncio
 async def test_worker_acks_invalid_payload_to_unblock_queue():
     service = SimpleNamespace(
-        parse_event=Mock(side_effect=NotificationEvent.model_validate_json),
+        parse_event=Mock(side_effect=LocalNotificationService.parse_event),
         process_event=AsyncMock(),
     )
     worker = NotificationWorker(service)
@@ -99,7 +99,7 @@ async def test_worker_acks_invalid_utf8_with_real_parser():
 @pytest.mark.asyncio
 async def test_worker_leaves_message_unacked_when_processing_raises():
     service = SimpleNamespace(
-        parse_event=Mock(side_effect=NotificationEvent.model_validate_json),
+        parse_event=Mock(side_effect=LocalNotificationService.parse_event),
         process_event=AsyncMock(side_effect=RuntimeError("db down")),
     )
     worker = NotificationWorker(service)

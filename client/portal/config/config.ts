@@ -46,6 +46,12 @@ export default defineConfig({
       layout: false,
     },
     {
+      path: '/wx/diagnosis/:reportId',
+      component: '@/pages/Wx/DiagnosisDetail',
+      layout: false,
+      hideInMenu: true,
+    },
+    {
       path: '/dashboard',
       name: '仪表盘',
       icon: 'DashboardOutlined',

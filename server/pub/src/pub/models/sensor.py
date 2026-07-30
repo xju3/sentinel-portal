@@ -304,18 +304,15 @@ class SensorTask(Base):
     0=pending delivery, 2=dispatched/running, 1=complete.
 
     action > 10 is used for temporary collection tasks:
-    - 11..99: default-parameter dense collection. The code is T I:
+    - 11..98: default-parameter dense collection. The code is T I:
       T = focus type, I = interval minutes. Focus types are 1=general,
       2=temperature, 3=RMS, 4=impact/spectrum.
       Example: action=15, val=3 means collect full data every 5 minutes,
       repeat 3 times.
       Example: action=25, val=3 means collect full data every 5 minutes,
       repeat 3 times with temperature as the server-side review focus.
-    - 1000..9999: IIS3DWB parameterized dense collection. The code is M RR I:
-      M = FFT points multiplier of 4096, RR = range_g as 02/04/08/16,
-      I = interval minutes. val is repeat count.
-      Example: action=2086, val=3 means 2*4096 points, 8g, every 6 minutes,
-      repeat 3 times.
+    - 99: FFT collection. The device chooses FFT points/range locally and
+      uploads the actual metadata in the FFT binary file.
     """
 
     __tablename__ = "sensor_task"
@@ -325,6 +322,30 @@ class SensorTask(Base):
     action = Column(SmallInteger, nullable=False)  # 动作类型
     val = Column(SmallInteger, nullable=False, default=0)  # 执行多少次
     remark = Column(Text, nullable=True)  # 任务内容和发起原因说明
+    diagnosis_case_id = Column(
+        Uuid(as_uuid=True),
+        ForeignKey("diagnosis_case.id"),
+        nullable=True,
+        index=True,
+    )
+    source_report_id = Column(
+        Uuid(as_uuid=True),
+        ForeignKey("diagnosis_record.id"),
+        nullable=True,
+        index=True,
+    )
+    source_diagnosis_id = Column(
+        Uuid(as_uuid=True),
+        ForeignKey("diagnosis.id"),
+        nullable=True,
+        index=True,
+    )
+    task_purpose = Column(
+        String(32),
+        nullable=True,
+        index=True,
+        comment="RESAMPLING|FFT; FFT tasks do not populate source diagnosis links",
+    )
     status = Column(
         SmallInteger,
         nullable=False,
@@ -358,6 +379,12 @@ class SensorTaskReport(Base):
     sn = Column(String(255), nullable=False, index=True)
     sequence = Column(SmallInteger, nullable=False, index=True)
     report_id = Column(String(64), nullable=False, index=True)
+    report_uuid = Column(
+        Uuid(as_uuid=True),
+        ForeignKey("diagnosis_record.id"),
+        nullable=True,
+        index=True,
+    )
     ts_ms = Column(BigInteger, nullable=False, index=True)
     created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
 

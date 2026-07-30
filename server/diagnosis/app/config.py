@@ -34,6 +34,11 @@ class Settings(BaseSettings):
     mqtt_protocol_version: str = "3.1.1"
     mqtt_notification_topic: str = "sentinel/notification/wechat"
     mqtt_publish_timeout_seconds: float = 5.0
+    notification_event_schema_version: int = 2
+    notification_outbox_poll_seconds: float = 1.0
+    notification_outbox_batch_size: int = 20
+    notification_outbox_initial_backoff_seconds: float = 2.0
+    notification_outbox_max_backoff_seconds: float = 300.0
 
     model_config = SettingsConfigDict(
         env_file=("../api/.env", "../../.env", ".env"),
