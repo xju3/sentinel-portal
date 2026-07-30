@@ -128,6 +128,12 @@ def setup_logging(environment: str = "development", debug: bool = True):
             },
         },
         "loggers": {
+            # aiomysql 会在每次 MySQL caching_sha2_password 认证成功时输出
+            # DEBUG 日志。连接池建立或重建连接属于正常行为，不应污染业务日志。
+            "aiomysql": {
+                "level": "WARNING",
+                "propagate": True,
+            },
             "sqlalchemy.engine": {
                 "level": "WARNING",
                 "propagate": False

@@ -32,7 +32,7 @@ services:
 
   diagnosis:
     <<: *python-app
-    container_name: stl-dia
+    container_name: stl-diagnoiss
     environment:
       <<: *python-env
       APP_PACKAGE: diagnosis

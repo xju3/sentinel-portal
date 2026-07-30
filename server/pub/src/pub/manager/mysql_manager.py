@@ -3,7 +3,6 @@ from typing import AsyncGenerator
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine, async_sessionmaker
-from sqlalchemy.pool import NullPool
 
 from pub.models import Base, import_all_models
 
@@ -115,8 +114,10 @@ class DatabaseManager:
                 mysql_url,
                 # echo=debug,
                 echo=False,  # 通过 logging 配置控制日志输出，避免 SQL 语句过多时日志过于冗长
-                poolclass=NullPool,
                 pool_pre_ping=True,
+                pool_size=10,
+                max_overflow=10,
+                pool_recycle=1800,
             )
             self.SessionLocal = async_sessionmaker(
                 self.engine, class_=AsyncSession, expire_on_commit=False
