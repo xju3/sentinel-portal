@@ -7,6 +7,7 @@ from datetime import datetime
 from sqlalchemy.ext.asyncio import AsyncSession
 from typing import List, Optional, cast
 from uuid import UUID
+from pydantic import ValidationError
 
 from pub.services import get_session
 from pub.models.customer import Account as AccountModel
@@ -18,6 +19,7 @@ from pub.services import (
     IsoStandardService,
     DeviceCategoryService,
     DeviceSpecService,
+    BearingService,
     DeviceInstService,
     SupplierService,
     SensorMonitoringService,
@@ -42,6 +44,11 @@ from pub.contract.devices import (
     DeviceSpecCreate,
     DeviceSpecUpdate,
     DeviceSpecResponse,
+    BearingModelCreate,
+    BearingModelUpdate,
+    BearingModelResponse,
+    DeviceSpecBearingReplace,
+    DeviceSpecBearingResponse,
     DeviceInstCreate,
     DeviceInstUpdate,
     DeviceInstResponse,
@@ -440,7 +447,128 @@ async def delete_device_category(
 
 
 # ==========================================
-# 3. DeviceSpec
+# 3. Bearings
+# ==========================================
+@router.get("/bearings")
+async def list_bearings(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(100, ge=1, le=100),
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    models = await BearingService.list_models(session, tenant_id, skip, limit)
+    return success(
+        [BearingModelResponse.model_validate(model) for model in models]
+    )
+
+
+@router.get("/bearings/{obj_id}")
+async def get_bearing(
+    obj_id: UUID,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    obj = await BearingService.get_model(session, tenant_id, obj_id)
+    if obj is None:
+        raise HTTPException(status_code=404, detail="Bearing model not found")
+    return success(BearingModelResponse.model_validate(obj))
+
+
+@router.post("/bearings")
+async def create_bearing(
+    item: BearingModelCreate,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    data = item.model_dump()
+    duplicate = await BearingService.find_duplicate(
+        session, tenant_id, data["brand"], data["model"]
+    )
+    if duplicate is not None:
+        raise HTTPException(
+            status_code=409,
+            detail="A bearing with the same brand and model already exists",
+        )
+    try:
+        created = await BearingService.create_model(session, tenant_id, data)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return success(BearingModelResponse.model_validate(created))
+
+
+@router.put("/bearings/{obj_id}")
+async def update_bearing(
+    obj_id: UUID,
+    item: BearingModelUpdate,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    obj = await BearingService.get_model(session, tenant_id, obj_id)
+    if obj is None:
+        raise HTTPException(status_code=404, detail="Bearing model not found")
+
+    update_data = item.model_dump(exclude_unset=True)
+    merged = {
+        "brand": obj.brand,
+        "model": obj.model,
+        "bearing_type": obj.bearing_type,
+        "rolling_element_count": obj.rolling_element_count,
+        "rolling_element_diameter_mm": obj.rolling_element_diameter_mm,
+        "pitch_diameter_mm": obj.pitch_diameter_mm,
+        "contact_angle_deg": obj.contact_angle_deg,
+        "description": obj.description,
+        "active": obj.active,
+        **update_data,
+    }
+    try:
+        validated = BearingModelCreate(**merged)
+    except ValidationError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    normalized = validated.model_dump()
+    update_data = {key: normalized[key] for key in update_data}
+
+    duplicate = await BearingService.find_duplicate(
+        session,
+        tenant_id,
+        normalized["brand"],
+        normalized["model"],
+        exclude_id=obj_id,
+    )
+    if duplicate is not None:
+        raise HTTPException(
+            status_code=409,
+            detail="A bearing with the same brand and model already exists",
+        )
+    try:
+        updated = await BearingService.update_model(session, obj, update_data)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return success(BearingModelResponse.model_validate(updated))
+
+
+@router.delete("/bearings/{obj_id}")
+async def delete_bearing(
+    obj_id: UUID,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    obj = await BearingService.get_model(session, tenant_id, obj_id)
+    if obj is None:
+        raise HTTPException(status_code=404, detail="Bearing model not found")
+    try:
+        await BearingService.delete_model(session, obj)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return success({"message": "Bearing model deleted successfully"})
+
+
+# ==========================================
+# 4. DeviceSpec
 # ==========================================
 @router.get("/device-specs")
 async def list_device_specs(
@@ -506,7 +634,9 @@ async def update_device_spec(
 
     update_data = item.model_dump(exclude_unset=True)
     await _validate_device_spec_refs(session, tenant_id, update_data)
-    return success(await DeviceSpecService.update(session, db_obj, update_data))
+    updated = await DeviceSpecService.update(session, db_obj, update_data)
+    await BearingService.invalidate_diagnosis_cache(session, [obj_id])
+    return success(updated)
 
 
 @router.delete("/device-specs/{obj_id}")
@@ -525,8 +655,55 @@ async def delete_device_spec(
     return success({"message": "DeviceSpec deleted successfully"})
 
 
+@router.get("/device-specs/{obj_id}/bearings")
+async def list_device_spec_bearings(
+    obj_id: UUID,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    bindings = await BearingService.list_bindings(session, tenant_id, obj_id)
+    if bindings is None:
+        raise HTTPException(status_code=404, detail="DeviceSpec not found")
+    return success(
+        [
+            DeviceSpecBearingResponse.model_validate(binding)
+            for binding in bindings
+        ]
+    )
+
+
+@router.put("/device-specs/{obj_id}/bearings")
+async def replace_device_spec_bearings(
+    obj_id: UUID,
+    item: DeviceSpecBearingReplace,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    try:
+        bindings = await BearingService.replace_bindings(
+            session,
+            tenant_id,
+            obj_id,
+            [binding.model_dump() for binding in item.bindings],
+        )
+    except BearingService.ConflictError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    if bindings is None:
+        raise HTTPException(status_code=404, detail="DeviceSpec not found")
+    return success(
+        [
+            DeviceSpecBearingResponse.model_validate(binding)
+            for binding in bindings
+        ]
+    )
+
+
 # ==========================================
-# 4. DeviceInst
+# 5. DeviceInst
 # ==========================================
 @router.get("/device-insts")
 async def list_device_insts(

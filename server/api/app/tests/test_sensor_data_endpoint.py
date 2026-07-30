@@ -1,10 +1,88 @@
 from datetime import datetime, timedelta, timezone
+from types import SimpleNamespace
 from unittest.mock import AsyncMock, Mock
+from uuid import uuid4
 
 import pytest
 from fastapi import HTTPException
 
 from app.routers import sensors
+
+
+@pytest.mark.asyncio
+async def test_sensor_binding_returns_location_specific_bearing_orders(monkeypatch):
+    device_id = uuid4()
+    location_id = uuid4()
+    binding_id = uuid4()
+    bearing_id = uuid4()
+    monkeypatch.setattr(
+        sensors.SensorDbService,
+        "get_binding_by_sn",
+        AsyncMock(
+            return_value={
+                "device_id": device_id,
+                "rpm": 1500,
+                "bearing": {
+                    "binding_id": binding_id,
+                    "bearing_id": bearing_id,
+                    "brand": "SKF",
+                    "model": "6205",
+                    "bearing_type": "DEEP_GROOVE_BALL",
+                    "shaft_speed_ratio": 0.2,
+                    "shaft_rpm": 300,
+                    "fault_orders": {
+                        "bpfo": 3.2,
+                        "bpfi": 4.8,
+                        "bsf": 2.4,
+                        "ftf": 0.4,
+                    },
+                },
+            }
+        ),
+    )
+
+    response = await sensors.get_sensor_binding(sn="SN-001", session=Mock())
+
+    assert response.data["device_id"] == str(device_id)
+    assert "location_id" not in response.data
+    assert "location_id" not in response.data["bearing"]
+    assert response.data["bearing"]["shaft_speed_ratio"] == 0.2
+    assert response.data["bearing"]["shaft_rpm"] == 300
+    assert response.data["bearing"]["fault_orders"]["bpfi"] == 4.8
+
+
+@pytest.mark.asyncio
+async def test_sensor_binding_query_matches_bearing_by_spec_and_location():
+    device_id = uuid4()
+    location_id = uuid4()
+    bearing_id = uuid4()
+    binding_id = uuid4()
+    query_result = Mock()
+    query_result.first.return_value = SimpleNamespace(
+        device_inst_id=device_id,
+        location_id=location_id,
+        rpm=1500,
+        binding_id=binding_id,
+        bearing_id=bearing_id,
+        shaft_speed_ratio=0.2,
+        brand="SKF",
+        model="6205",
+        bearing_type="DEEP_GROOVE_BALL",
+        rolling_element_count=8,
+        rolling_element_diameter_mm=10,
+        pitch_diameter_mm=50,
+        contact_angle_deg=0,
+    )
+    session = Mock()
+    session.execute = AsyncMock(return_value=query_result)
+
+    binding = await sensors.SensorDbService.get_binding_by_sn(session, "SN-001")
+
+    statement = str(session.execute.await_args.args[0])
+    assert "device_spec_bearing.location_id = sensor_monitoring.location_id" in statement
+    assert "location_id" not in binding
+    assert binding["bearing"]["shaft_rpm"] == 300
+    assert binding["bearing"]["fault_orders"]["bpfo"] == pytest.approx(3.2)
 
 
 @pytest.fixture(autouse=True)
@@ -57,6 +135,44 @@ async def test_receive_sensor_data_generates_ts_ms_when_device_omits_it(monkeypa
 
 
 @pytest.mark.asyncio
+async def test_receive_sensor_data_accepts_optional_bearing_features(monkeypatch):
+    dispatch = AsyncMock(return_value=[])
+    monkeypatch.setattr(sensors, "dispatch_quick_diagnosis_tasks", dispatch)
+    bearing_features = {
+        axis: {
+            "status": 0,
+            "envelope_kurtosis": 4.2,
+            "fault_candidates": {},
+        }
+        for axis in ("X", "Y", "Z")
+    }
+
+    await sensors.receive_sensor_data(
+        background_tasks=Mock(),
+        payload={"sn": "STL26SH0001", "bearing_features": bearing_features},
+        session=Mock(),
+    )
+
+    assert dispatch.await_args.kwargs["payload"]["bearing_features"] == bearing_features
+
+
+@pytest.mark.asyncio
+async def test_receive_sensor_data_rejects_invalid_bearing_features():
+    with pytest.raises(HTTPException) as exc:
+        await sensors.receive_sensor_data(
+            background_tasks=Mock(),
+            payload={
+                "sn": "STL26SH0001",
+                "bearing_features": {"X": {"status": 0}},
+            },
+            session=Mock(),
+        )
+
+    assert exc.value.status_code == 400
+    assert "bearing_features" in exc.value.detail
+
+
+@pytest.mark.asyncio
 @pytest.mark.parametrize(
     ("period", "delay", "expected_age"),
     [
@@ -105,6 +221,26 @@ async def test_receive_sensor_data_current_sample_does_not_require_period(monkey
     stored_payload = dispatch.await_args.kwargs["payload"]
     sample_time = datetime.fromtimestamp(stored_payload["ts_ms"] / 1000, timezone.utc)
     assert abs((datetime.now(timezone.utc) - sample_time).total_seconds()) < 1
+
+
+@pytest.mark.asyncio
+async def test_receive_sensor_data_requires_task_decision_to_succeed(monkeypatch):
+    monkeypatch.setattr(
+        sensors,
+        "dispatch_quick_diagnosis_tasks",
+        AsyncMock(side_effect=RuntimeError("database unavailable")),
+    )
+    background_tasks = Mock()
+
+    with pytest.raises(HTTPException) as exc_info:
+        await sensors.receive_sensor_data(
+            background_tasks=background_tasks,
+            payload={"sn": "STL26SH0001", "delay": 0},
+            session=Mock(),
+        )
+
+    assert exc_info.value.status_code == 503
+    background_tasks.add_task.assert_not_called()
 
 
 @pytest.mark.asyncio

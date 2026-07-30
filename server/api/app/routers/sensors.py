@@ -33,6 +33,7 @@ from pub.services import (
     record_sensor_status,
 )
 from pub.models.customer import Account
+from pub.models.report import BearingFeatures
 from pub.models.sensor import Sensor, SensorBatch, SensorTask
 from pub.exceptions.domain_exception import DomainException
 from pub.decorators.dashboard_cache import rebuild_dashboard_cache
@@ -217,8 +218,6 @@ async def get_sensor_binding(
     session: AsyncSession = Depends(get_session),
 ):
     binding = await SensorDbService.get_binding_by_sn(session, sn)
-    device_id = binding.get("device_id") if binding else None
-    rpm = binding.get("rpm") if binding else None
     
     meta_data = await SensorDbService.get_sensor_metadata_for_cache(session, sn)
     if meta_data:
@@ -226,7 +225,7 @@ async def get_sensor_binding(
         if redis_client:
             redis_client.set(REDIS_KEY_SENSOR_META.format(sn=sn), json.dumps(meta_data))
 
-    return success(SensorBindingResponse(device_id=device_id, rpm=rpm))
+    return success(SensorBindingResponse(**binding) if binding else SensorBindingResponse())
 
 
 @router.get("")
@@ -457,6 +456,15 @@ async def receive_sensor_data(
     if not sn:
         raise HTTPException(status_code=400, detail="Missing 'sn' in payload")
 
+    if payload.get("bearing_features") is not None:
+        try:
+            BearingFeatures.model_validate(payload["bearing_features"])
+        except ValueError as exc:
+            raise HTTPException(
+                status_code=400,
+                detail=f"Invalid 'bearing_features': {exc}",
+            ) from exc
+
     if (
         isinstance(delay, bool)
         or not isinstance(delay, (int, float))
@@ -534,6 +542,10 @@ async def receive_sensor_data(
                 quick_err,
                 exc_info=True,
             )
+            raise HTTPException(
+                status_code=503,
+                detail="Task decision unavailable; retry this upload",
+            ) from quick_err
 
         # Add to background tasks to execute immediately after returning response
         background_tasks.add_task(_process_sensor_data_background_async, object_name, stored_payload, report_id, total)
