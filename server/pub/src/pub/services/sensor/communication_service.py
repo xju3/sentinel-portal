@@ -22,10 +22,13 @@ class SensorCommunicationService:
     @staticmethod
     def payload_to_event(payload: dict[str, Any]) -> dict[str, Any] | None:
         """Extract the communication event from a result JSON payload."""
-        sn = payload.get("sn")
+        sn = payload.get("sensor_sn") or payload.get("sn")
         ts_ms = payload.get("ts_ms")
-        duration_ms = payload.get("duration_ms", payload.get("druation_ms"))
-        if not sn or ts_ms is None or duration_ms is None:
+        duration_ms = payload.get(
+            "duration_ms",
+            payload.get("druation_ms", 0),
+        )
+        if not sn or ts_ms is None:
             return None
 
         return {

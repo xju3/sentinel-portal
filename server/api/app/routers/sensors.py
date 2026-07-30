@@ -25,6 +25,7 @@ from pub.services import SensorTypeService, SensorDbService, SensorBatchService,
 from pub.services import dispatch_quick_diagnosis_tasks
 from pub.services import (
     FFT_COLLECTION_ACTION,
+    SensorCommunicationService,
     SYSTEM_ACTION_CONFIG_UPDATE,
     complete_device_system_task,
     create_manual_sensor_task,
@@ -41,7 +42,10 @@ from pub.decorators.dashboard_cache import rebuild_dashboard_cache
 from app.utils.auth import get_current_account
 from app.utils.response import success
 from app.database import minio_manager, redis_manager, stream_redis_manager
-from pub.utils.redis_keys import REDIS_KEY_SENSOR_META
+from pub.utils.redis_keys import (
+    REDIS_KEY_DASHBOARD_HEALTH_DIRTY,
+    REDIS_KEY_SENSOR_META,
+)
 from app.clients.mqtt import api_mqtt_manager
 from pub.clients.minio import upload_json_to_minio_sync
 from pub.contract.sensors import (
@@ -404,6 +408,31 @@ def _process_sensor_data_background(object_name: str, payload: dict):
 
 async def _process_sensor_data_background_async(object_name: str, payload: dict, report_id: str, total: int = 0):
     """Background task to upload data to MinIO, create DiagnosisRecord, and notify via MQTT"""
+    # Receiving a valid report is itself proof that the sensor is online.
+    # Keep communication_state independent from MinIO/diagnosis success so the
+    # dashboard does not mark an actively reporting sensor as offline.
+    try:
+        communication = await SensorCommunicationService.record_from_payload_managed(
+            payload
+        )
+        tenant_id = payload.get("tenant_id")
+        if communication is not None and tenant_id:
+            redis_client = redis_manager.get_client()
+            if redis_client:
+                await asyncio.to_thread(
+                    redis_client.hset,
+                    REDIS_KEY_DASHBOARD_HEALTH_DIRTY,
+                    str(tenant_id),
+                    int(datetime.now(timezone.utc).timestamp() * 1000),
+                )
+    except Exception as err:
+        logger.error(
+            "Failed to update communication state for %s: %s",
+            payload.get("sensor_sn") or payload.get("sn"),
+            err,
+            exc_info=True,
+        )
+
     # 1. 调用通用的 MinIO 上传工具 (在线程池中执行防止阻塞)
     success = await asyncio.to_thread(
         upload_json_to_minio_sync,
