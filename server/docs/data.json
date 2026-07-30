@@ -148,6 +148,36 @@
             }
         }
     },
+    "bearing_features": {
+        "X": {
+            "status": 0,
+            "envelope_kurtosis": 6.21,
+            "fault_candidates": {
+                "bpfo": [
+                    {
+                        "harmonic": 1,
+                        "observed_hz": 173.4,
+                        "snr_db": 8.4
+                    },
+                    {
+                        "harmonic": 2,
+                        "observed_hz": 346.8,
+                        "snr_db": 5.7
+                    }
+                ]
+            }
+        },
+        "Y": {
+            "status": 0,
+            "envelope_kurtosis": 3.18,
+            "fault_candidates": {}
+        },
+        "Z": {
+            "status": 1,
+            "envelope_kurtosis": null,
+            "fault_candidates": {}
+        }
+    },
     "delay": 0,
     "period": 1,
     "total": 0,

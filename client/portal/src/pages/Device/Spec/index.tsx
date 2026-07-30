@@ -5,13 +5,16 @@ import {
   PageContainer,
   ProColumns,
   ProFormDigit,
+  ProFormSwitch,
   ProFormText,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Popconfirm, Space, message } from 'antd';
+import { Button, Modal, Popconfirm, Space, Table, Tag, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 
 import EntityPicker from '@/components/EntityPicker';
+import { BearingModel, queryBearings } from '@/services/bearing';
+import { Location, queryLocations } from '@/services/location';
 import {
   DeviceCategory,
   queryDeviceCategories,
@@ -21,12 +24,16 @@ import {
   DeviceSpecPayload,
   createDeviceSpec,
   deleteDeviceSpec,
+  DeviceSpecBearingBinding,
+  DeviceSpecBearingBindingPayload,
+  getDeviceSpecBearingBindings,
   listAllDeviceSpecs,
   updateDeviceSpec,
+  updateDeviceSpecBearingBindings,
 } from '@/services/deviceSpec';
 import { Supplier, querySuppliers } from '@/services/supplier';
 
-import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';
+import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
 
 type CategoryTreeRow = DeviceCategory & {
   children?: CategoryTreeRow[];
@@ -41,6 +48,12 @@ type DeviceSpecFormValues = {
   rpm: number;
   supplier_id: string;
   device_category_id: string;
+};
+
+type BearingBindingFormValues = DeviceSpecBearingBindingPayload;
+
+type BearingBindingDraft = DeviceSpecBearingBinding & {
+  draftKey: string;
 };
 
 
@@ -98,6 +111,16 @@ const DeviceSpecPage = () => {
   const [rows, setRows] = useState<DeviceSpec[]>([]);
   const [editing, setEditing] = useState<DeviceSpec | null>(null);
   const [query, setQuery] = useState<Record<string, any>>({});
+  const [bindingModalOpen, setBindingModalOpen] = useState(false);
+  const [bindingEditorOpen, setBindingEditorOpen] = useState(false);
+  const [bindingLoading, setBindingLoading] = useState(false);
+  const [bindingSaving, setBindingSaving] = useState(false);
+  const [bindingSpec, setBindingSpec] = useState<DeviceSpec | null>(null);
+  const [bindings, setBindings] = useState<BearingBindingDraft[]>([]);
+  const [editingBindingIndex, setEditingBindingIndex] = useState<number | null>(null);
+  const [selectedBearing, setSelectedBearing] = useState<BearingModel | undefined>();
+  const [selectedLocation, setSelectedLocation] =
+    useState<Pick<Location, 'id' | 'name'> | undefined>();
 
   const loadRows = async () => {
     setLoading(true);
@@ -184,6 +207,98 @@ const DeviceSpecPage = () => {
     },
   ];
 
+  const bearingPickerColumns: ColumnsType<BearingModel> = [
+    { title: '品牌', dataIndex: 'brand', width: 130 },
+    { title: '型号', dataIndex: 'model', width: 160 },
+    {
+      title: '轴承类型',
+      dataIndex: 'bearing_type',
+      render: (_, row) => row.bearing_type || '-',
+    },
+    { title: '滚动体数量', dataIndex: 'rolling_element_count', width: 110 },
+    {
+      title: '状态',
+      dataIndex: 'active',
+      width: 80,
+      render: (_, row) => (row.active ? '启用' : '停用'),
+    },
+  ];
+
+  const openBindingModal = async (spec: DeviceSpec) => {
+    setBindingSpec(spec);
+    setBindingModalOpen(true);
+    setBindingLoading(true);
+    try {
+      const data: DeviceSpecBearingBinding[] =
+        await getDeviceSpecBearingBindings(spec.id);
+      setBindings(
+        data.map((item, index) => ({
+          ...item,
+          draftKey: item.id || `${item.location_id}-${item.bearing_id}-${index}`,
+        })),
+      );
+    } catch (error) {
+      message.error(toErrorMessage(error));
+      setBindingModalOpen(false);
+      setBindingSpec(null);
+    } finally {
+      setBindingLoading(false);
+    }
+  };
+
+  const bindingColumns: ColumnsType<BearingBindingDraft> = [
+    {
+      title: '安装位置',
+      dataIndex: 'location_id',
+      width: 140,
+      render: (_, row) => row.location?.name || row.location_id,
+    },
+    {
+      title: '轴承型号',
+      render: (_, row) =>
+        row.bearing ? `${row.bearing.brand} / ${row.bearing.model}` : row.bearing_id,
+    },
+    {
+      title: '轴转速比',
+      dataIndex: 'shaft_speed_ratio',
+      width: 110,
+    },
+    {
+      title: '诊断状态',
+      dataIndex: 'enabled',
+      width: 100,
+      render: (_, row) =>
+        row.enabled ? <Tag color="success">启用</Tag> : <Tag>停用</Tag>,
+    },
+    {
+      title: '操作',
+      width: 130,
+      align: 'center',
+      render: (_, row, index) => (
+        <Space>
+          <a
+            onClick={() => {
+              setEditingBindingIndex(index);
+              setSelectedBearing(row.bearing);
+              setSelectedLocation(row.location);
+              setBindingEditorOpen(true);
+            }}
+          >
+            编辑
+          </a>
+          <Popconfirm
+            title="确认移除该位置的轴承配置吗？"
+            onConfirm={() =>
+              setBindings((current) => current.filter((item) => item.draftKey !== row.draftKey))
+            }
+          >
+            <a style={{ color: '#ff4d4f' }}>移除</a>
+          </Popconfirm>
+        </Space>
+      ),
+    },
+  ];
+
   const columns: ProColumns<DeviceSpec>[] = [
     {
       title: '序号',
@@ -257,11 +372,14 @@ const DeviceSpecPage = () => {
     {
       title: '操作',
       valueType: 'option',
-      width: OPERATION_COL_WIDTH,
+      width: 220,
       fixed: 'right',
       align: 'center',
       render: (_, row) => (
         <Space size="middle">
+          <a key="bearing" onClick={() => void openBindingModal(row)}>
+            轴承配置
+          </a>
           <a
             key="edit"
             onClick={() => {
@@ -438,6 +556,200 @@ const DeviceSpecPage = () => {
           fieldProps={{ readOnly: true, placeholder: '选择供应商后自动填写' }}
         />
         <ProFormText name="description" label="备注" />
+      </ModalForm>
+
+      <Modal
+        title={bindingSpec ? `${bindingSpec.name} - 轴承配置` : '轴承配置'}
+        open={bindingModalOpen}
+        width={960}
+        destroyOnHidden
+        confirmLoading={bindingSaving}
+        okText="保存配置"
+        onCancel={() => {
+          setBindingModalOpen(false);
+          setBindingSpec(null);
+          setBindings([]);
+        }}
+        onOk={async () => {
+          if (!bindingSpec) {
+            return;
+          }
+          setBindingSaving(true);
+          try {
+            await updateDeviceSpecBearingBindings(
+              bindingSpec.id,
+              bindings.map((item) => ({
+                bearing_id: item.bearing_id,
+                location_id: item.location_id,
+                shaft_speed_ratio: item.shaft_speed_ratio,
+                enabled: item.enabled,
+              })),
+            );
+            message.success('轴承配置保存成功');
+            setBindingModalOpen(false);
+            setBindingSpec(null);
+            setBindings([]);
+          } catch (error) {
+            message.error(toErrorMessage(error));
+          } finally {
+            setBindingSaving(false);
+          }
+        }}
+      >
+        <Space style={{ marginBottom: 16 }}>
+          <Button
+            type="primary"
+            onClick={() => {
+              setEditingBindingIndex(null);
+              setSelectedBearing(undefined);
+              setSelectedLocation(undefined);
+              setBindingEditorOpen(true);
+            }}
+          >
+            添加安装位置
+          </Button>
+          <span style={{ color: '#8c8c8c' }}>
+            轴转速比 = 该测点轴承所在轴转速 ÷ 设备规格转速，直联设备填写 1。
+          </span>
+        </Space>
+        <Table<BearingBindingDraft>
+          rowKey="draftKey"
+          loading={bindingLoading}
+          columns={bindingColumns}
+          dataSource={bindings}
+          pagination={false}
+          size="small"
+        />
+      </Modal>
+
+      <ModalForm<BearingBindingFormValues>
+        key={
+          bindingEditorOpen
+            ? editingBindingIndex === null
+              ? 'new-bearing-binding'
+              : `edit-bearing-binding-${bindings[editingBindingIndex]?.draftKey}`
+            : 'closed-bearing-binding'
+        }
+        title={editingBindingIndex === null ? '添加轴承位置' : '编辑轴承位置'}
+        open={bindingEditorOpen}
+        modalProps={{
+          destroyOnHidden: true,
+          onCancel: () => {
+            setBindingEditorOpen(false);
+            setEditingBindingIndex(null);
+            setSelectedBearing(undefined);
+            setSelectedLocation(undefined);
+          },
+        }}
+        initialValues={
+          editingBindingIndex === null
+            ? {
+                shaft_speed_ratio: 1,
+                enabled: true,
+              }
+            : bindings[editingBindingIndex]
+        }
+        onFinish={async (values) => {
+          const locationId = values.location_id;
+          const duplicate = bindings.some(
+            (item, index) =>
+              index !== editingBindingIndex &&
+              item.location_id === locationId,
+          );
+          if (duplicate) {
+            message.error(`测点“${selectedLocation?.name || locationId}”已配置轴承`);
+            return false;
+          }
+          const previous =
+            editingBindingIndex === null ? undefined : bindings[editingBindingIndex];
+          const next: BearingBindingDraft = {
+            id: previous?.id,
+            device_spec_id: bindingSpec?.id || '',
+            bearing_id: values.bearing_id,
+            location_id: locationId,
+            shaft_speed_ratio: values.shaft_speed_ratio,
+            enabled: values.enabled ?? true,
+            bearing:
+              selectedBearing?.id === values.bearing_id
+                ? selectedBearing
+                : previous?.bearing?.id === values.bearing_id
+                  ? previous.bearing
+                  : undefined,
+            location:
+              selectedLocation?.id === locationId
+                ? selectedLocation
+                : previous?.location?.id === locationId
+                  ? previous.location
+                  : undefined,
+            draftKey:
+              previous?.draftKey ||
+              `${locationId}-${values.bearing_id}-${Date.now().toString(36)}`,
+          };
+          setBindings((current) => {
+            if (editingBindingIndex === null) {
+              return [...current, next];
+            }
+            return current.map((item, index) =>
+              index === editingBindingIndex ? next : item,
+            );
+          });
+          setBindingEditorOpen(false);
+          setEditingBindingIndex(null);
+          setSelectedBearing(undefined);
+          setSelectedLocation(undefined);
+          return true;
+        }}
+      >
+        <ProForm.Item
+          name="location_id"
+          label="故障测点"
+          rules={[{ required: true, message: '请选择故障测点' }]}
+        >
+          <EntityPicker<Location>
+            placeholder="请点击选择故障测点"
+            modalTitle="选择故障测点"
+            triggerText="选择"
+            valueLabel={selectedLocation?.name}
+            columns={[{ title: '名称', dataIndex: 'name', width: 200 }]}
+            getRecordLabel={(record) => record.name}
+            fetcher={({ current, pageSize, keyword }) =>
+              queryLocations(current, pageSize, keyword, true)
+            }
+            onRecordChange={setSelectedLocation}
+          />
+        </ProForm.Item>
+        <ProForm.Item
+          name="bearing_id"
+          label="轴承型号"
+          rules={[{ required: true, message: '请选择轴承型号' }]}
+        >
+          <EntityPicker<BearingModel>
+            placeholder="请点击选择轴承型号"
+            modalTitle="选择轴承型号"
+            triggerText="选择"
+            valueLabel={
+              selectedBearing
+                ? `${selectedBearing.brand} / ${selectedBearing.model}`
+                : undefined
+            }
+            columns={bearingPickerColumns}
+            getRecordLabel={(record) => `${record.brand} / ${record.model}`}
+            fetcher={({ current, pageSize, keyword }) =>
+              queryBearings({ current, pageSize, keyword, activeOnly: true })
+            }
+            onRecordChange={setSelectedBearing}
+          />
+        </ProForm.Item>
+        <ProFormDigit
+          name="shaft_speed_ratio"
+          label="轴转速比"
+          min={0.0001}
+          max={1000}
+          fieldProps={{ precision: 4 }}
+          tooltip="该轴承所在轴转速 ÷ 设备规格转速"
+          rules={[{ required: true, message: '请输入轴转速比' }]}
+        />
+        <ProFormSwitch name="enabled" label="参与诊断" />
       </ModalForm>
     </PageContainer>
   );

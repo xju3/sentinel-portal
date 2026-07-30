@@ -35,6 +35,10 @@ LEVEL_LABELS = {
 FAULT_LABELS = {
     "temperature": "温度",
     "vibration": "振动",
+    "bearing_bpfo": "轴承外圈",
+    "bearing_bpfi": "轴承内圈",
+    "bearing_bsf": "轴承滚动体",
+    "bearing_ftf": "轴承保持架",
     "legacy_aggregate": "历史记录",
 }
 REPORT_STATUS_LABELS = {
@@ -346,7 +350,11 @@ class DiagnosisReportDetailService:
         attempts: list[DiagnosisCaseAttempt],
         temperature_trend: list[DiagnosisRecord],
     ) -> dict[str, Any]:
-        primary_item = items[0] if items else None
+        primary_item = (
+            max(items, key=lambda item: int(item.level or 0))
+            if items
+            else None
+        )
         evidence = (
             primary_item.evidence if isinstance(getattr(primary_item, "evidence", None), dict) else {}
         )
@@ -409,7 +417,7 @@ class DiagnosisReportDetailService:
         attempts: list[DiagnosisCaseAttempt],
     ) -> int | None:
         if primary_item is not None:
-            return primary_item.level
+            return int(primary_item.level)
         for attempt in reversed(attempts):
             if attempt.fault_level is not None:
                 return int(attempt.fault_level)
@@ -510,6 +518,10 @@ class DiagnosisReportDetailService:
         if item.fault_type in {
             "temperature",
             "vibration",
+            "bearing_bpfo",
+            "bearing_bpfi",
+            "bearing_bsf",
+            "bearing_ftf",
             "legacy_aggregate",
         }:
             return str(item.fault_type)

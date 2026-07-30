@@ -46,27 +46,91 @@ class SensorDbService:
     @staticmethod
     async def get_binding_by_sn(session: AsyncSession, sn: str) -> Optional[dict]:
         from pub.models.sensor import SensorMonitoring
-        from pub.models.device import DeviceInst, DeviceSpec
+        from pub.models.device import (
+            BearingModel,
+            DeviceInst,
+            DeviceSpec,
+            DeviceSpecBearing,
+        )
+        from pub.services.diagnosis.bearing_frequency import calculate_bearing_orders
         from sqlalchemy import and_
         stmt = (
-            select(SensorMonitoring.device_inst_id, DeviceSpec.rpm)
+            select(
+                SensorMonitoring.device_inst_id,
+                SensorMonitoring.location_id,
+                DeviceSpec.rpm,
+                DeviceSpecBearing.id.label("binding_id"),
+                DeviceSpecBearing.bearing_id,
+                DeviceSpecBearing.shaft_speed_ratio,
+                BearingModel.brand,
+                BearingModel.model,
+                BearingModel.bearing_type,
+                BearingModel.rolling_element_count,
+                BearingModel.rolling_element_diameter_mm,
+                BearingModel.pitch_diameter_mm,
+                BearingModel.contact_angle_deg,
+            )
             .join(Sensor, Sensor.id == SensorMonitoring.sensor_id)
             .outerjoin(DeviceInst, SensorMonitoring.device_inst_id == DeviceInst.id)
             .outerjoin(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
+            .outerjoin(
+                DeviceSpecBearing,
+                and_(
+                    DeviceSpecBearing.device_spec_id == DeviceSpec.id,
+                    DeviceSpecBearing.location_id == SensorMonitoring.location_id,
+                    DeviceSpecBearing.enabled.is_(True),
+                ),
+            )
+            .outerjoin(
+                BearingModel,
+                and_(
+                    BearingModel.id == DeviceSpecBearing.bearing_id,
+                    BearingModel.active.is_(True),
+                ),
+            )
             .where(
                 and_(
                     Sensor.sn == sn,
                     SensorMonitoring.status == 1
                 )
             )
+            .order_by(SensorMonitoring.ts.desc())
+            .limit(1)
         )
         result = await session.execute(stmt)
         row = result.first()
         if not row:
             return None
+        bearing = None
+        if row.binding_id is not None and row.bearing_id is not None:
+            orders = calculate_bearing_orders(
+                rolling_element_count=row.rolling_element_count,
+                rolling_element_diameter_mm=row.rolling_element_diameter_mm,
+                pitch_diameter_mm=row.pitch_diameter_mm,
+                contact_angle_deg=row.contact_angle_deg,
+            )
+            speed_ratio = float(row.shaft_speed_ratio)
+            bearing = {
+                "binding_id": row.binding_id,
+                "bearing_id": row.bearing_id,
+                "brand": row.brand,
+                "model": row.model,
+                "bearing_type": row.bearing_type,
+                "shaft_speed_ratio": speed_ratio,
+                "shaft_rpm": (
+                    float(row.rpm) * speed_ratio if row.rpm is not None else None
+                ),
+                "fault_orders": {
+                    "bpfo": orders["BPFO"],
+                    "bpfi": orders["BPFI"],
+                    "bsf": orders["BSF"],
+                    "ftf": orders["FTF"],
+                },
+            }
         return {
             "device_id": row.device_inst_id,
-            "rpm": row.rpm
+            "rpm": row.rpm,
+            "bearing": bearing,
         }
 
     @staticmethod

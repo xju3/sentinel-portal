@@ -113,6 +113,29 @@ def test_parse_event_normalizes_beijing_notification_date():
     assert event.notification_date == date(2026, 7, 30)
 
 
+def test_parse_event_accepts_bearing_fault():
+    event = NotificationService.parse_event(
+        {
+            "schema_version": 2,
+            "event_id": str(uuid4()),
+            "diagnosis_id": str(uuid4()),
+            "report_id": str(uuid4()),
+            "device_id": str(uuid4()),
+            "sensor_sn": "SN-001",
+            "diagnosed_at": "2026-07-30T00:00:00Z",
+            "faults": [
+                {
+                    "fault_type": "bearing_bpfi",
+                    "fault_level": 2,
+                }
+            ],
+        }
+    )
+
+    assert event.fault_events[0].fault_type == "bearing_bpfi"
+    assert event.fault_events[0].fault_label == "轴承内圈"
+
+
 def test_parse_event_dispatches_v1_and_v2():
     v1 = NotificationService.parse_event(
         {

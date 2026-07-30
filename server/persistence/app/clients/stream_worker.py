@@ -153,6 +153,28 @@ async def _process_stream_message(bucket: str, path: str) -> bool:
         if rms_vel_x is not None: point = point.field("rms_vel_x", float(rms_vel_x))
         if rms_vel_y is not None: point = point.field("rms_vel_y", float(rms_vel_y))
         if rms_vel_z is not None: point = point.field("rms_vel_z", float(rms_vel_z))
+
+        if report.bearing_features is not None:
+            for axis in ("X", "Y", "Z"):
+                axis_features = getattr(report.bearing_features, axis)
+                axis_name = axis.lower()
+                if axis_features.status != 0:
+                    continue
+                if axis_features.envelope_kurtosis is not None:
+                    point = point.field(
+                        f"bearing_envelope_kurtosis_{axis_name}",
+                        float(axis_features.envelope_kurtosis),
+                    )
+                for fault_code in ("bpfo", "bpfi", "bsf", "ftf"):
+                    candidates = getattr(
+                        axis_features.fault_candidates,
+                        fault_code,
+                    )
+                    if candidates:
+                        point = point.field(
+                            f"bearing_{fault_code}_max_snr_{axis_name}",
+                            float(max(item.snr_db for item in candidates)),
+                        )
         
         max_rms_vel = max(float(rms_vel_x or 0), float(rms_vel_y or 0), float(rms_vel_z or 0))
         point = point.field("max_rms_vel", max_rms_vel)
@@ -191,6 +213,8 @@ async def _process_stream_message(bucket: str, path: str) -> bool:
             "device_id": str(report.device_id),
             "temperature_c": str(report.temperature_c) if report.temperature_c is not None else "",
             "max_rms_vel": str(max_rms_vel),
+            "fs_hz": str(report.fs_hz) if report.fs_hz is not None else "",
+            "points": str(report.points) if report.points is not None else "",
             "task_id": str(report.task_id) if report.task_id else "",
             "delay": str(report.delay) if report.delay is not None else "0",
             "total": str(report.total),
@@ -201,6 +225,14 @@ async def _process_stream_message(bucket: str, path: str) -> bool:
             "device_category_id": str(report.device_category_id) if report.device_category_id else "",
             "process_device_id": str(report.process_device_id) if report.process_device_id else "",
             "ts_ms": str(report.ts_ms),
+            "bearing_features": (
+                json.dumps(
+                    report.bearing_features.model_dump(mode="json"),
+                    separators=(",", ":"),
+                )
+                if report.bearing_features is not None
+                else ""
+            ),
         }
         await asyncio.to_thread(
             redis_client.xadd,

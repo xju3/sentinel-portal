@@ -79,9 +79,12 @@ class LocationService:
         current: int,
         page_size: int,
         keyword: Optional[str] = None,
+        bearing_only: bool = False,
     ) -> tuple:
         """Get paged locations with total count. Returns (items, total)."""
         base_stmt = select(Location).where(Location.tenant_id == tenant_id)
+        if bearing_only:
+            base_stmt = base_stmt.where(Location.is_bearing_point.is_(True))
         if keyword:
             like = f"%{keyword}%"
             base_stmt = base_stmt.where(Location.name.ilike(like))

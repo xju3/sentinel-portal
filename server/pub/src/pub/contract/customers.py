@@ -211,6 +211,7 @@ class AreaResponse(BaseModel):
 class LocationCreate(BaseModel):
     name: str
     description: Optional[str] = None
+    is_bearing_point: bool = False
     status: Optional[int] = 1
     tenant_id: Optional[UUID] = None
 
@@ -218,6 +219,7 @@ class LocationCreate(BaseModel):
 class LocationUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
+    is_bearing_point: Optional[bool] = None
     status: Optional[int] = None
     tenant_id: Optional[UUID] = None
 
@@ -226,6 +228,7 @@ class LocationResponse(BaseModel):
     id: UUID
     name: str
     description: Optional[str] = None
+    is_bearing_point: bool
     status: int
     tenant_id: UUID
 

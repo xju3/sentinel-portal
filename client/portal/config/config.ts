@@ -115,6 +115,11 @@ export default defineConfig({
           component: '@/pages/Device/Category',
         },
         {
+          path: '/device/bearings',
+          name: '轴承型号',
+          component: '@/pages/Device/Bearing',
+        },
+        {
           path: '/device/specs',
           name: '设备规格',
           component: '@/pages/Device/Spec',

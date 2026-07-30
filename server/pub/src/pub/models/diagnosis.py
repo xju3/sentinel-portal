@@ -46,6 +46,10 @@ class DiagnosisNotificationDeliveryStatus(IntEnum):
 class DiagnosisFaultType(str, Enum):
     TEMPERATURE = "temperature"
     VIBRATION = "vibration"
+    BEARING_BPFO = "bearing_bpfo"
+    BEARING_BPFI = "bearing_bpfi"
+    BEARING_BSF = "bearing_bsf"
+    BEARING_FTF = "bearing_ftf"
     LEGACY = "legacy_aggregate"
 
 
@@ -109,6 +113,11 @@ class DiagnosisRecord(Base):
     duration_ms = Column(Integer, nullable=True)
     
     quality = Column(MySQLJSON, nullable=True, comment="Raw quality object")
+    bearing_features = Column(
+        MySQLJSON,
+        nullable=True,
+        comment="Device-computed per-axis bearing envelope evidence",
+    )
     
     delay = Column(Integer, nullable=True, default=0)
     total = Column(Integer, nullable=True, default=0)

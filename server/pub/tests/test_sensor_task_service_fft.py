@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+from datetime import datetime, timedelta
 from types import SimpleNamespace
+from unittest.mock import AsyncMock
 from uuid import uuid4
 
 import pytest
@@ -71,3 +73,130 @@ def test_fft_collection_spec_is_parameter_free_action_99():
     assert sensor_task_service.describe_collection_action(2086, 3) == (
         "系统任务：action=2086, val=3"
     )
+
+
+def test_resampling_spec_is_fixed_action_53_three_passes():
+    spec = sensor_task_service.build_resampling_spec()
+
+    assert spec.action == 53
+    assert spec.val == 3
+    assert spec.kind == "resampling"
+    assert sensor_task_service.describe_collection_action(53, 3) == spec.description
+
+
+@pytest.mark.asyncio
+async def test_daily_fft_is_created_when_no_recent_or_open_work(monkeypatch):
+    session = FakeSession(
+        [
+            FakeExecuteResult(None),
+            FakeExecuteResult(None),
+        ]
+    )
+    expected = SimpleNamespace(id=uuid4(), action=99, task_purpose="FFT_DAILY")
+    create_fft = AsyncMock(return_value=expected)
+    monkeypatch.setattr(
+        sensor_task_service,
+        "create_fft_collection_task",
+        create_fft,
+    )
+
+    task = await sensor_task_service.ensure_daily_fft_task(
+        session=session,
+        sn="SN-001",
+        now=datetime(2026, 7, 30, 12, 0, 0),
+    )
+
+    assert task is expected
+    create_fft.assert_awaited_once()
+    assert create_fft.await_args.kwargs["task_purpose"] == "FFT_DAILY"
+
+
+@pytest.mark.asyncio
+async def test_daily_fft_is_not_created_during_open_resampling(monkeypatch):
+    session = FakeSession(
+        [
+            FakeExecuteResult(
+                SimpleNamespace(id=uuid4(), action=53, status=2)
+            ),
+        ]
+    )
+    create_fft = AsyncMock()
+    monkeypatch.setattr(
+        sensor_task_service,
+        "create_fft_collection_task",
+        create_fft,
+    )
+
+    task = await sensor_task_service.ensure_daily_fft_task(
+        session=session,
+        sn="SN-001",
+    )
+
+    assert task is None
+    create_fft.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_daily_fft_is_not_created_with_recent_success(monkeypatch):
+    now = datetime(2026, 7, 30, 12, 0, 0)
+    session = FakeSession(
+        [
+            FakeExecuteResult(None),
+            FakeExecuteResult(
+                SimpleNamespace(
+                    action=99,
+                    status=1,
+                    complete_time=now - timedelta(hours=23),
+                )
+            ),
+        ]
+    )
+    create_fft = AsyncMock()
+    monkeypatch.setattr(
+        sensor_task_service,
+        "create_fft_collection_task",
+        create_fft,
+    )
+
+    task = await sensor_task_service.ensure_daily_fft_task(
+        session=session,
+        sn="SN-001",
+        now=now,
+    )
+
+    assert task is None
+    create_fft.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_resampling_followup_reuses_durable_link_after_fft_completion():
+    resampling_id = uuid4()
+    fft_id = uuid4()
+    resampling = SimpleNamespace(
+        id=resampling_id,
+        sn="SN-001",
+        action=53,
+        val=3,
+        followup_fft_task_id=fft_id,
+    )
+    completed_fft = SimpleNamespace(
+        id=fft_id,
+        sn="SN-001",
+        action=99,
+        status=1,
+    )
+    session = FakeSession(
+        [
+            FakeExecuteResult(resampling),
+            FakeExecuteResult(completed_fft),
+        ]
+    )
+
+    task = await sensor_task_service.ensure_resampling_followup_fft_task(
+        session=session,
+        resampling_task_id=resampling_id,
+        reason="duplicate final upload",
+    )
+
+    assert task is completed_fft
+    assert session.commit_calls == 0

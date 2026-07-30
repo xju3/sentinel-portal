@@ -3,9 +3,9 @@ Device API contracts
 """
 
 from datetime import date
-from typing import List, Optional
+from typing import List, Literal, Optional
 from uuid import UUID
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 
 # ==========================================
@@ -173,6 +173,137 @@ class DeviceSpecResponse(BaseModel):
     device_category_id: UUID
     supplier: Optional[SupplierBrief] = None
     device_category: Optional[DeviceCategoryBrief] = None
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+# ==========================================
+# BearingModel / DeviceSpecBearing
+# ==========================================
+BearingType = Literal[
+    "DEEP_GROOVE_BALL",
+    "ANGULAR_CONTACT_BALL",
+    "SELF_ALIGNING_BALL",
+    "CYLINDRICAL_ROLLER",
+    "TAPERED_ROLLER",
+    "SPHERICAL_ROLLER",
+    "NEEDLE_ROLLER",
+    "THRUST_BALL",
+    "THRUST_ROLLER",
+    "OTHER",
+]
+
+
+class BearingModelCreate(BaseModel):
+    brand: str = Field(min_length=1, max_length=64)
+    model: str = Field(min_length=1, max_length=64)
+    bearing_type: Optional[BearingType] = None
+    rolling_element_count: int = Field(ge=3, le=1000)
+    rolling_element_diameter_mm: float = Field(gt=0, allow_inf_nan=False)
+    pitch_diameter_mm: float = Field(gt=0, allow_inf_nan=False)
+    contact_angle_deg: float = Field(
+        default=0.0,
+        ge=0,
+        lt=90,
+        allow_inf_nan=False,
+    )
+    description: Optional[str] = Field(default=None, max_length=255)
+    active: bool = True
+
+    @field_validator("brand", "model", "description")
+    @classmethod
+    def strip_text(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        normalized = value.strip()
+        return normalized or None
+
+    @model_validator(mode="after")
+    def validate_geometry(self):
+        if not self.brand or not self.model:
+            raise ValueError("brand and model cannot be blank")
+        if self.rolling_element_diameter_mm >= self.pitch_diameter_mm:
+            raise ValueError(
+                "rolling_element_diameter_mm must be less than pitch_diameter_mm"
+            )
+        return self
+
+
+class BearingModelUpdate(BaseModel):
+    brand: Optional[str] = Field(default=None, min_length=1, max_length=64)
+    model: Optional[str] = Field(default=None, min_length=1, max_length=64)
+    bearing_type: Optional[BearingType] = None
+    rolling_element_count: Optional[int] = Field(default=None, ge=3, le=1000)
+    rolling_element_diameter_mm: Optional[float] = Field(
+        default=None,
+        gt=0,
+        allow_inf_nan=False,
+    )
+    pitch_diameter_mm: Optional[float] = Field(
+        default=None,
+        gt=0,
+        allow_inf_nan=False,
+    )
+    contact_angle_deg: Optional[float] = Field(
+        default=None,
+        ge=0,
+        lt=90,
+        allow_inf_nan=False,
+    )
+    description: Optional[str] = Field(default=None, max_length=255)
+    active: Optional[bool] = None
+
+    @field_validator("brand", "model", "description")
+    @classmethod
+    def strip_text(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        normalized = value.strip()
+        return normalized or None
+
+
+class BearingModelResponse(BearingModelCreate):
+    id: UUID
+    tenant_id: UUID
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class DeviceSpecBearingInput(BaseModel):
+    bearing_id: UUID
+    location_id: UUID
+    shaft_speed_ratio: float = Field(
+        default=1.0,
+        gt=0,
+        le=1000,
+        allow_inf_nan=False,
+    )
+    enabled: bool = True
+
+
+class DeviceSpecBearingReplace(BaseModel):
+    bindings: List[DeviceSpecBearingInput]
+
+    @model_validator(mode="after")
+    def validate_unique_locations(self):
+        locations = [binding.location_id for binding in self.bindings]
+        if len(locations) != len(set(locations)):
+            raise ValueError("bearing locations must be unique within a device spec")
+        return self
+
+
+class BearingLocationResponse(BaseModel):
+    id: UUID
+    name: str
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class DeviceSpecBearingResponse(DeviceSpecBearingInput):
+    id: UUID
+    device_spec_id: UUID
+    bearing: BearingModelResponse
+    location: BearingLocationResponse
 
     model_config = ConfigDict(from_attributes=True)
 

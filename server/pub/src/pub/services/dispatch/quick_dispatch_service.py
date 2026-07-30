@@ -16,31 +16,28 @@ from typing import Any
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pub.services.diagnosis.quick_history_cache import (
+    QuickDiagnosisSnapshot,
+    build_quick_diagnosis_snapshot,
     get_last_regular_snapshot,
 )
 from pub.services.sensor.sensor_task_service import (
-    DEFAULT_DENSE_FOCUS_GENERAL,
     SensorTaskSpec,
-    build_default_dense_collection_spec,
-    create_collection_task,
+    TASK_PURPOSE_RESAMPLING,
+    build_resampling_spec,
+    create_resampling_task,
     dispatch_pending_sensor_tasks,
+    ensure_resampling_followup_fft_task,
+    ensure_daily_fft_task,
     record_sensor_task_report,
-)
-from pub.services.diagnosis.quick_history_cache import (
-    QuickDiagnosisSnapshot,
-    build_quick_diagnosis_snapshot,
+    sensor_task_to_device_payload,
 )
 
 logger = logging.getLogger(__name__)
 
-QUICK_INTERVAL_MINUTES = 5
-QUICK_REPEAT_COUNT = 3
-TEMPERATURE_ABSOLUTE_C = 50.0
-TEMPERATURE_DELTA_C = 3.0
-TEMPERATURE_RELATIVE_DELTA = 0.15
 RMS_ABSOLUTE_MM_S = 4.5
 RMS_DELTA_MM_S = 1.0
 RMS_RELATIVE_DELTA = 0.35
+KURTOSIS_EARLY_BEARING_THRESHOLD = 4.5
 
 
 @dataclass(frozen=True)
@@ -64,7 +61,8 @@ async def dispatch_quick_diagnosis_tasks(
     """Create quick-diagnosis tasks and return pending tasks for the upload response."""
     task_id = _payload_task_id(payload)
     if task_id:
-        await record_sensor_task_report(
+        followup_fft_task = None
+        task = await record_sensor_task_report(
             session=session,
             task_id=task_id,
             sn=sn,
@@ -78,7 +76,48 @@ async def dispatch_quick_diagnosis_tasks(
             report_id,
             task_id,
         )
-        return await dispatch_pending_sensor_tasks(session, sn)
+        sequence = _payload_task_sequence(payload)
+        if (
+            task is not None
+            and (
+                getattr(task, "task_purpose", None) == TASK_PURPOSE_RESAMPLING
+                or (
+                    getattr(task, "action", None) == 53
+                    and int(getattr(task, "val", 0) or 0) == 3
+                )
+            )
+            and sequence is not None
+            and sequence >= int(task.val or 0)
+        ):
+            reasons = _vibration_trigger_reasons(
+                payload=payload,
+                last_regular=get_last_regular_snapshot(sn),
+            )
+            if reasons:
+                followup_fft_task = await ensure_resampling_followup_fft_task(
+                    session=session,
+                    resampling_task_id=task.id,
+                    reason=(
+                        "复采最终确认仍存在振动或早期轴承冲击异常: "
+                        + "; ".join(reasons)
+                    ),
+                )
+        payloads = await dispatch_pending_sensor_tasks(session, sn)
+        if (
+            followup_fft_task is not None
+            and int(getattr(followup_fft_task, "status", -1)) == 2
+            and not any(
+                item.get("id") == str(followup_fft_task.id)
+                for item in payloads
+            )
+        ):
+            followup_payload = await sensor_task_to_device_payload(
+                session,
+                followup_fft_task,
+            )
+            if followup_payload is not None:
+                payloads.append(followup_payload)
+        return payloads
 
     last_regular = get_last_regular_snapshot(sn)
     plan = build_quick_dispatch_plan(
@@ -88,12 +127,10 @@ async def dispatch_quick_diagnosis_tasks(
         last_regular=last_regular,
     )
     if plan.should_create_task and plan.spec is not None:
-        task = await create_collection_task(
+        task = await create_resampling_task(
             session=session,
             sn=sn,
-            spec=plan.spec,
             reason="; ".join(plan.reasons),
-            name="quick_diagnosis_collection",
         )
         logger.info(
             "Quick dispatch task ready: sn=%s report_id=%s task_id=%s action=%s val=%s reasons=%s",
@@ -111,6 +148,8 @@ async def dispatch_quick_diagnosis_tasks(
             report_id,
             plan.skipped_reason,
         )
+        if plan.skipped_reason == "no quick trigger":
+            await ensure_daily_fft_task(session=session, sn=sn)
 
     return await dispatch_pending_sensor_tasks(session, sn)
 
@@ -133,62 +172,62 @@ def build_quick_dispatch_plan(
             skipped_reason=f"sample_type={current.sample_type}",
         )
 
-    reasons: list[str] = []
-    needs_default_dense_collection = False
-
-    temperature_reason = _temperature_reason(current, last_regular)
-    if temperature_reason:
-        reasons.append(temperature_reason)
-        needs_default_dense_collection = True
-
-    rms_reason = _rms_reason(current, last_regular)
-    if rms_reason:
-        reasons.append(rms_reason)
-        needs_default_dense_collection = True
+    reasons = _vibration_trigger_reasons(
+        payload=payload,
+        last_regular=last_regular,
+    )
 
     if not reasons:
         return QuickDispatchPlan(spec=None, reasons=[], skipped_reason="no quick trigger")
 
-    if not needs_default_dense_collection:
-        return QuickDispatchPlan(spec=None, reasons=[], skipped_reason="no dispatchable trigger")
-
     return QuickDispatchPlan(
-        spec=build_default_dense_collection_spec(
-            interval_minutes=QUICK_INTERVAL_MINUTES,
-            repeat_count=QUICK_REPEAT_COUNT,
-            focus_type=DEFAULT_DENSE_FOCUS_GENERAL,
-        ),
+        spec=build_resampling_spec(),
         reasons=reasons,
     )
 
 
-def _temperature_reason(
-    current: QuickDiagnosisSnapshot,
+def _vibration_trigger_reasons(
+    *,
+    payload: dict[str, Any],
     last_regular: dict[str, Any] | None,
-) -> str | None:
-    current_temp = current.temperature_c
-    if current_temp is None:
-        return None
-    if current_temp >= TEMPERATURE_ABSOLUTE_C:
-        return (
-            f"温度达到固定临界值: current_temperature_c={current_temp}, "
-            f"threshold_c={TEMPERATURE_ABSOLUTE_C}"
-        )
+) -> list[str]:
+    current = build_quick_diagnosis_snapshot(
+        report_id="task-decision",
+        sn="task-decision",
+        payload=payload,
+    )
+    reasons: list[str] = []
+    rms_reason = _rms_reason(current, last_regular)
+    if rms_reason:
+        reasons.append(rms_reason)
+    reasons.extend(_early_bearing_reasons(payload))
+    return reasons
 
-    previous_temp = _float_from_mapping(last_regular, "temperature_c")
-    if previous_temp is None:
-        return None
-    delta = current_temp - previous_temp
-    relative = _relative_positive_delta(current_temp, previous_temp)
-    if delta >= TEMPERATURE_DELTA_C or (
-        relative is not None and relative >= TEMPERATURE_RELATIVE_DELTA
-    ):
-        return (
-            "温度相对上次正常采集快速升高: "
-            f"previous_temperature_c={previous_temp}, current_temperature_c={current_temp}, "
-            f"delta_c={round(delta, 4)}, relative_delta={_format_optional(relative)}"
-        )
-    return None
+
+def _early_bearing_reasons(payload: dict[str, Any]) -> list[str]:
+    axis_features = payload.get("axis_features")
+    if not isinstance(axis_features, dict):
+        return []
+
+    reasons: list[str] = []
+    for axis in ("X", "Y", "Z"):
+        axis_payload = axis_features.get(axis)
+        if not isinstance(axis_payload, dict):
+            continue
+        time_payload = axis_payload.get("time")
+        if not isinstance(time_payload, dict):
+            continue
+        kurtosis = time_payload.get("kurtosis")
+        if (
+            _is_number(kurtosis)
+            and float(kurtosis) > KURTOSIS_EARLY_BEARING_THRESHOLD
+        ):
+            reasons.append(
+                f"{axis}轴峭度提示早期轴承冲击: "
+                f"kurtosis={float(kurtosis):.4f}, "
+                f"threshold={KURTOSIS_EARLY_BEARING_THRESHOLD}"
+            )
+    return reasons
 
 
 def _rms_reason(
@@ -267,15 +306,6 @@ def _max_rms_from_mapping(snapshot: dict[str, Any] | None) -> float | None:
     if not numeric_values:
         return None
     return max(numeric_values)
-
-
-def _float_from_mapping(mapping: dict[str, Any] | None, key: str) -> float | None:
-    if not isinstance(mapping, dict):
-        return None
-    value = mapping.get(key)
-    if not _is_number(value):
-        return None
-    return float(value)
 
 
 def _relative_positive_delta(current: float, previous: float) -> float | None:

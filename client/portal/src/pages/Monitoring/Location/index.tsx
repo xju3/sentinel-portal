@@ -4,6 +4,7 @@ import {
   PageContainer,
   ProColumns,
   ProFormSelect,
+  ProFormSwitch,
   ProFormText,
   ProTable,
 } from '@ant-design/pro-components';
@@ -22,6 +23,7 @@ import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTable
 type LocationFormValues = {
   name: string;
   description?: string;
+  is_bearing_point: boolean;
   status: number;
 };
 
@@ -71,6 +73,14 @@ const MonitoringLocationPage = () => {
         return false;
       }
       if (
+        query.is_bearing_point !== undefined &&
+        query.is_bearing_point !== null &&
+        query.is_bearing_point !== '' &&
+        String(row.is_bearing_point) !== String(query.is_bearing_point)
+      ) {
+        return false;
+      }
+      if (
         query.status !== undefined &&
         query.status !== null &&
         query.status !== '' &&
@@ -102,6 +112,18 @@ const MonitoringLocationPage = () => {
       ellipsis: true,
       render: (_, row) => row.description || '-',
       sorter: true,
+    },
+    {
+      title: '轴承测点',
+      dataIndex: 'is_bearing_point',
+      width: 110,
+      valueType: 'select',
+      valueEnum: {
+        true: { text: '是' },
+        false: { text: '否' },
+      },
+      render: (_, row) =>
+        row.is_bearing_point ? <Tag color="blue">是</Tag> : <Tag>否</Tag>,
     },
     {
       title: '状态',
@@ -195,10 +217,12 @@ const MonitoringLocationPage = () => {
             ? {
                 name: editing.name,
                 description: editing.description,
+                is_bearing_point: editing.is_bearing_point,
                 status: Number(editing.status),
               }
             : {
                 status: 1,
+                is_bearing_point: false,
               }
         }
         modalProps={{
@@ -216,6 +240,7 @@ const MonitoringLocationPage = () => {
           const payload: LocationPayload = {
             name: values.name.trim(),
             description: values.description?.trim() || undefined,
+            is_bearing_point: values.is_bearing_point ?? false,
             status: Number(values.status ?? 1),
           };
 
@@ -251,6 +276,11 @@ const MonitoringLocationPage = () => {
           name="description"
           label="描述"
           rules={[{ max: 255, message: '描述最多255个字符' }]}
+        />
+        <ProFormSwitch
+          name="is_bearing_point"
+          label="轴承测点"
+          tooltip="启用后，该测点可用于设备规格绑定轴承"
         />
         <ProFormSelect
           name="status"

@@ -344,7 +344,24 @@ class SensorTask(Base):
         String(32),
         nullable=True,
         index=True,
-        comment="RESAMPLING|FFT; FFT tasks do not populate source diagnosis links",
+        comment=(
+            "RESAMPLING|FFT_DAILY|FFT_DIAGNOSIS; "
+            "FFT tasks do not populate source diagnosis links"
+        ),
+    )
+    dedupe_key = Column(
+        String(64),
+        nullable=True,
+        unique=True,
+        index=True,
+        comment="Active automatic task idempotency key; cleared on completion",
+    )
+    followup_fft_task_id = Column(
+        Uuid(as_uuid=True),
+        ForeignKey("sensor_task.id"),
+        nullable=True,
+        index=True,
+        comment="FFT task selected after this resampling task completed",
     )
     status = Column(
         SmallInteger,

@@ -40,6 +40,18 @@ class Settings(BaseSettings):
     notification_outbox_initial_backoff_seconds: float = 2.0
     notification_outbox_max_backoff_seconds: float = 300.0
 
+    # Bearing envelope-feature diagnosis. These are centralized server policy
+    # thresholds; changing them does not require a firmware update.
+    bearing_frequency_tolerance_ratio: float = 0.02
+    bearing_frequency_tolerance_bins: float = 2.0
+    bearing_attention_snr_db: float = 6.0
+    bearing_abnormal_snr_db: float = 10.0
+    bearing_warning_snr_db: float = 15.0
+    bearing_critical_snr_db: float = 20.0
+    bearing_notification_confirmation_count: int = 2
+    bearing_notification_window_hours: float = 3.0
+    bearing_notification_immediate_level: int = 3
+
     model_config = SettingsConfigDict(
         env_file=("../api/.env", "../../.env", ".env"),
         env_file_encoding="utf-8",

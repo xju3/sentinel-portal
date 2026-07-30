@@ -6,6 +6,7 @@ from pub.models.diagnosis import (
     DiagnosisItem,
     DiagnosisNotificationDelivery,
     DiagnosisNotificationOutbox,
+    DiagnosisRecord,
 )
 from pub.models.sensor import SensorTask, SensorTaskReport
 
@@ -35,6 +36,7 @@ def test_diagnosis_models_keep_legacy_report_id_and_add_uuid_fk():
     assert _foreign_key_targets(Diagnosis.__table__, "report_uuid") == {
         "diagnosis_record.id"
     }
+    assert "bearing_features" in DiagnosisRecord.__table__.c
 
 
 def test_diagnosis_item_uses_explicit_fault_type():

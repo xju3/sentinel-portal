@@ -10,6 +10,7 @@ from sqlalchemy import (
     Date,
     DateTime,
     Float,
+    ForeignKey,
     Integer,
     SmallInteger,
     String,
@@ -92,6 +93,80 @@ class DeviceSpec(Base):
 
     def __repr__(self):
         return f"<DeviceSpec {self.id}: {self.name} - {self.model}>"
+
+
+class BearingModel(Base):
+    """Tenant-owned bearing geometry used by FFT fault-frequency analysis."""
+
+    __tablename__ = "bearing_model"
+    __table_args__ = (
+        UniqueConstraint(
+            "tenant_id",
+            "brand",
+            "model",
+            name="uq_bearing_model_tenant_brand_model",
+        ),
+    )
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    tenant_id = Column(Uuid(as_uuid=True), nullable=False, index=True)
+    brand = Column(String(64), nullable=False)
+    model = Column(String(64), nullable=False)
+    bearing_type = Column(String(64), nullable=True)
+    rolling_element_count = Column(Integer, nullable=False)
+    rolling_element_diameter_mm = Column(Float, nullable=False)
+    pitch_diameter_mm = Column(Float, nullable=False)
+    contact_angle_deg = Column(Float, nullable=False, default=0.0)
+    description = Column(String(255), nullable=True)
+    active = Column(Boolean, nullable=False, default=True)
+
+class DeviceSpecBearing(Base):
+    """One location-specific bearing configured for a device specification."""
+
+    __tablename__ = "device_spec_bearing"
+    __table_args__ = (
+        UniqueConstraint(
+            "device_spec_id",
+            "location_id",
+            name="uq_device_spec_bearing_spec_location",
+        ),
+    )
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    device_spec_id = Column(
+        Uuid(as_uuid=True),
+        ForeignKey("device_spec.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    bearing_id = Column(
+        Uuid(as_uuid=True),
+        ForeignKey("bearing_model.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
+    location_id = Column(
+        Uuid(as_uuid=True),
+        ForeignKey("location.id", ondelete="RESTRICT"),
+        nullable=False,
+        index=True,
+    )
+    shaft_speed_ratio = Column(Float, nullable=False, default=1.0)
+    enabled = Column(Boolean, nullable=False, default=True)
+
+    bearing = relationship(
+        "BearingModel",
+        primaryjoin="foreign(DeviceSpecBearing.bearing_id) == BearingModel.id",
+        lazy="selectin",
+        uselist=False,
+    )
+    location = relationship(
+        "Location",
+        primaryjoin="foreign(DeviceSpecBearing.location_id) == Location.id",
+        lazy="selectin",
+        uselist=False,
+    )
+
 
 class DeviceInst(Base):
     """Device instance entity model"""

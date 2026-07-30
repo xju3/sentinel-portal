@@ -189,6 +189,7 @@ class Location(Base):
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     name = Column(String(64), nullable=False)
     description = Column(String(255))
+    is_bearing_point = Column(Boolean, nullable=False, default=False)
     status = Column(SmallInteger, nullable=False, default=1)  # tinyint(1) for status
     tenant_id = Column(
         Uuid(as_uuid=True), nullable=False, default=uuid.uuid4, index=False

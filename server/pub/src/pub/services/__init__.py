@@ -17,6 +17,7 @@ from .customer.iso_standard_service import IsoStandardService
 from .device.device_category_service import DeviceCategoryService
 from .device.device_spec_service import DeviceSpecService
 from .device.device_inst_service import DeviceInstService
+from .device.bearing_service import BearingService
 from .sensor.sensor_type_service import SensorTypeService
 from .sensor.sensor_db_service import SensorDbService
 from .sensor.sim_card_service import SimCardService

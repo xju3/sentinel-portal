@@ -1,6 +1,7 @@
 import { request } from '@umijs/max';
 import { listAllSuppliers } from '@/services/supplier';
 import type { Supplier } from '@/services/supplier';
+import type { BearingModel } from '@/services/bearing';
 
 export type DeviceSpec = {
   id: string;
@@ -25,6 +26,24 @@ export type DeviceSpecPayload = {
   rpm: number;
   supplier_id: string;
   device_category_id: string;
+};
+
+export type DeviceSpecBearingBinding = {
+  id?: string;
+  device_spec_id: string;
+  bearing_id: string;
+  location_id: string;
+  shaft_speed_ratio: number;
+  enabled: boolean;
+  bearing?: BearingModel;
+  location?: { id: string; name: string };
+};
+
+export type DeviceSpecBearingBindingPayload = {
+  bearing_id: string;
+  location_id: string;
+  shaft_speed_ratio: number;
+  enabled: boolean;
 };
 
 export type DeviceSpecQueryParams = {
@@ -101,6 +120,24 @@ export async function updateDeviceSpec(id: string, payload: Partial<DeviceSpecPa
 export async function deleteDeviceSpec(id: string) {
   return request<{ message: string }>(`/api/v1/device-specs/${id}`, {
     method: 'DELETE',
+  });
+}
+
+export async function getDeviceSpecBearingBindings(id: string) {
+  return (
+    (await request<DeviceSpecBearingBinding[]>(`/api/v1/device-specs/${id}/bearings`, {
+      method: 'GET',
+    })) || []
+  );
+}
+
+export async function updateDeviceSpecBearingBindings(
+  id: string,
+  bindings: DeviceSpecBearingBindingPayload[],
+) {
+  return request<DeviceSpecBearingBinding[]>(`/api/v1/device-specs/${id}/bearings`, {
+    method: 'PUT',
+    data: { bindings },
   });
 }
 

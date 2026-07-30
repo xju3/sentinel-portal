@@ -79,6 +79,7 @@ class DiagnosisRecordService:
                     sample_type=payload.get("sample_type"),
                     duration_ms=payload.get("duration_ms"),
                     quality=payload.get("quality"),
+                    bearing_features=payload.get("bearing_features"),
                     delay=delay,
                     total=total,
                     diagnosis_status=diagnosis_status,

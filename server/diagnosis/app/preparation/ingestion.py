@@ -3,7 +3,7 @@ import json
 import logging
 import time
 from collections import defaultdict
-from datetime import datetime, timezone
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from pub.models.diagnosis import DiagnosisRecordStatus
@@ -97,6 +97,7 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
         import asyncio
         from app.config import settings
         from app.services.context import DeviceContextService
+        from app.handler.bearing import BearingDiagnosis
         from app.handler.temperature import TemperatureDiagnosis
         from app.handler.vibration import VibrationDiagnosis
         from pub.manager.database import db_manager, redis_manager
@@ -114,8 +115,12 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
             DiagnosisRecord,
         )
         from pub.models.sensor import SensorTask, SensorTaskReport
-        from pub.services.sensor.sensor_task_service import build_fft_collection_spec
-        from sqlalchemy import or_, select
+        from pub.services.sensor.sensor_task_service import (
+            create_resampling_task,
+            ensure_resampling_followup_fft_task,
+            find_open_resampling_task,
+        )
+        from sqlalchemy import func, or_, select
         from pub.utils.redis_keys import (
             REDIS_KEY_DASHBOARD_HEALTH_DIRTY,
             REDIS_KEY_DIA_AMBIENT_TEMP,
@@ -185,8 +190,20 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
             current_ts_ms=report.ts_ms,
         )
         vib_level = severity_to_level(vib_result.get("severity", "info"))
-        
-        overall_level = max(temp_level, vib_level)
+
+        bearing_results = BearingDiagnosis.analyze(
+            report.bearing_features,
+            context,
+            location_id=report.location_id,
+            fs_hz=report.fs_hz,
+            points=report.points,
+        )
+        bearing_level = max(
+            (int(result["level"]) for result in bearing_results),
+            default=0,
+        )
+
+        overall_level = max(temp_level, vib_level, bearing_level)
 
         redis_client = redis_manager.get_client()
         async with db_manager.SessionLocal() as session:
@@ -247,6 +264,25 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
                                     DiagnosisCase,
                                     task.diagnosis_case_id,
                                 )
+                            else:
+                                open_case_stmt = (
+                                    select(DiagnosisCase)
+                                    .where(
+                                        DiagnosisCase.sensor_sn == report.sensor_sn,
+                                        DiagnosisCase.fault_type
+                                        == DiagnosisFaultType.VIBRATION.value,
+                                        DiagnosisCase.confirmation_status
+                                        == DiagnosisConfirmationStatus.RESAMPLING.value,
+                                    )
+                                    .order_by(DiagnosisCase.created_at.desc())
+                                    .limit(1)
+                                )
+                                resampling_case = (
+                                    await session.execute(open_case_stmt)
+                                ).scalar_one_or_none()
+                                if resampling_case is not None:
+                                    task.diagnosis_case_id = resampling_case.id
+                                    resampling_case.resampling_task_id = task.id
 
                 ds_val = "服务端任务"
                 if not report.task_id:
@@ -261,6 +297,7 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
                 diag_record: Diagnosis | None = None
                 item_temp: DiagnosisItem | None = None
                 item_vib: DiagnosisItem | None = None
+                bearing_items: list[tuple[DiagnosisItem, dict[str, Any]]] = []
                 if overall_level > 0:
                     diag_record = Diagnosis(
                         device_id=device_uuid,
@@ -297,6 +334,19 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
                             evidence=vib_result.get("evidence", {}),
                         )
                         session.add(item_vib)
+
+                    for bearing_result in bearing_results:
+                        item_bearing = DiagnosisItem(
+                            diagnosis_id=diag_record.id,
+                            metric_id=int(bearing_result["metric_id"]),
+                            fault_type=f"bearing_{bearing_result['fault_code']}",
+                            level=int(bearing_result["level"]),
+                            resampling=0,
+                            description=bearing_result["description"],
+                            evidence=bearing_result["evidence"],
+                        )
+                        session.add(item_bearing)
+                        bearing_items.append((item_bearing, bearing_result))
                     await session.flush()
 
                 diagnosed_at = datetime.now(timezone.utc)
@@ -353,17 +403,15 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
                             resampling_case.confirmed_at = diagnosed_at.replace(
                                 tzinfo=None
                             )
-                            fft_spec = build_fft_collection_spec()
-                            fft_task = SensorTask(
-                                name="FFT Data Collection (Auto)",
-                                sn=report.sensor_sn,
-                                action=fft_spec.action,
-                                val=fft_spec.val,
-                                remark="Confirmed vibration anomaly triggered FFT",
-                                task_purpose="FFT",
-                                status=0,
+                            await ensure_resampling_followup_fft_task(
+                                session=session,
+                                resampling_task_id=task.id,
+                                reason=(
+                                    "深度诊断兜底：最终复采确认振动等级 "
+                                    f"{vib_level}，需要 FFT"
+                                ),
+                                commit=False,
                             )
-                            session.add(fft_task)
                         else:
                             resampling_case.confirmation_status = (
                                 DiagnosisConfirmationStatus.RESOLVED_NORMAL.value
@@ -438,20 +486,30 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
                         vib_result["evidence"]["confirmation_status"] = (
                             "pending_confirmation"
                         )
-                        resampling_task = SensorTask(
-                            name="Vibration Re-sampling (Auto)",
-                            sn=report.sensor_sn,
-                            action=53,
-                            val=3,
-                            remark="Vibration anomaly triggered resampling",
-                            diagnosis_case_id=vib_case.id,
-                            source_report_id=report_uuid,
-                            source_diagnosis_id=diag_record.id,
-                            task_purpose="RESAMPLING",
-                            status=0,
+                        resampling_task = await find_open_resampling_task(
+                            session,
+                            report.sensor_sn,
                         )
-                        session.add(resampling_task)
-                        await session.flush()
+                        if resampling_task is None:
+                            resampling_task = await create_resampling_task(
+                                session=session,
+                                sn=report.sensor_sn,
+                                reason=(
+                                    "深度诊断兜底：快速决策窗口后发现 "
+                                    f"振动等级 {vib_level}，需要复采"
+                                ),
+                                commit=False,
+                            )
+                            logger.warning(
+                                "Deep diagnosis created delayed fallback "
+                                "resampling task: report_id=%s task_id=%s",
+                                report.report_id,
+                                resampling_task.id,
+                            )
+                        resampling_task.diagnosis_case_id = vib_case.id
+                        resampling_task.source_report_id = report_uuid
+                        resampling_task.source_diagnosis_id = diag_record.id
+                        resampling_task.task_purpose = "RESAMPLING"
                         vib_case.resampling_task_id = resampling_task.id
 
                 if diag_record is not None:
@@ -470,6 +528,80 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
                                 "diagnosis_item_id": str(item_vib.id),
                                 "fault_type": DiagnosisFaultType.VIBRATION.value,
                                 "fault_level": vib_level,
+                            }
+                        )
+                    bearing_notification_items: dict[
+                        str, tuple[DiagnosisItem, dict[str, Any]]
+                    ] = {}
+                    for item_bearing, bearing_result in bearing_items:
+                        fault_code = str(bearing_result["fault_code"])
+                        current = bearing_notification_items.get(fault_code)
+                        if (
+                            current is None
+                            or int(bearing_result["level"])
+                            > int(current[1]["level"])
+                        ):
+                            bearing_notification_items[fault_code] = (
+                                item_bearing,
+                                bearing_result,
+                            )
+                    for item_bearing, bearing_result in (
+                        bearing_notification_items.values()
+                    ):
+                        previous_stmt = (
+                            select(func.max(DiagnosisItem.level))
+                            .join(
+                                Diagnosis,
+                                Diagnosis.id == DiagnosisItem.diagnosis_id,
+                            )
+                            .where(
+                                Diagnosis.id != diag_record.id,
+                                Diagnosis.device_id == device_uuid,
+                                Diagnosis.location_id == location_uuid,
+                                DiagnosisItem.fault_type
+                                == f"bearing_{bearing_result['fault_code']}",
+                                DiagnosisItem.level > 0,
+                                Diagnosis.diagnosed_at
+                                >= (
+                                    diagnosed_at
+                                    - timedelta(
+                                        hours=settings.bearing_notification_window_hours
+                                    )
+                                ).replace(tzinfo=None),
+                            )
+                            .group_by(Diagnosis.id, Diagnosis.diagnosed_at)
+                            .order_by(Diagnosis.diagnosed_at.desc())
+                            .limit(
+                                max(
+                                    0,
+                                    settings.bearing_notification_confirmation_count
+                                    - 1,
+                                )
+                            )
+                        )
+                        previous_levels = list(
+                            (
+                                await session.execute(previous_stmt)
+                            ).scalars().all()
+                        )
+                        if not BearingDiagnosis.should_notify(
+                            int(bearing_result["level"]),
+                            [int(level) for level in previous_levels],
+                            confirmation_count=(
+                                settings.bearing_notification_confirmation_count
+                            ),
+                            immediate_level=(
+                                settings.bearing_notification_immediate_level
+                            ),
+                        ):
+                            continue
+                        fault_events.append(
+                            {
+                                "diagnosis_item_id": str(item_bearing.id),
+                                "fault_type": (
+                                    f"bearing_{bearing_result['fault_code']}"
+                                ),
+                                "fault_level": int(bearing_result["level"]),
                             }
                         )
                     notification_event = {
@@ -500,17 +632,21 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
                         raise ValueError(
                             "notification_event_schema_version must be 1 or 2"
                         )
-                    session.add(
-                        DiagnosisNotificationOutbox(
-                            event_id=diag_record.id,
-                            diagnosis_id=diag_record.id,
-                            report_id=report_uuid,
-                            payload=notification_event,
-                            status=(
-                                DiagnosisNotificationOutboxStatus.PENDING.value
-                            ),
+                    if (
+                        settings.notification_event_schema_version != 2
+                        or fault_events
+                    ):
+                        session.add(
+                            DiagnosisNotificationOutbox(
+                                event_id=diag_record.id,
+                                diagnosis_id=diag_record.id,
+                                report_id=report_uuid,
+                                payload=notification_event,
+                                status=(
+                                    DiagnosisNotificationOutboxStatus.PENDING.value
+                                ),
+                            )
                         )
-                    )
 
         # 3. Update Health Status Cache
         if redis_client:

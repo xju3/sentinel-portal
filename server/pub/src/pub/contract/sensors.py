@@ -276,6 +276,25 @@ class SensorConfigResponse(BaseModel):
     configured: bool = False
 
 
+class SensorBearingFaultOrders(BaseModel):
+    bpfo: float
+    bpfi: float
+    bsf: float
+    ftf: float
+
+
+class SensorBindingBearing(BaseModel):
+    binding_id: UUID
+    bearing_id: UUID
+    brand: str
+    model: str
+    bearing_type: Optional[str] = None
+    shaft_speed_ratio: float
+    shaft_rpm: Optional[float] = None
+    fault_orders: SensorBearingFaultOrders
+
+
 class SensorBindingResponse(BaseModel):
     device_id: Optional[UUID] = None
     rpm: Optional[int] = None
+    bearing: Optional[SensorBindingBearing] = None

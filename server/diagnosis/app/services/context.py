@@ -12,11 +12,23 @@ from sqlalchemy.orm import aliased
 
 from pub.manager.database import db_manager, redis_manager
 from pub.models.customer import HealthCheckFreq, IsoStandard, Tenant
-from pub.models.device import DeviceCategory, DeviceInst, DeviceSpec, Process, ProcessDevice, ProcessDeviceItem, ProcessItem
+from pub.models.device import (
+    BearingModel,
+    DeviceCategory,
+    DeviceInst,
+    DeviceSpec,
+    DeviceSpecBearing,
+    Process,
+    ProcessDevice,
+    ProcessDeviceItem,
+    ProcessItem,
+)
 from pub.models.sensor import Sensor, SensorMonitoring, SensorThreshold
+from pub.services.diagnosis.bearing_frequency import calculate_bearing_frequencies
 from pub.utils.redis_keys import REDIS_KEY_DIA_PEER_GROUP, REDIS_KEY_DIA_DEVICE_CONTEXT
 
 logger = logging.getLogger(__name__)
+DEVICE_CONTEXT_CACHE_TTL_SECONDS = 86400
 
 class DeviceContextService:
     """
@@ -109,6 +121,12 @@ class DeviceContextService:
                 "sensor_sn": sensor.sn if sensor else None,
             })
 
+        bearing_bindings = await _build_bearing_bindings(
+            session,
+            device_spec,
+            device_category.tenant_id if device_category is not None else None,
+        )
+
         return _json_safe({
             "device_id": str(device_inst.id),
             "device_inst": _device_inst_context(device_inst),
@@ -121,6 +139,7 @@ class DeviceContextService:
                 "temperature": _threshold_context(temp_threshold),
             },
             "measuring_points": measuring_points,
+            "bearing_bindings": bearing_bindings,
             "configured": device_inst is not None and device_category is not None,
             "cached_at": datetime.utcnow().isoformat(),
         })
@@ -148,9 +167,36 @@ class DeviceContextService:
                 client.set,
                 key,
                 json.dumps(_json_safe(context), ensure_ascii=False),
+                ex=DEVICE_CONTEXT_CACHE_TTL_SECONDS,
             )
         except Exception as e:
             logger.warning("Failed to write context cache for device_id=%s: %s", device_id, e)
+
+    @staticmethod
+    async def invalidate_by_device_id(device_id: str) -> None:
+        await DeviceContextService.invalidate_by_device_ids([device_id])
+
+    @staticmethod
+    async def invalidate_by_device_ids(device_ids: list[str]) -> None:
+        unique_ids = sorted({str(device_id) for device_id in device_ids if device_id})
+        if not unique_ids:
+            return
+        client = _get_redis_client()
+        if client is None:
+            return
+        keys = [
+            REDIS_KEY_DIA_DEVICE_CONTEXT.format(device_id=device_id)
+            for device_id in unique_ids
+        ]
+        try:
+            await asyncio.to_thread(client.delete, *keys)
+            logger.info("Invalidated device context cache for device_ids=%s", unique_ids)
+        except Exception as e:
+            logger.warning(
+                "Failed to invalidate device context cache for device_ids=%s: %s",
+                unique_ids,
+                e,
+            )
 
     @staticmethod
     async def get_peer_group_managed(process_device_id: str, device_category_id: str) -> list[dict[str, Any]]:
@@ -204,6 +250,73 @@ class DeviceContextService:
                     logger.warning("Failed to write peer group cache: %s", e)
             
             return peers
+
+
+async def _build_bearing_bindings(
+    session: AsyncSession,
+    device_spec: DeviceSpec | None,
+    tenant_id: UUID | None,
+) -> list[dict[str, Any]]:
+    if device_spec is None or tenant_id is None:
+        return []
+    stmt = (
+        select(DeviceSpecBearing, BearingModel)
+        .join(BearingModel, BearingModel.id == DeviceSpecBearing.bearing_id)
+        .where(
+            DeviceSpecBearing.device_spec_id == device_spec.id,
+            BearingModel.tenant_id == tenant_id,
+            DeviceSpecBearing.enabled.is_(True),
+            BearingModel.active.is_(True),
+        )
+        .order_by(DeviceSpecBearing.location_id, BearingModel.brand, BearingModel.model)
+    )
+    rows = (await session.execute(stmt)).all()
+    return [
+        _bearing_binding_context(binding, bearing, device_spec.rpm)
+        for binding, bearing in rows
+    ]
+
+
+def _bearing_binding_context(
+    binding: DeviceSpecBearing,
+    bearing: BearingModel,
+    rpm: Any,
+) -> dict[str, Any]:
+    result = {
+        "id": binding.id,
+        "device_spec_id": binding.device_spec_id,
+        "bearing_id": binding.bearing_id,
+        "location_id": binding.location_id,
+        "shaft_speed_ratio": binding.shaft_speed_ratio,
+        "enabled": binding.enabled,
+        "bearing": {
+            "id": bearing.id,
+            "tenant_id": bearing.tenant_id,
+            "brand": bearing.brand,
+            "model": bearing.model,
+            "bearing_type": bearing.bearing_type,
+            "rolling_element_count": bearing.rolling_element_count,
+            "rolling_element_diameter_mm": bearing.rolling_element_diameter_mm,
+            "pitch_diameter_mm": bearing.pitch_diameter_mm,
+            "contact_angle_deg": bearing.contact_angle_deg,
+            "description": bearing.description,
+            "active": bearing.active,
+        },
+    }
+    try:
+        result["frequency_reference_hz"] = calculate_bearing_frequencies(
+            rpm=rpm,
+            rolling_element_count=bearing.rolling_element_count,
+            rolling_element_diameter_mm=bearing.rolling_element_diameter_mm,
+            pitch_diameter_mm=bearing.pitch_diameter_mm,
+            contact_angle_deg=bearing.contact_angle_deg,
+            shaft_speed_ratio=binding.shaft_speed_ratio,
+        )
+        result["frequency_validation_error"] = None
+    except ValueError as exc:
+        result["frequency_reference_hz"] = None
+        result["frequency_validation_error"] = str(exc)
+    return result
 
 def _get_redis_client() -> Any | None:
     try:

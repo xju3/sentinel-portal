@@ -46,10 +46,22 @@ LEVEL_LABELS = {
 FAULT_LABELS = {
     "temperature": "温度",
     "vibration": "振动",
+    "bearing_bpfo": "轴承外圈",
+    "bearing_bpfi": "轴承内圈",
+    "bearing_bsf": "轴承滚动体",
+    "bearing_ftf": "轴承保持架",
     "legacy_aggregate": "综合",
 }
 RouteSource = Literal["device_category", "process_device"]
-NotificationFaultType = Literal["temperature", "vibration", "legacy_aggregate"]
+NotificationFaultType = Literal[
+    "temperature",
+    "vibration",
+    "bearing_bpfo",
+    "bearing_bpfi",
+    "bearing_bsf",
+    "bearing_ftf",
+    "legacy_aggregate",
+]
 
 
 def _ensure_utc(value: datetime) -> datetime:
@@ -97,7 +109,14 @@ class DiagnosisNotificationFault(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     diagnosis_item_id: UUID | None = None
-    fault_type: Literal["temperature", "vibration"]
+    fault_type: Literal[
+        "temperature",
+        "vibration",
+        "bearing_bpfo",
+        "bearing_bpfi",
+        "bearing_bsf",
+        "bearing_ftf",
+    ]
     fault_level: int = Field(..., ge=1, le=4)
 
 
