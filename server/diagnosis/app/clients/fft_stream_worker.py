@@ -10,7 +10,6 @@ from uuid import UUID
 import redis as redis_lib
 
 from app.config import settings
-from pub.manager.database import redis_manager
 from pub.services.sensor.sensor_task_service import process_fft_metadata_background
 from pub.utils.redis_keys import REDIS_STREAM_FFT_GROUP, REDIS_STREAM_FFT_TRIGGER
 
@@ -33,7 +32,7 @@ def _create_worker_redis() -> redis_lib.Redis:
 
 
 def ensure_fft_consumer_group() -> None:
-    client = redis_manager.get_client()
+    client = _create_worker_redis()
     try:
         client.xgroup_create(
             REDIS_STREAM_FFT_TRIGGER,
@@ -44,6 +43,8 @@ def ensure_fft_consumer_group() -> None:
     except Exception as exc:
         if "BUSYGROUP" not in str(exc):
             raise
+    finally:
+        client.close()
 
 
 async def _process_message(

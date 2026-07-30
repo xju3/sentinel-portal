@@ -24,6 +24,17 @@ class FakeRedis:
     def hdel(self, key: str, field: str):
         return self.hashes.get(key, {}).pop(field, None)
 
+    def hmget(self, key: str, *fields: str):
+        values = self.hashes.get(key, {})
+        return [values.get(field) for field in fields]
+
+    def hset(self, key: str, field=None, value=None, mapping=None):
+        values = self.hashes.setdefault(key, {})
+        if mapping:
+            values.update({str(k): str(v) for k, v in mapping.items()})
+        elif field is not None:
+            values[str(field)] = str(value)
+
     def setex(self, key: str, _ttl: int, value: str):
         self.values[key] = value
 
@@ -82,6 +93,75 @@ def test_health_summary_keeps_uninspected_out_of_normal():
     assert result["healthSummary"]["unconfigured"] == 1
     assert result["healthSummary"]["monitored"] == 2
     assert result["healthSummary"]["online"] == 1
+
+
+@pytest.mark.asyncio
+async def test_health_dashboard_restores_completed_normal_result_after_redis_loss(
+    monkeypatch,
+):
+    device_id = uuid4()
+    redis = FakeRedis()
+    devices = {
+        str(device_id): {
+            "device_id": str(device_id),
+            "device_name": "Running",
+            "device_code": "R",
+            "category": "Pump",
+            "area": "A",
+            "sns": {"SN-1"},
+            "online": False,
+            "has_diagnosis": False,
+            "diagnosis_score": None,
+            "diagnosis_level": "未检测",
+            "triggered_metrics": {},
+        }
+    }
+    monkeypatch.setattr(
+        DashboardHealthService,
+        "_get_redis_client",
+        staticmethod(lambda: redis),
+    )
+    async def query_devices(_session, _tenant_id):
+        return devices
+
+    monkeypatch.setattr(
+        DashboardHealthService,
+        "_query_devices",
+        staticmethod(query_devices),
+    )
+
+    async def query_comm_states(_session, _sns):
+        return {"SN-1": SimpleNamespace(last_ts_ms=2_000)}
+
+    async def query_latest_health(_session, _device_ids):
+        return {str(device_id): 0}
+
+    monkeypatch.setattr(
+        DashboardHealthService,
+        "_query_comm_states",
+        staticmethod(query_comm_states),
+    )
+    monkeypatch.setattr(
+        DashboardHealthService,
+        "_query_latest_completed_health",
+        staticmethod(query_latest_health),
+    )
+    monkeypatch.setattr(
+        "pub.services.dashboard.dashboard_health_service.datetime",
+        SimpleNamespace(
+            utcnow=lambda: SimpleNamespace(timestamp=lambda: 2),
+        ),
+    )
+
+    result = await DashboardHealthService._build_health_dashboard(
+        object(),
+        uuid4(),
+    )
+
+    assert result["healthSummary"]["normal"] == 1
+    assert result["healthSummary"]["diagnosed"] == 1
+    assert result["healthSummary"]["uninspected"] == 0
+    assert redis.hashes["dia:health:status"][str(device_id)] == "0"
 
 
 def test_device_repetition_counts_diagnosis_events_across_metrics():

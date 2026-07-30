@@ -4,7 +4,6 @@ import logging
 import time
 
 import redis as redis_lib
-from pub.manager.database import redis_manager
 from pub.utils.redis_keys import REDIS_STREAM_DIAGNOSIS_TRIGGER, REDIS_STREAM_DIAGNOSIS_GROUP
 from pub.models.report import DiagnosisTriggerPayload
 from app.preparation.ingestion import process_incoming_report
@@ -49,7 +48,7 @@ def _ensure_consumer_group() -> None:
     若 Stream 不存在，mkstream=True 会自动创建。
     若 Group 已存在，捕获 BUSYGROUP 异常忽略即可。
     """
-    client = redis_manager.get_client()
+    client = _create_worker_redis()
     try:
         client.xgroup_create(
             REDIS_STREAM_DIAGNOSIS_TRIGGER,
@@ -64,6 +63,8 @@ def _ensure_consumer_group() -> None:
             logger.debug("Consumer group '%s' already exists, skipping creation.", REDIS_STREAM_DIAGNOSIS_GROUP)
         else:
             raise
+    finally:
+        client.close()
 
 
 async def _process_one_message(payload: DiagnosisTriggerPayload) -> None:

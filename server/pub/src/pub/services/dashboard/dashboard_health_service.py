@@ -21,7 +21,12 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from pub.manager.database import db_manager, redis_manager
 from pub.models.device import DeviceCategory, DeviceInst, DeviceSpec, ProcessDevice, ProcessDeviceItem
-from pub.models.diagnosis import Diagnosis, DiagnosisItem
+from pub.models.diagnosis import (
+    Diagnosis,
+    DiagnosisItem,
+    DiagnosisRecord,
+    DiagnosisRecordStatus,
+)
 from pub.models.customer import Area
 from pub.models.sensor import CommunicationState, Sensor, SensorMonitoring
 from pub.utils.redis_keys import (
@@ -276,10 +281,12 @@ class DashboardHealthService:
                         devices[device_id]["online"] = True
 
         # 5. Fetch overall level from Redis cache for all monitored devices.
-        # 正常结果只存在于这个 Hash；Redis miss 必须保留为“未检测”，不能猜成正常。
+        # Redis is an acceleration layer, not the source of truth. Restore
+        # missing entries from the latest completed diagnosis_record.
         redis_client = DashboardHealthService._get_redis_client()
         fault_device_ids = set()
-        
+        missing_health_device_ids: set[str] = set(devices)
+
         if redis_client and devices:
             device_ids_list = list(devices.keys())
             try:
@@ -295,14 +302,37 @@ class DashboardHealthService:
                         dev["has_diagnosis"] = True
                         dev["diagnosis_score"] = overall_score
                         dev["diagnosis_level"] = overall_level_str
+                        missing_health_device_ids.discard(dev_id)
                         
                         if overall_score > 0:
                             fault_device_ids.add(dev_id)
-                    # Cache miss: 设备尚未被诊断，或 Redis 重启后尚未恢复
-                    # 保持默认值 diagnosis_level="未检测"，不回源数据库
-                    # 理由：数据库只存异常记录，回源必然误判为异常
             except Exception as e:
                 logger.error("Failed to fetch health status from Redis: %s", e)
+
+        if missing_health_device_ids:
+            persisted_levels = (
+                await DashboardHealthService._query_latest_completed_health(
+                    session,
+                    {UUID(device_id) for device_id in missing_health_device_ids},
+                )
+            )
+            for dev_id, overall_score in persisted_levels.items():
+                dev = devices[dev_id]
+                dev["has_diagnosis"] = True
+                dev["diagnosis_score"] = overall_score
+                dev["diagnosis_level"] = INT_TO_LEVEL.get(overall_score, "正常")
+                if overall_score > 0:
+                    fault_device_ids.add(dev_id)
+
+            if redis_client and persisted_levels:
+                try:
+                    await asyncio.to_thread(
+                        redis_client.hset,
+                        REDIS_KEY_DIA_HEALTH_STATUS,
+                        mapping=persisted_levels,
+                    )
+                except Exception as e:
+                    logger.warning("Failed to restore health status cache: %s", e)
 
         # 6. For fault devices, query detailed metrics, duration, and trend
         latest_results = {}
@@ -462,6 +492,48 @@ class DashboardHealthService:
         stmt = select(CommunicationState).where(CommunicationState.sn.in_(list(sns)))
         rows = (await session.execute(stmt)).scalars().all()
         return {s.sn: s for s in rows}
+
+    @staticmethod
+    async def _query_latest_completed_health(
+        session: AsyncSession,
+        device_ids: set[UUID],
+    ) -> dict[str, int]:
+        """Return the latest persisted completed health level per device."""
+        if not device_ids:
+            return {}
+        ranked = (
+            select(
+                DiagnosisRecord.device_id,
+                DiagnosisRecord.overall_level,
+                func.row_number()
+                .over(
+                    partition_by=DiagnosisRecord.device_id,
+                    order_by=(
+                        desc(DiagnosisRecord.ts_ms),
+                        desc(DiagnosisRecord.diagnosed_at),
+                    ),
+                )
+                .label("row_num"),
+            )
+            .where(
+                DiagnosisRecord.device_id.in_(list(device_ids)),
+                DiagnosisRecord.diagnosis_status
+                == int(DiagnosisRecordStatus.DIAGNOSED),
+                DiagnosisRecord.overall_level.is_not(None),
+            )
+            .subquery()
+        )
+        rows = (
+            await session.execute(
+                select(ranked.c.device_id, ranked.c.overall_level).where(
+                    ranked.c.row_num == 1
+                )
+            )
+        ).all()
+        return {
+            str(row.device_id): int(row.overall_level)
+            for row in rows
+        }
 
     @staticmethod
     async def _query_first_triggered(
