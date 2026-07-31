@@ -160,34 +160,34 @@ const MonitoringPointsPage = () => {
       },
       sorter: true,
     },
-    {
-      title: '故障类型',
-      dataIndex: 'anomaly',
-      width: 100,
-      hideInSearch: true,
-      render: (_, row) => {
-        const map: Record<number, string> = {
-          0: '-',
-          1: '振动',
-          2: '温度',
-          3: '振动+温度',
-        };
-        return map[Number(row.anomaly)] || '正常';
-      },
-      sorter: true,
-    },
-    {
-      title: '故障时间',
-      dataIndex: 'ts',
-      width: 150,
-      hideInSearch: true,
-      render: (_: any, row: any) => {
-        if (!row.ts) return '-';
-        const d = new Date(Number(row.ts));
-        return d.toLocaleString('zh-CN', { hour12: false });
-      },
-      sorter: true,
-    },
+    // {
+    //   title: '故障类型',
+    //   dataIndex: 'anomaly',
+    //   width: 100,
+    //   hideInSearch: true,
+    //   render: (_, row) => {
+    //     const map: Record<number, string> = {
+    //       0: '-',
+    //       1: '振动',
+    //       2: '温度',
+    //       3: '振动+温度',
+    //     };
+    //     return map[Number(row.anomaly)] || '正常';
+    //   },
+    //   sorter: true,
+    // },
+    // {
+    //   title: '故障时间',
+    //   dataIndex: 'ts',
+    //   width: 150,
+    //   hideInSearch: true,
+    //   render: (_: any, row: any) => {
+    //     if (!row.ts) return '-';
+    //     const d = new Date(Number(row.ts));
+    //     return d.toLocaleString('zh-CN', { hour12: false });
+    //   },
+    //   sorter: true,
+    // },
     {
       title: '状态',
       dataIndex: 'status',

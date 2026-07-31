@@ -210,7 +210,8 @@ const DeviceListPage = () => {
     {
       title: '设备规格',
       dataIndex: 'device_spec_id',
-      width: 260,
+      width: 180,
+      ellipsis: true,
       render: (_, row: any) => {
         const spec = row.device_spec;
         return spec ? `${spec.name} / ${spec.model}${spec.brand ? ` / ${spec.brand}` : ''}` : '-';
@@ -221,6 +222,7 @@ const DeviceListPage = () => {
       title: '服役日期',
       dataIndex: 'purchase_date',
       width: 100,
+      align: 'center',
       valueType: 'date',
       sorter: true,
     },
@@ -228,13 +230,14 @@ const DeviceListPage = () => {
       title: '年限',
       dataIndex: 'life_span',
       width: 80,
+      align: 'center',
       valueType: 'digit',
       sorter: true,
     },
     {
       title: '测点',
       hideInSearch: true,
-      width: 60,
+      width: 120,
       render: (_, row: any) => {
         const monitorings = row.sensor_monitorings || [];
         if (!monitorings?.length) return '-';
@@ -260,19 +263,18 @@ const DeviceListPage = () => {
         );
       },
     },
-
-    {
-      title: '状态',
-      dataIndex: 'active',
-      width: 80,
-      valueType: 'select',
-      valueEnum: {
-        1: { text: '运行中', status: 'Success' },
-        0: { text: '已停止', status: 'Default' },
-      },
-      render: (_, row) => (Number(row.active) === 1 ? '运行中' : '已停止'),
-      sorter: true,
-    },
+    // {
+    //   title: '状态',
+    //   dataIndex: 'active',
+    //   width: 80,
+    //   valueType: 'select',
+    //   valueEnum: {
+    //     1: { text: '运行中', status: 'Success' },
+    //     0: { text: '已停止', status: 'Default' },
+    //   },
+    //   render: (_, row) => (Number(row.active) === 1 ? '运行中' : '已停止'),
+    //   sorter: true,
+    // },
     {
       title: '服役',
       dataIndex: 'available',
