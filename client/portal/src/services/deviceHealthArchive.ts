@@ -35,6 +35,11 @@ export type DeviceHealthArchive = {
     id: string;
     name: string;
     active: boolean;
+    sensor: {
+      id: string;
+      sn: string;
+      description?: string | null;
+    } | null;
   }>;
   selectedLocationId: string | null;
   range: {

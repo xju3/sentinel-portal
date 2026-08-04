@@ -2,6 +2,7 @@ import { request } from '@umijs/max';
 import { listAllSuppliers } from '@/services/supplier';
 import type { Supplier } from '@/services/supplier';
 import type { BearingModel } from '@/services/bearing';
+import type { PointTrendValue } from '@/services/deviceHealthArchive';
 
 export type DeviceSpec = {
   id: string;
@@ -57,7 +58,41 @@ export type DeviceSpecPagedResult = {
   total: number;
 };
 
-export async function listAllDeviceSpecs() {
+export type DeviceSpecComparisonPoint = PointTrendValue | null;
+
+export type DeviceSpecComparison = {
+  meta: {
+    rangeDays: number;
+    windowMinutes?: number | null;
+    raw: boolean;
+    patrolMinutes?: number;
+    startAt?: string;
+    endAt?: string;
+    deviceCount: number;
+    pointCount: number;
+  };
+  locations: Array<{
+    id: string;
+    name: string;
+    deviceCount: number;
+    activeDeviceCount: number;
+  }>;
+  selectedLocationId?: string | null;
+  selectedLocation?: {
+    id: string;
+    name: string;
+    deviceCount: number;
+    activeDeviceCount: number;
+  } | null;
+  series: Array<{
+    device: { id: string; name: string; code: string };
+    timestamps: string[];
+    temperature: DeviceSpecComparisonPoint[];
+    vibration: DeviceSpecComparisonPoint[];
+  }>;
+};
+
+export async function listAllDeviceSpecs(processDeviceId?: string) {
   const limit = 100;
   let skip = 0;
   const all: DeviceSpec[] = [];
@@ -66,7 +101,11 @@ export async function listAllDeviceSpecs() {
     const batch =
       (await request<DeviceSpec[]>('/api/v1/device-specs', {
         method: 'GET',
-        params: { skip, limit },
+        params: {
+          skip,
+          limit,
+          process_device_id: processDeviceId || undefined,
+        },
       })) || [];
     all.push(...batch);
     if (batch.length < limit) {
@@ -76,6 +115,29 @@ export async function listAllDeviceSpecs() {
   }
 
   return all;
+}
+
+export async function getDeviceSpecComparison(
+  deviceSpecId: string,
+  params: {
+    processDeviceId: string;
+    locationId?: string;
+    rangeDays: number;
+    windowMinutes: number;
+  },
+) {
+  return request<DeviceSpecComparison>(
+    `/api/v1/device-specs/${deviceSpecId}/comparison`,
+    {
+      method: 'GET',
+      params: {
+        process_device_id: params.processDeviceId,
+        location_id: params.locationId,
+        range_days: params.rangeDays,
+        window_minutes: params.windowMinutes,
+      },
+    },
+  );
 }
 
 export async function queryDeviceSpecs(

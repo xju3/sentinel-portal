@@ -4,6 +4,7 @@ import { PageContainer, ProCard } from '@ant-design/pro-components';
 import {
   Button,
   Col,
+  ConfigProvider,
   Descriptions,
   Divider,
   Drawer,
@@ -30,6 +31,8 @@ import {
   FireFilled,
   DashboardOutlined,
   ClockCircleOutlined,
+  FullscreenExitOutlined,
+  FullscreenOutlined,
 } from '@ant-design/icons';
 import { request } from '@umijs/max';
 import type { ColumnsType } from 'antd/es/table';
@@ -266,10 +269,12 @@ const DiagnosisPreviewDrawer = ({
   device,
   open,
   onClose,
+  getContainer,
 }: {
   device: FaultDevice | null;
   open: boolean;
   onClose: () => void;
+  getContainer: () => HTMLElement;
 }) => {
   if (!device) return null;
 
@@ -284,6 +289,7 @@ const DiagnosisPreviewDrawer = ({
       width={560}
       open={open}
       onClose={onClose}
+      getContainer={getContainer}
       destroyOnClose
       extra={
         <Button
@@ -297,7 +303,7 @@ const DiagnosisPreviewDrawer = ({
       <Descriptions size="small" column={2}>
         <Descriptions.Item label="设备编号">{device.deviceCode || '-'}</Descriptions.Item>
         <Descriptions.Item label="设备类型">{device.category}</Descriptions.Item>
-        <Descriptions.Item label="所属工艺段">{device.area}</Descriptions.Item>
+        <Descriptions.Item label="所属设备分组">{device.area}</Descriptions.Item>
         <Descriptions.Item label="问题状态">
           <Tag color={issueStateColor[device.issueState]}>
             {issueStateLabel[device.issueState]}
@@ -427,6 +433,8 @@ const HealthDashboard = () => {
   const [calendarData, setCalendarData] = useState<any>();
   const [calendarLoading, setCalendarLoading] = useState(true);
   const [previewDevice, setPreviewDevice] = useState<FaultDevice | null>(null);
+  const [fullscreen, setFullscreen] = useState(false);
+  const fullscreenRef = useRef<HTMLDivElement>(null);
   const refreshRetryRef = useRef(0);
   const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
@@ -475,6 +483,26 @@ const HealthDashboard = () => {
     fetchCalendarData();
     return () => clearTimeout(refreshTimerRef.current);
   }, []);
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setFullscreen(document.fullscreenElement === fullscreenRef.current);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = async () => {
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      } else if (fullscreenRef.current) {
+        await fullscreenRef.current.requestFullscreen();
+      }
+    } catch (error: any) {
+      message.error(error?.message || '无法切换全屏显示');
+    }
+  };
 
   // Auto-refresh every 10 minutes
   useEffect(() => {
@@ -528,7 +556,7 @@ const HealthDashboard = () => {
       width: 120,
     },
     {
-      title: '工艺段',
+      title: '设备分组',
       dataIndex: 'area',
       width: 120,
     },
@@ -589,15 +617,29 @@ const HealthDashboard = () => {
   ];
 
   return (
-    <PageContainer
+    <ConfigProvider
+      getPopupContainer={(trigger) =>
+        trigger?.parentElement || fullscreenRef.current || document.body
+      }
+    >
+      <div ref={fullscreenRef} className="health-dashboard-fullscreen">
+        <PageContainer
       title="设备健康总览"
       subTitle={
         data.snapshot?.generatedAt
           ? `数据生成于 ${new Date(data.snapshot.generatedAt).toLocaleString('zh-CN')}${data.snapshot.refreshing ? '，正在后台更新' : ''}`
           : '当前设备健康状态与异常定位'
       }
-      extra={
+      extra={[
         <Button
+          key="fullscreen"
+          icon={fullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
+          onClick={() => void toggleFullscreen()}
+        >
+          {fullscreen ? '退出全屏' : '全屏'}
+        </Button>,
+        <Button
+          key="refresh"
           icon={<ReloadOutlined />}
           onClick={() => {
             refreshRetryRef.current = 0;
@@ -606,10 +648,18 @@ const HealthDashboard = () => {
           loading={loading}
         >
           刷新
-        </Button>
-      }
+        </Button>,
+      ]}
     >
       <style>{`
+        .health-dashboard-fullscreen {
+          min-height: 100%;
+        }
+        .health-dashboard-fullscreen:fullscreen {
+          min-height: 100vh;
+          overflow: auto;
+          background: #f5f5f5;
+        }
         .health-card {
           transition: all 0.3s ease;
           border: 1px solid rgba(255, 255, 255, 0.4);
@@ -622,6 +672,12 @@ const HealthDashboard = () => {
           display: grid;
           grid-template-columns: repeat(6, minmax(0, 1fr));
           gap: 16px;
+        }
+        .issue-summary-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+          gap: 16px;
+          width: 100%;
         }
         @media (max-width: 900px) {
           .health-grid {
@@ -752,7 +808,7 @@ const HealthDashboard = () => {
         headerBordered
         style={{ marginTop: 16 }}
       >
-        <Row gutter={[16, 12]}>
+        <div className="issue-summary-grid">
           {[
             { label: '首次检出', value: data.issueSummary.new, color: '#1677ff' },
             { label: '重复检出', value: data.issueSummary.repeated, color: '#d48806' },
@@ -760,17 +816,18 @@ const HealthDashboard = () => {
             { label: '趋势好转', value: data.issueSummary.improving, color: '#389e0d' },
             { label: '复采确认中', value: data.issueSummary.pendingConfirmation, color: '#722ed1' },
           ].map(item => (
-            <Col xs={12} sm={8} lg={4} flex="1 1 160px" key={item.label}>
-              <div style={{ padding: '12px 16px', borderRadius: 8, background: '#fafafa', border: '1px solid #f0f0f0' }}>
-                <Text type="secondary">{item.label}</Text>
-                <div style={{ marginTop: 4 }}>
-                  <Text strong style={{ fontSize: 26, color: item.color }}>{item.value}</Text>
-                  <Text type="secondary" style={{ marginLeft: 4 }}>台</Text>
-                </div>
+            <div
+              key={item.label}
+              style={{ padding: '12px 16px', borderRadius: 8, background: '#fafafa', border: '1px solid #f0f0f0' }}
+            >
+              <Text type="secondary">{item.label}</Text>
+              <div style={{ marginTop: 4 }}>
+                <Text strong style={{ fontSize: 26, color: item.color }}>{item.value}</Text>
+                <Text type="secondary" style={{ marginLeft: 4 }}>台</Text>
               </div>
-            </Col>
+            </div>
           ))}
-        </Row>
+        </div>
       </ProCard>
 
       {/* ── Section 2: Problem distribution ── */}
@@ -783,7 +840,7 @@ const HealthDashboard = () => {
         </Col>
         <Col xs={24} lg={8}>
           <DistributionTags
-            title="问题工艺段"
+            title="问题设备分组"
             data={data.problemDistribution.byArea}
           />
         </Col>
@@ -830,6 +887,7 @@ const HealthDashboard = () => {
         device={previewDevice}
         open={previewDevice !== null}
         onClose={() => setPreviewDevice(null)}
+        getContainer={() => fullscreenRef.current || document.body}
       />
 
       {/* ── Section 4: Calendar Heatmap ── */}
@@ -843,7 +901,9 @@ const HealthDashboard = () => {
       >
         <CalendarHeatmap data={calendarData} loading={calendarLoading} />
       </ProCard>
-    </PageContainer>
+        </PageContainer>
+      </div>
+    </ConfigProvider>
   );
 };
 

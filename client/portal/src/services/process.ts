@@ -145,7 +145,7 @@ export async function deleteProcessItem(id: string) {
   });
 }
 
-export async function listAllProcessDevices() {
+export async function listAllProcessDevices(deviceSpecId?: string) {
   const limit = 100;
   let skip = 0;
   const all: ProcessDevice[] = [];
@@ -154,7 +154,11 @@ export async function listAllProcessDevices() {
     const batch =
       (await request<ProcessDevice[]>('/api/v1/process-devices', {
         method: 'GET',
-        params: { skip, limit },
+        params: {
+          skip,
+          limit,
+          device_spec_id: deviceSpecId || undefined,
+        },
       })) || [];
     all.push(...batch);
     if (batch.length < limit) {

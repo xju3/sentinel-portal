@@ -241,10 +241,10 @@ const ProcessManagePage = () => {
 
   const columns: ProColumns<ProcessDevice>[] = [
     { title: '序号', valueType: 'indexBorder', width: 68, hideInSearch: true, fixed: 'left' },
-    { title: '实例编码', dataIndex: 'code', sorter: (a, b) => (a.code || '').localeCompare(b.code || '', 'zh-CN') },
-    { title: '实例SN', dataIndex: 'sn', sorter: (a, b) => (a.sn || '').localeCompare(b.sn || '', 'zh-CN') },
+    { title: '分组编码', dataIndex: 'code', sorter: (a, b) => (a.code || '').localeCompare(b.code || '', 'zh-CN') },
+    { title: '分组SN', dataIndex: 'sn', sorter: (a, b) => (a.sn || '').localeCompare(b.sn || '', 'zh-CN') },
     {
-      title: '模板',
+      title: '分组模板',
       dataIndex: 'process_id',
       render: (_, row) => row.process?.name || row.process_id,
       sorter: (a, b) => {
@@ -318,7 +318,7 @@ const ProcessManagePage = () => {
           </a>
           <Popconfirm
             key="delete"
-            title="确认删除该工段实例吗？"
+            title="确认删除该设备分组吗？"
             onConfirm={async () => {
               try {
                 await deleteProcessDevice(row.id);
@@ -339,7 +339,7 @@ const ProcessManagePage = () => {
   ];
 
   return (
-    <PageContainer title="工段管理">
+    <PageContainer title="设备分组">
       <ProTable<ProcessDevice>
         rowKey="id"
         loading={loading}
@@ -360,7 +360,7 @@ const ProcessManagePage = () => {
               setModalOpen(true);
             }}
           >
-            新建工段实例
+            新建设备分组
           </Button>,
         ]}
       />
@@ -422,7 +422,7 @@ const ProcessManagePage = () => {
         <ProFormText
           name="code"
           label="编码"
-          rules={[{ required: true, message: '请输入编码' }, { max: 8, message: '实例编码最多8个字符' }]}
+          rules={[{ required: true, message: '请输入编码' }, { max: 8, message: '分组编码最多8个字符' }]}
         />
         <ProFormText
           name="sn"
@@ -431,12 +431,12 @@ const ProcessManagePage = () => {
         />
         <ProFormSelect
           name="process_id"
-          label="模板"
+          label="分组模板"
           request={async () => {
             const list = await listAllProcesses();
             return list.map((item) => ({ label: `${item.code} - ${item.name}`, value: item.id }));
           }}
-          rules={[{ required: true, message: '请选择模板' }]}
+          rules={[{ required: true, message: '请选择分组模板' }]}
         />
         <ProFormSelect
           name="area_id"
@@ -481,11 +481,11 @@ const ProcessManagePage = () => {
             for (const instId of selected) {
               const inst = instMap.get(instId);
               if (!inst || inst.device_spec_id !== row.device_spec_id) {
-                message.error('存在设备规格与模板子项不匹配的选择');
+                message.error('存在设备规格与分组模板子项不匹配的选择');
                 return;
               }
               if (allSelected.has(instId)) {
-                message.error('同一设备不能重复分配到多个模板子项');
+                message.error('同一设备不能重复分配到多个分组模板子项');
                 return;
               }
               allSelected.add(instId);
@@ -527,7 +527,7 @@ const ProcessManagePage = () => {
       >
         <Space direction="vertical" size={12} style={{ width: '100%' }}>
           {currentTemplateItems.length === 0 ? (
-            <Tag color="warning">当前模板没有子项，请先在模板中配置 ProcessItem</Tag>
+            <Tag color="warning">当前分组模板没有设备规格，请先完成模板配置</Tag>
           ) : null}
           {currentTemplateItems.map((row) => {
             const spec = specMap.get(row.device_spec_id);
@@ -550,7 +550,7 @@ const ProcessManagePage = () => {
               <div key={row.id} style={{ border: '1px solid #f0f0f0', borderRadius: 6, padding: 12 }}>
                 <div style={{ marginBottom: 8 }}>
                   <b>{spec ? `${spec.name} / ${spec.model}` : row.device_spec_id}</b>
-                  <span style={{ marginLeft: 8, color: '#999' }}>模板数量: {row.qty}</span>
+                  <span style={{ marginLeft: 8, color: '#999' }}>要求数量: {row.qty}</span>
                   <span style={{ marginLeft: 8, color: selected.length === row.qty ? '#389e0d' : '#cf1322' }}>
                     已选: {selected.length}
                   </span>

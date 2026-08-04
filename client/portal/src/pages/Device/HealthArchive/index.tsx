@@ -1,5 +1,10 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { ArrowLeftOutlined, ReloadOutlined } from '@ant-design/icons';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import {
+  ArrowLeftOutlined,
+  FullscreenExitOutlined,
+  FullscreenOutlined,
+  ReloadOutlined,
+} from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import { useNavigate, useParams } from '@umijs/max';
 import {
@@ -81,7 +86,9 @@ const bucketTooltip = (bucket: HealthArchiveBucket) => {
 const DeviceHealthArchivePage = () => {
   const { deviceId = '' } = useParams<{ deviceId: string }>();
   const navigate = useNavigate();
-  const [rangeDays, setRangeDays] = useState(7);
+  const fullscreenRef = useRef<HTMLDivElement>(null);
+  const [fullscreen, setFullscreen] = useState(false);
+  const [rangeDays, setRangeDays] = useState(1);
   const [intervalHours, setIntervalHours] = useState(1);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<DeviceHealthArchive | null>(null);
@@ -90,6 +97,26 @@ const DeviceHealthArchivePage = () => {
   const [dayDetail, setDayDetail] = useState<DeviceHealthArchive | null>(null);
   const [dayDetailLoading, setDayDetailLoading] = useState(false);
   const calendarMode = rangeDays >= 30;
+
+  useEffect(() => {
+    const handleFullscreenChange = () => {
+      setFullscreen(document.fullscreenElement === fullscreenRef.current);
+    };
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);
+  }, []);
+
+  const toggleFullscreen = async () => {
+    try {
+      if (document.fullscreenElement) {
+        await document.exitFullscreen();
+      } else if (fullscreenRef.current) {
+        await fullscreenRef.current.requestFullscreen();
+      }
+    } catch (error: any) {
+      message.error(error?.message || '无法切换全屏显示');
+    }
+  };
 
   const loadData = useCallback(async () => {
     if (!deviceId) return;
@@ -118,6 +145,7 @@ const DeviceHealthArchivePage = () => {
   }, [loadData]);
 
   const activeLocationId = selectedLocationId || data?.selectedLocationId || undefined;
+  const selectedPoint = data?.points.find((point) => point.id === activeLocationId);
 
   const orderedBuckets = useMemo(
     () =>
@@ -183,11 +211,19 @@ const DeviceHealthArchivePage = () => {
   );
 
   return (
-    <PageContainer
+    <div ref={fullscreenRef} className={styles.fullscreenHost}>
+      <PageContainer
       className={styles.archivePage}
       title={data ? `${data.device.name} · 健康档案` : '设备健康档案'}
       subTitle={data?.device.code}
       extra={[
+        <Button
+          key="fullscreen"
+          icon={fullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
+          onClick={() => void toggleFullscreen()}
+        >
+          {fullscreen ? '退出全屏' : '全屏'}
+        </Button>,
         <Button key="back" icon={<ArrowLeftOutlined />} onClick={() => navigate(-1)}>
           返回
         </Button>,
@@ -212,12 +248,25 @@ const DeviceHealthArchivePage = () => {
               <Select
                 style={{ minWidth: 200 }}
                 value={activeLocationId}
+                getPopupContainer={(trigger) => trigger.parentElement || document.body}
                 options={data.points.map((point) => ({
                   label: point.active ? point.name : `${point.name}（历史测点）`,
                   value: point.id,
                 }))}
                 onChange={(value) => setSelectedLocationId(value)}
               />
+            </Space>
+          )}
+          {data && activeLocationId && (
+            <Space>
+              <Typography.Text type="secondary">当前传感器</Typography.Text>
+              <Typography.Text>
+                {selectedPoint?.sensor
+                  ? [selectedPoint.sensor.sn, selectedPoint.sensor.description]
+                      .filter(Boolean)
+                      .join(' / ')
+                  : ''}
+              </Typography.Text>
             </Space>
           )}
           {calendarMode ? (
@@ -459,7 +508,8 @@ const DeviceHealthArchivePage = () => {
           )}
         </Spin>
       </Drawer>
-    </PageContainer>
+      </PageContainer>
+    </div>
   );
 };
 

@@ -11,6 +11,7 @@ import {
 } from '@ant-design/pro-components';
 import { Button, Modal, Popconfirm, Space, Table, Tag, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import { useNavigate } from '@umijs/max';
 
 import EntityPicker from '@/components/EntityPicker';
 import { BearingModel, queryBearings } from '@/services/bearing';
@@ -32,6 +33,10 @@ import {
   updateDeviceSpecBearingBindings,
 } from '@/services/deviceSpec';
 import { Supplier, querySuppliers } from '@/services/supplier';
+import {
+  ProcessDevice,
+  listAllProcessDevices,
+} from '@/services/process';
 
 import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
 
@@ -103,12 +108,14 @@ const buildCategoryTree = (rows: DeviceCategory[]): CategoryTreeRow[] => {
 };
 
 const DeviceSpecPage = () => {
+  const navigate = useNavigate();
   const formRef = useRef<import('@ant-design/pro-components').ProFormInstance>();
 
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
   const [rows, setRows] = useState<DeviceSpec[]>([]);
+  const [processDevices, setProcessDevices] = useState<ProcessDevice[]>([]);
   const [editing, setEditing] = useState<DeviceSpec | null>(null);
   const [query, setQuery] = useState<Record<string, any>>({});
   const [bindingModalOpen, setBindingModalOpen] = useState(false);
@@ -122,10 +129,10 @@ const DeviceSpecPage = () => {
   const [selectedLocation, setSelectedLocation] =
     useState<Pick<Location, 'id' | 'name'> | undefined>();
 
-  const loadRows = async () => {
+  const loadRows = async (processDeviceId?: string) => {
     setLoading(true);
     try {
-      const specs = await listAllDeviceSpecs();
+      const specs = await listAllDeviceSpecs(processDeviceId);
       setRows(specs);
     } catch (error) {
       message.error(toErrorMessage(error));
@@ -136,6 +143,9 @@ const DeviceSpecPage = () => {
 
   useEffect(() => {
     loadRows();
+    listAllProcessDevices()
+      .then(setProcessDevices)
+      .catch((error) => message.error(toErrorMessage(error)));
   }, []);
 
   const filteredRows = useMemo(() => {
@@ -315,6 +325,29 @@ const DeviceSpecPage = () => {
       sorter: (a, b) => (a.name || '').localeCompare(b.name || '', 'zh-CN'),
     },
     {
+      title: '设备分组',
+      dataIndex: 'process_device_id',
+      hideInTable: true,
+      valueType: 'select',
+      fieldProps: {
+        allowClear: true,
+        showSearch: true,
+        options: processDevices.map((item) => ({
+          value: item.id,
+          label: [
+            item.code,
+            item.sn,
+            item.process?.name,
+            item.status === 1 ? undefined : '已停用',
+          ]
+            .filter(Boolean)
+            .join(' / '),
+        })),
+        optionFilterProp: 'label',
+        placeholder: '请选择设备分组',
+      },
+    },
+    {
       title: '型号',
       dataIndex: 'model',
       width: 100,
@@ -372,13 +405,24 @@ const DeviceSpecPage = () => {
     {
       title: '操作',
       valueType: 'option',
-      width: 220,
+      width: 300,
       fixed: 'right',
       align: 'center',
       render: (_, row) => (
         <Space size="middle">
+          <a
+            key="comparison"
+            onClick={() => {
+              const groupQuery = query.process_device_id
+                ? `?group=${encodeURIComponent(query.process_device_id)}`
+                : '';
+              navigate(`/device/specs/${row.id}/comparison${groupQuery}`);
+            }}
+          >
+            对比
+          </a>
           <a key="bearing" onClick={() => void openBindingModal(row)}>
-            轴承配置
+            轴承
           </a>
           <a
             key="edit"
@@ -396,7 +440,7 @@ const DeviceSpecPage = () => {
               try {
                 await deleteDeviceSpec(row.id);
                 message.success('删除成功');
-                await loadRows();
+                await loadRows(query.process_device_id);
               } catch (error) {
                 message.error(toErrorMessage(error));
               }
@@ -420,9 +464,15 @@ const DeviceSpecPage = () => {
         scroll={{ x: 'max-content' }}
         dataSource={filteredRows}
         search={{ labelWidth: 'auto' }}
-        onSubmit={(values) => setQuery(values)}
-        onReset={() => setQuery({})}
-        options={{ reload: loadRows }}
+        onSubmit={async (values) => {
+          setQuery(values);
+          await loadRows(values.process_device_id);
+        }}
+        onReset={() => {
+          setQuery({});
+          void loadRows();
+        }}
+        options={{ reload: () => loadRows(query.process_device_id) }}
         optionsRender={renderRefSafeTableOptions}
         toolBarRender={() => [
           <Button
@@ -488,7 +538,7 @@ const DeviceSpecPage = () => {
             message.success('保存成功');
             setModalOpen(false);
             setEditing(null);
-            await loadRows();
+            await loadRows(query.process_device_id);
             return true;
           } catch (error) {
             message.error(toErrorMessage(error));
@@ -606,7 +656,7 @@ const DeviceSpecPage = () => {
               setBindingEditorOpen(true);
             }}
           >
-            添加安装位置
+            安装位置
           </Button>
           <span style={{ color: '#8c8c8c' }}>
             轴转速比 = 该测点轴承所在轴转速 ÷ 设备规格转速，直联设备填写 1。

@@ -167,7 +167,7 @@ const ProcessTemplatePage = () => {
           </a>
           <Popconfirm
             key="delete"
-            title="确认删除该模板吗？"
+            title="确认删除该分组模板吗？"
             onConfirm={async () => {
               try {
                 await deleteProcess(row.id);
@@ -252,7 +252,7 @@ const ProcessTemplatePage = () => {
   ];
 
   return (
-    <PageContainer title="模板">
+    <PageContainer title="分组模板">
       <ProTable<Process>
         rowKey="id"
         loading={loading}
@@ -273,13 +273,13 @@ const ProcessTemplatePage = () => {
               setModalOpen(true);
             }}
           >
-            新建模板
+            新建分组模板
           </Button>,
         ]}
       />
 
       <ModalForm<ProcessFormValues>
-        title={editing ? '编辑模板' : '新建模板'}
+        title={editing ? '编辑分组模板' : '新建分组模板'}
         open={modalOpen}
         modalProps={{
           destroyOnHidden: true,
@@ -352,7 +352,7 @@ const ProcessTemplatePage = () => {
       </ModalForm>
 
       <Modal
-        title={`模板配置 - ${currentProcess?.name || ''}`}
+        title={`分组模板配置 - ${currentProcess?.name || ''}`}
         open={configOpen}
         width={960}
         destroyOnHidden
@@ -412,7 +412,7 @@ const ProcessTemplatePage = () => {
           }
           onFinish={async (values) => {
             if (!currentProcess?.id) {
-              message.error('未选择模板');
+              message.error('未选择分组模板');
               return false;
             }
             setItemSaving(true);

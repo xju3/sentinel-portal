@@ -103,6 +103,27 @@ export default defineConfig({
       ],
     },
     {
+      path: '/process',
+      name: '分组对比',
+      icon: 'ClusterOutlined',
+      routes: [
+        {
+          path: '/process/templates',
+          name: '分组模板',
+          component: '@/pages/Process/Template',
+        },
+        {
+          path: '/process/manage',
+          name: '分组设置',
+          component: '@/pages/Process/Manage',
+        },
+        {
+          path: '/process',
+          redirect: '/process/templates',
+        },
+      ],
+    },
+    {
       path: '/device',
       name: '设备管理',
       icon: 'AppstoreOutlined',
@@ -123,6 +144,12 @@ export default defineConfig({
           component: '@/pages/Device/Spec',
         },
         {
+          path: '/device/specs/:deviceSpecId/comparison',
+          name: '同规格设备对比',
+          component: '@/pages/Device/SpecComparison',
+          hideInMenu: true,
+        },
+        {
           path: '/device/list',
           name: '实例列表',
           component: '@/pages/Device/List',
@@ -139,28 +166,6 @@ export default defineConfig({
         },
       ],
     },
-    {
-      path: '/process',
-      name: '对照分组',
-      icon: 'ClusterOutlined',
-      routes: [
-        {
-          path: '/process/templates',
-          name: '模板定义',
-          component: '@/pages/Process/Template',
-        },
-        {
-          path: '/process/manage',
-          name: '分组设定',
-          component: '@/pages/Process/Manage',
-        },
-        {
-          path: '/process',
-          redirect: '/process/templates',
-        },
-      ],
-    },
-
     {
       path: '/monitoring',
       name: '监测设定',

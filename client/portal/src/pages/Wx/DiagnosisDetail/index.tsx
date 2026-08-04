@@ -572,7 +572,7 @@ const WxDiagnosisDetailPage = () => {
           <Descriptions column={1} size="small" className={styles.summaryDescriptions}>
             <Descriptions.Item label="设备编码">{detail.device.code || '-'}</Descriptions.Item>
             <Descriptions.Item label="设备分类">{detail.device.category || '-'}</Descriptions.Item>
-            <Descriptions.Item label="工艺段">{detail.device.process || '-'}</Descriptions.Item>
+            <Descriptions.Item label="设备分组">{detail.device.process || '-'}</Descriptions.Item>
             <Descriptions.Item label="安装位置">{detail.device.location || '-'}</Descriptions.Item>
             <Descriptions.Item label="采样时间">{formatDateTime(detail.report.sampled_at)}</Descriptions.Item>
             <Descriptions.Item label="诊断时间">{formatDateTime(detail.report.diagnosed_at)}</Descriptions.Item>
