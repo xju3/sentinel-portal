@@ -124,9 +124,13 @@ async def test_get_device_points_combines_active_and_historical_locations():
     active_id = uuid4()
     binding_history_id = uuid4()
     diagnosis_history_id = uuid4()
+    sensor_id = uuid4()
     session = _FakeSession(
         [
-            [(active_id, "泵端", 1), (binding_history_id, "电机端", 0)],
+            [
+                (active_id, "泵端", 1, sensor_id, "A26SH00001", "泵端传感器"),
+                (binding_history_id, "电机端", 0, uuid4(), "A26SH00002", None),
+            ],
             [(active_id, "泵端"), (diagnosis_history_id, None)],
         ]
     )
@@ -144,12 +148,20 @@ async def test_get_device_points_combines_active_and_historical_locations():
     }
     assert next(point for point in points if point["id"] == str(active_id))["name"] == "泵端"
     assert next(point for point in points if point["id"] == str(active_id))["active"] is True
+    assert next(point for point in points if point["id"] == str(active_id))["sensor"] == {
+        "id": str(sensor_id),
+        "sn": "A26SH00001",
+        "description": "泵端传感器",
+    }
     assert next(point for point in points if point["id"] == str(binding_history_id))[
         "name"
     ] == "电机端"
     assert next(point for point in points if point["id"] == str(binding_history_id))[
         "active"
     ] is False
+    assert next(point for point in points if point["id"] == str(binding_history_id))[
+        "sensor"
+    ] is None
     assert next(point for point in points if point["id"] == str(diagnosis_history_id))[
         "name"
     ].startswith("历史测点 ")

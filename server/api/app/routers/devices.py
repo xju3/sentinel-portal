@@ -26,6 +26,7 @@ from pub.services import (
     DashboardHealthService,
     DeviceHealthArchiveService,
     DevicePointTrendService,
+    ProcessDeviceService,
 )
 from pub.decorators.dashboard_cache import rebuild_dashboard_cache
 from pub.decorators.config_change import monitor_config_change
@@ -582,6 +583,7 @@ async def list_device_specs(
     limit: int = Query(10, ge=1, le=100),
     sort_by: Optional[str] = Query(None),
     sort_order: Optional[str] = Query("ascend"),
+    process_device_id: Optional[UUID] = Query(None),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
@@ -594,6 +596,7 @@ async def list_device_specs(
             limit,
             sort_by,
             sort_order,
+            process_device_id,
         )
     )
 
@@ -609,6 +612,43 @@ async def get_device_spec(
     if not obj:
         raise HTTPException(status_code=404, detail="DeviceSpec not found")
     return success(obj)
+
+
+@router.get("/device-specs/{obj_id}/comparison")
+async def get_device_spec_comparison(
+    obj_id: UUID,
+    process_device_id: UUID = Query(..., description="Device group to compare"),
+    location_id: Optional[UUID] = Query(None, description="Monitoring point"),
+    range_days: int = Query(3, description="Rolling range ending now"),
+    window_minutes: Optional[int] = Query(None, ge=0),
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    if await DeviceSpecService.get_by_id(session, tenant_id, obj_id) is None:
+        raise HTTPException(status_code=404, detail="DeviceSpec not found")
+    if (
+        await ProcessDeviceService.get_by_id(
+            session,
+            tenant_id,
+            process_device_id,
+        )
+        is None
+    ):
+        raise HTTPException(status_code=404, detail="Device group not found")
+    try:
+        comparison = await DevicePointTrendService.get_spec_comparison(
+            session=session,
+            tenant_id=tenant_id,
+            device_spec_id=obj_id,
+            process_device_id=process_device_id,
+            location_id=location_id,
+            range_days=range_days,
+            window_minutes=window_minutes,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return success(comparison)
 
 
 @router.post("/device-specs")

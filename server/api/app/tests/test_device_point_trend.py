@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from types import SimpleNamespace
+from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
 
 import pytest
@@ -42,10 +43,12 @@ def test_flux_query_is_scoped_to_device_and_location_and_groups_sensor_history()
 
 
 class _Record:
-    def __init__(self, field, value, result="value"):
+    def __init__(self, field, value, result="value", device_id=None):
         self._field = field
         self._value = value
         self.values = {"result": result}
+        if device_id is not None:
+            self.values["device_id"] = str(device_id)
 
     def get_field(self):
         return self._field
@@ -95,3 +98,91 @@ def test_parse_raw_records_keeps_actual_values():
     assert result["temperature"][0]["value"] == 26.25
     assert result["temperature"][0]["count"] == 1
     assert result["vibration"] == [None]
+
+
+def test_group_flux_query_reads_all_devices_in_one_query():
+    device_ids = [uuid4(), uuid4()]
+    location_id = uuid4()
+
+    query = DevicePointTrendService.build_group_flux_query(
+        bucket="features",
+        device_ids=device_ids,
+        location_id=location_id,
+        start_at=datetime(2026, 8, 1, tzinfo=timezone.utc),
+        end_at=datetime(2026, 8, 4, tzinfo=timezone.utc),
+        window_minutes=60,
+    )
+
+    assert "contains(value: r.device_id" in query
+    assert str(device_ids[0]) in query
+    assert str(device_ids[1]) in query
+    assert f'r.location_id == "{location_id}"' in query
+    assert 'group(columns: ["device_id", "_field"])' in query
+
+
+def test_parse_group_records_keeps_device_series_separate():
+    first_device_id = uuid4()
+    second_device_id = uuid4()
+    records = [
+        _Record("temperature", 25.0, device_id=first_device_id),
+        _Record("temperature", 31.5, device_id=second_device_id),
+        _Record("max_rms_vel", 2.4, device_id=second_device_id),
+    ]
+
+    result = DevicePointTrendService.parse_group_records(
+        [SimpleNamespace(records=records)],
+        aggregated=False,
+    )
+
+    assert result[str(first_device_id)]["temperature"][0]["value"] == 25.0
+    assert result[str(first_device_id)]["vibration"] == [None]
+    assert result[str(second_device_id)]["temperature"][0]["value"] == 31.5
+    assert result[str(second_device_id)]["vibration"][0]["value"] == 2.4
+
+
+@pytest.mark.asyncio
+async def test_comparison_locations_preserve_the_device_dimension():
+    tenant_id = uuid4()
+    first_device_id = uuid4()
+    second_device_id = uuid4()
+    first_location_id = uuid4()
+    second_location_id = uuid4()
+    result = Mock()
+    result.all.return_value = [
+        SimpleNamespace(
+            id=first_location_id,
+            name="驱动端",
+            device_inst_id=first_device_id,
+            status=1,
+        ),
+        SimpleNamespace(
+            id=first_location_id,
+            name="驱动端",
+            device_inst_id=second_device_id,
+            status=0,
+        ),
+        SimpleNamespace(
+            id=second_location_id,
+            name="非驱动端",
+            device_inst_id=second_device_id,
+            status=1,
+        ),
+    ]
+    session = SimpleNamespace(execute=AsyncMock(return_value=result))
+
+    locations, location_devices = (
+        await DevicePointTrendService._get_comparison_locations(
+            session=session,
+            tenant_id=tenant_id,
+            device_ids=[first_device_id, second_device_id],
+        )
+    )
+
+    by_id = {item["id"]: item for item in locations}
+    assert by_id[str(first_location_id)]["deviceCount"] == 2
+    assert by_id[str(first_location_id)]["activeDeviceCount"] == 1
+    assert location_devices[first_location_id] == {
+        first_device_id,
+        second_device_id,
+    }
+    assert location_devices[second_location_id] == {second_device_id}

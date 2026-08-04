@@ -302,6 +302,7 @@ async def list_process_devices(
     limit: int = Query(10, ge=1, le=100),
     sort_by: Optional[str] = Query(None),
     sort_order: Optional[str] = Query("ascend"),
+    device_spec_id: Optional[UUID] = Query(None),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
@@ -314,6 +315,7 @@ async def list_process_devices(
             limit,
             sort_by,
             sort_order,
+            device_spec_id,
         )
     )
 

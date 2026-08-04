@@ -7,7 +7,13 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from pub.models.device import Process, ProcessDevice, ProcessDeviceItem, ProcessItem
+from pub.models.device import (
+    DeviceInst,
+    Process,
+    ProcessDevice,
+    ProcessDeviceItem,
+    ProcessItem,
+)
 from pub.models.org import Employee
 from pub.utils.sorting import apply_sorting
 
@@ -149,6 +155,7 @@ class ProcessDeviceService:
         limit: int,
         sort_by: str | None = None,
         sort_order: str = "ascend",
+        device_spec_id: UUID | None = None,
     ) -> List[ProcessDevice]:
         stmt = (
             select(ProcessDevice)
@@ -160,6 +167,19 @@ class ProcessDeviceService:
                 selectinload(ProcessDevice.area),
             )
         )
+        if device_spec_id is not None:
+            stmt = (
+                stmt.join(
+                    ProcessDeviceItem,
+                    ProcessDeviceItem.process_device_id == ProcessDevice.id,
+                )
+                .join(
+                    DeviceInst,
+                    DeviceInst.id == ProcessDeviceItem.device_inst_id,
+                )
+                .where(DeviceInst.device_spec_id == device_spec_id)
+                .distinct()
+            )
         stmt = apply_sorting(stmt, ProcessDevice, sort_by, sort_order or "ascend")
         result = await session.execute(stmt.offset(skip).limit(limit))
         return result.scalars().all()

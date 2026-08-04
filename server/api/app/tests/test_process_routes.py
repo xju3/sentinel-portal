@@ -69,8 +69,63 @@ async def test_process_list_queries_are_tenant_scoped(service):
     await service.get_all(session, tenant_id, 0, 100)
 
     statement = session.execute.await_args.args[0]
-    assert "process.tenant_id" in str(statement)
+    assert "dg_template.tenant_id" in str(statement)
     assert tenant_id in statement.compile().params.values()
+
+
+@pytest.mark.asyncio
+async def test_device_group_list_can_filter_by_contained_device_spec():
+    tenant_id = uuid4()
+    device_spec_id = uuid4()
+    result = Mock()
+    result.scalars.return_value.all.return_value = []
+    session = Mock()
+    session.execute = AsyncMock(return_value=result)
+
+    await ProcessDeviceService.get_all(
+        session,
+        tenant_id,
+        0,
+        100,
+        device_spec_id=device_spec_id,
+    )
+
+    statement = session.execute.await_args.args[0]
+    sql = str(statement)
+    assert "JOIN dg_inst_item" in sql
+    assert "JOIN device_inst" in sql
+    assert "device_inst.device_spec_id" in sql
+    assert "dg_template.tenant_id" in sql
+    assert device_spec_id in statement.compile().params.values()
+
+
+@pytest.mark.asyncio
+async def test_device_group_list_passes_device_spec_filter_to_service(monkeypatch):
+    tenant_id = uuid4()
+    device_spec_id = uuid4()
+    session = Mock()
+    get_all = AsyncMock(return_value=[])
+    monkeypatch.setattr(processes.ProcessDeviceService, "get_all", get_all)
+
+    await processes.list_process_devices(
+        skip=0,
+        limit=100,
+        sort_by=None,
+        sort_order="ascend",
+        device_spec_id=device_spec_id,
+        current_account=SimpleNamespace(tenant_id=tenant_id),
+        session=session,
+    )
+
+    get_all.assert_awaited_once_with(
+        session,
+        tenant_id,
+        0,
+        100,
+        None,
+        "ascend",
+        device_spec_id,
+    )
 
 
 @pytest.mark.asyncio
@@ -140,8 +195,8 @@ async def test_process_code_lookup_is_tenant_scoped():
     statement = session.execute.await_args.args[0]
     sql = str(statement)
     params = statement.compile().params
-    assert "process.tenant_id" in sql
-    assert "process.code" in sql
+    assert "dg_template.tenant_id" in sql
+    assert "dg_template.code" in sql
     assert tenant_id in params.values()
     assert "PHM" in params.values()
 

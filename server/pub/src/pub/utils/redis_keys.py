@@ -74,6 +74,12 @@ REDIS_KEY_DEVICE_POINT_TREND = (
     "dia:trend:v1:{tenant_id}:{device_id}:{location_id}:{range_days}:{window_minutes}"
 )
 
+# 同一设备分组、同一规格、同一测点的多设备趋势对比结果，60 秒过期。
+REDIS_KEY_DEVICE_SPEC_COMPARISON = (
+    "dia:compare:v2:{tenant_id}:{process_device_id}:{device_spec_id}:"
+    "{location_id}:{range_days}:{window_minutes}"
+)
+
 # Dashboard 健康快照。
 # - snapshot: 每个租户一份完整 Dashboard JSON，避免页面打开时重复执行多表聚合。
 # - dirty: Hash，field 为 tenant_id，value 为最近一次诊断写入时间戳（毫秒）。

@@ -27,6 +27,35 @@ async def test_device_spec_list_query_filters_by_category_tenant():
 
 
 @pytest.mark.asyncio
+async def test_device_spec_list_can_filter_by_tenant_owned_process_device():
+    tenant_id = uuid4()
+    process_device_id = uuid4()
+    result = Mock()
+    result.scalars.return_value.all.return_value = []
+    session = Mock()
+    session.execute = AsyncMock(return_value=result)
+
+    await DeviceSpecService.get_all(
+        session,
+        tenant_id,
+        0,
+        100,
+        process_device_id=process_device_id,
+    )
+
+    statement = session.execute.await_args.args[0]
+    sql = str(statement)
+    params = statement.compile().params.values()
+    assert "JOIN device_inst" in sql
+    assert "JOIN dg_inst_item" in sql
+    assert "JOIN dg_inst" in sql
+    assert "JOIN dg_template" in sql
+    assert "dg_template.tenant_id" in sql
+    assert tenant_id in params
+    assert process_device_id in params
+
+
+@pytest.mark.asyncio
 async def test_device_spec_detail_query_filters_by_category_tenant():
     tenant_id = uuid4()
     result = Mock()
@@ -53,6 +82,7 @@ async def test_device_spec_list_passes_current_tenant_to_service(monkeypatch):
         limit=100,
         sort_by=None,
         sort_order="ascend",
+        process_device_id=None,
         current_account=SimpleNamespace(tenant_id=tenant_id),
         session=session,
     )
@@ -64,6 +94,90 @@ async def test_device_spec_list_passes_current_tenant_to_service(monkeypatch):
         100,
         None,
         "ascend",
+        None,
+    )
+
+
+@pytest.mark.asyncio
+async def test_device_spec_list_passes_process_device_filter_to_service(monkeypatch):
+    tenant_id = uuid4()
+    process_device_id = uuid4()
+    get_all = AsyncMock(return_value=[])
+    monkeypatch.setattr(devices.DeviceSpecService, "get_all", get_all)
+    session = Mock()
+
+    await devices.list_device_specs(
+        skip=0,
+        limit=100,
+        sort_by=None,
+        sort_order="ascend",
+        process_device_id=process_device_id,
+        current_account=SimpleNamespace(tenant_id=tenant_id),
+        session=session,
+    )
+
+    get_all.assert_awaited_once_with(
+        session,
+        tenant_id,
+        0,
+        100,
+        None,
+        "ascend",
+        process_device_id,
+    )
+
+
+@pytest.mark.asyncio
+async def test_device_spec_comparison_validates_group_and_spec_tenant(monkeypatch):
+    tenant_id = uuid4()
+    spec_id = uuid4()
+    group_id = uuid4()
+    session = Mock()
+    monkeypatch.setattr(
+        devices.DeviceSpecService,
+        "get_by_id",
+        AsyncMock(return_value=SimpleNamespace(id=spec_id)),
+    )
+    monkeypatch.setattr(
+        devices.ProcessDeviceService,
+        "get_by_id",
+        AsyncMock(return_value=SimpleNamespace(id=group_id)),
+    )
+    get_comparison = AsyncMock(return_value={"series": []})
+    monkeypatch.setattr(
+        devices.DevicePointTrendService,
+        "get_spec_comparison",
+        get_comparison,
+    )
+
+    await devices.get_device_spec_comparison(
+        obj_id=spec_id,
+        process_device_id=group_id,
+        location_id=None,
+        range_days=3,
+        window_minutes=0,
+        current_account=SimpleNamespace(tenant_id=tenant_id),
+        session=session,
+    )
+
+    devices.DeviceSpecService.get_by_id.assert_awaited_once_with(
+        session,
+        tenant_id,
+        spec_id,
+    )
+    devices.ProcessDeviceService.get_by_id.assert_awaited_once_with(
+        session,
+        tenant_id,
+        group_id,
+    )
+    get_comparison.assert_awaited_once_with(
+        session=session,
+        tenant_id=tenant_id,
+        device_spec_id=spec_id,
+        process_device_id=group_id,
+        location_id=None,
+        range_days=3,
+        window_minutes=0,
     )
 
 

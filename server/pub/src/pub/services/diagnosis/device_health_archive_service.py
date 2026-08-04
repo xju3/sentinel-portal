@@ -12,7 +12,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from pub.models.customer import Location
 from pub.models.diagnosis import DiagnosisRecord, DiagnosisRecordStatus
-from pub.models.sensor import SensorMonitoring
+from pub.models.sensor import Sensor, SensorMonitoring
 
 
 LEVEL_NAMES = {
@@ -43,27 +43,44 @@ class DeviceHealthArchiveService:
         device_id: UUID,
     ) -> list[dict[str, Any]]:
         """Return active and historical monitoring points for one device."""
-        points: dict[UUID, str] = {}
+        points: dict[UUID, dict[str, Any]] = {}
         active_point_ids: set[UUID] = set()
 
         binding_statement = (
-            select(Location.id, Location.name, SensorMonitoring.status)
+            select(
+                Location.id,
+                Location.name,
+                SensorMonitoring.status,
+                Sensor.id,
+                Sensor.sn,
+                Sensor.description,
+            )
             .join(
                 SensorMonitoring,
                 SensorMonitoring.location_id == Location.id,
             )
+            .outerjoin(Sensor, Sensor.id == SensorMonitoring.sensor_id)
             .where(
                 SensorMonitoring.device_inst_id == device_id,
                 Location.tenant_id == tenant_id,
             )
             .distinct()
         )
-        for location_id, name, status in (
+        for location_id, name, status, sensor_id, sensor_sn, sensor_description in (
             await session.execute(binding_statement)
         ).all():
-            points.setdefault(location_id, name)
+            point = points.setdefault(
+                location_id,
+                {"name": name, "sensor": None},
+            )
             if int(status) == 1:
                 active_point_ids.add(location_id)
+                if sensor_id is not None:
+                    point["sensor"] = {
+                        "id": str(sensor_id),
+                        "sn": sensor_sn,
+                        "description": sensor_description,
+                    }
 
         historical_statement = (
             select(DiagnosisRecord.location_id, Location.name)
@@ -77,19 +94,26 @@ class DeviceHealthArchiveService:
         )
         for location_id, name in (await session.execute(historical_statement)).all():
             if location_id is not None:
-                points.setdefault(location_id, name or f"历史测点 {str(location_id)[:8]}")
+                points.setdefault(
+                    location_id,
+                    {
+                        "name": name or f"历史测点 {str(location_id)[:8]}",
+                        "sensor": None,
+                    },
+                )
 
         return [
             {
                 "id": str(location_id),
-                "name": name,
+                "name": point["name"],
                 "active": location_id in active_point_ids,
+                "sensor": point["sensor"],
             }
-            for location_id, name in sorted(
+            for location_id, point in sorted(
                 points.items(),
                 key=lambda item: (
                     item[0] not in active_point_ids,
-                    item[1],
+                    item[1]["name"],
                     str(item[0]),
                 ),
             )

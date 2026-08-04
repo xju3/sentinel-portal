@@ -49,12 +49,31 @@ class DeviceSpecService:
         limit: int,
         sort_by: str | None = None,
         sort_order: str = "ascend",
+        process_device_id: UUID | None = None,
     ) -> List[DeviceSpec]:
         stmt = (
             select(DeviceSpec)
             .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
             .where(DeviceCategory.tenant_id == tenant_id)
         )
+        if process_device_id is not None:
+            stmt = (
+                stmt.join(DeviceInst, DeviceInst.device_spec_id == DeviceSpec.id)
+                .join(
+                    ProcessDeviceItem,
+                    ProcessDeviceItem.device_inst_id == DeviceInst.id,
+                )
+                .join(
+                    ProcessDevice,
+                    ProcessDevice.id == ProcessDeviceItem.process_device_id,
+                )
+                .join(Process, Process.id == ProcessDevice.process_id)
+                .where(
+                    ProcessDeviceItem.process_device_id == process_device_id,
+                    Process.tenant_id == tenant_id,
+                )
+                .distinct()
+            )
         stmt = apply_sorting(stmt, DeviceSpec, sort_by, sort_order or "ascend")
         stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)

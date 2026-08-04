@@ -23,6 +23,9 @@ async def test_process_code_index_migration_replaces_global_unique_index():
     await ensure_process_code_tenant_unique(conn)
 
     migration_sql = str(conn.execute.await_args_list[2].args[0])
+    lookup_sql = str(conn.execute.await_args_list[0].args[0])
+    assert "table_name = 'dg_template'" in lookup_sql
+    assert "ALTER TABLE `dg_template`" in migration_sql
     assert "DROP INDEX `ix_process_code`" in migration_sql
     assert "UNIQUE (`tenant_id`, `code`)" in migration_sql
 

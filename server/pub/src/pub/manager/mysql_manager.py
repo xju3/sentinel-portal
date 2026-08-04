@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 
 async def ensure_process_code_tenant_unique(conn) -> None:
-    """Replace the legacy global process.code index with a tenant-scoped one."""
+    """Replace the legacy global dg_template.code index with a tenant-scoped one."""
     if conn.dialect.name != "mysql":
         return
 
@@ -18,7 +18,7 @@ async def ensure_process_code_tenant_unique(conn) -> None:
         SELECT COUNT(*)
         FROM information_schema.statistics
         WHERE table_schema = DATABASE()
-          AND table_name = 'process'
+          AND table_name = 'dg_template'
           AND index_name = :index_name
     """
     legacy_result = await conn.execute(
@@ -36,7 +36,7 @@ async def ensure_process_code_tenant_unique(conn) -> None:
         await conn.execute(
             text(
                 """
-                ALTER TABLE `process`
+                ALTER TABLE `dg_template`
                     DROP INDEX `ix_process_code`,
                     ADD CONSTRAINT `uq_process_tenant_code`
                         UNIQUE (`tenant_id`, `code`)
@@ -45,13 +45,13 @@ async def ensure_process_code_tenant_unique(conn) -> None:
         )
     elif has_legacy_index:
         await conn.execute(
-            text("ALTER TABLE `process` DROP INDEX `ix_process_code`")
+            text("ALTER TABLE `dg_template` DROP INDEX `ix_process_code`")
         )
     elif not has_scoped_index:
         await conn.execute(
             text(
                 """
-                ALTER TABLE `process`
+                ALTER TABLE `dg_template`
                     ADD CONSTRAINT `uq_process_tenant_code`
                         UNIQUE (`tenant_id`, `code`)
                 """
