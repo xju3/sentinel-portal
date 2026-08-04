@@ -33,6 +33,23 @@ def test_device_task_completion_routes_support_current_and_versioned_firmware():
     assert "requestBody" not in versioned_operation
     assert "/api/v1/sensors/tasks/{task_id}/complete/{status}" not in paths
 
+    completion_routes = {
+        (route.path, method)
+        for route in app.routes
+        if route.path
+        in {
+            "/sensors/{task_id}/complete/{status}",
+            "/api/v1/sensors/{task_id}/complete/{status}",
+        }
+        for method in (route.methods or set())
+    }
+    assert completion_routes == {
+        ("/sensors/{task_id}/complete/{status}", "GET"),
+        ("/sensors/{task_id}/complete/{status}", "POST"),
+        ("/api/v1/sensors/{task_id}/complete/{status}", "GET"),
+        ("/api/v1/sensors/{task_id}/complete/{status}", "POST"),
+    }
+
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(("status", "expected_success"), [(1, True), (0, False)])

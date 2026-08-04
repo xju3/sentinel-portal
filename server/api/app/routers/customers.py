@@ -729,12 +729,19 @@ async def list_locations(
     pageSize: int = Query(10, ge=1, le=100),
     keyword: Optional[str] = Query(None),
     bearing_only: bool = Query(False),
+    active_only: bool = Query(False),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
     items, total = await LocationService.get_paged_locations(
-        session, tenant_id, current, pageSize, keyword, bearing_only
+        session,
+        tenant_id,
+        current,
+        pageSize,
+        keyword,
+        bearing_only,
+        active_only,
     )
     return success(PagedLocationResponse(items=items, total=total))
 
@@ -783,8 +790,8 @@ async def delete_location(
     if not db_obj:
         raise HTTPException(status_code=404, detail="Location not found")
 
-    await LocationService.delete_location(session, db_obj)
-    return success({"message": "Location deleted successfully"})
+    await LocationService.disable_location(session, db_obj)
+    return success({"message": "Location disabled successfully"})
 
 
 # ==========================================

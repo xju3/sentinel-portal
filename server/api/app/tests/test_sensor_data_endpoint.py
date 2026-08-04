@@ -1,6 +1,6 @@
 from datetime import datetime, timedelta, timezone
 from types import SimpleNamespace
-from unittest.mock import AsyncMock, Mock
+from unittest.mock import ANY, AsyncMock, Mock
 from uuid import uuid4
 
 import pytest
@@ -205,6 +205,47 @@ async def test_receive_sensor_data_backdates_by_delay_and_payload_period(
     object_name = background_tasks.add_task.call_args.args[1]
     expected_path_time = sample_time.astimezone(timezone(timedelta(hours=8)))
     assert object_name == f"STL26SH0001/{expected_path_time.strftime('%Y/%m/%d/%H-%M-%S')}.json"
+
+
+@pytest.mark.asyncio
+async def test_delayed_report_uses_binding_valid_at_sample_time(monkeypatch):
+    historical_device_id = str(uuid4())
+    historical_location_id = str(uuid4())
+    resolve_metadata = AsyncMock(
+        return_value={
+            "sensor_sn": "STL26SH0001",
+            "device_id": historical_device_id,
+            "location_id": historical_location_id,
+        }
+    )
+    dispatch = AsyncMock(return_value=[])
+    monkeypatch.setattr(
+        sensors.SensorDbService,
+        "get_sensor_metadata_for_cache",
+        resolve_metadata,
+    )
+    monkeypatch.setattr(sensors, "dispatch_quick_diagnosis_tasks", dispatch)
+
+    await sensors.receive_sensor_data(
+        background_tasks=Mock(),
+        payload={
+            "sn": "STL26SH0001",
+            "delay": 2,
+            "period": 60,
+            "device_id": str(uuid4()),
+            "location_id": str(uuid4()),
+        },
+        session=Mock(),
+    )
+
+    stored_payload = dispatch.await_args.kwargs["payload"]
+    assert stored_payload["device_id"] == historical_device_id
+    assert stored_payload["location_id"] == historical_location_id
+    resolve_metadata.assert_awaited_once_with(
+        ANY,
+        "STL26SH0001",
+        sampled_at_ms=stored_payload["ts_ms"],
+    )
 
 
 @pytest.mark.asyncio

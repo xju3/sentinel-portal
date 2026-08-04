@@ -1,5 +1,6 @@
 from datetime import datetime, timezone
 from types import SimpleNamespace
+from uuid import uuid4
 
 import pytest
 
@@ -75,3 +76,81 @@ def test_normalize_range_rejects_more_than_one_year():
             datetime(2025, 1, 1, tzinfo=timezone.utc),
             datetime(2026, 7, 1, tzinfo=timezone.utc),
         )
+
+
+class _RowsResult:
+    def __init__(self, rows):
+        self._rows = rows
+
+    def all(self):
+        return self._rows
+
+    def scalars(self):
+        return self
+
+
+class _FakeSession:
+    def __init__(self, results):
+        self._results = iter(results)
+        self.statements = []
+
+    async def execute(self, statement):
+        self.statements.append(statement)
+        return _RowsResult(next(self._results))
+
+
+@pytest.mark.asyncio
+async def test_get_timeline_filters_records_by_selected_location():
+    location_id = uuid4()
+    session = _FakeSession([[]])
+
+    await DeviceHealthArchiveService.get_timeline(
+        session=session,
+        tenant_id=uuid4(),
+        device_id=uuid4(),
+        location_id=location_id,
+        start_at=datetime(2026, 8, 1, tzinfo=timezone.utc),
+        end_at=datetime(2026, 8, 2, tzinfo=timezone.utc),
+        interval_hours=1,
+    )
+
+    compiled = session.statements[0].compile()
+    assert "diagnosis_record.location_id" in str(session.statements[0])
+    assert location_id in compiled.params.values()
+
+
+@pytest.mark.asyncio
+async def test_get_device_points_combines_active_and_historical_locations():
+    active_id = uuid4()
+    binding_history_id = uuid4()
+    diagnosis_history_id = uuid4()
+    session = _FakeSession(
+        [
+            [(active_id, "泵端", 1), (binding_history_id, "电机端", 0)],
+            [(active_id, "泵端"), (diagnosis_history_id, None)],
+        ]
+    )
+
+    points = await DeviceHealthArchiveService.get_device_points(
+        session=session,
+        tenant_id=uuid4(),
+        device_id=uuid4(),
+    )
+
+    assert {point["id"] for point in points} == {
+        str(active_id),
+        str(binding_history_id),
+        str(diagnosis_history_id),
+    }
+    assert next(point for point in points if point["id"] == str(active_id))["name"] == "泵端"
+    assert next(point for point in points if point["id"] == str(active_id))["active"] is True
+    assert next(point for point in points if point["id"] == str(binding_history_id))[
+        "name"
+    ] == "电机端"
+    assert next(point for point in points if point["id"] == str(binding_history_id))[
+        "active"
+    ] is False
+    assert next(point for point in points if point["id"] == str(diagnosis_history_id))[
+        "name"
+    ].startswith("历史测点 ")
+    assert points[0]["id"] == str(active_id)

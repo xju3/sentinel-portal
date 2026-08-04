@@ -25,6 +25,7 @@ from pub.services import (
     SensorMonitoringService,
     DashboardHealthService,
     DeviceHealthArchiveService,
+    DevicePointTrendService,
 )
 from pub.decorators.dashboard_cache import rebuild_dashboard_cache
 from pub.decorators.config_change import monitor_config_change
@@ -142,7 +143,12 @@ async def _validate_sensor_monitoring_refs(
 
     location_id = data.get("location_id")
     if location_id is not None:
-        ok = await LocationService.is_tenant_location(session, tenant_id, location_id)
+        ok = await LocationService.is_tenant_location(
+            session,
+            tenant_id,
+            location_id,
+            active_only=True,
+        )
         if not ok:
             raise HTTPException(status_code=400, detail="location_id is not owned by current tenant")
 
@@ -785,6 +791,10 @@ async def delete_device_inst(
 @router.get("/devices/{device_id}/health-archive")
 async def get_device_health_archive(
     device_id: UUID,
+    location_id: UUID | None = Query(
+        None,
+        description="Monitoring point; defaults to the first point for multi-point devices",
+    ),
     start_at: datetime | None = Query(
         None,
         description="UTC start time; defaults to seven days before end_at",
@@ -804,6 +814,17 @@ async def get_device_health_archive(
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
     device = await _require_tenant_device(session, tenant_id, device_id)
+    points = await DeviceHealthArchiveService.get_device_points(
+        session,
+        tenant_id,
+        device_id,
+    )
+    point_ids = {UUID(point["id"]) for point in points}
+    selected_location_id = location_id
+    if selected_location_id is not None and selected_location_id not in point_ids:
+        raise HTTPException(status_code=404, detail="Monitoring point not found for device")
+    if selected_location_id is None and points:
+        selected_location_id = UUID(points[0]["id"])
 
     try:
         normalized_start, normalized_end = DeviceHealthArchiveService.normalize_range(
@@ -820,13 +841,55 @@ async def get_device_health_archive(
         start_at=normalized_start,
         end_at=normalized_end,
         interval_hours=interval_hours,
+        location_id=selected_location_id,
     )
     timeline["device"] = {
         "id": str(device.id),
         "name": device.name,
         "code": device.code,
     }
+    timeline["points"] = points
+    timeline["selectedLocationId"] = (
+        str(selected_location_id) if selected_location_id is not None else None
+    )
     return success(timeline)
+
+
+@router.get("/devices/{device_id}/point-trends")
+async def get_device_point_trends(
+    device_id: UUID,
+    location_id: UUID = Query(..., description="Monitoring point to query"),
+    range_days: int = Query(3, description="Rolling range ending at the current time"),
+    window_minutes: int | None = Query(
+        None,
+        ge=0,
+        description="Display aggregation window; 0 means raw data",
+    ),
+    session: AsyncSession = Depends(get_session),
+    current_account: AccountModel = Depends(get_current_account),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    await _require_tenant_device(session, tenant_id, device_id)
+    points = await DeviceHealthArchiveService.get_device_points(
+        session,
+        tenant_id,
+        device_id,
+    )
+    if location_id not in {UUID(point["id"]) for point in points}:
+        raise HTTPException(status_code=404, detail="Monitoring point not found for device")
+
+    try:
+        trend = await DevicePointTrendService.get_trends(
+            session=session,
+            tenant_id=tenant_id,
+            device_id=device_id,
+            location_id=location_id,
+            range_days=range_days,
+            window_minutes=window_minutes,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    return success(trend)
 
 
 # ==========================================
@@ -907,7 +970,11 @@ async def create_sensor_monitoring(
     tenant_id = cast(UUID, current_account.tenant_id)
     payload = item.model_dump()
     await _validate_sensor_monitoring_refs(session, tenant_id, payload)
-    return success(await SensorMonitoringService.create(session, payload))
+    try:
+        result = await SensorMonitoringService.create(session, payload)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return success(result)
 
 
 @router.put("/sensor-monitorings/{obj_id}")
@@ -926,7 +993,11 @@ async def update_sensor_monitoring(
 
     update_data = item.model_dump(exclude_unset=True)
     await _validate_sensor_monitoring_refs(session, tenant_id, update_data)
-    return success(await SensorMonitoringService.update(session, db_obj, update_data))
+    try:
+        result = await SensorMonitoringService.update(session, db_obj, update_data)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return success(result)
 
 
 @router.delete("/sensor-monitorings/{obj_id}")
@@ -942,4 +1013,4 @@ async def delete_sensor_monitoring(
         raise HTTPException(status_code=404, detail="SensorMonitoring not found")
 
     await SensorMonitoringService.delete(session, db_obj)
-    return success({"message": "SensorMonitoring deleted successfully"})
+    return success({"message": "SensorMonitoring binding ended successfully"})

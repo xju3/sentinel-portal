@@ -296,6 +296,10 @@ async def create_sensor_task_for_admin(
 
 @router.post("/{task_id}/complete/{status}")
 @device_router.post("/{task_id}/complete/{status}")
+# Compatibility for deployed firmware that reports completion with GET.
+# Keep it out of OpenAPI so new integrations continue to use POST.
+@router.get("/{task_id}/complete/{status}", include_in_schema=False)
+@device_router.get("/{task_id}/complete/{status}", include_in_schema=False)
 async def complete_sensor_system_task(
     task_id: UUID,
     status: Annotated[int, Path(ge=0, le=1)],
@@ -332,6 +336,18 @@ async def get_sensor_config_by_task(
     if task.action != SYSTEM_ACTION_CONFIG_UPDATE:
         raise HTTPException(status_code=400, detail="Task is not a config update")
     config = await SensorConfigService.get_config_by_sn(session, task.sn)
+    if config is None:
+        raise HTTPException(status_code=404, detail="Sensor config not found")
+
+    return config
+
+
+@router.get("/{sn}/config")
+async def get_sensor_config_by_sn(
+    sn: str,
+    session: AsyncSession = Depends(get_session),
+):
+    config = await SensorConfigService.get_config_by_sn(session, sn)
     if config is None:
         raise HTTPException(status_code=404, detail="Sensor config not found")
 
@@ -533,24 +549,42 @@ async def receive_sensor_data(
             del stored_payload["sn"]
         stored_payload["sensor_sn"] = sn
         
+        meta: dict | None = None
         redis_client = redis_manager.get_client()
-        if redis_client:
+        if delay > 0:
+            # A delayed report must use the binding that was effective at its
+            # sampling time, never the sensor's current binding cache.
+            meta = await SensorDbService.get_sensor_metadata_for_cache(
+                session,
+                str(sn),
+                sampled_at_ms=ts_ms,
+            )
+        elif redis_client:
             meta_str = redis_client.get(REDIS_KEY_SENSOR_META.format(sn=sn))
             if not meta_str:
-                meta_data = await SensorDbService.get_sensor_metadata_for_cache(session, sn)
+                meta_data = await SensorDbService.get_sensor_metadata_for_cache(
+                    session,
+                    str(sn),
+                )
                 if meta_data:
                     meta_str = json.dumps(meta_data)
                     redis_client.set(REDIS_KEY_SENSOR_META.format(sn=sn), meta_str)
-                    
             if meta_str:
                 try:
                     meta = json.loads(meta_str)
-                    # 展平 meta 字段到顶层，跳过顶层已有的 device_id / sensor_sn
-                    for key, value in meta.items():
-                        if key not in stored_payload:
-                            stored_payload[key] = value
                 except Exception as e:
                     logger.error(f"Failed to parse sensor metadata from redis for {sn}: {e}")
+        else:
+            meta = await SensorDbService.get_sensor_metadata_for_cache(
+                session,
+                str(sn),
+            )
+
+        if meta:
+            # Binding identity is server-owned. Overwrite any stale binding
+            # profile carried by the device, especially for delayed reports.
+            for key, value in meta.items():
+                stored_payload[key] = value
 
         stored_payload["ts_ms"] = ts_ms
         stored_payload["report_id"] = report_id
