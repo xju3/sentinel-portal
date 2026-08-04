@@ -21,6 +21,7 @@ async def test_sensor_binding_returns_location_specific_bearing_orders(monkeypat
         AsyncMock(
             return_value={
                 "device_id": device_id,
+                "location_id": location_id,
                 "rpm": 1500,
                 "bearing": {
                     "binding_id": binding_id,
@@ -44,7 +45,7 @@ async def test_sensor_binding_returns_location_specific_bearing_orders(monkeypat
     response = await sensors.get_sensor_binding(sn="SN-001", session=Mock())
 
     assert response.data["device_id"] == str(device_id)
-    assert "location_id" not in response.data
+    assert response.data["location_id"] == str(location_id)
     assert "location_id" not in response.data["bearing"]
     assert response.data["bearing"]["shaft_speed_ratio"] == 0.2
     assert response.data["bearing"]["shaft_rpm"] == 300
@@ -80,9 +81,35 @@ async def test_sensor_binding_query_matches_bearing_by_spec_and_location():
 
     statement = str(session.execute.await_args.args[0])
     assert "device_spec_bearing.location_id = sensor_monitoring.location_id" in statement
-    assert "location_id" not in binding
+    assert binding["location_id"] == location_id
     assert binding["bearing"]["shaft_rpm"] == 300
     assert binding["bearing"]["fault_orders"]["bpfo"] == pytest.approx(3.2)
+
+
+@pytest.mark.asyncio
+async def test_unbound_sensor_binding_query_removes_stale_metadata_cache(monkeypatch):
+    redis_client = Mock()
+    monkeypatch.setattr(
+        sensors.SensorDbService,
+        "get_binding_by_sn",
+        AsyncMock(return_value=None),
+    )
+    monkeypatch.setattr(
+        sensors.SensorDbService,
+        "get_sensor_metadata_for_cache",
+        AsyncMock(return_value=None),
+    )
+    monkeypatch.setattr(
+        sensors.redis_manager,
+        "get_client",
+        Mock(return_value=redis_client),
+    )
+
+    response = await sensors.get_sensor_binding(sn="SN-UNBOUND", session=Mock())
+
+    assert response.data["device_id"] is None
+    assert response.data["location_id"] is None
+    redis_client.delete.assert_called_once_with("sensor_meta:SN-UNBOUND")
 
 
 @pytest.fixture(autouse=True)

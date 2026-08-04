@@ -1,6 +1,6 @@
 from datetime import datetime
 from types import SimpleNamespace
-from unittest.mock import AsyncMock
+from unittest.mock import AsyncMock, Mock
 from uuid import uuid4
 
 import pytest
@@ -89,7 +89,11 @@ async def test_binding_change_closes_old_row_and_creates_replacement(monkeypatch
     assert session.added == [replacement]
     assert session.commit_count == 1
     ensure_available.assert_awaited_once()
-    notify.assert_awaited_once()
+    notify.assert_awaited_once_with(
+        session,
+        {old_binding.sensor_id},
+        {old_binding.device_inst_id},
+    )
 
 
 @pytest.mark.asyncio
@@ -109,7 +113,11 @@ async def test_delete_ends_binding_without_deleting_history(monkeypatch):
     assert binding.unbound_at is not None
     assert session.commit_count == 1
     assert session.added == []
-    notify.assert_awaited_once()
+    notify.assert_awaited_once_with(
+        session,
+        {binding.sensor_id},
+        {binding.device_inst_id},
+    )
 
 
 @pytest.mark.asyncio
@@ -142,3 +150,61 @@ async def test_delayed_sample_metadata_query_uses_binding_effective_period():
     assert "sensor_monitoring.bound_at <=" in statement
     assert "sensor_monitoring.unbound_at IS NULL" in statement
     assert "sensor_monitoring.unbound_at >" in statement
+
+
+class _ScalarRows:
+    def __init__(self, values):
+        self._values = values
+
+    def scalars(self):
+        return self
+
+    def all(self):
+        return self._values
+
+
+class _TupleRows:
+    def __init__(self, values):
+        self._values = values
+
+    def all(self):
+        return self._values
+
+
+@pytest.mark.asyncio
+async def test_binding_change_invalidates_all_binding_dependent_caches(monkeypatch):
+    sensor_id = uuid4()
+    device_id = uuid4()
+    process_device_id = uuid4()
+    device_category_id = uuid4()
+    session = Mock()
+    session.execute = AsyncMock(
+        side_effect=[
+            _ScalarRows(["SN-001"]),
+            _TupleRows([(process_device_id, device_category_id)]),
+        ]
+    )
+    redis_client = Mock()
+    monkeypatch.setattr(
+        "pub.manager.database.redis_manager.get_client",
+        Mock(return_value=redis_client),
+    )
+    create_task = AsyncMock()
+    monkeypatch.setattr(
+        "pub.services.sensor.sensor_task_service.create_manual_sensor_task",
+        create_task,
+    )
+
+    await SensorMonitoringService._notify_binding_sensors(
+        session,
+        {sensor_id},
+        {device_id},
+    )
+
+    assert set(redis_client.delete.call_args.args) == {
+        "sensor_meta:SN-001",
+        "dia:diagnosis_context:SN-001",
+        f"dia:device_context:{device_id}",
+        f"dia:peer_group:{process_device_id}:{device_category_id}",
+    }
+    create_task.assert_awaited_once()

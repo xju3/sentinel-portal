@@ -222,12 +222,19 @@ async def get_sensor_binding(
     session: AsyncSession = Depends(get_session),
 ):
     binding = await SensorDbService.get_binding_by_sn(session, sn)
-    
+
     meta_data = await SensorDbService.get_sensor_metadata_for_cache(session, sn)
-    if meta_data:
+    try:
         redis_client = redis_manager.get_client()
-        if redis_client:
+        if meta_data:
             redis_client.set(REDIS_KEY_SENSOR_META.format(sn=sn), json.dumps(meta_data))
+        else:
+            # An unbound sensor must not leave its previous binding snapshot cached.
+            redis_client.delete(REDIS_KEY_SENSOR_META.format(sn=sn))
+    except RuntimeError:
+        pass
+    except Exception:
+        logger.exception("Failed to refresh sensor binding metadata cache for sn=%s", sn)
 
     return success(SensorBindingResponse(**binding) if binding else SensorBindingResponse())
 
