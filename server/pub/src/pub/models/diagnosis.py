@@ -96,6 +96,13 @@ class DiagnosisRecord(Base):
             "diagnosis_status",
             "ts_ms",
         ),
+        Index(
+            "idx_diag_record_device_location_health_time",
+            "device_id",
+            "location_id",
+            "ts_ms",
+            "diagnosis_status",
+        ),
     )
     
     # Matching data.json top-level fields

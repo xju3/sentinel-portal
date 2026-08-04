@@ -31,6 +31,12 @@ export type DeviceHealthArchive = {
     name: string;
     code: string;
   };
+  points: Array<{
+    id: string;
+    name: string;
+    active: boolean;
+  }>;
+  selectedLocationId: string | null;
   range: {
     startAt: string;
     endAt: string;
@@ -54,6 +60,7 @@ export async function getDeviceHealthArchive(
     startAt: string;
     endAt: string;
     intervalHours: number;
+    locationId?: string;
   },
 ) {
   return request<DeviceHealthArchive>(`/api/v1/devices/${deviceId}/health-archive`, {
@@ -62,6 +69,48 @@ export async function getDeviceHealthArchive(
       start_at: params.startAt,
       end_at: params.endAt,
       interval_hours: params.intervalHours,
+      location_id: params.locationId,
+    },
+  });
+}
+
+export type PointTrendValue = {
+  value: number | null;
+  min: number | null;
+  max: number | null;
+  last: number | null;
+  count: number;
+};
+
+export type DevicePointTrend = {
+  meta: {
+    rangeDays: number;
+    windowMinutes: number;
+    raw: boolean;
+    patrolMinutes: number;
+    startAt: string;
+    endAt: string;
+    pointCount: number;
+  };
+  timestamps: string[];
+  temperature: Array<PointTrendValue | null>;
+  vibration: Array<PointTrendValue | null>;
+};
+
+export async function getDevicePointTrend(
+  deviceId: string,
+  params: {
+    locationId: string;
+    rangeDays: number;
+    windowMinutes: number;
+  },
+) {
+  return request<DevicePointTrend>(`/api/v1/devices/${deviceId}/point-trends`, {
+    method: 'GET',
+    params: {
+      location_id: params.locationId,
+      range_days: params.rangeDays,
+      window_minutes: params.windowMinutes,
     },
   });
 }

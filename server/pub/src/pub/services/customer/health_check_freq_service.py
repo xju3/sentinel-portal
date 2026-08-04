@@ -56,7 +56,11 @@ class HealthCheckFreqService:
             .join(DeviceCategory, DeviceCategory.health_check_freq_id == HealthCheckFreq.id)
             .join(DeviceSpec, DeviceSpec.device_category_id == DeviceCategory.id)
             .join(DeviceInst, DeviceInst.device_spec_id == DeviceSpec.id)
-            .join(SensorMonitoring, SensorMonitoring.device_inst_id == DeviceInst.id and SensorMonitoring.status == 1)  # 只考虑状态为1的监测
+            .join(
+                SensorMonitoring,
+                (SensorMonitoring.device_inst_id == DeviceInst.id)
+                & (SensorMonitoring.status == 1),
+            )
             .join(Sensor, Sensor.id == SensorMonitoring.sensor_id)
             .where(Sensor.sn == sn)
         )

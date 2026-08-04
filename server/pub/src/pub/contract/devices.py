@@ -2,7 +2,7 @@
 Device API contracts
 """
 
-from datetime import date
+from datetime import date, datetime
 from typing import List, Literal, Optional
 from uuid import UUID
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
@@ -486,8 +486,8 @@ class ProcessDeviceItemResponse(BaseModel):
 # ==========================================
 class SensorMonitoringCreate(BaseModel):
     device_inst_id: UUID
-    location_id: Optional[UUID] = None
-    sensor_id: Optional[UUID] = None
+    location_id: UUID
+    sensor_id: UUID
     direction: Optional[str] = None
     status: Optional[int] = 1
 
@@ -509,6 +509,8 @@ class SensorMonitoringResponse(BaseModel):
     anomaly: int = 0
     ts: Optional[int] = None
     status: int
+    bound_at: datetime
+    unbound_at: Optional[datetime] = None
 
     model_config = ConfigDict(from_attributes=True)
 

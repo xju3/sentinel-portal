@@ -61,11 +61,16 @@ function EntityPicker<T extends EntityRow>({
   const [total, setTotal] = useState(0);
   const [rows, setRows] = useState<T[]>([]);
   const [selectedId, setSelectedId] = useState<string | undefined>(value);
-  const [selectedLabel, setSelectedLabel] = useState('');
+  const [selectedLabel, setSelectedLabel] = useState(value ? valueLabel || '' : '');
+  const selectedIdRef = useRef(selectedId);
+  selectedIdRef.current = selectedId;
 
   useEffect(() => {
-    setSelectedId(value);
-  }, [value]);
+    if (selectedIdRef.current !== value) {
+      setSelectedId(value);
+      setSelectedLabel(value ? valueLabel || '' : '');
+    }
+  }, [value, valueLabel]);
 
   const runQuery = useCallback(
     async (nextCurrent: number, nextPageSize: number, nextKeyword: string) => {
@@ -126,13 +131,10 @@ function EntityPicker<T extends EntityRow>({
   };
 
   const displayValue = useMemo(() => {
-    if (valueLabel) {
-      return valueLabel;
-    }
     if (selectedLabel) {
       return selectedLabel;
     }
-    return value || '';
+    return value ? valueLabel || value : '';
   }, [selectedLabel, value, valueLabel]);
 
   const selectedKeys = useMemo<Key[]>(() => (selectedId ? [selectedId] : []), [selectedId]);

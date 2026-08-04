@@ -9,6 +9,11 @@ export type SensorMonitoring = {
   anomaly: number;
   ts?: number | null;
   status: number;
+  bound_at: string;
+  unbound_at?: string | null;
+  device_inst?: { code: string; name: string } | null;
+  location?: { name: string } | null;
+  sensor?: { sn: string } | null;
 };
 
 export type SensorMonitoringPayload = {
@@ -22,7 +27,7 @@ export type SensorMonitoringPayload = {
 export type SensorMonitoringDeviceInstOption = {
   id: string;
   code: string;
-  sn: string;
+  name: string;
   device_spec_id: string;
 };
 
@@ -86,8 +91,6 @@ export async function updateSensorMonitoring(
   });
 }
 
-export async function deleteSensorMonitoring(id: string) {
-  return request<{ message: string }>(`/api/v1/sensor-monitorings/${id}`, {
-    method: 'DELETE',
-  });
+export async function disableSensorMonitoring(id: string) {
+  return updateSensorMonitoring(id, { status: 0 });
 }

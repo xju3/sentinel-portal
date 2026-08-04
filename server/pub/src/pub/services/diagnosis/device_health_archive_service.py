@@ -10,7 +10,9 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from pub.models.customer import Location
 from pub.models.diagnosis import DiagnosisRecord, DiagnosisRecordStatus
+from pub.models.sensor import SensorMonitoring
 
 
 LEVEL_NAMES = {
@@ -33,6 +35,65 @@ def _iso_utc(ts_ms: int) -> str:
 class DeviceHealthArchiveService:
     DEFAULT_RANGE_DAYS = 7
     MAX_RANGE_DAYS = 366
+
+    @staticmethod
+    async def get_device_points(
+        session: AsyncSession,
+        tenant_id: UUID,
+        device_id: UUID,
+    ) -> list[dict[str, Any]]:
+        """Return active and historical monitoring points for one device."""
+        points: dict[UUID, str] = {}
+        active_point_ids: set[UUID] = set()
+
+        binding_statement = (
+            select(Location.id, Location.name, SensorMonitoring.status)
+            .join(
+                SensorMonitoring,
+                SensorMonitoring.location_id == Location.id,
+            )
+            .where(
+                SensorMonitoring.device_inst_id == device_id,
+                Location.tenant_id == tenant_id,
+            )
+            .distinct()
+        )
+        for location_id, name, status in (
+            await session.execute(binding_statement)
+        ).all():
+            points.setdefault(location_id, name)
+            if int(status) == 1:
+                active_point_ids.add(location_id)
+
+        historical_statement = (
+            select(DiagnosisRecord.location_id, Location.name)
+            .outerjoin(Location, Location.id == DiagnosisRecord.location_id)
+            .where(
+                DiagnosisRecord.tenant_id == tenant_id,
+                DiagnosisRecord.device_id == device_id,
+                DiagnosisRecord.location_id.is_not(None),
+            )
+            .distinct()
+        )
+        for location_id, name in (await session.execute(historical_statement)).all():
+            if location_id is not None:
+                points.setdefault(location_id, name or f"历史测点 {str(location_id)[:8]}")
+
+        return [
+            {
+                "id": str(location_id),
+                "name": name,
+                "active": location_id in active_point_ids,
+            }
+            for location_id, name in sorted(
+                points.items(),
+                key=lambda item: (
+                    item[0] not in active_point_ids,
+                    item[1],
+                    str(item[0]),
+                ),
+            )
+        ]
 
     @staticmethod
     def normalize_range(
@@ -67,21 +128,26 @@ class DeviceHealthArchiveService:
         start_at: datetime,
         end_at: datetime,
         interval_hours: int,
+        location_id: UUID | None = None,
     ) -> dict[str, Any]:
         start_ms = int(start_at.timestamp() * 1000)
         end_ms = int(end_at.timestamp() * 1000)
         interval_ms = interval_hours * 3600 * 1000
 
+        conditions = [
+            DiagnosisRecord.tenant_id == tenant_id,
+            DiagnosisRecord.device_id == device_id,
+            DiagnosisRecord.ts_ms >= start_ms,
+            DiagnosisRecord.ts_ms < end_ms,
+            DiagnosisRecord.diagnosis_status
+            != int(DiagnosisRecordStatus.SKIPPED),
+        ]
+        if location_id is not None:
+            conditions.append(DiagnosisRecord.location_id == location_id)
+
         statement = (
             select(DiagnosisRecord)
-            .where(
-                DiagnosisRecord.tenant_id == tenant_id,
-                DiagnosisRecord.device_id == device_id,
-                DiagnosisRecord.ts_ms >= start_ms,
-                DiagnosisRecord.ts_ms < end_ms,
-                DiagnosisRecord.diagnosis_status
-                != int(DiagnosisRecordStatus.SKIPPED),
-            )
+            .where(*conditions)
             .order_by(DiagnosisRecord.ts_ms.asc())
         )
         records = (await session.execute(statement)).scalars().all()

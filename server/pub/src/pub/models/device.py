@@ -193,7 +193,10 @@ class DeviceInst(Base):
 
     sensor_monitorings = relationship(
         "SensorMonitoring",
-        primaryjoin="DeviceInst.id == foreign(SensorMonitoring.device_inst_id)",
+        primaryjoin=(
+            "and_(DeviceInst.id == foreign(SensorMonitoring.device_inst_id), "
+            "SensorMonitoring.status == 1)"
+        ),
         lazy="selectin",
         uselist=True
     )

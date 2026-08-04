@@ -12,7 +12,7 @@ import { Button, Popconfirm, Space, Tag, message } from 'antd';
 
 import {
   createLocation,
-  deleteLocation,
+  disableLocation,
   listAllLocations,
   Location,
   LocationPayload,
@@ -132,10 +132,10 @@ const MonitoringLocationPage = () => {
       valueType: 'select',
       valueEnum: {
         1: { text: '启用' },
-        0: { text: '停用' },
+        0: { text: '禁用' },
       },
       render: (_, row) =>
-        Number(row.status) === 1 ? <Tag color="success">启用</Tag> : <Tag>停用</Tag>,
+        Number(row.status) === 1 ? <Tag color="success">启用</Tag> : <Tag>禁用</Tag>,
       sorter: true,
     },
     {
@@ -155,30 +155,30 @@ const MonitoringLocationPage = () => {
           >
             编辑
           </a>
-          <Popconfirm
-            key="delete"
-            title="确认删除该故障测点吗？"
-            onConfirm={async () => {
-              try {
-                await deleteLocation(row.id);
-                message.success('删除成功');
-                await loadRows();
-              } catch (error) {
-                message.error(toErrorMessage(error));
-              }
-            }}
-          >
-            <a style={{ color: '#ff4d4f' }}>
-              删除
-            </a>
-          </Popconfirm>
+          {Number(row.status) === 1 && (
+            <Popconfirm
+              key="disable"
+              title="确认禁用该测点吗？历史引用和诊断数据不会删除。"
+              onConfirm={async () => {
+                try {
+                  await disableLocation(row.id);
+                  message.success('测点已禁用');
+                  await loadRows();
+                } catch (error) {
+                  message.error(toErrorMessage(error));
+                }
+              }}
+            >
+              <a style={{ color: '#fa8c16' }}>禁用</a>
+            </Popconfirm>
+          )}
         </Space>
       ),
     },
   ];
 
   return (
-    <PageContainer title="故障测点">
+    <PageContainer title="测点设置">
       <ProTable<Location>
         rowKey="id"
         search={{ labelWidth: 'auto' }}
@@ -210,7 +210,7 @@ const MonitoringLocationPage = () => {
       />
 
       <ModalForm<LocationFormValues>
-        title={editing ? '编辑故障测点' : '新建故障测点'}
+        title={editing ? '编辑测点' : '新建测点'}
         open={modalOpen}
         initialValues={
           editing
@@ -287,7 +287,7 @@ const MonitoringLocationPage = () => {
           label="状态"
           options={[
             { label: '启用', value: 1 },
-            { label: '停用', value: 0 },
+            { label: '禁用', value: 0 },
           ]}
           rules={[{ required: true, message: '请选择状态' }]}
         />

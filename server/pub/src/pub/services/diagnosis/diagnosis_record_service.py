@@ -14,6 +14,15 @@ from pub.models.diagnosis import DiagnosisRecord, DiagnosisRecordStatus
 logger = logging.getLogger(__name__)
 
 
+def _uuid_or_none(value: Any) -> UUID | None:
+    if value in (None, ""):
+        return None
+    try:
+        return value if isinstance(value, UUID) else UUID(str(value))
+    except (TypeError, ValueError):
+        return None
+
+
 def initial_diagnosis_status(delay: int, total: int) -> DiagnosisRecordStatus:
     if delay > 0:
         return DiagnosisRecordStatus.SKIPPED
@@ -46,16 +55,18 @@ class DiagnosisRecordService:
         if db_manager.SessionLocal is None:
             raise RuntimeError("Database not initialized.")
             
-        if not context or "monitoring" not in context or not context["monitoring"]:
+        payload_has_binding = bool(payload.get("device_id") and payload.get("location_id"))
+        if not payload_has_binding and (
+            not context or "monitoring" not in context or not context["monitoring"]
+        ):
             logger.warning(f"No monitoring context for sn {sn}, skipping diagnosis record creation.")
             return None
 
         try:
             await db_manager.ensure_schema()
             async with db_manager.SessionLocal() as session:
-                monitoring = context["monitoring"]
-                device_id = monitoring.get("device_inst_id")
-                
+                context = context or {}
+                monitoring = context.get("monitoring") or {}
                 sensor_ctx = context.get("sensor") or {}
                 device_inst = context.get("device_inst") or {}
                 device_category = context.get("device_category") or {}
@@ -68,8 +79,12 @@ class DiagnosisRecordService:
                 record = DiagnosisRecord(
                     id=UUID(report_id) if report_id else None,
                     schema_version=payload.get("schema_version"),
-                    sensor_sn=sensor_ctx.get("sn") or payload.get("sensor_sn") or sn,
-                    device_id=UUID(device_inst.get("id")) if device_inst.get("id") else None,
+                    sensor_sn=payload.get("sensor_sn") or sensor_ctx.get("sn") or sn,
+                    device_id=_uuid_or_none(
+                        payload.get("device_id")
+                        or device_inst.get("id")
+                        or monitoring.get("device_inst_id")
+                    ),
                     temperature_c=payload.get("temperature_c"),
                     fs_hz=payload.get("fs_hz"),
                     requested_range_g=payload.get("requested_range_g"),
@@ -83,12 +98,20 @@ class DiagnosisRecordService:
                     delay=delay,
                     total=total,
                     diagnosis_status=diagnosis_status,
-                    sensor_id=UUID(sensor_ctx.get("id")) if sensor_ctx.get("id") else None,
-                    location_id=UUID(monitoring.get("location_id")) if monitoring.get("location_id") else None,
-                    tenant_id=UUID(device_category.get("tenant_id")) if device_category.get("tenant_id") else None,
+                    sensor_id=_uuid_or_none(payload.get("sensor_id") or sensor_ctx.get("id")),
+                    location_id=_uuid_or_none(
+                        payload.get("location_id") or monitoring.get("location_id")
+                    ),
+                    tenant_id=_uuid_or_none(
+                        payload.get("tenant_id") or device_category.get("tenant_id")
+                    ),
                     region_id=payload.get("region_id"),
-                    device_category_id=UUID(device_category.get("id")) if device_category.get("id") else None,
-                    process_device_id=UUID(process_device.get("id")) if process_device.get("id") else None,
+                    device_category_id=_uuid_or_none(
+                        payload.get("device_category_id") or device_category.get("id")
+                    ),
+                    process_device_id=_uuid_or_none(
+                        payload.get("process_device_id") or process_device.get("id")
+                    ),
                     rpm=payload.get("rpm"),
                     ts_ms=report_ts
                 )

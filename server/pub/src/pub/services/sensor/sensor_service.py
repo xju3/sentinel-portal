@@ -77,7 +77,10 @@ class SensorService:
         # 获取传感器的安装方向以供前端动态推断 XYZ 轴的真实物理含义
         direction_stmt = select(SensorMonitoring.direction).join(
             Sensor, Sensor.id == SensorMonitoring.sensor_id
-        ).where(Sensor.sn == sn)
+        ).where(
+            Sensor.sn == sn,
+            SensorMonitoring.status == 1,
+        )
         direction_result = await session.execute(direction_stmt)
         direction = direction_result.scalar_one_or_none()
 

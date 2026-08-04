@@ -4,12 +4,13 @@ Sensor service - business logic for sensor operations
 
 import logging
 import asyncio
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import List, Optional, Sequence
 from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import or_
 from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb_client.client.query_api import QueryApi
 
@@ -134,11 +135,29 @@ class SensorDbService:
         }
 
     @staticmethod
-    async def get_sensor_metadata_for_cache(session: AsyncSession, sn: str) -> Optional[dict]:
+    async def get_sensor_metadata_for_cache(
+        session: AsyncSession,
+        sn: str,
+        sampled_at_ms: int | None = None,
+    ) -> Optional[dict]:
+        """Resolve the binding snapshot valid when the sample was collected."""
         from pub.models.sensor import SensorMonitoring
         from pub.models.device import DeviceInst, DeviceSpec, DeviceCategory, ProcessDeviceItem
         from pub.models.customer import Tenant
-        from sqlalchemy import and_
+        if sampled_at_ms is None:
+            binding_condition = SensorMonitoring.status == 1
+        else:
+            sampled_at = datetime.fromtimestamp(
+                sampled_at_ms / 1000,
+                timezone.utc,
+            ).replace(tzinfo=None)
+            binding_condition = (
+                (SensorMonitoring.bound_at <= sampled_at)
+                & or_(
+                    SensorMonitoring.unbound_at.is_(None),
+                    SensorMonitoring.unbound_at > sampled_at,
+                )
+            )
 
         stmt = (
             select(
@@ -158,12 +177,9 @@ class SensorDbService:
             .outerjoin(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
             .outerjoin(Tenant, DeviceCategory.tenant_id == Tenant.id)
             .outerjoin(ProcessDeviceItem, ProcessDeviceItem.device_inst_id == DeviceInst.id)
-            .where(
-                and_(
-                    Sensor.sn == sn,
-                    SensorMonitoring.status == 1
-                )
-            )
+            .where(Sensor.sn == sn, binding_condition)
+            .order_by(SensorMonitoring.bound_at.desc())
+            .limit(1)
         )
         result = await session.execute(stmt)
         row = result.first()

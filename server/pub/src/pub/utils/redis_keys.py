@@ -65,6 +65,12 @@ REDIS_KEY_DIA_BURST_STATE = "dia:burst:state:{device_id}"
 # 已完成诊断的报告幂等标记，防止 Redis Stream 重投造成重复诊断；保留30天。
 REDIS_KEY_DIA_DIAGNOSED_REPORT = "dia:diagnosed:report:{report_id}"
 
+# 设备健康档案中的测点趋势短缓存，避免切换温度/振动 TAB 时重复读取 InfluxDB。
+# 数据为同一设备、测点、范围和显示窗口的完整趋势响应，60 秒过期。
+REDIS_KEY_DEVICE_POINT_TREND = (
+    "dia:trend:v1:{tenant_id}:{device_id}:{location_id}:{range_days}:{window_minutes}"
+)
+
 # Dashboard 健康快照。
 # - snapshot: 每个租户一份完整 Dashboard JSON，避免页面打开时重复执行多表聚合。
 # - dirty: Hash，field 为 tenant_id，value 为最近一次诊断写入时间戳（毫秒）。

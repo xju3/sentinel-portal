@@ -63,12 +63,16 @@ class LocationService:
         session: AsyncSession,
         tenant_id: UUID,
         location_id: UUID,
+        active_only: bool = False,
     ) -> bool:
         """Check if a location belongs to the given tenant."""
         stmt = select(Location.id).where(
             Location.id == location_id,
             Location.tenant_id == tenant_id,
-        ).limit(1)
+        )
+        if active_only:
+            stmt = stmt.where(Location.status == 1)
+        stmt = stmt.limit(1)
         result = await session.execute(stmt)
         return result.scalar_one_or_none() is not None
 
@@ -80,11 +84,14 @@ class LocationService:
         page_size: int,
         keyword: Optional[str] = None,
         bearing_only: bool = False,
+        active_only: bool = False,
     ) -> tuple:
         """Get paged locations with total count. Returns (items, total)."""
         base_stmt = select(Location).where(Location.tenant_id == tenant_id)
         if bearing_only:
             base_stmt = base_stmt.where(Location.is_bearing_point.is_(True))
+        if active_only:
+            base_stmt = base_stmt.where(Location.status == 1)
         if keyword:
             like = f"%{keyword}%"
             base_stmt = base_stmt.where(Location.name.ilike(like))
@@ -121,6 +128,9 @@ class LocationService:
         return db_obj
 
     @staticmethod
-    async def delete_location(session: AsyncSession, db_obj: Location) -> None:
-        await session.delete(db_obj)
+    async def disable_location(session: AsyncSession, db_obj: Location) -> Location:
+        """Disable a location without breaking historical foreign-key references."""
+        db_obj.status = 0
         await session.commit()
+        await session.refresh(db_obj)
+        return db_obj

@@ -28,7 +28,7 @@ def init_sensitive_fields():
     from pub.models.customer import Tenant
 
     CONFIG_SENSITIVE_FIELDS.update({
-        SensorMonitoring:    {"device_inst_id", "sensor_id", "direction", "status"},
+        SensorMonitoring:    {"device_inst_id", "location_id", "sensor_id", "direction", "status"},
         DeviceInst:          {"device_spec_id", "status", "active", "available"},
         DeviceSpec:          {"rpm", "device_category_id"},
         DeviceCategory:      {"iso_standard_id", "health_check_freq_id", "vib_threshold_id", "temp_threshold_id"},
@@ -167,6 +167,9 @@ async def find_affected_sns(session: AsyncSession, model_class: Type, obj_id: UU
     else:
         return sns
 
+    if model_class is not SensorMonitoring:
+        stmt = stmt.where(SensorMonitoring.status == 1)
+
     result = await session.execute(stmt)
     sns = [row[0] for row in result.fetchall()]
     return sns
@@ -226,24 +229,27 @@ async def _include_old_sensor_monitoring_sn(
     new_values: dict,
     sns: List[str],
 ) -> List[str]:
-    """Include the old SN when a monitoring record is moved to a different sensor."""
+    """Include both old and new sensors when a binding is versioned."""
     from pub.models.sensor import Sensor, SensorMonitoring
 
     if model_class is not SensorMonitoring:
         return sns
-    if "sensor_id" not in new_values:
-        return sns
-
     old_sensor_id = old_values.get("sensor_id")
-    new_sensor_id = new_values.get("sensor_id")
-    if old_sensor_id is None or old_sensor_id == new_sensor_id:
+    new_sensor_id = new_values.get("sensor_id", old_sensor_id)
+    sensor_ids = {
+        sensor_id
+        for sensor_id in (old_sensor_id, new_sensor_id)
+        if sensor_id is not None
+    }
+    if not sensor_ids:
         return sns
 
-    result = await session.execute(select(Sensor.sn).where(Sensor.id == old_sensor_id))
-    old_sn = result.scalar_one_or_none()
-    if old_sn and old_sn not in sns:
-        return [*sns, old_sn]
-    return sns
+    result = await session.execute(select(Sensor.sn).where(Sensor.id.in_(sensor_ids)))
+    combined = list(sns)
+    for sn in result.scalars().all():
+        if sn and sn not in combined:
+            combined.append(sn)
+    return combined
 
 
 

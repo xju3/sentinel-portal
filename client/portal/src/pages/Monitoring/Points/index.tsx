@@ -9,12 +9,13 @@ import {
 } from '@ant-design/pro-components';
 import { Button, Popconfirm, Space, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
+import dayjs from 'dayjs';
 
 import EntityPicker from '@/components/EntityPicker';
 import { Location, queryLocations } from '@/services/location';
 import {
   createSensorMonitoring,
-  deleteSensorMonitoring,
+  disableSensorMonitoring,
   listAllSensorMonitorings,
   querySensorMonitoringDeviceInsts,
   SensorMonitoring,
@@ -30,7 +31,6 @@ type SensorMonitoringFormValues = {
   location_id?: string;
   sensor_id?: string;
   direction?: string;
-  status: number;
 };
 
 const toErrorMessage = (error: unknown): string => {
@@ -121,8 +121,12 @@ const MonitoringPointsPage = () => {
     {
       title: '设备实例',
       dataIndex: 'device_inst_id',
-      width: 160,
-      render: (_, row) => row.device_inst ? [row.device_inst.code, row.device_inst.sn].filter(Boolean).join(' / ') : row.device_inst_id,
+      width: 200,
+      ellipsis: true,
+      render: (_, row) =>
+        row.device_inst
+          ? [row.device_inst.code, row.device_inst.name].filter(Boolean).join(' / ')
+          : row.device_inst_id,
       sorter: true,
     },
     {
@@ -195,10 +199,28 @@ const MonitoringPointsPage = () => {
       valueType: 'select',
       valueEnum: {
         1: { text: '启用' },
-        0: { text: '停用' },
+        0: { text: '禁用' },
       },
-      render: (_, row) => (Number(row.status) === 1 ? '启用' : '停用'),
+      render: (_, row) => (Number(row.status) === 1 ? '启用' : '禁用'),
       sorter: true,
+    },
+    {
+      title: '绑定时间',
+      dataIndex: 'bound_at',
+      width: 120,
+      ellipsis: true,
+      hideInSearch: true,
+      render: (_, row) =>
+        row.bound_at ? dayjs(row.bound_at).format('YYYY-MM-DD HH:mm:ss') : '-',
+    },
+    {
+      title: '禁用时间',
+      dataIndex: 'unbound_at',
+      width: 120,
+      ellipsis: true,
+      hideInSearch: true,
+      render: (_, row) =>
+        row.unbound_at ? dayjs(row.unbound_at).format('YYYY-MM-DD HH:mm:ss') : '-',
     },
     {
       title: '操作',
@@ -206,36 +228,37 @@ const MonitoringPointsPage = () => {
       width: OPERATION_COL_WIDTH,
       fixed: 'right',
       align: 'center',
-      render: (_, row) => (
-        <Space size="middle">
-          <a
-            key="edit"
-            onClick={() => {
-              setEditing(row);
-              setModalOpen(true);
-            }}
-          >
-            编辑
-          </a>
-          <Popconfirm
-            key="delete"
-            title="确认删除该测点绑定吗？"
-            onConfirm={async () => {
-              try {
-                await deleteSensorMonitoring(row.id);
-                message.success('删除成功');
-                await loadData();
-              } catch (error) {
-                message.error(toErrorMessage(error));
-              }
-            }}
-          >
-            <a style={{ color: '#ff4d4f' }}>
-              删除
+      render: (_, row) =>
+        Number(row.status) !== 1 ? (
+          <span style={{ color: '#8c8c8c' }}>已禁用</span>
+        ) : (
+          <Space size="middle">
+            <a
+              key="edit"
+              onClick={() => {
+                setEditing(row);
+                setModalOpen(true);
+              }}
+            >
+              变更
             </a>
-          </Popconfirm>
-        </Space>
-      ),
+            <Popconfirm
+              key="delete"
+              title="确认禁用该测点绑定吗？历史记录将被保留。"
+              onConfirm={async () => {
+                try {
+                  await disableSensorMonitoring(row.id);
+                  message.success('绑定已禁用');
+                  await loadData();
+                } catch (error) {
+                  message.error(toErrorMessage(error));
+                }
+              }}
+            >
+              <a style={{ color: '#fa8c16' }}>禁用</a>
+            </Popconfirm>
+          </Space>
+        ),
     },
   ];
 
@@ -272,7 +295,7 @@ const MonitoringPointsPage = () => {
       />
 
       <ModalForm<SensorMonitoringFormValues>
-        title={editing ? '编辑测点绑定' : '新建测点绑定'}
+        title={editing ? '变更测点绑定' : '新建测点绑定'}
         open={modalOpen}
         initialValues={
           editing
@@ -281,11 +304,8 @@ const MonitoringPointsPage = () => {
               location_id: editing.location_id || undefined,
               sensor_id: editing.sensor_id || undefined,
               direction: editing.direction || undefined,
-              status: Number(editing.status),
             }
-            : {
-              status: 1,
-            }
+            : undefined
         }
         modalProps={{
           destroyOnHidden: true,
@@ -304,7 +324,7 @@ const MonitoringPointsPage = () => {
             location_id: values.location_id || null,
             sensor_id: values.sensor_id || null,
             direction: values.direction || null,
-            status: Number(values.status ?? 1),
+            status: 1,
           };
 
           setSaving(true);
@@ -338,7 +358,9 @@ const MonitoringPointsPage = () => {
             placeholder="请选择设备实例"
             valueLabel={
               editing?.device_inst
-                ? [editing.device_inst.code, editing.device_inst.sn].filter(Boolean).join(' / ')
+                ? [editing.device_inst.code, editing.device_inst.name]
+                    .filter(Boolean)
+                    .join(' / ')
                 : editing?.device_inst_id
             }
             fetcher={async ({ current, pageSize, keyword }) => {
@@ -347,19 +369,20 @@ const MonitoringPointsPage = () => {
             }}
             columns={[
               { title: '编码', dataIndex: 'code', width: 160 },
-              { title: '序列号', dataIndex: 'sn', width: 160 },
+              { title: '名称', dataIndex: 'name', width: 160 },
             ]}
-            getRecordLabel={(row) => [row.code, row.sn].filter(Boolean).join(' / ')}
+            getRecordLabel={(row) => [row.code, row.name].filter(Boolean).join(' / ')}
           />
         </ProForm.Item>
         <ProForm.Item
           name="location_id"
-          label="故障测点"
+          label="测点"
+          rules={[{ required: true, message: '请选择测点' }]}
         >
           <EntityPicker<Location>
-            modalTitle="选择故障测点"
+            modalTitle="选择测点"
             triggerText="选择测点"
-            placeholder="请选择故障测点"
+            placeholder="请选择测点"
             valueLabel={
               editing?.location?.name || editing?.location_id
             }
@@ -376,6 +399,7 @@ const MonitoringPointsPage = () => {
         <ProForm.Item
           name="sensor_id"
           label="传感器"
+          rules={[{ required: true, message: '请选择传感器' }]}
         >
           <EntityPicker<Sensor>
             modalTitle="选择传感器"
@@ -402,15 +426,6 @@ const MonitoringPointsPage = () => {
             { label: '垂直', value: 'vertical' },
             { label: '轴向', value: 'axial' },
           ]}
-        />
-        <ProFormSelect
-          name="status"
-          label="状态"
-          options={[
-            { label: '启用', value: 1 },
-            { label: '停用', value: 0 },
-          ]}
-          rules={[{ required: true, message: '请选择状态' }]}
         />
       </ModalForm>
     </PageContainer>

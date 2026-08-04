@@ -37,6 +37,7 @@ export async function listAllLocations(
         sort_by: options.sort_field,
         sort_order: options.sort_order,
         bearing_only: options.bearingOnly,
+        active_only: false,
       },
     });
     all.push(...result.items);
@@ -57,7 +58,13 @@ export async function queryLocations(
 ) {
   return request<PagedLocationResult>('/api/v1/locations', {
     method: 'GET',
-    params: { current, pageSize, keyword, bearing_only: bearingOnly },
+    params: {
+      current,
+      pageSize,
+      keyword,
+      bearing_only: bearingOnly,
+      active_only: true,
+    },
   });
 }
 
@@ -75,8 +82,6 @@ export async function updateLocation(id: string, payload: Partial<LocationPayloa
   });
 }
 
-export async function deleteLocation(id: string) {
-  return request<{ message: string }>(`/api/v1/locations/${id}`, {
-    method: 'DELETE',
-  });
+export async function disableLocation(id: string) {
+  return updateLocation(id, { status: 0 });
 }

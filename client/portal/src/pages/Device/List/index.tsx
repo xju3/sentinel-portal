@@ -204,13 +204,14 @@ const DeviceListPage = () => {
     {
       title: '名称',
       dataIndex: 'name',
-      width: 140,
+      width: 120,
+      ellipsis: true,
       sorter: true,
     },
     {
       title: '设备规格',
       dataIndex: 'device_spec_id',
-      width: 180,
+      width: 120,
       ellipsis: true,
       render: (_, row: any) => {
         const spec = row.device_spec;
@@ -236,8 +237,8 @@ const DeviceListPage = () => {
     },
     {
       title: '测点',
+      width: 160,
       hideInSearch: true,
-      width: 120,
       render: (_, row: any) => {
         const monitorings = row.sensor_monitorings || [];
         if (!monitorings?.length) return '-';

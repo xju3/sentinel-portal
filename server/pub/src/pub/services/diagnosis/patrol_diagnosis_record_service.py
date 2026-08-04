@@ -76,7 +76,10 @@ class PatrolDiagnosisRecordService:
                 # 2. Find SensorMonitoring by sensor_id
                 monitor_stmt = (
                     select(SensorMonitoring)
-                    .where(SensorMonitoring.sensor_id == sensor.id)
+                    .where(
+                        SensorMonitoring.sensor_id == sensor.id,
+                        SensorMonitoring.status == 1,
+                    )
                     .limit(1)
                 )
                 monitor_result = await session.execute(monitor_stmt)

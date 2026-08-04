@@ -11,6 +11,7 @@ import {
   Empty,
   Row,
   Segmented,
+  Select,
   Space,
   Spin,
   Statistic,
@@ -28,6 +29,7 @@ import {
 } from '@/services/deviceHealthArchive';
 
 import styles from './index.less';
+import PointTrendCard from './PointTrendCard';
 
 const STATUS_META: Record<
   HealthArchiveBucketStatus,
@@ -83,6 +85,7 @@ const DeviceHealthArchivePage = () => {
   const [intervalHours, setIntervalHours] = useState(1);
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState<DeviceHealthArchive | null>(null);
+  const [selectedLocationId, setSelectedLocationId] = useState<string>();
   const [selectedDay, setSelectedDay] = useState<HealthArchiveBucket | null>(null);
   const [dayDetail, setDayDetail] = useState<DeviceHealthArchive | null>(null);
   const [dayDetailLoading, setDayDetailLoading] = useState(false);
@@ -100,6 +103,7 @@ const DeviceHealthArchivePage = () => {
         startAt: startAt.toISOString(),
         endAt: endAt.toISOString(),
         intervalHours: calendarMode ? 24 : intervalHours,
+        locationId: selectedLocationId,
       });
       setData(result);
     } catch (error: any) {
@@ -107,11 +111,13 @@ const DeviceHealthArchivePage = () => {
     } finally {
       setLoading(false);
     }
-  }, [calendarMode, deviceId, intervalHours, rangeDays]);
+  }, [calendarMode, deviceId, intervalHours, rangeDays, selectedLocationId]);
 
   useEffect(() => {
     void loadData();
   }, [loadData]);
+
+  const activeLocationId = selectedLocationId || data?.selectedLocationId || undefined;
 
   const orderedBuckets = useMemo(
     () =>
@@ -164,6 +170,7 @@ const DeviceHealthArchivePage = () => {
             startAt: dayStart.toISOString(),
             endAt: dayStart.add(1, 'day').toISOString(),
             intervalHours: 1,
+            locationId: activeLocationId,
           }),
         );
       } catch (error: any) {
@@ -172,7 +179,7 @@ const DeviceHealthArchivePage = () => {
         setDayDetailLoading(false);
       }
     },
-    [deviceId],
+    [activeLocationId, deviceId],
   );
 
   return (
@@ -199,6 +206,20 @@ const DeviceHealthArchivePage = () => {
               onChange={(value) => setRangeDays(Number(value))}
             />
           </Space>
+          {data && data.points.length > 1 && (
+            <Space>
+              <Typography.Text type="secondary">监测点</Typography.Text>
+              <Select
+                style={{ minWidth: 200 }}
+                value={activeLocationId}
+                options={data.points.map((point) => ({
+                  label: point.active ? point.name : `${point.name}（历史测点）`,
+                  value: point.id,
+                }))}
+                onChange={(value) => setSelectedLocationId(value)}
+              />
+            </Space>
+          )}
           {calendarMode ? (
             <Typography.Text type="secondary">按自然日汇总，每格代表一天</Typography.Text>
           ) : (
@@ -362,6 +383,16 @@ const DeviceHealthArchivePage = () => {
                 <Empty description="该时间范围内没有健康记录" />
               )}
             </Card>
+
+            {activeLocationId && (
+              <PointTrendCard
+                deviceId={deviceId}
+                locationId={activeLocationId}
+                locationName={
+                  data.points.find((point) => point.id === activeLocationId)?.name || '当前测点'
+                }
+              />
+            )}
           </>
         ) : (
           !loading && <Empty description="暂无设备健康档案" />

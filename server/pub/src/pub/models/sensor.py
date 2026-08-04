@@ -13,6 +13,7 @@ from sqlalchemy import (
     Float,
     ForeignKey,
     Integer,
+    Index,
     Numeric,
     SmallInteger,
     String,
@@ -220,9 +221,26 @@ class CommunicationRecord(Base):
 
 
 class SensorMonitoring(Base):
-    """Sensor monitoring entity model"""
+    """Versioned sensor-to-device/location binding.
+
+    A row records one binding period. Historical rows are closed instead of
+    being overwritten so time-series data always keeps its original point.
+    """
 
     __tablename__ = "sensor_monitoring"
+    __table_args__ = (
+        Index(
+            "idx_sensor_monitoring_sensor_status",
+            "sensor_id",
+            "status",
+        ),
+        Index(
+            "idx_sensor_monitoring_point_status",
+            "device_inst_id",
+            "location_id",
+            "status",
+        ),
+    )
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     device_inst_id = Column(
@@ -245,6 +263,17 @@ class SensorMonitoring(Base):
     )
     ts = Column(BigInteger, nullable=True, comment="异常发生时间戳(Unix毫秒)")
     status = Column(SmallInteger, default=1, comment="tiny(1) status")
+    bound_at = Column(
+        DateTime,
+        nullable=False,
+        default=datetime.utcnow,
+        comment="Binding effective time (UTC)",
+    )
+    unbound_at = Column(
+        DateTime,
+        nullable=True,
+        comment="Binding end time (UTC); NULL means currently active",
+    )
 
     sensor = relationship(
         "Sensor",

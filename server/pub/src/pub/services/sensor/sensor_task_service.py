@@ -916,7 +916,10 @@ async def process_fft_metadata_background(task_id: UUID | str) -> bool:
             stmt = (
                 select(SensorMonitoring)
                 .join(Sensor, Sensor.id == SensorMonitoring.sensor_id)
-                .where(Sensor.sn == task.sn)
+                .where(
+                    Sensor.sn == task.sn,
+                    SensorMonitoring.status == 1,
+                )
             )
             monitoring = (await session.execute(stmt)).scalar_one_or_none()
 
