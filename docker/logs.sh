@@ -25,5 +25,3 @@ if [[ "$confirm" =~ ^[Yy]$ ]]; then
 else
     echo "操作已取消。"
 fi
-~                                                                                                                                                                      
-~              
