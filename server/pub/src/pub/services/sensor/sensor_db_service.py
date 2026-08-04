@@ -130,6 +130,7 @@ class SensorDbService:
             }
         return {
             "device_id": row.device_inst_id,
+            "location_id": row.location_id,
             "rpm": row.rpm,
             "bearing": bearing,
         }

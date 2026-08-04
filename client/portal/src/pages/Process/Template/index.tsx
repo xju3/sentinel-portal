@@ -124,8 +124,8 @@ const ProcessTemplatePage = () => {
       hideInSearch: true,
       fixed: 'left',
     },
-    { title: '工段编码', dataIndex: 'code', width: 140, sorter: (a, b) => (a.code || '').localeCompare(b.code || '', 'zh-CN') },
-    { title: '工段名称', dataIndex: 'name', sorter: (a, b) => (a.name || '').localeCompare(b.name || '', 'zh-CN') },
+    { title: '编码', dataIndex: 'code', width: 140, sorter: (a, b) => (a.code || '').localeCompare(b.code || '', 'zh-CN') },
+    { title: '名称', dataIndex: 'name', sorter: (a, b) => (a.name || '').localeCompare(b.name || '', 'zh-CN') },
     {
       title: '状态',
       width: 120,
@@ -167,7 +167,7 @@ const ProcessTemplatePage = () => {
           </a>
           <Popconfirm
             key="delete"
-            title="确认删除该工段模板吗？"
+            title="确认删除该模板吗？"
             onConfirm={async () => {
               try {
                 await deleteProcess(row.id);
@@ -194,7 +194,7 @@ const ProcessTemplatePage = () => {
       width: 68,
     },
     {
-      title: '设备规格',
+      title: '规格',
       dataIndex: 'device_spec_id',
       render: (_, row) => row.device_spec?.name || row.device_spec_id,
     },
@@ -244,7 +244,7 @@ const ProcessTemplatePage = () => {
   ];
 
   const specPickerColumns: ColumnsType<DeviceSpec> = [
-    { title: '规格名称', dataIndex: 'name' },
+    { title: '规格', dataIndex: 'name' },
     { title: '型号', dataIndex: 'model' },
     { title: '品牌', dataIndex: 'brand' },
     { title: '电压(V)', dataIndex: 'voltage' },
@@ -252,7 +252,7 @@ const ProcessTemplatePage = () => {
   ];
 
   return (
-    <PageContainer title="工段模板">
+    <PageContainer title="模板">
       <ProTable<Process>
         rowKey="id"
         loading={loading}
@@ -273,13 +273,13 @@ const ProcessTemplatePage = () => {
               setModalOpen(true);
             }}
           >
-            新建工段模板
+            新建模板
           </Button>,
         ]}
       />
 
       <ModalForm<ProcessFormValues>
-        title={editing ? '编辑工段模板' : '新建工段模板'}
+        title={editing ? '编辑模板' : '新建模板'}
         open={modalOpen}
         modalProps={{
           destroyOnHidden: true,
@@ -326,18 +326,18 @@ const ProcessTemplatePage = () => {
       >
         <ProFormText
           name="code"
-          label="工段编码"
+          label="编码"
           rules={[
-            { required: true, message: '请输入工段编码' },
-            { max: 8, message: '工段编码最多8个字符' },
+            { required: true, message: '请输入编码' },
+            { max: 8, message: '编码最多8个字符' },
           ]}
         />
         <ProFormText
           name="name"
-          label="工段名称"
+          label="名称"
           rules={[
-            { required: true, message: '请输入工段名称' },
-            { max: 64, message: '工段名称最多64个字符' },
+            { required: true, message: '请输入名称' },
+            { max: 64, message: '名称最多64个字符' },
           ]}
         />
         <ProFormSelect
@@ -352,7 +352,7 @@ const ProcessTemplatePage = () => {
       </ModalForm>
 
       <Modal
-        title={`工段配置 - ${currentProcess?.name || ''}`}
+        title={`模板配置 - ${currentProcess?.name || ''}`}
         open={configOpen}
         width={960}
         destroyOnHidden
@@ -412,7 +412,7 @@ const ProcessTemplatePage = () => {
           }
           onFinish={async (values) => {
             if (!currentProcess?.id) {
-              message.error('未选择工段模板');
+              message.error('未选择模板');
               return false;
             }
             setItemSaving(true);

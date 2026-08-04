@@ -53,6 +53,9 @@ REDIS_KEY_DIA_PEER_GROUP = "dia:peer_group:{process_device_id}:{device_category_
 # 格式: dia:device_context:{device_id}
 REDIS_KEY_DIA_DEVICE_CONTEXT = "dia:device_context:{device_id}"
 
+# 按传感器 SN 缓存的完整诊断上下文，绑定关系变化时必须同步清理。
+REDIS_KEY_DIA_DIAGNOSIS_CONTEXT = "dia:diagnosis_context:{sn}"
+
 # 设备健康状态缓存 Key
 # 格式: Hash 结构, 键为 dia:health:status, field 为 device_id, value 为 overall_level
 # 过期时间: 永久 (由诊断流程实时更新)

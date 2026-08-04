@@ -16,12 +16,12 @@ from pub.models.customer import Location
 from pub.models.device import BearingModel, DeviceInst, DeviceSpecBearing
 from pub.models.sensor import Sensor, SensorMonitoring
 from pub.services.device.device_spec_service import DeviceSpecService
-from pub.utils.redis_keys import REDIS_KEY_DIA_DEVICE_CONTEXT
+from pub.utils.redis_keys import (
+    REDIS_KEY_DIA_DEVICE_CONTEXT,
+    REDIS_KEY_DIA_DIAGNOSIS_CONTEXT,
+)
 
 logger = logging.getLogger(__name__)
-
-DIAGNOSIS_CONTEXT_CACHE_PREFIX = "dia:diagnosis_context:"
-
 
 class BearingConflictError(ValueError):
     """A concurrent or persisted binding conflicts with the requested write."""
@@ -307,7 +307,7 @@ class BearingService:
             for device_id in device_ids
         }
         keys.update(
-            f"{DIAGNOSIS_CONTEXT_CACHE_PREFIX}{sn}"
+            REDIS_KEY_DIA_DIAGNOSIS_CONTEXT.format(sn=sn)
             for sn in sensor_result.scalars().all()
             if sn
         )

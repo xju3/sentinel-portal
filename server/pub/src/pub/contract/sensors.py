@@ -296,5 +296,6 @@ class SensorBindingBearing(BaseModel):
 
 class SensorBindingResponse(BaseModel):
     device_id: Optional[UUID] = None
+    location_id: Optional[UUID] = None
     rpm: Optional[int] = None
     bearing: Optional[SensorBindingBearing] = None

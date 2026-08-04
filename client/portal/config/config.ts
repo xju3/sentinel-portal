@@ -18,8 +18,6 @@ export default defineConfig({
     logo: 'https://preview.pro.ant.design/static/logo.f0355d39.svg',
     layout: 'mix',
     splitMenus: false,
-    navTheme: 'dark',
-    headerTheme: 'light',
     fixedHeader: true,
     fixSiderbar: true,
     contentWidth: 'Fluid',
@@ -143,17 +141,17 @@ export default defineConfig({
     },
     {
       path: '/process',
-      name: '生产工艺',
+      name: '对照分组',
       icon: 'ClusterOutlined',
       routes: [
         {
           path: '/process/templates',
-          name: '工段模板',
+          name: '模板定义',
           component: '@/pages/Process/Template',
         },
         {
           path: '/process/manage',
-          name: '工段管理',
+          name: '分组设定',
           component: '@/pages/Process/Manage',
         },
         {

@@ -7,7 +7,7 @@ import {
   ProFormSelect,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Popconfirm, Space, message } from 'antd';
+import { Button, Popconfirm, Space, Tag, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import dayjs from 'dayjs';
 
@@ -50,7 +50,7 @@ const MonitoringPointsPage = () => {
   const [modalOpen, setModalOpen] = useState(false);
   const [rows, setRows] = useState<SensorMonitoring[]>([]);
   const [editing, setEditing] = useState<SensorMonitoring | null>(null);
-  const [query, setQuery] = useState<Record<string, any>>({});
+  const [query, setQuery] = useState<Record<string, any>>({ hide_disabled: true });
   const [sort, setSort] = useState<Record<string, any>>({});
 
   const loadData = async (currentSort = sort) => {
@@ -72,6 +72,9 @@ const MonitoringPointsPage = () => {
   const filteredRows = useMemo(() => {
     const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();
     return rows.filter((row) => {
+      if (query.hide_disabled !== false && Number(row.status) !== 1) {
+        return false;
+      }
       if (query.device_inst_id) {
         const display = deviceInstMap.get(row.device_inst_id) || row.device_inst_id;
         const hit =
@@ -260,6 +263,17 @@ const MonitoringPointsPage = () => {
           </Space>
         ),
     },
+    {
+      title: '隐藏禁用',
+      dataIndex: 'hide_disabled',
+      valueType: 'switch',
+      initialValue: true,
+      hideInTable: true,
+      fieldProps: {
+        checkedChildren: '是',
+        unCheckedChildren: '否',
+      },
+    },
   ];
 
   return (
@@ -272,7 +286,7 @@ const MonitoringPointsPage = () => {
         dataSource={filteredRows}
         search={{ labelWidth: 'auto' }}
         onSubmit={(values) => setQuery(values)}
-        onReset={() => setQuery({})}
+        onReset={() => setQuery({ hide_disabled: true })}
         onChange={(pagination, filters, sorter: any) => {
           const currentSort = sorter.order ? { field: sorter.field, order: sorter.order } : {};
           setSort(currentSort);
@@ -392,6 +406,20 @@ const MonitoringPointsPage = () => {
             }}
             columns={[
               { title: '名称', dataIndex: 'name', width: 200 },
+              {
+                title: '轴承测点',
+                dataIndex: 'is_bearing_point',
+                width: 100,
+                render: (_, row) =>
+                  row.is_bearing_point ? <Tag color="blue">是</Tag> : <Tag>否</Tag>,
+              },
+              {
+                title: '描述',
+                dataIndex: 'description',
+                width: 280,
+                ellipsis: true,
+                render: (_, row) => row.description || '-',
+              },
             ]}
             getRecordLabel={(row) => row.name}
           />

@@ -34,10 +34,10 @@ from pub.models.device import (
 )
 from pub.models.sensor import Sensor, SensorMonitoring, SensorThreshold
 from pub.services.diagnosis.bearing_frequency import calculate_bearing_frequencies
+from pub.utils.redis_keys import REDIS_KEY_DIA_DIAGNOSIS_CONTEXT
 
 logger = logging.getLogger(__name__)
 
-DIAGNOSIS_CONTEXT_CACHE_PREFIX = "dia:diagnosis_context:"
 DIAGNOSIS_CONTEXT_CACHE_TTL_SECONDS = 86400
 
 
@@ -366,7 +366,7 @@ class DiagnosisContextService:
 
 
 def _cache_key(sn: str) -> str:
-    return f"{DIAGNOSIS_CONTEXT_CACHE_PREFIX}{sn}"
+    return REDIS_KEY_DIA_DIAGNOSIS_CONTEXT.format(sn=sn)
 
 
 def _get_redis_client() -> Any | None:

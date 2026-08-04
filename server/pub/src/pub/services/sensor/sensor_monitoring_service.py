@@ -141,6 +141,7 @@ class SensorMonitoringService:
         await SensorMonitoringService._notify_binding_sensors(
             session,
             {db_obj.sensor_id},
+            {db_obj.device_inst_id},
         )
         return db_obj
 
@@ -175,6 +176,7 @@ class SensorMonitoringService:
             await SensorMonitoringService._notify_binding_sensors(
                 session,
                 {db_obj.sensor_id},
+                {db_obj.device_inst_id},
             )
             return db_obj
 
@@ -185,6 +187,7 @@ class SensorMonitoringService:
             await SensorMonitoringService._notify_binding_sensors(
                 session,
                 {db_obj.sensor_id},
+                {db_obj.device_inst_id},
             )
             return db_obj
 
@@ -204,6 +207,7 @@ class SensorMonitoringService:
         await SensorMonitoringService._notify_binding_sensors(
             session,
             {db_obj.sensor_id},
+            {db_obj.device_inst_id},
         )
 
     @staticmethod
@@ -232,6 +236,7 @@ class SensorMonitoringService:
         await SensorMonitoringService._notify_binding_sensors(
             session,
             {old_binding.sensor_id, replacement.sensor_id},
+            {old_binding.device_inst_id, replacement.device_inst_id},
         )
         return replacement
 
@@ -292,41 +297,89 @@ class SensorMonitoringService:
     async def _notify_binding_sensors(
         session: AsyncSession,
         sensor_ids: set[UUID | None],
+        device_ids: set[UUID | None],
     ) -> None:
         active_sensor_ids = {item for item in sensor_ids if item is not None}
-        if not active_sensor_ids:
+        affected_device_ids = {item for item in device_ids if item is not None}
+        if not active_sensor_ids and not affected_device_ids:
             return
 
-        sns = list(
-            (
-                await session.execute(
-                    select(Sensor.sn).where(Sensor.id.in_(active_sensor_ids))
+        sns: list[str] = []
+        if active_sensor_ids:
+            sns = list(
+                (
+                    await session.execute(
+                        select(Sensor.sn).where(Sensor.id.in_(active_sensor_ids))
+                    )
                 )
+                .scalars()
+                .all()
             )
-            .scalars()
-            .all()
-        )
-        from pub.services.diagnosis.diagnosis_context_service import (
-            DiagnosisContextService,
-        )
 
-        await DiagnosisContextService.invalidate_by_sns(sns)
+        peer_groups: list[tuple[UUID, UUID]] = []
+        if affected_device_ids:
+            peer_groups = [
+                (process_device_id, device_category_id)
+                for process_device_id, device_category_id in (
+                    await session.execute(
+                        select(
+                            ProcessDeviceItem.process_device_id,
+                            DeviceSpec.device_category_id,
+                        )
+                        .select_from(DeviceInst)
+                        .join(DeviceSpec, DeviceSpec.id == DeviceInst.device_spec_id)
+                        .outerjoin(
+                            ProcessDeviceItem,
+                            ProcessDeviceItem.device_inst_id == DeviceInst.id,
+                        )
+                        .where(DeviceInst.id.in_(affected_device_ids))
+                    )
+                ).all()
+                if process_device_id is not None and device_category_id is not None
+            ]
+
         from pub.manager.database import redis_manager
-        from pub.utils.redis_keys import REDIS_KEY_SENSOR_META
+        from pub.utils.redis_keys import (
+            REDIS_KEY_DIA_DEVICE_CONTEXT,
+            REDIS_KEY_DIA_DIAGNOSIS_CONTEXT,
+            REDIS_KEY_DIA_PEER_GROUP,
+            REDIS_KEY_SENSOR_META,
+        )
 
-        if sns:
+        cache_keys = {
+            REDIS_KEY_SENSOR_META.format(sn=sn)
+            for sn in sns
+        }
+        cache_keys.update(
+            REDIS_KEY_DIA_DIAGNOSIS_CONTEXT.format(sn=sn)
+            for sn in sns
+        )
+        cache_keys.update(
+            REDIS_KEY_DIA_DEVICE_CONTEXT.format(device_id=device_id)
+            for device_id in affected_device_ids
+        )
+        cache_keys.update(
+            REDIS_KEY_DIA_PEER_GROUP.format(
+                process_device_id=process_device_id,
+                device_category_id=device_category_id,
+            )
+            for process_device_id, device_category_id in peer_groups
+        )
+
+        if cache_keys:
             try:
                 redis_client = redis_manager.get_client()
                 await asyncio.to_thread(
                     redis_client.delete,
-                    *[REDIS_KEY_SENSOR_META.format(sn=sn) for sn in sns],
+                    *sorted(cache_keys),
                 )
             except RuntimeError:
                 pass
             except Exception:
                 logger.exception(
-                    "Failed to invalidate sensor binding metadata for sns=%s",
+                    "Failed to invalidate binding caches for sns=%s device_ids=%s",
                     sns,
+                    sorted(str(item) for item in affected_device_ids),
                 )
 
         from pub.services.sensor.sensor_task_service import (

@@ -204,7 +204,7 @@ class BearingModelCreate(BaseModel):
     contact_angle_deg: float = Field(
         default=0.0,
         ge=0,
-        lt=90,
+        lt=255,
         allow_inf_nan=False,
     )
     description: Optional[str] = Field(default=None, max_length=255)

@@ -237,7 +237,6 @@ const DeviceListPage = () => {
     },
     {
       title: '测点',
-      width: 160,
       hideInSearch: true,
       render: (_, row: any) => {
         const monitorings = row.sensor_monitorings || [];

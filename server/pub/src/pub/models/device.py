@@ -36,7 +36,7 @@ class DeviceCategoryEmployee(Base):
 
 class ProcessDeviceEmployee(Base):
     """Many-to-many relationship between ProcessDevice and Employee for alarms"""
-    __tablename__ = "process_device_employee"
+    __tablename__ = "dg_inst_employee"
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     process_device_id = Column(Uuid(as_uuid=True), nullable=False, index=True)
@@ -204,7 +204,7 @@ class DeviceInst(Base):
 class Process(Base):
     """Device combo specification entity model"""
 
-    __tablename__ = "process"
+    __tablename__ = "dg_template"
     __table_args__ = (
         UniqueConstraint("tenant_id", "code", name="uq_process_tenant_code"),
     )
@@ -219,7 +219,7 @@ class Process(Base):
 class ProcessItem(Base):
     """Process item entity model"""
 
-    __tablename__ = "process_item"
+    __tablename__ = "dg_template_item"
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     process_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to processes
@@ -231,7 +231,7 @@ class ProcessItem(Base):
 class ProcessDevice(Base):
     """Process device entity model"""
 
-    __tablename__ = "process_device"
+    __tablename__ = "dg_inst"
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     code = Column(String(8), nullable=False, unique=True, index=True)
@@ -244,7 +244,7 @@ class ProcessDevice(Base):
     area = relationship("Area", primaryjoin="foreign(ProcessDevice.area_id) == Area.id", lazy="selectin", uselist=False)
     employees = relationship(
         "Employee",
-        secondary="process_device_employee",
+        secondary="dg_inst_employee",
         primaryjoin="foreign(ProcessDeviceEmployee.process_device_id) == ProcessDevice.id",
         secondaryjoin="foreign(ProcessDeviceEmployee.employee_id) == Employee.id",
         backref="process_devices"
@@ -256,7 +256,7 @@ class ProcessDevice(Base):
 class ProcessDeviceItem(Base):
     """Device combo instance detail entity model"""
 
-    __tablename__ = "process_device_item"
+    __tablename__ = "dg_inst_item"
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     code = Column(String(16), nullable=False, unique=True, index=True)

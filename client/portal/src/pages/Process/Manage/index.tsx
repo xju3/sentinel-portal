@@ -244,7 +244,7 @@ const ProcessManagePage = () => {
     { title: '实例编码', dataIndex: 'code', sorter: (a, b) => (a.code || '').localeCompare(b.code || '', 'zh-CN') },
     { title: '实例SN', dataIndex: 'sn', sorter: (a, b) => (a.sn || '').localeCompare(b.sn || '', 'zh-CN') },
     {
-      title: '工段模板',
+      title: '模板',
       dataIndex: 'process_id',
       render: (_, row) => row.process?.name || row.process_id,
       sorter: (a, b) => {
@@ -254,7 +254,7 @@ const ProcessManagePage = () => {
       },
     },
     {
-      title: '工作区域',
+      title: '区域',
       dataIndex: 'area_id',
       render: (_, row) => row.area?.name || row.area_id || '-',
       sorter: (a, b) => {
@@ -272,7 +272,7 @@ const ProcessManagePage = () => {
       sorter: (a, b) => Number(a.status) - Number(b.status),
     },
     {
-      title: '负责员工',
+      title: '员工',
       dataIndex: 'employees',
       hideInSearch: true,
       render: (_, row) => {
@@ -366,7 +366,7 @@ const ProcessManagePage = () => {
       />
 
       <ModalForm<ProcessDeviceFormValues>
-        title={editing ? '编辑工段实例' : '新建工段实例'}
+        title={editing ? '编辑' : '新建'}
         open={modalOpen}
         modalProps={{
           destroyOnHidden: true,
@@ -421,26 +421,26 @@ const ProcessManagePage = () => {
       >
         <ProFormText
           name="code"
-          label="实例编码"
-          rules={[{ required: true, message: '请输入实例编码' }, { max: 8, message: '实例编码最多8个字符' }]}
+          label="编码"
+          rules={[{ required: true, message: '请输入编码' }, { max: 8, message: '实例编码最多8个字符' }]}
         />
         <ProFormText
           name="sn"
-          label="实例SN"
-          rules={[{ required: true, message: '请输入实例SN' }, { max: 64, message: '实例SN最多64个字符' }]}
+          label="SN"
+          rules={[{ required: true, message: '请输入SN' }, { max: 64, message: 'SN最多64个字符' }]}
         />
         <ProFormSelect
           name="process_id"
-          label="工段模板"
+          label="模板"
           request={async () => {
             const list = await listAllProcesses();
             return list.map((item) => ({ label: `${item.code} - ${item.name}`, value: item.id }));
           }}
-          rules={[{ required: true, message: '请选择工段模板' }]}
+          rules={[{ required: true, message: '请选择模板' }]}
         />
         <ProFormSelect
           name="area_id"
-          label="工作区域"
+          label="区域"
           request={async () => {
             const list = await listAllAreas();
             return list.map((item) => ({ label: item.name, value: item.id }));
@@ -459,7 +459,7 @@ const ProcessManagePage = () => {
       </ModalForm>
 
       <Modal
-        title={`实例配置 - ${currentInstance?.code || ''}`}
+        title={`配置 - ${currentInstance?.code || ''}`}
         open={configOpen}
         width={980}
         onCancel={() => {
@@ -527,7 +527,7 @@ const ProcessManagePage = () => {
       >
         <Space direction="vertical" size={12} style={{ width: '100%' }}>
           {currentTemplateItems.length === 0 ? (
-            <Tag color="warning">当前工段模板没有子项，请先在工段模板中配置 ProcessItem</Tag>
+            <Tag color="warning">当前模板没有子项，请先在模板中配置 ProcessItem</Tag>
           ) : null}
           {currentTemplateItems.map((row) => {
             const spec = specMap.get(row.device_spec_id);
