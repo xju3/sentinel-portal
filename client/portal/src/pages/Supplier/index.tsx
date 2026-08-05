@@ -92,7 +92,7 @@ const DeviceSupplierPage = () => {
     {
       title: '供应商名称',
       dataIndex: 'name',
-      width: 180,
+      width: 220,
       sorter: true,
     },
     {

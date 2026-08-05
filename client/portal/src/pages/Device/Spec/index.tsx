@@ -351,6 +351,7 @@ const DeviceSpecPage = () => {
       title: '型号',
       dataIndex: 'model',
       width: 100,
+      ellipsis: true,
       sorter: (a, b) => (a.model || '').localeCompare(b.model || '', 'zh-CN'),
     },
     {
@@ -381,6 +382,8 @@ const DeviceSpecPage = () => {
     {
       title: '供应商',
       dataIndex: 'supplier_id',
+      width: 160,
+      ellipsis: true,
       render: (_, row) => row.supplier?.name || '-',
       sorter: (a, b) => {
         const labelA = a.supplier?.name || '';
@@ -405,7 +408,7 @@ const DeviceSpecPage = () => {
     {
       title: '操作',
       valueType: 'option',
-      width: 300,
+      width: 180,
       fixed: 'right',
       align: 'center',
       render: (_, row) => (

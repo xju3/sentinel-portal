@@ -190,12 +190,10 @@ const SpecComparisonContent = ({
       });
       return {
         name: `${item.device.code} · ${locationName}`,
-        type: 'bar',
+        type: 'line',
         data: points,
-        barMaxWidth: 24,
-        barMinWidth: 2,
-        barGap: '10%',
-        barCategoryGap: '30%',
+        smooth: true,
+        showSymbol: false,
         emphasis: { focus: 'series' },
       };
     });

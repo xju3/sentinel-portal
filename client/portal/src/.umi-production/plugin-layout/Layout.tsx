@@ -84,8 +84,6 @@ export default (props: any) => {
   "logo": "https://preview.pro.ant.design/static/logo.f0355d39.svg",
   "layout": "mix",
   "splitMenus": false,
-  "navTheme": "dark",
-  "headerTheme": "light",
   "fixedHeader": true,
   "fixSiderbar": true,
   "contentWidth": "Fluid"
