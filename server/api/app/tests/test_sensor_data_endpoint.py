@@ -203,11 +203,11 @@ async def test_receive_sensor_data_rejects_invalid_bearing_features():
 @pytest.mark.parametrize(
     ("period", "delay", "expected_age"),
     [
-        (1, 2, timedelta(minutes=2)),
-        (0.5, 4, timedelta(minutes=2)),
+        (20, 1200, timedelta(seconds=1200)),
+        (0.5, 4, timedelta(seconds=4)),
     ],
 )
-async def test_receive_sensor_data_backdates_by_delay_and_payload_period(
+async def test_receive_sensor_data_backdates_by_delay_seconds_independent_of_period(
     monkeypatch,
     period,
     delay,
@@ -326,14 +326,17 @@ async def test_receive_sensor_data_rejects_invalid_delay(delay):
 
 
 @pytest.mark.asyncio
-@pytest.mark.parametrize("period", [None, 0, -1, "1", True, float("nan")])
-async def test_receive_sensor_data_rejects_invalid_period_for_backfill(period):
-    with pytest.raises(HTTPException) as exc_info:
-        await sensors.receive_sensor_data(
-            background_tasks=Mock(),
-            payload={"sn": "STL26SH0001", "delay": 1, "period": period},
-            session=Mock(),
-        )
+async def test_receive_sensor_data_delayed_sample_does_not_require_period(monkeypatch):
+    dispatch = AsyncMock(return_value=[])
+    monkeypatch.setattr(sensors, "dispatch_quick_diagnosis_tasks", dispatch)
 
-    assert exc_info.value.status_code == 400
-    assert "'period'" in exc_info.value.detail
+    await sensors.receive_sensor_data(
+        background_tasks=Mock(),
+        payload={"sn": "STL26SH0001", "delay": 1200},
+        session=Mock(),
+    )
+
+    stored_payload = dispatch.await_args.kwargs["payload"]
+    sample_time = datetime.fromtimestamp(stored_payload["ts_ms"] / 1000, timezone.utc)
+    expected_age = timedelta(seconds=1200)
+    assert abs((datetime.now(timezone.utc) - sample_time - expected_age).total_seconds()) < 1

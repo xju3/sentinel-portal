@@ -502,7 +502,6 @@ async def receive_sensor_data(
     """Receive processed sensor data and asynchronously store to MinIO"""
     sn = payload.get("sensor_sn") or payload.get("sn")
     delay = payload.get("delay", 0)
-    period = payload.get("period")
     total = payload.get("total", 0)
 
     if not sn:
@@ -525,21 +524,12 @@ async def receive_sensor_data(
     ):
         raise HTTPException(status_code=400, detail="'delay' must be a non-negative number")
 
-    if delay > 0 and (
-        isinstance(period, bool)
-        or not isinstance(period, (int, float))
-        or not math.isfinite(period)
-        or period <= 0
-    ):
-        raise HTTPException(
-            status_code=400,
-            detail="'period' must be a positive number of minutes for backfilled data",
-        )
-
     try:
         dt_utc = datetime.now(timezone.utc)
         if delay > 0:
-            dt_utc -= timedelta(minutes=delay * period)
+            # Firmware reports delay as elapsed seconds based on its RTC,
+            # independent of the configured patrol period.
+            dt_utc -= timedelta(seconds=delay)
 
         ts_ms = int(dt_utc.timestamp() * 1000)
         tz_utc_8 = timezone(timedelta(hours=8))
