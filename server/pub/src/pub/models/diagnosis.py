@@ -405,7 +405,7 @@ class DiagnosisFft(Base):
 class DiagnosisNotificationDelivery(Base):
     """Daily WeChat delivery ledger for diagnosis notification events."""
 
-    __tablename__ = "diagnosis_notification_delivery"
+    __tablename__ = "notification_delivery"
     __table_args__ = (
         UniqueConstraint(
             "device_id",
@@ -490,7 +490,7 @@ class DiagnosisNotificationDelivery(Base):
 class DiagnosisNotificationOutbox(Base):
     """Reliable handoff ledger between diagnosis commits and MQTT publishing."""
 
-    __tablename__ = "diagnosis_notification_outbox"
+    __tablename__ = "notification_outbox"
     __table_args__ = (
         UniqueConstraint("event_id", name="uq_diagnosis_notification_outbox_event"),
         Index(
