@@ -90,6 +90,19 @@ def severity_to_level(severity: str) -> int:
     mapping = {"ok": 0, "normal": 0, "info": 0, "attention": 1, "abnormal": 2, "warning": 3, "critical": 4}
     return mapping.get(severity.lower(), 0)
 
+
+def _notification_schema_fields(
+    schema_version: int,
+    overall_level: int,
+    fault_events: list[dict[str, Any]],
+) -> dict[str, Any]:
+    if schema_version == 1:
+        return {"overall_level": overall_level}
+    if schema_version == 2:
+        return {"schema_version": 2, "faults": fault_events}
+    raise ValueError("notification_event_schema_version must be 1 or 2")
+
+
 async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
     logger.info("TRIGGER DIAGNOSIS: Executing diagnosis for device_id=%s", report.device_id)
     try:
@@ -610,7 +623,6 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
                         "report_id": report.report_id,
                         "device_id": str(device_uuid),
                         "sensor_sn": report.sensor_sn,
-                        "overall_level": overall_level,
                         "device_category_id": (
                             str(source_record.device_category_id)
                             if source_record.device_category_id
@@ -623,15 +635,13 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
                         ),
                         "diagnosed_at": diagnosed_at.isoformat(),
                     }
-                    if settings.notification_event_schema_version == 1:
-                        notification_event["overall_level"] = overall_level
-                    elif settings.notification_event_schema_version == 2:
-                        notification_event["schema_version"] = 2
-                        notification_event["faults"] = fault_events
-                    else:
-                        raise ValueError(
-                            "notification_event_schema_version must be 1 or 2"
+                    notification_event.update(
+                        _notification_schema_fields(
+                            settings.notification_event_schema_version,
+                            overall_level,
+                            fault_events,
                         )
+                    )
                     if (
                         settings.notification_event_schema_version != 2
                         or fault_events
