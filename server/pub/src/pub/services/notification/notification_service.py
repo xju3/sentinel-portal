@@ -256,6 +256,7 @@ class NotificationRouteResolution(BaseModel):
 
     device_category_id: UUID | None = None
     process_device_id: UUID | None = None
+    process_device_ids: tuple[UUID, ...] = ()
     device_category_source: Literal[
         "device", "event", "sensor_sn", "ambiguous", "missing"
     ] = "missing"
@@ -362,17 +363,22 @@ class NotificationService:
         )
 
         device_category_ambiguous = bool(device_route["device_category_ambiguous"])
-        process_device_ambiguous = bool(device_route["process_device_ambiguous"])
+        process_device_ids = tuple(device_route["process_device_ids"])
         device_category_id = (
             None
             if device_category_ambiguous
             else device_route["device_category_id"] or event.device_category_id
         )
-        process_device_id = (
-            None
-            if process_device_ambiguous
-            else device_route["process_device_id"] or event.process_device_id
-        )
+        if event.process_device_id in process_device_ids:
+            process_device_id = event.process_device_id
+        elif len(process_device_ids) == 1:
+            process_device_id = process_device_ids[0]
+        elif not process_device_ids:
+            process_device_id = event.process_device_id
+            if process_device_id is not None:
+                process_device_ids = (process_device_id,)
+        else:
+            process_device_id = None
         device_category_source = (
             "ambiguous"
             if device_category_ambiguous
@@ -383,10 +389,8 @@ class NotificationService:
             else "missing"
         )
         process_device_source = (
-            "ambiguous"
-            if process_device_ambiguous
-            else "device"
-            if device_route["process_device_id"]
+            "device"
+            if device_route["process_device_ids"]
             else "event"
             if event.process_device_id
             else "missing"
@@ -394,7 +398,7 @@ class NotificationService:
 
         if event.sensor_sn and (
             (device_category_id is None and not device_category_ambiguous)
-            or (process_device_id is None and not process_device_ambiguous)
+            or not process_device_ids
         ):
             sensor_route = await NotificationService._route_ids_by_sensor_sn(
                 session,
@@ -409,19 +413,21 @@ class NotificationService:
             ):
                 device_category_id = sensor_route["device_category_id"]
                 device_category_source = "sensor_sn"
-            if sensor_route["process_device_ambiguous"]:
-                process_device_id = None
-                process_device_source = "ambiguous"
-            elif (
-                process_device_id is None
-                and sensor_route["process_device_id"] is not None
-            ):
-                process_device_id = sensor_route["process_device_id"]
+            sensor_process_device_ids = tuple(sensor_route["process_device_ids"])
+            if not process_device_ids and sensor_process_device_ids:
+                process_device_ids = sensor_process_device_ids
+                if event.process_device_id in process_device_ids:
+                    process_device_id = event.process_device_id
+                elif len(process_device_ids) == 1:
+                    process_device_id = process_device_ids[0]
+                else:
+                    process_device_id = None
                 process_device_source = "sensor_sn"
 
         return NotificationRouteResolution(
             device_category_id=device_category_id,
             process_device_id=process_device_id,
+            process_device_ids=process_device_ids,
             device_category_source=device_category_source,
             process_device_source=process_device_source,
         )
@@ -445,10 +451,13 @@ class NotificationService:
                 "device_category",
             )
 
-        if route.process_device_id:
+        process_device_ids = route.process_device_ids
+        if not process_device_ids and route.process_device_id is not None:
+            process_device_ids = (route.process_device_id,)
+        for process_device_id in process_device_ids:
             process_rows = await NotificationService._recipient_rows_for_process_device(
                 session,
-                route.process_device_id,
+                process_device_id,
             )
             NotificationService._merge_recipient_rows(
                 recipients,
@@ -949,7 +958,7 @@ class NotificationService:
     def _coalesce_route_ids(
         rows: list[Any],
         relation_key: str,
-    ) -> dict[str, UUID | bool | None]:
+    ) -> dict[str, Any]:
         device_category_ids = {
             row.device_category_id for row in rows if row.device_category_id is not None
         }
@@ -957,7 +966,6 @@ class NotificationService:
             row.process_device_id for row in rows if row.process_device_id is not None
         }
         device_category_id = None
-        process_device_id = None
 
         if len(device_category_ids) == 1:
             device_category_id = next(iter(device_category_ids))
@@ -968,20 +976,12 @@ class NotificationService:
                 sorted(str(value) for value in device_category_ids),
             )
 
-        if len(process_device_ids) == 1:
-            process_device_id = next(iter(process_device_ids))
-        elif len(process_device_ids) > 1:
-            logger.error(
-                "Multiple process_device_id values found for %s: %s",
-                relation_key,
-                sorted(str(value) for value in process_device_ids),
-            )
-
         return {
             "device_category_id": device_category_id,
-            "process_device_id": process_device_id,
+            "process_device_ids": tuple(
+                sorted(process_device_ids, key=lambda value: str(value))
+            ),
             "device_category_ambiguous": len(device_category_ids) > 1,
-            "process_device_ambiguous": len(process_device_ids) > 1,
         }
 
     @staticmethod

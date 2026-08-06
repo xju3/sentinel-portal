@@ -208,20 +208,22 @@ async def test_route_resolution_prefers_current_device_relations():
 
 
 @pytest.mark.asyncio
-async def test_route_resolution_does_not_guess_ambiguous_process_device():
+async def test_route_resolution_keeps_all_process_devices():
     event = _event()
     category_id = uuid4()
+    process_device_a = uuid4()
+    process_device_b = uuid4()
     session = FakeSession(
         [
             FakeExecuteResult(
                 rows=[
                     SimpleNamespace(
                         device_category_id=category_id,
-                        process_device_id=uuid4(),
+                        process_device_id=process_device_a,
                     ),
                     SimpleNamespace(
                         device_category_id=category_id,
-                        process_device_id=uuid4(),
+                        process_device_id=process_device_b,
                     ),
                 ]
             )
@@ -232,7 +234,8 @@ async def test_route_resolution_does_not_guess_ambiguous_process_device():
 
     assert route.device_category_id == category_id
     assert route.process_device_id is None
-    assert route.process_device_source == "ambiguous"
+    assert set(route.process_device_ids) == {process_device_a, process_device_b}
+    assert route.process_device_source == "device"
 
 
 @pytest.mark.asyncio
@@ -284,6 +287,45 @@ async def test_list_recipients_merges_employee_ids(monkeypatch):
     )
     assert recipient_map[employee_b].route_sources == ("device_category",)
     assert recipient_map[employee_c].route_sources == ("process_device",)
+
+
+@pytest.mark.asyncio
+async def test_list_recipients_reads_all_process_device_groups(monkeypatch):
+    event = _event()
+    process_device_a = uuid4()
+    process_device_b = uuid4()
+    employee_a = uuid4()
+    employee_b = uuid4()
+    queried_process_devices = []
+
+    async def fake_resolve_route_ids(*_args, **_kwargs):
+        return NotificationRouteResolution(
+            process_device_ids=(process_device_a, process_device_b),
+            process_device_source="device",
+        )
+
+    async def fake_process_rows(_session, process_device_id):
+        queried_process_devices.append(process_device_id)
+        employee_id = employee_a if process_device_id == process_device_a else employee_b
+        return [
+            SimpleNamespace(
+                id=employee_id,
+                name=str(employee_id),
+                wx_user_id=f"wx-{employee_id}",
+            )
+        ]
+
+    monkeypatch.setattr(NotificationService, "resolve_route_ids", fake_resolve_route_ids)
+    monkeypatch.setattr(
+        NotificationService,
+        "_recipient_rows_for_process_device",
+        fake_process_rows,
+    )
+
+    recipients = await NotificationService.list_recipients(session=None, event=event)
+
+    assert set(queried_process_devices) == {process_device_a, process_device_b}
+    assert {recipient.employee_id for recipient in recipients} == {employee_a, employee_b}
 
 
 @pytest.mark.asyncio
