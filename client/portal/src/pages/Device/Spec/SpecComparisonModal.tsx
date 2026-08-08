@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { Empty, Select, Space, Spin, Tabs, Typography, message } from 'antd';
+import type { ReactNode } from 'react';
+import { Empty, Select, Space, Spin, Tabs, Typography, message, Radio, Row, Col } from 'antd';
 import * as echarts from 'echarts';
 import dayjs from 'dayjs';
 import { useNavigate } from '@umijs/max';
@@ -84,9 +85,13 @@ const toErrorMessage = (error: any) =>
 const SpecComparisonContent = ({
   spec,
   defaultGroupId,
+  refreshKey,
+  specSelector,
 }: {
   spec: DeviceSpec | null;
   defaultGroupId?: string;
+  refreshKey?: number;
+  specSelector?: ReactNode;
 }) => {
   const navigate = useNavigate();
   const chartRef = useRef<HTMLDivElement>(null);
@@ -121,7 +126,7 @@ const SpecComparisonContent = ({
       setData(result);
       setLocationId(
         result.selectedLocationId ||
-          (result.locations.length === 1 ? result.locations[0].id : undefined),
+          (result.locations.length > 0 ? result.locations[0].id : undefined),
       );
     } catch (error) {
       if (seq !== requestSeq.current) return;
@@ -150,7 +155,7 @@ const SpecComparisonContent = ({
         const initialGroupId =
           defaultGroupId && items.some((item) => item.id === defaultGroupId)
             ? defaultGroupId
-            : items.length === 1
+            : items.length > 0
               ? items[0].id
               : undefined;
         setGroupId(initialGroupId);
@@ -168,6 +173,13 @@ const SpecComparisonContent = ({
       active = false;
     };
   }, [spec?.id, defaultGroupId]);
+
+  useEffect(() => {
+    if (refreshKey === undefined || refreshKey === 0) return;
+    if (groupId) {
+      void loadComparison(groupId, locationId, rangeDays, windowMinutes);
+    }
+  }, [refreshKey]);
 
   const chartOption = useMemo(() => {
     if (!data || data.meta.pointCount === 0) return null;
@@ -241,71 +253,133 @@ const SpecComparisonContent = ({
 
   const groupOptions = compatibleGroups.map((item) => ({
     value: item.id,
-    label: [item.code, item.sn, item.process?.name, item.status === 1 ? undefined : '已停用']
-      .filter(Boolean)
-      .join(' / '),
+    label: item.process?.name || item.code,
   }));
 
   return (
     <div className={styles.comparisonPageContent}>
-      <Space wrap className={styles.comparisonFilters}>
-        <Typography.Text type="secondary">设备分组</Typography.Text>
-        <Select
-          value={groupId}
-          options={groupOptions}
-          loading={groupLoading}
-          showSearch
-          optionFilterProp="label"
-          getPopupContainer={(trigger) => trigger.parentElement || document.body}
-          placeholder={groupLoading ? '正在加载设备分组' : '请选择设备分组'}
-          style={{ width: 300 }}
-          onChange={(value) => {
-            setGroupId(value);
-            setLocationId(undefined);
-            setData(null);
-            void loadComparison(value, undefined, rangeDays, windowMinutes);
-          }}
-        />
-        <Typography.Text type="secondary">对比测点</Typography.Text>
-        <Select
-          value={locationId}
-          disabled={!groupId || !data?.locations.length}
-          options={(data?.locations || []).map((item) => ({
-            value: item.id,
-            label: `${item.name}（${item.deviceCount} 台）`,
-          }))}
-          getPopupContainer={(trigger) => trigger.parentElement || document.body}
-          style={{ width: 190 }}
-          onChange={(value) => {
-            setLocationId(value);
-            if (groupId) void loadComparison(groupId, value, rangeDays, windowMinutes);
-          }}
-        />
-        <Typography.Text type="secondary">时间范围</Typography.Text>
-        <Select
-          value={rangeDays}
-          options={RANGE_OPTIONS}
-          getPopupContainer={(trigger) => trigger.parentElement || document.body}
-          style={{ width: 112 }}
-          onChange={(value) => {
-            const nextWindow = DEFAULT_WINDOWS[value];
-            setRangeDays(value);
-            setWindowMinutes(nextWindow);
-            if (groupId) void loadComparison(groupId, locationId, value, nextWindow);
-          }}
-        />
-        <Typography.Text type="secondary">显示窗口</Typography.Text>
-        <Select
-          value={windowMinutes}
-          options={WINDOW_OPTIONS[rangeDays]}
-          getPopupContainer={(trigger) => trigger.parentElement || document.body}
-          style={{ width: 112 }}
-          onChange={(value) => {
-            setWindowMinutes(value);
-            if (groupId) void loadComparison(groupId, locationId, rangeDays, value);
-          }}
-        />
-      </Space>
+      <div className={styles.comparisonFilters} style={{ width: '100%', paddingBottom: 16 }}>
+        <Row gutter={[24, 16]}>
+          {/* 第一列（上）：设备规格 + 设备分组 */}
+          <Col span={14}>
+            <Space size="large" wrap>
+              {specSelector && (
+                <Space>
+                  {specSelector}
+                </Space>
+              )}
+              
+              <Space>
+                <Typography.Text type="secondary">设备分组</Typography.Text>
+                <Radio.Group
+                  value={groupId}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setGroupId(value);
+                    setLocationId(undefined);
+                    setData(null);
+                    void loadComparison(value, undefined, rangeDays, windowMinutes);
+                  }}
+                  optionType="button"
+                  buttonStyle="solid"
+                >
+                  {groupLoading ? (
+                    <Radio.Button disabled value="loading">正在加载...</Radio.Button>
+                  ) : groupOptions.length > 0 ? (
+                    groupOptions.map((item) => (
+                      <Radio.Button key={item.value} value={item.value}>
+                        {item.label}
+                      </Radio.Button>
+                    ))
+                  ) : (
+                    <Radio.Button disabled value="empty">暂无分组</Radio.Button>
+                  )}
+                </Radio.Group>
+              </Space>
+            </Space>
+          </Col>
+
+          {/* 第二列（上）：对比测点 */}
+          <Col span={10}>
+            <Space wrap>
+              <Typography.Text type="secondary">对比测点</Typography.Text>
+              <Radio.Group
+                value={locationId}
+                disabled={!groupId || !data?.locations.length}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setLocationId(value);
+                  if (groupId) void loadComparison(groupId, value, rangeDays, windowMinutes);
+                }}
+                optionType="button"
+                buttonStyle="solid"
+              >
+                {!groupId ? (
+                  <Radio.Button disabled value="empty">请先选择分组</Radio.Button>
+                ) : loading && !data?.locations?.length ? (
+                  <Radio.Button disabled value="loading">正在加载...</Radio.Button>
+                ) : data?.locations?.length ? (
+                  data.locations.map((item) => (
+                    <Radio.Button key={item.id} value={item.id}>
+                      {item.name}（{item.deviceCount} 台）
+                    </Radio.Button>
+                  ))
+                ) : (
+                  <Radio.Button disabled value="empty">暂无测点</Radio.Button>
+                )}
+              </Radio.Group>
+            </Space>
+          </Col>
+
+          {/* 第一列（下）：时间范围 */}
+          <Col span={14}>
+            <Space wrap>
+              <Typography.Text type="secondary">时间范围</Typography.Text>
+              <Radio.Group
+                value={rangeDays}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  const nextWindow = DEFAULT_WINDOWS[value];
+                  setRangeDays(value);
+                  setWindowMinutes(nextWindow);
+                  if (groupId) void loadComparison(groupId, locationId, value, nextWindow);
+                }}
+                optionType="button"
+                buttonStyle="solid"
+              >
+                {RANGE_OPTIONS.map((item) => (
+                  <Radio.Button key={item.value} value={item.value}>
+                    {item.label}
+                  </Radio.Button>
+                ))}
+              </Radio.Group>
+            </Space>
+          </Col>
+
+          {/* 第二列（下）：显示窗口 */}
+          <Col span={10}>
+            <Space wrap>
+              <Typography.Text type="secondary">显示窗口</Typography.Text>
+              <Radio.Group
+                value={windowMinutes}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setWindowMinutes(value);
+                  if (groupId) void loadComparison(groupId, locationId, rangeDays, value);
+                }}
+                optionType="button"
+                buttonStyle="solid"
+              >
+                {WINDOW_OPTIONS[rangeDays].map((item) => (
+                  <Radio.Button key={item.value} value={item.value}>
+                    {item.label}
+                  </Radio.Button>
+                ))}
+              </Radio.Group>
+            </Space>
+          </Col>
+        </Row>
+      </div>
 
       <Tabs
         activeKey={activeTab}

@@ -3,10 +3,11 @@ import {
   ArrowLeftOutlined,
   FullscreenExitOutlined,
   FullscreenOutlined,
+  ReloadOutlined,
 } from '@ant-design/icons';
 import { PageContainer } from '@ant-design/pro-components';
 import { useNavigate, useParams, useSearchParams } from '@umijs/max';
-import { Button, Card, Empty, Select, Space, Spin, Typography, message } from 'antd';
+import { Button, Card, Empty, Space, Spin, Typography, message, TreeSelect, Radio } from 'antd';
 
 import SpecComparisonContent from '@/pages/Device/Spec/SpecComparisonModal';
 import {
@@ -23,6 +24,7 @@ const SpecComparisonPage = () => {
   const navigate = useNavigate();
   const fullscreenRef = useRef<HTMLDivElement>(null);
   const [fullscreen, setFullscreen] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
   const [loading, setLoading] = useState(true);
   const [categories, setCategories] = useState<DeviceCategory[]>([]);
   const [specs, setSpecs] = useState<DeviceSpec[]>([]);
@@ -94,6 +96,41 @@ const SpecComparisonPage = () => {
     ? specsByCategory.get(selectedSpec.device_category_id) || []
     : [];
 
+  const categoryTreeData = useMemo(() => {
+    const map = new Map();
+    categories.forEach((item) => {
+      map.set(item.id, {
+        value: item.id,
+        title: item.name,
+        disabled: !specsByCategory.get(item.id)?.length,
+        children: [],
+      });
+    });
+
+    const tree: any[] = [];
+    categories.forEach((item) => {
+      const node = map.get(item.id);
+      if (item.parent_id && map.has(item.parent_id)) {
+        map.get(item.parent_id).children.push(node);
+      } else {
+        tree.push(node);
+      }
+    });
+
+    const cleanEmptyChildren = (nodes: any[]) => {
+      nodes.forEach((node) => {
+        if (node.children.length === 0) {
+          delete node.children;
+        } else {
+          cleanEmptyChildren(node.children);
+        }
+      });
+    };
+    cleanEmptyChildren(tree);
+
+    return tree;
+  }, [categories, specsByCategory]);
+
   const navigateToSpec = (specId: string) => {
     navigate(`/device/specs/${specId}/comparison`);
   };
@@ -104,6 +141,31 @@ const SpecComparisonPage = () => {
       title="同规格设备对比"
       subTitle={selectedSpec ? `${selectedSpec.name} / ${selectedSpec.model}` : undefined}
       extra={[
+        <Space key="category" style={{ marginRight: 24 }}>
+          <Typography.Text type="secondary">设备分类</Typography.Text>
+          <TreeSelect
+            value={selectedSpec?.device_category_id}
+            loading={loading}
+            showSearch
+            treeNodeFilterProp="title"
+            treeDefaultExpandAll
+            getPopupContainer={(trigger) => trigger.parentElement || document.body}
+            placeholder="请选择设备分类"
+            style={{ width: 220 }}
+            treeData={categoryTreeData}
+            onChange={(categoryId) => {
+              const firstSpec = specsByCategory.get(categoryId)?.[0];
+              if (firstSpec) navigateToSpec(firstSpec.id);
+            }}
+          />
+        </Space>,
+        <Button
+          key="refresh"
+          icon={<ReloadOutlined />}
+          onClick={() => setRefreshKey((k) => k + 1)}
+        >
+          刷新
+        </Button>,
         <Button
           key="fullscreen"
           icon={fullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}
@@ -116,54 +178,29 @@ const SpecComparisonPage = () => {
         </Button>,
       ]}
     >
-      <Card style={{ marginBottom: 16 }}>
-        <Space size="large" wrap>
-          <Space>
-            <Typography.Text type="secondary">设备分类</Typography.Text>
-            <Select
-              value={selectedSpec?.device_category_id}
-              loading={loading}
-              showSearch
-              optionFilterProp="label"
-              getPopupContainer={(trigger) => trigger.parentElement || document.body}
-              placeholder="请选择设备分类"
-              style={{ width: 220 }}
-              options={categories.map((item) => ({
-                value: item.id,
-                label: item.name,
-                disabled: !specsByCategory.get(item.id)?.length,
-              }))}
-              onChange={(categoryId) => {
-                const firstSpec = specsByCategory.get(categoryId)?.[0];
-                if (firstSpec) navigateToSpec(firstSpec.id);
-              }}
-            />
-          </Space>
-          <Space>
-            <Typography.Text type="secondary">设备规格</Typography.Text>
-            <Select
-              value={selectedSpec?.id}
-              loading={loading}
-              showSearch
-              optionFilterProp="label"
-              getPopupContainer={(trigger) => trigger.parentElement || document.body}
-              placeholder="请选择设备规格"
-              style={{ width: 280 }}
-              options={categorySpecs.map((item) => ({
-                value: item.id,
-                label: `${item.name} / ${item.model}`,
-              }))}
-              onChange={navigateToSpec}
-            />
-          </Space>
-        </Space>
-      </Card>
-
       <Spin spinning={loading}>
         {selectedSpec ? (
           <SpecComparisonContent
             spec={selectedSpec}
             defaultGroupId={searchParams.get('group') || undefined}
+            refreshKey={refreshKey}
+            specSelector={
+              <>
+                <Typography.Text type="secondary">设备规格</Typography.Text>
+                <Radio.Group
+                  value={selectedSpec?.id}
+                  onChange={(e) => navigateToSpec(e.target.value)}
+                  optionType="button"
+                  buttonStyle="solid"
+                >
+                  {categorySpecs.map((item) => (
+                    <Radio.Button key={item.id} value={item.id}>
+                      {item.name} / {item.model}
+                    </Radio.Button>
+                  ))}
+                </Radio.Group>
+              </>
+            }
           />
         ) : (
           !loading && <Empty description="没有可用于对比的设备规格" />

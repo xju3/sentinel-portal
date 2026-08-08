@@ -31,7 +31,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -44,7 +44,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 5
+        "register": 11
       },
       "enableBy": "register"
     },
@@ -74,7 +74,7 @@
             0
           ]
         },
-        "register": 2
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -108,7 +108,7 @@
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -135,10 +135,10 @@
       "time": {
         "hooks": {
           "modifyAppData": [
-            32
+            26
           ]
         },
-        "register": 16
+        "register": 12
       },
       "enableBy": "register"
     },
@@ -171,7 +171,7 @@
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -185,10 +185,10 @@
       "time": {
         "hooks": {
           "onCheck": [
-            1
+            0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -201,7 +201,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -218,7 +218,7 @@
             0
           ]
         },
-        "register": 6
+        "register": 3
       },
       "enableBy": "register"
     },
@@ -1084,7 +1084,7 @@
       "time": {
         "hooks": {
           "onStart": [
-            0
+            1
           ]
         },
         "register": 0
@@ -1100,7 +1100,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1113,7 +1113,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 52
+        "register": 46
       },
       "enableBy": "register"
     },
@@ -1126,7 +1126,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 27
+        "register": 17
       },
       "enableBy": "config"
     },
@@ -1139,7 +1139,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 9
+        "register": 5
       },
       "enableBy": "config"
     },
@@ -1156,7 +1156,7 @@
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1169,7 +1169,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1182,7 +1182,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1195,7 +1195,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 22
+        "register": 18
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/mpa/mpa": {
@@ -1245,7 +1245,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1262,7 +1262,7 @@
             0
           ]
         },
-        "register": 1
+        "register": 0
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/polyfill/publicPathPolyfill": {
@@ -1274,7 +1274,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1287,7 +1287,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1313,7 +1313,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1326,7 +1326,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1339,7 +1339,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1377,7 +1377,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 3
       },
       "enableBy": "config"
     },
@@ -1390,7 +1390,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1403,7 +1403,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1454,7 +1454,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 15
+        "register": 12
       },
       "enableBy": "config"
     },
@@ -1467,7 +1467,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/clickToComponent/clickToComponent": {
@@ -1479,7 +1479,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/legacy/legacy": {
@@ -1517,7 +1517,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/swc/swc": {
@@ -1546,7 +1546,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/mako/mako": {
@@ -1558,7 +1558,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1571,7 +1571,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/hmrGuardian/hmrGuardian": {
@@ -1595,7 +1595,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 18
+        "register": 16
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/forget/forget": {
@@ -1620,7 +1620,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1646,7 +1646,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 25
+        "register": 21
       },
       "enableBy": "register"
     },
@@ -1659,7 +1659,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 21
+        "register": 11
       }
     },
     "./node_modules/@umijs/preset-umi/dist/commands/help": {
@@ -1697,7 +1697,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1710,7 +1710,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1749,7 +1749,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1775,7 +1775,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1840,7 +1840,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1892,7 +1892,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -1905,7 +1905,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 16
+        "register": 12
       },
       "enableBy": "register"
     },
@@ -1931,7 +1931,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1972,7 +1972,7 @@
       "time": {
         "hooks": {
           "modifyConfig": [
-            4
+            3
           ],
           "modifyAppData": [
             0
@@ -1981,7 +1981,7 @@
             0
           ]
         },
-        "register": 7
+        "register": 5
       }
     },
     "./node_modules/@umijs/plugins/dist/dva": {
@@ -1993,7 +1993,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 4
+        "register": 3
       },
       "enableBy": "config"
     },
@@ -2028,10 +2028,10 @@
             0
           ],
           "modifyAppData": [
-            0
+            1
           ]
         },
-        "register": 2
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2044,7 +2044,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2121,7 +2121,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       }
     },
     "./node_modules/@umijs/plugins/dist/react-query": {
@@ -2133,7 +2133,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2146,7 +2146,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2159,7 +2159,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2172,7 +2172,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2185,7 +2185,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2249,7 +2249,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     }
@@ -3929,7 +3929,7 @@
       "parentId": "19",
       "id": "23",
       "absPath": "/device/specs/:deviceSpecId/comparison",
-      "__content": "import { useEffect, useMemo, useRef, useState } from 'react';\nimport {\n  ArrowLeftOutlined,\n  FullscreenExitOutlined,\n  FullscreenOutlined,\n} from '@ant-design/icons';\nimport { PageContainer } from '@ant-design/pro-components';\nimport { useNavigate, useParams, useSearchParams } from '@umijs/max';\nimport { Button, Card, Empty, Select, Space, Spin, Typography, message } from 'antd';\n\nimport SpecComparisonContent from '@/pages/Device/Spec/SpecComparisonModal';\nimport {\n  DeviceCategory,\n  listAllDeviceCategories,\n} from '@/services/deviceCategory';\nimport { DeviceSpec, listAllDeviceSpecs } from '@/services/deviceSpec';\n\nimport styles from './index.less';\n\nconst SpecComparisonPage = () => {\n  const { deviceSpecId = '' } = useParams<{ deviceSpecId: string }>();\n  const [searchParams] = useSearchParams();\n  const navigate = useNavigate();\n  const fullscreenRef = useRef<HTMLDivElement>(null);\n  const [fullscreen, setFullscreen] = useState(false);\n  const [loading, setLoading] = useState(true);\n  const [categories, setCategories] = useState<DeviceCategory[]>([]);\n  const [specs, setSpecs] = useState<DeviceSpec[]>([]);\n\n  useEffect(() => {\n    const handleFullscreenChange = () => {\n      setFullscreen(document.fullscreenElement === fullscreenRef.current);\n    };\n    document.addEventListener('fullscreenchange', handleFullscreenChange);\n    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);\n  }, []);\n\n  const toggleFullscreen = async () => {\n    try {\n      if (document.fullscreenElement) {\n        await document.exitFullscreen();\n      } else if (fullscreenRef.current) {\n        await fullscreenRef.current.requestFullscreen();\n      }\n    } catch (error: any) {\n      message.error(error?.message || '无法切换全屏显示');\n    }\n  };\n\n  useEffect(() => {\n    let active = true;\n    setLoading(true);\n    Promise.all([listAllDeviceCategories(), listAllDeviceSpecs()])\n      .then(([categoryRows, specRows]) => {\n        if (!active) return;\n        setCategories(categoryRows);\n        setSpecs(specRows);\n        if (specRows.length > 0 && !specRows.some((item) => item.id === deviceSpecId)) {\n          navigate(`/device/specs/${specRows[0].id}/comparison`, { replace: true });\n        }\n      })\n      .catch((error: any) => {\n        if (active) {\n          message.error(error?.data?.detail || error?.message || '设备规格加载失败');\n        }\n      })\n      .finally(() => {\n        if (active) setLoading(false);\n      });\n    return () => {\n      active = false;\n    };\n  }, []);\n\n  const selectedSpec = useMemo(\n    () => specs.find((item) => item.id === deviceSpecId) || null,\n    [deviceSpecId, specs],\n  );\n  const specsByCategory = useMemo(() => {\n    const grouped = new Map<string, DeviceSpec[]>();\n    specs.forEach((item) => {\n      const items = grouped.get(item.device_category_id) || [];\n      items.push(item);\n      grouped.set(item.device_category_id, items);\n    });\n    grouped.forEach((items) =>\n      items.sort((left, right) =>\n        `${left.name}-${left.model}`.localeCompare(`${right.name}-${right.model}`, 'zh-CN'),\n      ),\n    );\n    return grouped;\n  }, [specs]);\n  const categorySpecs = selectedSpec\n    ? specsByCategory.get(selectedSpec.device_category_id) || []\n    : [];\n\n  const navigateToSpec = (specId: string) => {\n    navigate(`/device/specs/${specId}/comparison`);\n  };\n\n  return (\n    <div ref={fullscreenRef} className={styles.fullscreenHost}>\n      <PageContainer\n      title=\"同规格设备对比\"\n      subTitle={selectedSpec ? `${selectedSpec.name} / ${selectedSpec.model}` : undefined}\n      extra={[\n        <Button\n          key=\"fullscreen\"\n          icon={fullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}\n          onClick={() => void toggleFullscreen()}\n        >\n          {fullscreen ? '退出全屏' : '全屏'}\n        </Button>,\n        <Button key=\"back\" icon={<ArrowLeftOutlined />} onClick={() => navigate('/device/specs')}>\n          返回设备规格\n        </Button>,\n      ]}\n    >\n      <Card style={{ marginBottom: 16 }}>\n        <Space size=\"large\" wrap>\n          <Space>\n            <Typography.Text type=\"secondary\">设备分类</Typography.Text>\n            <Select\n              value={selectedSpec?.device_category_id}\n              loading={loading}\n              showSearch\n              optionFilterProp=\"label\"\n              getPopupContainer={(trigger) => trigger.parentElement || document.body}\n              placeholder=\"请选择设备分类\"\n              style={{ width: 220 }}\n              options={categories.map((item) => ({\n                value: item.id,\n                label: item.name,\n                disabled: !specsByCategory.get(item.id)?.length,\n              }))}\n              onChange={(categoryId) => {\n                const firstSpec = specsByCategory.get(categoryId)?.[0];\n                if (firstSpec) navigateToSpec(firstSpec.id);\n              }}\n            />\n          </Space>\n          <Space>\n            <Typography.Text type=\"secondary\">设备规格</Typography.Text>\n            <Select\n              value={selectedSpec?.id}\n              loading={loading}\n              showSearch\n              optionFilterProp=\"label\"\n              getPopupContainer={(trigger) => trigger.parentElement || document.body}\n              placeholder=\"请选择设备规格\"\n              style={{ width: 280 }}\n              options={categorySpecs.map((item) => ({\n                value: item.id,\n                label: `${item.name} / ${item.model}`,\n              }))}\n              onChange={navigateToSpec}\n            />\n          </Space>\n        </Space>\n      </Card>\n\n      <Spin spinning={loading}>\n        {selectedSpec ? (\n          <SpecComparisonContent\n            spec={selectedSpec}\n            defaultGroupId={searchParams.get('group') || undefined}\n          />\n        ) : (\n          !loading && <Empty description=\"没有可用于对比的设备规格\" />\n        )}\n      </Spin>\n      </PageContainer>\n    </div>\n  );\n};\n\nexport default SpecComparisonPage;\n",
+      "__content": "import { useEffect, useMemo, useRef, useState } from 'react';\nimport {\n  ArrowLeftOutlined,\n  FullscreenExitOutlined,\n  FullscreenOutlined,\n  ReloadOutlined,\n} from '@ant-design/icons';\nimport { PageContainer } from '@ant-design/pro-components';\nimport { useNavigate, useParams, useSearchParams } from '@umijs/max';\nimport { Button, Card, Empty, Space, Spin, Typography, message, TreeSelect, Radio } from 'antd';\n\nimport SpecComparisonContent from '@/pages/Device/Spec/SpecComparisonModal';\nimport {\n  DeviceCategory,\n  listAllDeviceCategories,\n} from '@/services/deviceCategory';\nimport { DeviceSpec, listAllDeviceSpecs } from '@/services/deviceSpec';\n\nimport styles from './index.less';\n\nconst SpecComparisonPage = () => {\n  const { deviceSpecId = '' } = useParams<{ deviceSpecId: string }>();\n  const [searchParams] = useSearchParams();\n  const navigate = useNavigate();\n  const fullscreenRef = useRef<HTMLDivElement>(null);\n  const [fullscreen, setFullscreen] = useState(false);\n  const [refreshKey, setRefreshKey] = useState(0);\n  const [loading, setLoading] = useState(true);\n  const [categories, setCategories] = useState<DeviceCategory[]>([]);\n  const [specs, setSpecs] = useState<DeviceSpec[]>([]);\n\n  useEffect(() => {\n    const handleFullscreenChange = () => {\n      setFullscreen(document.fullscreenElement === fullscreenRef.current);\n    };\n    document.addEventListener('fullscreenchange', handleFullscreenChange);\n    return () => document.removeEventListener('fullscreenchange', handleFullscreenChange);\n  }, []);\n\n  const toggleFullscreen = async () => {\n    try {\n      if (document.fullscreenElement) {\n        await document.exitFullscreen();\n      } else if (fullscreenRef.current) {\n        await fullscreenRef.current.requestFullscreen();\n      }\n    } catch (error: any) {\n      message.error(error?.message || '无法切换全屏显示');\n    }\n  };\n\n  useEffect(() => {\n    let active = true;\n    setLoading(true);\n    Promise.all([listAllDeviceCategories(), listAllDeviceSpecs()])\n      .then(([categoryRows, specRows]) => {\n        if (!active) return;\n        setCategories(categoryRows);\n        setSpecs(specRows);\n        if (specRows.length > 0 && !specRows.some((item) => item.id === deviceSpecId)) {\n          navigate(`/device/specs/${specRows[0].id}/comparison`, { replace: true });\n        }\n      })\n      .catch((error: any) => {\n        if (active) {\n          message.error(error?.data?.detail || error?.message || '设备规格加载失败');\n        }\n      })\n      .finally(() => {\n        if (active) setLoading(false);\n      });\n    return () => {\n      active = false;\n    };\n  }, []);\n\n  const selectedSpec = useMemo(\n    () => specs.find((item) => item.id === deviceSpecId) || null,\n    [deviceSpecId, specs],\n  );\n  const specsByCategory = useMemo(() => {\n    const grouped = new Map<string, DeviceSpec[]>();\n    specs.forEach((item) => {\n      const items = grouped.get(item.device_category_id) || [];\n      items.push(item);\n      grouped.set(item.device_category_id, items);\n    });\n    grouped.forEach((items) =>\n      items.sort((left, right) =>\n        `${left.name}-${left.model}`.localeCompare(`${right.name}-${right.model}`, 'zh-CN'),\n      ),\n    );\n    return grouped;\n  }, [specs]);\n  const categorySpecs = selectedSpec\n    ? specsByCategory.get(selectedSpec.device_category_id) || []\n    : [];\n\n  const categoryTreeData = useMemo(() => {\n    const map = new Map();\n    categories.forEach((item) => {\n      map.set(item.id, {\n        value: item.id,\n        title: item.name,\n        disabled: !specsByCategory.get(item.id)?.length,\n        children: [],\n      });\n    });\n\n    const tree: any[] = [];\n    categories.forEach((item) => {\n      const node = map.get(item.id);\n      if (item.parent_id && map.has(item.parent_id)) {\n        map.get(item.parent_id).children.push(node);\n      } else {\n        tree.push(node);\n      }\n    });\n\n    const cleanEmptyChildren = (nodes: any[]) => {\n      nodes.forEach((node) => {\n        if (node.children.length === 0) {\n          delete node.children;\n        } else {\n          cleanEmptyChildren(node.children);\n        }\n      });\n    };\n    cleanEmptyChildren(tree);\n\n    return tree;\n  }, [categories, specsByCategory]);\n\n  const navigateToSpec = (specId: string) => {\n    navigate(`/device/specs/${specId}/comparison`);\n  };\n\n  return (\n    <div ref={fullscreenRef} className={styles.fullscreenHost}>\n      <PageContainer\n      title=\"同规格设备对比\"\n      subTitle={selectedSpec ? `${selectedSpec.name} / ${selectedSpec.model}` : undefined}\n      extra={[\n        <Space key=\"category\" style={{ marginRight: 24 }}>\n          <Typography.Text type=\"secondary\">设备分类</Typography.Text>\n          <TreeSelect\n            value={selectedSpec?.device_category_id}\n            loading={loading}\n            showSearch\n            treeNodeFilterProp=\"title\"\n            treeDefaultExpandAll\n            getPopupContainer={(trigger) => trigger.parentElement || document.body}\n            placeholder=\"请选择设备分类\"\n            style={{ width: 220 }}\n            treeData={categoryTreeData}\n            onChange={(categoryId) => {\n              const firstSpec = specsByCategory.get(categoryId)?.[0];\n              if (firstSpec) navigateToSpec(firstSpec.id);\n            }}\n          />\n        </Space>,\n        <Button\n          key=\"refresh\"\n          icon={<ReloadOutlined />}\n          onClick={() => setRefreshKey((k) => k + 1)}\n        >\n          刷新\n        </Button>,\n        <Button\n          key=\"fullscreen\"\n          icon={fullscreen ? <FullscreenExitOutlined /> : <FullscreenOutlined />}\n          onClick={() => void toggleFullscreen()}\n        >\n          {fullscreen ? '退出全屏' : '全屏'}\n        </Button>,\n        <Button key=\"back\" icon={<ArrowLeftOutlined />} onClick={() => navigate('/device/specs')}>\n          返回设备规格\n        </Button>,\n      ]}\n    >\n      <Spin spinning={loading}>\n        {selectedSpec ? (\n          <SpecComparisonContent\n            spec={selectedSpec}\n            defaultGroupId={searchParams.get('group') || undefined}\n            refreshKey={refreshKey}\n            specSelector={\n              <>\n                <Typography.Text type=\"secondary\">设备规格</Typography.Text>\n                <Radio.Group\n                  value={selectedSpec?.id}\n                  onChange={(e) => navigateToSpec(e.target.value)}\n                  optionType=\"button\"\n                  buttonStyle=\"solid\"\n                >\n                  {categorySpecs.map((item) => (\n                    <Radio.Button key={item.id} value={item.id}>\n                      {item.name} / {item.model}\n                    </Radio.Button>\n                  ))}\n                </Radio.Group>\n              </>\n            }\n          />\n        ) : (\n          !loading && <Empty description=\"没有可用于对比的设备规格\" />\n        )}\n      </Spin>\n      </PageContainer>\n    </div>\n  );\n};\n\nexport default SpecComparisonPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/LH.朗湖科技/Sentinel/Codes/Platform/client/portal/src/pages/Device/SpecComparison/index.tsx"
     },
