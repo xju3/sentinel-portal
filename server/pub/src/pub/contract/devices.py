@@ -462,6 +462,7 @@ class ProcessDeviceItemCreate(BaseModel):
     desc: str
     device_inst_id: UUID
     process_device_id: UUID
+    color: str
 
 
 class ProcessDeviceItemUpdate(BaseModel):
@@ -469,6 +470,7 @@ class ProcessDeviceItemUpdate(BaseModel):
     desc: Optional[str] = None
     device_inst_id: Optional[UUID] = None
     process_device_id: Optional[UUID] = None
+    color: Optional[str] = None
 
 
 class ProcessDeviceItemResponse(BaseModel):
@@ -477,6 +479,7 @@ class ProcessDeviceItemResponse(BaseModel):
     desc: str
     device_inst_id: UUID
     process_device_id: UUID
+    color: str
 
     model_config = ConfigDict(from_attributes=True)
 

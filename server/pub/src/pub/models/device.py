@@ -260,7 +260,7 @@ class ProcessDeviceItem(Base):
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     code = Column(String(16), nullable=False, unique=True, index=True)
-    color = Column(String(32), nullable=False, unique=True, index=True)
+    color = Column(String(32), nullable=False, index=True)
     desc = Column(String(128), nullable=False)
     device_inst_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to device_insts
     process_device_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to process_devices
