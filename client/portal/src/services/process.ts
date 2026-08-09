@@ -54,6 +54,7 @@ export type ProcessDeviceItem = {
   desc: string;
   device_inst_id: string;
   process_device_id: string;
+  color: string;
 };
 
 export type ProcessDeviceItemPayload = {
@@ -61,6 +62,7 @@ export type ProcessDeviceItemPayload = {
   desc: string;
   device_inst_id: string;
   process_device_id: string;
+  color: string;
 };
 
 export async function listAllProcesses() {

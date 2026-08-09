@@ -161,7 +161,7 @@ class DevicePointTrendService:
     ) -> dict[str, Any]:
         devices = (
             await session.execute(
-                select(DeviceInst.id, DeviceInst.name, DeviceInst.code)
+                select(DeviceInst.id, DeviceInst.name, DeviceInst.code, ProcessDeviceItem.color)
                 .select_from(ProcessDeviceItem)
                 .join(
                     DeviceInst,
@@ -269,6 +269,7 @@ class DevicePointTrendService:
                         "id": str(device.id),
                         "name": device.name,
                         "code": device.code,
+                        "color": device.color,
                     },
                     **trend,
                 }

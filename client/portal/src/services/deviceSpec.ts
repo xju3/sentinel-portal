@@ -85,7 +85,12 @@ export type DeviceSpecComparison = {
     activeDeviceCount: number;
   } | null;
   series: Array<{
-    device: { id: string; name: string; code: string };
+    device: {
+      id: string;
+      name: string;
+      code: string;
+      color: string;
+    };
     timestamps: string[];
     temperature: DeviceSpecComparisonPoint[];
     vibration: DeviceSpecComparisonPoint[];

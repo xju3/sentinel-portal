@@ -495,18 +495,63 @@ const ProcessManagePage = () => {
           setConfigSaving(true);
           try {
             await Promise.all(currentInstanceItems.map((item) => deleteProcessDeviceItem(item.id)));
+            const globalDeviceColorMap = new Map<string, string>();
+            processDeviceItems.forEach((item) => {
+              if (item.device_inst_id && item.color) {
+                globalDeviceColorMap.set(item.device_inst_id, item.color);
+              }
+            });
+
+            const usedColorsInGroup = new Set<string>();
+            const deviceColorAssignments = new Map<string, string>();
+
+            const GROUP_COLORS = [
+              '#1677FF', '#52C41A', '#FA8C16', '#F5222D', '#722ED1',
+              '#13C2C2', '#EB2F96', '#FADB14', '#A0D911', '#FA541C',
+              '#2F54EB', '#7CB305', '#D48806', '#CF1322', '#531DAB',
+              '#08979C', '#C41D7F', '#D4B106', '#5B8C00', '#D4380D',
+            ];
+
+            for (const row of currentTemplateItems) {
+              const selected = configSelections[row.id] || [];
+              for (const instId of selected) {
+                if (globalDeviceColorMap.has(instId)) {
+                  const c = globalDeviceColorMap.get(instId)!;
+                  deviceColorAssignments.set(instId, c);
+                  usedColorsInGroup.add(c);
+                }
+              }
+            }
+
+            for (const row of currentTemplateItems) {
+              const selected = configSelections[row.id] || [];
+              for (const instId of selected) {
+                if (!deviceColorAssignments.has(instId)) {
+                  let color = GROUP_COLORS.find((c) => !usedColorsInGroup.has(c));
+                  if (!color) {
+                    color = GROUP_COLORS[deviceColorAssignments.size % GROUP_COLORS.length];
+                  }
+                  deviceColorAssignments.set(instId, color);
+                  usedColorsInGroup.add(color);
+                  globalDeviceColorMap.set(instId, color);
+                }
+              }
+            }
+
             const createTasks: Promise<any>[] = [];
             let seq = 1;
             for (const row of currentTemplateItems) {
               const selected = configSelections[row.id] || [];
               for (const instId of selected) {
                 const specName = specMap.get(row.device_spec_id)?.name || row.device_spec_id;
+                const color = deviceColorAssignments.get(instId)!;
                 createTasks.push(
                   createProcessDeviceItem({
                     code: makeItemCode(currentInstance.code, seq++),
                     desc: `${currentInstance.code}-${specName}`,
                     device_inst_id: instId,
                     process_device_id: currentInstance.id,
+                    color: color,
                   }),
                 );
               }

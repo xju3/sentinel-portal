@@ -17,13 +17,16 @@ import styles from './index.less';
 type TrendTab = 'temperature' | 'vibration';
 
 const SERIES_COLORS = [
-  '#1677ff',
-  '#fa8c16',
-  '#52c41a',
-  '#722ed1',
-  '#13c2c2',
-  '#eb2f96',
-  '#a0d911',
+  '#1677FF',
+  '#52C41A',
+  '#FA8C16',
+  '#F5222D',
+  '#722ED1',
+  '#13C2C2',
+  '#EB2F96',
+  '#FADB14',
+  '#A0D911',
+  '#FA541C',
 ];
 
 const RANGE_OPTIONS = [
@@ -211,7 +214,7 @@ const SpecComparisonContent = ({
     });
     return {
       animation: false,
-      color: SERIES_COLORS,
+      color: data.series.map(item => item.device.color || SERIES_COLORS[0]),
       tooltip: {
         trigger: 'axis',
         valueFormatter: (value: number | null) =>
@@ -432,7 +435,7 @@ const SpecComparisonContent = ({
                 >
                   <span
                     className={styles.comparisonDeviceColor}
-                    style={{ backgroundColor: SERIES_COLORS[index % SERIES_COLORS.length] }}
+                    style={{ backgroundColor: item.device.color || SERIES_COLORS[index % SERIES_COLORS.length] }}
                   />
                   <span className={styles.comparisonDeviceIdentity}>
                     <Typography.Text ellipsis title={item.device.name}>

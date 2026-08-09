@@ -31,7 +31,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -44,7 +44,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 11
+        "register": 5
       },
       "enableBy": "register"
     },
@@ -57,7 +57,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -74,7 +74,7 @@
             0
           ]
         },
-        "register": 1
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -121,7 +121,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -135,10 +135,10 @@
       "time": {
         "hooks": {
           "modifyAppData": [
-            26
+            36
           ]
         },
-        "register": 12
+        "register": 14
       },
       "enableBy": "register"
     },
@@ -171,7 +171,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -218,7 +218,7 @@
             0
           ]
         },
-        "register": 3
+        "register": 5
       },
       "enableBy": "register"
     },
@@ -1084,7 +1084,7 @@
       "time": {
         "hooks": {
           "onStart": [
-            1
+            0
           ]
         },
         "register": 0
@@ -1100,7 +1100,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1113,7 +1113,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 46
+        "register": 52
       },
       "enableBy": "register"
     },
@@ -1126,7 +1126,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 17
+        "register": 28
       },
       "enableBy": "config"
     },
@@ -1139,7 +1139,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 5
+        "register": 9
       },
       "enableBy": "config"
     },
@@ -1182,7 +1182,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1195,7 +1195,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 18
+        "register": 23
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/mpa/mpa": {
@@ -1262,7 +1262,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/polyfill/publicPathPolyfill": {
@@ -1274,7 +1274,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1287,7 +1287,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1300,7 +1300,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1326,7 +1326,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1339,7 +1339,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 4
       },
       "enableBy": "register"
     },
@@ -1365,7 +1365,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/ssr/ssr": {
@@ -1377,7 +1377,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1390,7 +1390,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -1416,7 +1416,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "config"
     },
@@ -1442,7 +1442,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 3
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/monorepo/redirect": {
@@ -1454,7 +1454,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 12
+        "register": 14
       },
       "enableBy": "config"
     },
@@ -1479,7 +1479,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/legacy/legacy": {
@@ -1533,7 +1533,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1546,7 +1546,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/mako/mako": {
@@ -1558,7 +1558,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1571,7 +1571,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/hmrGuardian/hmrGuardian": {
@@ -1595,7 +1595,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 16
+        "register": 19
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/forget/forget": {
@@ -1620,7 +1620,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1646,7 +1646,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 21
+        "register": 26
       },
       "enableBy": "register"
     },
@@ -1659,7 +1659,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 11
+        "register": 21
       }
     },
     "./node_modules/@umijs/preset-umi/dist/commands/help": {
@@ -1684,7 +1684,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1736,7 +1736,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 3
       },
       "enableBy": "register"
     },
@@ -1749,7 +1749,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1775,7 +1775,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1801,7 +1801,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1814,7 +1814,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1827,7 +1827,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1866,7 +1866,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1879,7 +1879,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1892,7 +1892,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1905,7 +1905,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 12
+        "register": 14
       },
       "enableBy": "register"
     },
@@ -1918,7 +1918,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1931,7 +1931,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -1972,16 +1972,16 @@
       "time": {
         "hooks": {
           "modifyConfig": [
-            3
+            4
           ],
           "modifyAppData": [
             0
           ],
           "onCheck": [
-            0
+            1
           ]
         },
-        "register": 5
+        "register": 7
       }
     },
     "./node_modules/@umijs/plugins/dist/dva": {
@@ -2006,7 +2006,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2028,10 +2028,10 @@
             0
           ],
           "modifyAppData": [
-            1
+            0
           ]
         },
-        "register": 1
+        "register": 2
       },
       "enableBy": "config"
     },
@@ -2044,7 +2044,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "config"
     },
@@ -2146,7 +2146,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2172,7 +2172,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2185,7 +2185,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2249,7 +2249,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     }
@@ -3869,7 +3869,7 @@
       "parentId": "15",
       "id": "17",
       "absPath": "/process/manage",
-      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProFormSelect,\n  ProFormText,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Modal, Popconfirm, Select, Space, Tag, Tooltip, Transfer, message } from 'antd';\n\nimport { Area, listAllAreas } from '@/services/area';\nimport { DeviceInst, listAllDeviceInsts } from '@/services/deviceInst';\nimport { DeviceSpec, listAllDeviceSpecs } from '@/services/deviceSpec';\nimport { listEmployees } from '@/services/org';\nimport {\n  createProcessDevice,\n  createProcessDeviceItem,\n  deleteProcessDevice,\n  deleteProcessDeviceItem,\n  listAllProcessDeviceItems,\n  listAllProcessDevices,\n  listAllProcessItems,\n  listAllProcesses,\n  updateProcessDeviceEmployees,\n  Process,\n  ProcessDevice,\n  ProcessDeviceItem,\n  ProcessItem,\n  updateProcessDevice,\n} from '@/services/process';\n\nimport { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';\ntype ProcessDeviceFormValues = {\n  code: string;\n  sn: string;\n  process_id: string;\n  area_id?: string;\n  status: number;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n      data?: { detail?: string };\n      info?: { errorMessage?: string };\n      message?: string;\n    }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst makeItemCode = (instanceCode: string, seq: number): string => {\n  const prefix = instanceCode.replace(/[^a-zA-Z0-9]/g, '').slice(0, 4).toUpperCase() || 'PROC';\n  const stamp = Date.now().toString(36).slice(-5).toUpperCase();\n  const index = seq.toString(36).padStart(2, '0').toUpperCase();\n  return `${prefix}${stamp}${index}`.slice(0, 16);\n};\n\nconst clampSelections = (values: string[], max: number): string[] => {\n  if (values.length <= max) {\n    return values;\n  }\n  return values.slice(0, max);\n};\n\nconst ProcessManagePage = () => {\n  const [loading, setLoading] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [editing, setEditing] = useState<ProcessDevice | null>(null);\n  const [query, setQuery] = useState<Record<string, any>>({});\n  const [rows, setRows] = useState<ProcessDevice[]>([]);\n\n  const [processItems, setProcessItems] = useState<ProcessItem[]>([]);\n  const [deviceSpecs, setDeviceSpecs] = useState<DeviceSpec[]>([]);\n  const [deviceInsts, setDeviceInsts] = useState<DeviceInst[]>([]);\n  const [processDeviceItems, setProcessDeviceItems] = useState<ProcessDeviceItem[]>([]);\n\n  const [configOpen, setConfigOpen] = useState(false);\n  const [currentInstance, setCurrentInstance] = useState<ProcessDevice | null>(null);\n  const [configSelections, setConfigSelections] = useState<Record<string, string[]>>({});\n  const [configSaving, setConfigSaving] = useState(false);\n\n  const [employeeModalOpen, setEmployeeModalOpen] = useState(false);\n  const [currentProcessDevice, setCurrentProcessDevice] = useState<ProcessDevice | null>(null);\n  const [allEmployees, setAllEmployees] = useState<{ key: string; title: string; description: string }[]>([]);\n  const [targetKeys, setTargetKeys] = useState<string[]>([]);\n  const [employeeLoading, setEmployeeLoading] = useState(false);\n\n  const specMap = useMemo(() => new Map(deviceSpecs.map((item) => [item.id, item])), [deviceSpecs]);\n  const instMap = useMemo(() => new Map(deviceInsts.map((item) => [item.id, item])), [deviceInsts]);\n\n  const loadAll = async () => {\n    setLoading(true);\n    try {\n      const instances = await listAllProcessDevices();\n      setRows(instances);\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    loadAll();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    return rows.filter((row) => {\n      const processName = row.process?.name || '';\n      if (query.code && !norm(row.code).includes(norm(query.code))) {\n        return false;\n      }\n      if (query.sn && !norm(row.sn).includes(norm(query.sn))) {\n        return false;\n      }\n      if (query.process_id) {\n        const hit =\n          norm(processName).includes(norm(query.process_id)) ||\n          norm(row.process_id).includes(norm(query.process_id));\n        if (!hit) {\n          return false;\n        }\n      }\n      if (query.area_id) {\n        const areaName = row.area?.name || '';\n        const hit =\n          norm(areaName).includes(norm(query.area_id)) ||\n          norm(row.area_id).includes(norm(query.area_id));\n        if (!hit) {\n          return false;\n        }\n      }\n      if (\n        query.status !== undefined &&\n        query.status !== null &&\n        String(row.status) !== String(query.status)\n      ) {\n        return false;\n      }\n      return true;\n    });\n  }, [query, rows]);\n\n  const currentTemplateItems = useMemo(() => {\n    if (!currentInstance?.process_id) {\n      return [];\n    }\n    return processItems.filter((item) => item.process_id === currentInstance.process_id);\n  }, [currentInstance?.process_id, processItems]);\n\n  const currentInstanceItems = useMemo(() => {\n    if (!currentInstance?.id) {\n      return [];\n    }\n    return processDeviceItems.filter((item) => item.process_device_id === currentInstance.id);\n  }, [currentInstance?.id, processDeviceItems]);\n\n  const handleOpenEmployeeModal = async (record: ProcessDevice) => {\n    setCurrentProcessDevice(record);\n    setTargetKeys((record.employees || []).map((e: any) => e.id));\n    setEmployeeModalOpen(true);\n    setEmployeeLoading(true);\n    try {\n      const data = await listEmployees({ skip: 0, limit: 1000, has_wx_user_id: true });\n      setAllEmployees(\n        (data || []).map((emp: any) => ({\n          key: emp.id,\n          title: emp.name,\n          description: emp.code,\n        })),\n      );\n    } catch (e) {\n      message.error(toErrorMessage(e));\n    } finally {\n      setEmployeeLoading(false);\n    }\n  };\n\n  const handleSaveEmployees = async () => {\n    if (!currentProcessDevice) return;\n    setEmployeeLoading(true);\n    try {\n      await updateProcessDeviceEmployees(currentProcessDevice.id, targetKeys);\n      message.success('员工分配成功');\n      setEmployeeModalOpen(false);\n      loadAll();\n    } catch (e) {\n      message.error(toErrorMessage(e));\n    } finally {\n      setEmployeeLoading(false);\n    }\n  };\n\n  const handleOpenConfigModal = async (instance: ProcessDevice) => {\n    setCurrentInstance(instance);\n    \n    // Fetch configuration options on demand\n    try {\n      const [templateRows, itemRows, allSpecs, allInsts] = await Promise.all([\n        listAllProcessItems(),\n        listAllProcessDeviceItems(),\n        listAllDeviceSpecs(),\n        listAllDeviceInsts(),\n      ]);\n      setProcessItems(templateRows);\n      setProcessDeviceItems(itemRows);\n      setDeviceSpecs(allSpecs);\n      setDeviceInsts(allInsts);\n\n      const instMapLocal = new Map(allInsts.map((item) => [item.id, item]));\n      const instanceTemplateRows = templateRows.filter((item) => item.process_id === instance.process_id);\n      const instanceItemRows = itemRows.filter((item) => item.process_device_id === instance.id);\n\n      const grouped = new Map<string, string[]>();\n      instanceItemRows.forEach((item) => {\n        const inst = instMapLocal.get(item.device_inst_id);\n        if (!inst) {\n          return;\n        }\n        const list = grouped.get(inst.device_spec_id) || [];\n        list.push(inst.id);\n        grouped.set(inst.device_spec_id, list);\n      });\n\n      const selections: Record<string, string[]> = {};\n      instanceTemplateRows.forEach((row) => {\n        const all = grouped.get(row.device_spec_id) || [];\n        selections[row.id] = all.slice(0, row.qty);\n        grouped.set(row.device_spec_id, all.slice(row.qty));\n      });\n      setConfigSelections(selections);\n      setConfigOpen(true);\n    } catch (e) {\n      message.error(toErrorMessage(e));\n    }\n  };\n\n  const columns: ProColumns<ProcessDevice>[] = [\n    { title: '序号', valueType: 'indexBorder', width: 68, hideInSearch: true, fixed: 'left' },\n    { title: '分组编码', dataIndex: 'code', sorter: (a, b) => (a.code || '').localeCompare(b.code || '', 'zh-CN') },\n    { title: '分组SN', dataIndex: 'sn', sorter: (a, b) => (a.sn || '').localeCompare(b.sn || '', 'zh-CN') },\n    {\n      title: '分组模板',\n      dataIndex: 'process_id',\n      render: (_, row) => row.process?.name || row.process_id,\n      sorter: (a, b) => {\n        const labelA = a.process?.name || '';\n        const labelB = b.process?.name || '';\n        return labelA.localeCompare(labelB, 'zh-CN');\n      },\n    },\n    {\n      title: '区域',\n      dataIndex: 'area_id',\n      render: (_, row) => row.area?.name || row.area_id || '-',\n      sorter: (a, b) => {\n        const labelA = a.area?.name || '';\n        const labelB = b.area?.name || '';\n        return labelA.localeCompare(labelB, 'zh-CN');\n      },\n    },\n    {\n      title: '状态',\n      dataIndex: 'status',\n      valueType: 'select',\n      valueEnum: { 1: { text: '启用' }, 0: { text: '停用' } },\n      render: (_, row) => (Number(row.status) === 1 ? '启用' : '停用'),\n      sorter: (a, b) => Number(a.status) - Number(b.status),\n    },\n    {\n      title: '员工',\n      dataIndex: 'employees',\n      hideInSearch: true,\n      render: (_, row) => {\n        const list = row.employees || [];\n        if (list.length === 0) return '-';\n        return (\n          <Tooltip title={list.map((e) => e.name).join('，')}>\n            <Tag color=\"blue\">{list.length} 人</Tag>\n          </Tooltip>\n        );\n      },\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 200,\n      fixed: 'right',\n      align: 'center',\n      render: (_, row) => (\n        <Space size=\"middle\">\n          <a\n            key=\"config\"\n            onClick={() => handleOpenConfigModal(row)}\n          >\n            配置\n          </a>\n          <a\n            key=\"employee\"\n            onClick={() => {\n              handleOpenEmployeeModal(row);\n            }}\n          >\n            微信员工\n          </a>\n          <a\n            key=\"edit\"\n            onClick={() => {\n              setEditing(row);\n              setModalOpen(true);\n            }}\n          >\n            编辑\n          </a>\n          <Popconfirm\n            key=\"delete\"\n            title=\"确认删除该设备分组吗？\"\n            onConfirm={async () => {\n              try {\n                await deleteProcessDevice(row.id);\n                message.success('删除成功');\n                await loadAll();\n              } catch (error) {\n                message.error(toErrorMessage(error));\n              }\n            }}\n          >\n            <a style={{ color: '#ff4d4f' }}>\n              删除\n            </a>\n          </Popconfirm>\n        </Space>\n      ),\n    },\n  ];\n\n  return (\n    <PageContainer title=\"设备分组\">\n      <ProTable<ProcessDevice>\n        rowKey=\"id\"\n        loading={loading}\n        columns={columns}\n        scroll={{ x: 'max-content' }}\n        dataSource={filteredRows}\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        options={{ reload: loadAll }}\n        optionsRender={renderRefSafeTableOptions}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建设备分组\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<ProcessDeviceFormValues>\n        title={editing ? '编辑' : '新建'}\n        open={modalOpen}\n        modalProps={{\n          destroyOnHidden: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        initialValues={\n          editing\n            ? {\n              code: editing.code,\n              sn: editing.sn,\n              process_id: editing.process_id,\n              area_id: editing.area_id || undefined,\n              status: Number(editing.status),\n            }\n            : { status: 1 }\n        }\n        onFinish={async (values) => {\n          setSaving(true);\n          try {\n            const payload = {\n              code: values.code.trim(),\n              sn: values.sn.trim(),\n              process_id: values.process_id,\n              area_id: values.area_id || null,\n              status: Number(values.status ?? 1),\n            };\n            if (editing) {\n              await updateProcessDevice(editing.id, payload);\n              message.success('更新成功');\n            } else {\n              await createProcessDevice(payload);\n              message.success('创建成功');\n            }\n            setModalOpen(false);\n            setEditing(null);\n            await loadAll();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormText\n          name=\"code\"\n          label=\"编码\"\n          rules={[{ required: true, message: '请输入编码' }, { max: 8, message: '分组编码最多8个字符' }]}\n        />\n        <ProFormText\n          name=\"sn\"\n          label=\"SN\"\n          rules={[{ required: true, message: '请输入SN' }, { max: 64, message: 'SN最多64个字符' }]}\n        />\n        <ProFormSelect\n          name=\"process_id\"\n          label=\"分组模板\"\n          request={async () => {\n            const list = await listAllProcesses();\n            return list.map((item) => ({ label: `${item.code} - ${item.name}`, value: item.id }));\n          }}\n          rules={[{ required: true, message: '请选择分组模板' }]}\n        />\n        <ProFormSelect\n          name=\"area_id\"\n          label=\"区域\"\n          request={async () => {\n            const list = await listAllAreas();\n            return list.map((item) => ({ label: item.name, value: item.id }));\n          }}\n          allowClear\n        />\n        <ProFormSelect\n          name=\"status\"\n          label=\"状态\"\n          options={[\n            { label: '启用', value: 1 },\n            { label: '停用', value: 0 },\n          ]}\n          rules={[{ required: true, message: '请选择状态' }]}\n        />\n      </ModalForm>\n\n      <Modal\n        title={`配置 - ${currentInstance?.code || ''}`}\n        open={configOpen}\n        width={980}\n        onCancel={() => {\n          setConfigOpen(false);\n          setCurrentInstance(null);\n          setConfigSelections({});\n        }}\n        onOk={async () => {\n          if (!currentInstance) {\n            return;\n          }\n          const allSelected = new Set<string>();\n          for (const row of currentTemplateItems) {\n            const selected = configSelections[row.id] || [];\n            if (selected.length !== row.qty) {\n              message.error(`规格 ${specMap.get(row.device_spec_id)?.name || row.device_spec_id} 需要 ${row.qty} 台`);\n              return;\n            }\n            for (const instId of selected) {\n              const inst = instMap.get(instId);\n              if (!inst || inst.device_spec_id !== row.device_spec_id) {\n                message.error('存在设备规格与分组模板子项不匹配的选择');\n                return;\n              }\n              if (allSelected.has(instId)) {\n                message.error('同一设备不能重复分配到多个分组模板子项');\n                return;\n              }\n              allSelected.add(instId);\n            }\n          }\n\n          setConfigSaving(true);\n          try {\n            await Promise.all(currentInstanceItems.map((item) => deleteProcessDeviceItem(item.id)));\n            const createTasks: Promise<any>[] = [];\n            let seq = 1;\n            for (const row of currentTemplateItems) {\n              const selected = configSelections[row.id] || [];\n              for (const instId of selected) {\n                const specName = specMap.get(row.device_spec_id)?.name || row.device_spec_id;\n                createTasks.push(\n                  createProcessDeviceItem({\n                    code: makeItemCode(currentInstance.code, seq++),\n                    desc: `${currentInstance.code}-${specName}`,\n                    device_inst_id: instId,\n                    process_device_id: currentInstance.id,\n                  }),\n                );\n              }\n            }\n            await Promise.all(createTasks);\n            message.success('配置保存成功');\n            await loadAll();\n            setConfigOpen(false);\n            setCurrentInstance(null);\n            setConfigSelections({});\n          } catch (error) {\n            message.error(toErrorMessage(error));\n          } finally {\n            setConfigSaving(false);\n          }\n        }}\n        confirmLoading={configSaving}\n      >\n        <Space direction=\"vertical\" size={12} style={{ width: '100%' }}>\n          {currentTemplateItems.length === 0 ? (\n            <Tag color=\"warning\">当前分组模板没有设备规格，请先完成模板配置</Tag>\n          ) : null}\n          {currentTemplateItems.map((row) => {\n            const spec = specMap.get(row.device_spec_id);\n            const selectedInOthers = new Set<string>();\n            currentTemplateItems.forEach((other) => {\n              if (other.id === row.id) {\n                return;\n              }\n              (configSelections[other.id] || []).forEach((instId) => selectedInOthers.add(instId));\n            });\n            const options = deviceInsts\n              .filter((item) => item.device_spec_id === row.device_spec_id)\n              .map((item) => ({\n                label: `${item.code} - ${item.name}`,\n                value: item.id,\n                disabled: selectedInOthers.has(item.id),\n              }));\n            const selected = configSelections[row.id] || [];\n            return (\n              <div key={row.id} style={{ border: '1px solid #f0f0f0', borderRadius: 6, padding: 12 }}>\n                <div style={{ marginBottom: 8 }}>\n                  <b>{spec ? `${spec.name} / ${spec.model}` : row.device_spec_id}</b>\n                  <span style={{ marginLeft: 8, color: '#999' }}>要求数量: {row.qty}</span>\n                  <span style={{ marginLeft: 8, color: selected.length === row.qty ? '#389e0d' : '#cf1322' }}>\n                    已选: {selected.length}\n                  </span>\n                </div>\n                <Select\n                  mode=\"multiple\"\n                  style={{ width: '100%' }}\n                  placeholder=\"请选择设备实例\"\n                  options={options}\n                  value={selected}\n                  onChange={(vals) => {\n                    const next = clampSelections(vals, row.qty);\n                    if (vals.length > row.qty) {\n                      message.warning(`该规格最多只能选择 ${row.qty} 台设备`);\n                    }\n                    setConfigSelections((prev) => ({ ...prev, [row.id]: next }));\n                  }}\n                  maxCount={row.qty}\n                  maxTagCount=\"responsive\"\n                />\n              </div>\n            );\n          })}\n        </Space>\n      </Modal>\n\n      <Modal\n        title=\"分配员工\"\n        open={employeeModalOpen}\n        onCancel={() => setEmployeeModalOpen(false)}\n        onOk={handleSaveEmployees}\n        confirmLoading={employeeLoading}\n        width={600}\n        destroyOnClose\n      >\n        <Transfer\n          dataSource={allEmployees}\n          titles={['可选员工', '已选员工']}\n          targetKeys={targetKeys}\n          onChange={(newTargetKeys) => setTargetKeys(newTargetKeys as string[])}\n          render={(item) => `${item.title} (${item.description})`}\n          listStyle={{ width: 250, height: 300 }}\n          showSearch\n        />\n      </Modal>\n    </PageContainer>\n  );\n};\n\nexport default ProcessManagePage;\n",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProFormSelect,\n  ProFormText,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Modal, Popconfirm, Select, Space, Tag, Tooltip, Transfer, message } from 'antd';\n\nimport { Area, listAllAreas } from '@/services/area';\nimport { DeviceInst, listAllDeviceInsts } from '@/services/deviceInst';\nimport { DeviceSpec, listAllDeviceSpecs } from '@/services/deviceSpec';\nimport { listEmployees } from '@/services/org';\nimport {\n  createProcessDevice,\n  createProcessDeviceItem,\n  deleteProcessDevice,\n  deleteProcessDeviceItem,\n  listAllProcessDeviceItems,\n  listAllProcessDevices,\n  listAllProcessItems,\n  listAllProcesses,\n  updateProcessDeviceEmployees,\n  Process,\n  ProcessDevice,\n  ProcessDeviceItem,\n  ProcessItem,\n  updateProcessDevice,\n} from '@/services/process';\n\nimport { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';\ntype ProcessDeviceFormValues = {\n  code: string;\n  sn: string;\n  process_id: string;\n  area_id?: string;\n  status: number;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | {\n      data?: { detail?: string };\n      info?: { errorMessage?: string };\n      message?: string;\n    }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst makeItemCode = (instanceCode: string, seq: number): string => {\n  const prefix = instanceCode.replace(/[^a-zA-Z0-9]/g, '').slice(0, 4).toUpperCase() || 'PROC';\n  const stamp = Date.now().toString(36).slice(-5).toUpperCase();\n  const index = seq.toString(36).padStart(2, '0').toUpperCase();\n  return `${prefix}${stamp}${index}`.slice(0, 16);\n};\n\nconst clampSelections = (values: string[], max: number): string[] => {\n  if (values.length <= max) {\n    return values;\n  }\n  return values.slice(0, max);\n};\n\nconst ProcessManagePage = () => {\n  const [loading, setLoading] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [editing, setEditing] = useState<ProcessDevice | null>(null);\n  const [query, setQuery] = useState<Record<string, any>>({});\n  const [rows, setRows] = useState<ProcessDevice[]>([]);\n\n  const [processItems, setProcessItems] = useState<ProcessItem[]>([]);\n  const [deviceSpecs, setDeviceSpecs] = useState<DeviceSpec[]>([]);\n  const [deviceInsts, setDeviceInsts] = useState<DeviceInst[]>([]);\n  const [processDeviceItems, setProcessDeviceItems] = useState<ProcessDeviceItem[]>([]);\n\n  const [configOpen, setConfigOpen] = useState(false);\n  const [currentInstance, setCurrentInstance] = useState<ProcessDevice | null>(null);\n  const [configSelections, setConfigSelections] = useState<Record<string, string[]>>({});\n  const [configSaving, setConfigSaving] = useState(false);\n\n  const [employeeModalOpen, setEmployeeModalOpen] = useState(false);\n  const [currentProcessDevice, setCurrentProcessDevice] = useState<ProcessDevice | null>(null);\n  const [allEmployees, setAllEmployees] = useState<{ key: string; title: string; description: string }[]>([]);\n  const [targetKeys, setTargetKeys] = useState<string[]>([]);\n  const [employeeLoading, setEmployeeLoading] = useState(false);\n\n  const specMap = useMemo(() => new Map(deviceSpecs.map((item) => [item.id, item])), [deviceSpecs]);\n  const instMap = useMemo(() => new Map(deviceInsts.map((item) => [item.id, item])), [deviceInsts]);\n\n  const loadAll = async () => {\n    setLoading(true);\n    try {\n      const instances = await listAllProcessDevices();\n      setRows(instances);\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    loadAll();\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    return rows.filter((row) => {\n      const processName = row.process?.name || '';\n      if (query.code && !norm(row.code).includes(norm(query.code))) {\n        return false;\n      }\n      if (query.sn && !norm(row.sn).includes(norm(query.sn))) {\n        return false;\n      }\n      if (query.process_id) {\n        const hit =\n          norm(processName).includes(norm(query.process_id)) ||\n          norm(row.process_id).includes(norm(query.process_id));\n        if (!hit) {\n          return false;\n        }\n      }\n      if (query.area_id) {\n        const areaName = row.area?.name || '';\n        const hit =\n          norm(areaName).includes(norm(query.area_id)) ||\n          norm(row.area_id).includes(norm(query.area_id));\n        if (!hit) {\n          return false;\n        }\n      }\n      if (\n        query.status !== undefined &&\n        query.status !== null &&\n        String(row.status) !== String(query.status)\n      ) {\n        return false;\n      }\n      return true;\n    });\n  }, [query, rows]);\n\n  const currentTemplateItems = useMemo(() => {\n    if (!currentInstance?.process_id) {\n      return [];\n    }\n    return processItems.filter((item) => item.process_id === currentInstance.process_id);\n  }, [currentInstance?.process_id, processItems]);\n\n  const currentInstanceItems = useMemo(() => {\n    if (!currentInstance?.id) {\n      return [];\n    }\n    return processDeviceItems.filter((item) => item.process_device_id === currentInstance.id);\n  }, [currentInstance?.id, processDeviceItems]);\n\n  const handleOpenEmployeeModal = async (record: ProcessDevice) => {\n    setCurrentProcessDevice(record);\n    setTargetKeys((record.employees || []).map((e: any) => e.id));\n    setEmployeeModalOpen(true);\n    setEmployeeLoading(true);\n    try {\n      const data = await listEmployees({ skip: 0, limit: 1000, has_wx_user_id: true });\n      setAllEmployees(\n        (data || []).map((emp: any) => ({\n          key: emp.id,\n          title: emp.name,\n          description: emp.code,\n        })),\n      );\n    } catch (e) {\n      message.error(toErrorMessage(e));\n    } finally {\n      setEmployeeLoading(false);\n    }\n  };\n\n  const handleSaveEmployees = async () => {\n    if (!currentProcessDevice) return;\n    setEmployeeLoading(true);\n    try {\n      await updateProcessDeviceEmployees(currentProcessDevice.id, targetKeys);\n      message.success('员工分配成功');\n      setEmployeeModalOpen(false);\n      loadAll();\n    } catch (e) {\n      message.error(toErrorMessage(e));\n    } finally {\n      setEmployeeLoading(false);\n    }\n  };\n\n  const handleOpenConfigModal = async (instance: ProcessDevice) => {\n    setCurrentInstance(instance);\n    \n    // Fetch configuration options on demand\n    try {\n      const [templateRows, itemRows, allSpecs, allInsts] = await Promise.all([\n        listAllProcessItems(),\n        listAllProcessDeviceItems(),\n        listAllDeviceSpecs(),\n        listAllDeviceInsts(),\n      ]);\n      setProcessItems(templateRows);\n      setProcessDeviceItems(itemRows);\n      setDeviceSpecs(allSpecs);\n      setDeviceInsts(allInsts);\n\n      const instMapLocal = new Map(allInsts.map((item) => [item.id, item]));\n      const instanceTemplateRows = templateRows.filter((item) => item.process_id === instance.process_id);\n      const instanceItemRows = itemRows.filter((item) => item.process_device_id === instance.id);\n\n      const grouped = new Map<string, string[]>();\n      instanceItemRows.forEach((item) => {\n        const inst = instMapLocal.get(item.device_inst_id);\n        if (!inst) {\n          return;\n        }\n        const list = grouped.get(inst.device_spec_id) || [];\n        list.push(inst.id);\n        grouped.set(inst.device_spec_id, list);\n      });\n\n      const selections: Record<string, string[]> = {};\n      instanceTemplateRows.forEach((row) => {\n        const all = grouped.get(row.device_spec_id) || [];\n        selections[row.id] = all.slice(0, row.qty);\n        grouped.set(row.device_spec_id, all.slice(row.qty));\n      });\n      setConfigSelections(selections);\n      setConfigOpen(true);\n    } catch (e) {\n      message.error(toErrorMessage(e));\n    }\n  };\n\n  const columns: ProColumns<ProcessDevice>[] = [\n    { title: '序号', valueType: 'indexBorder', width: 68, hideInSearch: true, fixed: 'left' },\n    { title: '分组编码', dataIndex: 'code', sorter: (a, b) => (a.code || '').localeCompare(b.code || '', 'zh-CN') },\n    { title: '分组SN', dataIndex: 'sn', sorter: (a, b) => (a.sn || '').localeCompare(b.sn || '', 'zh-CN') },\n    {\n      title: '分组模板',\n      dataIndex: 'process_id',\n      render: (_, row) => row.process?.name || row.process_id,\n      sorter: (a, b) => {\n        const labelA = a.process?.name || '';\n        const labelB = b.process?.name || '';\n        return labelA.localeCompare(labelB, 'zh-CN');\n      },\n    },\n    {\n      title: '区域',\n      dataIndex: 'area_id',\n      render: (_, row) => row.area?.name || row.area_id || '-',\n      sorter: (a, b) => {\n        const labelA = a.area?.name || '';\n        const labelB = b.area?.name || '';\n        return labelA.localeCompare(labelB, 'zh-CN');\n      },\n    },\n    {\n      title: '状态',\n      dataIndex: 'status',\n      valueType: 'select',\n      valueEnum: { 1: { text: '启用' }, 0: { text: '停用' } },\n      render: (_, row) => (Number(row.status) === 1 ? '启用' : '停用'),\n      sorter: (a, b) => Number(a.status) - Number(b.status),\n    },\n    {\n      title: '员工',\n      dataIndex: 'employees',\n      hideInSearch: true,\n      render: (_, row) => {\n        const list = row.employees || [];\n        if (list.length === 0) return '-';\n        return (\n          <Tooltip title={list.map((e) => e.name).join('，')}>\n            <Tag color=\"blue\">{list.length} 人</Tag>\n          </Tooltip>\n        );\n      },\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 200,\n      fixed: 'right',\n      align: 'center',\n      render: (_, row) => (\n        <Space size=\"middle\">\n          <a\n            key=\"config\"\n            onClick={() => handleOpenConfigModal(row)}\n          >\n            配置\n          </a>\n          <a\n            key=\"employee\"\n            onClick={() => {\n              handleOpenEmployeeModal(row);\n            }}\n          >\n            微信员工\n          </a>\n          <a\n            key=\"edit\"\n            onClick={() => {\n              setEditing(row);\n              setModalOpen(true);\n            }}\n          >\n            编辑\n          </a>\n          <Popconfirm\n            key=\"delete\"\n            title=\"确认删除该设备分组吗？\"\n            onConfirm={async () => {\n              try {\n                await deleteProcessDevice(row.id);\n                message.success('删除成功');\n                await loadAll();\n              } catch (error) {\n                message.error(toErrorMessage(error));\n              }\n            }}\n          >\n            <a style={{ color: '#ff4d4f' }}>\n              删除\n            </a>\n          </Popconfirm>\n        </Space>\n      ),\n    },\n  ];\n\n  return (\n    <PageContainer title=\"设备分组\">\n      <ProTable<ProcessDevice>\n        rowKey=\"id\"\n        loading={loading}\n        columns={columns}\n        scroll={{ x: 'max-content' }}\n        dataSource={filteredRows}\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        options={{ reload: loadAll }}\n        optionsRender={renderRefSafeTableOptions}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建设备分组\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<ProcessDeviceFormValues>\n        title={editing ? '编辑' : '新建'}\n        open={modalOpen}\n        modalProps={{\n          destroyOnHidden: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        initialValues={\n          editing\n            ? {\n              code: editing.code,\n              sn: editing.sn,\n              process_id: editing.process_id,\n              area_id: editing.area_id || undefined,\n              status: Number(editing.status),\n            }\n            : { status: 1 }\n        }\n        onFinish={async (values) => {\n          setSaving(true);\n          try {\n            const payload = {\n              code: values.code.trim(),\n              sn: values.sn.trim(),\n              process_id: values.process_id,\n              area_id: values.area_id || null,\n              status: Number(values.status ?? 1),\n            };\n            if (editing) {\n              await updateProcessDevice(editing.id, payload);\n              message.success('更新成功');\n            } else {\n              await createProcessDevice(payload);\n              message.success('创建成功');\n            }\n            setModalOpen(false);\n            setEditing(null);\n            await loadAll();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormText\n          name=\"code\"\n          label=\"编码\"\n          rules={[{ required: true, message: '请输入编码' }, { max: 8, message: '分组编码最多8个字符' }]}\n        />\n        <ProFormText\n          name=\"sn\"\n          label=\"SN\"\n          rules={[{ required: true, message: '请输入SN' }, { max: 64, message: 'SN最多64个字符' }]}\n        />\n        <ProFormSelect\n          name=\"process_id\"\n          label=\"分组模板\"\n          request={async () => {\n            const list = await listAllProcesses();\n            return list.map((item) => ({ label: `${item.code} - ${item.name}`, value: item.id }));\n          }}\n          rules={[{ required: true, message: '请选择分组模板' }]}\n        />\n        <ProFormSelect\n          name=\"area_id\"\n          label=\"区域\"\n          request={async () => {\n            const list = await listAllAreas();\n            return list.map((item) => ({ label: item.name, value: item.id }));\n          }}\n          allowClear\n        />\n        <ProFormSelect\n          name=\"status\"\n          label=\"状态\"\n          options={[\n            { label: '启用', value: 1 },\n            { label: '停用', value: 0 },\n          ]}\n          rules={[{ required: true, message: '请选择状态' }]}\n        />\n      </ModalForm>\n\n      <Modal\n        title={`配置 - ${currentInstance?.code || ''}`}\n        open={configOpen}\n        width={980}\n        onCancel={() => {\n          setConfigOpen(false);\n          setCurrentInstance(null);\n          setConfigSelections({});\n        }}\n        onOk={async () => {\n          if (!currentInstance) {\n            return;\n          }\n          const allSelected = new Set<string>();\n          for (const row of currentTemplateItems) {\n            const selected = configSelections[row.id] || [];\n            if (selected.length !== row.qty) {\n              message.error(`规格 ${specMap.get(row.device_spec_id)?.name || row.device_spec_id} 需要 ${row.qty} 台`);\n              return;\n            }\n            for (const instId of selected) {\n              const inst = instMap.get(instId);\n              if (!inst || inst.device_spec_id !== row.device_spec_id) {\n                message.error('存在设备规格与分组模板子项不匹配的选择');\n                return;\n              }\n              if (allSelected.has(instId)) {\n                message.error('同一设备不能重复分配到多个分组模板子项');\n                return;\n              }\n              allSelected.add(instId);\n            }\n          }\n\n          setConfigSaving(true);\n          try {\n            await Promise.all(currentInstanceItems.map((item) => deleteProcessDeviceItem(item.id)));\n            const globalDeviceColorMap = new Map<string, string>();\n            processDeviceItems.forEach((item) => {\n              if (item.device_inst_id && item.color) {\n                globalDeviceColorMap.set(item.device_inst_id, item.color);\n              }\n            });\n\n            const usedColorsInGroup = new Set<string>();\n            const deviceColorAssignments = new Map<string, string>();\n\n            const GROUP_COLORS = [\n              '#1677FF', '#52C41A', '#FA8C16', '#F5222D', '#722ED1',\n              '#13C2C2', '#EB2F96', '#FADB14', '#A0D911', '#FA541C',\n              '#2F54EB', '#7CB305', '#D48806', '#CF1322', '#531DAB',\n              '#08979C', '#C41D7F', '#D4B106', '#5B8C00', '#D4380D',\n            ];\n\n            for (const row of currentTemplateItems) {\n              const selected = configSelections[row.id] || [];\n              for (const instId of selected) {\n                if (globalDeviceColorMap.has(instId)) {\n                  const c = globalDeviceColorMap.get(instId)!;\n                  deviceColorAssignments.set(instId, c);\n                  usedColorsInGroup.add(c);\n                }\n              }\n            }\n\n            for (const row of currentTemplateItems) {\n              const selected = configSelections[row.id] || [];\n              for (const instId of selected) {\n                if (!deviceColorAssignments.has(instId)) {\n                  let color = GROUP_COLORS.find((c) => !usedColorsInGroup.has(c));\n                  if (!color) {\n                    color = GROUP_COLORS[deviceColorAssignments.size % GROUP_COLORS.length];\n                  }\n                  deviceColorAssignments.set(instId, color);\n                  usedColorsInGroup.add(color);\n                  globalDeviceColorMap.set(instId, color);\n                }\n              }\n            }\n\n            const createTasks: Promise<any>[] = [];\n            let seq = 1;\n            for (const row of currentTemplateItems) {\n              const selected = configSelections[row.id] || [];\n              for (const instId of selected) {\n                const specName = specMap.get(row.device_spec_id)?.name || row.device_spec_id;\n                const color = deviceColorAssignments.get(instId)!;\n                createTasks.push(\n                  createProcessDeviceItem({\n                    code: makeItemCode(currentInstance.code, seq++),\n                    desc: `${currentInstance.code}-${specName}`,\n                    device_inst_id: instId,\n                    process_device_id: currentInstance.id,\n                    color: color,\n                  }),\n                );\n              }\n            }\n            await Promise.all(createTasks);\n            message.success('配置保存成功');\n            await loadAll();\n            setConfigOpen(false);\n            setCurrentInstance(null);\n            setConfigSelections({});\n          } catch (error) {\n            message.error(toErrorMessage(error));\n          } finally {\n            setConfigSaving(false);\n          }\n        }}\n        confirmLoading={configSaving}\n      >\n        <Space direction=\"vertical\" size={12} style={{ width: '100%' }}>\n          {currentTemplateItems.length === 0 ? (\n            <Tag color=\"warning\">当前分组模板没有设备规格，请先完成模板配置</Tag>\n          ) : null}\n          {currentTemplateItems.map((row) => {\n            const spec = specMap.get(row.device_spec_id);\n            const selectedInOthers = new Set<string>();\n            currentTemplateItems.forEach((other) => {\n              if (other.id === row.id) {\n                return;\n              }\n              (configSelections[other.id] || []).forEach((instId) => selectedInOthers.add(instId));\n            });\n            const options = deviceInsts\n              .filter((item) => item.device_spec_id === row.device_spec_id)\n              .map((item) => ({\n                label: `${item.code} - ${item.name}`,\n                value: item.id,\n                disabled: selectedInOthers.has(item.id),\n              }));\n            const selected = configSelections[row.id] || [];\n            return (\n              <div key={row.id} style={{ border: '1px solid #f0f0f0', borderRadius: 6, padding: 12 }}>\n                <div style={{ marginBottom: 8 }}>\n                  <b>{spec ? `${spec.name} / ${spec.model}` : row.device_spec_id}</b>\n                  <span style={{ marginLeft: 8, color: '#999' }}>要求数量: {row.qty}</span>\n                  <span style={{ marginLeft: 8, color: selected.length === row.qty ? '#389e0d' : '#cf1322' }}>\n                    已选: {selected.length}\n                  </span>\n                </div>\n                <Select\n                  mode=\"multiple\"\n                  style={{ width: '100%' }}\n                  placeholder=\"请选择设备实例\"\n                  options={options}\n                  value={selected}\n                  onChange={(vals) => {\n                    const next = clampSelections(vals, row.qty);\n                    if (vals.length > row.qty) {\n                      message.warning(`该规格最多只能选择 ${row.qty} 台设备`);\n                    }\n                    setConfigSelections((prev) => ({ ...prev, [row.id]: next }));\n                  }}\n                  maxCount={row.qty}\n                  maxTagCount=\"responsive\"\n                />\n              </div>\n            );\n          })}\n        </Space>\n      </Modal>\n\n      <Modal\n        title=\"分配员工\"\n        open={employeeModalOpen}\n        onCancel={() => setEmployeeModalOpen(false)}\n        onOk={handleSaveEmployees}\n        confirmLoading={employeeLoading}\n        width={600}\n        destroyOnClose\n      >\n        <Transfer\n          dataSource={allEmployees}\n          titles={['可选员工', '已选员工']}\n          targetKeys={targetKeys}\n          onChange={(newTargetKeys) => setTargetKeys(newTargetKeys as string[])}\n          render={(item) => `${item.title} (${item.description})`}\n          listStyle={{ width: 250, height: 300 }}\n          showSearch\n        />\n      </Modal>\n    </PageContainer>\n  );\n};\n\nexport default ProcessManagePage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Workspace/LH.朗湖科技/Sentinel/Codes/Platform/client/portal/src/pages/Process/Manage/index.tsx"
     },
