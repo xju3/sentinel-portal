@@ -37,8 +37,9 @@ logger = logging.getLogger(__name__)
 class DevicePointTrendService:
     """Read point-scoped raw or downsampled trend data from InfluxDB."""
 
-    RANGE_DAYS = {3, 7, 14, 30, 90, 180, 365}
+    RANGE_DAYS = {1, 3, 7, 14, 30, 90, 180, 365}
     DEFAULT_WINDOWS = {
+        1: 0,
         3: 0,
         7: 60,
         14: 120,
@@ -47,7 +48,7 @@ class DevicePointTrendService:
         180: 1440,
         365: 1440,
     }
-    ALLOWED_WINDOWS = {0, 60, 120, 240, 480, 720, 1440}
+    ALLOWED_WINDOWS = {0, 30, 60, 120, 240, 480, 720, 1440}
     CACHE_SECONDS = 60
 
     @classmethod
@@ -68,10 +69,10 @@ class DevicePointTrendService:
         if requested_window not in cls.ALLOWED_WINDOWS:
             raise ValueError("unsupported trend window")
 
-        # Raw data is intentionally available only for the default three-day view.
+        # Raw data is intentionally available only for up to three-day views.
         # Longer raw queries can become unbounded during high-frequency testing.
-        if requested_window == 0 and range_days != 3:
-            raise ValueError("raw data is available only for the three-day range")
+        if requested_window == 0 and range_days > 3:
+            raise ValueError("raw data is available only for ranges up to 3 days")
 
         if requested_window == 0:
             return range_days, 0

@@ -19,6 +19,7 @@ import { Location, queryLocations } from '@/services/location';
 import {
   DeviceCategory,
   queryDeviceCategories,
+  listAllDeviceCategories,
 } from '@/services/deviceCategory';
 import {
   DeviceSpec,
@@ -128,6 +129,26 @@ const DeviceSpecPage = () => {
   const [selectedBearing, setSelectedBearing] = useState<BearingModel | undefined>();
   const [selectedLocation, setSelectedLocation] =
     useState<Pick<Location, 'id' | 'name'> | undefined>();
+  const [categoryTreeData, setCategoryTreeData] = useState<any[]>([]);
+
+  useEffect(() => {
+    listAllDeviceCategories().then(categories => {
+      const buildTree = (parentId?: string | null): any[] => {
+        return categories
+          .filter((d) => (parentId ? d.parent_id === parentId : !d.parent_id))
+          .map((d) => {
+            const children = buildTree(d.id);
+            return {
+              ...d,
+              key: d.id,
+              children: children.length > 0 ? children : undefined,
+              disabled: children.length > 0,
+            };
+          });
+      };
+      setCategoryTreeData(buildTree());
+    }).catch(console.error);
+  }, []);
 
   const loadRows = async (processDeviceId?: string) => {
     setLoading(true);
@@ -350,28 +371,30 @@ const DeviceSpecPage = () => {
     {
       title: '型号',
       dataIndex: 'model',
-      width: 100,
+      width: 80,
       ellipsis: true,
       sorter: (a, b) => (a.model || '').localeCompare(b.model || '', 'zh-CN'),
     },
     {
       title: '电压',
       dataIndex: 'voltage',
-      width: 80,
+      width: 60,
+      ellipsis: true,
       valueType: 'digit',
       sorter: (a, b) => Number(a.voltage) - Number(b.voltage),
     },
     {
       title: '转速',
       dataIndex: 'rpm',
-      width: 80,
+      width: 70,
       valueType: 'digit',
       sorter: (a, b) => Number(a.rpm) - Number(b.rpm),
     },
     {
       title: '分类',
       dataIndex: 'device_category_id',
-      width: 100,
+      width: 120,
+      ellipsis: true,
       render: (_, row) => row.device_category?.name || '-',
       sorter: (a, b) => {
         const labelA = a.device_category?.name || '';
@@ -382,7 +405,7 @@ const DeviceSpecPage = () => {
     {
       title: '供应商',
       dataIndex: 'supplier_id',
-      width: 160,
+      width: 120,
       ellipsis: true,
       render: (_, row) => row.supplier?.name || '-',
       sorter: (a, b) => {
@@ -521,10 +544,10 @@ const DeviceSpecPage = () => {
         }
         onFinish={async (values) => {
           const payload: DeviceSpecPayload = {
-            name: values.name.trim(),
-            model: values.model.trim(),
-            description: values.description || undefined,
-            brand: values.brand.trim(),
+            name: values.name?.trim() || '',
+            model: values.model?.trim() || '',
+            description: values.description?.trim() || undefined,
+            brand: values.brand?.trim() || '',
             voltage: values.voltage,
             rpm: values.rpm,
             supplier_id: values.supplier_id,
@@ -566,6 +589,7 @@ const DeviceSpecPage = () => {
             fetcher={({ current, pageSize, keyword }) =>
               queryDeviceCategories({ current, pageSize, keyword })
             }
+            treeData={categoryTreeData}
           />
         </ProForm.Item>
         <ProForm.Item name="supplier_id" label="供应商" rules={[{ required: true, message: '请选择供应商' }]}>
@@ -596,7 +620,7 @@ const DeviceSpecPage = () => {
           label="电压(V)"
           min={0}
           fieldProps={{ precision: 2 }}
-          rules={[{required: true,  message: '请输入电压' }]}
+          rules={[{ required: true, message: '请输入电压' }]}
         />
 
         <ProFormText name="model" label="型号" rules={[{ message: '请输入型号' }]} />
@@ -696,9 +720,9 @@ const DeviceSpecPage = () => {
         initialValues={
           editingBindingIndex === null
             ? {
-                shaft_speed_ratio: 1,
-                enabled: true,
-              }
+              shaft_speed_ratio: 1,
+              enabled: true,
+            }
             : bindings[editingBindingIndex]
         }
         onFinish={async (values) => {

@@ -228,9 +228,9 @@ const DeviceListPage = () => {
       sorter: true,
     },
     {
-      title: '年限',
+      title: '年限(月)',
       dataIndex: 'life_span',
-      width: 80,
+      width: 100,
       align: 'center',
       valueType: 'digit',
       sorter: true,
@@ -275,18 +275,18 @@ const DeviceListPage = () => {
     //   render: (_, row) => (Number(row.active) === 1 ? '运行中' : '已停止'),
     //   sorter: true,
     // },
-    {
-      title: '服役',
-      dataIndex: 'available',
-      width: 80,
-      valueType: 'select',
-      valueEnum: {
-        1: { text: '服役中', status: 'Success' },
-        0: { text: '不可用', status: 'Error' },
-      },
-      render: (_, row) => (Number(row.available) === 1 ? '服役中' : '不可用'),
-      sorter: true,
-    },
+    // {
+    //   title: '服役',
+    //   dataIndex: 'available',
+    //   width: 80,
+    //   valueType: 'select',
+    //   valueEnum: {
+    //     1: { text: '服役中', status: 'Success' },
+    //     0: { text: '不可用', status: 'Error' },
+    //   },
+    //   render: (_, row) => (Number(row.available) === 1 ? '服役中' : '不可用'),
+    //   sorter: true,
+    // },
     {
       title: '状态',
       dataIndex: 'status',

@@ -39,6 +39,7 @@ from .sensor.sensor_task_service import *
 from .diagnosis.diagnosis_record_service import DiagnosisRecordService
 from .diagnosis.device_health_archive_service import DeviceHealthArchiveService
 from .diagnosis.device_point_trend_service import DevicePointTrendService
+from .diagnosis.device_fft_record_service import DeviceFftRecordService
 # from .diagnosis.diagnosis_result_service import DiagnosisResultService
 # from .diagnosis.patrol_diagnosis_record_service import PatrolDiagnosisRecordService
 from .diagnosis.diagnosis_context_service import DiagnosisContextService

@@ -26,6 +26,7 @@ from pub.services import (
     DashboardHealthService,
     DeviceHealthArchiveService,
     DevicePointTrendService,
+    DeviceFftRecordService,
     ProcessDeviceService,
 )
 from pub.decorators.dashboard_cache import rebuild_dashboard_cache
@@ -854,6 +855,7 @@ async def get_device_health_archive(
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
     device = await _require_tenant_device(session, tenant_id, device_id)
+    device_spec = await DeviceSpecService.get_by_id(session, tenant_id, device.device_spec_id) if device.device_spec_id else None
     points = await DeviceHealthArchiveService.get_device_points(
         session,
         tenant_id,
@@ -887,6 +889,7 @@ async def get_device_health_archive(
         "id": str(device.id),
         "name": device.name,
         "code": device.code,
+        "rpm": device_spec.rpm if device_spec else 0,
     }
     timeline["points"] = points
     timeline["selectedLocationId"] = (
@@ -930,6 +933,61 @@ async def get_device_point_trends(
     except ValueError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
     return success(trend)
+
+
+@router.get("/devices/{device_id}/fft-records")
+async def get_device_fft_records(
+    device_id: UUID,
+    session: AsyncSession = Depends(get_session),
+    current_account: AccountModel = Depends(get_current_account),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    await _require_tenant_device(session, tenant_id, device_id)
+    records = await DeviceFftRecordService.list_for_device(
+        session, tenant_id, device_id, limit=50
+    )
+    result = []
+    for r in records:
+        r_dict = {
+            "id": r.id,
+            "ts_ms": int(r.created_at.timestamp() * 1000) if r.created_at else r.ts_ms,
+            "points": r.points,
+            "range_g": r.range_g,
+            "fs_hz": r.fs_hz,
+        }
+        result.append(r_dict)
+    return success(result)
+
+
+@router.get("/devices/{device_id}/fft-records/{record_id}/data")
+async def get_device_fft_data(
+    device_id: UUID,
+    record_id: UUID,
+    session: AsyncSession = Depends(get_session),
+    current_account: AccountModel = Depends(get_current_account),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    await _require_tenant_device(session, tenant_id, device_id)
+    
+    record = await DeviceFftRecordService.get_by_id(session, tenant_id, record_id)
+    if not record or record.device_inst_id != device_id:
+        raise HTTPException(status_code=404, detail="FFT record not found")
+
+    import sys
+    from pathlib import Path
+
+    server_path = Path(__file__).parent.parent.parent.parent
+    if str(server_path) not in sys.path:
+        sys.path.append(str(server_path))
+
+    from diagnosis.app.preparation.fft_parser import FftParser, build_preview_payload
+
+    fft_data = FftParser.parse_from_minio(str(record.task_id))
+    if not fft_data:
+        raise HTTPException(status_code=404, detail="FFT binary data not found in storage")
+        
+    payload = build_preview_payload(fft_data)
+    return success(payload)
 
 
 # ==========================================

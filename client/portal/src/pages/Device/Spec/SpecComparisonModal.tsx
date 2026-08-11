@@ -30,6 +30,7 @@ const SERIES_COLORS = [
 ];
 
 const RANGE_OPTIONS = [
+  { label: '近 1 天', value: 1 },
   { label: '近 3 天', value: 3 },
   { label: '近 1 周', value: 7 },
   { label: '近 2 周', value: 14 },
@@ -40,6 +41,7 @@ const RANGE_OPTIONS = [
 ];
 
 const DEFAULT_WINDOWS: Record<number, number> = {
+  1: 0,
   3: 0,
   7: 60,
   14: 120,
@@ -50,6 +52,11 @@ const DEFAULT_WINDOWS: Record<number, number> = {
 };
 
 const WINDOW_OPTIONS: Record<number, Array<{ label: string; value: number }>> = {
+  1: [
+    { label: '原始数据', value: 0 },
+    { label: '30 分钟', value: 30 },
+    { label: '1 小时', value: 60 },
+  ],
   3: [
     { label: '原始数据', value: 0 },
     { label: '1 小时', value: 60 },
@@ -101,7 +108,7 @@ const SpecComparisonContent = ({
   const requestSeq = useRef(0);
   const [groupId, setGroupId] = useState<string>();
   const [locationId, setLocationId] = useState<string>();
-  const [rangeDays, setRangeDays] = useState(3);
+  const [rangeDays, setRangeDays] = useState(1);
   const [windowMinutes, setWindowMinutes] = useState(0);
   const [activeTab, setActiveTab] = useState<TrendTab>('temperature');
   const [loading, setLoading] = useState(false);
@@ -147,7 +154,7 @@ const SpecComparisonContent = ({
     setCompatibleGroups([]);
     setGroupId(undefined);
     setLocationId(undefined);
-    setRangeDays(3);
+    setRangeDays(1);
     setWindowMinutes(0);
     setActiveTab('temperature');
     setData(null);
@@ -163,7 +170,7 @@ const SpecComparisonContent = ({
               : undefined;
         setGroupId(initialGroupId);
         if (initialGroupId) {
-          void loadComparison(initialGroupId, undefined, 3, 0);
+          void loadComparison(initialGroupId, undefined, 1, 0);
         }
       })
       .catch((error) => {

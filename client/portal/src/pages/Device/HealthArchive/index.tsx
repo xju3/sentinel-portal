@@ -35,6 +35,7 @@ import {
 
 import styles from './index.less';
 import PointTrendCard from './PointTrendCard';
+import DeviceFftCard from './DeviceFftCard';
 
 const STATUS_META: Record<
   HealthArchiveBucketStatus,
@@ -283,6 +284,7 @@ const DeviceHealthArchivePage = () => {
           )}
         </Space>
       </Card>
+      {deviceId && <DeviceFftCard deviceId={deviceId} rpm={data?.device?.rpm} />}
 
       <Spin spinning={loading}>
         {data ? (

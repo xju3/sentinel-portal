@@ -232,6 +232,9 @@ function EntityPicker<T extends EntityRow>({
           rowSelection={{
             type: 'radio',
             selectedRowKeys: selectedKeys,
+            getCheckboxProps: (record: any) => ({
+              disabled: record.disabled,
+            }),
             onChange: (keys, selectedRows) => {
               const key = keys[0];
               const row = selectedRows[0];
@@ -245,8 +248,9 @@ function EntityPicker<T extends EntityRow>({
               }
             },
           }}
-          onRow={(record) => ({
+          onRow={(record: any) => ({
             onClick: () => {
+              if (record.disabled) return;
               setSelectedId(record.id);
               setSelectedLabel(getRecordLabel(record));
             },
