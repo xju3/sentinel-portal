@@ -54,7 +54,7 @@ const TenantPage = () => {
 
   const filteredRows = useMemo(() => {
     const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();
-    return rows.filter((row) => {
+    return (Array.isArray(rows) ? rows : []).filter((row) => {
       if (query.code && !norm(row.code).includes(norm(query.code))) {
         return false;
       }

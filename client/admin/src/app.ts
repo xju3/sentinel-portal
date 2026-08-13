@@ -42,9 +42,11 @@ export const request: RequestConfig = {
           return Promise.reject(new Error(body.message || 'Unauthorized'));
         }
 
-        // For other error codes, show error message
+        // For other error codes, show error message and reject promise
         if (body && body.code !== 0 && body.code !== 200 && body.code !== 202 && body.code !== undefined) {
-          message.error(body.message || `Error (code: ${body.code})`);
+          const errMsg = body.message || `Error (code: ${body.code})`;
+          message.error(errMsg);
+          return Promise.reject(new Error(errMsg));
         }
 
         // Unwrap the ApiResponse: replace response.data with body.data

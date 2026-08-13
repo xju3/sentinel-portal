@@ -4,6 +4,7 @@ Customer API contracts
 
 from typing import List, Optional
 from uuid import UUID
+from datetime import datetime
 from pydantic import BaseModel, ConfigDict
 
 
@@ -50,8 +51,12 @@ class TenantResponse(BaseModel):
     name: str
     mqtt_server: str
     api_server: str
-    region_id: str
+    region_id: Optional[str] = None
     active: bool
+    web_site: Optional[str] = None
+    desc: Optional[str] = None
+    create_at: datetime
+    src: Optional[int] = None
 
     model_config = ConfigDict(from_attributes=True)
 
