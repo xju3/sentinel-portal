@@ -52,6 +52,25 @@ async def wx_message_get(
     else:
         return Response(content="error")
 
+
+@router.get("/wx-mini-app/push-message")
+async def wx_mini_app_push_message_verify(
+    signature: str = Query(None),
+    timestamp: str = Query(None),
+    nonce: str = Query(None),
+    echostr: str = Query(None)
+):
+    """WeChat Mini Program message push server verification endpoint"""
+    if not all([signature, timestamp, nonce, echostr]):
+        return Response(content="missing parameters")
+
+    wx_service = get_wx_service()
+    if wx_service.verify_signature(signature, timestamp, nonce, settings.wx_mini_app_push_message_token):
+        return Response(content=echostr)
+    else:
+        logger.warning("wx mini app push message signature verification failed")
+        return Response(content="error")
+
 async def handle_wx_event_message(wx_service: WxService, data: dict, from_user: str, to_user: str, session: AsyncSession) -> str:
     """Handle event messages (subscribe, unsubscribe, scan, etc.) and return plain reply XML or empty string."""
     event = data.get("Event")

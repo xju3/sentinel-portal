@@ -73,6 +73,12 @@ class Settings(BaseSettings):
         "https://langhu.ai/api/v1/wx/diagnosis/callback"
     )
 
+    # wx mini app settings
+    wx_mini_app_id: str = ""
+    wx_mini_app_secret: str = ""
+    wx_mini_app_push_message_token: str = ""
+    wx_mini_app_message_key: str = ""
+
     # Queue Configuration
     patrol_queue_length: int = 72
 
