@@ -10,5 +10,7 @@
     />
     
     <empty-state wx:if="{{!loading && specs.length === 0}}" title="暂无可用对比规格" desc="未找到配置了测点分组的设备规格" />
+    <view wx:if="{{loading && specs.length > 0}}" class="page-status">加载中...</view>
+    <view wx:if="{{!loading && !hasMore && specs.length > 0}}" class="page-status">没有更多了</view>
   </view>
 </view>

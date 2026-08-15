@@ -614,6 +614,29 @@ async def list_device_specs(
     return success(specs)
 
 
+@router.get("/wx-mini-app/device-specs")
+async def list_grouped_device_specs(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100),
+    sort_by: Optional[str] = Query("name"),
+    sort_order: Optional[str] = Query("ascend"),
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    """小程序分组对比入口：分页返回至少属于一个设备分组的规格。"""
+    tenant_id = cast(UUID, current_account.tenant_id)
+    specs = await DeviceSpecService.get_all(
+        session,
+        tenant_id,
+        skip,
+        limit,
+        sort_by,
+        sort_order,
+        in_device_group=True,
+    )
+    return success(specs)
+
+
 @router.get("/device-specs/{obj_id}")
 async def get_device_spec(
     obj_id: UUID,

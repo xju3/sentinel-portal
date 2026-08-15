@@ -6,7 +6,7 @@ from uuid import UUID
 from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import func, or_
+from sqlalchemy import exists, func, or_
 
 from pub.models.device import (
     IsoStandard,
@@ -50,6 +50,7 @@ class DeviceSpecService:
         sort_by: str | None = None,
         sort_order: str = "ascend",
         process_device_id: UUID | None = None,
+        in_device_group: bool = False,
     ) -> List[DeviceSpec]:
         stmt = (
             select(DeviceSpec)
@@ -74,7 +75,25 @@ class DeviceSpecService:
                 )
                 .distinct()
             )
+
+        if in_device_group:
+            group_exists = (
+                select(ProcessDeviceItem.id)
+                .select_from(ProcessDeviceItem)
+                .join(DeviceInst, ProcessDeviceItem.device_inst_id == DeviceInst.id)
+                .join(ProcessDevice, ProcessDevice.id == ProcessDeviceItem.process_device_id)
+                .join(Process, Process.id == ProcessDevice.process_id)
+                .where(
+                    DeviceInst.device_spec_id == DeviceSpec.id,
+                    Process.tenant_id == tenant_id,
+                )
+            )
+            stmt = stmt.where(exists(group_exists))
+
         stmt = apply_sorting(stmt, DeviceSpec, sort_by, sort_order or "ascend")
+        if in_device_group:
+            # A stable tie-breaker prevents duplicates or gaps between pages.
+            stmt = stmt.order_by(DeviceSpec.id.asc())
         stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
         return result.scalars().all()

@@ -1,4 +1,9 @@
-import { getProcessDevices, getDeviceSpecComparison, getDeviceCategories, getDeviceSpecs } from '../../utils/api'
+import {
+  getProcessDevices,
+  getDeviceSpecComparison,
+  getDeviceCategories,
+  getAllGroupedDeviceSpecs,
+} from '../../utils/api'
 import * as echarts from '../../components/ec-canvas/echarts'
 
 const app = getApp<IAppOption>()
@@ -97,10 +102,10 @@ Page({
     const specId = this.data.specId
 
     try {
-      // Request 1 + 2: parallel — categories and ALL specs (no filter)
+      // Request 1 + 2: parallel — categories and all grouped specs
       const [rawCats, rawSpecs] = await Promise.all([
         getDeviceCategories(token),
-        getDeviceSpecs(token, 0, 100),
+        getAllGroupedDeviceSpecs(token),
       ])
 
       const catList = Array.isArray(rawCats) ? rawCats
@@ -119,7 +124,8 @@ Page({
         : 0
       
       const catId = categories[categoryIndex]?.id
-      const filteredSpecs = catId ? specList.filter((s: any) => s.device_category_id === catId && s.process_device_count > 0) : []
+      // Group membership has already been filtered by the API.
+      const filteredSpecs = catId ? specList.filter((s: any) => s.device_category_id === catId) : []
       const newSpecIndex = Math.max(0, filteredSpecs.findIndex((s: any) => s.id === specId))
 
       this.setData({ 

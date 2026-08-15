@@ -1,55 +1,72 @@
-import { getDeviceSpecs } from '../../utils/api'
+import { getGroupedDeviceSpecs } from '../../utils/api'
+import { createPagedListLoader, PagedListLoader } from '../../utils/pagination'
 
 const app = getApp<IAppOption>()
 
 Page({
+  specLoader: null as PagedListLoader<any> | null,
+
   data: {
     specs: [] as any[],
     loading: true,
-    skip: 0,
     hasMore: true,
   },
 
   onLoad() {
+    this.specLoader = createPagedListLoader({
+      pageSize: 20,
+      fetchPage: (skip, limit) => {
+        const token = app.globalData.session?.accessToken
+        if (!token) {
+          return Promise.reject(new Error('用户未登录'))
+        }
+        return getGroupedDeviceSpecs(token, skip, limit)
+      },
+      onChange: ({ items, loading, hasMore }) => {
+        this.setData({ specs: items, loading, hasMore })
+      },
+    })
     this.fetchData()
   },
 
   async onPullDownRefresh() {
-    this.setData({ skip: 0, hasMore: true })
-    await this.fetchData()
-    wx.stopPullDownRefresh()
+    try {
+      await this.fetchData()
+    } finally {
+      wx.stopPullDownRefresh()
+    }
   },
 
   async onReachBottom() {
-    if (!this.data.hasMore || this.data.loading) return
     await this.fetchData(true)
   },
 
   async fetchData(append = false) {
-    const session = app.globalData.session
-    if (!session?.accessToken) return
+    if (!this.specLoader || !app.globalData.session?.accessToken) {
+      this.setData({ loading: false })
+      return
+    }
 
-    this.setData({ loading: true })
+    const current = this.specLoader.getSnapshot()
+    if (current.loading || (append && !current.hasMore)) return
+
     if (!append) {
       wx.showNavigationBarLoading()
     }
 
     try {
-      const data = await getDeviceSpecs(session.accessToken, this.data.skip, 20)
-      const validSpecs = data.filter((s: any) => s.process_device_count > 0)
-      
-      this.setData({
-        specs: append ? [...this.data.specs, ...validSpecs] : validSpecs,
-        skip: this.data.skip + data.length,
-        hasMore: data.length === 20,
-        loading: false
-      })
+      if (append) {
+        await this.specLoader.loadMore()
+      } else {
+        await this.specLoader.refresh()
+      }
     } catch (err) {
       console.error('Fetch specs failed', err)
-      this.setData({ loading: false })
       wx.showToast({ title: '加载失败', icon: 'none' })
     } finally {
-      wx.hideNavigationBarLoading()
+      if (!append) {
+        wx.hideNavigationBarLoading()
+      }
     }
   },
 

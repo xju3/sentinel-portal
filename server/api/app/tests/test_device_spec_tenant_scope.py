@@ -56,6 +56,36 @@ async def test_device_spec_list_can_filter_by_tenant_owned_process_device():
 
 
 @pytest.mark.asyncio
+async def test_device_spec_list_can_filter_to_specs_in_tenant_device_groups():
+    tenant_id = uuid4()
+    result = Mock()
+    result.scalars.return_value.all.return_value = []
+    session = Mock()
+    session.execute = AsyncMock(return_value=result)
+
+    await DeviceSpecService.get_all(
+        session,
+        tenant_id,
+        20,
+        10,
+        in_device_group=True,
+    )
+
+    statement = session.execute.await_args.args[0]
+    sql = str(statement)
+    params = statement.compile().params
+    assert "EXISTS" in sql
+    assert "FROM dg_inst_item" in sql
+    assert "JOIN device_inst" in sql
+    assert "JOIN dg_inst" in sql
+    assert "JOIN dg_template" in sql
+    assert "dg_template.tenant_id" in sql
+    assert tenant_id in params.values()
+    assert 10 in params.values()
+    assert 20 in params.values()
+
+
+@pytest.mark.asyncio
 async def test_device_spec_detail_query_filters_by_category_tenant():
     tenant_id = uuid4()
     result = Mock()
@@ -125,6 +155,34 @@ async def test_device_spec_list_passes_process_device_filter_to_service(monkeypa
         "ascend",
         process_device_id,
     )
+
+
+@pytest.mark.asyncio
+async def test_mini_app_device_spec_list_requests_only_grouped_specs(monkeypatch):
+    tenant_id = uuid4()
+    get_all = AsyncMock(return_value=[])
+    monkeypatch.setattr(devices.DeviceSpecService, "get_all", get_all)
+    session = Mock()
+
+    response = await devices.list_grouped_device_specs(
+        skip=20,
+        limit=10,
+        sort_by="name",
+        sort_order="ascend",
+        current_account=SimpleNamespace(tenant_id=tenant_id),
+        session=session,
+    )
+
+    get_all.assert_awaited_once_with(
+        session,
+        tenant_id,
+        20,
+        10,
+        "name",
+        "ascend",
+        in_device_group=True,
+    )
+    assert response.data == []
 
 
 @pytest.mark.asyncio

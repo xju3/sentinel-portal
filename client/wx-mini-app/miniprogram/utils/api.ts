@@ -114,6 +114,31 @@ export function getDeviceSpecs(token: string, skip = 0, limit = 100, device_cate
   return request<any[]>('/device-specs', 'GET', { skip, limit, device_category_id }, token)
 }
 
+/** Get a page of device specs which belong to at least one comparison group. */
+export function getGroupedDeviceSpecs(token: string, skip = 0, limit = 100) {
+  return request<any[]>(
+    '/wx-mini-app/device-specs',
+    'GET',
+    { skip, limit, sort_by: 'name', sort_order: 'ascend' },
+    token,
+  )
+}
+
+/** Get all device specs which belong to at least one comparison group. */
+export async function getAllGroupedDeviceSpecs(token: string) {
+  const limit = 100
+  let skip = 0
+  const all: any[] = []
+  while (true) {
+    const batch = await getGroupedDeviceSpecs(token, skip, limit)
+    const items = Array.isArray(batch) ? batch : ((batch as any)?.items || [])
+    all.push(...items)
+    if (items.length < limit) break
+    skip += limit
+  }
+  return all
+}
+
 /** Get single device spec detail */
 export function getDeviceSpec(token: string, id: string) {
   return request<any>(`/device-specs/${id}`, 'GET', undefined, token)

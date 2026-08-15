@@ -9,3 +9,10 @@
   flex-direction: column;
   gap: 24rpx;
 }
+
+.page-status {
+  padding: 12rpx 0 24rpx;
+  color: #8c96a9;
+  font-size: 24rpx;
+  text-align: center;
+}

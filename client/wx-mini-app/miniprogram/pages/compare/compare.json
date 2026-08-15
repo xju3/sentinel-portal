@@ -1,6 +1,7 @@
 {
   "navigationBarTitleText": "分组对比",
   "enablePullDownRefresh": true,
+  "onReachBottomDistance": 100,
   "backgroundTextStyle": "light",
   "backgroundColorTop": "#0A0F1C",
   "usingComponents": {
