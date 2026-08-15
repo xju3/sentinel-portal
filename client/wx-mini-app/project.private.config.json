@@ -18,5 +18,32 @@
     "checkInvalidKey": true,
     "ignoreDevUnusedFiles": true
   },
-  "libVersion": "3.17.0"
+  "libVersion": "3.17.0",
+  "condition": {
+    "miniprogram": {
+      "list": [
+        {
+          "name": "pages/home/home",
+          "pathName": "pages/home/home",
+          "query": "",
+          "scene": null,
+          "launchMode": "default"
+        },
+        {
+          "name": "pages/compare/detail",
+          "pathName": "pages/compare/detail",
+          "query": "id=4b714bcf-c503-448a-a1c4-111e1925b51f&name=%25E7%2594%25B5%25E6%259C%25BA(2920)",
+          "launchMode": "default",
+          "scene": null
+        },
+        {
+          "name": "pages/home/home",
+          "pathName": "pages/home/home",
+          "query": "",
+          "launchMode": "default",
+          "scene": null
+        }
+      ]
+    }
+  }
 }

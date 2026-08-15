@@ -9,6 +9,7 @@ interface UserSession {
   accountId?: string
   tenantId?: string
   openid?: string  // only set when not registered
+  unionid?: string // only set when not registered and available
 }
 
 App<IAppOption>({

@@ -1,20 +1,8 @@
 <!--pages/register/register.wxml-->
 <scroll-view scroll-y class="page" enhanced show-scrollbar="{{false}}">
 
-  <!-- ── Success state ─────────────────────────────── -->
-  <view class="success-wrap" wx:if="{{submitted}}">
-    <view class="success-icon">
-      <view class="checkmark" />
-    </view>
-    <text class="success-title">注册成功</text>
-    <text class="success-body">我们已将密码设置链接发送至您的邮箱。\n请查收邮件并完成密码设置后，使用 Web 端登录系统。</text>
-    <view class="tip-card">
-      <text class="tip-card__text">💡 设置密码后，您可通过微信小程序直接访问工作台，无需再次注册。</text>
-    </view>
-  </view>
-
   <!-- ── Form state ─────────────────────────────────── -->
-  <view class="form-wrap" wx:else>
+  <view class="form-wrap">
 
     <!-- Hero -->
     <view class="hero">

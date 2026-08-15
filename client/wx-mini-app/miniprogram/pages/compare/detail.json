@@ -1,0 +1,7 @@
+{
+  "navigationBarTitleText": "规格对比",
+  "backgroundColorTop": "#0A0F1C",
+  "usingComponents": {
+    "ec-canvas": "../../components/ec-canvas/ec-canvas"
+  }
+}

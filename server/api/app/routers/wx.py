@@ -160,6 +160,64 @@ async def wx_mini_app_login(
     })
 
 
+# ── Mini App Login With Password ───────────────────────────────────────────────
+
+class MiniAppLoginWithPasswordRequest(BaseModel):
+    username: str
+    password: str
+    openid: str
+    unionid: Optional[str] = None
+
+@router.post("/wx-mini-app/bind-login")
+async def wx_mini_app_bind_login(
+    payload: MiniAppLoginWithPasswordRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """Login with username/password and bind the WeChat mini-app identity."""
+    account = await AuthService.get_account_by_credentials(
+        session, payload.username, payload.password
+    )
+    if account is None:
+        raise HTTPException(status_code=401, detail="用户名或密码不正确")
+
+    # Bind openid (and unionid)
+    await AuthService.bind_account_wx_mini(session, account, payload.openid, payload.unionid)
+
+    tenant_name: Optional[str] = None
+    contact_name: Optional[str] = None
+    tenant = await AuthService.get_tenant_by_id(session, account.tenant_id)
+    if tenant:
+        tenant_name = str(tenant.name)
+    if account.contact_id:
+        contact = await AuthService.get_contact_by_id(session, account.contact_id)
+        if contact:
+            contact_name = str(contact.name)
+
+    expires_in = settings.jwt_access_token_expires_minutes * 60
+    access_token = create_access_token(
+        subject=str(account.id),
+        tenant_id=str(account.tenant_id),
+        username=account.username,
+        jwt_secret_key=settings.jwt_secret_key,
+        admin=account.admin,
+        contact_id=str(account.contact_id) if account.contact_id else None,
+        flag=account.flag,
+        expires_minutes=settings.jwt_access_token_expires_minutes,
+    )
+
+    return success({
+        "registered": True,
+        "access_token": access_token,
+        "token_type": "Bearer",
+        "expires_in": expires_in,
+        "account_id": str(account.id),
+        "tenant_id": str(account.tenant_id),
+        "tenant_name": tenant_name,
+        "contact_id": str(account.contact_id) if account.contact_id else None,
+        "contact_name": contact_name,
+    })
+
+
 # ── Mini App Register ────────────────────────────────────────────────────────────
 
 USERNAME_FLAG_EMAIL = 1

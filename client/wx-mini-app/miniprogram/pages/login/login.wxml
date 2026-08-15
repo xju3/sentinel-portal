@@ -1,0 +1,71 @@
+<!--pages/login/login.wxml-->
+<scroll-view scroll-y class="page" enhanced show-scrollbar="{{false}}">
+  <view class="form-wrap">
+
+    <!-- Hero -->
+    <view class="hero">
+      <view class="hero__dot-wrap">
+        <view class="hero__dot" />
+      </view>
+      <text class="hero__title">欢迎回来</text>
+      <text class="hero__subtitle">登录以访问您的工作台</text>
+    </view>
+
+    <!-- Form card -->
+    <view class="form-card card">
+
+      <view class="field">
+        <text class="field__label">用户名/邮箱<text class="field__required">*</text></text>
+        <input
+          class="field__input {{errors.username ? 'field__input--error' : ''}}"
+          placeholder="请输入注册邮箱"
+          placeholder-class="field__placeholder"
+          data-field="username"
+          value="{{form.username}}"
+          bindinput="onInput"
+          type="text"
+          maxlength="120"
+        />
+        <text class="field__error" wx:if="{{errors.username}}">{{errors.username}}</text>
+      </view>
+
+      <view class="divider" />
+
+      <view class="field">
+        <text class="field__label">密码<text class="field__required">*</text></text>
+        <input
+          class="field__input {{errors.password ? 'field__input--error' : ''}}"
+          placeholder="请输入密码"
+          placeholder-class="field__placeholder"
+          data-field="password"
+          value="{{form.password}}"
+          bindinput="onInput"
+          password
+          maxlength="120"
+        />
+        <text class="field__error" wx:if="{{errors.password}}">{{errors.password}}</text>
+      </view>
+
+    </view>
+
+    <!-- Note -->
+    <text class="form-note">登录成功后，您的微信将自动与该账号关联，下次可直接免密登录。</text>
+
+    <!-- Submit -->
+    <button
+      class="btn-submit {{submitting ? 'btn-submit--loading' : ''}}"
+      bindtap="onSubmit"
+      disabled="{{submitting}}"
+    >
+      <view class="btn-submit__spinner" wx:if="{{submitting}}" />
+      <text>{{submitting ? '登录中...' : '登录'}}</text>
+    </button>
+
+    <!-- Register Link -->
+    <view class="register-link" bindtap="onGoToRegister">
+      <text>还没有企业账号？<text class="register-link__text">立即注册</text></text>
+    </view>
+
+  </view>
+  <view class="footer-safe" />
+</scroll-view>

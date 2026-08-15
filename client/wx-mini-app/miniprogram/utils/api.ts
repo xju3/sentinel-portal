@@ -1,6 +1,6 @@
 // utils/api.ts — Unified HTTP request wrapper
 
-const BASE_URL = 'https://langhu.ai/api/v1'
+const BASE_URL = 'https://api-server.icu/api/v1'
 
 interface ApiResponse<T = any> {
   code: number
@@ -25,7 +25,9 @@ export function request<T = any>(
     wx.request({
       url: `${BASE_URL}${path}`,
       method,
-      data,
+      data: data
+        ? Object.fromEntries(Object.entries(data).filter(([, v]) => v !== undefined))
+        : undefined,
       header,
       success(res) {
         const body = res.data as ApiResponse<T>
@@ -58,6 +60,24 @@ export function miniLogin(code: string) {
 }
 
 /** Register new tenant */
+export function miniLoginWithPassword(payload: {
+  username: string
+  password: string
+  openid: string
+  unionid?: string
+}) {
+  return request<{
+    registered: boolean
+    access_token: string
+    tenant_name?: string
+    contact_name?: string
+    account_id: string
+    tenant_id: string
+    expires_in: number
+  }>('/wx-mini-app/bind-login', 'POST', payload)
+}
+
+/** Register new tenant */
 export function miniRegister(payload: {
   company_name: string
   contact_name: string
@@ -70,4 +90,43 @@ export function miniRegister(payload: {
     'POST',
     payload,
   )
+}
+
+/** Get health dashboard summary */
+export function getDashboardHealth(token: string) {
+  return request<any>('/dashboard/health', 'GET', undefined, token)
+}
+
+/** Get device categories */
+export function getDeviceCategories(token: string) {
+  return request<any[]>('/device-categories', 'GET', { skip: 0, limit: 100 }, token)
+}
+
+/** Get list of device specs */
+export function getDeviceSpecs(token: string, skip = 0, limit = 100, device_category_id?: string) {
+  return request<any[]>('/device-specs', 'GET', { skip, limit, device_category_id }, token)
+}
+
+/** Get single device spec detail */
+export function getDeviceSpec(token: string, id: string) {
+  return request<any>(`/device-specs/${id}`, 'GET', undefined, token)
+}
+
+/** Get process devices */
+export function getProcessDevices(token: string, skip = 0, limit = 100, device_spec_id?: string) {
+  return request<any[]>('/process-devices', 'GET', { skip, limit, device_spec_id }, token)
+}
+
+/** Get device spec comparison data */
+export function getDeviceSpecComparison(
+  token: string,
+  deviceSpecId: string,
+  params: {
+    process_device_id?: string
+    location_id?: string
+    range_days: number
+    window_minutes: number
+  }
+) {
+  return request<any>(`/device-specs/${deviceSpecId}/comparison`, 'GET', params as Record<string, any>, token)
 }

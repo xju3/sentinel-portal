@@ -1,0 +1,118 @@
+<view class="container">
+  <view class="header">
+    <view class="title-group">
+      <text class="title">{{specName || '规格对比'}}</text>
+      <text class="subtitle">同规格设备多维对比</text>
+    </view>
+    <view class="filter-btn" bindtap="openDrawer">
+      <text>参数设置</text>
+    </view>
+  </view>
+
+  <view class="tabs">
+    <view class="tab {{activeTab === 'temperature' ? 'tab--active' : ''}}" bindtap="switchTab" data-tab="temperature">温度对比</view>
+    <view class="tab {{activeTab === 'vibration' ? 'tab--active' : ''}}" bindtap="switchTab" data-tab="vibration">振动对比</view>
+  </view>
+
+  <view class="chart-container">
+    <view wx:if="{{loading}}" class="chart-placeholder">
+      <text>数据加载中...</text>
+    </view>
+    <view wx:elif="{{!data}}" class="chart-placeholder">
+      <text>暂无对比数据</text>
+      <text class="chart-hint">点击右上角"参数设置"选择数据范围</text>
+    </view>
+    <block wx:else>
+      <view class="chart-box" style="width: 100%; height: 500rpx;">
+        <ec-canvas id="mychart-dom-line" canvas-id="mychart-line" ec="{{ ec }}"></ec-canvas>
+      </view>
+      <view class="meta-bar" wx:if="{{metaText}}">
+        <text class="meta-text">{{metaText}}</text>
+      </view>
+      <view class="legend" wx:if="{{data.series && data.series.length > 0}}">
+        <view class="legend-item" wx:for="{{data.series}}" wx:key="index">
+          <view class="legend-color" style="background: {{item.device.color}}" />
+          <text>{{item.device.name}}</text>
+        </view>
+      </view>
+    </block>
+  </view>
+</view>
+
+<!-- Bottom Drawer -->
+<view class="drawer-mask {{drawerVisible ? 'drawer-mask--visible' : ''}}" bindtap="closeDrawer"></view>
+<view class="drawer {{drawerVisible ? 'drawer--visible' : ''}}">
+  <view class="drawer__header">
+    <text class="drawer__title">参数设置</text>
+    <text class="drawer__close" bindtap="closeDrawer">完成</text>
+  </view>
+
+  <scroll-view scroll-y class="drawer__body">
+
+    <!-- 1. 设备分类 -->
+    <view class="form-group">
+      <view class="form-label">设备分类</view>
+      <picker bindchange="onCategoryChange" value="{{categoryIndex}}" range="{{categories}}" range-key="label" disabled="{{categories.length === 0}}">
+        <view class="picker-view {{categories.length === 0 ? 'picker-view--dim' : ''}}">
+          <text wx:if="{{categories.length === 0}}">加载中...</text>
+          <text wx:else>{{categories[categoryIndex].label}}</text>
+        </view>
+      </picker>
+    </view>
+
+    <!-- 2. 设备规格 -->
+    <view class="form-group">
+      <view class="form-label">设备规格</view>
+      <picker bindchange="onSpecChange" value="{{specIndex}}" range="{{deviceSpecs}}" range-key="name" disabled="{{deviceSpecs.length === 0}}">
+        <view class="picker-view {{deviceSpecs.length === 0 ? 'picker-view--dim' : ''}}">
+          <text wx:if="{{deviceSpecs.length === 0}}">加载中...</text>
+          <text wx:else>{{deviceSpecs[specIndex].name}}</text>
+        </view>
+      </picker>
+    </view>
+
+    <!-- 3. 设备分组 -->
+    <view class="form-group">
+      <view class="form-label">设备分组</view>
+      <picker bindchange="onGroupChange" value="{{groupIndex}}" range="{{processDevices}}" range-key="label" disabled="{{processDevices.length === 0}}">
+        <view class="picker-view {{processDevices.length === 0 ? 'picker-view--dim' : ''}}">
+          <text wx:if="{{processDevices.length === 0}}">加载中...</text>
+          <text wx:else>{{processDevices[groupIndex].label}}</text>
+        </view>
+      </picker>
+    </view>
+
+    <!-- 4. 对比测点 -->
+    <view class="form-group">
+      <view class="form-label">对比测点</view>
+      <picker bindchange="onLocationChange" value="{{locationIndex}}" range="{{locations}}" range-key="name" disabled="{{locations.length === 0}}">
+        <view class="picker-view {{!data ? 'picker-view--dim' : ''}}">
+          <text wx:if="{{!data}}">加载中...</text>
+          <text wx:elif="{{locations.length === 0}}">暂无测点</text>
+          <text wx:else>{{locations[locationIndex].name}}</text>
+        </view>
+      </picker>
+    </view>
+
+    <!-- 5. 时间范围 -->
+    <view class="form-group">
+      <view class="form-label">时间范围</view>
+      <picker bindchange="onRangeChange" value="{{rangeIndex}}" range="{{rangeOptions}}" range-key="label">
+        <view class="picker-view">{{rangeOptions[rangeIndex].label}}</view>
+      </picker>
+    </view>
+
+    <!-- 6. 显示窗口 -->
+    <view class="form-group">
+      <view class="form-label">显示窗口</view>
+      <picker bindchange="onWindowChange" value="{{windowIndex}}" range="{{windowOptions}}" range-key="label">
+        <view class="picker-view">{{windowOptions[windowIndex].label}}</view>
+      </picker>
+    </view>
+
+    <view class="form-action">
+      <button class="btn-primary" bindtap="applyParams">应用并刷新</button>
+    </view>
+
+  </scroll-view>
+</view>

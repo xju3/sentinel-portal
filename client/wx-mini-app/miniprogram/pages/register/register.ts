@@ -13,7 +13,6 @@ Page({
     },
     openid: '',
     submitting: false,
-    submitted: false,
     errors: {} as Record<string, string>,
   },
 
@@ -57,7 +56,10 @@ Page({
     this.setData({ submitting: true })
     try {
       await miniRegister({ ...this.data.form, openid: this.data.openid })
-      this.setData({ submitted: true })
+      wx.showToast({ title: '注册成功', icon: 'success', duration: 1500 })
+      setTimeout(() => {
+        wx.reLaunch({ url: '/pages/index/index' })
+      }, 1500)
     } catch (e: any) {
       wx.showToast({ title: e.message || '注册失败，请重试', icon: 'none', duration: 3000 })
     } finally {

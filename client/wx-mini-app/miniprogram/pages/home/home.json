@@ -1,6 +1,9 @@
 {
-  "usingComponents": {},
+  "usingComponents": {
+    "stat-card": "/components/stat-card/stat-card"
+  },
   "navigationBarTitleText": "工作台",
-  "enablePullDownRefresh": false,
-  "backgroundColorTop": "#0A1628"
+  "enablePullDownRefresh": true,
+  "backgroundTextStyle": "light",
+  "backgroundColorTop": "#0A0F1C"
 }

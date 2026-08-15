@@ -150,3 +150,16 @@ page {
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+.register-link {
+  text-align: center;
+  padding: 32rpx 0;
+  font-size: 26rpx;
+  color: var(--color-text-secondary);
+}
+
+.register-link__text {
+  color: var(--color-primary);
+  font-weight: 600;
+  margin-left: 8rpx;
+}

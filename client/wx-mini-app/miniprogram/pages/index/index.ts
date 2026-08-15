@@ -36,8 +36,8 @@ Page({
             }
             wx.reLaunch({ url: '/pages/home/home' })
           } else {
-            app.globalData.session = { registered: false, openid: result.openid }
-            wx.reLaunch({ url: '/pages/register/register' })
+            app.globalData.session = { registered: false, openid: result.openid, unionid: (result as any).unionid }
+            wx.reLaunch({ url: '/pages/login/login' })
           }
         } catch (e: any) {
           this.setData({ status: 'error', errorMsg: e.message || '网络异常，请重试' })

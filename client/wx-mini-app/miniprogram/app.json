@@ -2,13 +2,18 @@
   "pages": [
     "pages/index/index",
     "pages/home/home",
-    "pages/register/register"
+    "pages/login/login",
+    "pages/register/register",
+    "pages/compare/compare",
+    "pages/compare/detail"
   ],
   "window": {
     "navigationBarTextStyle": "white",
     "navigationBarTitleText": "朗湖哨兵",
-    "navigationBarBackgroundColor": "#0A1628",
-    "backgroundColor": "#F5F7FA"
+    "navigationBarBackgroundColor": "#0A0F1C",
+    "backgroundColor": "#0A0F1C",
+    "enablePullDownRefresh": true,
+    "backgroundTextStyle": "light"
   },
   "style": "v2",
   "componentFramework": "glass-easel",

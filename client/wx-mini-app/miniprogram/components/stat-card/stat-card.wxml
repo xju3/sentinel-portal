@@ -1,0 +1,10 @@
+<view class="stat-card" style="{{item.isZero ? 'border-color: rgba(255, 255, 255, 0.05); background: rgba(20, 30, 48, 0.3);' : ''}}">
+  <view class="stat-card__label-container">
+    <view class="stat-card__icon {{item.icon}}" style="background-color: {{item.color}};" />
+    <text class="stat-card__label" style="color: {{item.color}}">{{item.label}}</text>
+  </view>
+  <view class="stat-card__data" style="{{item.isZero ? 'opacity: 0.5;' : ''}}">
+    <text class="stat-card__value" style="{{item.isZero ? 'text-shadow: none;' : ''}}">{{item.value}}</text>
+    <text class="stat-card__unit">{{item.unit}}</text>
+  </view>
+</view>
