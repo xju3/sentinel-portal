@@ -1,0 +1,92 @@
+.page {
+  min-height: 100vh;
+  padding: 32rpx;
+  box-sizing: border-box;
+}
+
+.page__hero {
+  display: flex;
+  flex-direction: column;
+  gap: 12rpx;
+  margin-bottom: 24rpx;
+  padding: 28rpx;
+}
+
+.page__hero-title {
+  font-size: 34rpx;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.page__hero-desc {
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+}
+
+.device-list,
+.skeleton-list {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+}
+
+.page-status {
+  padding: 20rpx 0 28rpx;
+  text-align: center;
+  font-size: 24rpx;
+  color: var(--color-text-secondary);
+}
+
+.skeleton-card {
+  display: flex;
+  flex-direction: column;
+  gap: 20rpx;
+  padding: 28rpx;
+  border-radius: 24rpx;
+  border: 1rpx solid rgba(255, 255, 255, 0.08);
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.02) 25%, rgba(255, 255, 255, 0.06) 50%, rgba(255, 255, 255, 0.02) 75%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s infinite;
+}
+
+.skeleton-card__line {
+  border-radius: 9999rpx;
+  background: rgba(255, 255, 255, 0.12);
+}
+
+.skeleton-card__line--lg {
+  width: 48%;
+  height: 28rpx;
+}
+
+.skeleton-card__line--md {
+  width: 34%;
+  height: 20rpx;
+}
+
+.skeleton-card__line--sm {
+  width: 82%;
+  height: 20rpx;
+}
+
+.skeleton-card__metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16rpx;
+}
+
+.skeleton-card__metric {
+  height: 96rpx;
+  border-radius: 18rpx;
+  background: rgba(255, 255, 255, 0.08);
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}

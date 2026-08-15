@@ -104,6 +104,70 @@ export function getDashboardHealth(token: string) {
   return request<any>('/dashboard/health', 'GET', undefined, token)
 }
 
+/** Get a page of devices which have current or historical sensor monitoring. */
+export async function getHealthArchiveDevices(token: string, skip = 0, limit = 10) {
+  const data = await request<any>(
+    '/wx-mini-app/health-archive/devices',
+    'GET',
+    { skip, limit },
+    token,
+  )
+  if (Array.isArray(data)) {
+    return data
+  }
+  if (Array.isArray(data?.items)) {
+    const hasMore = typeof data.hasMore === 'boolean'
+      ? data.hasMore
+      : (typeof data.total === 'number'
+        ? skip + data.items.length < data.total
+        : undefined)
+    return { items: data.items, hasMore }
+  }
+  throw new Error('设备列表响应格式错误')
+}
+
+/** Get the diagnosis timeline and monitoring points for one device. */
+export function getDeviceHealthArchive(
+  token: string,
+  deviceId: string,
+  params: {
+    start_at: string
+    end_at: string
+    interval_hours: number
+    location_id?: string
+  },
+) {
+  return request<any>(`/devices/${deviceId}/health-archive`, 'GET', params, token)
+}
+
+/** Get temperature and vibration history for one monitoring point. */
+export function getDevicePointTrends(
+  token: string,
+  deviceId: string,
+  params: {
+    location_id: string
+    range_days: number
+    window_minutes: number
+  },
+) {
+  return request<any>(`/devices/${deviceId}/point-trends`, 'GET', params, token)
+}
+
+/** Get recent FFT captures for one device. */
+export function getDeviceFftRecords(token: string, deviceId: string) {
+  return request<any[]>(`/devices/${deviceId}/fft-records`, 'GET', undefined, token)
+}
+
+/** Get parsed FFT spectrum data for one capture. */
+export function getDeviceFftData(token: string, deviceId: string, recordId: string) {
+  return request<any>(
+    `/devices/${deviceId}/fft-records/${recordId}/data`,
+    'GET',
+    undefined,
+    token,
+  )
+}
+
 /** Get device categories */
 export function getDeviceCategories(token: string) {
   return request<any[]>('/device-categories', 'GET', { skip: 0, limit: 100 }, token)

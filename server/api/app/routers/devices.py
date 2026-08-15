@@ -805,6 +805,23 @@ async def list_device_insts(
     return success(items)
 
 
+@router.get("/wx-mini-app/health-archive/devices")
+async def list_wx_health_archive_devices(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(10, ge=1, le=100),
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    items, has_more = await DeviceInstService.get_tenant_health_archive_devices_paged(
+        session=session,
+        tenant_id=tenant_id,
+        skip=skip,
+        limit=limit,
+    )
+    return success({"items": items, "hasMore": has_more})
+
+
 @router.get("/device-insts/{obj_id}")
 async def get_device_inst(
     obj_id: UUID,

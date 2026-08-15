@@ -38,7 +38,7 @@
           <text class="entry-item__desc">同规则, 同分组, 同工况设备之间比对</text>
         </view>
       </view>
-      <view class="entry-item">
+      <view class="entry-item" bindtap="navToHealthArchive">
         <view class="entry-item__icon entry-item__icon--green">
           <view class="entry-item__icon-svg icon-profile" />
         </view>

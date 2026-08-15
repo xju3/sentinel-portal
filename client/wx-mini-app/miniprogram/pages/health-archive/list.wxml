@@ -1,0 +1,36 @@
+<view class="page">
+  <view class="page__hero card">
+    <text class="page__hero-title">设备健康档案</text>
+    <text class="page__hero-desc">仅展示当前正在被监控或曾被监控的设备，下拉刷新，触底继续加载。</text>
+  </view>
+
+  <view class="device-list" wx:if="{{devices.length > 0}}">
+    <health-device-card
+      wx:for="{{devices}}"
+      wx:key="id"
+      item="{{item}}"
+      bind:click="navToDetail"
+    />
+  </view>
+
+  <view wx:if="{{loading && devices.length === 0}}" class="skeleton-list">
+    <view class="skeleton-card" wx:for="{{[1,2,3]}}" wx:key="*this">
+      <view class="skeleton-card__line skeleton-card__line--lg"></view>
+      <view class="skeleton-card__line skeleton-card__line--md"></view>
+      <view class="skeleton-card__metrics">
+        <view class="skeleton-card__metric"></view>
+        <view class="skeleton-card__metric"></view>
+      </view>
+      <view class="skeleton-card__line skeleton-card__line--sm"></view>
+    </view>
+  </view>
+
+  <empty-state
+    wx:if="{{!loading && devices.length === 0}}"
+    title="暂无可查看的健康档案设备"
+    desc="只有正在监控或曾被监控的设备才会出现在这里"
+  />
+
+  <view wx:if="{{loading && devices.length > 0}}" class="page-status">加载中...</view>
+  <view wx:if="{{!loading && !hasMore && devices.length > 0}}" class="page-status">没有更多了</view>
+</view>

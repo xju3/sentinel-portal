@@ -1,0 +1,136 @@
+.health-device-card {
+  display: flex;
+  flex-direction: column;
+  gap: 24rpx;
+  padding: 28rpx;
+  border-radius: 24rpx;
+  background: linear-gradient(180deg, rgba(16, 27, 44, 0.92) 0%, rgba(10, 16, 28, 0.96) 100%);
+  border: 1rpx solid rgba(0, 210, 255, 0.14);
+  box-shadow: 0 8rpx 28rpx rgba(0, 210, 255, 0.08);
+}
+
+.health-device-card:active {
+  transform: scale(0.992);
+  border-color: rgba(0, 210, 255, 0.22);
+}
+
+.health-device-card__header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 20rpx;
+}
+
+.health-device-card__title-wrap {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+}
+
+.health-device-card__name {
+  font-size: 32rpx;
+  line-height: 1.35;
+  font-weight: 600;
+  color: var(--color-text-primary);
+  word-break: break-all;
+}
+
+.health-device-card__code {
+  font-size: 22rpx;
+  line-height: 1.4;
+  color: var(--color-text-secondary);
+  word-break: break-all;
+}
+
+.health-device-card__status {
+  flex-shrink: 0;
+  padding: 8rpx 18rpx;
+  border-radius: 9999rpx;
+  border: 1rpx solid transparent;
+}
+
+.health-device-card__status--active {
+  background: rgba(0, 255, 194, 0.12);
+  border-color: rgba(0, 255, 194, 0.24);
+}
+
+.health-device-card__status--history {
+  background: rgba(255, 176, 32, 0.12);
+  border-color: rgba(255, 176, 32, 0.24);
+}
+
+.health-device-card__status-text {
+  font-size: 22rpx;
+  font-weight: 600;
+  color: var(--color-text-primary);
+}
+
+.health-device-card__tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12rpx;
+}
+
+.health-device-card__tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 10rpx;
+  max-width: 100%;
+  padding: 10rpx 14rpx;
+  border-radius: 9999rpx;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1rpx solid rgba(255, 255, 255, 0.08);
+}
+
+.health-device-card__tag-label {
+  flex-shrink: 0;
+  font-size: 20rpx;
+  color: var(--color-text-secondary);
+}
+
+.health-device-card__tag-value {
+  min-width: 0;
+  font-size: 22rpx;
+  color: var(--color-text-primary);
+}
+
+.health-device-card__metrics {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16rpx;
+}
+
+.health-device-card__metric {
+  display: flex;
+  flex-direction: column;
+  gap: 8rpx;
+  padding: 18rpx 20rpx;
+  border-radius: 18rpx;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1rpx solid rgba(255, 255, 255, 0.06);
+}
+
+.health-device-card__metric-label {
+  font-size: 22rpx;
+  color: var(--color-text-secondary);
+}
+
+.health-device-card__metric-value {
+  font-size: 30rpx;
+  line-height: 1.2;
+  font-weight: 600;
+  color: var(--color-primary);
+}
+
+.health-device-card__desc {
+  font-size: 24rpx;
+  line-height: 1.6;
+  color: var(--color-text-secondary);
+  display: -webkit-box;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}

@@ -5,7 +5,9 @@
     "pages/login/login",
     "pages/register/register",
     "pages/compare/compare",
-    "pages/compare/detail"
+    "pages/compare/detail",
+    "pages/health-archive/list",
+    "pages/health-archive/detail"
   ],
   "window": {
     "navigationBarTextStyle": "white",

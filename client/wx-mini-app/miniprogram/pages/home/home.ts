@@ -102,5 +102,9 @@ Page({
 
   navToCompare() {
     wx.navigateTo({ url: '/pages/compare/compare' })
+  },
+
+  navToHealthArchive() {
+    wx.navigateTo({ url: '/pages/health-archive/list' })
   }
 })

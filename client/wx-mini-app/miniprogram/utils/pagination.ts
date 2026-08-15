@@ -11,9 +11,14 @@ export interface PagedListLoader<T> {
   getSnapshot(): PagedListSnapshot<T>
 }
 
+export interface PagedListPage<T> {
+  items: T[]
+  hasMore?: boolean
+}
+
 interface PagedListOptions<T> {
   pageSize?: number
-  fetchPage(skip: number, limit: number): Promise<T[]>
+  fetchPage(skip: number, limit: number): Promise<T[] | PagedListPage<T>>
   onChange(snapshot: PagedListSnapshot<T>): void
 }
 
@@ -44,12 +49,15 @@ export function createPagedListLoader<T>(options: PagedListOptions<T>): PagedLis
     update({ ...snapshot, loading: true })
 
     try {
-      const page = await options.fetchPage(skip, pageSize)
+      const result = await options.fetchPage(skip, pageSize)
+      const page = Array.isArray(result) ? result : result.items
       const items = append ? [...snapshot.items, ...page] : page
       update({
         items,
         skip: skip + page.length,
-        hasMore: page.length === pageSize,
+        hasMore: Array.isArray(result)
+          ? page.length === pageSize
+          : (result.hasMore ?? page.length === pageSize),
         loading: false,
       })
       return snapshot

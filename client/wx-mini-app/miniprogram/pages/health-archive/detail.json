@@ -1,0 +1,9 @@
+{
+  "navigationBarTitleText": "设备健康档案",
+  "enablePullDownRefresh": true,
+  "backgroundColorTop": "#0A0F1C",
+  "usingComponents": {
+    "ec-canvas": "../../components/ec-canvas/ec-canvas",
+    "empty-state": "../../components/empty-state/empty-state"
+  }
+}
