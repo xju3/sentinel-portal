@@ -2,5 +2,9 @@
   "navigationBarTitleText": "分组对比",
   "enablePullDownRefresh": true,
   "backgroundTextStyle": "light",
-  "backgroundColorTop": "#0A0F1C"
+  "backgroundColorTop": "#0A0F1C",
+  "usingComponents": {
+    "empty-state": "../../components/empty-state/empty-state",
+    "spec-card": "../../components/spec-card/spec-card"
+  }
 }

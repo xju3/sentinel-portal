@@ -52,6 +52,7 @@ class DeviceCategory(Base):
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     name = Column(String(64), nullable=False, unique=True)
     description = Column(String(255))
+    color = Column(String(20), nullable=True)
     parent_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Self-referential link for category hierarchy
     vib_threshold_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Optional link to vibration threshold for default values
     temp_threshold_id = Column(Uuid(as_uuid=True), nullable=True, index=True)  # Optional link to temperature threshold for default values

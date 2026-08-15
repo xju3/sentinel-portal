@@ -4,6 +4,7 @@
   "pageOrientation": "auto",
   "usingComponents": {
     "ec-canvas": "../../components/ec-canvas/ec-canvas",
-    "device-card": "../../components/device-card/device-card"
+    "device-card": "../../components/device-card/device-card",
+    "empty-state": "../../components/empty-state/empty-state"
   }
 }

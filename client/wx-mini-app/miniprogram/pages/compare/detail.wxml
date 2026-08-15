@@ -19,8 +19,7 @@
       <text>数据加载中...</text>
     </view>
     <view wx:elif="{{!data}}" class="chart-placeholder">
-      <text>暂无对比数据</text>
-      <text class="chart-hint">点击右上角"参数设置"选择数据范围</text>
+      <empty-state title="暂无对比数据" desc="点击右上角'参数设置'选择数据范围" />
     </view>
     <block wx:else>
       <view class="{{isFullscreen ? 'fullscreen-wrapper' : ''}}">
@@ -28,12 +27,16 @@
           <view class="meta-bar" wx:if="{{metaText && !isFullscreen}}">
             <text class="meta-text">{{metaText}}</text>
           </view>
-          <view class="fullscreen-btn" bindtap="toggleFullscreen">
-            <text>{{isFullscreen ? '退出横屏大图' : '全屏'}}</text>
+          
+          <view wx:if="{{isFullscreen}}" class="fullscreen-back-btn" bindtap="toggleFullscreen">
+            <view class="icon-back-arrow" />
+          </view>
+          <view wx:else class="fullscreen-btn" bindtap="toggleFullscreen">
+            <text>全屏</text>
           </view>
         </view>
         <view class="chart-box" style="{{isFullscreen ? 'flex: 1; width: 100%;' : 'width: 100%; height: 500rpx;'}}">
-          <ec-canvas id="mychart-dom-line" canvas-id="mychart-line" force-use-old-canvas="false" ec="{{ ec }}"></ec-canvas>
+          <ec-canvas id="mychart-dom-line" canvas-id="mychart-line" force-use-old-canvas="false" ec="{{ ec }}" style="width: 100%; height: 100%; display: block;"></ec-canvas>
         </view>
       </view>
       <view class="device-list" wx:if="{{data.series && data.series.length > 0 && !isFullscreen}}">

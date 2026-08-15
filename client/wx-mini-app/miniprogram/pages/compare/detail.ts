@@ -305,11 +305,21 @@ Page({
       // Small delay to allow orientation to change and CSS to settle before resizing canvas
       setTimeout(() => {
         if (this.chart) {
-          this.chart.resize()
+          const query = wx.createSelectorQuery()
+          query.select('.chart-box').boundingClientRect((res) => {
+            if (res) {
+              this.chart.resize({
+                width: res.width,
+                height: res.height
+              })
+            } else {
+              this.chart.resize()
+            }
+          }).exec()
         } else {
           this.renderChart()
         }
-      }, 300)
+      }, 500)
     })
   },
 

@@ -12,6 +12,7 @@ export type DeviceCategory = {
   id: string;
   name: string;
   description?: string;
+  color?: string | null;
   parent_id?: string | null;
   health_check_freq_id: string;
   tenant_id?: string | null;
@@ -28,6 +29,7 @@ export type DeviceCategory = {
 export type DeviceCategoryPayload = {
   name: string;
   description?: string;
+  color?: string | null;
   parent_id?: string | null;
   health_check_freq_id: string;
   iso_standard_id?: string | null;

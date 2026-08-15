@@ -40,11 +40,6 @@ page {
 
   /* ── Base ─────────────────────────────────────────────────── */
   background-color: var(--color-bg);
-  background-image: 
-    linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
-    linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
-  background-size: 40rpx 40rpx;
-  background-position: center top;
   color: var(--color-text-primary);
   font-family: "DIN Alternate", -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
   font-size: var(--font-base);

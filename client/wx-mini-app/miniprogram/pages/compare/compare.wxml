@@ -1,32 +1,14 @@
 <view class="container">
   <view class="spec-list">
-    <view class="spec-card" wx:for="{{specs}}" wx:key="id" bindtap="navToDetail" data-id="{{item.id}}" data-name="{{item.name}}">
-      <view class="spec-card__header">
-        <view class="spec-card__title">{{item.name}}</view>
-        <view class="spec-card__brand">{{item.brand}}</view>
-      </view>
-      <view class="spec-card__body">
-        <view class="spec-info">
-          <text class="spec-info__label">型号</text>
-          <text class="spec-info__value">{{item.model}}</text>
-        </view>
-        <view class="spec-info">
-          <text class="spec-info__label">分类</text>
-          <text class="spec-info__value">{{item.device_category.name || '--'}}</text>
-        </view>
-        <view class="spec-info">
-          <text class="spec-info__label">转速(RPM)</text>
-          <text class="spec-info__value">{{item.rpm || '--'}}</text>
-        </view>
-        <view class="spec-info">
-          <text class="spec-info__label">电压(V)</text>
-          <text class="spec-info__value">{{item.voltage || '--'}}</text>
-        </view>
-      </view>
-    </view>
+    <spec-card 
+      wx:for="{{specs}}" 
+      wx:key="id" 
+      item="{{item}}" 
+      bind:click="navToDetail" 
+      data-id="{{item.id}}" 
+      data-name="{{item.name}}"
+    />
     
-    <view class="empty-state" wx:if="{{!loading && specs.length === 0}}">
-      <text>暂无设备规格数据</text>
-    </view>
+    <empty-state wx:if="{{!loading && specs.length === 0}}" title="暂无可用对比规格" desc="未找到配置了测点分组的设备规格" />
   </view>
 </view>

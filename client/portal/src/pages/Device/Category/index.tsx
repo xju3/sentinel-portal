@@ -36,6 +36,7 @@ type CategoryTreeRow = DeviceCategory & {
 type CategoryFormValues = {
   name: string;
   description?: string;
+  color?: string;
   parent_id?: string;
   health_check_freq_id: string;
   iso_standard_id?: string;
@@ -194,6 +195,15 @@ const DeviceCategoryPage = () => {
       dataIndex: 'name',
       width: 120,
       sorter: (a, b) => (a.name || '').localeCompare(b.name || '', 'zh-CN'),
+    },
+    {
+      title: '标识色',
+      dataIndex: 'color',
+      width: 100,
+      render: (_, row) => {
+        if (!row.color) return '-';
+        return <Tag color={row.color}>{row.color}</Tag>;
+      },
     },
     // {
     //   title: '上级',
@@ -462,6 +472,7 @@ const DeviceCategoryPage = () => {
             ? {
               name: editing.name,
               description: editing.description,
+              color: editing.color || undefined,
               parent_id: editing.parent_id || undefined,
               health_check_freq_id: editing.health_check_freq_id,
               iso_standard_id: editing.iso_standard_id || undefined,
@@ -478,6 +489,7 @@ const DeviceCategoryPage = () => {
           const payload: DeviceCategoryPayload = {
             name: values.name.trim(),
             description: values.description || undefined,
+            color: values.color || null,
             parent_id: values.parent_id || null,
             health_check_freq_id: values.health_check_freq_id,
             iso_standard_id: values.iso_standard_id || null,
@@ -505,7 +517,10 @@ const DeviceCategoryPage = () => {
           }
         }}
       >
-        <ProFormText name="name" label="名称" rules={[{ required: true, message: '请选择分类' }]} />
+        <ProFormText name="name" label="名称" rules={[{ required: true, message: '请填写名称' }]} />
+        <ProForm.Item name="color" label="标识色">
+          <input type="color" style={{ width: 100, height: 32, padding: 0, border: 'none', background: 'none' }} />
+        </ProForm.Item>
         <ProFormSelect
           name="vib_threshold_id"
           label="振动阀值"

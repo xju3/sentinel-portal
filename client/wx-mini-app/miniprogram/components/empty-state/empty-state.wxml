@@ -1,0 +1,12 @@
+<view class="empty-state">
+  <view class="empty-state__icon-wrapper">
+    <image wx:if="{{icon}}" class="empty-state__icon-img" src="{{icon}}" mode="aspectFit" />
+    <view wx:else class="empty-state__icon-default">
+      <view class="icon-circle icon-circle--outer" />
+      <view class="icon-circle icon-circle--inner" />
+      <view class="icon-shape" />
+    </view>
+  </view>
+  <text class="empty-state__title">{{title}}</text>
+  <text class="empty-state__desc" wx:if="{{desc}}">{{desc}}</text>
+</view>

@@ -44,6 +44,7 @@ class IsoStandardResponse(BaseModel):
 class DeviceCategoryCreate(BaseModel):
     name: str
     description: Optional[str] = None
+    color: Optional[str] = None
     parent_id: Optional[UUID] = None
     health_check_freq_id: UUID
     tenant_id: Optional[UUID] = None
@@ -55,6 +56,7 @@ class DeviceCategoryCreate(BaseModel):
 class DeviceCategoryUpdate(BaseModel):
     name: Optional[str] = None
     description: Optional[str] = None
+    color: Optional[str] = None
     parent_id: Optional[UUID] = None
     health_check_freq_id: Optional[UUID] = None
     tenant_id: Optional[UUID] = None
@@ -103,6 +105,7 @@ class DeviceCategoryResponse(BaseModel):
     id: UUID
     name: str
     description: Optional[str] = None
+    color: Optional[str] = None
     parent_id: Optional[UUID] = None
     health_check_freq_id: UUID
     tenant_id: Optional[UUID] = None
@@ -157,6 +160,7 @@ class SupplierBrief(BaseModel):
 class DeviceCategoryBrief(BaseModel):
     id: UUID
     name: str
+    color: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 

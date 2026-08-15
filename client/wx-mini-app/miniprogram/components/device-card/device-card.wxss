@@ -70,6 +70,8 @@
 .status--has-data,
 .status--no-data {
   font-size: 20rpx;
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .status--has-data {

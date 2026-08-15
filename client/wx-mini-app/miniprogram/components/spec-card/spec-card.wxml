@@ -1,0 +1,26 @@
+<view class="spec-card" bindtap="onTap" style="{{item.device_category.color ? 'border-left: 8rpx solid ' + item.device_category.color + ';' : ''}}">
+  <view class="spec-card__header">
+    <text class="spec-card__title">{{item.name}}</text>
+    <text class="spec-card__brand" wx:if="{{item.brand}}">{{item.brand}}</text>
+  </view>
+  <view class="spec-card__body">
+    <view class="spec-info">
+      <text class="spec-info__label">型号：</text>
+      <text class="spec-info__value">{{item.model || '--'}}</text>
+    </view>
+    <view class="spec-info">
+      <text class="spec-info__label">分类：</text>
+      <view class="spec-category-tag" style="{{item.device_category.color ? 'color: ' + item.device_category.color + '; background: ' + item.device_category.color + '1A;' : ''}}">
+        <text class="spec-info__value" style="{{item.device_category.color ? 'color: ' + item.device_category.color : ''}}">{{item.device_category.name || '--'}}</text>
+      </view>
+    </view>
+    <view class="spec-info">
+      <text class="spec-info__label">转速：</text>
+      <text class="spec-info__value">{{item.rpm ? item.rpm + ' RPM' : '--'}}</text>
+    </view>
+    <view class="spec-info">
+      <text class="spec-info__label">电压：</text>
+      <text class="spec-info__value">{{item.voltage ? item.voltage + ' V' : '--'}}</text>
+    </view>
+  </view>
+</view>

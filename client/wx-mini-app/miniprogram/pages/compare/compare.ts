@@ -36,9 +36,10 @@ Page({
 
     try {
       const data = await getDeviceSpecs(session.accessToken, this.data.skip, 20)
+      const validSpecs = data.filter((s: any) => s.process_device_count > 0)
       
       this.setData({
-        specs: append ? [...this.data.specs, ...data] : data,
+        specs: append ? [...this.data.specs, ...validSpecs] : validSpecs,
         skip: this.data.skip + data.length,
         hasMore: data.length === 20,
         loading: false
