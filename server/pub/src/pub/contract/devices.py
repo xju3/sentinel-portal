@@ -171,6 +171,7 @@ class DeviceSpecResponse(BaseModel):
     rpm: int
     supplier_id: UUID
     device_category_id: UUID
+    process_device_count: int = 0
     supplier: Optional[SupplierBrief] = None
     device_category: Optional[DeviceCategoryBrief] = None
 

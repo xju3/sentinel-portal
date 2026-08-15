@@ -1,0 +1,15 @@
+<view class="device-card" bindtap="onTap">
+  <view class="device-card__header">
+    <view class="device-card__color" style="background-color: {{color}}"></view>
+    <text class="device-card__name">{{item.device.name}}</text>
+  </view>
+  <view class="device-card__body">
+    <text class="device-card__code">{{item.device.code}}</text>
+    <view class="device-card__location-row">
+      <text class="device-card__location">{{locationName}}</text>
+      <text class="{{item.timestamps.length > 0 ? 'status--has-data' : 'status--no-data'}}">
+        {{item.timestamps.length > 0 ? item.timestamps.length + '点' : '无'}}
+      </text>
+    </view>
+  </view>
+</view>

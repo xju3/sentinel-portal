@@ -1,7 +1,9 @@
 {
   "navigationBarTitleText": "规格对比",
   "backgroundColorTop": "#0A0F1C",
+  "pageOrientation": "auto",
   "usingComponents": {
-    "ec-canvas": "../../components/ec-canvas/ec-canvas"
+    "ec-canvas": "../../components/ec-canvas/ec-canvas",
+    "device-card": "../../components/device-card/device-card"
   }
 }

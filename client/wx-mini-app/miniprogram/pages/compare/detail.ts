@@ -46,6 +46,7 @@ Page({
     categoryIndex: 0,
     // Param 2
     deviceSpecs: [] as any[],
+    filteredSpecs: [] as any[],
     specIndex: 0,
     // Param 3
     processDevices: [] as any[],
@@ -62,6 +63,7 @@ Page({
 
     data: null as any,
     metaText: '',
+    isFullscreen: false,
   },
 
   async onLoad(options: any) {
@@ -115,8 +117,16 @@ Page({
       const categoryIndex = categoryId
         ? Math.max(0, categories.findIndex((c: any) => c.id === categoryId))
         : 0
+      
+      const catId = categories[categoryIndex]?.id
+      const filteredSpecs = catId ? specList.filter((s: any) => s.device_category_id === catId) : []
+      const newSpecIndex = Math.max(0, filteredSpecs.findIndex((s: any) => s.id === specId))
 
-      this.setData({ categories, categoryIndex, deviceSpecs: specList, specIndex })
+      this.setData({ 
+        categories, categoryIndex, 
+        deviceSpecs: specList, filteredSpecs, 
+        specIndex: newSpecIndex 
+      })
 
       // Request 3: process-devices for this spec
       await this.loadGroupsBySpec(specId)
@@ -136,15 +146,17 @@ Page({
       // Request 3: process-devices?device_spec_id=specId
       const raw = await getProcessDevices(session.accessToken, 0, 100, specId)
       const list = Array.isArray(raw) ? raw : []
+      console.log('[groups] specId:', specId, 'count:', list.length, 'ids:', list.map((d:any)=>d.id).join(','))
       const options = list.map((d: any) => ({
         id: d.id,
         label: d.process?.name || d.code || d.id
       }))
       this.setData({ processDevices: options, groupIndex: 0, data: null, locations: [], locationIndex: 0, metaText: '' })
-      if (this.chart) this.chart.clear()
+      this.chart = null
+      this.chartComponent = null
 
       if (options.length > 0) {
-        // Request 4: comparison with first group
+        console.log('[groups] calling doFetch with processDeviceId:', options[0].id)
         await this.doFetch(
           specId,
           options[0].id,
@@ -178,6 +190,7 @@ Page({
     this.setData({ loading: true })
     wx.showNavigationBarLoading()
     try {
+      console.log('[doFetch] calling API specId:', specId, 'pdId:', processDeviceId, 'range:', rangeDays, 'window:', windowMinutes)
       // Request 4: comparison
       const data = await getDeviceSpecComparison(session.accessToken, specId, {
         process_device_id: processDeviceId,
@@ -185,6 +198,7 @@ Page({
         range_days: rangeDays,
         window_minutes: windowMinutes,
       })
+      console.log('[doFetch] API success, series length:', data?.series?.length)
 
       const newLocations: any[] = Array.isArray(data?.locations) ? data.locations : []
       const selectedId = locationId || data?.selectedLocationId || newLocations[0]?.id
@@ -195,8 +209,9 @@ Page({
         ? `测点: ${locationName} · ${data.meta.deviceCount} 台 · ${data.meta.pointCount} 个数据点`
         : ''
 
-      this.setData({ data, locations: newLocations, locationIndex, loading: false, metaText })
-      this.renderChart()
+      this.setData({ data, locations: newLocations, locationIndex, loading: false, metaText }, () => {
+        this.renderChart()
+      })
     } catch (err: any) {
       console.error('[doFetch]', err)
       this.setData({ loading: false })
@@ -208,26 +223,39 @@ Page({
   },
 
   renderChart() {
+    if (!this.chartComponent) {
+      this.chartComponent = this.selectComponent('#mychart-dom-line')
+    }
     const { data, activeTab } = this.data
-    if (!this.chartComponent || !data?.series) return
+    if (!this.chartComponent || !data?.series) {
+      console.warn('[renderChart] Aborted: component or data missing', { hasComp: !!this.chartComponent, hasData: !!data?.series })
+      return
+    }
     const isVib = activeTab === 'vibration'
     const unit = isVib ? 'mm/s' : '°C'
 
-    const series = data.series.map((item: any) => {
+    const fallbackColors = ['#1677FF', '#52C41A', '#FA8C16', '#F5222D', '#722ED1', '#13C2C2', '#EB2F96', '#FADB14']
+
+    const series = data.series.map((item: any, idx: number) => {
       const src = isVib ? item.vibration : item.temperature
       const pts = (item.timestamps || []).map((ts: string, i: number) => {
         const v = src?.[i]
         return [ts, v ? (v.value ?? v.max ?? null) : null]
       })
+      const color = item.device?.color || fallbackColors[idx % fallbackColors.length]
+      item._displayColor = color
       return {
         name: item.device?.code || item.device?.name || '?',
         type: 'line', smooth: true, showSymbol: false,
-        data: pts, itemStyle: { color: item.device?.color }
+        data: pts, itemStyle: { color }
       }
     })
 
+    // Update the local data to include _displayColor so the wxml can read it
+    this.setData({ data: this.data.data })
+
     const option = {
-      color: data.series.map((s: any) => s.device?.color),
+      color: data.series.map((s: any, idx: number) => s.device?.color || fallbackColors[idx % fallbackColors.length]),
       tooltip: {
         trigger: 'axis',
         formatter: (ps: any[]) =>
@@ -237,13 +265,17 @@ Page({
       xAxis: {
         type: 'time',
         axisLabel: {
+          hideOverlap: true,
           formatter: (v: number) => {
             const d = new Date(v)
-            return `${d.getMonth()+1}-${d.getDate()} ${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`
+            const dateStr = `${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+            const timeStr = `${String(d.getHours()).padStart(2, '0')}:${String(d.getMinutes()).padStart(2, '0')}`
+            const rangeDays = this.data.rangeOptions?.[this.data.rangeIndex]?.value || 1
+            return rangeDays <= 7 ? `${dateStr}\n${timeStr}` : dateStr
           }
         }
       },
-      yAxis: { type: 'value', name: unit },
+      yAxis: { type: 'value', name: unit, scale: true },
       series,
     }
 
@@ -262,6 +294,23 @@ Page({
   switchTab(e: any) {
     this.setData({ activeTab: e.currentTarget.dataset.tab })
     this.renderChart()
+  },
+
+  toggleFullscreen() {
+    const nextState = !this.data.isFullscreen
+    this.setData({ isFullscreen: nextState }, () => {
+      wx.setPageOrientation({
+        orientation: nextState ? 'landscape' : 'portrait'
+      })
+      // Small delay to allow orientation to change and CSS to settle before resizing canvas
+      setTimeout(() => {
+        if (this.chart) {
+          this.chart.resize()
+        } else {
+          this.renderChart()
+        }
+      }, 300)
+    })
   },
 
   openDrawer() { this.setData({ drawerVisible: true }) },
@@ -284,32 +333,49 @@ Page({
     const cat = this.data.categories[idx]
     if (!cat?.id) return
     this.setData({ categoryIndex: idx })
-    // Filter specs by category for spec picker (local, no new request)
     const filtered = this.data.deviceSpecs.filter((s: any) => s.device_category_id === cat.id)
     if (filtered.length > 0) {
       const specIndex = 0
+      const spec = filtered[specIndex]
       this.setData({
+        filteredSpecs: filtered,
         specIndex,
+        specId: spec.id,
+        specName: `${spec.name} ${spec.model || ''}`,
         processDevices: [], groupIndex: 0,
         locations: [], locationIndex: 0,
         data: null, metaText: ''
       })
-      if (this.chart) this.chart.clear()
-      this.loadGroupsBySpec(filtered[specIndex].id)
+      this.chart = null
+      this.chartComponent = null
+      this.loadGroupsBySpec(spec.id)
+    } else {
+      this.setData({
+        filteredSpecs: [],
+        specIndex: 0,
+        specId: '',
+        specName: '',
+        processDevices: [], groupIndex: 0,
+        locations: [], locationIndex: 0,
+        data: null, metaText: ''
+      })
     }
   },
 
   onSpecChange(e: any) {
     const idx = Number(e.detail.value)
-    const spec = this.data.deviceSpecs[idx]
+    const spec = this.data.filteredSpecs[idx]
     if (!spec?.id) return
     this.setData({
-      specIndex: idx, specId: spec.id,
+      specIndex: idx, 
+      specId: spec.id,
+      specName: `${spec.name} ${spec.model || ''}`,
       processDevices: [], groupIndex: 0,
       locations: [], locationIndex: 0,
       data: null, metaText: ''
     })
-    if (this.chart) this.chart.clear()
+    this.chart = null
+    this.chartComponent = null
     this.loadGroupsBySpec(spec.id)
   },
 
@@ -317,7 +383,8 @@ Page({
     const idx = Number(e.detail.value)
     const { specId, processDevices, rangeOptions, rangeIndex, windowOptions, windowIndex } = this.data
     this.setData({ groupIndex: idx, locations: [], locationIndex: 0, data: null, metaText: '' })
-    if (this.chart) this.chart.clear()
+    this.chart = null
+    this.chartComponent = null
     this.doFetch(specId, processDevices[idx]?.id, undefined, rangeOptions[rangeIndex].value, windowOptions[windowIndex].value)
   },
 

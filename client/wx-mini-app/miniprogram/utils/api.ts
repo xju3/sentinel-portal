@@ -22,12 +22,19 @@ export function request<T = any>(
       header['Authorization'] = `Bearer ${token}`
     }
 
+    let cleanData: Record<string, any> | undefined = undefined
+    if (data) {
+      cleanData = {}
+      for (const key in data) {
+        if (data[key] !== undefined) {
+          cleanData[key] = data[key]
+        }
+      }
+    }
     wx.request({
       url: `${BASE_URL}${path}`,
       method,
-      data: data
-        ? Object.fromEntries(Object.entries(data).filter(([, v]) => v !== undefined))
-        : undefined,
+      data: cleanData,
       header,
       success(res) {
         const body = res.data as ApiResponse<T>

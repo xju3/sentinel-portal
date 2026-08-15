@@ -23,17 +23,27 @@
       <text class="chart-hint">点击右上角"参数设置"选择数据范围</text>
     </view>
     <block wx:else>
-      <view class="chart-box" style="width: 100%; height: 500rpx;">
-        <ec-canvas id="mychart-dom-line" canvas-id="mychart-line" ec="{{ ec }}"></ec-canvas>
-      </view>
-      <view class="meta-bar" wx:if="{{metaText}}">
-        <text class="meta-text">{{metaText}}</text>
-      </view>
-      <view class="legend" wx:if="{{data.series && data.series.length > 0}}">
-        <view class="legend-item" wx:for="{{data.series}}" wx:key="index">
-          <view class="legend-color" style="background: {{item.device.color}}" />
-          <text>{{item.device.name}}</text>
+      <view class="{{isFullscreen ? 'fullscreen-wrapper' : ''}}">
+        <view class="{{isFullscreen ? 'fullscreen-header' : 'chart-header'}}">
+          <view class="meta-bar" wx:if="{{metaText && !isFullscreen}}">
+            <text class="meta-text">{{metaText}}</text>
+          </view>
+          <view class="fullscreen-btn" bindtap="toggleFullscreen">
+            <text>{{isFullscreen ? '退出横屏大图' : '全屏'}}</text>
+          </view>
         </view>
+        <view class="chart-box" style="{{isFullscreen ? 'flex: 1; width: 100%;' : 'width: 100%; height: 500rpx;'}}">
+          <ec-canvas id="mychart-dom-line" canvas-id="mychart-line" force-use-old-canvas="false" ec="{{ ec }}"></ec-canvas>
+        </view>
+      </view>
+      <view class="device-list" wx:if="{{data.series && data.series.length > 0 && !isFullscreen}}">
+        <device-card 
+          wx:for="{{data.series}}" 
+          wx:key="index"
+          item="{{item}}"
+          color="{{item._displayColor}}"
+          locationName="{{locations[locationIndex].name || '-'}}"
+        />
       </view>
     </block>
   </view>
@@ -63,10 +73,10 @@
     <!-- 2. 设备规格 -->
     <view class="form-group">
       <view class="form-label">设备规格</view>
-      <picker bindchange="onSpecChange" value="{{specIndex}}" range="{{deviceSpecs}}" range-key="name" disabled="{{deviceSpecs.length === 0}}">
-        <view class="picker-view {{deviceSpecs.length === 0 ? 'picker-view--dim' : ''}}">
-          <text wx:if="{{deviceSpecs.length === 0}}">加载中...</text>
-          <text wx:else>{{deviceSpecs[specIndex].name}}</text>
+      <picker bindchange="onSpecChange" value="{{specIndex}}" range="{{filteredSpecs}}" range-key="name" disabled="{{filteredSpecs.length === 0}}">
+        <view class="picker-view {{filteredSpecs.length === 0 ? 'picker-view--dim' : ''}}">
+          <text wx:if="{{filteredSpecs.length === 0}}">加载中...</text>
+          <text wx:else>{{filteredSpecs[specIndex].name}} {{filteredSpecs[specIndex].model}}</text>
         </view>
       </picker>
     </view>
