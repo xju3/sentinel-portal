@@ -431,27 +431,10 @@ const DeviceSpecPage = () => {
     {
       title: '操作',
       valueType: 'option',
-      width: 180,
+      width: 160,
       fixed: 'right',
-      align: 'center',
       render: (_, row) => (
-        <Space size="middle">
-          {row.process_device_count > 0 && (
-            <a
-              key="comparison"
-              onClick={() => {
-                const groupQuery = query.process_device_id
-                  ? `?group=${encodeURIComponent(query.process_device_id)}`
-                  : '';
-                navigate(`/device/specs/${row.id}/comparison${groupQuery}`);
-              }}
-            >
-              对比
-            </a>
-          )}
-          <a key="bearing" onClick={() => void openBindingModal(row)}>
-            轴承
-          </a>
+        <Space size="small">
           <a
             key="edit"
             onClick={() => {
@@ -478,8 +461,25 @@ const DeviceSpecPage = () => {
               删除
             </a>
           </Popconfirm>
+          <a key="bearing" onClick={() => void openBindingModal(row)}>
+            轴承
+          </a>
+            {row.process_device_count > 0 && (
+            <a
+              key="comparison"
+              onClick={() => {
+                const groupQuery = query.process_device_id
+                  ? `?group=${encodeURIComponent(query.process_device_id)}`
+                  : '';
+                navigate(`/device/specs/${row.id}/comparison${groupQuery}`);
+              }}
+            >
+              对比
+            </a>
+          )}
         </Space>
       ),
+
     },
   ];
 
