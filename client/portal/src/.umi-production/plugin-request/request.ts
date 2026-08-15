@@ -6,8 +6,8 @@ import axios, {
   type AxiosRequestConfig,
   type AxiosResponse,
   type AxiosError,
-} from '/Users/tju/Workspace/LH.朗湖科技/Sentinel/Codes/Platform/client/portal/node_modules/axios';
-import useUmiRequest, { UseRequestProvider } from '/Users/tju/Workspace/LH.朗湖科技/Sentinel/Codes/Platform/client/portal/node_modules/@umijs/plugins/node_modules/@ahooksjs/use-request';
+} from '/Users/tju/Langhu/Products/Sentinel/Codes/Platform/client/portal/node_modules/axios';
+import useUmiRequest, { UseRequestProvider } from '/Users/tju/Langhu/Products/Sentinel/Codes/Platform/client/portal/node_modules/@umijs/plugins/node_modules/@ahooksjs/use-request';
 import { ApplyPluginsType } from 'umi';
 import { getPluginManager } from '../core/plugin';
 
@@ -26,7 +26,7 @@ import {
   PaginatedOptionsWithFormat,
   PaginatedParams,
   PaginatedResult,
-} from '/Users/tju/Workspace/LH.朗湖科技/Sentinel/Codes/Platform/client/portal/node_modules/@umijs/plugins/node_modules/@ahooksjs/use-request/es/types';
+} from '/Users/tju/Langhu/Products/Sentinel/Codes/Platform/client/portal/node_modules/@umijs/plugins/node_modules/@ahooksjs/use-request/es/types';
 
 type ResultWithData< T = any > = { data?: T; [key: string]: any };
 

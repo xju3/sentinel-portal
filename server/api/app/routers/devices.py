@@ -11,7 +11,7 @@ from pydantic import ValidationError
 
 from pub.services import get_session
 from pub.models.customer import Account as AccountModel
-from pub.models.device import DeviceCategory, DeviceInst, DeviceSpec
+from pub.models.device import DeviceCategory, DeviceInst, DeviceSpec, ProcessDeviceItem
 from pub.models.sensor import SensorMonitoring
 from pub.services import LocationService
 
@@ -589,17 +589,29 @@ async def list_device_specs(
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
-    return success(
-        await DeviceSpecService.get_all(
-            session,
-            tenant_id,
-            skip,
-            limit,
-            sort_by,
-            sort_order,
-            process_device_id,
-        )
+    specs = await DeviceSpecService.get_all(
+        session,
+        tenant_id,
+        skip,
+        limit,
+        sort_by,
+        sort_order,
+        process_device_id,
     )
+    if specs:
+        from sqlalchemy import select, func
+        spec_ids = [s.id for s in specs]
+        stmt = (
+            select(DeviceInst.device_spec_id, func.count(func.distinct(ProcessDeviceItem.process_device_id)))
+            .join(ProcessDeviceItem, ProcessDeviceItem.device_inst_id == DeviceInst.id)
+            .where(DeviceInst.device_spec_id.in_(spec_ids))
+            .group_by(DeviceInst.device_spec_id)
+        )
+        res = await session.execute(stmt)
+        count_map = {row[0]: row[1] for row in res.all()}
+        for s in specs:
+            s.process_device_count = count_map.get(s.id, 0)
+    return success(specs)
 
 
 @router.get("/device-specs/{obj_id}")

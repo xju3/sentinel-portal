@@ -119,7 +119,7 @@ Page({
         : 0
       
       const catId = categories[categoryIndex]?.id
-      const filteredSpecs = catId ? specList.filter((s: any) => s.device_category_id === catId) : []
+      const filteredSpecs = catId ? specList.filter((s: any) => s.device_category_id === catId && s.process_device_count > 0) : []
       const newSpecIndex = Math.max(0, filteredSpecs.findIndex((s: any) => s.id === specId))
 
       this.setData({ 
@@ -333,7 +333,7 @@ Page({
     const cat = this.data.categories[idx]
     if (!cat?.id) return
     this.setData({ categoryIndex: idx })
-    const filtered = this.data.deviceSpecs.filter((s: any) => s.device_category_id === cat.id)
+    const filtered = this.data.deviceSpecs.filter((s: any) => s.device_category_id === cat.id && s.process_device_count > 0)
     if (filtered.length > 0) {
       const specIndex = 0
       const spec = filtered[specIndex]

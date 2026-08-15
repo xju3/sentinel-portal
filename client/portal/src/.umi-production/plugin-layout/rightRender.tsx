@@ -3,7 +3,7 @@
 // DO NOT CHANGE IT MANUALLY!
 import React from 'react';
 import { Avatar, version, Dropdown, Menu, Spin } from 'antd';
-import { LogoutOutlined } from '/Users/tju/Workspace/LH.朗湖科技/Sentinel/Codes/Platform/client/portal/node_modules/@umijs/plugins/node_modules/@ant-design/icons';
+import { LogoutOutlined } from '/Users/tju/Langhu/Products/Sentinel/Codes/Platform/client/portal/node_modules/@umijs/plugins/node_modules/@ant-design/icons';
 
 export function getRightRenderContent (opts: {
    runtimeConfig: any,
