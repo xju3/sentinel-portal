@@ -809,6 +809,9 @@ async def list_device_insts(
 async def list_wx_health_archive_devices(
     skip: int = Query(0, ge=0),
     limit: int = Query(10, ge=1, le=100),
+    device_category_id: UUID | None = Query(None),
+    device_spec_id: UUID | None = Query(None),
+    process_device_id: UUID | None = Query(None),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
@@ -818,8 +821,25 @@ async def list_wx_health_archive_devices(
         tenant_id=tenant_id,
         skip=skip,
         limit=limit,
+        device_category_id=device_category_id,
+        device_spec_id=device_spec_id,
+        process_device_id=process_device_id,
     )
     return success({"items": items, "hasMore": has_more})
+
+
+@router.get("/wx-mini-app/health-archive/device-filters")
+async def list_wx_health_archive_device_filters(
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    return success(
+        await DeviceInstService.get_tenant_health_archive_device_filters(
+            session=session,
+            tenant_id=tenant_id,
+        )
+    )
 
 
 @router.get("/device-insts/{obj_id}")

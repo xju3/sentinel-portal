@@ -1,4 +1,4 @@
-<scroll-view scroll-y class="page" enhanced show-scrollbar="{{false}}">
+<view class="page">
   <view class="device-header">
     <view>
       <text class="device-name">{{deviceName || '设备健康档案'}}</text>
@@ -27,12 +27,6 @@
         </view>
       </scroll-view>
 
-      <view class="context-row" wx:if="{{!calendarMode}}">
-        <text class="context-label">时间粒度</text>
-        <picker value="{{intervalIndex}}" range="{{intervalOptions}}" range-key="label" bindchange="changeInterval">
-          <view class="picker-value">{{intervalOptions[intervalIndex].label}}⌄</view>
-        </picker>
-      </view>
       <view class="context-row" wx:if="{{points.length}}">
         <text class="context-label">监测点</text>
         <picker value="{{pointIndex}}" range="{{points}}" range-key="name" bindchange="changePoint">
@@ -72,40 +66,22 @@
     </view>
 
     <view class="section timeline-card">
-      <view class="section-title">{{calendarMode ? '设备健康日历' : '健康时间轴'}}</view>
-      <view class="section-subtitle">{{calendarMode ? '每格代表一个自然日，点击查看小时明细' : '每格代表一个时间段，点击查看诊断统计'}}</view>
+      <view class="section-title">健康时间轴</view>
+      <view class="section-subtitle">每24小时一行、每小时一格；最后一格结束于当前时间</view>
 
       <block wx:if="{{buckets.length}}">
-        <block wx:if="{{calendarMode}}">
-          <view class="calendar-month" wx:for="{{calendarMonths}}" wx:key="key" wx:for-item="month">
-            <text class="month-title">{{month.label}}</text>
-            <view class="weekday-row">
-              <text>日</text><text>一</text><text>二</text><text>三</text><text>四</text><text>五</text><text>六</text>
-            </view>
-            <view class="calendar-grid">
-              <view class="day-cell day-cell--empty" wx:for="{{month.placeholders}}" wx:key="*this" />
+        <scroll-view scroll-x class="timeline-scroll" show-scrollbar="{{false}}" enhanced>
+          <view class="timeline-table">
+            <view class="day-row" wx:for="{{timelineDays}}" wx:key="key" wx:for-item="day">
+              <text class="day-row-label">{{day.label}}</text>
               <view
-                class="day-cell {{item.hasGap ? 'status-gap' : ''}}"
-                wx:for="{{month.buckets}}"
+                class="hour-status {{item.hasGap ? 'status-gap' : ''}}"
+                wx:for="{{day.buckets}}"
                 wx:key="startAt"
                 style="background: {{item.color}};"
                 data-start="{{item.startAt}}"
                 bindtap="selectBucket"
-              >{{item.dayLabel}}</view>
-            </view>
-          </view>
-        </block>
-        <scroll-view wx:else scroll-x class="timeline-scroll" show-scrollbar="{{false}}">
-          <view class="timeline-row">
-            <view
-              class="timeline-item"
-              wx:for="{{buckets}}"
-              wx:key="startAt"
-              data-start="{{item.startAt}}"
-              bindtap="selectBucket"
-            >
-              <view class="timeline-block {{item.hasGap ? 'status-gap' : ''}}" style="background: {{item.color}};" />
-              <text class="timeline-time">{{item.shortTime}}</text>
+              >{{item.diagnosedCount || ''}}</view>
             </view>
           </view>
         </scroll-view>
@@ -119,7 +95,7 @@
 
         <view class="bucket-detail" wx:if="{{selectedBucket}}">
           <view class="bucket-detail__header">
-            <text>{{selectedBucket.shortTime}} · {{selectedBucket.statusLabel}}</text>
+            <text>{{selectedBucket.rangeLabel}} · {{selectedBucket.statusLabel}}</text>
             <view class="status-dot" style="background: {{selectedBucket.color}};" />
           </view>
           <view class="detail-metrics">
@@ -127,16 +103,6 @@
             <text>异常 {{selectedBucket.abnormalCount}}</text>
             <text>缺口 {{selectedBucket.missedCount}}</text>
             <text>待补传 {{selectedBucket.waitingCount}}</text>
-          </view>
-          <view wx:if="{{calendarMode}}" class="day-detail">
-            <text class="day-detail__title">24小时状态</text>
-            <view class="day-loading" wx:if="{{dayDetailLoading}}">加载小时明细...</view>
-            <view class="hour-grid" wx:elif="{{dayDetail}}">
-              <view class="hour-item" wx:for="{{dayDetail.buckets}}" wx:key="startAt">
-                <view class="hour-block {{item.hasGap ? 'status-gap' : ''}}" style="background: {{item.color}};">{{item.diagnosedCount || ''}}</view>
-                <text>{{item.hourLabel}}</text>
-              </view>
-            </view>
           </view>
         </view>
       </block>
@@ -160,8 +126,16 @@
       <view class="chart-loading" wx:if="{{trendLoading}}">趋势加载中...</view>
       <view class="chart-error" wx:elif="{{trendError}}" bindtap="retryTrend">{{trendError}}，点击重试</view>
       <empty-state wx:elif="{{!trendData || !trendData.meta.pointCount}}" title="暂无趋势" desc="该测点在所选范围内没有数据" />
-      <view wx:else class="chart-box">
-        <ec-canvas id="health-trend-chart" canvas-id="health-trend-canvas" ec="{{trendEc}}" style="width:100%;height:100%;display:block;" />
+      <view wx:else class="chart-stage {{fullscreenChart === 'trend' ? 'chart-stage--fullscreen' : ''}}">
+        <view class="chart-fullscreen-header">
+          <text wx:if="{{fullscreenChart === 'trend'}}">{{trendTab === 'temperature' ? '温度趋势' : '振动趋势'}}</text>
+          <view class="chart-fullscreen-button" data-chart="trend" bindtap="toggleChartFullscreen">
+            {{fullscreenChart === 'trend' ? '退出全屏' : '全屏'}}
+          </view>
+        </view>
+        <view id="trend-chart-box" class="chart-box">
+          <ec-canvas id="health-trend-chart" canvas-id="health-trend-canvas" force-use-old-canvas="false" ec="{{trendEc}}" style="width:100%;height:100%;display:block;" />
+        </view>
       </view>
     </view>
 
@@ -194,8 +168,16 @@
             采样 {{fftRecords[fftRecordIndex].fs_hz}}Hz · {{fftRecords[fftRecordIndex].points}}点 · {{fftRecords[fftRecordIndex].range_g}}g
           </view>
           <view class="chart-loading" wx:if="{{fftDataLoading}}">频谱加载中...</view>
-          <view wx:else class="chart-box">
-            <ec-canvas id="health-fft-chart" canvas-id="health-fft-canvas" ec="{{fftEc}}" style="width:100%;height:100%;display:block;" />
+          <view wx:else class="chart-stage {{fullscreenChart === 'fft' ? 'chart-stage--fullscreen' : ''}}">
+            <view class="chart-fullscreen-header">
+              <text wx:if="{{fullscreenChart === 'fft'}}">FFT 频谱分析</text>
+              <view class="chart-fullscreen-button" data-chart="fft" bindtap="toggleChartFullscreen">
+                {{fullscreenChart === 'fft' ? '退出全屏' : '全屏'}}
+              </view>
+            </view>
+            <view id="fft-chart-box" class="chart-box">
+              <ec-canvas id="health-fft-chart" canvas-id="health-fft-canvas" force-use-old-canvas="false" ec="{{fftEc}}" style="width:100%;height:100%;display:block;" />
+            </view>
           </view>
         </block>
       </block>
@@ -204,4 +186,4 @@
 
   <view class="initial-loading" wx:if="{{loading && !archive}}">健康档案加载中...</view>
   <view class="safe-bottom" />
-</scroll-view>
+</view>

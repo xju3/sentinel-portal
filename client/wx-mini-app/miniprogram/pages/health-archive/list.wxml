@@ -1,7 +1,17 @@
 <view class="page">
   <view class="page__hero card">
-    <text class="page__hero-title">设备健康档案</text>
+    <view class="page__hero-head">
+      <text class="page__hero-title">设备健康档案</text>
+      <view class="page__hero-actions">
+        <text class="page__favorite-count">关注 {{favoriteCount}}</text>
+        <view class="filter-trigger {{hasActiveFilter ? 'filter-trigger--active' : ''}}" bindtap="toggleFilters">
+          <text>筛选</text>
+          <text class="filter-trigger__chevron">⌄</text>
+        </view>
+      </view>
+    </view>
     <text class="page__hero-desc">仅展示当前正在被监控或曾被监控的设备，下拉刷新，触底继续加载。</text>
+    <text class="page__filter-summary" wx:if="{{hasActiveFilter}}">已筛选：{{filterSummary}}</text>
   </view>
 
   <view class="device-list" wx:if="{{devices.length > 0}}">
@@ -10,6 +20,7 @@
       wx:key="id"
       item="{{item}}"
       bind:click="navToDetail"
+      bind:favorite="toggleFavorite"
     />
   </view>
 
@@ -25,12 +36,55 @@
     </view>
   </view>
 
-  <empty-state
-    wx:if="{{!loading && devices.length === 0}}"
-    title="暂无可查看的健康档案设备"
-    desc="只有正在监控或曾被监控的设备才会出现在这里"
-  />
+  <view wx:if="{{!loading && devices.length === 0}}" class="filter-empty">
+    <empty-state
+      title="{{hasActiveFilter ? '没有匹配的设备' : '暂无可查看的健康档案设备'}}"
+      desc="{{hasActiveFilter ? '可以调整类别、规格或分组后重试' : '只有正在监控或曾被监控的设备才会出现在这里'}}"
+    />
+    <view class="filter-empty__reset" wx:if="{{hasActiveFilter}}" bindtap="resetFilters">清除筛选</view>
+  </view>
 
   <view wx:if="{{loading && devices.length > 0}}" class="page-status">加载中...</view>
   <view wx:if="{{!loading && !hasMore && devices.length > 0}}" class="page-status">没有更多了</view>
+
+  <view class="filter-overlay" wx:if="{{filtersExpanded}}" bindtap="closeFilters">
+    <view class="filter-sheet" catchtap="keepFilterPanelOpen">
+    <view class="filter-sheet__header">
+      <view>
+        <text class="filter-sheet__title">筛选设备</text>
+        <text class="filter-sheet__hint">选择结果会自动记住</text>
+      </view>
+      <view class="filter-sheet__done" bindtap="closeFilters">完成</view>
+    </view>
+
+    <view class="filter-tabs">
+      <view class="filter-tab {{activeFilterKey === 'category' ? 'filter-tab--active' : ''}}" data-key="category" bindtap="changeFilterTab">类别</view>
+      <view class="filter-tab {{activeFilterKey === 'spec' ? 'filter-tab--active' : ''}}" data-key="spec" bindtap="changeFilterTab">规格</view>
+      <view class="filter-tab {{activeFilterKey === 'group' ? 'filter-tab--active' : ''}}" data-key="group" bindtap="changeFilterTab">分组</view>
+    </view>
+
+    <view class="filter-error" wx:if="{{filterError}}">
+      <text>{{filterError}}</text>
+      <view class="filter-error__retry" bindtap="retryFilterOptions">重新加载</view>
+    </view>
+    <scroll-view class="filter-options" scroll-y wx:else>
+      <view class="filter-options__label">{{activeFilterTitle}}</view>
+      <view
+        class="filter-option {{item.id === activeFilterValue ? 'filter-option--selected' : ''}}"
+        wx:for="{{activeFilterOptions}}"
+        wx:key="id"
+        data-id="{{item.id}}"
+        bindtap="selectFilterOption"
+      >
+        <text>{{item.name}}</text>
+        <text class="filter-option__check" wx:if="{{item.id === activeFilterValue}}">✓</text>
+      </view>
+    </scroll-view>
+
+    <view class="filter-sheet__footer" wx:if="{{hasActiveFilter && !filterError}}">
+      <text class="filter-sheet__summary">{{filterSummary}}</text>
+      <view class="filter-reset" bindtap="resetFilters">清除全部</view>
+    </view>
+    </view>
+  </view>
 </view>

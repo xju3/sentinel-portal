@@ -39,6 +39,16 @@ export function request<T = any>(
       success(res) {
         const body = res.data as ApiResponse<T>
         if (res.statusCode >= 200 && res.statusCode < 300) {
+          if (
+            body &&
+            typeof body === 'object' &&
+            Object.prototype.hasOwnProperty.call(body, 'data') &&
+            typeof body.code === 'number' &&
+            body.code !== 0
+          ) {
+            reject(new Error(body.message || '请求失败'))
+            return
+          }
           resolve(body.data ?? (body as any))
         } else {
           const detail = (res.data as any)?.detail || '请求失败'
@@ -105,11 +115,26 @@ export function getDashboardHealth(token: string) {
 }
 
 /** Get a page of devices which have current or historical sensor monitoring. */
-export async function getHealthArchiveDevices(token: string, skip = 0, limit = 10) {
+export async function getHealthArchiveDevices(
+  token: string,
+  skip = 0,
+  limit = 10,
+  filters: {
+    deviceCategoryId?: string
+    deviceSpecId?: string
+    processDeviceId?: string
+  } = {},
+) {
   const data = await request<any>(
     '/wx-mini-app/health-archive/devices',
     'GET',
-    { skip, limit },
+    {
+      skip,
+      limit,
+      device_category_id: filters.deviceCategoryId || undefined,
+      device_spec_id: filters.deviceSpecId || undefined,
+      process_device_id: filters.processDeviceId || undefined,
+    },
     token,
   )
   if (Array.isArray(data)) {
@@ -124,6 +149,15 @@ export async function getHealthArchiveDevices(token: string, skip = 0, limit = 1
     return { items: data.items, hasMore }
   }
   throw new Error('设备列表响应格式错误')
+}
+
+/** Get category, specification and group options available to health archive devices. */
+export function getHealthArchiveDeviceFilters(token: string) {
+  return request<{
+    categories: Array<{ id: string; name: string }>
+    specs: Array<{ id: string; name: string; deviceCategoryId: string }>
+    groups: Array<{ id: string; name: string; deviceSpecIds: string[] }>
+  }>('/wx-mini-app/health-archive/device-filters', 'GET', undefined, token)
 }
 
 /** Get the diagnosis timeline and monitoring points for one device. */

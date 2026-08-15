@@ -6,7 +6,7 @@ from uuid import UUID
 from typing import Any, List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import case, func, or_
+from sqlalchemy import case, exists, func, or_
 
 from pub.models.device import (
     IsoStandard,
@@ -23,6 +23,38 @@ from pub.models.customer import HealthCheckFreq, Location
 from pub.utils.sorting import apply_sorting
 
 class DeviceInstService:
+    @staticmethod
+    def _health_archive_monitored_devices(tenant_id: UUID):
+        return (
+            select(
+                SensorMonitoring.device_inst_id.label("device_id"),
+                func.count(
+                    func.distinct(
+                        case(
+                            (SensorMonitoring.status == 1, SensorMonitoring.id),
+                            else_=None,
+                        )
+                    )
+                ).label("active_binding_count"),
+                func.count(
+                    func.distinct(SensorMonitoring.location_id)
+                ).label("historical_point_count"),
+                func.max(
+                    func.coalesce(
+                        SensorMonitoring.unbound_at,
+                        SensorMonitoring.bound_at,
+                    )
+                ).label("last_monitored_at"),
+            )
+            .join(Location, Location.id == SensorMonitoring.location_id)
+            .where(
+                SensorMonitoring.sensor_id.is_not(None),
+                Location.tenant_id == tenant_id,
+            )
+            .group_by(SensorMonitoring.device_inst_id)
+            .subquery()
+        )
+
     @staticmethod
     async def get_all(
         session: AsyncSession,
@@ -102,35 +134,12 @@ class DeviceInstService:
         tenant_id: UUID,
         skip: int,
         limit: int,
+        device_category_id: UUID | None = None,
+        device_spec_id: UUID | None = None,
+        process_device_id: UUID | None = None,
     ) -> tuple[list[dict[str, Any]], bool]:
-        monitored_devices = (
-            select(
-                SensorMonitoring.device_inst_id.label("device_id"),
-                func.count(
-                    func.distinct(
-                        case(
-                            (SensorMonitoring.status == 1, SensorMonitoring.id),
-                            else_=None,
-                        )
-                    )
-                ).label("active_binding_count"),
-                func.count(
-                    func.distinct(SensorMonitoring.location_id)
-                ).label("historical_point_count"),
-                func.max(
-                    func.coalesce(
-                        SensorMonitoring.unbound_at,
-                        SensorMonitoring.bound_at,
-                    )
-                ).label("last_monitored_at"),
-            )
-            .join(Location, Location.id == SensorMonitoring.location_id)
-            .where(
-                SensorMonitoring.sensor_id.is_not(None),
-                Location.tenant_id == tenant_id,
-            )
-            .group_by(SensorMonitoring.device_inst_id)
-            .subquery()
+        monitored_devices = DeviceInstService._health_archive_monitored_devices(
+            tenant_id
         )
 
         base_stmt = (
@@ -157,8 +166,29 @@ class DeviceInstService:
             .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
             .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
             .where(DeviceCategory.tenant_id == tenant_id)
-            .order_by(DeviceInst.name.asc(), DeviceInst.id.asc())
         )
+
+        if device_category_id is not None:
+            base_stmt = base_stmt.where(DeviceCategory.id == device_category_id)
+        if device_spec_id is not None:
+            base_stmt = base_stmt.where(DeviceSpec.id == device_spec_id)
+        if process_device_id is not None:
+            belongs_to_group = exists(
+                select(ProcessDeviceItem.id)
+                .join(
+                    ProcessDevice,
+                    ProcessDevice.id == ProcessDeviceItem.process_device_id,
+                )
+                .join(Process, Process.id == ProcessDevice.process_id)
+                .where(
+                    ProcessDeviceItem.device_inst_id == DeviceInst.id,
+                    ProcessDeviceItem.process_device_id == process_device_id,
+                    Process.tenant_id == tenant_id,
+                )
+            )
+            base_stmt = base_stmt.where(belongs_to_group)
+
+        base_stmt = base_stmt.order_by(DeviceInst.name.asc(), DeviceInst.id.asc())
 
         rows = (
             await session.execute(base_stmt.offset(skip).limit(limit + 1))
@@ -194,6 +224,106 @@ class DeviceInstService:
             for row in rows
         ]
         return items, has_more
+
+    @staticmethod
+    async def get_tenant_health_archive_device_filters(
+        session: AsyncSession,
+        tenant_id: UUID,
+    ) -> dict[str, list[dict[str, Any]]]:
+        monitored_devices = DeviceInstService._health_archive_monitored_devices(
+            tenant_id
+        )
+        monitored_join = (
+            select(DeviceInst.id)
+            .join(
+                monitored_devices,
+                monitored_devices.c.device_id == DeviceInst.id,
+            )
+            .subquery()
+        )
+
+        category_stmt = (
+            select(DeviceCategory.id, DeviceCategory.name)
+            .join(DeviceSpec, DeviceSpec.device_category_id == DeviceCategory.id)
+            .join(DeviceInst, DeviceInst.device_spec_id == DeviceSpec.id)
+            .join(monitored_join, monitored_join.c.id == DeviceInst.id)
+            .where(DeviceCategory.tenant_id == tenant_id)
+            .distinct()
+            .order_by(DeviceCategory.name.asc(), DeviceCategory.id.asc())
+        )
+        spec_stmt = (
+            select(
+                DeviceSpec.id,
+                DeviceSpec.name,
+                DeviceSpec.device_category_id,
+            )
+            .join(DeviceInst, DeviceInst.device_spec_id == DeviceSpec.id)
+            .join(monitored_join, monitored_join.c.id == DeviceInst.id)
+            .join(
+                DeviceCategory,
+                DeviceCategory.id == DeviceSpec.device_category_id,
+            )
+            .where(DeviceCategory.tenant_id == tenant_id)
+            .distinct()
+            .order_by(DeviceSpec.name.asc(), DeviceSpec.id.asc())
+        )
+        group_stmt = (
+            select(
+                ProcessDevice.id,
+                ProcessDevice.code,
+                Process.name.label("process_name"),
+                DeviceInst.device_spec_id,
+            )
+            .join(
+                ProcessDeviceItem,
+                ProcessDeviceItem.process_device_id == ProcessDevice.id,
+            )
+            .join(DeviceInst, DeviceInst.id == ProcessDeviceItem.device_inst_id)
+            .join(monitored_join, monitored_join.c.id == DeviceInst.id)
+            .join(Process, Process.id == ProcessDevice.process_id)
+            .join(DeviceSpec, DeviceSpec.id == DeviceInst.device_spec_id)
+            .join(
+                DeviceCategory,
+                DeviceCategory.id == DeviceSpec.device_category_id,
+            )
+            .where(
+                Process.tenant_id == tenant_id,
+                DeviceCategory.tenant_id == tenant_id,
+            )
+            .distinct()
+            .order_by(Process.name.asc(), ProcessDevice.code.asc(), ProcessDevice.id.asc())
+        )
+
+        category_rows = (await session.execute(category_stmt)).all()
+        spec_rows = (await session.execute(spec_stmt)).all()
+        group_rows = (await session.execute(group_stmt)).all()
+        groups: dict[UUID, dict[str, Any]] = {}
+        for row in group_rows:
+            group = groups.setdefault(
+                row.id,
+                {
+                    "id": row.id,
+                    "name": row.process_name or row.code,
+                    "deviceSpecIds": [],
+                },
+            )
+            if row.device_spec_id not in group["deviceSpecIds"]:
+                group["deviceSpecIds"].append(row.device_spec_id)
+
+        return {
+            "categories": [
+                {"id": row.id, "name": row.name} for row in category_rows
+            ],
+            "specs": [
+                {
+                    "id": row.id,
+                    "name": row.name,
+                    "deviceCategoryId": row.device_category_id,
+                }
+                for row in spec_rows
+            ],
+            "groups": list(groups.values()),
+        }
 
     @staticmethod
     async def create(session: AsyncSession, data: dict) -> DeviceInst:

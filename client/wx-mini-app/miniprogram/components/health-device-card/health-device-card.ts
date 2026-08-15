@@ -9,5 +9,8 @@ Component({
     onTap() {
       this.triggerEvent('click', this.data.item)
     },
+    onFavoriteTap() {
+      this.triggerEvent('favorite', this.data.item)
+    },
   },
 })

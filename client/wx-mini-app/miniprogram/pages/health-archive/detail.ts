@@ -7,6 +7,7 @@ import {
 import * as echarts from '../../components/ec-canvas/echarts'
 
 const app = getApp<IAppOption>()
+const wxApi = wx as any
 
 const STATUS_META: Record<string, { label: string; color: string }> = {
   normal: { label: '正常', color: '#00C897' },
@@ -22,13 +23,7 @@ const STATUS_META: Record<string, { label: string; color: string }> = {
 
 const ARCHIVE_RANGES = [
   { label: '1天', value: 1 }, { label: '3天', value: 3 },
-  { label: '7天', value: 7 }, { label: '30天', value: 30 },
-  { label: '90天', value: 90 }, { label: '1年', value: 365 },
-]
-
-const INTERVALS = [
-  { label: '1小时', value: 1 }, { label: '4小时', value: 4 },
-  { label: '8小时', value: 8 }, { label: '24小时', value: 24 },
+  { label: '7天', value: 7 },
 ]
 
 const TREND_RANGES = [
@@ -65,30 +60,22 @@ function decorateBucket(bucket: any) {
     ...bucket,
     statusLabel: meta.label,
     color: meta.color,
-    shortTime: formatTime(bucket.startAt),
-    hourLabel: `${pad(new Date(bucket.startAt).getHours())}:00`,
-    dayLabel: pad(new Date(bucket.startAt).getDate()),
+    rangeLabel: `${formatTime(bucket.startAt)} 至 ${formatTime(bucket.endAt)}`,
   }
 }
 
-function buildCalendarMonths(buckets: any[]) {
-  const months: Array<any> = []
-  buckets.forEach((bucket) => {
-    const date = new Date(bucket.startAt)
-    const key = `${date.getFullYear()}-${pad(date.getMonth() + 1)}`
-    let month = months.find((item) => item.key === key)
-    if (!month) {
-      month = {
-        key,
-        label: `${date.getFullYear()}年${date.getMonth() + 1}月`,
-        placeholders: Array.from({ length: new Date(date.getFullYear(), date.getMonth(), 1).getDay() }),
-        buckets: [],
-      }
-      months.push(month)
-    }
-    month.buckets.push(decorateBucket(bucket))
-  })
-  return months
+function buildTimelineDays(buckets: any[]) {
+  const days: any[] = []
+  for (let index = 0; index < buckets.length; index += 24) {
+    const dayBuckets = buckets.slice(index, index + 24)
+    if (!dayBuckets.length) continue
+    days.push({
+      key: dayBuckets[0].startAt,
+      label: `${formatTime(dayBuckets[0].startAt)} 至 ${formatTime(dayBuckets[dayBuckets.length - 1].endAt)}`,
+      buckets: dayBuckets,
+    })
+  }
+  return days
 }
 
 Page({
@@ -107,14 +94,9 @@ Page({
     selectedSensorText: '',
     rangeOptions: ARCHIVE_RANGES,
     rangeIndex: 0,
-    intervalOptions: INTERVALS,
-    intervalIndex: 0,
-    calendarMode: false,
     buckets: [] as any[],
-    calendarMonths: [] as any[],
+    timelineDays: [] as any[],
     selectedBucket: null as any,
-    dayDetail: null as any,
-    dayDetailLoading: false,
     legend: Object.keys(STATUS_META).map((key) => ({ key, ...STATUS_META[key] })),
 
     trendEc: { lazyLoad: true },
@@ -126,6 +108,7 @@ Page({
     trendRangeIndex: 1,
     trendWindowOptions: WINDOW_OPTIONS[3],
     trendWindowIndex: 0,
+    fullscreenChart: '',
 
     fftEc: { lazyLoad: true },
     fftExpanded: false,
@@ -155,21 +138,21 @@ Page({
     }
   },
 
+  onUnload() {
+    if (this.data.fullscreenChart) {
+      wxApi.setPageOrientation({ orientation: 'portrait' })
+    }
+  },
+
   async loadArchive(refreshTrend = false) {
     const token = app.globalData.session?.accessToken
-    const { deviceId, rangeOptions, rangeIndex, intervalOptions, intervalIndex } = this.data
+    const { deviceId, rangeOptions, rangeIndex } = this.data
     if (!token || !deviceId) return
 
     const rangeDays = rangeOptions[rangeIndex].value
-    const calendarMode = rangeDays >= 30
     const end = new Date()
     const start = new Date(end)
-    if (calendarMode) {
-      start.setHours(0, 0, 0, 0)
-      start.setDate(start.getDate() - rangeDays + 1)
-    } else {
-      start.setTime(end.getTime() - rangeDays * 24 * 60 * 60 * 1000)
-    }
+    start.setTime(end.getTime() - rangeDays * 24 * 60 * 60 * 1000)
 
     this.setData({ loading: true, errorText: '' })
     wx.showNavigationBarLoading()
@@ -177,7 +160,7 @@ Page({
       const requestParams = {
         start_at: start.toISOString(),
         end_at: end.toISOString(),
-        interval_hours: calendarMode ? 24 : intervalOptions[intervalIndex].value,
+        interval_hours: 1,
         location_id: this.data.selectedLocationId || undefined,
       }
       let archive: any
@@ -217,11 +200,9 @@ Page({
         selectedLocationId,
         pointIndex,
         selectedSensorText,
-        calendarMode,
         buckets,
-        calendarMonths: calendarMode ? buildCalendarMonths(archive?.buckets || []) : [],
+        timelineDays: buildTimelineDays(buckets),
         selectedBucket: null,
-        dayDetail: null,
         loading: false,
       }, () => {
         if (refreshTrend && selectedLocationId) this.loadTrend()
@@ -239,10 +220,6 @@ Page({
     this.setData({ rangeIndex: Number(e.currentTarget.dataset.index) }, () => this.loadArchive(false))
   },
 
-  changeInterval(e: any) {
-    this.setData({ intervalIndex: Number(e.detail.value) }, () => this.loadArchive(false))
-  },
-
   changePoint(e: any) {
     const pointIndex = Number(e.detail.value)
     const point = this.data.points[pointIndex]
@@ -252,34 +229,8 @@ Page({
   selectBucket(e: any) {
     const startAt = e.currentTarget.dataset.start
     const bucket = this.data.buckets.find((item: any) => item.startAt === startAt)
-      || this.data.calendarMonths.flatMap((month: any) => month.buckets).find((item: any) => item.startAt === startAt)
     if (!bucket) return
-    this.setData({ selectedBucket: bucket, dayDetail: null })
-    if (this.data.calendarMode) this.loadDayDetail(bucket)
-  },
-
-  async loadDayDetail(bucket: any) {
-    const token = app.globalData.session?.accessToken
-    if (!token) return
-    const start = new Date(bucket.startAt)
-    start.setHours(0, 0, 0, 0)
-    const end = new Date(start.getTime() + 24 * 60 * 60 * 1000)
-    this.setData({ dayDetailLoading: true })
-    try {
-      const detail = await getDeviceHealthArchive(token, this.data.deviceId, {
-        start_at: start.toISOString(),
-        end_at: end.toISOString(),
-        interval_hours: 1,
-        location_id: this.data.selectedLocationId || undefined,
-      })
-      detail.buckets = (detail.buckets || []).map(decorateBucket)
-      this.setData({ dayDetail: detail })
-    } catch (error) {
-      console.error('[day detail]', error)
-      wx.showToast({ title: '当日明细加载失败', icon: 'none' })
-    } finally {
-      this.setData({ dayDetailLoading: false })
-    }
+    this.setData({ selectedBucket: bucket })
   },
 
   async loadTrend() {
@@ -320,6 +271,29 @@ Page({
 
   switchTrendTab(e: any) {
     this.setData({ trendTab: e.currentTarget.dataset.tab }, () => this.renderTrendChart())
+  },
+
+  toggleChartFullscreen(e: any) {
+    const requestedChart = e.currentTarget.dataset.chart
+    const fullscreenChart = this.data.fullscreenChart === requestedChart ? '' : requestedChart
+    this.setData({ fullscreenChart }, () => {
+      wxApi.setPageOrientation({ orientation: fullscreenChart ? 'landscape' : 'portrait' })
+      setTimeout(() => this.resizeChart(requestedChart), 500)
+    })
+  },
+
+  resizeChart(chartType: string) {
+    const chart = chartType === 'fft' ? this.fftChart : this.trendChart
+    const selector = chartType === 'fft' ? '#fft-chart-box' : '#trend-chart-box'
+    if (!chart) {
+      if (chartType === 'fft') this.renderFftChart()
+      else this.renderTrendChart()
+      return
+    }
+    wx.createSelectorQuery().select(selector).boundingClientRect((rect) => {
+      if (rect) chart.resize({ width: rect.width, height: rect.height })
+      else chart.resize()
+    }).exec()
   },
 
   renderTrendChart() {

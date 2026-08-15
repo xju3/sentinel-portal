@@ -4,8 +4,13 @@
       <text class="health-device-card__name">{{item.name}}</text>
       <text class="health-device-card__code">{{item.code}}</text>
     </view>
-    <view class="health-device-card__status health-device-card__status--{{item.statusTone}}">
-      <text class="health-device-card__status-text">{{item.statusText}}</text>
+    <view class="health-device-card__actions">
+      <view class="health-device-card__favorite {{item.isFavorite ? 'health-device-card__favorite--active' : ''}}" catchtap="onFavoriteTap">
+        <text>{{item.isFavorite ? '★ 已关注' : '☆ 关注'}}</text>
+      </view>
+      <view class="health-device-card__status health-device-card__status--{{item.statusTone}}">
+        <text class="health-device-card__status-text">{{item.statusText}}</text>
+      </view>
     </view>
   </view>
 

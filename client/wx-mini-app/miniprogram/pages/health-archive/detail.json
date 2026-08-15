@@ -1,5 +1,6 @@
 {
   "navigationBarTitleText": "设备健康档案",
+  "pageOrientation": "auto",
   "enablePullDownRefresh": true,
   "backgroundColorTop": "#0A0F1C",
   "usingComponents": {
