@@ -135,6 +135,8 @@ class Account(Base):
     admin = Column(Boolean, default=False, comment="Whether the account is an admin")
     # wx_access_token = Column(String(255), nullable=True)
     wx_user_id = Column(String(255), nullable=True)
+    wx_mini_open_id = Column(String(255), nullable=True, unique=True, comment="WeChat Mini Program openid")
+    wx_union_id = Column(String(255), nullable=True, unique=True, index=True, comment="WeChat Open Platform UnionID")
     contact_id = Column(
         Uuid(as_uuid=True), nullable=True, index=True
     )  # Optional link to contacts

@@ -121,6 +121,21 @@ class WxService:
                 logger.error(f"Failed to send WeChat template message: {res_data}")
                 raise Exception(f"WeChat API error: {res_data.get('errmsg')}")
 
+    async def get_user_info(self, openid: str) -> dict:
+        """Get user info including unionid using Official Account access token"""
+        access_token = await self.get_access_token()
+        url = f"https://api.weixin.qq.com/cgi-bin/user/info?access_token={access_token}&openid={openid}&lang=zh_CN"
+        
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url)
+            response.raise_for_status()
+            data = response.json()
+            
+            if "errcode" in data and data["errcode"] != 0:
+                logger.error(f"Failed to get WeChat user info: {data}")
+                raise Exception(f"WeChat API error: {data.get('errmsg')}")
+            return data
+
     @staticmethod
     def verify_signature(signature: str, timestamp: str, nonce: str, token: str = "sentinel_wx_token") -> bool:
         """Verify the WeChat server signature"""
@@ -154,3 +169,29 @@ class WxService:
   <MsgType><![CDATA[text]]></MsgType>
   <Content><![CDATA[{content}]]></Content>
 </xml>"""
+
+    @staticmethod
+    async def jscode2session(mini_app_id: str, mini_app_secret: str, code: str) -> dict:
+        """Exchange a Mini Program login code for openid and session_key via WeChat API.
+
+        Returns a dict containing at least: openid, session_key.
+        May also contain unionid if the mini app is linked to an Open Platform account.
+        Raises Exception if WeChat returns an error.
+        """
+        url = "https://api.weixin.qq.com/sns/jscode2session"
+        params = {
+            "appid": mini_app_id,
+            "secret": mini_app_secret,
+            "js_code": code,
+            "grant_type": "authorization_code",
+        }
+        async with httpx.AsyncClient() as client:
+            response = await client.get(url, params=params)
+            response.raise_for_status()
+            data = response.json()
+
+        if "openid" in data:
+            return data
+        else:
+            logger.error(f"jscode2session failed: {data}")
+            raise Exception(f"WeChat jscode2session error: {data.get('errmsg', 'unknown')}")

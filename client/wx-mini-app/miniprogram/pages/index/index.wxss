@@ -1,0 +1,136 @@
+/**pages/index/index.wxss — Splash screen styles**/
+page {
+  height: 100vh;
+}
+
+.splash {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  padding: 160rpx 60rpx 120rpx;
+  background: linear-gradient(160deg, #0A1628 0%, #0F2548 55%, #163363 100%);
+  box-sizing: border-box;
+}
+
+/* ── Brand ──────────────────────────────────────────── */
+.splash__brand {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32rpx;
+  margin-top: 80rpx;
+}
+
+.splash__logo {
+  position: relative;
+  width: 160rpx;
+  height: 160rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.logo-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 4rpx solid rgba(26, 110, 245, 0.5);
+  animation: pulse 3s ease-in-out infinite;
+}
+
+.logo-ring--outer {
+  width: 160rpx;
+  height: 160rpx;
+  border-color: rgba(26, 110, 245, 0.25);
+  animation-delay: 0s;
+}
+
+.logo-ring--inner {
+  width: 112rpx;
+  height: 112rpx;
+  border-color: rgba(26, 110, 245, 0.5);
+  animation-delay: 0.5s;
+}
+
+.logo-dot {
+  width: 56rpx;
+  height: 56rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #1A6EF5 0%, #00C897 100%);
+  box-shadow: 0 0 40rpx rgba(26, 110, 245, 0.6);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.4; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.04); }
+}
+
+.splash__name {
+  font-size: 56rpx;
+  font-weight: 700;
+  color: #FFFFFF;
+  letter-spacing: 4rpx;
+}
+
+.splash__tagline {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.45);
+  letter-spacing: 2rpx;
+}
+
+/* ── Footer ─────────────────────────────────────────── */
+.splash__footer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 28rpx;
+  width: 100%;
+}
+
+/* Spinner */
+.spinner {
+  width: 64rpx;
+  height: 64rpx;
+  position: relative;
+}
+
+.spinner__arc {
+  width: 64rpx;
+  height: 64rpx;
+  border-radius: 50%;
+  border: 5rpx solid rgba(255, 255, 255, 0.15);
+  border-top-color: #1A6EF5;
+  animation: spin 0.8s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.splash__hint {
+  font-size: 26rpx;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.splash__error {
+  font-size: 26rpx;
+  color: rgba(242, 92, 84, 0.9);
+  text-align: center;
+  line-height: 1.6;
+}
+
+/* Retry button */
+.btn--primary {
+  background: #1A6EF5;
+  color: #FFFFFF;
+  border-radius: var(--radius-pill);
+  font-size: var(--font-base);
+  font-weight: 600;
+  padding: 0 60rpx;
+  height: 88rpx;
+  line-height: 88rpx;
+  border: none;
+  min-width: 280rpx;
+  box-shadow: 0 8rpx 24rpx rgba(26, 110, 245, 0.4);
+}

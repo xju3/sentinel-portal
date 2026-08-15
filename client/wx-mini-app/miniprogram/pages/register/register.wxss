@@ -1,0 +1,213 @@
+/**pages/register/register.wxss**/
+page {
+  height: 100vh;
+  background: var(--color-bg);
+}
+
+.page {
+  height: 100vh;
+}
+
+/* ── Shared ──────────────────────────────────────────────── */
+.footer-safe { height: 80rpx; }
+
+/* ── Success State ───────────────────────────────────────── */
+.success-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 160rpx 60rpx 0;
+  gap: 32rpx;
+  text-align: center;
+}
+
+.success-icon {
+  width: 160rpx;
+  height: 160rpx;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #00C897 0%, #1A6EF5 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 16rpx 48rpx rgba(0, 200, 151, 0.35);
+  animation: pop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+@keyframes pop {
+  from { transform: scale(0.5); opacity: 0; }
+  to   { transform: scale(1);   opacity: 1; }
+}
+
+.checkmark {
+  width: 60rpx;
+  height: 36rpx;
+  border-left: 6rpx solid #fff;
+  border-bottom: 6rpx solid #fff;
+  transform: rotate(-45deg) translateY(-8rpx);
+}
+
+.success-title {
+  font-size: 48rpx;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.success-body {
+  font-size: 28rpx;
+  color: var(--color-text-secondary);
+  line-height: 1.8;
+  white-space: pre-line;
+}
+
+.tip-card {
+  background: var(--color-primary-light);
+  border-radius: var(--radius-md);
+  padding: 28rpx 32rpx;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+.tip-card__text {
+  font-size: 26rpx;
+  color: var(--color-primary);
+  line-height: 1.7;
+}
+
+/* ── Form State ──────────────────────────────────────────── */
+.form-wrap {
+  display: flex;
+  flex-direction: column;
+  gap: 32rpx;
+  padding: 0 32rpx;
+}
+
+/* Hero */
+.hero {
+  padding: 80rpx 16rpx 16rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 16rpx;
+}
+
+.hero__dot-wrap { margin-bottom: 8rpx; }
+
+.hero__dot {
+  width: 48rpx;
+  height: 8rpx;
+  border-radius: var(--radius-pill);
+  background: linear-gradient(90deg, #1A6EF5 0%, #00C897 100%);
+}
+
+.hero__title {
+  font-size: 56rpx;
+  font-weight: 800;
+  color: var(--color-text-primary);
+  letter-spacing: 1rpx;
+}
+
+.hero__subtitle {
+  font-size: 28rpx;
+  color: var(--color-text-secondary);
+}
+
+/* Form card */
+.form-card {
+  padding: 8rpx 0;
+}
+
+.field {
+  padding: 28rpx 36rpx;
+  display: flex;
+  flex-direction: column;
+  gap: 14rpx;
+}
+
+.field__label {
+  font-size: 26rpx;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  letter-spacing: 0.5rpx;
+}
+
+.field__required {
+  color: var(--color-danger);
+  margin-left: 4rpx;
+}
+
+.field__input {
+  font-size: 32rpx;
+  color: var(--color-text-primary);
+  height: 72rpx;
+  line-height: 72rpx;
+  border-bottom: 2rpx solid var(--color-border);
+  transition: border-color 0.2s;
+}
+
+.field__input--error {
+  border-bottom-color: var(--color-danger);
+}
+
+.field__placeholder {
+  color: var(--color-text-placeholder);
+}
+
+.field__error {
+  font-size: 24rpx;
+  color: var(--color-danger);
+  animation: slide-in 0.2s ease;
+}
+
+@keyframes slide-in {
+  from { opacity: 0; transform: translateY(-8rpx); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+.divider {
+  height: 1rpx;
+  background: var(--color-border);
+  margin: 0 36rpx;
+}
+
+/* Note */
+.form-note {
+  font-size: 24rpx;
+  color: var(--color-text-placeholder);
+  line-height: 1.7;
+  padding: 0 8rpx;
+}
+
+/* Submit button */
+.btn-submit {
+  width: 100%;
+  height: 96rpx;
+  background: linear-gradient(90deg, #1A6EF5 0%, #0D5BD8 100%);
+  border-radius: var(--radius-pill);
+  border: none;
+  color: #FFFFFF;
+  font-size: 34rpx;
+  font-weight: 700;
+  letter-spacing: 2rpx;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16rpx;
+  box-shadow: 0 12rpx 32rpx rgba(26, 110, 245, 0.4);
+  transition: opacity 0.2s, transform 0.1s;
+  margin-top: 8rpx;
+}
+
+.btn-submit:active { opacity: 0.85; transform: scale(0.985); }
+.btn-submit--loading { opacity: 0.75; }
+
+.btn-submit__spinner {
+  width: 36rpx;
+  height: 36rpx;
+  border: 4rpx solid rgba(255, 255, 255, 0.3);
+  border-top-color: #fff;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}

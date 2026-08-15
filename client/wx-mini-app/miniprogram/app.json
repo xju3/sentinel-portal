@@ -1,0 +1,16 @@
+{
+  "pages": [
+    "pages/index/index",
+    "pages/home/home",
+    "pages/register/register"
+  ],
+  "window": {
+    "navigationBarTextStyle": "white",
+    "navigationBarTitleText": "朗湖哨兵",
+    "navigationBarBackgroundColor": "#0A1628",
+    "backgroundColor": "#F5F7FA"
+  },
+  "style": "v2",
+  "componentFramework": "glass-easel",
+  "lazyCodeLoading": "requiredComponents"
+}

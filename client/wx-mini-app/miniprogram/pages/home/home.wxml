@@ -1,0 +1,83 @@
+<!--pages/home/home.wxml-->
+<scroll-view scroll-y class="page" enhanced show-scrollbar="{{false}}">
+
+  <!-- Header -->
+  <view class="header">
+    <view class="header__top">
+      <view class="header__brand">
+        <text class="header__company">{{tenantName}}</text>
+        <text class="header__greeting">你好，{{contactName}}</text>
+      </view>
+      <view class="header__avatar">
+        <text class="avatar-initials">{{contactName.substring(0,1)}}</text>
+      </view>
+    </view>
+
+    <!-- Status bar -->
+    <view class="status-bar">
+      <view class="status-dot status-dot--online" />
+      <text class="status-text">系统运行正常</text>
+    </view>
+  </view>
+
+  <!-- Stats grid -->
+  <view class="section">
+    <text class="section__title">设备概览</text>
+    <view class="stats-grid" wx:if="{{!loading}}">
+      <view
+        class="stat-card"
+        wx:for="{{stats}}"
+        wx:key="label"
+      >
+        <view class="stat-card__indicator" style="background:{{item.color}}" />
+        <text class="stat-card__value">{{item.value}}</text>
+        <text class="stat-card__unit">{{item.unit}}</text>
+        <text class="stat-card__label">{{item.label}}</text>
+      </view>
+    </view>
+    <view class="stats-skeleton" wx:else>
+      <view class="skeleton-card" wx:for="{{[1,2,3,4]}}" wx:key="*this" />
+    </view>
+  </view>
+
+  <!-- Quick entry -->
+  <view class="section">
+    <text class="section__title">快速入口</text>
+    <view class="entry-list">
+      <view class="entry-item entry-item--disabled">
+        <view class="entry-item__icon entry-item__icon--blue">
+          <text class="entry-item__icon-text">设</text>
+        </view>
+        <view class="entry-item__body">
+          <text class="entry-item__name">设备管理</text>
+          <text class="entry-item__desc">查看所有设备状态</text>
+        </view>
+        <view class="entry-item__badge">即将上线</view>
+      </view>
+
+      <view class="entry-item entry-item--disabled">
+        <view class="entry-item__icon entry-item__icon--red">
+          <text class="entry-item__icon-text">警</text>
+        </view>
+        <view class="entry-item__body">
+          <text class="entry-item__name">告警中心</text>
+          <text class="entry-item__desc">实时查看告警信息</text>
+        </view>
+        <view class="entry-item__badge">即将上线</view>
+      </view>
+
+      <view class="entry-item entry-item--disabled">
+        <view class="entry-item__icon entry-item__icon--green">
+          <text class="entry-item__icon-text">诊</text>
+        </view>
+        <view class="entry-item__body">
+          <text class="entry-item__name">诊断报告</text>
+          <text class="entry-item__desc">查看 AI 诊断分析</text>
+        </view>
+        <view class="entry-item__badge">即将上线</view>
+      </view>
+    </view>
+  </view>
+
+  <view class="footer-safe" />
+</scroll-view>

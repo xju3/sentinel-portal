@@ -173,9 +173,26 @@ class EmployeeService:
 
     @staticmethod
     async def bind_employee_wx(
-        session: AsyncSession, employee: Employee, wx_user_id: str
+        session: AsyncSession, employee: Employee, wx_user_id: str, wx_union_id: Optional[str] = None
     ) -> None:
         employee.wx_user_id = wx_user_id
+        if wx_union_id:
+            employee.wx_union_id = wx_union_id
+        await session.commit()
+
+    @staticmethod
+    async def get_employee_by_wx_union_id(
+        session: AsyncSession, wx_union_id: str
+    ) -> Optional[Employee]:
+        stmt = select(Employee).where(Employee.wx_union_id == wx_union_id)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def bind_employee_wx_union(
+        session: AsyncSession, employee: Employee, wx_union_id: str
+    ) -> None:
+        employee.wx_union_id = wx_union_id
         await session.commit()
 
     @staticmethod

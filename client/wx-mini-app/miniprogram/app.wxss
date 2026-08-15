@@ -1,0 +1,60 @@
+/**app.wxss — Global design tokens & base styles **/
+
+/* ── Color Tokens ─────────────────────────────────────────── */
+page {
+  --color-bg: #F5F7FA;
+  --color-bg-card: #FFFFFF;
+  --color-primary: #1A6EF5;
+  --color-primary-dark: #0A1628;
+  --color-primary-light: #E8F0FE;
+  --color-accent: #00C897;
+  --color-danger: #F25C54;
+  --color-warning: #F5A623;
+  --color-text-primary: #1A2133;
+  --color-text-secondary: #6B7A99;
+  --color-text-placeholder: #BCC4D6;
+  --color-border: #E4E9F2;
+  --color-shadow: rgba(0, 0, 0, 0.06);
+
+  /* ── Spacing Tokens ───────────────────────────────────────── */
+  --space-xs: 8rpx;
+  --space-sm: 16rpx;
+  --space-md: 24rpx;
+  --space-lg: 40rpx;
+  --space-xl: 64rpx;
+
+  /* ── Radius Tokens ────────────────────────────────────────── */
+  --radius-sm: 12rpx;
+  --radius-md: 20rpx;
+  --radius-lg: 32rpx;
+  --radius-pill: 9999rpx;
+
+  /* ── Font Tokens ──────────────────────────────────────────── */
+  --font-xs: 22rpx;
+  --font-sm: 26rpx;
+  --font-base: 30rpx;
+  --font-md: 34rpx;
+  --font-lg: 40rpx;
+  --font-xl: 52rpx;
+  --font-2xl: 68rpx;
+
+  /* ── Base ─────────────────────────────────────────────────── */
+  background-color: var(--color-bg);
+  color: var(--color-text-primary);
+  font-family: -apple-system, "PingFang SC", "Helvetica Neue", sans-serif;
+  font-size: var(--font-base);
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ── Utility ──────────────────────────────────────────────── */
+.text-secondary { color: var(--color-text-secondary); }
+.text-primary   { color: var(--color-primary); }
+.text-danger    { color: var(--color-danger); }
+
+.card {
+  background: var(--color-bg-card);
+  border-radius: var(--radius-md);
+  box-shadow: 0 2rpx 16rpx var(--color-shadow);
+  overflow: hidden;
+}

@@ -1,5 +1,11 @@
 import uuid
 import logging
+import asyncio
+import hashlib
+import re
+import secrets
+import string
+from typing import Optional
 from uuid import UUID
 
 logger = logging.getLogger(__name__)
@@ -18,9 +24,12 @@ from app.utils.auth import get_current_account
 from pub.models.customer import Account
 from pub.models.diagnosis import DiagnosisNotificationDelivery
 from pub.utils.jwt_token import create_access_token
-from pub.contract.auth import LoginResponse
+from pub.contract.auth import LoginResponse, RegisterRequest
 from app.utils.response import success
 from pydantic import BaseModel
+from app.clients.email import EmailDeliveryError, send_registration_email
+from pub.utils.jwt_token import create_password_setup_token
+from urllib.parse import urlencode, urlsplit, urlunsplit
 import xml.etree.ElementTree as ET
 from pub.services.wx.crypto import WXBizMsgCrypt
 
@@ -70,6 +79,224 @@ async def wx_mini_app_push_message_verify(
     else:
         logger.warning("wx mini app push message signature verification failed")
         return Response(content="error")
+
+
+# ── Mini App Login ──────────────────────────────────────────────────────────────
+
+class MiniAppLoginRequest(BaseModel):
+    code: str
+
+
+@router.post("/wx-mini-app/login")
+async def wx_mini_app_login(
+    payload: MiniAppLoginRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """Exchange a wx.login() code for user binding status.
+
+    Returns:
+      registered=True  + JWT token + tenant info  if the openid is bound to an account.
+      registered=False + openid                   if not registered yet.
+    """
+    try:
+        session_data = await WxService.jscode2session(
+            mini_app_id=settings.wx_mini_app_id,
+            mini_app_secret=settings.wx_mini_app_secret,
+            code=payload.code,
+        )
+    except Exception as e:
+        logger.error(f"jscode2session failed: {e}")
+        raise HTTPException(status_code=502, detail="微信登录验证失败，请稍后重试")
+
+    mini_open_id: str = session_data["openid"]
+    union_id: Optional[str] = session_data.get("unionid")
+
+    account = None
+    if union_id:
+        account = await AuthService.get_account_by_wx_union_id(session, union_id)
+
+    if account is None:
+        account = await AuthService.get_account_by_wx_mini_open_id(session, mini_open_id)
+
+    if account is None:
+        return success({"registered": False, "openid": mini_open_id, "unionid": union_id})
+        
+    # Silent binding: if account found via union_id but missing mini_open_id
+    if account.wx_mini_open_id != mini_open_id or (union_id and account.wx_union_id != union_id):
+        await AuthService.bind_account_wx_mini(session, account, mini_open_id, union_id)
+
+    tenant_name: Optional[str] = None
+    contact_name: Optional[str] = None
+    tenant = await AuthService.get_tenant_by_id(session, account.tenant_id)
+    if tenant:
+        tenant_name = str(tenant.name)
+    if account.contact_id:
+        contact = await AuthService.get_contact_by_id(session, account.contact_id)
+        if contact:
+            contact_name = str(contact.name)
+
+    expires_in = settings.jwt_access_token_expires_minutes * 60
+    access_token = create_access_token(
+        subject=str(account.id),
+        tenant_id=str(account.tenant_id),
+        username=account.username,
+        jwt_secret_key=settings.jwt_secret_key,
+        admin=account.admin,
+        contact_id=str(account.contact_id) if account.contact_id else None,
+        flag=account.flag,
+        expires_minutes=settings.jwt_access_token_expires_minutes,
+    )
+
+    return success({
+        "registered": True,
+        "access_token": access_token,
+        "token_type": "Bearer",
+        "expires_in": expires_in,
+        "account_id": str(account.id),
+        "tenant_id": str(account.tenant_id),
+        "tenant_name": tenant_name,
+        "contact_id": str(account.contact_id) if account.contact_id else None,
+        "contact_name": contact_name,
+    })
+
+
+# ── Mini App Register ────────────────────────────────────────────────────────────
+
+USERNAME_FLAG_EMAIL = 1
+PASSWORD_SETUP_PREFIX = "!setup:"
+
+
+def _mini_company_slug(company_name: str) -> str:
+    slug = re.sub(r"[^a-z0-9]+", "-", company_name.lower()).strip("-")
+    return slug or "tenant"
+
+
+def _mini_normalize_phone(phone: str) -> str:
+    return re.sub(r"\D", "", phone)
+
+
+def _mini_password_setup_marker(nonce: str) -> str:
+    digest = hashlib.sha256(nonce.encode("utf-8")).hexdigest()
+    return f"{PASSWORD_SETUP_PREFIX}{digest}"
+
+
+def _mini_build_password_setup_url(token: str) -> str:
+    portal = urlsplit(settings.portal_login_url)
+    query = urlencode({"token": token})
+    return urlunsplit((portal.scheme, portal.netloc, "/set-password", query, ""))
+
+
+async def _mini_generate_unique_tenant_code(session: AsyncSession) -> str:
+    alphabet = string.ascii_uppercase + string.digits
+    for _ in range(8):
+        code = "".join(secrets.choice(alphabet) for _ in range(8))
+        existing = await AuthService.get_tenant_by_code(session, code)
+        if existing is None:
+            return code
+    raise HTTPException(status_code=500, detail="Unable to generate unique tenant code")
+
+
+class MiniAppRegisterRequest(BaseModel):
+    company_name: str
+    contact_name: str
+    phone: str
+    email: str
+    openid: str  # mini app openid obtained from /wx-mini-app/login
+    unionid: Optional[str] = None
+
+
+@router.post("/wx-mini-app/register")
+async def wx_mini_app_register(
+    payload: MiniAppRegisterRequest,
+    session: AsyncSession = Depends(get_session),
+):
+    """Register a new tenant account from the Mini Program.
+
+    After successful registration the openid is bound to the new account.
+    A password-setup email is sent to the provided address.
+    """
+    normalized_phone = _mini_normalize_phone(payload.phone)
+    if not normalized_phone:
+        raise HTTPException(status_code=400, detail="手机号格式不正确")
+
+    email = payload.email.strip().lower()
+    if "@" not in email:
+        raise HTTPException(status_code=400, detail="邮箱格式不正确")
+
+    company_name = payload.company_name.strip()
+    contact_name = payload.contact_name.strip()
+    if not company_name:
+        raise HTTPException(status_code=400, detail="公司名称不能为空")
+    if not contact_name:
+        raise HTTPException(status_code=400, detail="联系人姓名不能为空")
+
+    # Verify openid hasn't been registered yet
+    existing = await AuthService.get_account_by_wx_mini_open_id(session, payload.openid)
+    if existing:
+        raise HTTPException(status_code=400, detail="该微信账号已注册，请勿重复注册")
+        
+    if payload.unionid:
+        existing_union = await AuthService.get_account_by_wx_union_id(session, payload.unionid)
+        if existing_union:
+            raise HTTPException(status_code=400, detail="该微信账号已绑定其他租户，请勿重复注册")
+
+    tenant_code = await _mini_generate_unique_tenant_code(session)
+    slug = _mini_company_slug(company_name)
+    setup_nonce = secrets.token_urlsafe(32)
+    password_marker = _mini_password_setup_marker(setup_nonce)
+
+    try:
+        result = await AuthService.register(
+            session=session,
+            username=email,
+            email=email,
+            normalized_phone=normalized_phone,
+            company_name=company_name,
+            contact_name=contact_name,
+            login_channel="email",
+            account_flag=USERNAME_FLAG_EMAIL,
+            tenant_code=tenant_code,
+            tenant_mqtt_server=f"mqtt.{slug}.portal.local",
+            tenant_api_server=f"api.{slug}.portal.local",
+            password_value=password_marker,
+        )
+        setup_token = create_password_setup_token(
+            subject=str(result["account_id"]),
+            nonce=setup_nonce,
+            jwt_secret_key=settings.jwt_secret_key,
+            expires_minutes=settings.password_setup_token_expires_minutes,
+        )
+        await asyncio.to_thread(
+            send_registration_email,
+            recipient=email,
+            contact_name=contact_name,
+            company_name=company_name,
+            password_setup_url=_mini_build_password_setup_url(setup_token),
+        )
+        # Bind openid to the new account
+        account = await AuthService.get_account(session, result["account_id"])
+        if account:
+            await AuthService.bind_account_wx_mini(session, account, payload.openid, payload.unionid)
+        else:
+            await AuthService.commit(session)
+    except EmailDeliveryError as exc:
+        await AuthService.rollback(session)
+        raise HTTPException(
+            status_code=503,
+            detail="注册邮件发送失败，账号未创建，请稍后重试",
+        ) from exc
+    except HTTPException:
+        raise
+    except Exception:
+        await AuthService.rollback(session)
+        raise
+
+    return success({
+        "message": "注册成功，请查收邮件完成密码设置",
+        "account_id": str(result["account_id"]),
+        "tenant_id": str(result["tenant_id"]),
+    })
+
 
 async def handle_wx_event_message(wx_service: WxService, data: dict, from_user: str, to_user: str, session: AsyncSession) -> str:
     """Handle event messages (subscribe, unsubscribe, scan, etc.) and return plain reply XML or empty string."""
@@ -293,7 +520,15 @@ async def get_bind_status(
             
         db_account = await AuthService.get_account(session, account_uuid)
         if db_account:
-            await AuthService.bind_account_wx(session, db_account, wx_user_id)
+            union_id = None
+            try:
+                wx_service = get_wx_service()
+                user_info = await wx_service.get_user_info(wx_user_id)
+                union_id = user_info.get("unionid")
+            except Exception as e:
+                logger.warning(f"Failed to fetch user info for unionid during account bind: {e}")
+                
+            await AuthService.bind_account_wx(session, db_account, wx_user_id, union_id)
             
             # Clean up redis
             redis_client.delete(REDIS_KEY_WX_SCAN.format(scene=scene_str))
@@ -326,9 +561,17 @@ async def get_empbind_status(
         except ValueError:
             raise HTTPException(status_code=400, detail="Invalid employee ID format")
             
-        db_emp = await EmployeeService.get_employee(session, employee_uuid)
-        if db_emp:
-            await EmployeeService.bind_employee_wx(session, db_emp, wx_user_id)
+        db_employee = await EmployeeService.get_employee_by_id(session, employee_uuid)
+        if db_employee:
+            union_id = None
+            try:
+                wx_service = get_wx_service()
+                user_info = await wx_service.get_user_info(wx_user_id)
+                union_id = user_info.get("unionid")
+            except Exception as e:
+                logger.warning(f"Failed to fetch user info for unionid during employee bind: {e}")
+                
+            await EmployeeService.bind_employee_wx(session, db_employee, wx_user_id, union_id)
             
             redis_client.delete(REDIS_KEY_WX_SCAN.format(scene=scene_str))
             return {"code": 200, "message": "success"}

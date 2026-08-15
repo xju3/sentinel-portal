@@ -184,9 +184,43 @@ class AuthService:
 
     @staticmethod
     async def bind_account_wx(
-        session: AsyncSession, account: Account, wx_user_id: str
+        session: AsyncSession, account: Account, wx_user_id: str, wx_union_id: Optional[str] = None
     ) -> None:
         account.wx_user_id = wx_user_id
+        if wx_union_id:
+            account.wx_union_id = wx_union_id
+        await session.commit()
+
+    @staticmethod
+    async def get_account_by_wx_mini_open_id(
+        session: AsyncSession, mini_open_id: str
+    ) -> Optional[Account]:
+        stmt = select(Account).where(Account.wx_mini_open_id == mini_open_id)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def bind_account_wx_mini(
+        session: AsyncSession, account: Account, mini_open_id: str, wx_union_id: Optional[str] = None
+    ) -> None:
+        account.wx_mini_open_id = mini_open_id
+        if wx_union_id:
+            account.wx_union_id = wx_union_id
+        await session.commit()
+
+    @staticmethod
+    async def get_account_by_wx_union_id(
+        session: AsyncSession, wx_union_id: str
+    ) -> Optional[Account]:
+        stmt = select(Account).where(Account.wx_union_id == wx_union_id)
+        result = await session.execute(stmt)
+        return result.scalar_one_or_none()
+
+    @staticmethod
+    async def bind_account_wx_union(
+        session: AsyncSession, account: Account, wx_union_id: str
+    ) -> None:
+        account.wx_union_id = wx_union_id
         await session.commit()
 
     @staticmethod

@@ -1,0 +1,31 @@
+<!--pages/index/index.wxml — Splash screen-->
+<view class="splash">
+  <!-- Logo area -->
+  <view class="splash__brand">
+    <view class="splash__logo">
+      <view class="logo-ring logo-ring--outer" />
+      <view class="logo-ring logo-ring--inner" />
+      <view class="logo-dot" />
+    </view>
+    <text class="splash__name">朗湖哨兵</text>
+    <text class="splash__tagline">工业设备健康监测平台</text>
+  </view>
+
+  <!-- Loading state -->
+  <block wx:if="{{status === 'loading'}}">
+    <view class="splash__footer">
+      <view class="spinner">
+        <view class="spinner__arc" />
+      </view>
+      <text class="splash__hint">正在验证身份...</text>
+    </view>
+  </block>
+
+  <!-- Error state -->
+  <block wx:elif="{{status === 'error'}}">
+    <view class="splash__footer">
+      <text class="splash__error">{{errorMsg}}</text>
+      <button class="btn btn--primary" bindtap="onRetry">重新尝试</button>
+    </view>
+  </block>
+</view>
