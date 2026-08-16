@@ -7,6 +7,7 @@ import {
   ProFormSwitch,
   ProFormCascader,
   ProTable,
+  ProFormSelect,
 } from '@ant-design/pro-components';
 import { Button, Popconfirm, Switch, message } from 'antd';
 
@@ -143,6 +144,37 @@ const TenantPage = () => {
       ),
     },
     {
+      title: '邮箱',
+      dataIndex: 'email',
+      width: 180,
+    },
+    {
+      title: '邮件状态',
+      dataIndex: 'email_status',
+      width: 100,
+      valueType: 'select',
+      valueEnum: {
+        0: { text: '默认', status: 'Default' },
+        1: { text: '已送达', status: 'Success' },
+        2: { text: '已打开', status: 'Processing' },
+      },
+    },
+    {
+      title: '业务状态',
+      dataIndex: 'status',
+      width: 100,
+      valueType: 'select',
+      valueEnum: {
+        1: { text: '正常', status: 'Success' },
+        0: { text: '异常/停用', status: 'Error' },
+      },
+    },
+    {
+      title: '行业',
+      dataIndex: 'industry',
+      width: 100,
+    },
+    {
       title: '操作',
       valueType: 'option',
       // fixed: 'right',
@@ -242,8 +274,11 @@ const TenantPage = () => {
                   return [editing.region_id];
                 })(),
                 active: editing.active,
+                email: editing.email,
+                status: editing.status,
+                industry: editing.industry,
               }
-            : { active: true, mqtt_server: 'mqtt.api-server.icu', api_server: 'api.api-server.icu' }
+            : { active: true, mqtt_server: 'mqtt.api-server.icu', api_server: 'api.api-server.icu', status: 1 }
         }
         onFinish={async (values) => {
           setSaving(true);
@@ -255,6 +290,9 @@ const TenantPage = () => {
               api_server: values.api_server.trim(),
               region_id: Array.isArray(values.region_id) ? values.region_id[values.region_id.length - 1] : values.region_id,
               active: values.active,
+              email: values.email?.trim(),
+              status: values.status,
+              industry: values.industry ? Number(values.industry) : undefined,
             };
 
             if (editing) {
@@ -317,7 +355,24 @@ const TenantPage = () => {
             changeOnSelect: true,
           }}
         />
-        <ProFormSwitch name="active" label="状态" />
+        <ProFormText
+          name="email"
+          label="联系邮箱"
+          rules={[{ type: 'email', message: '请输入有效的邮箱地址' }]}
+        />
+        <ProFormSelect
+          name="status"
+          label="业务状态"
+          options={[
+            { label: '正常', value: 1 },
+            { label: '停用', value: 0 },
+          ]}
+        />
+        <ProFormText
+          name="industry"
+          label="行业代码"
+        />
+        <ProFormSwitch name="active" label="系统状态" />
       </ModalForm>
     </PageContainer>
   );

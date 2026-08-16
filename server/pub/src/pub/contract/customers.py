@@ -34,6 +34,9 @@ class TenantCreate(BaseModel):
     api_server: str = "api.api-server.icu"
     region_id: str
     active: Optional[bool] = True
+    status: Optional[int] = 1
+    industry: Optional[int] = None
+    email: Optional[str] = None
 
 
 class TenantUpdate(BaseModel):
@@ -43,6 +46,9 @@ class TenantUpdate(BaseModel):
     api_server: Optional[str] = None
     region_id: Optional[str] = None
     active: Optional[bool] = None
+    status: Optional[int] = None
+    industry: Optional[int] = None
+    email: Optional[str] = None
 
 
 class TenantResponse(BaseModel):
@@ -57,6 +63,10 @@ class TenantResponse(BaseModel):
     desc: Optional[str] = None
     create_at: datetime
     src: Optional[int] = None
+    status: Optional[int] = None
+    industry: Optional[int] = None
+    email: Optional[str] = None
+    email_status: Optional[int] = None
 
     model_config = ConfigDict(from_attributes=True)
 

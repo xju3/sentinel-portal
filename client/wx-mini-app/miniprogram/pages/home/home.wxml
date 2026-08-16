@@ -22,6 +22,43 @@
     </view>
   </view>
 
+  <!-- Current abnormal devices -->
+  <view class="section" wx:if="{{!loading && faultDevices.length}}">
+    <view class="section__header">
+      <view class="section__title-wrap">
+        <view class="section__title-icon icon-alert" />
+        <text class="section__title">当前异常设备</text>
+      </view>
+      <text class="section__extra">{{faultDevices.length}} 台</text>
+    </view>
+    <view class="fault-list">
+      <view
+        class="fault-card"
+        wx:for="{{faultDevices}}"
+        wx:key="deviceId"
+        data-id="{{item.deviceId}}"
+        data-name="{{item.deviceName}}"
+        bindtap="navToDeviceHealth"
+      >
+        <view class="fault-card__level" style="background-color: {{item.levelColor}};" />
+        <view class="fault-card__body">
+          <view class="fault-card__header">
+            <text class="fault-card__name">{{item.deviceName}}</text>
+            <text class="fault-card__status" style="color: {{item.levelColor}}; border-color: {{item.levelColor}};">{{item.level}}</text>
+          </view>
+          <text class="fault-card__code">{{item.deviceCode}}</text>
+          <view class="fault-card__meta" wx:if="{{item.category || item.area}}">
+            <text wx:if="{{item.category}}">{{item.category}}</text>
+            <text wx:if="{{item.category && item.area}}">·</text>
+            <text wx:if="{{item.area}}">{{item.area}}</text>
+          </view>
+          <text class="fault-card__metrics" wx:if="{{item.metricsText}}">异常项：{{item.metricsText}}</text>
+        </view>
+        <text class="fault-card__arrow">›</text>
+      </view>
+    </view>
+  </view>
+
   <!-- Quick entry -->
   <view class="section">
     <view class="section__title-wrap" style="margin-bottom: 24rpx;">

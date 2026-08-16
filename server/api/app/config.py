@@ -93,6 +93,9 @@ class Settings(BaseSettings):
     portal_login_url: str = "https://portal.api-server.icu"
     password_setup_token_expires_minutes: int = 1440
 
+    # Resend Webhook
+    resend_web_hook_key: str = ""
+
     model_config = SettingsConfigDict(
         env_file=(Path.home() / ".env", ".env"),
         env_file_encoding="utf-8",

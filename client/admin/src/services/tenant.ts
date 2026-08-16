@@ -8,6 +8,10 @@ export type Tenant = {
   api_server: string;
   region_id: string;
   active: boolean;
+  status?: number;
+  industry?: number;
+  email?: string;
+  email_status?: number;
 };
 
 export type TenantPayload = {
@@ -17,6 +21,9 @@ export type TenantPayload = {
   api_server: string;
   region_id: string;
   active?: boolean;
+  status?: number;
+  industry?: number;
+  email?: string;
 };
 
 export async function listTenants(skip = 0, limit = 100) {

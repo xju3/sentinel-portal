@@ -9,11 +9,51 @@ interface StatCard {
   color: string
 }
 
+interface FaultDeviceCard {
+  deviceId: string
+  deviceName: string
+  deviceCode: string
+  category: string
+  area: string
+  level: string
+  levelColor: string
+  metricsText: string
+}
+
+const LEVEL_COLORS: Record<string, string> = {
+  '关注': '#F2C94C',
+  '异常': '#FA8C16',
+  '警告': '#EC008C',
+  '严重': '#FF3366',
+}
+
+function normalizeFaultDevice(item: any): FaultDeviceCard | null {
+  const deviceId = typeof item?.deviceId === 'string' ? item.deviceId : ''
+  if (!deviceId) return null
+
+  const metrics = Array.isArray(item?.metrics)
+    ? item.metrics.filter((metric: unknown): metric is string => typeof metric === 'string' && Boolean(metric))
+    : []
+  const level = typeof item?.level === 'string' && item.level ? item.level : '异常'
+
+  return {
+    deviceId,
+    deviceName: item?.deviceName || '未命名设备',
+    deviceCode: item?.deviceCode || '--',
+    category: item?.category || '',
+    area: item?.area || '',
+    level,
+    levelColor: LEVEL_COLORS[level] || LEVEL_COLORS['异常'],
+    metricsText: metrics.join('、'),
+  }
+}
+
 Page({
   data: {
     tenantName: '',
     contactName: '',
     stats: [] as StatCard[],
+    faultDevices: [] as FaultDeviceCard[],
     total: '--' as string | number,
     loading: true,
   },
@@ -85,8 +125,13 @@ Page({
         }
       })
 
+      const faultDevices = (Array.isArray(data?.faultDevices) ? data.faultDevices : [])
+        .map(normalizeFaultDevice)
+        .filter((item: FaultDeviceCard | null): item is FaultDeviceCard => item !== null)
+
       this.setData({
         stats,
+        faultDevices,
         total,
         loading: false
       })
@@ -106,5 +151,13 @@ Page({
 
   navToHealthArchive() {
     wx.navigateTo({ url: '/pages/health-archive/list' })
+  },
+
+  navToDeviceHealth(e: WechatMiniprogram.BaseEvent) {
+    const { id, name } = e.currentTarget.dataset
+    if (!id) return
+    wx.navigateTo({
+      url: `/pages/health-archive/detail?id=${encodeURIComponent(id)}&name=${encodeURIComponent(name || '')}`,
+    })
   }
 })

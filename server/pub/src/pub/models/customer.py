@@ -10,6 +10,8 @@ from sqlalchemy import (
     Boolean,
     Numeric,
     Date,
+    DateTime,
+    Text,
     Integer,
     SmallInteger,
 )
@@ -46,18 +48,20 @@ class Tenant(Base):
 
     id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
     code = Column(String(12), nullable=False, unique=True, index=True)
-    name = Column(String(128), nullable=False)
-    mqtt_server = Column(String(255), nullable=False, default="mqtt.api-server.icu")
-    api_server = Column(String(255), nullable=False, default="api.api-server.icu")
-    region_id = Column(String(16), nullable=False, index=True)
-    active = Column(Boolean, default=True)
-    create_at = Column(Date, nullable=False)
-    src =Column(SmallInteger, nullable=True, default=1)
-    desc = Column(String(255), nullable=True)  
+    name = Column(String(64), nullable=False)
+    status = Column(SmallInteger, nullable=True, default=1)
+    mqtt_server = Column(String(255), nullable=True, default="mqtt.api-server.icu")
+    api_server = Column(String(255), nullable=True, default="api.api-server.icu")
+    region_id = Column(String(16), nullable=True, index=True)
     web_site = Column(String(255), nullable=True)
-    start_at = Column(
-        Date, nullable=False
-    )  # The date when the tenant started using the service
+    desc = Column(Text, nullable=True)
+    src = Column(SmallInteger, nullable=True)
+    active = Column(Boolean, nullable=True, default=False)
+    create_at = Column(DateTime, nullable=True)
+    start_at = Column(DateTime, nullable=True)
+    industry = Column(SmallInteger, nullable=True)
+    email = Column(String(255), nullable=True, index=True)
+    email_status = Column(SmallInteger, nullable=True, default=0)
 
     def __repr__(self):
         return f"<Tenant {self.id}: {self.code} - {self.name}>"
