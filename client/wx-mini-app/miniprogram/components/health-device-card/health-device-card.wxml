@@ -4,13 +4,8 @@
       <text class="health-device-card__name">{{item.name}}</text>
       <text class="health-device-card__code">{{item.code}}</text>
     </view>
-    <view class="health-device-card__actions">
-      <view class="health-device-card__favorite {{item.isFavorite ? 'health-device-card__favorite--active' : ''}}" catchtap="onFavoriteTap">
-        <text>{{item.isFavorite ? '★ 已关注' : '☆ 关注'}}</text>
-      </view>
-      <view class="health-device-card__status health-device-card__status--{{item.statusTone}}">
-        <text class="health-device-card__status-text">{{item.statusText}}</text>
-      </view>
+    <view class="health-device-card__favorite {{item.isFavorite ? 'health-device-card__favorite--active' : ''}}" catchtap="onFavoriteTap">
+      <text>{{item.isFavorite ? '★ 已关注' : '☆ 关注'}}</text>
     </view>
   </view>
 
@@ -24,17 +19,4 @@
       <text class="health-device-card__tag-value">{{item.categoryName}}</text>
     </view>
   </view>
-
-  <view class="health-device-card__metrics">
-    <view class="health-device-card__metric">
-      <text class="health-device-card__metric-label">当前监控</text>
-      <text class="health-device-card__metric-value">{{item.currentBindingCount}}</text>
-    </view>
-    <view class="health-device-card__metric">
-      <text class="health-device-card__metric-label">累计测点</text>
-      <text class="health-device-card__metric-value">{{item.historicalPointCount}}</text>
-    </view>
-  </view>
-
-  <text class="health-device-card__desc">{{item.description}}</text>
 </view>

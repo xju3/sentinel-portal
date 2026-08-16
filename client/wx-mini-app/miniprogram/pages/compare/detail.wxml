@@ -2,7 +2,7 @@
   <view class="header">
     <view class="title-group">
       <text class="title">{{specName || '规格对比'}}</text>
-      <text class="subtitle">同规格设备多维对比</text>
+      <text class="subtitle">同组设备温度与振动趋势对比</text>
     </view>
     <view class="filter-btn" bindtap="openDrawer">
       <text>参数设置</text>

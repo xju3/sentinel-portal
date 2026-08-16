@@ -14,7 +14,7 @@ Page({
 
   onLoad() {
     this.specLoader = createPagedListLoader({
-      pageSize: 20,
+      pageSize: 10,
       fetchPage: (skip, limit) => {
         const token = app.globalData.session?.accessToken
         if (!token) {

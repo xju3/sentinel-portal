@@ -13,6 +13,7 @@ interface StoredFilters {
 }
 
 interface FilterOption { id: string; name: string }
+interface CategoryFilterOption extends FilterOption { parentId: string }
 interface SpecFilterOption extends FilterOption { deviceCategoryId: string }
 interface GroupFilterOption extends FilterOption { deviceSpecIds: string[] }
 type FilterKey = 'category' | 'spec' | 'group'
@@ -23,11 +24,6 @@ interface HealthArchiveDeviceCardItem {
   code: string
   specName: string
   categoryName: string
-  statusText: string
-  statusTone: 'active' | 'history'
-  currentBindingCount: number
-  historicalPointCount: number
-  description: string
   isFavorite: boolean
   raw: any
 }
@@ -72,45 +68,7 @@ function firstText(...values: Array<unknown>): string {
   return ''
 }
 
-function firstNumber(...values: Array<unknown>): number {
-  for (const value of values) {
-    if (typeof value === 'number' && Number.isFinite(value)) {
-      return value
-    }
-  }
-  return 0
-}
-
 function normalizeDevice(item: any, favoriteIds: string[]): HealthArchiveDeviceCardItem {
-  const currentBindingCount = firstNumber(
-    item?.activeBindingCount,
-    item?.active_binding_count,
-    item?.currentBindingCount,
-    item?.current_binding_count,
-    item?.activeMonitoringCount,
-    item?.active_monitoring_count,
-    item?.currentMonitoredPointCount,
-    item?.current_monitored_point_count,
-  )
-
-  const historicalPointCount = firstNumber(
-    item?.historicalPointCount,
-    item?.historical_point_count,
-    item?.historyPointCount,
-    item?.history_point_count,
-    item?.monitoredPointCount,
-    item?.monitored_point_count,
-    item?.locationCount,
-    item?.location_count,
-  )
-
-  const statusText = firstText(
-    item?.monitoringStatus,
-    item?.monitoring_status,
-    currentBindingCount > 0 ? '监控中' : '',
-    historicalPointCount > 0 ? '历史监控' : '',
-  ) || '未监控'
-
   const id = firstText(item?.id, item?.deviceId, item?.device_id, item?.device?.id)
   return {
     id,
@@ -136,13 +94,6 @@ function normalizeDevice(item: any, favoriteIds: string[]): HealthArchiveDeviceC
         item?.device_category?.name,
         item?.category?.name,
       ) || '--',
-    statusText,
-    statusTone: currentBindingCount > 0 ? 'active' : 'history',
-    currentBindingCount,
-    historicalPointCount,
-    description:
-      firstText(item?.desc, item?.description, item?.device?.description, item?.remark, item?.notes) ||
-      '查看设备诊断历史、健康基线与测点详情',
     isFavorite: favoriteIds.includes(id),
     raw: item,
   }
@@ -157,7 +108,7 @@ function normalizeAndSortDevices(items: any[], favoriteIds: string[]) {
 Page({
   deviceLoader: null as PagedListLoader<any> | null,
   filterRefreshPending: false,
-  allCategories: [] as FilterOption[],
+  allCategories: [] as CategoryFilterOption[],
   allSpecs: [] as SpecFilterOption[],
   allGroups: [] as GroupFilterOption[],
 
@@ -171,6 +122,10 @@ Page({
     specId: '',
     groupId: '',
     categoryOptions: [{ id: '', name: '全部类别' }] as FilterOption[],
+    rootCategoryTabs: [{ id: '', name: '全部' }] as FilterOption[],
+    childCategoryTabs: [] as FilterOption[],
+    activeRootCategoryId: '',
+    activeChildCategoryId: '',
     specOptions: [{ id: '', name: '全部规格' }] as FilterOption[],
     groupOptions: [{ id: '', name: '全部分组' }] as FilterOption[],
     filtersExpanded: false,
@@ -234,7 +189,13 @@ Page({
     this.setData({ filtersLoading: true, filterError: '' })
     try {
       const result = await getHealthArchiveDeviceFilters(token)
-      this.allCategories = Array.isArray(result?.categories) ? result.categories : []
+      this.allCategories = Array.isArray(result?.categories)
+        ? result.categories.map((item) => ({
+          id: item.id,
+          name: item.name,
+          parentId: item.parentId || '',
+        }))
+        : []
       this.allSpecs = Array.isArray(result?.specs) ? result.specs : []
       this.allGroups = Array.isArray(result?.groups) ? result.groups : []
       this.setFilterState(storedFilters, false)
@@ -248,6 +209,10 @@ Page({
         specId: '',
         groupId: '',
         categoryOptions: [{ id: '', name: '全部类别' }],
+        rootCategoryTabs: [{ id: '', name: '全部' }],
+        childCategoryTabs: [],
+        activeRootCategoryId: '',
+        activeChildCategoryId: '',
         specOptions: [{ id: '', name: '全部规格' }],
         groupOptions: [{ id: '', name: '全部分组' }],
         hasActiveFilter: false,
@@ -265,8 +230,9 @@ Page({
     const categoryId = this.allCategories.some((item) => item.id === filters.categoryId)
       ? filters.categoryId
       : ''
+    const selectedCategoryIds = this.getCategoryAndDescendantIds(categoryId)
     const categorySpecs = categoryId
-      ? this.allSpecs.filter((item) => item.deviceCategoryId === categoryId)
+      ? this.allSpecs.filter((item) => selectedCategoryIds.has(item.deviceCategoryId))
       : this.allSpecs
     const specId = categorySpecs.some((item) => item.id === filters.specId)
       ? filters.specId
@@ -288,6 +254,7 @@ Page({
       specOptions.find((item) => item.id === specId)?.name,
       groupOptions.find((item) => item.id === groupId)?.name,
     ].filter((name) => name && !name.startsWith('全部'))
+    const categoryTabState = this.getCategoryTabState(categoryId)
     this.setData({
       categoryId,
       specId,
@@ -295,6 +262,7 @@ Page({
       categoryOptions,
       specOptions,
       groupOptions,
+      ...categoryTabState,
       hasActiveFilter: Boolean(categoryId || specId || groupId),
       filterSummary: selectedNames.length ? selectedNames.join(' · ') : '全部设备',
     }, () => {
@@ -302,6 +270,66 @@ Page({
       this.saveFilters()
       if (refresh) this.refreshForFilters()
     })
+  },
+
+  getCategoryAndDescendantIds(categoryId: string) {
+    const ids = new Set<string>()
+    if (!categoryId) return ids
+    ids.add(categoryId)
+    let changed = true
+    while (changed) {
+      changed = false
+      this.allCategories.forEach((item) => {
+        if (item.parentId && ids.has(item.parentId) && !ids.has(item.id)) {
+          ids.add(item.id)
+          changed = true
+        }
+      })
+    }
+    return ids
+  },
+
+  getCategoryTabState(categoryId: string) {
+    const categoryIds = new Set(this.allCategories.map((item) => item.id))
+    const roots = this.allCategories.filter(
+      (item) => !item.parentId || !categoryIds.has(item.parentId),
+    )
+    const categoryById = new Map(this.allCategories.map((item) => [item.id, item]))
+    const lineage: CategoryFilterOption[] = []
+    const visited = new Set<string>()
+    let current = categoryById.get(categoryId)
+    while (current && !visited.has(current.id)) {
+      lineage.unshift(current)
+      visited.add(current.id)
+      current = categoryById.get(current.parentId)
+    }
+    const activeRootCategoryId = lineage[0]?.id || ''
+    const directChildren = activeRootCategoryId
+      ? this.allCategories.filter((item) => item.parentId === activeRootCategoryId)
+      : []
+    const activeChildCategoryId = lineage[1]?.id || ''
+    return {
+      rootCategoryTabs: [{ id: '', name: '全部' }, ...roots],
+      childCategoryTabs: directChildren,
+      activeRootCategoryId,
+      activeChildCategoryId,
+    }
+  },
+
+  selectRootCategory(e: WechatMiniprogram.TouchEvent) {
+    const categoryId = String(e.currentTarget.dataset.id || '')
+    if (categoryId === this.data.categoryId && !this.data.specId && !this.data.groupId) {
+      return
+    }
+    this.setFilterState({ categoryId, specId: '', groupId: '' })
+  },
+
+  selectChildCategory(e: WechatMiniprogram.TouchEvent) {
+    const categoryId = String(e.currentTarget.dataset.id || '')
+    if (categoryId === this.data.categoryId && !this.data.specId && !this.data.groupId) {
+      return
+    }
+    this.setFilterState({ categoryId, specId: '', groupId: '' })
   },
 
   async onPullDownRefresh() {

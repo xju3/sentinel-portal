@@ -154,7 +154,7 @@ export async function getHealthArchiveDevices(
 /** Get category, specification and group options available to health archive devices. */
 export function getHealthArchiveDeviceFilters(token: string) {
   return request<{
-    categories: Array<{ id: string; name: string }>
+    categories: Array<{ id: string; name: string; parentId: string | null }>
     specs: Array<{ id: string; name: string; deviceCategoryId: string }>
     groups: Array<{ id: string; name: string; deviceSpecIds: string[] }>
   }>('/wx-mini-app/health-archive/device-filters', 'GET', undefined, token)

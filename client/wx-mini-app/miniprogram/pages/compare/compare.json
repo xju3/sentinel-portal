@@ -1,5 +1,5 @@
 {
-  "navigationBarTitleText": "分组对比",
+  "navigationBarTitleText": "同组设备对比",
   "enablePullDownRefresh": true,
   "onReachBottomDistance": 100,
   "backgroundTextStyle": "light",

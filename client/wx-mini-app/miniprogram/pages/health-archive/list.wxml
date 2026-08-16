@@ -1,17 +1,41 @@
 <view class="page">
-  <view class="page__hero card">
+  <view class="page__hero">
     <view class="page__hero-head">
       <text class="page__hero-title">设备健康档案</text>
       <view class="page__hero-actions">
-        <text class="page__favorite-count">关注 {{favoriteCount}}</text>
-        <view class="filter-trigger {{hasActiveFilter ? 'filter-trigger--active' : ''}}" bindtap="toggleFilters">
+        <view class="page__action-button page__action-button--favorite">
+          <text>关注 {{favoriteCount}}</text>
+        </view>
+        <view class="page__action-button filter-trigger {{hasActiveFilter ? 'filter-trigger--active' : ''}}" hover-class="page__action-button--pressed" bindtap="toggleFilters">
           <text>筛选</text>
           <text class="filter-trigger__chevron">⌄</text>
         </view>
       </view>
     </view>
-    <text class="page__hero-desc">仅展示当前正在被监控或曾被监控的设备，下拉刷新，触底继续加载。</text>
-    <text class="page__filter-summary" wx:if="{{hasActiveFilter}}">已筛选：{{filterSummary}}</text>
+
+    <scroll-view class="category-tabs" scroll-x enhanced show-scrollbar="{{false}}">
+      <view class="category-tabs__track">
+        <view
+          class="category-tab {{item.id === activeRootCategoryId ? 'category-tab--active' : ''}}"
+          wx:for="{{rootCategoryTabs}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          bindtap="selectRootCategory"
+        >{{item.name}}</view>
+      </view>
+    </scroll-view>
+
+    <scroll-view class="category-tabs category-tabs--child" scroll-x enhanced show-scrollbar="{{false}}" wx:if="{{childCategoryTabs.length}}">
+      <view class="category-tabs__track">
+        <view
+          class="category-tab category-tab--child {{item.id === activeChildCategoryId ? 'category-tab--active' : ''}}"
+          wx:for="{{childCategoryTabs}}"
+          wx:key="id"
+          data-id="{{item.id}}"
+          bindtap="selectChildCategory"
+        >{{item.name}}</view>
+      </view>
+    </scroll-view>
   </view>
 
   <view class="device-list" wx:if="{{devices.length > 0}}">

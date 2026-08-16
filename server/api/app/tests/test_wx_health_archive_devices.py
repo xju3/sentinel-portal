@@ -4,11 +4,11 @@ from uuid import uuid4
 
 import pytest
 from httpx import AsyncClient
+from pub.services.device.device_inst_service import DeviceInstService
 
 from app.main import app
 from app.routers import devices as devices_router
 from app.utils.auth import get_current_account
-from pub.services.device.device_inst_service import DeviceInstService
 
 
 class _RowsResult:
@@ -119,7 +119,8 @@ async def test_get_tenant_health_archive_devices_paged_builds_filtered_stable_qu
     assert "location.tenant_id" in fetch_sql
     assert "GROUP BY sensor_monitoring.device_inst_id" in fetch_sql
     assert "device_category.tenant_id" in fetch_sql
-    assert "device_category.id" in fetch_sql
+    assert "WITH RECURSIVE selected_device_categories" in fetch_sql
+    assert "device_category.parent_id" in fetch_sql
     assert "device_spec.id" in fetch_sql
     assert "EXISTS" in fetch_sql
     assert "dg_inst_item" in fetch_sql
@@ -137,13 +138,19 @@ async def test_get_tenant_health_archive_devices_paged_builds_filtered_stable_qu
 @pytest.mark.asyncio
 async def test_get_tenant_health_archive_device_filters_returns_linked_options():
     tenant_id = uuid4()
+    root_category_id = uuid4()
     category_id = uuid4()
+    unused_category_id = uuid4()
     spec_id = uuid4()
     other_spec_id = uuid4()
     group_id = uuid4()
     session = _FakeSession(
         [
-            _RowsResult(rows=[SimpleNamespace(id=category_id, name="泵类")]),
+            _RowsResult(rows=[
+                SimpleNamespace(id=root_category_id, name="动力设备", parent_id=None),
+                SimpleNamespace(id=category_id, name="泵类", parent_id=root_category_id),
+                SimpleNamespace(id=unused_category_id, name="未使用类别", parent_id=None),
+            ]),
             _RowsResult(
                 rows=[
                     SimpleNamespace(
@@ -178,7 +185,10 @@ async def test_get_tenant_health_archive_device_filters_returns_linked_options()
     )
 
     assert result == {
-        "categories": [{"id": category_id, "name": "泵类"}],
+        "categories": [
+            {"id": root_category_id, "name": "动力设备", "parentId": None},
+            {"id": category_id, "name": "泵类", "parentId": root_category_id},
+        ],
         "specs": [
             {
                 "id": spec_id,
@@ -209,7 +219,7 @@ async def test_wx_health_archive_device_filters_route_returns_service_data(monke
     group_id = uuid4()
     session = object()
     expected = {
-        "categories": [{"id": category_id, "name": "泵类"}],
+        "categories": [{"id": category_id, "name": "泵类", "parentId": None}],
         "specs": [
             {
                 "id": spec_id,
@@ -253,7 +263,9 @@ async def test_wx_health_archive_device_filters_route_returns_service_data(monke
     assert response.status_code == 200
     assert captured == {"session": session, "tenant_id": tenant_id}
     assert response.json()["data"] == {
-        "categories": [{"id": str(category_id), "name": "泵类"}],
+        "categories": [
+            {"id": str(category_id), "name": "泵类", "parentId": None}
+        ],
         "specs": [
             {
                 "id": str(spec_id),

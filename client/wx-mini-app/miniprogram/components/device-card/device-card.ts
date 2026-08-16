@@ -15,12 +15,11 @@ Component({
   },
   methods: {
     onTap() {
-      const deviceId = this.data.item?.device?.id
-      if (deviceId) {
-        wx.navigateTo({
-          url: `/pages/device/detail?id=${deviceId}`
-        })
-      }
+      const device = this.data.item?.device
+      if (!device?.id) return
+      wx.navigateTo({
+        url: `/pages/health-archive/detail?id=${device.id}&name=${encodeURIComponent(device.name || '')}`,
+      })
     }
   }
 })

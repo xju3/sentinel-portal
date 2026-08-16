@@ -1,16 +1,29 @@
-<view class="container">
-  <view class="spec-list">
-    <spec-card 
-      wx:for="{{specs}}" 
-      wx:key="id" 
-      item="{{item}}" 
-      bind:click="navToDetail" 
-      data-id="{{item.id}}" 
+<view class="page">
+  <view class="page__header">
+    <text class="page__title">选择设备规格</text>
+    <text class="page__subtitle">选择设备规格，进入同组设备的温度与振动趋势对比</text>
+  </view>
+
+  <view class="spec-list" wx:if="{{specs.length > 0}}">
+    <spec-card
+      wx:for="{{specs}}"
+      wx:key="id"
+      item="{{item}}"
+      bind:click="navToDetail"
+      data-id="{{item.id}}"
       data-name="{{item.name}}"
     />
-    
-    <empty-state wx:if="{{!loading && specs.length === 0}}" title="暂无可用对比规格" desc="未找到配置了测点分组的设备规格" />
-    <view wx:if="{{loading && specs.length > 0}}" class="page-status">加载中...</view>
-    <view wx:if="{{!loading && !hasMore && specs.length > 0}}" class="page-status">没有更多了</view>
   </view>
+
+  <view wx:if="{{loading && specs.length === 0}}" class="skeleton-list">
+    <view class="skeleton-card" wx:for="{{[1,2,3,4]}}" wx:key="*this">
+      <view class="skeleton-line skeleton-line--title"></view>
+      <view class="skeleton-line skeleton-line--model"></view>
+      <view class="skeleton-line skeleton-line--meta"></view>
+    </view>
+  </view>
+
+  <empty-state wx:if="{{!loading && specs.length === 0}}" title="暂无可对比的设备规格" desc="只有已配置设备分组的规格才会出现在这里" />
+  <view wx:if="{{loading && specs.length > 0}}" class="page-status">加载中...</view>
+  <view wx:if="{{!loading && !hasMore && specs.length > 0}}" class="page-status">没有更多了</view>
 </view>

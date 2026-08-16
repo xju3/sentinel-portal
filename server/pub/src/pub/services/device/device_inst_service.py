@@ -2,25 +2,25 @@
 Device service - business logic for device operations
 """
 
-from uuid import UUID
 from typing import Any, List, Optional
+from uuid import UUID
+
+from sqlalchemy import case, exists, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
-from sqlalchemy import case, exists, func, or_
 
+from pub.models.customer import Location
 from pub.models.device import (
-    IsoStandard,
     DeviceCategory,
-    DeviceSpec,
     DeviceInst,
+    DeviceSpec,
     Process,
-    ProcessItem,
     ProcessDevice,
     ProcessDeviceItem,
 )
 from pub.models.sensor import SensorMonitoring
-from pub.models.customer import HealthCheckFreq, Location
 from pub.utils.sorting import apply_sorting
+
 
 class DeviceInstService:
     @staticmethod
@@ -103,8 +103,6 @@ class DeviceInstService:
         keyword: Optional[str] = None,
     ) -> tuple:
         """Get paged DeviceInsts scoped to tenant, with total count."""
-        from pub.models.customer import Location as LocationModel
-
         base_join = (
             select(DeviceInst)
             .join(DeviceSpec, DeviceInst.device_spec_id == DeviceSpec.id)
@@ -169,7 +167,23 @@ class DeviceInstService:
         )
 
         if device_category_id is not None:
-            base_stmt = base_stmt.where(DeviceCategory.id == device_category_id)
+            selected_categories = (
+                select(DeviceCategory.id)
+                .where(
+                    DeviceCategory.id == device_category_id,
+                    DeviceCategory.tenant_id == tenant_id,
+                )
+                .cte(name="selected_device_categories", recursive=True)
+            )
+            selected_categories = selected_categories.union_all(
+                select(DeviceCategory.id).where(
+                    DeviceCategory.parent_id == selected_categories.c.id,
+                    DeviceCategory.tenant_id == tenant_id,
+                )
+            )
+            base_stmt = base_stmt.where(
+                DeviceCategory.id.in_(select(selected_categories.c.id))
+            )
         if device_spec_id is not None:
             base_stmt = base_stmt.where(DeviceSpec.id == device_spec_id)
         if process_device_id is not None:
@@ -243,12 +257,12 @@ class DeviceInstService:
         )
 
         category_stmt = (
-            select(DeviceCategory.id, DeviceCategory.name)
-            .join(DeviceSpec, DeviceSpec.device_category_id == DeviceCategory.id)
-            .join(DeviceInst, DeviceInst.device_spec_id == DeviceSpec.id)
-            .join(monitored_join, monitored_join.c.id == DeviceInst.id)
+            select(
+                DeviceCategory.id,
+                DeviceCategory.name,
+                DeviceCategory.parent_id,
+            )
             .where(DeviceCategory.tenant_id == tenant_id)
-            .distinct()
             .order_by(DeviceCategory.name.asc(), DeviceCategory.id.asc())
         )
         spec_stmt = (
@@ -297,6 +311,17 @@ class DeviceInstService:
         category_rows = (await session.execute(category_stmt)).all()
         spec_rows = (await session.execute(spec_stmt)).all()
         group_rows = (await session.execute(group_stmt)).all()
+        category_by_id = {row.id: row for row in category_rows}
+        visible_category_ids = {row.device_category_id for row in spec_rows}
+        pending_category_ids = list(visible_category_ids)
+        while pending_category_ids:
+            category_id = pending_category_ids.pop()
+            category = category_by_id.get(category_id)
+            parent_id = category.parent_id if category is not None else None
+            if parent_id is not None and parent_id not in visible_category_ids:
+                visible_category_ids.add(parent_id)
+                pending_category_ids.append(parent_id)
+
         groups: dict[UUID, dict[str, Any]] = {}
         for row in group_rows:
             group = groups.setdefault(
@@ -312,7 +337,13 @@ class DeviceInstService:
 
         return {
             "categories": [
-                {"id": row.id, "name": row.name} for row in category_rows
+                {
+                    "id": row.id,
+                    "name": row.name,
+                    "parentId": row.parent_id,
+                }
+                for row in category_rows
+                if row.id in visible_category_ids
             ],
             "specs": [
                 {

@@ -15,9 +15,9 @@ const STATUS_META: Record<string, { label: string; color: string }> = {
   abnormal: { label: '异常', color: '#FA8C16' },
   warning: { label: '告警', color: '#FF3366' },
   critical: { label: '严重', color: '#820014' },
-  missed: { label: '诊断缺口', color: '#8C8C8C' },
-  waiting: { label: '等待补传', color: '#1677FF' },
-  processing: { label: '处理中', color: '#13C2C2' },
+  missed: { label: '缺口', color: '#8C8C8C' },
+  // waiting: { label: '补传', color: '#1677FF' },
+  // processing: { label: '处理中', color: '#13C2C2' },
   no_data: { label: '无数据', color: '#263247' },
 }
 

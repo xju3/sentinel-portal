@@ -14,8 +14,8 @@
 
   <block wx:if="{{archive}}">
     <view class="section context-card">
-      <view class="section-title">档案范围</view>
-      <scroll-view scroll-x class="range-scroll" show-scrollbar="{{false}}">
+      <view class="range-head">
+        <view class="section-title">档案范围</view>
         <view class="range-row">
           <view
             wx:for="{{rangeOptions}}"
@@ -25,22 +25,25 @@
             bindtap="changeArchiveRange"
           >{{item.label}}</view>
         </view>
-      </scroll-view>
-
-      <view class="context-row" wx:if="{{points.length}}">
-        <text class="context-label">监测点</text>
-        <picker value="{{pointIndex}}" range="{{points}}" range-key="name" bindchange="changePoint">
-          <view class="picker-value">{{points[pointIndex].name}}{{points[pointIndex].active ? '' : '（历史）'}}⌄</view>
-        </picker>
       </view>
-      <view class="context-row" wx:if="{{points.length}}">
-        <text class="context-label">当前传感器</text>
-        <text class="context-value {{selectedSensorText ? '' : 'context-value--muted'}}">{{selectedSensorText || '当前未绑定传感器'}}</text>
+
+      <view class="context-meta" wx:if="{{points.length}}">
+        <picker class="context-meta__point" value="{{pointIndex}}" range="{{points}}" range-key="name" bindchange="changePoint">
+          <view class="context-meta__item">
+            <text class="context-label">监测点</text>
+            <text class="picker-value">{{points[pointIndex].name}}{{points[pointIndex].active ? '' : '（历史）'}}⌄</text>
+          </view>
+        </picker>
+        <view class="context-meta__divider"></view>
+        <view class="context-meta__item context-meta__sensor">
+          <text class="context-label">传感器</text>
+          <text class="context-value {{selectedSensorText ? '' : 'context-value--muted'}}">{{selectedSensorText || '当前未绑定'}}</text>
+        </view>
       </view>
       <view class="context-empty" wx:else>暂无监测点，以下展示设备级历史</view>
     </view>
 
-    <view class="section">
+    <view class="section overview-card">
       <view class="section-title">健康概览</view>
       <view class="summary-grid">
         <view class="summary-card">
