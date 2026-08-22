@@ -77,7 +77,8 @@ async def create_sensor_firmware(
     session: AsyncSession = Depends(get_session),
     current_account: Account = Depends(get_current_account),
 ):
-    return success(await SensorFirmwareService.create(session, item.model_dump()))
+    db_obj = await SensorFirmwareService.create(session, item.model_dump())
+    return success(SensorFirmwareResponse.model_validate(db_obj))
 
 
 @router.put("/sensor-firmwares/{obj_id}")
@@ -92,7 +93,8 @@ async def update_sensor_firmware(
         raise HTTPException(status_code=404, detail="SensorFirmware not found")
     if db_obj.status == 1:
         raise HTTPException(status_code=400, detail="Cannot modify a released firmware")
-    return success(await SensorFirmwareService.update(session, db_obj, item.model_dump(exclude_unset=True)))
+    updated_obj = await SensorFirmwareService.update(session, db_obj, item.model_dump(exclude_unset=True))
+    return success(SensorFirmwareResponse.model_validate(updated_obj))
 
 
 @router.delete("/sensor-firmwares/{obj_id}")

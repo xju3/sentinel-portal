@@ -146,6 +146,10 @@ async def _process_stream_message(bucket: str, path: str) -> bool:
         rms_vel_y = report.axis_features["Y"].time.rms_vel_mm_s if "Y" in report.axis_features and report.axis_features["Y"].time else 0.0
         rms_vel_z = report.axis_features["Z"].time.rms_vel_mm_s if "Z" in report.axis_features and report.axis_features["Z"].time else 0.0
         
+        p2p_disp_x = report.axis_features["X"].time.peak_to_peak_disp_um if "X" in report.axis_features and report.axis_features["X"].time else 0.0
+        p2p_disp_y = report.axis_features["Y"].time.peak_to_peak_disp_um if "Y" in report.axis_features and report.axis_features["Y"].time else 0.0
+        p2p_disp_z = report.axis_features["Z"].time.peak_to_peak_disp_um if "Z" in report.axis_features and report.axis_features["Z"].time else 0.0
+        
         if rms_x is not None: point = point.field("rms_x", float(rms_x))
         if rms_y is not None: point = point.field("rms_y", float(rms_y))
         if rms_z is not None: point = point.field("rms_z", float(rms_z))
@@ -153,6 +157,10 @@ async def _process_stream_message(bucket: str, path: str) -> bool:
         if rms_vel_x is not None: point = point.field("rms_vel_x", float(rms_vel_x))
         if rms_vel_y is not None: point = point.field("rms_vel_y", float(rms_vel_y))
         if rms_vel_z is not None: point = point.field("rms_vel_z", float(rms_vel_z))
+
+        if p2p_disp_x is not None: point = point.field("p2p_disp_x", float(p2p_disp_x))
+        if p2p_disp_y is not None: point = point.field("p2p_disp_y", float(p2p_disp_y))
+        if p2p_disp_z is not None: point = point.field("p2p_disp_z", float(p2p_disp_z))
 
         if report.bearing_features is not None:
             for axis in ("X", "Y", "Z"):
@@ -179,6 +187,9 @@ async def _process_stream_message(bucket: str, path: str) -> bool:
         max_rms_vel = max(float(rms_vel_x or 0), float(rms_vel_y or 0), float(rms_vel_z or 0))
         point = point.field("max_rms_vel", max_rms_vel)
         
+        max_p2p_disp = max(float(p2p_disp_x or 0), float(p2p_disp_y or 0), float(p2p_disp_z or 0))
+        point = point.field("max_p2p_disp", max_p2p_disp)
+        
         if rms_x is not None and rms_y is not None and rms_z is not None:
             rms_m = math.sqrt(rms_x**2 + rms_y**2 + rms_z**2)
             point = point.field("rms_m", float(rms_m))
@@ -197,6 +208,7 @@ async def _process_stream_message(bucket: str, path: str) -> bool:
         if report.location_id:
             metrics = {
                 "rms_vel_mm_s": max_rms_vel,
+                "p2p_disp_um": max_p2p_disp,
             }
             if rms_m is not None:
                 metrics["rms_acc_g"] = rms_m
@@ -213,6 +225,7 @@ async def _process_stream_message(bucket: str, path: str) -> bool:
             "device_id": str(report.device_id),
             "temperature_c": str(report.temperature_c) if report.temperature_c is not None else "",
             "max_rms_vel": str(max_rms_vel),
+            "max_p2p_disp": str(max_p2p_disp),
             "fs_hz": str(report.fs_hz) if report.fs_hz is not None else "",
             "points": str(report.points) if report.points is not None else "",
             "task_id": str(report.task_id) if report.task_id else "",

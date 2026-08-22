@@ -427,7 +427,7 @@ class DevicePointTrendService:
   |> filter(fn: (r) => r._measurement == "vibration_feature")
   |> filter(fn: (r) => r.device_id == "{device_id}")
   |> filter(fn: (r) => r.location_id == "{location_id}")
-  |> filter(fn: (r) => r._field == "temperature" or r._field == "max_rms_vel")
+  |> filter(fn: (r) => r._field == "temperature" or r._field == "max_rms_vel" or r._field == "max_p2p_disp")
   |> group(columns: ["_field"])'''
         if window_minutes == 0:
             return f"{base}\n  |> sort(columns: [\"_time\"])"
@@ -458,7 +458,7 @@ data |> aggregateWindow(every: {window_minutes}m, fn: count, createEmpty: true) 
   |> filter(fn: (r) => r._measurement == "vibration_feature")
   |> filter(fn: (r) => contains(value: r.device_id, set: {device_set}))
   |> filter(fn: (r) => r.location_id == "{location_id}")
-  |> filter(fn: (r) => r._field == "temperature" or r._field == "max_rms_vel")
+  |> filter(fn: (r) => r._field == "temperature" or r._field == "max_rms_vel" or r._field == "max_p2p_disp")
   |> group(columns: ["device_id", "_field"])'''
         if window_minutes == 0:
             return f'{base}\n  |> sort(columns: ["_time"])'
@@ -476,7 +476,7 @@ data |> aggregateWindow(every: {window_minutes}m, fn: count, createEmpty: true) 
         for table in tables:
             for record in table.records:
                 field = record.get_field()
-                if field not in {"temperature", "max_rms_vel"}:
+                if field not in {"temperature", "max_rms_vel", "max_p2p_disp"}:
                     continue
                 timestamp = record.get_time().isoformat().replace("+00:00", "Z")
                 item = values.setdefault(timestamp, {}).setdefault(field, {})
@@ -525,6 +525,7 @@ data |> aggregateWindow(every: {window_minutes}m, fn: count, createEmpty: true) 
             "timestamps": timestamps,
             "temperature": build_series("temperature"),
             "vibration": build_series("max_rms_vel"),
+            "displacement": build_series("max_p2p_disp"),
         }
 
     @classmethod

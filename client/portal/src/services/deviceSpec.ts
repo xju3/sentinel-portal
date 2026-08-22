@@ -94,6 +94,7 @@ export type DeviceSpecComparison = {
     timestamps: string[];
     temperature: DeviceSpecComparisonPoint[];
     vibration: DeviceSpecComparisonPoint[];
+    displacement: DeviceSpecComparisonPoint[];
   }>;
 };
 

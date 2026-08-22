@@ -40,7 +40,11 @@ class SensorDbService:
 
     @staticmethod
     async def get_by_id(session: AsyncSession, obj_id: UUID) -> Optional[Sensor]:
-        stmt = select(Sensor).where(Sensor.id == obj_id)
+        from sqlalchemy.orm import joinedload
+        stmt = select(Sensor).options(
+            joinedload(Sensor.sim_card),
+            joinedload(Sensor.latest_status)
+        ).where(Sensor.id == obj_id)
         result = await session.execute(stmt)
         return result.scalar_one_or_none()
 
@@ -233,9 +237,13 @@ class SensorDbService:
         sort_order: str = "ascend",
     ) -> tuple:
         """Get paged sensors with total count. Returns (items, total)."""
+        from sqlalchemy.orm import joinedload
         from sqlalchemy import func
 
-        base_stmt = select(Sensor)
+        base_stmt = select(Sensor).options(
+            joinedload(Sensor.sim_card),
+            joinedload(Sensor.latest_status)
+        )
         
         if not sort_by:
             sort_by = "sn"
@@ -292,8 +300,7 @@ class SensorDbService:
                     sim_card.status = 1
 
         await session.commit()
-        await session.refresh(db_obj)
-        return db_obj
+        return await SensorDbService.get_by_id(session, db_obj.id)
 
     @staticmethod
     async def create_batch(session: AsyncSession, items: List[dict]) -> List[Sensor]:
@@ -308,7 +315,6 @@ class SensorDbService:
     @staticmethod
     async def update(session: AsyncSession, db_obj: Sensor, data: dict) -> Sensor:
         old_sim_id = db_obj.sim_id
-
         for key, value in data.items():
             setattr(db_obj, key, value)
 
@@ -330,8 +336,7 @@ class SensorDbService:
                     sim_card.status = 1
 
         await session.commit()
-        await session.refresh(db_obj)
-        return db_obj
+        return await SensorDbService.get_by_id(session, db_obj.id)
 
     @staticmethod
     async def delete(session: AsyncSession, db_obj: Sensor) -> None:

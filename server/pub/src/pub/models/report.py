@@ -9,6 +9,7 @@ class TimeFeature(BaseModel):
     peak_acc_g: float | None = None
     peak_to_peak_acc_g: float | None = None
     rms_vel_mm_s: float | None = None
+    peak_to_peak_disp_um: float | None = None
     crest_factor: float | None = None
     kurtosis: float | None = None
 
@@ -128,6 +129,7 @@ class DiagnosisTriggerPayload(BaseModel):
     device_id: str
     temperature_c: float | None = None
     max_rms_vel: float
+    max_p2p_disp: float | None = None
     fs_hz: int | None = None
     points: int | None = None
     task_id: str | None = None

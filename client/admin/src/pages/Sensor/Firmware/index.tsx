@@ -9,7 +9,7 @@ import {
   ProFormTextArea,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Popconfirm, Row, Col, Tag, Upload, message, Space, Typography } from 'antd';
+import { Button, Popconfirm, Row, Col, Tag, Upload, message, Space, Typography, Form } from 'antd';
 import { UploadOutlined, InboxOutlined, LinkOutlined } from '@ant-design/icons';
 
 import {
@@ -26,6 +26,7 @@ import {
 } from '@/services/sensorFirmware';
 import { listSensorTypes, SensorType } from '@/services/sensorType';
 import { listTenants, Tenant } from '@/services/tenant';
+import EntityPicker from '@/components/EntityPicker';
 
 const { Text, Paragraph } = Typography;
 
@@ -51,7 +52,6 @@ const SensorFirmwarePage = () => {
   const [editing, setEditing] = useState<SensorFirmware | null>(null);
 
   const [sensorTypes, setSensorTypes] = useState<SensorType[]>([]);
-  const [tenants, setTenants] = useState<Tenant[]>([]);
 
   // Upload state
   const [uploadFile, setUploadFile] = useState<File | null>(null);
@@ -66,20 +66,9 @@ const SensorFirmwarePage = () => {
     return map;
   }, [sensorTypes]);
 
-  const tenantMap = useMemo(() => {
-    const map = new Map<string, string>();
-    tenants.forEach((t) => map.set(t.id, t.name));
-    return map;
-  }, [tenants]);
-
   const sensorTypeOptions = useMemo(
     () => sensorTypes.map((t) => ({ label: t.name, value: t.id })),
     [sensorTypes],
-  );
-
-  const tenantOptions = useMemo(
-    () => tenants.map((t) => ({ label: t.name, value: t.id })),
-    [tenants],
   );
 
   const loadRows = async () => {
@@ -97,14 +86,11 @@ const SensorFirmwarePage = () => {
 
   const loadOptions = async () => {
     try {
-      const [typesRes, tenantRes] = await Promise.all([
+      const [typesRes] = await Promise.all([
         listSensorTypes(),
-        listTenants(),
       ]);
       const types = (typesRes as any)?.data ?? typesRes;
-      const tenantList = (tenantRes as any)?.data ?? tenantRes;
       setSensorTypes(Array.isArray(types) ? types : []);
-      setTenants(Array.isArray(tenantList) ? tenantList : []);
     } catch (error) {
       message.error(toErrorMessage(error));
     }
@@ -214,7 +200,7 @@ const SensorFirmwarePage = () => {
       width: 200,
       hideInSearch: true,
       render: (_, row) =>
-        row.tenant_id ? tenantMap.get(row.tenant_id) || row.tenant_id : '-',
+        row.tenant?.name || (row.tenant_id ? row.tenant_id.replace(/-/g, '') : '-'),
     },
     {
       title: '发布日期',
@@ -562,14 +548,28 @@ const SensorFirmwarePage = () => {
           showSearch
           placeholder="请搜索或选择传感器类型"
         />
-        <ProFormSelect
-          name="tenant_id"
-          label="租户"
-          options={tenantOptions}
-          placeholder="请选择租户（可选）"
-          allowClear
-          showSearch
-        />
+        <Form.Item name="tenant_id" label="租户">
+          <EntityPicker<Tenant>
+            modalTitle="选择租户"
+            fetcher={async (query) => {
+              const res = await listTenants(0, 1000, true);
+              let items = (res as any)?.data ?? res ?? [];
+              if (query.keyword) {
+                items = items.filter((t: any) => t.name.includes(query.keyword) || t.code.includes(query.keyword));
+              }
+              const total = items.length;
+              items = items.slice((query.current - 1) * query.pageSize, query.current * query.pageSize);
+              return { items, total };
+            }}
+            columns={[
+              { title: '租户名称', dataIndex: 'name' },
+              { title: '租户编码', dataIndex: 'code' },
+            ]}
+            getRecordLabel={(t) => t.name}
+            valueLabel={editing?.tenant?.name}
+            placeholder="请选择租户（可选）"
+          />
+        </Form.Item>
         <ProFormDatePicker
           name="release_date"
           label="发布日期"

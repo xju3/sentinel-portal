@@ -17,6 +17,8 @@ class SensorFirmwareUpdate(BaseModel):
     sensor_type_id: Optional[UUID] = None
     tenant_id: Optional[UUID] = None
 
+from .customers import TenantResponse
+
 class SensorFirmwareResponse(BaseModel):
     id: UUID
     version: str
@@ -25,6 +27,7 @@ class SensorFirmwareResponse(BaseModel):
     file_url: str
     sensor_type_id: UUID
     tenant_id: Optional[UUID] = None
+    tenant: Optional[TenantResponse] = None
     status: int
 
     model_config = ConfigDict(from_attributes=True)

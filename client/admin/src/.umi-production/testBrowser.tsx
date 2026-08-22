@@ -3,7 +3,7 @@
 // DO NOT CHANGE IT MANUALLY!
 import React, { useEffect, useState } from 'react';
 import { ApplyPluginsType } from 'umi';
-import { renderClient, RenderClientOpts } from '/Users/tju/Langhu/Products/Sentinel/Codes/Platform/client/admin/node_modules/@umijs/renderer-react';
+import { renderClient, RenderClientOpts } from '/Users/tju/Langhu/Sentinel/Codes/Platform/client/admin/node_modules/@umijs/renderer-react';
 import { createHistory } from './core/history';
 import { createPluginManager } from './core/plugin';
 import { getRoutes } from './core/route';

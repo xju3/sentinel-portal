@@ -128,12 +128,13 @@ async def update_current_tenant(
 @router.get("/tenants")
 async def list_tenants(
     skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
+    limit: int = Query(10, ge=1, le=1000),
     sort_by: Optional[str] = Query(None),
     sort_order: Optional[str] = Query("ascend"),
+    active: Optional[bool] = Query(None),
     session: AsyncSession = Depends(get_session),
 ):
-    tenants = await TenantService.get_tenants(session, skip, limit, sort_by, sort_order)
+    tenants = await TenantService.get_tenants(session, skip, limit, sort_by, sort_order, active)
     return success([TenantResponse.model_validate(t) for t in tenants])
 
 

@@ -26,10 +26,10 @@ export type TenantPayload = {
   email?: string;
 };
 
-export async function listTenants(skip = 0, limit = 100) {
+export async function listTenants(skip = 0, limit = 1000, active?: boolean) {
   return request<Tenant[]>('/api/v1/tenants', {
     method: 'GET',
-    params: { skip, limit },
+    params: { skip, limit, ...(active !== undefined ? { active } : {}) },
   });
 }
 

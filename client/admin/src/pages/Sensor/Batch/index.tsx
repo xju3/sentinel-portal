@@ -77,7 +77,7 @@ const SensorBatchPage = () => {
 
   const loadTenants = async () => {
     try {
-      setTenants(await listTenants());
+      setTenants(await listTenants(0, 1000, true));
     } catch (error) {
       message.error(toErrorMessage(error));
     }
@@ -125,7 +125,7 @@ const SensorBatchPage = () => {
 
   const getTenantName = (id: string) => {
     const found = tenants.find((t) => t.id === id);
-    return found ? `${found.name} (${found.code})` : id;
+    return found ? `${found.name} (${found.code})` : id.replace(/-/g, '');
   };
 
   const handleUpgradeStatus = async (row: SensorBatch) => {

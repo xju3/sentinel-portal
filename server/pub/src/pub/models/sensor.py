@@ -67,6 +67,12 @@ class SensorFirmware(Base):
     )  # Link to tenant for multi-tenant support
     status = Column(SmallInteger, default=0, comment="状态: 1=active, 0=inactive")
 
+    tenant = relationship(
+        "Tenant",
+        primaryjoin="foreign(SensorFirmware.tenant_id) == Tenant.id",
+        uselist=False,
+    )
+
 
 class SensorType(Base):
     """Sensor type entity model"""

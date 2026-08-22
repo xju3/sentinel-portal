@@ -381,7 +381,7 @@ async def get_sensor(
     obj = await SensorDbService.get_by_id(session, obj_id)
     if not obj:
         raise HTTPException(status_code=404, detail="Sensor not found")
-    return success(obj)
+    return success(SensorResponse.model_validate(obj))
 
 
 @router.post("")
@@ -390,7 +390,8 @@ async def create_sensor(
     item: SensorCreate,
     session: AsyncSession = Depends(get_session),
 ):
-    return success(await SensorDbService.create(session, item.model_dump()))
+    db_obj = await SensorDbService.create(session, item.model_dump())
+    return success(SensorResponse.model_validate(db_obj))
 
 
 @router.put("/{obj_id}")
@@ -405,7 +406,8 @@ async def update_sensor(
         raise HTTPException(status_code=404, detail="Sensor not found")
 
     update_data = item.model_dump(exclude_unset=True)
-    return success(await SensorDbService.update(session, db_obj, update_data))
+    updated_obj = await SensorDbService.update(session, db_obj, update_data)
+    return success(SensorResponse.model_validate(updated_obj))
 
 
 @router.delete("/{obj_id}")

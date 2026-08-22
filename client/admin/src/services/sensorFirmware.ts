@@ -1,4 +1,5 @@
 import { request } from '@umijs/max';
+import type { Tenant } from './tenant';
 
 export type SensorFirmware = {
   id: string;
@@ -8,6 +9,7 @@ export type SensorFirmware = {
   file_url: string;
   sensor_type_id: string;
   tenant_id?: string;
+  tenant?: Tenant;
   status: number;
 };
 

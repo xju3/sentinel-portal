@@ -11,10 +11,11 @@ import {
   getDeviceSpecComparison,
 } from '@/services/deviceSpec';
 import { ProcessDevice, listAllProcessDevices } from '@/services/process';
+import { calculateTrendLine } from '@/utils/trendline';
 
 import styles from './index.less';
 
-type TrendTab = 'temperature' | 'vibration';
+type TrendTab = 'temperature' | 'vibration' | 'displacement';
 
 const SERIES_COLORS = [
   '#1677FF',
@@ -193,41 +194,57 @@ const SpecComparisonContent = ({
 
   const chartOption = useMemo(() => {
     if (!data || data.meta.pointCount === 0) return null;
-    const isVibration = activeTab === 'vibration';
-    const unit = isVibration ? 'mm/s' : '°C';
     const locationName = data.selectedLocation?.name || '未命名测点';
-    const chartSeries = data.series.map((item) => {
-      const source = isVibration ? item.vibration : item.temperature;
+    const chartSeries: any[] = [];
+    
+    let unit = '°C';
+    if (activeTab === 'vibration') unit = 'mm/s';
+    if (activeTab === 'displacement') unit = 'um';
+
+    data.series.forEach((item, deviceIndex) => {
+      let source;
+      if (activeTab === 'temperature') source = item.temperature;
+      else if (activeTab === 'vibration') source = item.vibration;
+      else source = item.displacement;
+
       const points: Array<[string, number | null]> = [];
       item.timestamps.forEach((timestamp, index) => {
-        const value = source[index];
-        points.push([
-          timestamp,
-          value
-            ? isVibration && !data.meta.raw
-              ? value.max
-              : value.value
-            : null,
-        ]);
+        const value = source?.[index];
+        points.push([timestamp, value ? (data.meta.raw ? value.value : value.max) : null]);
       });
-      return {
+      const trendData = (activeTab === 'vibration' || activeTab === 'displacement') 
+        ? calculateTrendLine(item.timestamps, points.map(p => p[1]))
+        : undefined;
+
+      chartSeries.push({
         name: `${item.device.code} · ${locationName}`,
         type: 'line',
         data: points,
         smooth: true,
         showSymbol: false,
+        itemStyle: { color: item.device.color || SERIES_COLORS[deviceIndex % SERIES_COLORS.length] },
         emphasis: { focus: 'series' },
-      };
+        markLine: trendData ? {
+          data: trendData.markLineData,
+          symbol: 'none',
+          label: { formatter: `${trendData.slopePerHour.toFixed(3)} / ${trendData.amplitude.toFixed(3)}`, position: 'end' },
+          lineStyle: { type: 'dashed', color: item.device.color || SERIES_COLORS[deviceIndex % SERIES_COLORS.length] },
+          tooltip: { formatter: `${item.device.code} - Slope: ${trendData.slopePerHour.toFixed(3)}, Amp: ${trendData.amplitude.toFixed(3)}` }
+        } : undefined,
+      });
     });
+
     return {
       animation: false,
       color: data.series.map(item => item.device.color || SERIES_COLORS[0]),
       tooltip: {
         trigger: 'axis',
-        valueFormatter: (value: number | null) =>
-          value === null || value === undefined ? '无数据' : `${Number(value).toFixed(3)} ${unit}`,
+        valueFormatter: (value: number | null) => {
+          if (value === null || value === undefined) return '无数据';
+          return `${Number(value).toFixed(3)} ${unit}`;
+        },
       },
-      grid: { top: 24, left: 62, right: 28, bottom: 72 },
+      grid: { top: 24, left: 62, right: activeTab === 'temperature' ? 28 : 100, bottom: 72 },
       xAxis: {
         type: 'time',
         axisLabel: {
@@ -396,7 +413,8 @@ const SpecComparisonContent = ({
         onChange={(key) => setActiveTab(key as TrendTab)}
         items={[
           { key: 'temperature', label: '温度对比' },
-          { key: 'vibration', label: '振动对比' },
+          { key: 'vibration', label: '振动 (速度) 对比' },
+          { key: 'displacement', label: '振动 (位移) 对比' },
         ]}
       />
       <Spin spinning={loading}>

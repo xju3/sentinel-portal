@@ -8,10 +8,11 @@ import {
   PointTrendValue,
   getDevicePointTrend,
 } from '@/services/deviceHealthArchive';
+import { calculateTrendLine } from '@/utils/trendline';
 
 import styles from './index.less';
 
-type TrendTab = 'temperature' | 'vibration';
+type TrendTab = 'temperature' | 'vibration' | 'displacement';
 
 const RANGE_OPTIONS = [
   { label: '近 3 天', value: 3 },
@@ -135,65 +136,155 @@ const PointTrendCard = ({
 
   const chartOption = useMemo(() => {
     if (!data) return null;
-    const source = activeTab === 'temperature' ? data.temperature : data.vibration;
-    const unit = activeTab === 'temperature' ? '°C' : 'mm/s';
-    const name = activeTab === 'temperature' ? '温度' : '振动速度有效值';
-    const values = source.map((item) =>
-      item ? (activeTab === 'vibration' && !data.meta.raw ? item.max : item.value) : null,
-    );
+    
     const times = data.timestamps.map((timestamp) =>
       dayjs(timestamp).format(rangeDays <= 7 ? 'MM-DD HH:mm' : 'YYYY-MM-DD'),
     );
+
+    const series = [];
+    let yAxis: any;
+    let tooltipFormatter: any;
+
+    if (activeTab === 'temperature') {
+      const source = data.temperature;
+      const values = source.map((item) => (item ? item.value : null));
+      series.push({
+        name: '温度',
+        type: 'line',
+        data: values,
+        connectNulls: false,
+        showSymbol: data.timestamps.length <= 100,
+        symbolSize: 5,
+        sampling: 'lttb',
+        lineStyle: { width: 2, color: '#fa8c16' },
+        itemStyle: { color: '#fa8c16' },
+        areaStyle: { opacity: 0.06 },
+      });
+      yAxis = { type: 'value', name: '°C', scale: true };
+      
+      tooltipFormatter = (params: any[]) => {
+        const index = params?.[0]?.dataIndex;
+        const item = source[index];
+        if (!item) return `${times[index]}<br/>无数据`;
+        const lines = [
+          dayjs(data.timestamps[index]).format('YYYY-MM-DD HH:mm'),
+          `温度：${values[index]?.toFixed(3)} °C`,
+        ];
+        if (!data.meta.raw) {
+          lines.push(
+            `最小：${item.min?.toFixed(3) ?? '-'} °C`,
+            `平均：${item.value?.toFixed(3) ?? '-'} °C`,
+            `最大：${item.max?.toFixed(3) ?? '-'} °C`,
+            `末次：${item.last?.toFixed(3) ?? '-'} °C`,
+            `采样：${item.count} 次`,
+          );
+        }
+        return lines.join('<br/>');
+      };
+    } else if (activeTab === 'vibration') {
+      const source = data.vibration;
+      const values = source.map((item) => (item ? (!data.meta.raw ? item.max : item.value) : null));
+      const trendData = calculateTrendLine(data.timestamps, values);
+      series.push({
+        name: '速度 RMS',
+        type: 'line',
+        data: values,
+        connectNulls: false,
+        showSymbol: data.timestamps.length <= 100,
+        symbolSize: 5,
+        sampling: 'lttb',
+        lineStyle: { width: 2, color: '#1677ff' },
+        itemStyle: { color: '#1677ff' },
+        areaStyle: { opacity: 0.06 },
+        markLine: trendData ? {
+          data: trendData.markLineData,
+          symbol: 'none',
+          label: { formatter: `${trendData.slopePerHour.toFixed(3)} / ${trendData.amplitude.toFixed(3)}`, position: 'end' },
+          lineStyle: { type: 'dashed', color: '#1677ff' },
+          tooltip: { formatter: `Slope: ${trendData.slopePerHour.toFixed(3)}, Amp: ${trendData.amplitude.toFixed(3)}` }
+        } : undefined
+      });
+      yAxis = { type: 'value', name: 'mm/s', scale: true };
+      
+      tooltipFormatter = (params: any[]) => {
+        const index = params?.[0]?.dataIndex;
+        const item = source[index];
+        if (!item) return `${times[index]}<br/>无数据`;
+        const lines = [
+          dayjs(data.timestamps[index]).format('YYYY-MM-DD HH:mm'),
+          `速度 (RMS)：${values[index]?.toFixed(3)} mm/s`,
+        ];
+        if (!data.meta.raw) {
+          lines.push(
+            `最小：${item.min?.toFixed(3) ?? '-'} mm/s`,
+            `最大：${item.max?.toFixed(3) ?? '-'} mm/s`,
+            `采样：${item.count} 次`,
+          );
+        }
+        return lines.join('<br/>');
+      };
+    } else {
+      const source = data.displacement;
+      const values = source.map((item) => (item ? (!data.meta.raw ? item.max : item.value) : null));
+      const trendData = calculateTrendLine(data.timestamps, values);
+      series.push({
+        name: '位移 P-P',
+        type: 'line',
+        data: values,
+        connectNulls: false,
+        showSymbol: data.timestamps.length <= 100,
+        symbolSize: 5,
+        sampling: 'lttb',
+        lineStyle: { width: 2, color: '#13c2c2' },
+        itemStyle: { color: '#13c2c2' },
+        areaStyle: { opacity: 0.06 },
+        markLine: trendData ? {
+          data: trendData.markLineData,
+          symbol: 'none',
+          label: { formatter: `${trendData.slopePerHour.toFixed(3)} / ${trendData.amplitude.toFixed(3)}`, position: 'end' },
+          lineStyle: { type: 'dashed', color: '#13c2c2' },
+          tooltip: { formatter: `Slope: ${trendData.slopePerHour.toFixed(3)}, Amp: ${trendData.amplitude.toFixed(3)}` }
+        } : undefined
+      });
+      yAxis = { type: 'value', name: 'um', scale: true };
+      
+      tooltipFormatter = (params: any[]) => {
+        const index = params?.[0]?.dataIndex;
+        const item = source[index];
+        if (!item) return `${times[index]}<br/>无数据`;
+        const lines = [
+          dayjs(data.timestamps[index]).format('YYYY-MM-DD HH:mm'),
+          `位移 (P-P)：${values[index]?.toFixed(3)} um`,
+        ];
+        if (!data.meta.raw) {
+          lines.push(
+            `最小：${item.min?.toFixed(3) ?? '-'} um`,
+            `最大：${item.max?.toFixed(3) ?? '-'} um`,
+          );
+        }
+        return lines.join('<br/>');
+      };
+    }
+
     return {
       animation: false,
       tooltip: {
         trigger: 'axis',
-        formatter: (params: any[]) => {
-          const index = params?.[0]?.dataIndex;
-          const item = source[index];
-          if (!item) return `${times[index]}<br/>无数据`;
-          const lines = [
-            dayjs(data.timestamps[index]).format('YYYY-MM-DD HH:mm'),
-            `${name}：${values[index]?.toFixed(3)} ${unit}`,
-          ];
-          if (!data.meta.raw) {
-            lines.push(
-              `最小：${item.min?.toFixed(3) ?? '-'} ${unit}`,
-              `平均：${item.value?.toFixed(3) ?? '-'} ${unit}`,
-              `最大：${item.max?.toFixed(3) ?? '-'} ${unit}`,
-              `末次：${item.last?.toFixed(3) ?? '-'} ${unit}`,
-              `采样：${item.count} 次`,
-            );
-          }
-          return lines.join('<br/>');
-        },
+        formatter: tooltipFormatter,
       },
-      grid: { top: 36, left: 56, right: 26, bottom: 76 },
+      grid: { top: 36, left: 56, right: activeTab === 'temperature' ? 26 : 100, bottom: 76 },
       xAxis: {
         type: 'category',
         data: times,
         boundaryGap: false,
         axisLabel: { hideOverlap: true },
       },
-      yAxis: { type: 'value', name: unit, scale: true },
+      yAxis,
       dataZoom: [
         { type: 'inside', filterMode: 'none' },
         { type: 'slider', height: 22, bottom: 18, filterMode: 'none' },
       ],
-      series: [
-        {
-          name,
-          type: 'line',
-          data: values,
-          connectNulls: false,
-          showSymbol: data.timestamps.length <= 100,
-          symbolSize: 5,
-          sampling: 'lttb',
-          lineStyle: { width: 2, color: activeTab === 'temperature' ? '#fa8c16' : '#1677ff' },
-          itemStyle: { color: activeTab === 'temperature' ? '#fa8c16' : '#1677ff' },
-          areaStyle: { opacity: 0.06 },
-        },
-      ],
+      series,
     };
   }, [activeTab, data, rangeDays]);
 
@@ -245,7 +336,8 @@ const PointTrendCard = ({
         onChange={(key) => setActiveTab(key as TrendTab)}
         items={[
           { key: 'temperature', label: '温度' },
-          { key: 'vibration', label: '振动' },
+          { key: 'vibration', label: '振动 (速度)' },
+          { key: 'displacement', label: '振动 (位移)' },
         ]}
       />
       <Spin spinning={loading}>

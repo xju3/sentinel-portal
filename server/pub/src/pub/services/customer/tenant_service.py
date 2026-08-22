@@ -34,8 +34,11 @@ class TenantService:
         limit: int,
         sort_by: str | None = None,
         sort_order: str = "ascend",
+        active: bool | None = None,
     ) -> List[Tenant]:
         stmt = select(Tenant)
+        if active is not None:
+            stmt = stmt.where(Tenant.active == active)
         stmt = apply_sorting(stmt, Tenant, sort_by, sort_order)
         stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
