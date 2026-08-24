@@ -3,7 +3,7 @@
 from typing import List, Optional
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import func, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
@@ -18,6 +18,40 @@ from pub.models.org import Employee
 from pub.utils.sorting import apply_sorting
 
 
+def _apply_model_filters(stmt, model, **filters):
+    for key, value in filters.items():
+        if value is None or not hasattr(model, key):
+            continue
+
+        column = getattr(model, key)
+        if isinstance(value, str):
+            value = value.strip()
+            if not value:
+                continue
+            stmt = stmt.where(column.ilike(f"%{value}%"))
+        else:
+            stmt = stmt.where(column == value)
+
+    return stmt
+
+
+async def _paginate(
+    session: AsyncSession,
+    stmt,
+    model,
+    skip: int,
+    limit: int,
+    sort_by: str | None,
+    sort_order: str,
+):
+    count_stmt = select(func.count()).select_from(stmt.order_by(None).subquery())
+    total = (await session.execute(count_stmt)).scalar() or 0
+
+    stmt = apply_sorting(stmt, model, sort_by, sort_order or "ascend")
+    result = await session.execute(stmt.offset(skip).limit(limit))
+    return result.scalars().all(), total
+
+
 class ProcessService:
     @staticmethod
     async def get_all(
@@ -27,11 +61,29 @@ class ProcessService:
         limit: int,
         sort_by: str | None = None,
         sort_order: str = "ascend",
-    ) -> List[Process]:
+        **kwargs,
+    ) -> tuple[List[Process], int]:
         stmt = select(Process).where(Process.tenant_id == tenant_id)
-        stmt = apply_sorting(stmt, Process, sort_by, sort_order or "ascend")
-        result = await session.execute(stmt.offset(skip).limit(limit))
-        return result.scalars().all()
+        keyword = kwargs.pop("keyword", None)
+        if keyword:
+            like_keyword = f"%{keyword.strip()}%"
+            stmt = stmt.where(
+                or_(
+                    Process.code.ilike(like_keyword),
+                    Process.name.ilike(like_keyword),
+                    Process.remark.ilike(like_keyword),
+                )
+            )
+        stmt = _apply_model_filters(stmt, Process, **kwargs)
+        return await _paginate(
+            session,
+            stmt,
+            Process,
+            skip,
+            limit,
+            sort_by,
+            sort_order,
+        )
 
     @staticmethod
     async def get_by_id(
@@ -93,15 +145,24 @@ class ProcessItemService:
         limit: int,
         sort_by: str | None = None,
         sort_order: str = "ascend",
-    ) -> List[ProcessItem]:
+        **kwargs,
+    ) -> tuple[List[ProcessItem], int]:
         stmt = (
             select(ProcessItem)
             .join(Process, ProcessItem.process_id == Process.id)
             .where(Process.tenant_id == tenant_id)
+            .options(selectinload(ProcessItem.device_spec))
         )
-        stmt = apply_sorting(stmt, ProcessItem, sort_by, sort_order or "ascend")
-        result = await session.execute(stmt.offset(skip).limit(limit))
-        return result.scalars().all()
+        stmt = _apply_model_filters(stmt, ProcessItem, **kwargs)
+        return await _paginate(
+            session,
+            stmt,
+            ProcessItem,
+            skip,
+            limit,
+            sort_by,
+            sort_order,
+        )
 
     @staticmethod
     async def get_by_id(
@@ -155,8 +216,14 @@ class ProcessDeviceService:
         limit: int,
         sort_by: str | None = None,
         sort_order: str = "ascend",
+        keyword: str | None = None,
+        code: str | None = None,
+        sn: str | None = None,
+        process_id: UUID | None = None,
+        area_id: UUID | None = None,
+        status: int | None = None,
         device_spec_id: UUID | None = None,
-    ) -> List[ProcessDevice]:
+    ) -> tuple[List[ProcessDevice], int]:
         stmt = (
             select(ProcessDevice)
             .join(Process, ProcessDevice.process_id == Process.id)
@@ -166,6 +233,23 @@ class ProcessDeviceService:
                 selectinload(ProcessDevice.process),
                 selectinload(ProcessDevice.area),
             )
+        )
+        if keyword:
+            like_keyword = f"%{keyword.strip()}%"
+            stmt = stmt.where(
+                or_(
+                    ProcessDevice.code.ilike(like_keyword),
+                    ProcessDevice.sn.ilike(like_keyword),
+                )
+            )
+        stmt = _apply_model_filters(
+            stmt,
+            ProcessDevice,
+            code=code,
+            sn=sn,
+            process_id=process_id,
+            area_id=area_id,
+            status=status,
         )
         if device_spec_id is not None:
             stmt = (
@@ -180,9 +264,15 @@ class ProcessDeviceService:
                 .where(DeviceInst.device_spec_id == device_spec_id)
                 .distinct()
             )
-        stmt = apply_sorting(stmt, ProcessDevice, sort_by, sort_order or "ascend")
-        result = await session.execute(stmt.offset(skip).limit(limit))
-        return result.scalars().all()
+        return await _paginate(
+            session,
+            stmt,
+            ProcessDevice,
+            skip,
+            limit,
+            sort_by,
+            sort_order,
+        )
 
     @staticmethod
     async def get_by_id(
@@ -260,7 +350,8 @@ class ProcessDeviceItemService:
         limit: int,
         sort_by: str | None = None,
         sort_order: str = "ascend",
-    ) -> List[ProcessDeviceItem]:
+        **kwargs,
+    ) -> tuple[List[ProcessDeviceItem], int]:
         stmt = (
             select(ProcessDeviceItem)
             .join(
@@ -270,14 +361,20 @@ class ProcessDeviceItemService:
             .join(Process, ProcessDevice.process_id == Process.id)
             .where(Process.tenant_id == tenant_id)
         )
-        stmt = apply_sorting(
+        stmt = _apply_model_filters(
             stmt,
             ProcessDeviceItem,
-            sort_by,
-            sort_order or "ascend",
+            **kwargs,
         )
-        result = await session.execute(stmt.offset(skip).limit(limit))
-        return result.scalars().all()
+        return await _paginate(
+            session,
+            stmt,
+            ProcessDeviceItem,
+            skip,
+            limit,
+            sort_by,
+            sort_order,
+        )
 
     @staticmethod
     async def get_by_id(

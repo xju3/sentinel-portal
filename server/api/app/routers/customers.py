@@ -128,14 +128,39 @@ async def update_current_tenant(
 @router.get("/tenants")
 async def list_tenants(
     skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=1000),
+    limit: int = Query(20, ge=1, le=1000),
     sort_by: Optional[str] = Query(None),
     sort_order: Optional[str] = Query("ascend"),
     active: Optional[bool] = Query(None),
+    code: Optional[str] = Query(None),
+    name: Optional[str] = Query(None),
+    mqtt_server: Optional[str] = Query(None),
+    api_server: Optional[str] = Query(None),
+    status: Optional[int] = Query(None),
+    email_status: Optional[int] = Query(None),
+    industry: Optional[int] = Query(None),
+    email: Optional[str] = Query(None),
+    region_id: Optional[str] = Query(None),
     session: AsyncSession = Depends(get_session),
 ):
-    tenants = await TenantService.get_tenants(session, skip, limit, sort_by, sort_order, active)
-    return success([TenantResponse.model_validate(t) for t in tenants])
+    items, total = await TenantService.get_tenants(
+        session,
+        skip,
+        limit,
+        sort_by,
+        sort_order,
+        active,
+        code,
+        name,
+        mqtt_server,
+        api_server,
+        status,
+        email_status,
+        industry,
+        email,
+        region_id,
+    )
+    return success({"items": [TenantResponse.model_validate(t) for t in items], "total": total})
 
 
 @router.get("/tenants/{tenant_id}")
@@ -251,16 +276,26 @@ async def delete_tenant_sensor(
 @router.get("/suppliers")
 async def list_suppliers(
     skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=200),
     keyword: Optional[str] = Query(None),
+    name: Optional[str] = Query(None),
+    brand: Optional[str] = Query(None),
+    contact_info: Optional[str] = Query(None),
+    active: Optional[bool] = Query(None),
     sort_by: Optional[str] = Query(None),
     sort_order: Optional[str] = Query("ascend"),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
-    suppliers = await SupplierService.get_suppliers(session, tenant_id, skip, limit, keyword, sort_by, sort_order)
-    return success([SupplierResponse.model_validate(s) for s in suppliers])
+    extra: dict = {}
+    if keyword: extra["keyword"] = keyword
+    if name: extra["name"] = name
+    if brand: extra["brand"] = brand
+    if contact_info: extra["contact_info"] = contact_info
+    if active is not None: extra["active"] = active
+    items, total = await SupplierService.get_suppliers(session, tenant_id, skip, limit, sort_by=sort_by, sort_order=sort_order, **extra)
+    return success({"items": [SupplierResponse.model_validate(s) for s in items], "total": total})
 
 
 @router.get("/suppliers/count")
@@ -654,14 +689,26 @@ async def delete_account(
 @router.get("/areas")
 async def list_areas(
     skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=200),
+    keyword: Optional[str] = Query(None),
+    name: Optional[str] = Query(None),
+    network: Optional[int] = Query(None),
+    ssid: Optional[str] = Query(None),
+    parent_id: Optional[UUID] = Query(None),
     sort_by: Optional[str] = Query(None),
     sort_order: Optional[str] = Query("ascend"),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
-    return success(await AreaService.get_areas(session, tenant_id, skip, limit, sort_by, sort_order))
+    extra: dict = {}
+    if keyword: extra["keyword"] = keyword
+    if name: extra["name"] = name
+    if network is not None: extra["network"] = network
+    if ssid: extra["ssid"] = ssid
+    if parent_id is not None: extra["parent_id"] = parent_id
+    items, total = await AreaService.get_areas(session, tenant_id, skip, limit, sort_by=sort_by, sort_order=sort_order, **extra)
+    return success({"items": items, "total": total})
 
 
 @router.post("/areas")
@@ -726,25 +773,33 @@ async def delete_area(
 # ==========================================
 @router.get("/locations")
 async def list_locations(
-    current: int = Query(1, ge=1),
-    pageSize: int = Query(10, ge=1, le=100),
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=200),
     keyword: Optional[str] = Query(None),
+    name: Optional[str] = Query(None),
+    description: Optional[str] = Query(None),
+    status: Optional[int] = Query(None),
+    is_bearing_point: Optional[bool] = Query(None),
     bearing_only: bool = Query(False),
     active_only: bool = Query(False),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
-    items, total = await LocationService.get_paged_locations(
-        session,
-        tenant_id,
-        current,
-        pageSize,
-        keyword,
-        bearing_only,
-        active_only,
+    extra: dict = {}
+    if keyword: extra["keyword"] = keyword
+    if name: extra["name"] = name
+    if description: extra["description"] = description
+    if status is not None: extra["status"] = status
+    if is_bearing_point is not None: extra["is_bearing_point"] = is_bearing_point
+    if bearing_only: extra["bearing_only"] = bearing_only
+    if active_only: extra["active_only"] = active_only
+    items, total = await LocationService.get_locations(
+        session, tenant_id, skip, limit, sort_by=sort_by, sort_order=sort_order, **extra
     )
-    return success(PagedLocationResponse(items=items, total=total))
+    return success({"items": items, "total": total})
 
 
 @router.post("/locations")
@@ -801,14 +856,26 @@ async def delete_location(
 @router.get("/health-check-freqs")
 async def list_health_check_freqs(
     skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=200),
+    keyword: Optional[str] = Query(None),
+    patrol: Optional[float] = Query(None),
+    diagnosis: Optional[float] = Query(None),
+    report: Optional[int] = Query(None),
+    status: Optional[bool] = Query(None),
     sort_by: Optional[str] = Query(None),
     sort_order: Optional[str] = Query("ascend"),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
-    return success(await HealthCheckFreqService.get_health_check_freqs(session, tenant_id, skip, limit, sort_by, sort_order))
+    extra: dict = {}
+    if keyword: extra["keyword"] = keyword
+    if patrol is not None: extra["patrol"] = patrol
+    if diagnosis is not None: extra["diagnosis"] = diagnosis
+    if report is not None: extra["report"] = report
+    if status is not None: extra["status"] = status
+    items, total = await HealthCheckFreqService.get_health_check_freqs(session, tenant_id, skip, limit, sort_by=sort_by, sort_order=sort_order, **extra)
+    return success({"items": items, "total": total})
 
 
 @router.post("/health-check-freqs")
@@ -864,14 +931,26 @@ async def delete_health_check_freq(
 @router.get("/iso-standards")
 async def list_iso_standards(
     skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=200),
+    keyword: Optional[str] = Query(None),
+    code: Optional[str] = Query(None),
+    version: Optional[int] = Query(None),
+    category: Optional[int] = Query(None),
+    foundation: Optional[int] = Query(None),
     sort_by: Optional[str] = Query(None),
     sort_order: Optional[str] = Query("ascend"),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
-    return success(await IsoStandardService.get_iso_standards(session, tenant_id, skip, limit, sort_by, sort_order))
+    extra: dict = {}
+    if keyword: extra["keyword"] = keyword
+    if code: extra["code"] = code
+    if version is not None: extra["version"] = version
+    if category is not None: extra["category"] = category
+    if foundation is not None: extra["foundation"] = foundation
+    items, total = await IsoStandardService.get_iso_standards(session, tenant_id, skip, limit, sort_by=sort_by, sort_order=sort_order, **extra)
+    return success({"items": items, "total": total})
 
 
 @router.get("/iso-standards/count")
@@ -890,7 +969,10 @@ async def list_all_iso_standards(
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
-    return success(await IsoStandardService.get_iso_standards(session, tenant_id, 0, 1000))
+    items, _total = await IsoStandardService.get_iso_standards(
+        session, tenant_id, 0, 1000
+    )
+    return success(items)
 
 
 @router.get("/iso-standards/{iso_id}")

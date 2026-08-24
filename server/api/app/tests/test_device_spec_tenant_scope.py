@@ -103,7 +103,7 @@ async def test_device_spec_detail_query_filters_by_category_tenant():
 @pytest.mark.asyncio
 async def test_device_spec_list_passes_current_tenant_to_service(monkeypatch):
     tenant_id = uuid4()
-    get_all = AsyncMock(return_value=[])
+    get_all = AsyncMock(return_value=([], 0))
     monkeypatch.setattr(devices.DeviceSpecService, "get_all", get_all)
     session = Mock()
 
@@ -112,6 +112,13 @@ async def test_device_spec_list_passes_current_tenant_to_service(monkeypatch):
         limit=100,
         sort_by=None,
         sort_order="ascend",
+        name=None,
+        model=None,
+        brand=None,
+        supplier_id=None,
+        device_category_id=None,
+        rpm=None,
+        voltage=None,
         process_device_id=None,
         current_account=SimpleNamespace(tenant_id=tenant_id),
         session=session,
@@ -122,9 +129,17 @@ async def test_device_spec_list_passes_current_tenant_to_service(monkeypatch):
         tenant_id,
         0,
         100,
-        None,
-        "ascend",
-        None,
+        sort_by=None,
+        sort_order="ascend",
+        process_device_id=None,
+        in_device_group=False,
+        name=None,
+        model=None,
+        brand=None,
+        supplier_id=None,
+        device_category_id=None,
+        rpm=None,
+        voltage=None,
     )
 
 
@@ -132,7 +147,7 @@ async def test_device_spec_list_passes_current_tenant_to_service(monkeypatch):
 async def test_device_spec_list_passes_process_device_filter_to_service(monkeypatch):
     tenant_id = uuid4()
     process_device_id = uuid4()
-    get_all = AsyncMock(return_value=[])
+    get_all = AsyncMock(return_value=([], 0))
     monkeypatch.setattr(devices.DeviceSpecService, "get_all", get_all)
     session = Mock()
 
@@ -141,6 +156,13 @@ async def test_device_spec_list_passes_process_device_filter_to_service(monkeypa
         limit=100,
         sort_by=None,
         sort_order="ascend",
+        name=None,
+        model=None,
+        brand=None,
+        supplier_id=None,
+        device_category_id=None,
+        rpm=None,
+        voltage=None,
         process_device_id=process_device_id,
         current_account=SimpleNamespace(tenant_id=tenant_id),
         session=session,
@@ -151,16 +173,24 @@ async def test_device_spec_list_passes_process_device_filter_to_service(monkeypa
         tenant_id,
         0,
         100,
-        None,
-        "ascend",
-        process_device_id,
+        sort_by=None,
+        sort_order="ascend",
+        process_device_id=process_device_id,
+        in_device_group=False,
+        name=None,
+        model=None,
+        brand=None,
+        supplier_id=None,
+        device_category_id=None,
+        rpm=None,
+        voltage=None,
     )
 
 
 @pytest.mark.asyncio
 async def test_mini_app_device_spec_list_requests_only_grouped_specs(monkeypatch):
     tenant_id = uuid4()
-    get_all = AsyncMock(return_value=[])
+    get_all = AsyncMock(return_value=([], 0))
     monkeypatch.setattr(devices.DeviceSpecService, "get_all", get_all)
     session = Mock()
 
@@ -182,7 +212,7 @@ async def test_mini_app_device_spec_list_requests_only_grouped_specs(monkeypatch
         "ascend",
         in_device_group=True,
     )
-    assert response.data == []
+    assert response.data == {"items": [], "total": 0}
 
 
 @pytest.mark.asyncio

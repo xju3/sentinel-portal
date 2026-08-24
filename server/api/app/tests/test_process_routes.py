@@ -1,3 +1,4 @@
+import inspect
 from types import SimpleNamespace
 from unittest.mock import ANY, AsyncMock, Mock
 from uuid import uuid4
@@ -49,6 +50,33 @@ def test_process_management_routes_are_registered():
     assert expected <= registered
 
 
+@pytest.mark.parametrize(
+    ("route", "expected_names"),
+    [
+        (
+            processes.list_processes,
+            {"keyword", "code", "name", "status"},
+        ),
+        (
+            processes.list_process_items,
+            {"process_id", "device_spec_id"},
+        ),
+        (
+            processes.list_process_devices,
+            {"keyword", "code", "sn", "process_id", "area_id", "status", "device_spec_id"},
+        ),
+        (
+            processes.list_process_device_items,
+            {"code", "color", "desc", "process_device_id", "device_inst_id"},
+        ),
+    ],
+)
+def test_process_list_routes_default_limit_and_query_filters(route, expected_names):
+    signature = inspect.signature(route)
+    assert signature.parameters["limit"].default.default == 20
+    assert expected_names <= set(signature.parameters)
+
+
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "service",
@@ -68,7 +96,7 @@ async def test_process_list_queries_are_tenant_scoped(service):
 
     await service.get_all(session, tenant_id, 0, 100)
 
-    statement = session.execute.await_args.args[0]
+    statement = session.execute.await_args_list[-1].args[0]
     assert "dg_template.tenant_id" in str(statement)
     assert tenant_id in statement.compile().params.values()
 
@@ -90,7 +118,7 @@ async def test_device_group_list_can_filter_by_contained_device_spec():
         device_spec_id=device_spec_id,
     )
 
-    statement = session.execute.await_args.args[0]
+    statement = session.execute.await_args_list[-1].args[0]
     sql = str(statement)
     assert "JOIN dg_inst_item" in sql
     assert "JOIN device_inst" in sql
@@ -104,12 +132,18 @@ async def test_device_group_list_passes_device_spec_filter_to_service(monkeypatc
     tenant_id = uuid4()
     device_spec_id = uuid4()
     session = Mock()
-    get_all = AsyncMock(return_value=[])
+    get_all = AsyncMock(return_value=([], 0))
     monkeypatch.setattr(processes.ProcessDeviceService, "get_all", get_all)
 
     await processes.list_process_devices(
         skip=0,
-        limit=100,
+        limit=20,
+        keyword="line-a",
+        code="PD001",
+        sn="SN-001",
+        process_id=uuid4(),
+        area_id=uuid4(),
+        status=1,
         sort_by=None,
         sort_order="ascend",
         device_spec_id=device_spec_id,
@@ -121,23 +155,33 @@ async def test_device_group_list_passes_device_spec_filter_to_service(monkeypatc
         session,
         tenant_id,
         0,
-        100,
+        20,
         None,
         "ascend",
-        device_spec_id,
+        keyword="line-a",
+        code="PD001",
+        sn="SN-001",
+        process_id=ANY,
+        area_id=ANY,
+        status=1,
+        device_spec_id=device_spec_id,
     )
 
 
 @pytest.mark.asyncio
 async def test_process_list_passes_current_tenant_to_service(monkeypatch):
     tenant_id = uuid4()
-    get_all = AsyncMock(return_value=[])
+    get_all = AsyncMock(return_value=([], 0))
     monkeypatch.setattr(processes.ProcessService, "get_all", get_all)
     session = Mock()
 
-    await processes.list_processes(
+    response = await processes.list_processes(
         skip=0,
-        limit=100,
+        limit=20,
+        keyword="kw",
+        code="P001",
+        name="主线",
+        status=1,
         sort_by=None,
         sort_order="ascend",
         current_account=SimpleNamespace(tenant_id=tenant_id),
@@ -148,10 +192,85 @@ async def test_process_list_passes_current_tenant_to_service(monkeypatch):
         session,
         tenant_id,
         0,
-        100,
+        20,
         None,
         "ascend",
+        keyword="kw",
+        code="P001",
+        name="主线",
+        status=1,
     )
+    assert response.data == {"items": [], "total": 0}
+
+
+@pytest.mark.asyncio
+async def test_process_item_list_defaults_limit_and_passes_filters(monkeypatch):
+    tenant_id = uuid4()
+    process_id = uuid4()
+    device_spec_id = uuid4()
+    get_all = AsyncMock(return_value=([], 0))
+    monkeypatch.setattr(processes.ProcessItemService, "get_all", get_all)
+
+    response = await processes.list_process_items(
+        skip=0,
+        limit=20,
+        process_id=process_id,
+        device_spec_id=device_spec_id,
+        sort_by=None,
+        sort_order="ascend",
+        current_account=SimpleNamespace(tenant_id=tenant_id),
+        session=Mock(),
+    )
+
+    get_all.assert_awaited_once_with(
+        ANY,
+        tenant_id,
+        0,
+        20,
+        None,
+        "ascend",
+        process_id=process_id,
+        device_spec_id=device_spec_id,
+    )
+    assert response.data == {"items": [], "total": 0}
+
+
+@pytest.mark.asyncio
+async def test_process_device_item_list_defaults_limit_and_passes_filters(monkeypatch):
+    tenant_id = uuid4()
+    process_device_id = uuid4()
+    device_inst_id = uuid4()
+    get_all = AsyncMock(return_value=([], 0))
+    monkeypatch.setattr(processes.ProcessDeviceItemService, "get_all", get_all)
+
+    response = await processes.list_process_device_items(
+        skip=0,
+        limit=20,
+        code="ITEM-01",
+        color="red",
+        desc="bearing",
+        process_device_id=process_device_id,
+        device_inst_id=device_inst_id,
+        sort_by=None,
+        sort_order="ascend",
+        current_account=SimpleNamespace(tenant_id=tenant_id),
+        session=Mock(),
+    )
+
+    get_all.assert_awaited_once_with(
+        ANY,
+        tenant_id,
+        0,
+        20,
+        None,
+        "ascend",
+        code="ITEM-01",
+        color="red",
+        desc="bearing",
+        process_device_id=process_device_id,
+        device_inst_id=device_inst_id,
+    )
+    assert response.data == {"items": [], "total": 0}
 
 
 @pytest.mark.asyncio

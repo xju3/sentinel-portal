@@ -35,15 +35,39 @@ class HealthCheckFreqService:
         limit: int,
         sort_by: str | None = None,
         sort_order: str = "ascend",
-    ) -> List[HealthCheckFreq]:
-        stmt = (
-            select(HealthCheckFreq)
-            .where(HealthCheckFreq.tenant_id == tenant_id)
-        )
+        keyword: Optional[str] = None,
+        patrol: Optional[float] = None,
+        diagnosis: Optional[float] = None,
+        report: Optional[int] = None,
+        status: Optional[bool] = None,
+    ) -> tuple[List[HealthCheckFreq], int]:
+        stmt = select(HealthCheckFreq).where(HealthCheckFreq.tenant_id == tenant_id)
+        if keyword:
+            value = keyword.strip()
+            numeric_filters = []
+            try:
+                numeric = float(value)
+                numeric_filters.extend(
+                    [HealthCheckFreq.patrol == numeric, HealthCheckFreq.diagnosis == numeric]
+                )
+            except ValueError:
+                pass
+            if numeric_filters:
+                stmt = stmt.where(or_(*numeric_filters))
+        if status is not None:
+            stmt = stmt.where(HealthCheckFreq.status == status)
+        if patrol is not None:
+            stmt = stmt.where(HealthCheckFreq.patrol == patrol)
+        if diagnosis is not None:
+            stmt = stmt.where(HealthCheckFreq.diagnosis == diagnosis)
+        if report is not None:
+            stmt = stmt.where(HealthCheckFreq.report == report)
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total = (await session.execute(count_stmt)).scalar() or 0
         stmt = apply_sorting(stmt, HealthCheckFreq, sort_by, sort_order)
         stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
-        return result.scalars().all()
+        return result.scalars().all(), total
 
     @staticmethod
     async def get_health_check_by_sensor_sn(

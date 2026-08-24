@@ -1,4 +1,10 @@
 import { request } from '@umijs/max';
+import {
+  requestAllListItems,
+  requestPagedList,
+  type PagedResult,
+  type SortParams,
+} from '@/utils/proTableRequest';
 
 export type Location = {
   id: string;
@@ -16,55 +22,60 @@ export type LocationPayload = {
   status: number;
 };
 
-export type PagedLocationResult = {
-  items: Location[];
-  total: number;
-};
+export type PagedLocationResult = PagedResult<Location>;
 
 export async function listAllLocations(
   options: { sort_field?: string; sort_order?: string; bearingOnly?: boolean } = {},
 ) {
-  const pageSize = 100;
-  let current = 1;
-  const all: Location[] = [];
-
-  while (true) {
-    const result = await request<PagedLocationResult>('/api/v1/locations', {
-      method: 'GET',
-      params: {
-        current,
-        pageSize,
-        sort_by: options.sort_field,
-        sort_order: options.sort_order,
-        bearing_only: options.bearingOnly,
-        active_only: false,
-      },
-    });
-    all.push(...result.items);
-    if (result.items.length < pageSize) {
-      break;
-    }
-    current++;
-  }
-
-  return all;
+  return requestAllListItems<Location>(
+    '/api/v1/locations',
+    {
+      sort_by: options.sort_field,
+      sort_order: options.sort_order,
+      bearing_only: options.bearingOnly,
+      active_only: false,
+    },
+    100,
+  );
 }
 
+export function queryLocations(
+  params?: Record<string, any>,
+  sort?: SortParams,
+): Promise<PagedResult<Location>>;
+export function queryLocations(
+  current?: number,
+  pageSize?: number,
+  keyword?: string,
+  bearingOnly?: boolean,
+): Promise<PagedResult<Location>>;
 export async function queryLocations(
-  current: number,
-  pageSize: number,
+  currentOrParams: number | Record<string, any> = {},
+  pageSizeOrSort?: number | SortParams,
   keyword?: string,
   bearingOnly = false,
 ) {
-  return request<PagedLocationResult>('/api/v1/locations', {
-    method: 'GET',
-    params: {
-      current,
-      pageSize,
-      keyword,
-      bearing_only: bearingOnly,
-      active_only: true,
-    },
+  const params =
+    typeof currentOrParams === 'number'
+      ? {
+          current: currentOrParams,
+          pageSize: typeof pageSizeOrSort === 'number' ? pageSizeOrSort : 20,
+          keyword,
+          bearing_only: bearingOnly,
+          active_only: true,
+        }
+      : {
+          ...currentOrParams,
+        };
+  const sort =
+    typeof currentOrParams === 'number'
+      ? {}
+      : ((pageSizeOrSort as SortParams | undefined) || {});
+
+  return requestPagedList<Location>('/api/v1/locations', {
+    params,
+    sort,
+    defaultPageSize: 20,
   });
 }
 

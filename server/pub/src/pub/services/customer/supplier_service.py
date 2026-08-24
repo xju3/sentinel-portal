@@ -36,7 +36,11 @@ class SupplierService:
         keyword: Optional[str] = None,
         sort_by: str | None = None,
         sort_order: str = "ascend",
-    ) -> List[Supplier]:
+        name: Optional[str] = None,
+        brand: Optional[str] = None,
+        contact_info: Optional[str] = None,
+        active: Optional[bool] = None,
+    ) -> tuple[List[Supplier], int]:
         stmt = select(Supplier).where(Supplier.tenant_id == tenant_id)
         if keyword:
             like_kw = f"%{keyword.strip()}%"
@@ -47,10 +51,24 @@ class SupplierService:
                     Supplier.contact_info.ilike(like_kw),
                 )
             )
+        if name:
+            stmt = stmt.where(Supplier.name.ilike(f"%{name.strip()}%"))
+        if brand:
+            stmt = stmt.where(Supplier.brand.ilike(f"%{brand.strip()}%"))
+        if contact_info:
+            stmt = stmt.where(Supplier.contact_info.ilike(f"%{contact_info.strip()}%"))
+        if active is not None:
+            if isinstance(active, str):
+                active = active.lower() == 'true'
+            stmt = stmt.where(Supplier.active == active)
+
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total = (await session.execute(count_stmt)).scalar() or 0
+
         stmt = apply_sorting(stmt, Supplier, sort_by, sort_order)
         stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
-        return result.scalars().all()
+        return result.scalars().all(), total
 
     @staticmethod
     async def count_suppliers(

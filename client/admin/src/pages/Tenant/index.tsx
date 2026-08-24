@@ -1,23 +1,26 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useRef, useState } from 'react';
 import {
+  ActionType,
   ModalForm,
   PageContainer,
   ProColumns,
   ProFormText,
+  ProFormTextArea,
   ProFormSwitch,
   ProFormCascader,
   ProTable,
   ProFormSelect,
 } from '@ant-design/pro-components';
-import { Button, Popconfirm, Switch, message } from 'antd';
+import { Button, Popconfirm, Switch, message, Tabs } from 'antd';
 
 import { getRegionTree } from '@/services/region';
 import {
   Tenant,
+  TenantListParams,
   TenantPayload,
   createTenant,
   deleteTenant,
-  listTenants,
+  listTenantPage,
   updateTenant,
 } from '@/services/tenant';
 
@@ -29,48 +32,33 @@ const toErrorMessage = (error: unknown): string => {
 };
 
 const TenantPage = () => {
-  const [loading, setLoading] = useState(false);
+  const actionRef = useRef<ActionType>();
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [rows, setRows] = useState<Tenant[]>([]);
-  const [query, setQuery] = useState<Record<string, any>>({});
   const [editing, setEditing] = useState<Tenant | null>(null);
   const [regionTree, setRegionTree] = useState<any[]>([]);
 
-  const loadRows = async () => {
-    setLoading(true);
-    try {
-      setRows(await listTenants());
-    } catch (error) {
-      message.error(toErrorMessage(error));
-    } finally {
-      setLoading(false);
+  const ensureRegionTree = async () => {
+    if (regionTree.length > 0) {
+      return regionTree;
     }
+    const tree = await getRegionTree();
+    setRegionTree(tree);
+    return tree;
   };
 
-  useEffect(() => {
-    loadRows();
-    getRegionTree().then(setRegionTree).catch(() => message.error('获取地区信息失败'));
-  }, []);
-
-  const filteredRows = useMemo(() => {
-    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();
-    return (Array.isArray(rows) ? rows : []).filter((row) => {
-      if (query.code && !norm(row.code).includes(norm(query.code))) {
-        return false;
+  const resolveRegionName = (val?: string) => {
+    if (!val) return '';
+    for (const prov of regionTree) {
+      if (prov.value === val) return prov.label;
+      if (prov.children) {
+        for (const city of prov.children) {
+          if (city.value === val) return `${prov.label} / ${city.label}`;
+        }
       }
-      if (query.name && !norm(row.name).includes(norm(query.name))) {
-        return false;
-      }
-      if (query.mqtt_server && !norm(row.mqtt_server).includes(norm(query.mqtt_server))) {
-        return false;
-      }
-      if (query.api_server && !norm(row.api_server).includes(norm(query.api_server))) {
-        return false;
-      }
-      return true;
-    });
-  }, [query, rows]);
+    }
+    return val;
+  };
 
   const columns: ProColumns<Tenant>[] = [
     {
@@ -101,18 +89,7 @@ const TenantPage = () => {
       title: '所在地区',
       dataIndex: 'region_id',
       width: 150,
-      renderText: (val: string) => {
-        if (!val) return '-';
-        for (const prov of regionTree) {
-          if (prov.value === val) return prov.label;
-          if (prov.children) {
-            for (const city of prov.children) {
-              if (city.value === val) return `${prov.label} / ${city.label}`;
-            }
-          }
-        }
-        return val;
-      },
+      renderText: (val: string) => resolveRegionName(val) || '-',
     },
     {
       title: 'MQTT 服务器',
@@ -142,7 +119,7 @@ const TenantPage = () => {
             try {
               await updateTenant(row.id, { active: checked });
               message.success('更新成功');
-              await loadRows();
+              actionRef.current?.reload();
             } catch (error) {
               message.error(toErrorMessage(error));
             }
@@ -189,7 +166,13 @@ const TenantPage = () => {
       render: (_, row) => [
         <a
           key="edit"
-          onClick={() => {
+          onClick={async () => {
+            try {
+              await ensureRegionTree();
+            } catch (error) {
+              message.error(toErrorMessage(error));
+              return;
+            }
             setEditing(row);
             setModalOpen(true);
           }}
@@ -203,7 +186,7 @@ const TenantPage = () => {
             try {
               await deleteTenant(row.id);
               message.success('删除成功');
-              await loadRows();
+              actionRef.current?.reload();
             } catch (error) {
               message.error(toErrorMessage(error));
             }
@@ -224,19 +207,48 @@ const TenantPage = () => {
     >
       <ProTable<Tenant>
         rowKey="id"
-        loading={loading}
+        actionRef={actionRef}
         columns={columns}
-        dataSource={filteredRows}
         scroll={{ x: 800 }}
         search={{ labelWidth: 'auto' }}
-        onSubmit={(values) => setQuery(values)}
-        onReset={() => setQuery({})}
-        options={{ reload: loadRows }}
+        pagination={{ defaultPageSize: 20, showSizeChanger: true }}
+        request={async (params, sort) => {
+          try {
+            const current = Number(params.current || 1);
+            const pageSize = Number(params.pageSize || 20);
+            const sorter = Object.entries(sort).find(([, value]) => !!value);
+            const query: TenantListParams = {
+              active: typeof params.active === 'boolean' ? params.active : undefined,
+              code: params.code,
+              name: params.name,
+              mqtt_server: params.mqtt_server,
+              api_server: params.api_server,
+              status: params.status === undefined ? undefined : Number(params.status),
+              email_status: params.email_status === undefined ? undefined : Number(params.email_status),
+              industry: params.industry === undefined ? undefined : Number(params.industry),
+              email: params.email,
+              region_id: params.region_id,
+              sort_by: sorter?.[0],
+              sort_order: sorter?.[1] as string | undefined,
+            };
+            const result = await listTenantPage((current - 1) * pageSize, pageSize, query);
+            return { data: result.items, total: result.total, success: true };
+          } catch (error) {
+            message.error(toErrorMessage(error));
+            return { data: [], total: 0, success: false };
+          }
+        }}
         toolBarRender={() => [
           <Button
             key="create"
             type="primary"
-            onClick={() => {
+            onClick={async () => {
+              try {
+                await ensureRegionTree();
+              } catch (error) {
+                message.error(toErrorMessage(error));
+                return;
+              }
               setEditing(null);
               setModalOpen(true);
             }}
@@ -313,7 +325,7 @@ const TenantPage = () => {
             }
             setModalOpen(false);
             setEditing(null);
-            await loadRows();
+            actionRef.current?.reload();
             return true;
           } catch (error) {
             message.error(toErrorMessage(error));
@@ -323,69 +335,90 @@ const TenantPage = () => {
           }
         }}
       >
-        <ProFormText
-          name="code"
-          label="编码"
-          rules={[
-            { required: true, message: '请输入租户编码' },
-            { max: 12, message: '编码最多12个字符' },
+        <Tabs
+          defaultActiveKey="1"
+          items={[
+            {
+              key: '1',
+              label: '基本信息',
+              children: (
+                <>
+                  <ProFormText
+                    name="code"
+                    label="编码"
+                    rules={[
+                      { required: true, message: '请输入租户编码' },
+                      { max: 12, message: '编码最多12个字符' },
+                    ]}
+                  />
+                  <ProFormText
+                    name="name"
+                    label="名称"
+                    rules={[
+                      { required: true, message: '请输入租户名称' },
+                      { max: 64, message: '名称最多64个字符' },
+                    ]}
+                  />
+                  <ProFormText
+                    name="mqtt_server"
+                    label="MQTT 服务器"
+                    rules={[
+                      { required: true, message: '请输入 MQTT 服务器地址' },
+                      { max: 255, message: '地址最多255个字符' },
+                    ]}
+                  />
+                  <ProFormText
+                    name="api_server"
+                    label="API 服务器"
+                    rules={[
+                      { required: true, message: '请输入 API 服务器地址' },
+                      { max: 255, message: '地址最多255个字符' },
+                    ]}
+                  />
+                  <ProFormCascader
+                    name="region_id"
+                    label="省市"
+                    rules={[{ required: true, message: '请选择省市' }]}
+                    fieldProps={{
+                      options: regionTree,
+                      changeOnSelect: true,
+                    }}
+                  />
+                  <ProFormText
+                    name="email"
+                    label="联系邮箱"
+                    rules={[{ type: 'email', message: '请输入有效的邮箱地址' }]}
+                  />
+                  <ProFormSelect
+                    name="status"
+                    label="业务状态"
+                    options={[
+                      { label: '正常', value: 1 },
+                      { label: '停用', value: 0 },
+                    ]}
+                  />
+                  <ProFormText
+                    name="industry"
+                    label="行业代码"
+                  />
+                  <ProFormSwitch name="active" label="系统状态" />
+                </>
+              ),
+            },
+            {
+              key: '2',
+              label: '业务场景',
+              children: (
+                <ProFormTextArea
+                  name="remark"
+                  label=""
+                  placeholder="请输入该租户的业务场景等信息"
+                  fieldProps={{ rows: 14 }}
+                />
+              ),
+            },
           ]}
         />
-        <ProFormText
-          name="name"
-          label="名称"
-          rules={[
-            { required: true, message: '请输入租户名称' },
-            { max: 64, message: '名称最多64个字符' },
-          ]}
-        />
-        <ProFormText
-          name="mqtt_server"
-          label="MQTT 服务器"
-          rules={[
-            { required: true, message: '请输入 MQTT 服务器地址' },
-            { max: 255, message: '地址最多255个字符' },
-          ]}
-        />
-        <ProFormText
-          name="api_server"
-          label="API 服务器"
-          rules={[
-            { required: true, message: '请输入 API 服务器地址' },
-            { max: 255, message: '地址最多255个字符' },
-          ]}
-        />
-        <ProFormCascader
-          name="region_id"
-          label="省市"
-          rules={[{ required: true, message: '请选择省市' }]}
-          fieldProps={{
-            options: regionTree,
-            changeOnSelect: true,
-          }}
-        />
-        <ProFormText
-          name="email"
-          label="联系邮箱"
-          rules={[{ type: 'email', message: '请输入有效的邮箱地址' }]}
-        />
-        <ProFormSelect
-          name="status"
-          label="业务状态"
-          options={[
-            { label: '正常', value: 1 },
-            { label: '停用', value: 0 },
-          ]}
-        />
-        <ProFormText
-          name="industry"
-          label="行业代码"
-        />
-        <ProFormText
-          name="remark"
-          label="业务场景"
-        />
-        <ProFormSwitch name="active" label="系统状态" />
       </ModalForm>
     </PageContainer>
   );

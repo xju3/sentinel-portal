@@ -37,11 +37,11 @@ export async function listAllSensorMonitorings() {
   const all: SensorMonitoring[] = [];
 
   while (true) {
-    const batch =
-      (await request<SensorMonitoring[]>('/api/v1/sensor-monitorings', {
+    const res = await request<any>('/api/v1/sensor-monitorings', {
         method: 'GET',
         params: { skip, limit },
-      })) || [];
+      });
+    const batch = res?.data?.items || res?.items || res || [];
     all.push(...batch);
     if (batch.length < limit) {
       break;

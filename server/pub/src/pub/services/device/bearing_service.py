@@ -6,7 +6,7 @@ import math
 from typing import Any
 from uuid import UUID
 
-from sqlalchemy import delete, func, select
+from sqlalchemy import delete, func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -35,16 +35,48 @@ class BearingService:
         session: AsyncSession,
         tenant_id: UUID,
         skip: int = 0,
-        limit: int = 100,
-    ) -> list[BearingModel]:
-        result = await session.execute(
-            select(BearingModel)
-            .where(BearingModel.tenant_id == tenant_id)
-            .order_by(BearingModel.brand, BearingModel.model)
-            .offset(skip)
-            .limit(limit)
-        )
-        return list(result.scalars().all())
+        limit: int = 20,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
+        keyword: str | None = None,
+        brand: str | None = None,
+        model: str | None = None,
+        bearing_type: str | None = None,
+        active: bool | None = None,
+    ) -> tuple[list[BearingModel], int]:
+        stmt = select(BearingModel).where(BearingModel.tenant_id == tenant_id)
+        if keyword:
+            like = f"%{keyword.strip()}%"
+            stmt = stmt.where(
+                or_(
+                    BearingModel.brand.ilike(like),
+                    BearingModel.model.ilike(like),
+                    BearingModel.bearing_type.ilike(like),
+                    BearingModel.description.ilike(like),
+                )
+            )
+        if brand:
+            stmt = stmt.where(BearingModel.brand.ilike(f"%{brand.strip()}%"))
+        if model:
+            stmt = stmt.where(BearingModel.model.ilike(f"%{model.strip()}%"))
+        if bearing_type:
+            stmt = stmt.where(
+                BearingModel.bearing_type.ilike(f"%{bearing_type.strip()}%")
+            )
+        if active is not None:
+            stmt = stmt.where(BearingModel.active == active)
+
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total = (await session.execute(count_stmt)).scalar() or 0
+        order_column = getattr(BearingModel, sort_by, None) if sort_by else None
+        if order_column is None:
+            stmt = stmt.order_by(BearingModel.brand, BearingModel.model)
+        elif sort_order == "descend":
+            stmt = stmt.order_by(order_column.desc())
+        else:
+            stmt = stmt.order_by(order_column.asc())
+        result = await session.execute(stmt.offset(skip).limit(limit))
+        return list(result.scalars().all()), total
 
     @staticmethod
     async def get_model(

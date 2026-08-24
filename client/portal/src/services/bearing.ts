@@ -1,4 +1,10 @@
 import { request } from '@umijs/max';
+import {
+  requestAllListItems,
+  requestPagedList,
+  type PagedResult,
+  type SortParams,
+} from '@/utils/proTableRequest';
 
 export const BEARING_TYPE_OPTIONS = [
   { label: '深沟球轴承', value: 'DEEP_GROOVE_BALL' },
@@ -51,56 +57,33 @@ export type BearingQueryParams = {
   pageSize?: number;
   keyword?: string;
   activeOnly?: boolean;
+  brand?: string;
+  model?: string;
 };
 
-export type BearingPagedResult = {
-  items: BearingModel[];
-  total: number;
-};
+export type BearingPagedResult = PagedResult<BearingModel>;
 
 export async function listAllBearings(activeOnly = false) {
-  const limit = 100;
-  let skip = 0;
-  const all: BearingModel[] = [];
-
-  while (true) {
-    const batch =
-      (await request<BearingModel[]>('/api/v1/bearings', {
-        method: 'GET',
-        params: { skip, limit },
-      })) || [];
-    all.push(...batch);
-    if (batch.length < limit) {
-      break;
-    }
-    skip += limit;
-  }
-
-  return activeOnly ? all.filter((item) => item.active) : all;
+  return requestAllListItems<BearingModel>(
+    '/api/v1/bearings',
+    { active: activeOnly || undefined },
+    100,
+  );
 }
 
 export async function queryBearings(
   params: BearingQueryParams = {},
+  sort: SortParams = {},
 ): Promise<BearingPagedResult> {
-  const current = params.current || 1;
-  const pageSize = params.pageSize || 10;
-  const keyword = String(params.keyword || '').trim().toLowerCase();
-  const all = await listAllBearings(Boolean(params.activeOnly));
-  const filtered = keyword
-    ? all.filter((item) =>
-        [item.brand, item.model, item.bearing_type, item.id].some((part) =>
-          String(part || '')
-            .toLowerCase()
-            .includes(keyword),
-        ),
-      )
-    : all;
-  const start = (current - 1) * pageSize;
-
-  return {
-    items: filtered.slice(start, start + pageSize),
-    total: filtered.length,
-  };
+  const { activeOnly, ...rest } = params;
+  return requestPagedList<BearingModel>('/api/v1/bearings', {
+    params: {
+      ...rest,
+      active: activeOnly,
+    },
+    sort,
+    defaultPageSize: 20,
+  });
 }
 
 export async function createBearing(payload: BearingModelPayload) {

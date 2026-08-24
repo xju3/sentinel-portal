@@ -124,23 +124,26 @@ async def _validate_process_device_item_refs(
 @router.get("/processes")
 async def list_processes(
     skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=200),
+    keyword: Optional[str] = Query(None),
+    code: Optional[str] = Query(None),
+    name: Optional[str] = Query(None),
+    status: Optional[int] = Query(None),
     sort_by: Optional[str] = Query(None),
     sort_order: Optional[str] = Query("ascend"),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
-    return success(
-        await ProcessService.get_all(
-            session,
-            tenant_id,
-            skip,
-            limit,
-            sort_by,
-            sort_order,
-        )
+    extra: dict = {}
+    if keyword: extra["keyword"] = keyword
+    if code: extra["code"] = code
+    if name: extra["name"] = name
+    if status is not None: extra["status"] = status
+    items, total = await ProcessService.get_all(
+        session, tenant_id, skip, limit, sort_by, sort_order, **extra
     )
+    return success({"items": items, "total": total})
 
 
 @router.get("/processes/{obj_id}")
@@ -222,23 +225,22 @@ async def delete_process(
 @router.get("/process-items")
 async def list_process_items(
     skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=200),
+    process_id: Optional[UUID] = Query(None),
+    device_spec_id: Optional[UUID] = Query(None),
     sort_by: Optional[str] = Query(None),
     sort_order: Optional[str] = Query("ascend"),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
-    return success(
-        await ProcessItemService.get_all(
-            session,
-            tenant_id,
-            skip,
-            limit,
-            sort_by,
-            sort_order,
-        )
+    extra: dict = {}
+    if process_id: extra["process_id"] = process_id
+    if device_spec_id: extra["device_spec_id"] = device_spec_id
+    items, total = await ProcessItemService.get_all(
+        session, tenant_id, skip, limit, sort_by, sort_order, **extra
     )
+    return success({"items": items, "total": total})
 
 
 @router.get("/process-items/{obj_id}")
@@ -299,25 +301,32 @@ async def delete_process_item(
 @router.get("/process-devices")
 async def list_process_devices(
     skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=200),
+    keyword: Optional[str] = Query(None),
+    code: Optional[str] = Query(None),
+    sn: Optional[str] = Query(None),
+    process_id: Optional[UUID] = Query(None),
+    area_id: Optional[UUID] = Query(None),
+    status: Optional[int] = Query(None),
+    device_spec_id: Optional[UUID] = Query(None),
     sort_by: Optional[str] = Query(None),
     sort_order: Optional[str] = Query("ascend"),
-    device_spec_id: Optional[UUID] = Query(None),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
-    return success(
-        await ProcessDeviceService.get_all(
-            session,
-            tenant_id,
-            skip,
-            limit,
-            sort_by,
-            sort_order,
-            device_spec_id,
-        )
+    extra: dict = {}
+    if keyword: extra["keyword"] = keyword
+    if code: extra["code"] = code
+    if sn: extra["sn"] = sn
+    if process_id: extra["process_id"] = process_id
+    if area_id: extra["area_id"] = area_id
+    if status is not None: extra["status"] = status
+    if device_spec_id: extra["device_spec_id"] = device_spec_id
+    items, total = await ProcessDeviceService.get_all(
+        session, tenant_id, skip, limit, sort_by, sort_order, **extra
     )
+    return success({"items": items, "total": total})
 
 
 @router.get("/process-devices/{obj_id}")
@@ -402,23 +411,29 @@ async def delete_process_device(
 @router.get("/process-device-items")
 async def list_process_device_items(
     skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=200),
+    code: Optional[str] = Query(None),
+    color: Optional[str] = Query(None),
+    desc: Optional[str] = Query(None),
+    process_device_id: Optional[UUID] = Query(None),
+    device_inst_id: Optional[UUID] = Query(None),
     sort_by: Optional[str] = Query(None),
     sort_order: Optional[str] = Query("ascend"),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
-    return success(
-        await ProcessDeviceItemService.get_all(
-            session,
-            tenant_id,
-            skip,
-            limit,
-            sort_by,
-            sort_order,
-        )
+    extra: dict = {}
+    if code: extra["code"] = code
+    if color: extra["color"] = color
+    if desc: extra["desc"] = desc
+    if process_device_id: extra["process_device_id"] = process_device_id
+    if device_inst_id: extra["device_inst_id"] = device_inst_id
+    items, total = await ProcessDeviceItemService.get_all(
+        session, tenant_id, skip, limit, sort_by, sort_order, **extra
     )
+    return success({"items": items, "total": total})
+
 
 
 @router.get("/process-device-items/{obj_id}")

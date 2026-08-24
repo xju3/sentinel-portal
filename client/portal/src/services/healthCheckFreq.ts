@@ -1,4 +1,5 @@
 import { request } from '@umijs/max';
+import { requestAllListItems, requestPagedList, type SortParams } from '@/utils/proTableRequest';
 
 export type HealthCheckFreq = {
   id: string;
@@ -17,24 +18,18 @@ export type HealthCheckFreqPayload = {
 };
 
 export async function listAllHealthCheckFreqs() {
-  const limit = 100;
-  let skip = 0;
-  const all: HealthCheckFreq[] = [];
+  return requestAllListItems<HealthCheckFreq>('/api/v1/health-check-freqs');
+}
 
-  while (true) {
-    const batch =
-      (await request<HealthCheckFreq[]>('/api/v1/health-check-freqs', {
-        method: 'GET',
-        params: { skip, limit },
-      })) || [];
-    all.push(...batch);
-    if (batch.length < limit) {
-      break;
-    }
-    skip += limit;
-  }
-
-  return all;
+export async function queryHealthCheckFreqs(
+  params: Record<string, any> = {},
+  sort: SortParams = {},
+) {
+  return requestPagedList<HealthCheckFreq>('/api/v1/health-check-freqs', {
+    params,
+    sort,
+    defaultPageSize: 20,
+  });
 }
 
 export async function createHealthCheckFreq(payload: HealthCheckFreqPayload) {

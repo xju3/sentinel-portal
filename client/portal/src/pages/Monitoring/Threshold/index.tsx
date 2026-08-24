@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useRef, useState } from 'react';
 import {
+  ActionType,
   ModalForm,
   PageContainer,
   ProColumns,
@@ -9,16 +10,14 @@ import {
   ProTable,
 } from '@ant-design/pro-components';
 import { Button, Popconfirm, Space, Tag, message } from 'antd';
-
 import {
   SensorThreshold,
   SensorThresholdPayload,
   createSensorThreshold,
   deleteSensorThreshold,
-  listSensorThresholds,
+  querySensorThresholds,
   updateSensorThreshold,
 } from '@/services/sensorThreshold';
-
 import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';
 
 const METRIC_MAP: Record<number, { text: string; color: string }> = {
@@ -44,159 +43,36 @@ type ThresholdFormValues = {
 
 const toErrorMessage = (error: unknown): string => {
   const e = error as
-    | {
-      data?: { detail?: string };
-      info?: { errorMessage?: string };
-      message?: string;
-    }
+    | { data?: { detail?: string }; info?: { errorMessage?: string }; message?: string }
     | undefined;
   return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';
 };
 
 const MonitoringThresholdPage = () => {
-  const [loading, setLoading] = useState(false);
+  const actionRef = useRef<ActionType>();
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [rows, setRows] = useState<SensorThreshold[]>([]);
   const [editing, setEditing] = useState<SensorThreshold | null>(null);
-  const [query, setQuery] = useState<Record<string, any>>({});
-
-  const loadRows = async () => {
-    setLoading(true);
-    try {
-      setRows(await listSensorThresholds());
-    } catch (error) {
-      message.error(toErrorMessage(error));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadRows();
-  }, []);
-
-  const filteredRows = useMemo(() => {
-    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();
-    return rows.filter((row) => {
-      if (query.code && !norm(row.code).includes(norm(query.code))) {
-        return false;
-      }
-      if (query.metric !== undefined && query.metric !== null && row.metric !== Number(query.metric)) {
-        return false;
-      }
-      return true;
-    });
-  }, [query, rows]);
 
   const columns: ProColumns<SensorThreshold>[] = [
-    {
-      title: '序号',
-      valueType: 'indexBorder',
-      width: 68,
-      hideInSearch: true,
-      fixed: 'left',
-      align: 'center',
-    },
-    {
-      title: '编号',
-      dataIndex: 'code',
-      align: 'center',
-      render: (_, row) => <Tag>{row.code || '-'}</Tag>,
-      sorter: (a, b) => (a.code || '').localeCompare(b.code || '', 'zh-CN'),
-    },
+    { title: '序号', valueType: 'indexBorder', width: 68, hideInSearch: true, fixed: 'left' },
+    { title: '编号', dataIndex: 'code', render: (_, row) => <Tag>{row.code || '-'}</Tag> },
     {
       title: '监测指标',
       dataIndex: 'metric',
       valueType: 'select',
-      align: 'center',
-      valueEnum: { // ProTable 的 valueEnum 也需要同步更新
-        1: { text: '振动', status: 'Default' },
-        2: { text: '温度', status: 'Default' },
-      },
+      valueEnum: { 1: { text: '振动' }, 2: { text: '温度' } },
       render: (_, row) => {
         const info = METRIC_MAP[row.metric] || { text: `${row.metric}`, color: 'default' };
         return <Tag color={info.color}>{info.text}</Tag>;
       },
-      sorter: (a, b) => Number(a.metric) - Number(b.metric),
     },
-    {
-      title: '突变',
-      dataIndex: 'rt_max_delta',
-      hideInSearch: true,
-      align: 'center',
-      render: (_, row) => (
-        <span>{row.rt_max_delta} {row.metric === 1 ? 'mm/s' : '°C'}</span>
-      ),
-      sorter: (a, b) => Number(a.rt_max_delta) - Number(b.rt_max_delta),
-    },
-    {
-      title: '短期(24小时)',
-      hideInSearch: true,
-      children: [{
-        title: '最大斜率',
-        align: 'center',
-        dataIndex: 'st_max_slope',
-        hideInSearch: true,
-        render: (_, row) => (
-          <span style={{ whiteSpace: 'nowrap' }}>
-            {row.st_max_slope} {row.metric === 1 ? 'mm/s' : '°C'}
-            <sub style={{ marginLeft: 2, color: '#8c8c8c' }}>24h</sub>
-          </span>
-        ),
-      },
-      {
-        title: '最大振幅',
-        dataIndex: 'st_max_amplitude',
-        align: 'center',
-        hideInSearch: true,
-        render: (_, row) => (
-          <span style={{ whiteSpace: 'nowrap' }}>
-            {row.st_max_amplitude} {row.metric === 1 ? 'mm/s' : '°C'}
-            <sub style={{ marginLeft: 2, color: '#8c8c8c' }}>24h</sub>
-          </span>
-        ),
-      },]
-    },
-
-    {
-      title: '中期(3天)',
-      hideInSearch: true,
-      children: [{
-        title: '最大斜率',
-        align: 'center',
-        dataIndex: 'mt_max_slope',
-        hideInSearch: true,
-        render: (_, row) => (
-          <span style={{ whiteSpace: 'nowrap' }}>
-            {row.mt_max_slope} {row.metric === 1 ? 'mm/s' : '°C'}
-            <sub style={{ marginLeft: 2, color: '#8c8c8c' }}>72h</sub>
-          </span>
-        ),
-      },
-      {
-        title: '最大振幅',
-        align: 'center',
-        dataIndex: 'mt_max_amplitude',
-        hideInSearch: true,
-        render: (_, row) => (
-          <span style={{ whiteSpace: 'nowrap' }}>
-            {row.mt_max_amplitude} {row.metric === 1 ? 'mm/s' : '°C'}
-            <sub style={{ marginLeft: 2, color: '#8c8c8c' }}>72h</sub>
-          </span>
-        ),
-      },]
-    },
-
-    {
-      title: '阀值',
-      dataIndex: 'baseline',
-      align: 'center',
-      hideInSearch: true,
-      render: (_, row) => (
-        <span>{row.baseline} {row.metric === 1 ? 'mm/s' : '°C'}</span>
-      ),
-    },
+    { title: '突变', dataIndex: 'rt_max_delta', hideInSearch: true },
+    { title: '短时最大斜率', dataIndex: 'st_max_slope', hideInSearch: true },
+    { title: '短时最大振幅', dataIndex: 'st_max_amplitude', hideInSearch: true },
+    { title: '中期最大斜率', dataIndex: 'mt_max_slope', hideInSearch: true },
+    { title: '中期最大振幅', dataIndex: 'mt_max_amplitude', hideInSearch: true },
+    { title: '阈值', dataIndex: 'baseline', hideInSearch: true },
     {
       title: '操作',
       valueType: 'option',
@@ -206,7 +82,6 @@ const MonitoringThresholdPage = () => {
       render: (_, row) => (
         <Space size="middle">
           <a
-            key="edit"
             onClick={() => {
               setEditing(row);
               setModalOpen(true);
@@ -215,21 +90,18 @@ const MonitoringThresholdPage = () => {
             编辑
           </a>
           <Popconfirm
-            key="delete"
             title="确认删除该阀值定义吗？"
             onConfirm={async () => {
               try {
                 await deleteSensorThreshold(row.id);
                 message.success('删除成功');
-                await loadRows();
+                actionRef.current?.reload();
               } catch (error) {
                 message.error(toErrorMessage(error));
               }
             }}
           >
-            <a style={{ color: '#ff4d4f' }}>
-              删除
-            </a>
+            <a style={{ color: '#ff4d4f' }}>删除</a>
           </Popconfirm>
         </Space>
       ),
@@ -240,15 +112,11 @@ const MonitoringThresholdPage = () => {
     <PageContainer title="阀值定义">
       <ProTable<SensorThreshold>
         rowKey="id"
-        search={{ labelWidth: 'auto' }}
-        onSubmit={(values) => setQuery(values)}
-        onReset={() => setQuery({})}
-        loading={loading}
+        actionRef={actionRef}
         columns={columns}
-        bordered
-        scroll={{ x: 'max-content' }}
-        dataSource={filteredRows}
-        options={{ reload: loadRows }}
+        request={querySensorThresholds}
+        search={{ labelWidth: 'auto' }}
+        pagination={{ defaultPageSize: 20, showSizeChanger: true }}
         optionsRender={renderRefSafeTableOptions}
         toolBarRender={() => [
           <Button
@@ -270,24 +138,24 @@ const MonitoringThresholdPage = () => {
         initialValues={
           editing
             ? {
-              code: editing.code,
-              metric: editing.metric,
-              rt_max_delta: editing.rt_max_delta,
-              st_max_slope: editing.st_max_slope,
-              st_max_amplitude: editing.st_max_amplitude,
-              mt_max_slope: editing.mt_max_slope,
-              mt_max_amplitude: editing.mt_max_amplitude,
-              baseline: editing.baseline,
-            }
+                code: editing.code,
+                metric: editing.metric,
+                rt_max_delta: editing.rt_max_delta,
+                st_max_slope: editing.st_max_slope,
+                st_max_amplitude: editing.st_max_amplitude,
+                mt_max_slope: editing.mt_max_slope,
+                mt_max_amplitude: editing.mt_max_amplitude,
+                baseline: editing.baseline,
+              }
             : {
-              metric: 1, // 新建时默认选中“振动”
-              rt_max_delta: 0,
-              st_max_slope: 0,
-              st_max_amplitude: 0,
-              mt_max_slope: 0,
-              mt_max_amplitude: 0,
-              baseline: 0,
-            }
+                metric: 1,
+                rt_max_delta: 0,
+                st_max_slope: 0,
+                st_max_amplitude: 0,
+                mt_max_slope: 0,
+                mt_max_amplitude: 0,
+                baseline: 0,
+              }
         }
         modalProps={{
           destroyOnHidden: true,
@@ -302,7 +170,7 @@ const MonitoringThresholdPage = () => {
         }}
         onFinish={async (values) => {
           const payload: SensorThresholdPayload = {
-            code: values.code,
+            code: values.code.trim(),
             metric: values.metric,
             rt_max_delta: values.rt_max_delta,
             st_max_slope: values.st_max_slope,
@@ -311,7 +179,6 @@ const MonitoringThresholdPage = () => {
             mt_max_amplitude: values.mt_max_amplitude,
             baseline: values.baseline,
           };
-
           setSaving(true);
           try {
             if (editing) {
@@ -322,7 +189,7 @@ const MonitoringThresholdPage = () => {
             message.success('保存成功');
             setModalOpen(false);
             setEditing(null);
-            await loadRows();
+            actionRef.current?.reload();
             return true;
           } catch (error) {
             message.error(toErrorMessage(error));
@@ -332,54 +199,14 @@ const MonitoringThresholdPage = () => {
           }
         }}
       >
-        <ProFormText
-          name="code"
-          label="编号"
-          rules={[{ required: true, message: '请输入编号' }]}
-          placeholder="请输入编号"
-        />
-        <ProFormSelect
-          name="metric"
-          label="监测指标"
-          rules={[{ required: true, message: '请选择监测指标' }]}
-          options={METRIC_OPTIONS}
-        />
-        <ProFormDigit
-          name="rt_max_delta"
-          label="突变容忍值"
-          rules={[{ required: true, message: '请输入实时最大偏差' }]}
-          fieldProps={{ precision: 4 }}
-        />
-        <ProFormDigit
-          name="st_max_slope"
-          label="短时最大斜率 (24h)"
-          rules={[{ required: true, message: '请输入短时最大斜率' }]}
-          fieldProps={{ precision: 4 }}
-        />
-        <ProFormDigit
-          name="st_max_amplitude"
-          label="短时最大振幅 (24h)"
-          rules={[{ required: true, message: '请输入短时最大振幅' }]}
-          fieldProps={{ precision: 4 }}
-        />
-        <ProFormDigit
-          name="mt_max_slope"
-          label="中时最大斜率 (72h)"
-          rules={[{ required: true, message: '请输入中时最大斜率' }]}
-          fieldProps={{ precision: 4 }}
-        />
-        <ProFormDigit
-          name="mt_max_amplitude"
-          label="中时最大振幅 (72h)"
-          rules={[{ required: true, message: '请输入中时最大振幅' }]}
-          fieldProps={{ precision: 4 }}
-        />
-        <ProFormDigit
-          name="baseline"
-          label="基线值"
-          rules={[{ required: true, message: '请输入基线值' }]}
-          fieldProps={{ precision: 4 }}
-        />
+        <ProFormText name="code" label="编号" rules={[{ required: true, message: '请输入编号' }]} />
+        <ProFormSelect name="metric" label="监测指标" rules={[{ required: true, message: '请选择监测指标' }]} options={METRIC_OPTIONS} />
+        <ProFormDigit name="rt_max_delta" label="突变容忍值" rules={[{ required: true, message: '请输入实时最大偏差' }]} fieldProps={{ precision: 4 }} />
+        <ProFormDigit name="st_max_slope" label="短时最大斜率 (24h)" rules={[{ required: true, message: '请输入短时最大斜率' }]} fieldProps={{ precision: 4 }} />
+        <ProFormDigit name="st_max_amplitude" label="短时最大振幅 (24h)" rules={[{ required: true, message: '请输入短时最大振幅' }]} fieldProps={{ precision: 4 }} />
+        <ProFormDigit name="mt_max_slope" label="中期最大斜率 (72h)" rules={[{ required: true, message: '请输入中期最大斜率' }]} fieldProps={{ precision: 4 }} />
+        <ProFormDigit name="mt_max_amplitude" label="中期最大振幅 (72h)" rules={[{ required: true, message: '请输入中期最大振幅' }]} fieldProps={{ precision: 4 }} />
+        <ProFormDigit name="baseline" label="阈值" rules={[{ required: true, message: '请输入阈值' }]} fieldProps={{ precision: 4 }} />
       </ModalForm>
     </PageContainer>
   );

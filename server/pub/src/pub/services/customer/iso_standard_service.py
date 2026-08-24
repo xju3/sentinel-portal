@@ -35,19 +35,43 @@ class IsoStandardService:
         limit: int,
         sort_by: str | None = None,
         sort_order: str = "ascend",
-    ) -> List[IsoStandard]:
+        keyword: Optional[str] = None,
+        code: Optional[str] = None,
+        version: Optional[int] = None,
+        category: Optional[int] = None,
+        foundation: Optional[int] = None,
+    ) -> tuple[List[IsoStandard], int]:
         stmt = select(IsoStandard).where(IsoStandard.tenant_id == tenant_id)
+        if keyword:
+            like = f"%{keyword.strip()}%"
+            stmt = stmt.where(
+                or_(IsoStandard.code.ilike(like), IsoStandard.description.ilike(like))
+            )
+        if code:
+            stmt = stmt.where(IsoStandard.code.ilike(f"%{code.strip()}%"))
+        if version is not None:
+            stmt = stmt.where(IsoStandard.version == version)
+        if category is not None:
+            stmt = stmt.where(IsoStandard.category == category)
+        if foundation is not None:
+            stmt = stmt.where(IsoStandard.foundation == foundation)
+
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total = (await session.execute(count_stmt)).scalar() or 0
+
         stmt = apply_sorting(stmt, IsoStandard, sort_by, sort_order)
         stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
-        return result.scalars().all()
+        return result.scalars().all(), total
 
     @staticmethod
     async def count_iso_standards(
         session: AsyncSession,
         tenant_id: UUID,
     ) -> int:
-        stmt = select(func.count(IsoStandard.id)).where(IsoStandard.tenant_id == tenant_id)
+        stmt = select(func.count(IsoStandard.id)).where(
+            IsoStandard.tenant_id == tenant_id
+        )
         result = await session.execute(stmt)
         return int(result.scalar_one() or 0)
 
@@ -66,11 +90,7 @@ class IsoStandardService:
 
     @staticmethod
     async def create_iso_standard(session: AsyncSession, data: dict) -> IsoStandard:
-        db_obj = IsoStandard(**data)
-        session.add(db_obj)
-        await session.commit()
-        await session.refresh(db_obj)
-        return db_obj
+        return await IsoStandardService.create(session, data)
 
     @staticmethod
     async def update_iso_standard(
@@ -78,30 +98,11 @@ class IsoStandardService:
         db_obj: IsoStandard,
         data: dict,
     ) -> IsoStandard:
-        for key, value in data.items():
-            setattr(db_obj, key, value)
-        await session.commit()
-        await session.refresh(db_obj)
-        return db_obj
+        return await IsoStandardService.update(session, db_obj, data)
 
     @staticmethod
     async def delete_iso_standard(session: AsyncSession, db_obj: IsoStandard) -> None:
-        await session.delete(db_obj)
-        await session.commit()
-
-    @staticmethod
-    async def get_all(
-        session: AsyncSession,
-        skip: int,
-        limit: int,
-        sort_by: str | None = None,
-        sort_order: str = "ascend",
-    ) -> List[IsoStandard]:
-        stmt = select(IsoStandard)
-        stmt = apply_sorting(stmt, IsoStandard, sort_by, sort_order)
-        stmt = stmt.offset(skip).limit(limit)
-        result = await session.execute(stmt)
-        return result.scalars().all()
+        await IsoStandardService.delete(session, db_obj)
 
 
     @staticmethod

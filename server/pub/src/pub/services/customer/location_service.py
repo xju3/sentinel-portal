@@ -35,15 +35,40 @@ class LocationService:
         limit: int,
         sort_by: str | None = None,
         sort_order: str = "ascend",
-    ) -> List[Location]:
-        stmt = (
-            select(Location)
-            .where(Location.tenant_id == tenant_id)
-        )
+        keyword: Optional[str] = None,
+        name: Optional[str] = None,
+        description: Optional[str] = None,
+        status: Optional[int] = None,
+        is_bearing_point: Optional[bool] = None,
+        bearing_only: bool = False,
+        active_only: bool = False,
+    ) -> tuple[List[Location], int]:
+        stmt = select(Location).where(Location.tenant_id == tenant_id)
+        if keyword:
+            like = f"%{keyword.strip()}%"
+            stmt = stmt.where(
+                or_(Location.name.ilike(like), Location.description.ilike(like))
+            )
+        if name:
+            stmt = stmt.where(Location.name.ilike(f"%{name.strip()}%"))
+        if description:
+            stmt = stmt.where(Location.description.ilike(f"%{description.strip()}%"))
+        if status is not None:
+            stmt = stmt.where(Location.status == status)
+        if is_bearing_point is not None:
+            stmt = stmt.where(Location.is_bearing_point.is_(is_bearing_point))
+        if bearing_only:
+            stmt = stmt.where(Location.is_bearing_point.is_(True))
+        if active_only:
+            stmt = stmt.where(Location.status == 1)
+
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total = (await session.execute(count_stmt)).scalar() or 0
+
         stmt = apply_sorting(stmt, Location, sort_by, sort_order)
         stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
-        return result.scalars().all()
+        return result.scalars().all(), total
 
     @staticmethod
     async def get_location(

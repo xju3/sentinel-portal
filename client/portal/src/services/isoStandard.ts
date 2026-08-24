@@ -1,4 +1,10 @@
 import { request } from '@umijs/max';
+import {
+  requestAllListItems,
+  requestPagedList,
+  type PagedResult,
+  type SortParams,
+} from '@/utils/proTableRequest';
 
 export type IsoStandard = {
   id: string;
@@ -20,58 +26,35 @@ export type IsoStandardPayload = {
 export type IsoStandardQueryParams = {
   current?: number;
   pageSize?: number;
+  keyword?: string;
+  code?: string;
+  version?: number;
+  category?: number;
+  foundation?: number;
 };
 
-export type IsoStandardPagedResult = {
-  items: IsoStandard[];
-  total: number;
-};
+export type IsoStandardPagedResult = PagedResult<IsoStandard>;
 
 export async function listAllIsoStandards(
   sort_by?: string,
   sort_order?: string,
 ) {
-  const limit = 100;
-  let skip = 0;
-  const all: IsoStandard[] = [];
-
-  while (true) {
-    const batch =
-      (await request<IsoStandard[]>('/api/v1/iso-standards', {
-        method: 'GET',
-        params: { skip, limit, sort_by, sort_order },
-      })) || [];
-    all.push(...batch);
-    if (batch.length < limit) {
-      break;
-    }
-    skip += limit;
-  }
-
-  return all;
+  return requestAllListItems<IsoStandard>(
+    '/api/v1/iso-standards',
+    { sort_by, sort_order },
+    100,
+  );
 }
 
-export async function queryIsoStandards(params: IsoStandardQueryParams = {}): Promise<IsoStandardPagedResult> {
-  const current = params.current || 1;
-  const pageSize = params.pageSize || 10;
-  const skip = (current - 1) * pageSize;
-  const list =
-    (await request<IsoStandard[]>('/api/v1/iso-standards', {
-      method: 'GET',
-      params: {
-        skip,
-        limit: pageSize,
-      },
-    })) || [];
-
-  const countRes = await request<{ total: number }>('/api/v1/iso-standards/count', {
-    method: 'GET',
+export async function queryIsoStandards(
+  params: IsoStandardQueryParams = {},
+  sort: SortParams = {},
+): Promise<IsoStandardPagedResult> {
+  return requestPagedList<IsoStandard>('/api/v1/iso-standards', {
+    params,
+    sort,
+    defaultPageSize: 20,
   });
-
-  return {
-    items: list,
-    total: countRes?.total || 0,
-  };
 }
 
 export async function createIsoStandard(payload: IsoStandardPayload) {

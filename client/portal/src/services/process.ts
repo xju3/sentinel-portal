@@ -1,4 +1,10 @@
 import { request } from '@umijs/max';
+import {
+  requestAllListItems,
+  requestPagedList,
+  type PagedResult,
+  type SortParams,
+} from '@/utils/proTableRequest';
 
 export type Process = {
   id: string;
@@ -22,6 +28,7 @@ export type ProcessItem = {
   process_id: string;
   device_spec_id: string;
   qty: number;
+  device_spec?: { id: string; name: string; model: string; brand: string } | null;
 };
 
 export type ProcessItemPayload = {
@@ -67,25 +74,13 @@ export type ProcessDeviceItemPayload = {
   color: string;
 };
 
+export type ProcessPagedResult = PagedResult<Process>;
+export type ProcessItemPagedResult = PagedResult<ProcessItem>;
+export type ProcessDevicePagedResult = PagedResult<ProcessDevice>;
+export type ProcessDeviceItemPagedResult = PagedResult<ProcessDeviceItem>;
+
 export async function listAllProcesses() {
-  const limit = 100;
-  let skip = 0;
-  const all: Process[] = [];
-
-  while (true) {
-    const batch =
-      (await request<Process[]>('/api/v1/processes', {
-        method: 'GET',
-        params: { skip, limit },
-      })) || [];
-    all.push(...batch);
-    if (batch.length < limit) {
-      break;
-    }
-    skip += limit;
-  }
-
-  return all;
+  return requestAllListItems<Process>('/api/v1/processes');
 }
 
 export async function createProcess(payload: ProcessPayload) {
@@ -109,24 +104,7 @@ export async function deleteProcess(id: string) {
 }
 
 export async function listAllProcessItems() {
-  const limit = 100;
-  let skip = 0;
-  const all: ProcessItem[] = [];
-
-  while (true) {
-    const batch =
-      (await request<ProcessItem[]>('/api/v1/process-items', {
-        method: 'GET',
-        params: { skip, limit },
-      })) || [];
-    all.push(...batch);
-    if (batch.length < limit) {
-      break;
-    }
-    skip += limit;
-  }
-
-  return all;
+  return requestAllListItems<ProcessItem>('/api/v1/process-items');
 }
 
 export async function createProcessItem(payload: ProcessItemPayload) {
@@ -150,28 +128,11 @@ export async function deleteProcessItem(id: string) {
 }
 
 export async function listAllProcessDevices(deviceSpecId?: string) {
-  const limit = 100;
-  let skip = 0;
-  const all: ProcessDevice[] = [];
-
-  while (true) {
-    const batch =
-      (await request<ProcessDevice[]>('/api/v1/process-devices', {
-        method: 'GET',
-        params: {
-          skip,
-          limit,
-          device_spec_id: deviceSpecId || undefined,
-        },
-      })) || [];
-    all.push(...batch);
-    if (batch.length < limit) {
-      break;
-    }
-    skip += limit;
-  }
-
-  return all;
+  return requestAllListItems<ProcessDevice>(
+    '/api/v1/process-devices',
+    { device_spec_id: deviceSpecId || undefined },
+    100,
+  );
 }
 
 export async function createProcessDevice(payload: ProcessDevicePayload) {
@@ -202,24 +163,7 @@ export async function updateProcessDeviceEmployees(id: string, employee_ids: str
 }
 
 export async function listAllProcessDeviceItems() {
-  const limit = 100;
-  let skip = 0;
-  const all: ProcessDeviceItem[] = [];
-
-  while (true) {
-    const batch =
-      (await request<ProcessDeviceItem[]>('/api/v1/process-device-items', {
-        method: 'GET',
-        params: { skip, limit },
-      })) || [];
-    all.push(...batch);
-    if (batch.length < limit) {
-      break;
-    }
-    skip += limit;
-  }
-
-  return all;
+  return requestAllListItems<ProcessDeviceItem>('/api/v1/process-device-items');
 }
 
 export async function createProcessDeviceItem(payload: ProcessDeviceItemPayload) {
@@ -239,5 +183,50 @@ export async function updateProcessDeviceItem(id: string, payload: Partial<Proce
 export async function deleteProcessDeviceItem(id: string) {
   return request<{ message: string }>(`/api/v1/process-device-items/${id}`, {
     method: 'DELETE',
+  });
+}
+
+
+export async function queryProcesses(
+  params: Record<string, any> = {},
+  sort: SortParams = {},
+) {
+  return requestPagedList<Process>('/api/v1/processes', {
+    params,
+    sort,
+    defaultPageSize: 20,
+  });
+}
+
+export async function queryProcessItems(
+  params: Record<string, any> = {},
+  sort: SortParams = {},
+) {
+  return requestPagedList<ProcessItem>('/api/v1/process-items', {
+    params,
+    sort,
+    defaultPageSize: 20,
+  });
+}
+
+export async function queryProcessDevices(
+  params: Record<string, any> = {},
+  sort: SortParams = {},
+) {
+  return requestPagedList<ProcessDevice>('/api/v1/process-devices', {
+    params,
+    sort,
+    defaultPageSize: 20,
+  });
+}
+
+export async function queryProcessDeviceItems(
+  params: Record<string, any> = {},
+  sort: SortParams = {},
+) {
+  return requestPagedList<ProcessDeviceItem>('/api/v1/process-device-items', {
+    params,
+    sort,
+    defaultPageSize: 20,
   });
 }

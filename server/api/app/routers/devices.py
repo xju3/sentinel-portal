@@ -16,7 +16,6 @@ from pub.models.sensor import SensorMonitoring
 from pub.services import LocationService
 
 from pub.services import (
-    IsoStandardService,
     DeviceCategoryService,
     DeviceSpecService,
     BearingService,
@@ -35,9 +34,6 @@ from pub.decorators.config_change import monitor_config_change
 from app.utils.auth import get_current_account
 from app.utils.response import success
 from pub.contract.devices import (
-    IsoStandardCreate,
-    IsoStandardUpdate,
-    IsoStandardResponse,
     DeviceCategoryCreate,
     DeviceCategoryUpdate,
     DeviceCategoryMembersUpdate,
@@ -158,66 +154,6 @@ async def _validate_sensor_monitoring_refs(
 
 
 # ==========================================
-# 1. IsoStandard
-# ==========================================
-@router.get("/iso-standards")
-async def list_iso_standards(
-    skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
-    sort_by: Optional[str] = Query(None),
-    sort_order: Optional[str] = Query("ascend"),
-    session: AsyncSession = Depends(get_session),
-):
-    return success(await IsoStandardService.get_all(session, skip, limit, sort_by, sort_order))
-
-
-@router.get("/iso-standards/{obj_id}")
-async def get_iso_standard(
-    obj_id: UUID,
-    session: AsyncSession = Depends(get_session),
-):
-    obj = await IsoStandardService.get_by_id(session, obj_id)
-    if not obj:
-        raise HTTPException(status_code=404, detail="IsoStandard not found")
-    return success(obj)
-
-
-@router.post("/iso-standards")
-async def create_iso_standard(
-    item: IsoStandardCreate,
-    session: AsyncSession = Depends(get_session),
-):
-    return success(await IsoStandardService.create(session, item.model_dump()))
-
-
-@router.put("/iso-standards/{obj_id}")
-async def update_iso_standard(
-    obj_id: UUID,
-    item: IsoStandardUpdate,
-    session: AsyncSession = Depends(get_session),
-):
-    db_obj = await IsoStandardService.get_by_id(session, obj_id)
-    if not db_obj:
-        raise HTTPException(status_code=404, detail="IsoStandard not found")
-
-    update_data = item.model_dump(exclude_unset=True)
-    return success(await IsoStandardService.update(session, db_obj, update_data))
-
-
-@router.delete("/iso-standards/{obj_id}")
-async def delete_iso_standard(
-    obj_id: UUID,
-    session: AsyncSession = Depends(get_session),
-):
-    db_obj = await IsoStandardService.get_by_id(session, obj_id)
-    if not db_obj:
-        raise HTTPException(status_code=404, detail="IsoStandard not found")
-
-    await IsoStandardService.delete(session, db_obj)
-    return success({"message": "IsoStandard deleted successfully"})
-
-
-# ==========================================
 # 2. DeviceCategory
 # ==========================================
 def _serialize_device_category(
@@ -228,7 +164,13 @@ def _serialize_device_category(
         "id": item.id,
         "name": item.name,
         "description": item.description,
+        "color": item.color,
         "parent_id": item.parent_id,
+        "parent": (
+            {"id": item.parent.id, "name": item.parent.name}
+            if getattr(item, "parent", None) is not None
+            else None
+        ),
         "health_check_freq_id": cast(Optional[UUID], item.health_check_freq_id),
         "tenant_id": cast(Optional[UUID], item.tenant_id),
         "iso_standard_id": cast(Optional[UUID], item.iso_standard_id),
@@ -308,25 +250,40 @@ async def _validate_device_category_parent(
 @router.get("/device-categories")
 async def list_device_categories(
     skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=200),
     keyword: Optional[str] = Query(None),
+    name: Optional[str] = Query(None),
+    description: Optional[str] = Query(None),
+    color: Optional[str] = Query(None),
+    parent_id: Optional[UUID] = Query(None),
+    health_check_freq_id: Optional[UUID] = Query(None),
+    iso_standard_id: Optional[UUID] = Query(None),
+    vib_threshold_id: Optional[UUID] = Query(None),
+    temp_threshold_id: Optional[UUID] = Query(None),
     sort_by: Optional[str] = Query(None),
     sort_order: Optional[str] = Query("ascend"),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
-    rows = await DeviceCategoryService.get_all(session, tenant_id, skip, limit, keyword, sort_by, sort_order)
-    freq_ids: List[UUID] = [cast(UUID, row.health_check_freq_id) for row in rows]
-    freq_map = await DeviceCategoryService.get_health_check_freq_map(
-        session,
-        tenant_id,
-        freq_ids,
+    extra: dict = {}
+    if keyword: extra["keyword"] = keyword
+    if name: extra["name"] = name
+    if description: extra["description"] = description
+    if color: extra["color"] = color
+    if parent_id is not None: extra["parent_id"] = parent_id
+    if health_check_freq_id is not None:
+        extra["health_check_freq_id"] = health_check_freq_id
+    if iso_standard_id is not None: extra["iso_standard_id"] = iso_standard_id
+    if vib_threshold_id is not None: extra["vib_threshold_id"] = vib_threshold_id
+    if temp_threshold_id is not None: extra["temp_threshold_id"] = temp_threshold_id
+    items, total = await DeviceCategoryService.get_device_categories(
+        session, tenant_id, skip, limit, sort_by=sort_by, sort_order=sort_order, **extra
     )
-    return success([
-        _serialize_device_category(row, freq_map.get(cast(UUID, row.health_check_freq_id)))
-        for row in rows
-    ])
+    return success({"items": [
+        _serialize_device_category(item, getattr(item, "health_check_freq", None))
+        for item in items
+    ], "total": total})
 
 
 @router.get("/device-categories/count")
@@ -460,15 +417,28 @@ async def delete_device_category(
 @router.get("/bearings")
 async def list_bearings(
     skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=200),
+    keyword: Optional[str] = Query(None),
+    brand: Optional[str] = Query(None),
+    model: Optional[str] = Query(None),
+    bearing_type: Optional[str] = Query(None),
+    active: Optional[bool] = Query(None),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
-    models = await BearingService.list_models(session, tenant_id, skip, limit)
-    return success(
-        [BearingModelResponse.model_validate(model) for model in models]
+    extra: dict = {}
+    if keyword: extra["keyword"] = keyword
+    if brand: extra["brand"] = brand
+    if model: extra["model"] = model
+    if bearing_type: extra["bearing_type"] = bearing_type
+    if active is not None: extra["active"] = active
+    items, total = await BearingService.list_models(
+        session, tenant_id, skip, limit, sort_by=sort_by, sort_order=sort_order, **extra
     )
+    return success({"items": [BearingModelResponse.model_validate(item) for item in items], "total": total})
 
 
 @router.get("/bearings/{obj_id}")
@@ -581,43 +551,44 @@ async def delete_bearing(
 @router.get("/device-specs")
 async def list_device_specs(
     skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=1000),
     sort_by: Optional[str] = Query(None),
     sort_order: Optional[str] = Query("ascend"),
+    name: Optional[str] = Query(None),
+    model: Optional[str] = Query(None),
+    brand: Optional[str] = Query(None),
+    supplier_id: Optional[UUID] = Query(None),
+    device_category_id: Optional[UUID] = Query(None),
+    rpm: Optional[int] = Query(None),
+    voltage: Optional[float] = Query(None),
     process_device_id: Optional[UUID] = Query(None),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
-    specs = await DeviceSpecService.get_all(
+    specs, total = await DeviceSpecService.get_all(
         session,
         tenant_id,
         skip,
         limit,
-        sort_by,
-        sort_order,
-        process_device_id,
+        sort_by=sort_by,
+        sort_order=sort_order,
+        process_device_id=process_device_id,
+        in_device_group=False,
+        name=name,
+        model=model,
+        brand=brand,
+        supplier_id=supplier_id,
+        device_category_id=device_category_id,
+        rpm=rpm,
+        voltage=voltage,
     )
-    if specs:
-        from sqlalchemy import select, func
-        spec_ids = [s.id for s in specs]
-        stmt = (
-            select(DeviceInst.device_spec_id, func.count(func.distinct(ProcessDeviceItem.process_device_id)))
-            .join(ProcessDeviceItem, ProcessDeviceItem.device_inst_id == DeviceInst.id)
-            .where(DeviceInst.device_spec_id.in_(spec_ids))
-            .group_by(DeviceInst.device_spec_id)
-        )
-        res = await session.execute(stmt)
-        count_map = {row[0]: row[1] for row in res.all()}
-        for s in specs:
-            s.process_device_count = count_map.get(s.id, 0)
-    return success(specs)
-
+    return success({"items": specs, "total": total})
 
 @router.get("/wx-mini-app/device-specs")
 async def list_grouped_device_specs(
     skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=100),
     sort_by: Optional[str] = Query("name"),
     sort_order: Optional[str] = Query("ascend"),
     current_account: AccountModel = Depends(get_current_account),
@@ -625,7 +596,7 @@ async def list_grouped_device_specs(
 ):
     """小程序分组对比入口：分页返回至少属于一个设备分组的规格。"""
     tenant_id = cast(UUID, current_account.tenant_id)
-    specs = await DeviceSpecService.get_all(
+    specs, total = await DeviceSpecService.get_all(
         session,
         tenant_id,
         skip,
@@ -634,7 +605,7 @@ async def list_grouped_device_specs(
         sort_order,
         in_device_group=True,
     )
-    return success(specs)
+    return success({"items": specs, "total": total})
 
 
 @router.get("/device-specs/{obj_id}")
@@ -790,19 +761,38 @@ async def replace_device_spec_bearings(
 @router.get("/device-insts")
 async def list_device_insts(
     skip: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=200),
+    keyword: Optional[str] = Query(None),
+    name: Optional[str] = Query(None),
+    code: Optional[str] = Query(None),
+    purchase_date: Optional[str] = Query(None),
+    life_span: Optional[int] = Query(None),
+    desc: Optional[str] = Query(None),
+    status: Optional[int] = Query(None),
+    device_spec_id: Optional[UUID] = Query(None),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
-    current = skip // limit + 1
-    items, _ = await DeviceInstService.get_tenant_device_insts_paged(
+    items, total = await DeviceInstService.get_tenant_device_insts_paged(
         session,
         tenant_id,
-        current,
+        skip,
         limit,
+        keyword=keyword,
+        name=name,
+        code=code,
+        purchase_date=purchase_date,
+        life_span=life_span,
+        desc=desc,
+        status=status,
+        device_spec_id=device_spec_id,
+        sort_by=sort_by,
+        sort_order=sort_order or "ascend",
     )
-    return success(items)
+    return success({"items": items, "total": total})
 
 
 @router.get("/wx-mini-app/health-archive/devices")
@@ -1090,14 +1080,34 @@ async def list_fault_devices(
 @router.get("/sensor-monitorings")
 async def list_sensor_monitorings(
     skip: int = Query(0, ge=0),
-    limit: int = Query(10, ge=1, le=100),
+    limit: int = Query(20, ge=1, le=200),
+    device_inst_id: Optional[UUID] = Query(None),
+    sensor_id: Optional[UUID] = Query(None),
+    location_id: Optional[UUID] = Query(None),
+    direction: Optional[str] = Query(None),
+    status: Optional[int] = Query(None),
+    anomaly: Optional[int] = Query(None),
     sort_by: Optional[str] = Query(None),
     sort_order: Optional[str] = Query("ascend"),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
-    return success(await SensorMonitoringService.get_all_by_tenant(session, tenant_id, skip, limit, sort_by, sort_order))
+    items, total = await SensorMonitoringService.get_all_by_tenant(
+        session,
+        tenant_id,
+        skip,
+        limit,
+        sort_by,
+        sort_order or "ascend",
+        device_inst_id=device_inst_id,
+        sensor_id=sensor_id,
+        location_id=location_id,
+        direction=direction,
+        status=status,
+        anomaly=anomaly,
+    )
+    return success({"items": items, "total": total})
 
 
 @router.get(

@@ -1,4 +1,10 @@
 import { request } from '@umijs/max';
+import {
+  requestAllListItems,
+  requestPagedList,
+  type PagedResult,
+  type SortParams,
+} from '@/utils/proTableRequest';
 
 export type Supplier = {
   id: string;
@@ -21,60 +27,28 @@ export type SupplierQueryParams = {
   keyword?: string;
 };
 
-export type SupplierPagedResult = {
-  items: Supplier[];
-  total: number;
-};
+export type SupplierPagedResult = PagedResult<Supplier>;
 
 export async function listAllSuppliers(
   sort_by?: string,
   sort_order?: string,
 ) {
-  const limit = 100;
-  let skip = 0;
-  const all: Supplier[] = [];
-
-  while (true) {
-    const batch =
-      (await request<Supplier[]>('/api/v1/suppliers', {
-        method: 'GET',
-        params: { skip, limit, sort_by, sort_order },
-      })) || [];
-    all.push(...batch);
-    if (batch.length < limit) {
-      break;
-    }
-    skip += limit;
-  }
-
-  return all;
+  return requestAllListItems<Supplier>(
+    '/api/v1/suppliers',
+    { sort_by, sort_order },
+    100,
+  );
 }
 
-export async function querySuppliers(params: SupplierQueryParams = {}): Promise<SupplierPagedResult> {
-  const current = params.current || 1;
-  const pageSize = params.pageSize || 10;
-  const skip = (current - 1) * pageSize;
-  const list =
-    (await request<Supplier[]>('/api/v1/suppliers', {
-      method: 'GET',
-      params: {
-        skip,
-        limit: pageSize,
-        keyword: params.keyword || undefined,
-      },
-    })) || [];
-
-  const countRes = await request<{ total: number }>('/api/v1/suppliers/count', {
-    method: 'GET',
-    params: {
-      keyword: params.keyword || undefined,
-    },
+export async function querySuppliers(
+  params: SupplierQueryParams = {},
+  sort: SortParams = {},
+): Promise<SupplierPagedResult> {
+  return requestPagedList<Supplier>('/api/v1/suppliers', {
+    params,
+    sort,
+    defaultPageSize: 20,
   });
-
-  return {
-    items: list,
-    total: countRes?.total || 0,
-  };
 }
 
 export async function createSupplier(payload: SupplierPayload) {

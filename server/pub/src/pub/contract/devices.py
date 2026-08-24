@@ -167,6 +167,12 @@ class DeviceCategoryBrief(BaseModel):
     model_config = ConfigDict(from_attributes=True)
 
 
+class ProcessDeviceBrief(BaseModel):
+    id: UUID
+    code: str
+    sn: str
+
+
 class DeviceSpecResponse(BaseModel):
     id: UUID
     name: str
@@ -179,6 +185,7 @@ class DeviceSpecResponse(BaseModel):
     supplier_id: UUID
     device_category_id: UUID
     process_device_count: int = 0
+    process_devices: List[ProcessDeviceBrief] = Field(default_factory=list)
     supplier: Optional[SupplierBrief] = None
     device_category: Optional[DeviceCategoryBrief] = None
 

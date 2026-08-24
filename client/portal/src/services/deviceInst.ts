@@ -1,4 +1,5 @@
 import { request } from '@umijs/max';
+import { requestAllListItems, requestPagedList, type SortParams } from '@/utils/proTableRequest';
 
 export type DeviceInst = {
   id: string;
@@ -12,6 +13,11 @@ export type DeviceInst = {
   active: number;
   available: number;
   device_spec?: { id: string; name: string; model: string; brand: string };
+  sensor_monitorings?: Array<{
+    id: string;
+    location?: { id: string; name: string } | null;
+    sensor?: { id: string; sn: string } | null;
+  }>;
 };
 
 export type DeviceInstPayload = {
@@ -27,24 +33,18 @@ export type DeviceInstPayload = {
 };
 
 export async function listAllDeviceInsts() {
-  const limit = 100;
-  let skip = 0;
-  const all: DeviceInst[] = [];
+  return requestAllListItems<DeviceInst>('/api/v1/device-insts');
+}
 
-  while (true) {
-    const batch =
-      (await request<DeviceInst[]>('/api/v1/device-insts', {
-        method: 'GET',
-        params: { skip, limit },
-      })) || [];
-    all.push(...batch);
-    if (batch.length < limit) {
-      break;
-    }
-    skip += limit;
-  }
-
-  return all;
+export async function queryDeviceInsts(
+  params: Record<string, any> = {},
+  sort: SortParams = {},
+) {
+  return requestPagedList<DeviceInst>('/api/v1/device-insts', {
+    params,
+    sort,
+    defaultPageSize: 20,
+  });
 }
 
 export async function createDeviceInst(payload: DeviceInstPayload) {

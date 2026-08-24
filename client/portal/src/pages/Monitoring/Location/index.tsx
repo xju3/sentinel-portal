@@ -1,5 +1,6 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useRef, useState } from 'react';
 import {
+  ActionType,
   ModalForm,
   PageContainer,
   ProColumns,
@@ -9,17 +10,16 @@ import {
   ProTable,
 } from '@ant-design/pro-components';
 import { Button, Popconfirm, Space, Tag, message } from 'antd';
-
 import {
-  createLocation,
-  disableLocation,
-  listAllLocations,
   Location,
   LocationPayload,
+  createLocation,
+  disableLocation,
+  queryLocations,
   updateLocation,
 } from '@/services/location';
-
 import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';
+
 type LocationFormValues = {
   name: string;
   description?: string;
@@ -29,90 +29,21 @@ type LocationFormValues = {
 
 const toErrorMessage = (error: unknown): string => {
   const e = error as
-    | {
-        data?: { detail?: string };
-        info?: { errorMessage?: string };
-        message?: string;
-      }
+    | { data?: { detail?: string }; info?: { errorMessage?: string }; message?: string }
     | undefined;
   return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';
 };
 
 const MonitoringLocationPage = () => {
-  const [loading, setLoading] = useState(false);
+  const actionRef = useRef<ActionType>();
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [rows, setRows] = useState<Location[]>([]);
   const [editing, setEditing] = useState<Location | null>(null);
-  const [query, setQuery] = useState<Record<string, any>>({});
-  const [sort, setSort] = useState<Record<string, any>>({});
-
-  const loadRows = async (currentSort = sort) => {
-    setLoading(true);
-    try {
-      // 注意：这里需要你同步修改服务层的 listAllLocations 方法，让它把排序参数发给后端
-      setRows(await listAllLocations({ sort_field: currentSort.field, sort_order: currentSort.order }));
-    } catch (error) {
-      message.error(toErrorMessage(error));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadRows();
-  }, []);
-
-  const filteredRows = useMemo(() => {
-    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();
-    return rows.filter((row) => {
-      if (query.name && !norm(row.name).includes(norm(query.name))) {
-        return false;
-      }
-      if (query.description && !norm(row.description).includes(norm(query.description))) {
-        return false;
-      }
-      if (
-        query.is_bearing_point !== undefined &&
-        query.is_bearing_point !== null &&
-        query.is_bearing_point !== '' &&
-        String(row.is_bearing_point) !== String(query.is_bearing_point)
-      ) {
-        return false;
-      }
-      if (
-        query.status !== undefined &&
-        query.status !== null &&
-        query.status !== '' &&
-        String(row.status) !== String(query.status)
-      ) {
-        return false;
-      }
-      return true;
-    });
-  }, [query, rows]);
 
   const columns: ProColumns<Location>[] = [
-    {
-      title: '序号',
-      valueType: 'indexBorder',
-      width: 68,
-      hideInSearch: true,
-      fixed: 'left',
-    },
-    {
-      title: '测点名称',
-      dataIndex: 'name',
-      width: 220,
-      sorter: true,
-    },
-    {
-      title: '描述',
-      dataIndex: 'description',
-      ellipsis: true,
-      render: (_, row) => row.description || '-',
-      sorter: true,
-    },
+    { title: '序号', valueType: 'indexBorder', width: 68, hideInSearch: true, fixed: 'left' },
+    { title: '测点名称', dataIndex: 'name', width: 220, sorter: true },
+    { title: '描述', dataIndex: 'description', ellipsis: true, render: (_, row) => row.description || '-' },
     {
       title: '轴承测点',
       dataIndex: 'is_bearing_point',
@@ -122,8 +53,7 @@ const MonitoringLocationPage = () => {
         true: { text: '是' },
         false: { text: '否' },
       },
-      render: (_, row) =>
-        row.is_bearing_point ? <Tag color="blue">是</Tag> : <Tag>否</Tag>,
+      render: (_, row) => (row.is_bearing_point ? <Tag color="blue">是</Tag> : <Tag>否</Tag>),
     },
     {
       title: '状态',
@@ -134,9 +64,7 @@ const MonitoringLocationPage = () => {
         1: { text: '启用' },
         0: { text: '禁用' },
       },
-      render: (_, row) =>
-        Number(row.status) === 1 ? <Tag color="success">启用</Tag> : <Tag>禁用</Tag>,
-      sorter: true,
+      render: (_, row) => (Number(row.status) === 1 ? <Tag color="success">启用</Tag> : <Tag>禁用</Tag>),
     },
     {
       title: '操作',
@@ -147,7 +75,6 @@ const MonitoringLocationPage = () => {
       render: (_, row) => (
         <Space size="middle">
           <a
-            key="edit"
             onClick={() => {
               setEditing(row);
               setModalOpen(true);
@@ -157,13 +84,12 @@ const MonitoringLocationPage = () => {
           </a>
           {Number(row.status) === 1 && (
             <Popconfirm
-              key="disable"
               title="确认禁用该测点吗？历史引用和诊断数据不会删除。"
               onConfirm={async () => {
                 try {
                   await disableLocation(row.id);
                   message.success('测点已禁用');
-                  await loadRows();
+                  actionRef.current?.reload();
                 } catch (error) {
                   message.error(toErrorMessage(error));
                 }
@@ -181,19 +107,11 @@ const MonitoringLocationPage = () => {
     <PageContainer title="测点设置">
       <ProTable<Location>
         rowKey="id"
-        search={{ labelWidth: 'auto' }}
-        onSubmit={(values) => setQuery(values)}
-        onReset={() => setQuery({})}
-        onChange={(pagination, filters, sorter: any) => {
-          // 捕获服务端的排序指令并触发数据刷新
-          const currentSort = sorter.order ? { field: sorter.field, order: sorter.order } : {};
-          setSort(currentSort);
-          loadRows(currentSort);
-        }}
-        loading={loading}
+        actionRef={actionRef}
         columns={columns}
-        dataSource={filteredRows}
-        options={{ reload: loadRows }}
+        request={queryLocations}
+        search={{ labelWidth: 'auto' }}
+        pagination={{ defaultPageSize: 20, showSizeChanger: true }}
         optionsRender={renderRefSafeTableOptions}
         toolBarRender={() => [
           <Button
@@ -220,10 +138,7 @@ const MonitoringLocationPage = () => {
                 is_bearing_point: editing.is_bearing_point,
                 status: Number(editing.status),
               }
-            : {
-                status: 1,
-                is_bearing_point: false,
-              }
+            : { status: 1, is_bearing_point: false }
         }
         modalProps={{
           destroyOnHidden: true,
@@ -243,7 +158,6 @@ const MonitoringLocationPage = () => {
             is_bearing_point: values.is_bearing_point ?? false,
             status: Number(values.status ?? 1),
           };
-
           setSaving(true);
           try {
             if (editing) {
@@ -254,7 +168,7 @@ const MonitoringLocationPage = () => {
             message.success('保存成功');
             setModalOpen(false);
             setEditing(null);
-            await loadRows();
+            actionRef.current?.reload();
             return true;
           } catch (error) {
             message.error(toErrorMessage(error));
@@ -264,24 +178,9 @@ const MonitoringLocationPage = () => {
           }
         }}
       >
-        <ProFormText
-          name="name"
-          label="测点名称"
-          rules={[
-            { required: true, message: '请输入测点名称' },
-            { max: 64, message: '测点名称最多64个字符' },
-          ]}
-        />
-        <ProFormText
-          name="description"
-          label="描述"
-          rules={[{ max: 255, message: '描述最多255个字符' }]}
-        />
-        <ProFormSwitch
-          name="is_bearing_point"
-          label="轴承测点"
-          tooltip="启用后，该测点可用于设备规格绑定轴承"
-        />
+        <ProFormText name="name" label="测点名称" rules={[{ required: true, message: '请输入测点名称' }]} />
+        <ProFormText name="description" label="描述" />
+        <ProFormSwitch name="is_bearing_point" label="轴承测点" />
         <ProFormSelect
           name="status"
           label="状态"

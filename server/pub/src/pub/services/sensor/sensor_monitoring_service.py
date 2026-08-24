@@ -10,6 +10,7 @@ from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import func, or_
+from sqlalchemy.orm import selectinload
 
 from pub.models.device import (
     IsoStandard,
@@ -80,7 +81,13 @@ class SensorMonitoringService:
         limit: int,
         sort_by: str | None = None,
         sort_order: str = "ascend",
-    ):
+        device_inst_id: UUID | None = None,
+        sensor_id: UUID | None = None,
+        location_id: UUID | None = None,
+        direction: str | None = None,
+        status: int | None = None,
+        anomaly: int | None = None,
+    ) -> tuple[list[SensorMonitoring], int]:
         """Get SensorMonitoring records scoped to a tenant."""
         from pub.models.device import DeviceInst, DeviceSpec, DeviceCategory
 
@@ -91,10 +98,28 @@ class SensorMonitoringService:
             .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
             .where(DeviceCategory.tenant_id == tenant_id)
         )
+        if device_inst_id is not None:
+            stmt = stmt.where(SensorMonitoring.device_inst_id == device_inst_id)
+        if sensor_id is not None:
+            stmt = stmt.where(SensorMonitoring.sensor_id == sensor_id)
+        if location_id is not None:
+            stmt = stmt.where(SensorMonitoring.location_id == location_id)
+        if direction:
+            stmt = stmt.where(SensorMonitoring.direction.ilike(f"%{direction.strip()}%"))
+        if status is not None:
+            stmt = stmt.where(SensorMonitoring.status == status)
+        if anomaly is not None:
+            stmt = stmt.where(SensorMonitoring.anomaly == anomaly)
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total = (await session.execute(count_stmt)).scalar() or 0
         stmt = apply_sorting(stmt, SensorMonitoring, sort_by, sort_order)
-        stmt = stmt.offset(skip).limit(limit)
+        stmt = stmt.options(
+            selectinload(SensorMonitoring.sensor),
+            selectinload(SensorMonitoring.location),
+            selectinload(SensorMonitoring.device_inst),
+        ).offset(skip).limit(limit)
         result = await session.execute(stmt)
-        return result.scalars().all()
+        return result.scalars().all(), total
 
     @staticmethod
     async def get_by_id_and_tenant(

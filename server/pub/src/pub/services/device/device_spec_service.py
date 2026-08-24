@@ -7,6 +7,7 @@ from typing import List, Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
 from sqlalchemy import exists, func, or_
+from sqlalchemy.orm import selectinload
 
 from pub.models.device import (
     IsoStandard,
@@ -51,7 +52,14 @@ class DeviceSpecService:
         sort_order: str = "ascend",
         process_device_id: UUID | None = None,
         in_device_group: bool = False,
-    ) -> List[DeviceSpec]:
+        name: str | None = None,
+        model: str | None = None,
+        brand: str | None = None,
+        supplier_id: UUID | None = None,
+        device_category_id: UUID | None = None,
+        rpm: int | None = None,
+        voltage: float | None = None,
+    ) -> tuple[List[DeviceSpec], int]:
         stmt = (
             select(DeviceSpec)
             .join(DeviceCategory, DeviceSpec.device_category_id == DeviceCategory.id)
@@ -90,13 +98,79 @@ class DeviceSpecService:
             )
             stmt = stmt.where(exists(group_exists))
 
+        if name:
+            stmt = stmt.where(DeviceSpec.name.ilike(f"%{name.strip()}%"))
+        if model:
+            stmt = stmt.where(DeviceSpec.model.ilike(f"%{model.strip()}%"))
+        if brand:
+            stmt = stmt.where(DeviceSpec.brand.ilike(f"%{brand.strip()}%"))
+        if supplier_id is not None:
+            stmt = stmt.where(DeviceSpec.supplier_id == supplier_id)
+        if device_category_id is not None:
+            stmt = stmt.where(DeviceSpec.device_category_id == device_category_id)
+        if rpm is not None:
+            stmt = stmt.where(DeviceSpec.rpm == rpm)
+        if voltage is not None:
+            stmt = stmt.where(DeviceSpec.voltage == voltage)
+
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total = (await session.execute(count_stmt)).scalar() or 0
+
         stmt = apply_sorting(stmt, DeviceSpec, sort_by, sort_order or "ascend")
         if in_device_group:
             # A stable tie-breaker prevents duplicates or gaps between pages.
             stmt = stmt.order_by(DeviceSpec.id.asc())
-        stmt = stmt.offset(skip).limit(limit)
+        stmt = stmt.options(
+            selectinload(DeviceSpec.supplier),
+            selectinload(DeviceSpec.device_category),
+        ).offset(skip).limit(limit)
         result = await session.execute(stmt)
-        return result.scalars().all()
+        items = result.scalars().all()
+        await DeviceSpecService._attach_process_devices(
+            session, tenant_id, items
+        )
+        return items, total
+
+    @staticmethod
+    async def _attach_process_devices(
+        session: AsyncSession,
+        tenant_id: UUID,
+        specs: List[DeviceSpec],
+    ) -> None:
+        if not specs:
+            return
+        spec_ids = [spec.id for spec in specs]
+        stmt = (
+            select(
+                DeviceInst.device_spec_id,
+                ProcessDevice.id,
+                ProcessDevice.code,
+                ProcessDevice.sn,
+            )
+            .join(
+                ProcessDeviceItem,
+                ProcessDeviceItem.device_inst_id == DeviceInst.id,
+            )
+            .join(
+                ProcessDevice,
+                ProcessDevice.id == ProcessDeviceItem.process_device_id,
+            )
+            .join(Process, Process.id == ProcessDevice.process_id)
+            .where(
+                DeviceInst.device_spec_id.in_(spec_ids),
+                Process.tenant_id == tenant_id,
+            )
+            .distinct()
+        )
+        rows = (await session.execute(stmt)).all()
+        process_devices: dict[UUID, list[dict]] = {}
+        for spec_id, item_id, code, sn in rows:
+            process_devices.setdefault(spec_id, []).append(
+                {"id": item_id, "code": code, "sn": sn}
+            )
+        for spec in specs:
+            spec.process_devices = process_devices.get(spec.id, [])
+            spec.process_device_count = len(spec.process_devices)
 
     @staticmethod
     async def get_by_id(

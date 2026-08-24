@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import {
   ModalForm,
   PageContainer,
@@ -7,6 +7,7 @@ import {
   ProFormText,
   ProTable,
 } from '@ant-design/pro-components';
+import type { ActionType } from '@ant-design/pro-components';
 import { Button, Modal, Popconfirm, Select, Space, Tag, Tooltip, Transfer, message } from 'antd';
 
 import { Area, listAllAreas } from '@/services/area';
@@ -19,18 +20,17 @@ import {
   deleteProcessDevice,
   deleteProcessDeviceItem,
   listAllProcessDeviceItems,
-  listAllProcessDevices,
   listAllProcessItems,
   listAllProcesses,
-  updateProcessDeviceEmployees,
-  Process,
   ProcessDevice,
   ProcessDeviceItem,
   ProcessItem,
   updateProcessDevice,
+  updateProcessDeviceEmployees,
 } from '@/services/process';
-
 import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';
+import { requestPagedList } from '@/utils/proTableRequest';
+
 type ProcessDeviceFormValues = {
   code: string;
   sn: string;
@@ -39,13 +39,17 @@ type ProcessDeviceFormValues = {
   status: number;
 };
 
+type ProcessDeviceRecord = ProcessDevice & {
+  employees?: Array<{ id: string; name: string }> | null;
+};
+
 const toErrorMessage = (error: unknown): string => {
   const e = error as
     | {
-      data?: { detail?: string };
-      info?: { errorMessage?: string };
-      message?: string;
-    }
+        data?: { detail?: string };
+        info?: { errorMessage?: string };
+        message?: string;
+      }
     | undefined;
   return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';
 };
@@ -65,12 +69,10 @@ const clampSelections = (values: string[], max: number): string[] => {
 };
 
 const ProcessManagePage = () => {
-  const [loading, setLoading] = useState(false);
+  const actionRef = useRef<ActionType>();
   const [saving, setSaving] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
-  const [editing, setEditing] = useState<ProcessDevice | null>(null);
-  const [query, setQuery] = useState<Record<string, any>>({});
-  const [rows, setRows] = useState<ProcessDevice[]>([]);
+  const [editing, setEditing] = useState<ProcessDeviceRecord | null>(null);
 
   const [processItems, setProcessItems] = useState<ProcessItem[]>([]);
   const [deviceSpecs, setDeviceSpecs] = useState<DeviceSpec[]>([]);
@@ -78,72 +80,20 @@ const ProcessManagePage = () => {
   const [processDeviceItems, setProcessDeviceItems] = useState<ProcessDeviceItem[]>([]);
 
   const [configOpen, setConfigOpen] = useState(false);
-  const [currentInstance, setCurrentInstance] = useState<ProcessDevice | null>(null);
+  const [currentInstance, setCurrentInstance] = useState<ProcessDeviceRecord | null>(null);
   const [configSelections, setConfigSelections] = useState<Record<string, string[]>>({});
   const [configSaving, setConfigSaving] = useState(false);
 
   const [employeeModalOpen, setEmployeeModalOpen] = useState(false);
-  const [currentProcessDevice, setCurrentProcessDevice] = useState<ProcessDevice | null>(null);
-  const [allEmployees, setAllEmployees] = useState<{ key: string; title: string; description: string }[]>([]);
+  const [currentProcessDevice, setCurrentProcessDevice] = useState<ProcessDeviceRecord | null>(null);
+  const [allEmployees, setAllEmployees] = useState<
+    { key: string; title: string; description: string }[]
+  >([]);
   const [targetKeys, setTargetKeys] = useState<string[]>([]);
   const [employeeLoading, setEmployeeLoading] = useState(false);
 
   const specMap = useMemo(() => new Map(deviceSpecs.map((item) => [item.id, item])), [deviceSpecs]);
   const instMap = useMemo(() => new Map(deviceInsts.map((item) => [item.id, item])), [deviceInsts]);
-
-  const loadAll = async () => {
-    setLoading(true);
-    try {
-      const instances = await listAllProcessDevices();
-      setRows(instances);
-    } catch (error) {
-      message.error(toErrorMessage(error));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    loadAll();
-  }, []);
-
-  const filteredRows = useMemo(() => {
-    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();
-    return rows.filter((row) => {
-      const processName = row.process?.name || '';
-      if (query.code && !norm(row.code).includes(norm(query.code))) {
-        return false;
-      }
-      if (query.sn && !norm(row.sn).includes(norm(query.sn))) {
-        return false;
-      }
-      if (query.process_id) {
-        const hit =
-          norm(processName).includes(norm(query.process_id)) ||
-          norm(row.process_id).includes(norm(query.process_id));
-        if (!hit) {
-          return false;
-        }
-      }
-      if (query.area_id) {
-        const areaName = row.area?.name || '';
-        const hit =
-          norm(areaName).includes(norm(query.area_id)) ||
-          norm(row.area_id).includes(norm(query.area_id));
-        if (!hit) {
-          return false;
-        }
-      }
-      if (
-        query.status !== undefined &&
-        query.status !== null &&
-        String(row.status) !== String(query.status)
-      ) {
-        return false;
-      }
-      return true;
-    });
-  }, [query, rows]);
 
   const currentTemplateItems = useMemo(() => {
     if (!currentInstance?.process_id) {
@@ -159,46 +109,46 @@ const ProcessManagePage = () => {
     return processDeviceItems.filter((item) => item.process_device_id === currentInstance.id);
   }, [currentInstance?.id, processDeviceItems]);
 
-  const handleOpenEmployeeModal = async (record: ProcessDevice) => {
+  const handleOpenEmployeeModal = async (record: ProcessDeviceRecord) => {
     setCurrentProcessDevice(record);
-    setTargetKeys((record.employees || []).map((e: any) => e.id));
+    setTargetKeys((record.employees || []).map((employee) => employee.id));
     setEmployeeModalOpen(true);
     setEmployeeLoading(true);
     try {
       const data = await listEmployees({ skip: 0, limit: 1000, has_wx_user_id: true });
       setAllEmployees(
-        (data || []).map((emp: any) => ({
-          key: emp.id,
-          title: emp.name,
-          description: emp.code,
+        (data || []).map((employee: any) => ({
+          key: employee.id,
+          title: employee.name,
+          description: employee.code,
         })),
       );
-    } catch (e) {
-      message.error(toErrorMessage(e));
+    } catch (error) {
+      message.error(toErrorMessage(error));
     } finally {
       setEmployeeLoading(false);
     }
   };
 
   const handleSaveEmployees = async () => {
-    if (!currentProcessDevice) return;
+    if (!currentProcessDevice) {
+      return;
+    }
     setEmployeeLoading(true);
     try {
       await updateProcessDeviceEmployees(currentProcessDevice.id, targetKeys);
       message.success('员工分配成功');
       setEmployeeModalOpen(false);
-      loadAll();
-    } catch (e) {
-      message.error(toErrorMessage(e));
+      actionRef.current?.reload();
+    } catch (error) {
+      message.error(toErrorMessage(error));
     } finally {
       setEmployeeLoading(false);
     }
   };
 
-  const handleOpenConfigModal = async (instance: ProcessDevice) => {
+  const handleOpenConfigModal = async (instance: ProcessDeviceRecord) => {
     setCurrentInstance(instance);
-    
-    // Fetch configuration options on demand
     try {
       const [templateRows, itemRows, allSpecs, allInsts] = await Promise.all([
         listAllProcessItems(),
@@ -211,57 +161,50 @@ const ProcessManagePage = () => {
       setDeviceSpecs(allSpecs);
       setDeviceInsts(allInsts);
 
-      const instMapLocal = new Map(allInsts.map((item) => [item.id, item]));
+      const instanceMap = new Map(allInsts.map((item) => [item.id, item]));
       const instanceTemplateRows = templateRows.filter((item) => item.process_id === instance.process_id);
       const instanceItemRows = itemRows.filter((item) => item.process_device_id === instance.id);
 
       const grouped = new Map<string, string[]>();
       instanceItemRows.forEach((item) => {
-        const inst = instMapLocal.get(item.device_inst_id);
-        if (!inst) {
+        const deviceInst = instanceMap.get(item.device_inst_id);
+        if (!deviceInst) {
           return;
         }
-        const list = grouped.get(inst.device_spec_id) || [];
-        list.push(inst.id);
-        grouped.set(inst.device_spec_id, list);
+        const ids = grouped.get(deviceInst.device_spec_id) || [];
+        ids.push(deviceInst.id);
+        grouped.set(deviceInst.device_spec_id, ids);
       });
 
       const selections: Record<string, string[]> = {};
       instanceTemplateRows.forEach((row) => {
-        const all = grouped.get(row.device_spec_id) || [];
-        selections[row.id] = all.slice(0, row.qty);
-        grouped.set(row.device_spec_id, all.slice(row.qty));
+        const currentIds = grouped.get(row.device_spec_id) || [];
+        selections[row.id] = currentIds.slice(0, row.qty);
+        grouped.set(row.device_spec_id, currentIds.slice(row.qty));
       });
+
       setConfigSelections(selections);
       setConfigOpen(true);
-    } catch (e) {
-      message.error(toErrorMessage(e));
+    } catch (error) {
+      message.error(toErrorMessage(error));
     }
   };
 
-  const columns: ProColumns<ProcessDevice>[] = [
+  const columns: ProColumns<ProcessDeviceRecord>[] = [
     { title: '序号', valueType: 'indexBorder', width: 68, hideInSearch: true, fixed: 'left' },
-    { title: '分组编码', dataIndex: 'code', sorter: (a, b) => (a.code || '').localeCompare(b.code || '', 'zh-CN') },
-    { title: '分组SN', dataIndex: 'sn', sorter: (a, b) => (a.sn || '').localeCompare(b.sn || '', 'zh-CN') },
+    { title: '分组编码', dataIndex: 'code', sorter: true },
+    { title: '分组SN', dataIndex: 'sn', sorter: true },
     {
       title: '分组模板',
       dataIndex: 'process_id',
       render: (_, row) => row.process?.name || row.process_id,
-      sorter: (a, b) => {
-        const labelA = a.process?.name || '';
-        const labelB = b.process?.name || '';
-        return labelA.localeCompare(labelB, 'zh-CN');
-      },
+      sorter: true,
     },
     {
       title: '区域',
       dataIndex: 'area_id',
       render: (_, row) => row.area?.name || row.area_id || '-',
-      sorter: (a, b) => {
-        const labelA = a.area?.name || '';
-        const labelB = b.area?.name || '';
-        return labelA.localeCompare(labelB, 'zh-CN');
-      },
+      sorter: true,
     },
     {
       title: '状态',
@@ -269,18 +212,20 @@ const ProcessManagePage = () => {
       valueType: 'select',
       valueEnum: { 1: { text: '启用' }, 0: { text: '停用' } },
       render: (_, row) => (Number(row.status) === 1 ? '启用' : '停用'),
-      sorter: (a, b) => Number(a.status) - Number(b.status),
+      sorter: true,
     },
     {
       title: '员工',
       dataIndex: 'employees',
       hideInSearch: true,
       render: (_, row) => {
-        const list = row.employees || [];
-        if (list.length === 0) return '-';
+        const employees = row.employees || [];
+        if (employees.length === 0) {
+          return '-';
+        }
         return (
-          <Tooltip title={list.map((e) => e.name).join('，')}>
-            <Tag color="blue">{list.length} 人</Tag>
+          <Tooltip title={employees.map((employee) => employee.name).join('，')}>
+            <Tag color="blue">{employees.length} 人</Tag>
           </Tooltip>
         );
       },
@@ -293,18 +238,10 @@ const ProcessManagePage = () => {
       align: 'center',
       render: (_, row) => (
         <Space size="middle">
-          <a
-            key="config"
-            onClick={() => handleOpenConfigModal(row)}
-          >
+          <a key="config" onClick={() => handleOpenConfigModal(row)}>
             配置
           </a>
-          <a
-            key="employee"
-            onClick={() => {
-              handleOpenEmployeeModal(row);
-            }}
-          >
+          <a key="employee" onClick={() => handleOpenEmployeeModal(row)}>
             微信员工
           </a>
           <a
@@ -323,15 +260,13 @@ const ProcessManagePage = () => {
               try {
                 await deleteProcessDevice(row.id);
                 message.success('删除成功');
-                await loadAll();
+                actionRef.current?.reload();
               } catch (error) {
                 message.error(toErrorMessage(error));
               }
             }}
           >
-            <a style={{ color: '#ff4d4f' }}>
-              删除
-            </a>
+            <a style={{ color: '#ff4d4f' }}>删除</a>
           </Popconfirm>
         </Space>
       ),
@@ -340,16 +275,21 @@ const ProcessManagePage = () => {
 
   return (
     <PageContainer title="设备分组">
-      <ProTable<ProcessDevice>
+      <ProTable<ProcessDeviceRecord>
         rowKey="id"
-        loading={loading}
         columns={columns}
         scroll={{ x: 'max-content' }}
-        dataSource={filteredRows}
+        actionRef={actionRef}
+        request={(params, sort) =>
+          requestPagedList<ProcessDeviceRecord>('/api/v1/process-devices', {
+            params,
+            sort: sort as any,
+            defaultPageSize: 20,
+          })
+        }
         search={{ labelWidth: 'auto' }}
-        onSubmit={(values) => setQuery(values)}
-        onReset={() => setQuery({})}
-        options={{ reload: loadAll }}
+        pagination={{ defaultPageSize: 20, showSizeChanger: true }}
+        options={{ reload: () => actionRef.current?.reload() }}
         optionsRender={renderRefSafeTableOptions}
         toolBarRender={() => [
           <Button
@@ -382,12 +322,12 @@ const ProcessManagePage = () => {
         initialValues={
           editing
             ? {
-              code: editing.code,
-              sn: editing.sn,
-              process_id: editing.process_id,
-              area_id: editing.area_id || undefined,
-              status: Number(editing.status),
-            }
+                code: editing.code,
+                sn: editing.sn,
+                process_id: editing.process_id,
+                area_id: editing.area_id || undefined,
+                status: Number(editing.status),
+              }
             : { status: 1 }
         }
         onFinish={async (values) => {
@@ -409,7 +349,7 @@ const ProcessManagePage = () => {
             }
             setModalOpen(false);
             setEditing(null);
-            await loadAll();
+            actionRef.current?.reload();
             return true;
           } catch (error) {
             message.error(toErrorMessage(error));
@@ -443,7 +383,7 @@ const ProcessManagePage = () => {
           label="区域"
           request={async () => {
             const list = await listAllAreas();
-            return list.map((item) => ({ label: item.name, value: item.id }));
+            return list.map((item: Area) => ({ label: item.name, value: item.id }));
           }}
           allowClear
         />
@@ -495,6 +435,7 @@ const ProcessManagePage = () => {
           setConfigSaving(true);
           try {
             await Promise.all(currentInstanceItems.map((item) => deleteProcessDeviceItem(item.id)));
+
             const globalDeviceColorMap = new Map<string, string>();
             processDeviceItems.forEach((item) => {
               if (item.device_inst_id && item.color) {
@@ -504,21 +445,36 @@ const ProcessManagePage = () => {
 
             const usedColorsInGroup = new Set<string>();
             const deviceColorAssignments = new Map<string, string>();
-
-            const GROUP_COLORS = [
-              '#1677FF', '#52C41A', '#FA8C16', '#F5222D', '#722ED1',
-              '#13C2C2', '#EB2F96', '#FADB14', '#A0D911', '#FA541C',
-              '#2F54EB', '#7CB305', '#D48806', '#CF1322', '#531DAB',
-              '#08979C', '#C41D7F', '#D4B106', '#5B8C00', '#D4380D',
+            const groupColors = [
+              '#1677FF',
+              '#52C41A',
+              '#FA8C16',
+              '#F5222D',
+              '#722ED1',
+              '#13C2C2',
+              '#EB2F96',
+              '#FADB14',
+              '#A0D911',
+              '#FA541C',
+              '#2F54EB',
+              '#7CB305',
+              '#D48806',
+              '#CF1322',
+              '#531DAB',
+              '#08979C',
+              '#C41D7F',
+              '#D4B106',
+              '#5B8C00',
+              '#D4380D',
             ];
 
             for (const row of currentTemplateItems) {
               const selected = configSelections[row.id] || [];
               for (const instId of selected) {
                 if (globalDeviceColorMap.has(instId)) {
-                  const c = globalDeviceColorMap.get(instId)!;
-                  deviceColorAssignments.set(instId, c);
-                  usedColorsInGroup.add(c);
+                  const color = globalDeviceColorMap.get(instId)!;
+                  deviceColorAssignments.set(instId, color);
+                  usedColorsInGroup.add(color);
                 }
               }
             }
@@ -527,9 +483,9 @@ const ProcessManagePage = () => {
               const selected = configSelections[row.id] || [];
               for (const instId of selected) {
                 if (!deviceColorAssignments.has(instId)) {
-                  let color = GROUP_COLORS.find((c) => !usedColorsInGroup.has(c));
+                  let color = groupColors.find((candidate) => !usedColorsInGroup.has(candidate));
                   if (!color) {
-                    color = GROUP_COLORS[deviceColorAssignments.size % GROUP_COLORS.length];
+                    color = groupColors[deviceColorAssignments.size % groupColors.length];
                   }
                   deviceColorAssignments.set(instId, color);
                   usedColorsInGroup.add(color);
@@ -544,21 +500,20 @@ const ProcessManagePage = () => {
               const selected = configSelections[row.id] || [];
               for (const instId of selected) {
                 const specName = specMap.get(row.device_spec_id)?.name || row.device_spec_id;
-                const color = deviceColorAssignments.get(instId)!;
                 createTasks.push(
                   createProcessDeviceItem({
                     code: makeItemCode(currentInstance.code, seq++),
                     desc: `${currentInstance.code}-${specName}`,
                     device_inst_id: instId,
                     process_device_id: currentInstance.id,
-                    color: color,
+                    color: deviceColorAssignments.get(instId)!,
                   }),
                 );
               }
             }
             await Promise.all(createTasks);
             message.success('配置保存成功');
-            await loadAll();
+            actionRef.current?.reload();
             setConfigOpen(false);
             setCurrentInstance(null);
             setConfigSelections({});
@@ -606,9 +561,9 @@ const ProcessManagePage = () => {
                   placeholder="请选择设备实例"
                   options={options}
                   value={selected}
-                  onChange={(vals) => {
-                    const next = clampSelections(vals, row.qty);
-                    if (vals.length > row.qty) {
+                  onChange={(values) => {
+                    const next = clampSelections(values, row.qty);
+                    if (values.length > row.qty) {
                       message.warning(`该规格最多只能选择 ${row.qty} 台设备`);
                     }
                     setConfigSelections((prev) => ({ ...prev, [row.id]: next }));

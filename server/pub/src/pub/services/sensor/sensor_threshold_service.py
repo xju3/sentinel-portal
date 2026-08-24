@@ -10,6 +10,7 @@ from uuid import UUID
 
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy import func
 from influxdb_client.client.write_api import SYNCHRONOUS
 from influxdb_client.client.query_api import QueryApi
 
@@ -31,15 +32,23 @@ class SensorThresholdService:
         limit: int,
         sort_by: str | None = None,
         sort_order: str = "ascend",
-    ) -> Sequence[SensorThreshold]:
+        code: str | None = None,
+        metric: int | None = None,
+    ) -> tuple[Sequence[SensorThreshold], int]:
         stmt = (
             select(SensorThreshold)
             .where(SensorThreshold.tenant_id == tenant_id)
         )
+        if code:
+            stmt = stmt.where(SensorThreshold.code.ilike(f"%{code.strip()}%"))
+        if metric is not None:
+            stmt = stmt.where(SensorThreshold.metric == metric)
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total = (await session.execute(count_stmt)).scalar() or 0
         stmt = apply_sorting(stmt, SensorThreshold, sort_by, sort_order)
         stmt = stmt.offset(skip).limit(limit)
         result = await session.execute(stmt)
-        return result.scalars().all()
+        return result.scalars().all(), total
 
     @staticmethod
     async def get_by_id_and_tenant(session: AsyncSession, obj_id: UUID, tenant_id: UUID) -> Optional[SensorThreshold]:

@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useRef, useState } from 'react';
 import {
   ModalForm,
   PageContainer,
@@ -7,27 +7,28 @@ import {
   ProFormDigit,
   ProFormSelect,
   ProFormText,
+  ProFormTextArea,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Modal, Popconfirm, Space, message } from 'antd';
+import type { ActionType } from '@ant-design/pro-components';
+import { Button, Modal, Popconfirm, Space, message, Tabs } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 
 import EntityPicker from '@/components/EntityPicker';
-import { DeviceSpec, listAllDeviceSpecs, queryDeviceSpecs } from '@/services/deviceSpec';
+import { DeviceSpec, queryDeviceSpecs } from '@/services/deviceSpec';
 import {
   createProcess,
   createProcessItem,
   deleteProcess,
   deleteProcessItem,
-  listAllProcessItems,
-  listAllProcesses,
   Process,
   ProcessItem,
   updateProcess,
   updateProcessItem,
 } from '@/services/process';
-
 import { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';
+import { requestPagedList } from '@/utils/proTableRequest';
+
 type ProcessFormValues = {
   code: string;
   name: string;
@@ -38,6 +39,10 @@ type ProcessFormValues = {
 type ProcessItemFormValues = {
   device_spec_id: string;
   qty: number;
+};
+
+type ProcessItemRecord = ProcessItem & {
+  device_spec?: DeviceSpec;
 };
 
 const toErrorMessage = (error: unknown): string => {
@@ -52,70 +57,16 @@ const toErrorMessage = (error: unknown): string => {
 };
 
 const ProcessTemplatePage = () => {
-  const [loading, setLoading] = useState(false);
+  const actionRef = useRef<ActionType>();
+  const itemActionRef = useRef<ActionType>();
   const [saving, setSaving] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editing, setEditing] = useState<Process | null>(null);
-  const [query, setQuery] = useState<Record<string, any>>({});
-  const [rows, setRows] = useState<Process[]>([]);
-
   const [configOpen, setConfigOpen] = useState(false);
   const [currentProcess, setCurrentProcess] = useState<Process | null>(null);
-  const [processItems, setProcessItems] = useState<ProcessItem[]>([]);
   const [itemSaving, setItemSaving] = useState(false);
   const [itemModalOpen, setItemModalOpen] = useState(false);
-  const [editingItem, setEditingItem] = useState<ProcessItem | null>(null);
-
-  const loadProcesses = async () => {
-    setLoading(true);
-    try {
-      setRows(await listAllProcesses());
-    } catch (error) {
-      message.error(toErrorMessage(error));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const loadItems = async () => {
-    try {
-      setProcessItems(await listAllProcessItems());
-    } catch (error) {
-      message.error(toErrorMessage(error));
-    }
-  };
-
-  useEffect(() => {
-    loadProcesses();
-    loadItems();
-  }, []);
-
-  const filteredRows = useMemo(() => {
-    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();
-    return rows.filter((row) => {
-      if (query.code && !norm(row.code).includes(norm(query.code))) {
-        return false;
-      }
-      if (query.name && !norm(row.name).includes(norm(query.name))) {
-        return false;
-      }
-      if (
-        query.status !== undefined &&
-        query.status !== null &&
-        String(row.status) !== String(query.status)
-      ) {
-        return false;
-      }
-      return true;
-    });
-  }, [query, rows]);
-
-  const currentProcessItems = useMemo(() => {
-    if (!currentProcess?.id) {
-      return [];
-    }
-    return processItems.filter((item) => item.process_id === currentProcess.id);
-  }, [currentProcess?.id, processItems]);
+  const [editingItem, setEditingItem] = useState<ProcessItemRecord | null>(null);
 
   const columns: ProColumns<Process>[] = [
     {
@@ -125,8 +76,17 @@ const ProcessTemplatePage = () => {
       hideInSearch: true,
       fixed: 'left',
     },
-    { title: '编码', dataIndex: 'code', width: 140, sorter: (a, b) => (a.code || '').localeCompare(b.code || '', 'zh-CN') },
-    { title: '名称', dataIndex: 'name', sorter: (a, b) => (a.name || '').localeCompare(b.name || '', 'zh-CN') },
+    {
+      title: '编码',
+      dataIndex: 'code',
+      width: 140,
+      sorter: true,
+    },
+    {
+      title: '名称',
+      dataIndex: 'name',
+      sorter: true,
+    },
     {
       title: '工况及说明',
       dataIndex: 'remark',
@@ -143,7 +103,7 @@ const ProcessTemplatePage = () => {
         0: { text: '停用' },
       },
       render: (_, row) => (Number(row.status) === 1 ? '启用' : '停用'),
-      sorter: (a, b) => Number(a.status) - Number(b.status),
+      sorter: true,
     },
     {
       title: '操作',
@@ -155,10 +115,11 @@ const ProcessTemplatePage = () => {
         <Space size="middle">
           <a
             key="config"
-            onClick={async () => {
+            onClick={() => {
               setCurrentProcess(row);
+              setEditingItem(null);
+              setItemModalOpen(false);
               setConfigOpen(true);
-              await loadItems();
             }}
           >
             配置
@@ -179,22 +140,20 @@ const ProcessTemplatePage = () => {
               try {
                 await deleteProcess(row.id);
                 message.success('删除成功');
-                await loadProcesses();
+                actionRef.current?.reload();
               } catch (error) {
                 message.error(toErrorMessage(error));
               }
             }}
           >
-            <a style={{ color: '#ff4d4f' }}>
-              删除
-            </a>
+            <a style={{ color: '#ff4d4f' }}>删除</a>
           </Popconfirm>
         </Space>
       ),
     },
   ];
 
-  const itemColumns: ProColumns<ProcessItem>[] = [
+  const itemColumns: ProColumns<ProcessItemRecord>[] = [
     {
       title: '序号',
       valueType: 'indexBorder',
@@ -203,7 +162,10 @@ const ProcessTemplatePage = () => {
     {
       title: '规格',
       dataIndex: 'device_spec_id',
-      render: (_, row) => row.device_spec?.name || row.device_spec_id,
+      render: (_, row) =>
+        row.device_spec
+          ? `${row.device_spec.name} / ${row.device_spec.model}${row.device_spec.brand ? ` / ${row.device_spec.brand}` : ''}`
+          : row.device_spec_id,
     },
     {
       title: '数量',
@@ -235,15 +197,13 @@ const ProcessTemplatePage = () => {
               try {
                 await deleteProcessItem(row.id);
                 message.success('删除成功');
-                await loadItems();
+                itemActionRef.current?.reload();
               } catch (error) {
                 message.error(toErrorMessage(error));
               }
             }}
           >
-            <a style={{ color: '#ff4d4f' }}>
-              删除
-            </a>
+            <a style={{ color: '#ff4d4f' }}>删除</a>
           </Popconfirm>
         </Space>
       ),
@@ -262,14 +222,19 @@ const ProcessTemplatePage = () => {
     <PageContainer title="分组模板">
       <ProTable<Process>
         rowKey="id"
-        loading={loading}
         columns={columns}
         scroll={{ x: 'max-content' }}
-        dataSource={filteredRows}
+        actionRef={actionRef}
+        request={(params, sort) =>
+          requestPagedList<Process>('/api/v1/processes', {
+            params,
+            sort: sort as any,
+            defaultPageSize: 20,
+          })
+        }
         search={{ labelWidth: 'auto' }}
-        onSubmit={(values) => setQuery(values)}
-        onReset={() => setQuery({})}
-        options={{ reload: loadProcesses }}
+        pagination={{ defaultPageSize: 20, showSizeChanger: true }}
+        options={{ reload: () => actionRef.current?.reload() }}
         optionsRender={renderRefSafeTableOptions}
         toolBarRender={() => [
           <Button
@@ -301,7 +266,12 @@ const ProcessTemplatePage = () => {
         }}
         initialValues={
           editing
-            ? { code: editing.code, name: editing.name, status: Number(editing.status), remark: editing.remark }
+            ? {
+                code: editing.code,
+                name: editing.name,
+                status: Number(editing.status),
+                remark: editing.remark,
+              }
             : { status: 1 }
         }
         onFinish={async (values) => {
@@ -322,7 +292,7 @@ const ProcessTemplatePage = () => {
             }
             setModalOpen(false);
             setEditing(null);
-            await loadProcesses();
+            actionRef.current?.reload();
             return true;
           } catch (error) {
             message.error(toErrorMessage(error));
@@ -332,34 +302,55 @@ const ProcessTemplatePage = () => {
           }
         }}
       >
-        <ProFormText
-          name="code"
-          label="编码"
-          rules={[
-            { required: true, message: '请输入编码' },
-            { max: 8, message: '编码最多8个字符' },
+        <Tabs
+          defaultActiveKey="1"
+          items={[
+            {
+              key: '1',
+              label: '基本信息',
+              children: (
+                <>
+                  <ProFormText
+                    name="code"
+                    label="编码"
+                    rules={[
+                      { required: true, message: '请输入编码' },
+                      { max: 8, message: '编码最多8个字符' },
+                    ]}
+                  />
+                  <ProFormText
+                    name="name"
+                    label="名称"
+                    rules={[
+                      { required: true, message: '请输入名称' },
+                      { max: 64, message: '名称最多64个字符' },
+                    ]}
+                  />
+                  <ProFormSelect
+                    name="status"
+                    label="状态"
+                    options={[
+                      { label: '启用', value: 1 },
+                      { label: '停用', value: 0 },
+                    ]}
+                    rules={[{ required: true, message: '请选择状态' }]}
+                  />
+                </>
+              ),
+            },
+            {
+              key: '2',
+              label: '工况/工艺/设备构成',
+              children: (
+                <ProFormTextArea
+                  name="remark"
+                  label=""
+                  placeholder="请输入工况、工艺、或设备构成等信息"
+                  fieldProps={{ rows: 14 }}
+                />
+              ),
+            },
           ]}
-        />
-        <ProFormText
-          name="name"
-          label="名称"
-          rules={[
-            { required: true, message: '请输入名称' },
-            { max: 64, message: '名称最多64个字符' },
-          ]}
-        />
-        <ProFormSelect
-          name="status"
-          label="状态"
-          options={[
-            { label: '启用', value: 1 },
-            { label: '停用', value: 0 },
-          ]}
-          rules={[{ required: true, message: '请选择状态' }]}
-        />
-        <ProFormText
-          name="remark"
-          label="工况/工艺/设备构成"
         />
       </ModalForm>
 
@@ -376,13 +367,30 @@ const ProcessTemplatePage = () => {
         }}
         footer={null}
       >
-        <ProTable<ProcessItem>
+        <ProTable<ProcessItemRecord>
           rowKey="id"
           columns={itemColumns}
           scroll={{ x: 'max-content' }}
-          dataSource={currentProcessItems}
+          actionRef={itemActionRef}
+          request={(params, sort) => {
+            if (!currentProcess?.id) {
+              return Promise.resolve({
+                data: [],
+                success: true,
+                total: 0,
+              });
+            }
+            return requestPagedList<ProcessItemRecord>('/api/v1/process-items', {
+              params: {
+                ...params,
+                process_id: currentProcess.id,
+              },
+              sort: sort as any,
+              defaultPageSize: 20,
+            });
+          }}
           search={false}
-          pagination={{ pageSize: 8 }}
+          pagination={{ defaultPageSize: 20, showSizeChanger: true }}
           options={false}
           toolBarRender={() => [
             <Button
@@ -443,7 +451,7 @@ const ProcessTemplatePage = () => {
               }
               setItemModalOpen(false);
               setEditingItem(null);
-              await loadItems();
+              itemActionRef.current?.reload();
               return true;
             } catch (error) {
               message.error(toErrorMessage(error));
@@ -469,7 +477,13 @@ const ProcessTemplatePage = () => {
               }
               columns={specPickerColumns}
               getRecordLabel={(record) => `${record.name} / ${record.model} / ${record.brand}`}
-              fetcher={queryDeviceSpecs}
+              fetcher={async (query) => {
+                const result = await queryDeviceSpecs(query);
+                return {
+                  items: result.items || result.data,
+                  total: result.total,
+                };
+              }}
             />
           </ProForm.Item>
           <ProFormDigit

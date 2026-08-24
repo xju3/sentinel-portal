@@ -1,76 +1,46 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import {
-  ProForm,
+  ActionType,
   ModalForm,
   PageContainer,
   ProColumns,
+  ProForm,
   ProFormDigit,
   ProFormSwitch,
   ProFormText,
+  ProFormTextArea,
   ProTable,
 } from '@ant-design/pro-components';
-import { Button, Modal, Popconfirm, Space, Table, Tag, message } from 'antd';
+import { Button, Modal, Popconfirm, Space, Table, Tag, Tabs, message } from 'antd';
 import type { ColumnsType } from 'antd/es/table';
 import { useNavigate } from '@umijs/max';
-
 import EntityPicker from '@/components/EntityPicker';
 import { BearingModel, queryBearings } from '@/services/bearing';
 import { Location, queryLocations } from '@/services/location';
-import {
-  DeviceCategory,
-  queryDeviceCategories,
-  listAllDeviceCategories,
-} from '@/services/deviceCategory';
+import { DeviceCategory, listAllDeviceCategories, queryDeviceCategories } from '@/services/deviceCategory';
 import {
   DeviceSpec,
+  DeviceSpecBearingBinding,
+  DeviceSpecBearingBindingPayload,
   DeviceSpecPayload,
   createDeviceSpec,
   deleteDeviceSpec,
-  DeviceSpecBearingBinding,
-  DeviceSpecBearingBindingPayload,
   getDeviceSpecBearingBindings,
-  listAllDeviceSpecs,
+  queryDeviceSpecs,
   updateDeviceSpec,
   updateDeviceSpecBearingBindings,
 } from '@/services/deviceSpec';
 import { Supplier, querySuppliers } from '@/services/supplier';
-import {
-  ProcessDevice,
-  listAllProcessDevices,
-} from '@/services/process';
-
 import { renderRefSafeTableOptions } from '@/utils/proTableOptions';
 
-type CategoryTreeRow = DeviceCategory & {
-  children?: CategoryTreeRow[];
-};
-
-type DeviceSpecFormValues = {
-  name: string;
-  model: string;
-  description?: string;
-  brand: string;
-  voltage: number;
-  rpm: number;
-  supplier_id: string;
-  device_category_id: string;
-  remark?: string;
-};
-
+type CategoryTreeRow = DeviceCategory & { children?: CategoryTreeRow[] };
+type DeviceSpecFormValues = DeviceSpecPayload;
 type BearingBindingFormValues = DeviceSpecBearingBindingPayload;
-
-type BearingBindingDraft = DeviceSpecBearingBinding & {
-  draftKey: string;
-};
-
+type BearingBindingDraft = DeviceSpecBearingBinding & { draftKey: string };
 
 const toErrorMessage = (error: unknown): string => {
   const e = error as
-    | {
-      data?: { detail?: string };
-      info?: { errorMessage?: string };
-      message?: string;
-    }
+    | { data?: { detail?: string }; info?: { errorMessage?: string }; message?: string }
     | undefined;
   return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';
 };
@@ -78,181 +48,122 @@ const toErrorMessage = (error: unknown): string => {
 const buildCategoryTree = (rows: DeviceCategory[]): CategoryTreeRow[] => {
   const nodeMap = new Map<string, CategoryTreeRow>();
   rows.forEach((item) => nodeMap.set(item.id, { ...item, children: [] }));
-
   const roots: CategoryTreeRow[] = [];
   rows.forEach((item) => {
     const node = nodeMap.get(item.id);
-    if (!node) {
-      return;
-    }
-    const pid = item.parent_id || undefined;
-    if (pid && nodeMap.has(pid)) {
-      const parent = nodeMap.get(pid);
-      if (parent) {
-        parent.children = parent.children || [];
-        parent.children.push(node);
-      }
+    if (!node) return;
+    if (item.parent_id && nodeMap.has(item.parent_id)) {
+      nodeMap.get(item.parent_id)?.children?.push(node);
       return;
     }
     roots.push(node);
   });
-
-  const sortTree = (nodes: CategoryTreeRow[]) => {
-    nodes.sort((a, b) => a.name.localeCompare(b.name, 'zh-CN'));
-    nodes.forEach((item) => {
-      if (item.children && item.children.length > 0) {
-        sortTree(item.children);
-      }
-    });
-  };
-  sortTree(roots);
   return roots;
 };
 
 const DeviceSpecPage = () => {
   const navigate = useNavigate();
-  const formRef = useRef<import('@ant-design/pro-components').ProFormInstance>();
-
-  const [loading, setLoading] = useState(false);
+  const actionRef = useRef<ActionType>();
+  const formRef = useRef<any>();
   const [modalOpen, setModalOpen] = useState(false);
   const [saving, setSaving] = useState(false);
-  const [rows, setRows] = useState<DeviceSpec[]>([]);
-  const [processDevices, setProcessDevices] = useState<ProcessDevice[]>([]);
   const [editing, setEditing] = useState<DeviceSpec | null>(null);
-  const [query, setQuery] = useState<Record<string, any>>({});
+  const [categoryTreeData, setCategoryTreeData] = useState<CategoryTreeRow[]>([]);
   const [bindingModalOpen, setBindingModalOpen] = useState(false);
   const [bindingEditorOpen, setBindingEditorOpen] = useState(false);
+  const [bindingSpec, setBindingSpec] = useState<DeviceSpec | null>(null);
   const [bindingLoading, setBindingLoading] = useState(false);
   const [bindingSaving, setBindingSaving] = useState(false);
-  const [bindingSpec, setBindingSpec] = useState<DeviceSpec | null>(null);
   const [bindings, setBindings] = useState<BearingBindingDraft[]>([]);
   const [editingBindingIndex, setEditingBindingIndex] = useState<number | null>(null);
   const [selectedBearing, setSelectedBearing] = useState<BearingModel | undefined>();
-  const [selectedLocation, setSelectedLocation] =
-    useState<Pick<Location, 'id' | 'name'> | undefined>();
-  const [categoryTreeData, setCategoryTreeData] = useState<any[]>([]);
+  const [selectedLocation, setSelectedLocation] = useState<Pick<Location, 'id' | 'name'> | undefined>();
 
   useEffect(() => {
-    listAllDeviceCategories().then(categories => {
-      const buildTree = (parentId?: string | null): any[] => {
-        return categories
-          .filter((d) => (parentId ? d.parent_id === parentId : !d.parent_id))
-          .map((d) => {
-            const children = buildTree(d.id);
-            return {
-              ...d,
-              key: d.id,
-              children: children.length > 0 ? children : undefined,
-              disabled: children.length > 0,
-            };
-          });
-      };
-      setCategoryTreeData(buildTree());
-    }).catch(console.error);
-  }, []);
-
-  const loadRows = async (processDeviceId?: string) => {
-    setLoading(true);
-    try {
-      const specs = await listAllDeviceSpecs(processDeviceId);
-      setRows(specs);
-    } catch (error) {
-      message.error(toErrorMessage(error));
-    } finally {
-      setLoading(false);
+    if (!modalOpen || categoryTreeData.length > 0) {
+      return;
     }
-  };
+    void listAllDeviceCategories()
+      .then((rows) => setCategoryTreeData(buildCategoryTree(rows)))
+      .catch(() => undefined);
+  }, [categoryTreeData.length, modalOpen]);
 
-  useEffect(() => {
-    loadRows();
-    listAllProcessDevices()
-      .then(setProcessDevices)
-      .catch((error) => message.error(toErrorMessage(error)));
-  }, []);
-
-  const filteredRows = useMemo(() => {
-    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();
-    return rows.filter((row) => {
-      if (query.name && !norm(row.name).includes(norm(query.name))) {
-        return false;
-      }
-      if (query.model && !norm(row.model).includes(norm(query.model))) {
-        return false;
-      }
-      if (query.brand && !norm(row.brand).includes(norm(query.brand))) {
-        return false;
-      }
-      if (query.supplier_id) {
-        const supplierName = row.supplier?.name || '';
-        const hit =
-          norm(supplierName).includes(norm(query.supplier_id)) ||
-          norm(row.supplier_id).includes(norm(query.supplier_id));
-        if (!hit) {
-          return false;
-        }
-      }
-      if (query.device_category_id) {
-        const categoryName = row.device_category?.name || '';
-        const hit =
-          norm(categoryName).includes(norm(query.device_category_id)) ||
-          norm(row.device_category_id).includes(norm(query.device_category_id));
-        if (!hit) {
-          return false;
-        }
-      }
-      if (query.rpm !== undefined && query.rpm !== null && String(row.rpm) !== String(query.rpm)) {
-        return false;
-      }
-      if (
-        query.voltage !== undefined &&
-        query.voltage !== null &&
-        String(row.voltage) !== String(query.voltage)
-      ) {
-        return false;
-      }
-      return true;
-    });
-  }, [query, rows]);
-
-  const supplierPickerColumns: ColumnsType<Supplier> = [
-    { title: '名称', dataIndex: 'name' },
-    { title: '品牌', dataIndex: 'brand' },
+  const columns: ProColumns<DeviceSpec>[] = [
+    { title: '序号', valueType: 'indexBorder', width: 68, hideInSearch: true, fixed: 'left' },
+    { title: '名称', dataIndex: 'name', width: 180, sorter: true },
+    { title: '型号', dataIndex: 'model', width: 120, sorter: true },
+    { title: '品牌', dataIndex: 'brand', width: 120, sorter: true },
+    { title: '电压', dataIndex: 'voltage', width: 90, valueType: 'digit', sorter: true },
+    { title: '转速', dataIndex: 'rpm', width: 90, valueType: 'digit', sorter: true },
     {
-      title: '联系方式',
-      dataIndex: 'contact_info',
-      render: (_, row) => row.contact_info || '-',
+      title: '分类',
+      dataIndex: 'device_category_id',
+      hideInSearch: true,
+      render: (_, row) => row.device_category?.name || '-',
     },
     {
-      title: '状态',
-      dataIndex: 'active',
-      width: 80,
-      render: (_, row) => (row.active ? '启用' : '停用'),
+      title: '供应商',
+      dataIndex: 'supplier_id',
+      hideInSearch: true,
+      render: (_, row) => row.supplier?.name || '-',
     },
-  ];
-
-  const categoryPickerColumns: ColumnsType<DeviceCategory> = [
-    { title: '分类名称', dataIndex: 'name' },
     {
-      title: '描述',
+      title: '备注',
       dataIndex: 'description',
+      ellipsis: true,
+      hideInSearch: true,
       render: (_, row) => row.description || '-',
     },
-  ];
-
-  const bearingPickerColumns: ColumnsType<BearingModel> = [
-    { title: '品牌', dataIndex: 'brand', width: 130 },
-    { title: '型号', dataIndex: 'model', width: 160 },
     {
-      title: '轴承类型',
-      dataIndex: 'bearing_type',
-      render: (_, row) => row.bearing_type || '-',
+      title: '性能标准',
+      dataIndex: 'remark',
+      ellipsis: true,
+      hideInSearch: true,
+      render: (_, row) => row.remark || '-',
     },
-    { title: '滚动体数量', dataIndex: 'rolling_element_count', width: 110 },
     {
-      title: '状态',
-      dataIndex: 'active',
-      width: 80,
-      render: (_, row) => (row.active ? '启用' : '停用'),
+      title: '操作',
+      valueType: 'option',
+      width: 180,
+      fixed: 'right',
+      render: (_, row) => (
+        <Space size="small">
+          <a
+            onClick={() => {
+              setEditing(row);
+              setModalOpen(true);
+            }}
+          >
+            编辑
+          </a>
+          <Popconfirm
+            title="确认删除该设备规格吗？"
+            onConfirm={async () => {
+              try {
+                await deleteDeviceSpec(row.id);
+                message.success('删除成功');
+                actionRef.current?.reload();
+              } catch (error) {
+                message.error(toErrorMessage(error));
+              }
+            }}
+          >
+            <a style={{ color: '#ff4d4f' }}>删除</a>
+          </Popconfirm>
+          <a onClick={() => void openBindingModal(row)}>轴承</a>
+          {(row.process_device_count || 0) > 0 && (
+            <a
+              onClick={() => {
+                const group = row.process_devices?.[0]?.id;
+                const suffix = group ? `?group=${encodeURIComponent(group)}` : '';
+                navigate(`/device/specs/${row.id}/comparison${suffix}`);
+              }}
+            >
+              对比
+            </a>
+          )}
+        </Space>
+      ),
     },
   ];
 
@@ -261,10 +172,9 @@ const DeviceSpecPage = () => {
     setBindingModalOpen(true);
     setBindingLoading(true);
     try {
-      const data: DeviceSpecBearingBinding[] =
-        await getDeviceSpecBearingBindings(spec.id);
+      const rows: DeviceSpecBearingBinding[] = await getDeviceSpecBearingBindings(spec.id);
       setBindings(
-        data.map((item, index) => ({
+        rows.map((item, index) => ({
           ...item,
           draftKey: item.id || `${item.location_id}-${item.bearing_id}-${index}`,
         })),
@@ -279,33 +189,21 @@ const DeviceSpecPage = () => {
   };
 
   const bindingColumns: ColumnsType<BearingBindingDraft> = [
-    {
-      title: '安装位置',
-      dataIndex: 'location_id',
-      width: 140,
-      render: (_, row) => row.location?.name || row.location_id,
-    },
+    { title: '安装位置', dataIndex: 'location_id', render: (_, row) => row.location?.name || row.location_id },
     {
       title: '轴承型号',
-      render: (_, row) =>
-        row.bearing ? `${row.bearing.brand} / ${row.bearing.model}` : row.bearing_id,
+      render: (_, row) => (row.bearing ? `${row.bearing.brand} / ${row.bearing.model}` : row.bearing_id),
     },
-    {
-      title: '轴转速比',
-      dataIndex: 'shaft_speed_ratio',
-      width: 110,
-    },
+    { title: '轴转速比', dataIndex: 'shaft_speed_ratio', width: 110 },
     {
       title: '诊断状态',
       dataIndex: 'enabled',
       width: 100,
-      render: (_, row) =>
-        row.enabled ? <Tag color="success">启用</Tag> : <Tag>停用</Tag>,
+      render: (_, row) => (row.enabled ? <Tag color="success">启用</Tag> : <Tag>停用</Tag>),
     },
     {
       title: '操作',
       width: 130,
-      align: 'center',
       render: (_, row, index) => (
         <Space>
           <a
@@ -320,9 +218,7 @@ const DeviceSpecPage = () => {
           </a>
           <Popconfirm
             title="确认移除该位置的轴承配置吗？"
-            onConfirm={() =>
-              setBindings((current) => current.filter((item) => item.draftKey !== row.draftKey))
-            }
+            onConfirm={() => setBindings((current) => current.filter((item) => item.draftKey !== row.draftKey))}
           >
             <a style={{ color: '#ff4d4f' }}>移除</a>
           </Popconfirm>
@@ -331,182 +227,15 @@ const DeviceSpecPage = () => {
     },
   ];
 
-  const columns: ProColumns<DeviceSpec>[] = [
-    {
-      title: '序号',
-      valueType: 'indexBorder',
-      width: 68,
-      hideInSearch: true,
-      fixed: 'left',
-    },
-
-    {
-      title: '名称',
-      dataIndex: 'name',
-      width: 180,
-      sorter: (a, b) => (a.name || '').localeCompare(b.name || '', 'zh-CN'),
-    },
-    {
-      title: '设备分组',
-      dataIndex: 'process_device_id',
-      hideInTable: true,
-      valueType: 'select',
-      fieldProps: {
-        allowClear: true,
-        showSearch: true,
-        options: processDevices.map((item) => ({
-          value: item.id,
-          label: [
-            item.code,
-            item.sn,
-            item.process?.name,
-            item.status === 1 ? undefined : '已停用',
-          ]
-            .filter(Boolean)
-            .join(' / '),
-        })),
-        optionFilterProp: 'label',
-        placeholder: '请选择设备分组',
-      },
-    },
-    {
-      title: '型号',
-      dataIndex: 'model',
-      width: 80,
-      ellipsis: true,
-      sorter: (a, b) => (a.model || '').localeCompare(b.model || '', 'zh-CN'),
-    },
-    {
-      title: '电压',
-      dataIndex: 'voltage',
-      width: 60,
-      ellipsis: true,
-      valueType: 'digit',
-      sorter: (a, b) => Number(a.voltage) - Number(b.voltage),
-    },
-    {
-      title: '转速',
-      dataIndex: 'rpm',
-      width: 70,
-      valueType: 'digit',
-      sorter: (a, b) => Number(a.rpm) - Number(b.rpm),
-    },
-    {
-      title: '分类',
-      dataIndex: 'device_category_id',
-      width: 120,
-      ellipsis: true,
-      render: (_, row) => row.device_category?.name || '-',
-      sorter: (a, b) => {
-        const labelA = a.device_category?.name || '';
-        const labelB = b.device_category?.name || '';
-        return labelA.localeCompare(labelB, 'zh-CN');
-      },
-    },
-    {
-      title: '供应商',
-      dataIndex: 'supplier_id',
-      width: 120,
-      ellipsis: true,
-      render: (_, row) => row.supplier?.name || '-',
-      sorter: (a, b) => {
-        const labelA = a.supplier?.name || '';
-        const labelB = b.supplier?.name || '';
-        return labelA.localeCompare(labelB, 'zh-CN');
-      },
-    },
-    {
-      title: '品牌',
-      dataIndex: 'brand',
-      width: 100,
-      sorter: (a, b) => (a.brand || '').localeCompare(b.brand || '', 'zh-CN'),
-    },
-    {
-      title: '备注',
-      dataIndex: 'description',
-      ellipsis: true,
-      render: (_, row) => row.description || '-',
-      hideInSearch: true,
-      sorter: (a, b) => (a.description || '').localeCompare(b.description || '', 'zh-CN'),
-    },
-    {
-      title: '性能标准',
-      dataIndex: 'remark',
-      hideInSearch: true,
-      ellipsis: true,
-    },
-    {
-      title: '操作',
-      valueType: 'option',
-      width: 160,
-      fixed: 'right',
-      render: (_, row) => (
-        <Space size="small">
-          <a
-            key="edit"
-            onClick={() => {
-              setEditing(row);
-              setModalOpen(true);
-            }}
-          >
-            编辑
-          </a>
-          <Popconfirm
-            key="delete"
-            title="确认删除该设备规格吗？"
-            onConfirm={async () => {
-              try {
-                await deleteDeviceSpec(row.id);
-                message.success('删除成功');
-                await loadRows(query.process_device_id);
-              } catch (error) {
-                message.error(toErrorMessage(error));
-              }
-            }}
-          >
-            <a style={{ color: '#ff4d4f' }}>
-              删除
-            </a>
-          </Popconfirm>
-          <a key="bearing" onClick={() => void openBindingModal(row)}>
-            轴承
-          </a>
-            {row.process_device_count > 0 && (
-            <a
-              key="comparison"
-              onClick={() => {
-                const groupQuery = query.process_device_id
-                  ? `?group=${encodeURIComponent(query.process_device_id)}`
-                  : '';
-                navigate(`/device/specs/${row.id}/comparison${groupQuery}`);
-              }}
-            >
-              对比
-            </a>
-          )}
-        </Space>
-      ),
-
-    },
-  ];
-
   return (
     <PageContainer title="设备规格">
       <ProTable<DeviceSpec>
         rowKey="id"
-        loading={loading}
+        actionRef={actionRef}
         columns={columns}
-        dataSource={filteredRows}
+        request={queryDeviceSpecs}
         search={{ labelWidth: 'auto' }}
-        onSubmit={async (values) => {
-          setQuery(values);
-          await loadRows(values.process_device_id);
-        }}
-        onReset={() => {
-          setQuery({});
-          void loadRows();
-        }}
-        options={{ reload: () => loadRows(query.process_device_id) }}
+        pagination={{ defaultPageSize: 20, showSizeChanger: true }}
         optionsRender={renderRefSafeTableOptions}
         toolBarRender={() => [
           <Button
@@ -533,36 +262,33 @@ const DeviceSpecPage = () => {
             setEditing(null);
           },
         }}
-        submitter={{
-          submitButtonProps: { loading: saving },
-          searchConfig: { submitText: '保存' },
-        }}
+        submitter={{ submitButtonProps: { loading: saving }, searchConfig: { submitText: '保存' } }}
         initialValues={
           editing
             ? {
-              name: editing.name,
-              model: editing.model,
-              description: editing.description,
-              brand: editing.brand,
-              voltage: editing.voltage,
-              rpm: editing.rpm,
-              supplier_id: editing.supplier_id,
-              device_category_id: editing.device_category_id,
-              remark: editing.remark,
-            }
+                name: editing.name,
+                model: editing.model,
+                description: editing.description,
+                brand: editing.brand,
+                voltage: editing.voltage,
+                rpm: editing.rpm,
+                supplier_id: editing.supplier_id,
+                device_category_id: editing.device_category_id,
+                remark: editing.remark,
+              }
             : { voltage: 0, rpm: 0 }
         }
         onFinish={async (values) => {
           const payload: DeviceSpecPayload = {
-            name: values.name?.trim() || '',
-            model: values.model?.trim() || '',
+            name: values.name.trim(),
+            model: values.model.trim(),
             description: values.description?.trim() || undefined,
-            brand: values.brand?.trim() || '',
+            brand: values.brand.trim(),
             voltage: values.voltage,
             rpm: values.rpm,
             supplier_id: values.supplier_id,
             device_category_id: values.device_category_id,
-            remark: values.remark?.trim(),
+            remark: values.remark?.trim() || undefined,
           };
           setSaving(true);
           try {
@@ -574,7 +300,7 @@ const DeviceSpecPage = () => {
             message.success('保存成功');
             setModalOpen(false);
             setEditing(null);
-            await loadRows(query.process_device_id);
+            actionRef.current?.reload();
             return true;
           } catch (error) {
             message.error(toErrorMessage(error));
@@ -584,73 +310,74 @@ const DeviceSpecPage = () => {
           }
         }}
       >
-        <ProFormText name="name" label="名称" rules={[{ required: true, message: '请输入规格名称' }]} />
-        <ProForm.Item
-          name="device_category_id"
-          label="设备分类"
-          rules={[{ required: true, message: '请选择设备分类' }]}
-        >
-          <EntityPicker<DeviceCategory>
-            placeholder="请点击选择设备分类"
-            modalTitle="选择设备分类"
-            triggerText="选择"
-            valueLabel={editing?.device_category?.name}
-            columns={categoryPickerColumns}
-            getRecordLabel={(record) => record.name}
-            fetcher={({ current, pageSize, keyword }) =>
-              queryDeviceCategories({ current, pageSize, keyword })
-            }
-            treeData={categoryTreeData}
-          />
-        </ProForm.Item>
-        <ProForm.Item name="supplier_id" label="供应商" rules={[{ required: true, message: '请选择供应商' }]}>
-          <EntityPicker<Supplier>
-            placeholder="请点击选择供应商"
-            modalTitle="选择供应商"
-            triggerText="选择"
-            valueLabel={editing?.supplier?.name}
-            columns={supplierPickerColumns}
-            getRecordLabel={(record) => record.name}
-            fetcher={({ current, pageSize, keyword }) =>
-              querySuppliers({ current, pageSize, keyword })
-            }
-            onRecordChange={(record) => {
-              formRef.current?.setFieldsValue({ brand: record?.brand || '' });
-            }}
-          />
-        </ProForm.Item>
-        <ProFormDigit
-          name="rpm"
-          label="转速(RPM)"
-          min={0}
-          fieldProps={{ precision: 0 }}
-          rules={[{ required: true, message: '请输入转速' }]}
+        <Tabs
+          defaultActiveKey="1"
+          items={[
+            {
+              key: '1',
+              label: '基本信息',
+              children: (
+                <>
+                  <ProFormText name="name" label="名称" rules={[{ required: true, message: '请输入规格名称' }]} />
+                  <ProForm.Item name="device_category_id" label="设备分类" rules={[{ required: true, message: '请选择设备分类' }]}>
+                    <EntityPicker<DeviceCategory>
+                      placeholder="请点击选择设备分类"
+                      modalTitle="选择设备分类"
+                      triggerText="选择"
+                      valueLabel={editing?.device_category?.name}
+                      columns={[
+                        { title: '分类名称', dataIndex: 'name' },
+                        { title: '描述', dataIndex: 'description', render: (_, row) => row.description || '-' },
+                      ]}
+                      getRecordLabel={(record) => record.name}
+                      fetcher={async ({ current, pageSize, keyword }) => {
+                        const result = await queryDeviceCategories({ current, pageSize, keyword });
+                        return { items: result.data, total: result.total };
+                      }}
+                      treeData={categoryTreeData}
+                    />
+                  </ProForm.Item>
+                  <ProForm.Item name="supplier_id" label="供应商" rules={[{ required: true, message: '请选择供应商' }]}>
+                    <EntityPicker<Supplier>
+                      placeholder="请点击选择供应商"
+                      modalTitle="选择供应商"
+                      triggerText="选择"
+                      valueLabel={editing?.supplier?.name}
+                      columns={[
+                        { title: '名称', dataIndex: 'name' },
+                        { title: '品牌', dataIndex: 'brand' },
+                        { title: '联系方式', dataIndex: 'contact_info', render: (_, row) => row.contact_info || '-' },
+                      ]}
+                      getRecordLabel={(record) => record.name}
+                      fetcher={async ({ current, pageSize, keyword }) => {
+                        const result = await querySuppliers({ current, pageSize, keyword });
+                        return { items: result.data, total: result.total };
+                      }}
+                      onRecordChange={(record) => formRef.current?.setFieldsValue({ brand: record?.brand || '' })}
+                    />
+                  </ProForm.Item>
+                  <ProFormDigit name="rpm" label="转速(RPM)" min={0} fieldProps={{ precision: 0 }} rules={[{ required: true, message: '请输入转速' }]} />
+                  <ProFormDigit name="voltage" label="电压(V)" min={0} fieldProps={{ precision: 2 }} rules={[{ required: true, message: '请输入电压' }]} />
+                  <ProFormText name="model" label="型号" />
+                  <ProFormText name="brand" label="品牌" fieldProps={{ readOnly: true }} />
+                  <ProFormText name="description" label="备注" />
+                </>
+              ),
+            },
+            {
+              key: '2',
+              label: '电气性能标准',
+              children: <ProFormTextArea name="remark" label="" fieldProps={{ rows: 14 }} placeholder="请输入该设备规格的电气性能标准" />,
+            },
+          ]}
         />
-        <ProFormDigit
-          name="voltage"
-          label="电压(V)"
-          min={0}
-          fieldProps={{ precision: 2 }}
-          rules={[{ required: true, message: '请输入电压' }]}
-        />
-
-        <ProFormText name="model" label="型号" rules={[{ message: '请输入型号' }]} />
-        <ProFormText
-          name="brand"
-          label="品牌"
-          disabled={true}
-          rules={[{ message: '品牌将自动填写' }]}
-          fieldProps={{ readOnly: true, placeholder: '选择供应商后自动填写' }}
-        />
-        <ProFormText name="remark" label="电气性能标准" />
-        <ProFormText name="description" label="备注" />
       </ModalForm>
 
       <Modal
         title={bindingSpec ? `${bindingSpec.name} - 轴承配置` : '轴承配置'}
         open={bindingModalOpen}
         width={960}
-        destroyOnHidden
+        destroyOnClose
         confirmLoading={bindingSaving}
         okText="保存配置"
         onCancel={() => {
@@ -659,9 +386,7 @@ const DeviceSpecPage = () => {
           setBindings([]);
         }}
         onOk={async () => {
-          if (!bindingSpec) {
-            return;
-          }
+          if (!bindingSpec) return;
           setBindingSaving(true);
           try {
             await updateDeviceSpecBearingBindings(
@@ -696,28 +421,13 @@ const DeviceSpecPage = () => {
           >
             安装位置
           </Button>
-          <span style={{ color: '#8c8c8c' }}>
-            轴转速比 = 该测点轴承所在轴转速 ÷ 设备规格转速，直联设备填写 1。
-          </span>
+          <span style={{ color: '#8c8c8c' }}>轴转速比 = 测点轴承所在轴转速 ÷ 设备规格转速。</span>
         </Space>
-        <Table<BearingBindingDraft>
-          rowKey="draftKey"
-          loading={bindingLoading}
-          columns={bindingColumns}
-          dataSource={bindings}
-          pagination={false}
-          size="small"
-        />
+        <Table<BearingBindingDraft> rowKey="draftKey" loading={bindingLoading} columns={bindingColumns} dataSource={bindings} pagination={false} size="small" />
       </Modal>
 
       <ModalForm<BearingBindingFormValues>
-        key={
-          bindingEditorOpen
-            ? editingBindingIndex === null
-              ? 'new-bearing-binding'
-              : `edit-bearing-binding-${bindings[editingBindingIndex]?.draftKey}`
-            : 'closed-bearing-binding'
-        }
+        key={editingBindingIndex === null ? 'new-bearing-binding' : `edit-bearing-binding-${editingBindingIndex}`}
         title={editingBindingIndex === null ? '添加轴承位置' : '编辑轴承位置'}
         open={bindingEditorOpen}
         modalProps={{
@@ -731,56 +441,27 @@ const DeviceSpecPage = () => {
         }}
         initialValues={
           editingBindingIndex === null
-            ? {
-              shaft_speed_ratio: 1,
-              enabled: true,
-            }
+            ? { shaft_speed_ratio: 1, enabled: true }
             : bindings[editingBindingIndex]
         }
         onFinish={async (values) => {
-          const locationId = values.location_id;
-          const duplicate = bindings.some(
-            (item, index) =>
-              index !== editingBindingIndex &&
-              item.location_id === locationId,
-          );
-          if (duplicate) {
-            message.error(`测点“${selectedLocation?.name || locationId}”已配置轴承`);
-            return false;
-          }
-          const previous =
-            editingBindingIndex === null ? undefined : bindings[editingBindingIndex];
+          const previous = editingBindingIndex === null ? undefined : bindings[editingBindingIndex];
           const next: BearingBindingDraft = {
             id: previous?.id,
             device_spec_id: bindingSpec?.id || '',
             bearing_id: values.bearing_id,
-            location_id: locationId,
+            location_id: values.location_id,
             shaft_speed_ratio: values.shaft_speed_ratio,
             enabled: values.enabled ?? true,
-            bearing:
-              selectedBearing?.id === values.bearing_id
-                ? selectedBearing
-                : previous?.bearing?.id === values.bearing_id
-                  ? previous.bearing
-                  : undefined,
-            location:
-              selectedLocation?.id === locationId
-                ? selectedLocation
-                : previous?.location?.id === locationId
-                  ? previous.location
-                  : undefined,
-            draftKey:
-              previous?.draftKey ||
-              `${locationId}-${values.bearing_id}-${Date.now().toString(36)}`,
+            bearing: selectedBearing,
+            location: selectedLocation,
+            draftKey: previous?.draftKey || `${values.location_id}-${values.bearing_id}-${Date.now().toString(36)}`,
           };
-          setBindings((current) => {
-            if (editingBindingIndex === null) {
-              return [...current, next];
-            }
-            return current.map((item, index) =>
-              index === editingBindingIndex ? next : item,
-            );
-          });
+          setBindings((current) =>
+            editingBindingIndex === null
+              ? [...current, next]
+              : current.map((item, index) => (index === editingBindingIndex ? next : item)),
+          );
           setBindingEditorOpen(false);
           setEditingBindingIndex(null);
           setSelectedBearing(undefined);
@@ -788,11 +469,7 @@ const DeviceSpecPage = () => {
           return true;
         }}
       >
-        <ProForm.Item
-          name="location_id"
-          label="故障测点"
-          rules={[{ required: true, message: '请选择故障测点' }]}
-        >
+        <ProForm.Item name="location_id" label="故障测点" rules={[{ required: true, message: '请选择故障测点' }]}>
           <EntityPicker<Location>
             placeholder="请点击选择故障测点"
             modalTitle="选择故障测点"
@@ -800,43 +477,33 @@ const DeviceSpecPage = () => {
             valueLabel={selectedLocation?.name}
             columns={[{ title: '名称', dataIndex: 'name', width: 200 }]}
             getRecordLabel={(record) => record.name}
-            fetcher={({ current, pageSize, keyword }) =>
-              queryLocations(current, pageSize, keyword, true)
-            }
+            fetcher={async ({ current, pageSize, keyword }) => {
+              const result = await queryLocations(current, pageSize, keyword, true);
+              return { items: result.data, total: result.total };
+            }}
             onRecordChange={setSelectedLocation}
           />
         </ProForm.Item>
-        <ProForm.Item
-          name="bearing_id"
-          label="轴承型号"
-          rules={[{ required: true, message: '请选择轴承型号' }]}
-        >
+        <ProForm.Item name="bearing_id" label="轴承型号" rules={[{ required: true, message: '请选择轴承型号' }]}>
           <EntityPicker<BearingModel>
             placeholder="请点击选择轴承型号"
             modalTitle="选择轴承型号"
             triggerText="选择"
-            valueLabel={
-              selectedBearing
-                ? `${selectedBearing.brand} / ${selectedBearing.model}`
-                : undefined
-            }
-            columns={bearingPickerColumns}
+            valueLabel={selectedBearing ? `${selectedBearing.brand} / ${selectedBearing.model}` : undefined}
+            columns={[
+              { title: '品牌', dataIndex: 'brand' },
+              { title: '型号', dataIndex: 'model' },
+              { title: '轴承类型', dataIndex: 'bearing_type' },
+            ]}
             getRecordLabel={(record) => `${record.brand} / ${record.model}`}
-            fetcher={({ current, pageSize, keyword }) =>
-              queryBearings({ current, pageSize, keyword, activeOnly: true })
-            }
+            fetcher={async ({ current, pageSize, keyword }) => {
+              const result = await queryBearings({ current, pageSize, keyword, activeOnly: true });
+              return { items: result.data, total: result.total };
+            }}
             onRecordChange={setSelectedBearing}
           />
         </ProForm.Item>
-        <ProFormDigit
-          name="shaft_speed_ratio"
-          label="轴转速比"
-          min={0.0001}
-          max={1000}
-          fieldProps={{ precision: 4 }}
-          tooltip="该轴承所在轴转速 ÷ 设备规格转速"
-          rules={[{ required: true, message: '请输入轴转速比' }]}
-        />
+        <ProFormDigit name="shaft_speed_ratio" label="轴转速比" min={0.0001} max={1000} fieldProps={{ precision: 4 }} rules={[{ required: true, message: '请输入轴转速比' }]} />
         <ProFormSwitch name="enabled" label="参与诊断" />
       </ModalForm>
     </PageContainer>

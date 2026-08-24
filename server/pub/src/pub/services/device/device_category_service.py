@@ -25,7 +25,7 @@ from pub.utils.sorting import apply_sorting
 
 class DeviceCategoryService:
     @staticmethod
-    async def get_all(
+    async def get_device_categories(
         session: AsyncSession,
         tenant_id: UUID,
         skip: int,
@@ -33,7 +33,15 @@ class DeviceCategoryService:
         keyword: Optional[str] = None,
         sort_by: str | None = None,
         sort_order: str = "ascend",
-    ) -> List[DeviceCategory]:
+        name: Optional[str] = None,
+        description: Optional[str] = None,
+        color: Optional[str] = None,
+        parent_id: Optional[UUID] = None,
+        health_check_freq_id: Optional[UUID] = None,
+        iso_standard_id: Optional[UUID] = None,
+        vib_threshold_id: Optional[UUID] = None,
+        temp_threshold_id: Optional[UUID] = None,
+    ) -> tuple[List[DeviceCategory], int]:
         stmt = select(DeviceCategory).where(DeviceCategory.tenant_id == tenant_id)
         if keyword:
             like_kw = f"%{keyword.strip()}%"
@@ -43,11 +51,41 @@ class DeviceCategoryService:
                     DeviceCategory.description.ilike(like_kw),
                 )
             )
+        if name:
+            stmt = stmt.where(DeviceCategory.name.ilike(f"%{name.strip()}%"))
+        if description:
+            stmt = stmt.where(
+                DeviceCategory.description.ilike(f"%{description.strip()}%")
+            )
+        if color:
+            stmt = stmt.where(DeviceCategory.color.ilike(f"%{color.strip()}%"))
+        if parent_id is not None:
+            stmt = stmt.where(DeviceCategory.parent_id == parent_id)
+        if health_check_freq_id is not None:
+            stmt = stmt.where(
+                DeviceCategory.health_check_freq_id == health_check_freq_id
+            )
+        if iso_standard_id is not None:
+            stmt = stmt.where(DeviceCategory.iso_standard_id == iso_standard_id)
+        if vib_threshold_id is not None:
+            stmt = stmt.where(DeviceCategory.vib_threshold_id == vib_threshold_id)
+        if temp_threshold_id is not None:
+            stmt = stmt.where(DeviceCategory.temp_threshold_id == temp_threshold_id)
+
+        count_stmt = select(func.count()).select_from(stmt.subquery())
+        total = (await session.execute(count_stmt)).scalar() or 0
+
         stmt = apply_sorting(stmt, DeviceCategory, sort_by, sort_order)
-        stmt = stmt.options(selectinload(DeviceCategory.employees))
-        stmt = stmt.offset(skip).limit(limit)
+        stmt = stmt.options(
+            selectinload(DeviceCategory.parent),
+            selectinload(DeviceCategory.employees),
+            selectinload(DeviceCategory.health_check_freq),
+            selectinload(DeviceCategory.iso_standard),
+            selectinload(DeviceCategory.vib_threshold),
+            selectinload(DeviceCategory.temp_threshold),
+        ).offset(skip).limit(limit)
         result = await session.execute(stmt)
-        return result.scalars().all()
+        return result.scalars().all(), total
 
     @staticmethod
     async def count_all(

@@ -3,6 +3,12 @@ import { listAllSuppliers } from '@/services/supplier';
 import type { Supplier } from '@/services/supplier';
 import type { BearingModel } from '@/services/bearing';
 import type { PointTrendValue } from '@/services/deviceHealthArchive';
+import {
+  requestAllListItems,
+  requestPagedList,
+  type PagedResult,
+  type SortParams,
+} from '@/utils/proTableRequest';
 
 export type DeviceSpec = {
   id: string;
@@ -17,6 +23,8 @@ export type DeviceSpec = {
   remark?: string;
   supplier?: { id: string; name: string };
   device_category?: { id: string; name: string };
+  process_device_count?: number;
+  process_devices?: Array<{ id: string; code: string; sn: string }>;
 };
 
 export type DeviceSpecPayload = {
@@ -53,12 +61,17 @@ export type DeviceSpecQueryParams = {
   current?: number;
   pageSize?: number;
   keyword?: string;
+  name?: string;
+  model?: string;
+  brand?: string;
+  supplier_id?: string;
+  device_category_id?: string;
+  rpm?: number;
+  voltage?: number;
+  process_device_id?: string;
 };
 
-export type DeviceSpecPagedResult = {
-  items: DeviceSpec[];
-  total: number;
-};
+export type DeviceSpecPagedResult = PagedResult<DeviceSpec>;
 
 export type DeviceSpecComparisonPoint = PointTrendValue | null;
 
@@ -101,28 +114,11 @@ export type DeviceSpecComparison = {
 };
 
 export async function listAllDeviceSpecs(processDeviceId?: string) {
-  const limit = 100;
-  let skip = 0;
-  const all: DeviceSpec[] = [];
-
-  while (true) {
-    const batch =
-      (await request<DeviceSpec[]>('/api/v1/device-specs', {
-        method: 'GET',
-        params: {
-          skip,
-          limit,
-          process_device_id: processDeviceId || undefined,
-        },
-      })) || [];
-    all.push(...batch);
-    if (batch.length < limit) {
-      break;
-    }
-    skip += limit;
-  }
-
-  return all;
+  return requestAllListItems<DeviceSpec>(
+    '/api/v1/device-specs',
+    { process_device_id: processDeviceId || undefined },
+    100,
+  );
 }
 
 export async function getDeviceSpecComparison(
@@ -149,28 +145,14 @@ export async function getDeviceSpecComparison(
 }
 
 export async function queryDeviceSpecs(
-  params: DeviceSpecQueryParams = {},
-): Promise<DeviceSpecPagedResult> {
-  const current = params.current || 1;
-  const pageSize = params.pageSize || 10;
-  const keyword = String(params.keyword || '').trim().toLowerCase();
-
-  const all = await listAllDeviceSpecs();
-  const filtered = keyword
-    ? all.filter((item) =>
-      [item.name, item.model, item.brand, item.id].some((part) =>
-        String(part || '')
-          .toLowerCase()
-          .includes(keyword),
-      ),
-    )
-    : all;
-
-  const start = (current - 1) * pageSize;
-  return {
-    items: filtered.slice(start, start + pageSize),
-    total: filtered.length,
-  };
+  params: Record<string, any> = {},
+  sort: SortParams = {},
+) {
+  return requestPagedList<DeviceSpec>('/api/v1/device-specs', {
+    params,
+    sort,
+    defaultPageSize: 20,
+  });
 }
 
 export async function createDeviceSpec(payload: DeviceSpecPayload) {

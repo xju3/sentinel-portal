@@ -24,11 +24,11 @@ export async function listAllTenantSensors() {
   const all: TenantSensor[] = [];
 
   while (true) {
-    const batch =
-      (await request<TenantSensor[]>('/api/v1/tenant-sensors', {
+    const res = await request<any>('/api/v1/tenant-sensors', {
         method: 'GET',
         params: { skip, limit },
-      })) || [];
+      });
+    const batch = res?.data?.items || res?.items || res || [];
     all.push(...batch);
     if (batch.length < limit) {
       break;

@@ -1,4 +1,5 @@
 import { request } from '@umijs/max';
+import { requestAllListItems, requestPagedList, type SortParams } from '@/utils/proTableRequest';
 
 export type Area = {
   id: string;
@@ -8,6 +9,7 @@ export type Area = {
   ssid?: string;
   passwd?: string;
   parent_id?: string | null;
+  parent?: { id: string; name: string } | null;
   tenant_id: string;
 };
 
@@ -21,24 +23,7 @@ export type AreaPayload = {
 };
 
 export async function listAllAreas() {
-  const limit = 100;
-  let skip = 0;
-  const all: Area[] = [];
-
-  while (true) {
-    const batch =
-      (await request<Area[]>('/api/v1/areas', {
-        method: 'GET',
-        params: { skip, limit },
-      })) || [];
-    all.push(...batch);
-    if (batch.length < limit) {
-      break;
-    }
-    skip += limit;
-  }
-
-  return all;
+  return requestAllListItems<Area>('/api/v1/areas');
 }
 
 export async function createArea(payload: AreaPayload) {
@@ -58,5 +43,14 @@ export async function updateArea(id: string, payload: Partial<AreaPayload>) {
 export async function deleteArea(id: string) {
   return request<{ message: string }>(`/api/v1/areas/${id}`, {
     method: 'DELETE',
+  });
+}
+
+
+export async function queryAreas(params: Record<string, any> = {}, sort: SortParams = {}) {
+  return requestPagedList<Area>('/api/v1/areas', {
+    params,
+    sort,
+    defaultPageSize: 20,
   });
 }

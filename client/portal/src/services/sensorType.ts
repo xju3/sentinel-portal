@@ -15,11 +15,11 @@ export async function listSensorTypes() {
   const all: SensorType[] = [];
 
   while (true) {
-    const batch =
-      (await request<SensorType[]>('/api/v1/sensors/types', {
+    const res = await request<any>('/api/v1/sensors/types', {
         method: 'GET',
         params: { skip, limit },
-      })) || [];
+      });
+    const batch = res?.data?.items || res?.items || res || [];
     all.push(...batch);
     if (batch.length < limit) {
       break;

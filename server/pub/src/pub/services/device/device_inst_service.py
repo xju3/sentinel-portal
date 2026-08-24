@@ -8,6 +8,7 @@ from uuid import UUID
 from sqlalchemy import case, exists, func, or_
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.future import select
+from sqlalchemy.orm import selectinload
 
 from pub.models.customer import Location
 from pub.models.device import (
@@ -98,9 +99,18 @@ class DeviceInstService:
     async def get_tenant_device_insts_paged(
         session: AsyncSession,
         tenant_id: UUID,
-        current: int,
-        page_size: int,
+        skip: int,
+        limit: int,
         keyword: Optional[str] = None,
+        name: Optional[str] = None,
+        code: Optional[str] = None,
+        purchase_date: Optional[str] = None,
+        life_span: Optional[int] = None,
+        desc: Optional[str] = None,
+        status: Optional[int] = None,
+        device_spec_id: Optional[UUID] = None,
+        sort_by: str | None = None,
+        sort_order: str = "ascend",
     ) -> tuple:
         """Get paged DeviceInsts scoped to tenant, with total count."""
         base_join = (
@@ -110,17 +120,47 @@ class DeviceInstService:
             .where(DeviceCategory.tenant_id == tenant_id)
         )
         if keyword:
-            like = f"%{keyword}%"
+            like = f"%{keyword.strip()}%"
             base_join = base_join.where(
-                or_(DeviceInst.name.ilike(like), DeviceInst.code.ilike(like))
+                or_(
+                    DeviceInst.name.ilike(like),
+                    DeviceInst.code.ilike(like),
+                    DeviceInst.desc.ilike(like),
+                )
             )
+        if name:
+            base_join = base_join.where(DeviceInst.name.ilike(f"%{name.strip()}%"))
+        if code:
+            base_join = base_join.where(DeviceInst.code.ilike(f"%{code.strip()}%"))
+        if purchase_date:
+            base_join = base_join.where(DeviceInst.purchase_date == purchase_date)
+        if life_span is not None:
+            base_join = base_join.where(DeviceInst.life_span == life_span)
+        if desc:
+            base_join = base_join.where(DeviceInst.desc.ilike(f"%{desc.strip()}%"))
+        if status is not None:
+            base_join = base_join.where(DeviceInst.status == status)
+        if device_spec_id is not None:
+            base_join = base_join.where(DeviceInst.device_spec_id == device_spec_id)
 
         count_stmt = select(func.count()).select_from(base_join.subquery())
         count_result = await session.execute(count_stmt)
         total = count_result.scalar() or 0
 
-        skip = (current - 1) * page_size
-        fetch_stmt = base_join.offset(skip).limit(page_size)
+        fetch_stmt = apply_sorting(
+            base_join, DeviceInst, sort_by, sort_order or "ascend"
+        ).options(
+            selectinload(DeviceInst.device_spec).selectinload(DeviceSpec.supplier),
+            selectinload(DeviceInst.device_spec).selectinload(
+                DeviceSpec.device_category
+            ),
+            selectinload(DeviceInst.sensor_monitorings).selectinload(
+                SensorMonitoring.location
+            ),
+            selectinload(DeviceInst.sensor_monitorings).selectinload(
+                SensorMonitoring.sensor
+            ),
+        ).offset(skip).limit(limit)
         result = await session.execute(fetch_stmt)
         items = result.scalars().all()
 

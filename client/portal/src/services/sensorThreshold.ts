@@ -1,4 +1,5 @@
 import { request } from '@umijs/max';
+import { requestAllListItems, requestPagedList, type SortParams } from '@/utils/proTableRequest';
 
 export type SensorThreshold = {
   id: string;
@@ -25,24 +26,18 @@ export type SensorThresholdPayload = {
 };
 
 export async function listSensorThresholds() {
-  const limit = 200;
-  let skip = 0;
-  const all: SensorThreshold[] = [];
+  return requestAllListItems<SensorThreshold>('/api/v1/thresholds', {}, 200);
+}
 
-  while (true) {
-    const batch =
-      (await request<SensorThreshold[]>('/api/v1/thresholds', {
-        method: 'GET',
-        params: { skip, limit },
-      })) || [];
-    all.push(...batch);
-    if (batch.length < limit) {
-      break;
-    }
-    skip += limit;
-  }
-
-  return all;
+export async function querySensorThresholds(
+  params: Record<string, any> = {},
+  sort: SortParams = {},
+) {
+  return requestPagedList<SensorThreshold>('/api/v1/thresholds', {
+    params,
+    sort,
+    defaultPageSize: 20,
+  });
 }
 
 export async function createSensorThreshold(payload: SensorThresholdPayload) {

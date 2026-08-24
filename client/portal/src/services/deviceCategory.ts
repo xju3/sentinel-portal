@@ -1,4 +1,10 @@
 import { request } from '@umijs/max';
+import {
+  requestAllListItems,
+  requestPagedList,
+  type PagedResult,
+  type SortParams,
+} from '@/utils/proTableRequest';
 
 export type HealthCheckFreqRef = {
   id: string;
@@ -14,6 +20,7 @@ export type DeviceCategory = {
   description?: string;
   color?: string | null;
   parent_id?: string | null;
+  parent?: { id: string; name: string } | null;
   health_check_freq_id: string;
   tenant_id?: string | null;
   iso_standard_id?: string | null;
@@ -59,68 +66,35 @@ export type DeviceCategoryQueryParams = {
   current?: number;
   pageSize?: number;
   keyword?: string;
+  name?: string;
+  description?: string;
+  color?: string;
+  parent_id?: string;
+  health_check_freq_id?: string;
+  iso_standard_id?: string;
+  vib_threshold_id?: string;
+  temp_threshold_id?: string;
 };
 
-export type DeviceCategoryPagedResult = {
-  items: DeviceCategory[];
-  total: number;
-};
+export type DeviceCategoryPagedResult = PagedResult<DeviceCategory>;
 
 export async function listDeviceCategories() {
-  return request<DeviceCategory[]>('/api/v1/device-categories', {
-    method: 'GET',
-    params: { skip: 0, limit: 100 },
-  });
+  return requestAllListItems<DeviceCategory>('/api/v1/device-categories');
 }
 
 export async function listAllDeviceCategories() {
-  const limit = 100;
-  let skip = 0;
-  const all: DeviceCategory[] = [];
-
-  while (true) {
-    const batch =
-      (await request<DeviceCategory[]>('/api/v1/device-categories', {
-        method: 'GET',
-        params: { skip, limit },
-      })) || [];
-    all.push(...batch);
-    if (batch.length < limit) {
-      break;
-    }
-    skip += limit;
-  }
-
-  return all;
+  return requestAllListItems<DeviceCategory>('/api/v1/device-categories');
 }
 
 export async function queryDeviceCategories(
   params: DeviceCategoryQueryParams = {},
+  sort: SortParams = {},
 ): Promise<DeviceCategoryPagedResult> {
-  const current = params.current || 1;
-  const pageSize = params.pageSize || 10;
-  const skip = (current - 1) * pageSize;
-  const list =
-    (await request<DeviceCategory[]>('/api/v1/device-categories', {
-      method: 'GET',
-      params: {
-        skip,
-        limit: pageSize,
-        keyword: params.keyword || undefined,
-      },
-    })) || [];
-
-  const countRes = await request<{ total: number }>('/api/v1/device-categories/count', {
-    method: 'GET',
-    params: {
-      keyword: params.keyword || undefined,
-    },
+  return requestPagedList<DeviceCategory>('/api/v1/device-categories', {
+    params,
+    sort,
+    defaultPageSize: 20,
   });
-
-  return {
-    items: list,
-    total: countRes?.total || 0,
-  };
 }
 
 export async function createDeviceCategory(payload: DeviceCategoryPayload) {
@@ -151,15 +125,9 @@ export async function updateDeviceCategoryEmployees(id: string, employee_ids: st
 }
 
 export async function listHealthCheckFreqs() {
-  return request<HealthCheckFreq[]>('/api/v1/health-check-freqs', {
-    method: 'GET',
-    params: { skip: 0, limit: 100 },
-  });
+  return requestAllListItems<HealthCheckFreq>('/api/v1/health-check-freqs');
 }
 
 export async function listIsoStandards() {
-  return request<IsoStandard[]>('/api/v1/iso-standards', {
-    method: 'GET',
-    params: { skip: 0, limit: 100 },
-  });
+  return requestAllListItems<IsoStandard>('/api/v1/iso-standards');
 }
