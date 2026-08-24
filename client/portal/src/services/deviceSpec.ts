@@ -14,6 +14,7 @@ export type DeviceSpec = {
   rpm: number;
   supplier_id: string;
   device_category_id: string;
+  remark?: string;
   supplier?: { id: string; name: string };
   device_category?: { id: string; name: string };
 };
@@ -27,6 +28,7 @@ export type DeviceSpecPayload = {
   rpm: number;
   supplier_id: string;
   device_category_id: string;
+  remark?: string;
 };
 
 export type DeviceSpecBearingBinding = {

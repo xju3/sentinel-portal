@@ -91,6 +91,13 @@ const TenantPage = () => {
       width: 200,
     },
     {
+      title: '业务场景',
+      dataIndex: 'remark',
+      width: 200,
+      hideInSearch: true,
+      ellipsis: true,
+    },
+    {
       title: '所在地区',
       dataIndex: 'region_id',
       width: 150,
@@ -277,6 +284,7 @@ const TenantPage = () => {
                 email: editing.email,
                 status: editing.status,
                 industry: editing.industry,
+                remark: editing.remark,
               }
             : { active: true, mqtt_server: 'mqtt.api-server.icu', api_server: 'api.api-server.icu', status: 1 }
         }
@@ -293,6 +301,7 @@ const TenantPage = () => {
               email: values.email?.trim(),
               status: values.status,
               industry: values.industry ? Number(values.industry) : undefined,
+              remark: values.remark?.trim(),
             };
 
             if (editing) {
@@ -371,6 +380,10 @@ const TenantPage = () => {
         <ProFormText
           name="industry"
           label="行业代码"
+        />
+        <ProFormText
+          name="remark"
+          label="业务场景"
         />
         <ProFormSwitch name="active" label="系统状态" />
       </ModalForm>

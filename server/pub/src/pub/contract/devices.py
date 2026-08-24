@@ -135,6 +135,7 @@ class DeviceSpecCreate(BaseModel):
     brand: str
     voltage: Optional[float] = 0.0
     rpm: Optional[int] = 0
+    remark: Optional[str] = None
     supplier_id: UUID
     device_category_id: UUID
 
@@ -146,6 +147,7 @@ class DeviceSpecUpdate(BaseModel):
     brand: Optional[str] = None
     voltage: Optional[float] = None
     rpm: Optional[int] = None
+    remark: Optional[str] = None
     supplier_id: Optional[UUID] = None
     device_category_id: Optional[UUID] = None
 
@@ -173,6 +175,7 @@ class DeviceSpecResponse(BaseModel):
     brand: str
     voltage: float
     rpm: int
+    remark: Optional[str] = None
     supplier_id: UUID
     device_category_id: UUID
     process_device_count: int = 0
@@ -373,6 +376,7 @@ class ProcessCreate(BaseModel):
     code: str
     name: str
     status: Optional[int] = 1
+    remark: Optional[str] = None
 
 
 class ProcessUpdate(BaseModel):
@@ -380,6 +384,7 @@ class ProcessUpdate(BaseModel):
     code: Optional[str] = None
     name: Optional[str] = None
     status: Optional[int] = None
+    remark: Optional[str] = None
 
 
 class ProcessResponse(BaseModel):
@@ -388,6 +393,7 @@ class ProcessResponse(BaseModel):
     code: str
     name: str
     status: int
+    remark: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 

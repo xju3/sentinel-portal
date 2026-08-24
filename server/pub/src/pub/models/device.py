@@ -85,6 +85,7 @@ class DeviceSpec(Base):
     brand = Column(String(64), nullable=False)
     voltage = Column(Float, nullable=False, default=0.0)
     rpm = Column(Integer, nullable=False, default=0)
+    remark = Column(Text, nullable=True, comment="电气性能标准")
     supplier_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to supplier for multi-tenant support
     device_category_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to device_category
 
@@ -214,6 +215,7 @@ class Process(Base):
     tenant_id = Column(Uuid(as_uuid=True), nullable=False, default=uuid.uuid4)
     code = Column(String(8), nullable=False)
     name = Column(String(64), nullable=False)
+    remark = Column(Text, nullable=True, comment="工况, 工艺目标, 设备构成")
 
     status = Column(SmallInteger, default=1, comment="tiny(1) status")
 

@@ -62,6 +62,7 @@ class Tenant(Base):
     industry = Column(SmallInteger, nullable=True)
     email = Column(String(255), nullable=True, index=True)
     email_status = Column(SmallInteger, nullable=True, default=0)
+    remark = Column(Text, nullable=True, comment="业务场景")
 
     def __repr__(self):
         return f"<Tenant {self.id}: {self.code} - {self.name}>"

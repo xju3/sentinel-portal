@@ -12,6 +12,7 @@ export type Tenant = {
   industry?: number;
   email?: string;
   email_status?: number;
+  remark?: string;
 };
 
 export type TenantPayload = {
@@ -24,6 +25,7 @@ export type TenantPayload = {
   status?: number;
   industry?: number;
   email?: string;
+  remark?: string;
 };
 
 export async function listTenants(skip = 0, limit = 1000, active?: boolean) {

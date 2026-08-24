@@ -54,6 +54,7 @@ type DeviceSpecFormValues = {
   rpm: number;
   supplier_id: string;
   device_category_id: string;
+  remark?: string;
 };
 
 type BearingBindingFormValues = DeviceSpecBearingBindingPayload;
@@ -429,6 +430,12 @@ const DeviceSpecPage = () => {
       sorter: (a, b) => (a.description || '').localeCompare(b.description || '', 'zh-CN'),
     },
     {
+      title: '性能标准',
+      dataIndex: 'remark',
+      hideInSearch: true,
+      ellipsis: true,
+    },
+    {
       title: '操作',
       valueType: 'option',
       width: 160,
@@ -541,6 +548,7 @@ const DeviceSpecPage = () => {
               rpm: editing.rpm,
               supplier_id: editing.supplier_id,
               device_category_id: editing.device_category_id,
+              remark: editing.remark,
             }
             : { voltage: 0, rpm: 0 }
         }
@@ -554,6 +562,7 @@ const DeviceSpecPage = () => {
             rpm: values.rpm,
             supplier_id: values.supplier_id,
             device_category_id: values.device_category_id,
+            remark: values.remark?.trim(),
           };
           setSaving(true);
           try {
@@ -633,6 +642,7 @@ const DeviceSpecPage = () => {
           rules={[{ message: '品牌将自动填写' }]}
           fieldProps={{ readOnly: true, placeholder: '选择供应商后自动填写' }}
         />
+        <ProFormText name="remark" label="电气性能标准" />
         <ProFormText name="description" label="备注" />
       </ModalForm>
 

@@ -37,6 +37,7 @@ class TenantCreate(BaseModel):
     status: Optional[int] = 1
     industry: Optional[int] = None
     email: Optional[str] = None
+    remark: Optional[str] = None
 
 
 class TenantUpdate(BaseModel):
@@ -49,6 +50,7 @@ class TenantUpdate(BaseModel):
     status: Optional[int] = None
     industry: Optional[int] = None
     email: Optional[str] = None
+    remark: Optional[str] = None
 
 
 class TenantResponse(BaseModel):
@@ -67,6 +69,7 @@ class TenantResponse(BaseModel):
     industry: Optional[int] = None
     email: Optional[str] = None
     email_status: Optional[int] = None
+    remark: Optional[str] = None
 
     model_config = ConfigDict(from_attributes=True)
 

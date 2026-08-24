@@ -6,6 +6,7 @@ export type Process = {
   code: string;
   name: string;
   status: number;
+  remark?: string;
 };
 
 export type ProcessPayload = {
@@ -13,6 +14,7 @@ export type ProcessPayload = {
   code: string;
   name: string;
   status: number;
+  remark?: string;
 };
 
 export type ProcessItem = {

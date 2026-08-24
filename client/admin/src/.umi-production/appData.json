@@ -42,7 +42,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 20
       },
       "enableBy": "register"
     },
@@ -55,7 +55,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 4
       },
       "enableBy": "register"
     },
@@ -72,7 +72,7 @@
             0
           ]
         },
-        "register": 1
+        "register": 4
       },
       "enableBy": "register"
     },
@@ -89,7 +89,7 @@
             2
           ]
         },
-        "register": 3
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -106,7 +106,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -133,10 +133,10 @@
       "time": {
         "hooks": {
           "modifyAppData": [
-            38
+            31
           ]
         },
-        "register": 11
+        "register": 19
       },
       "enableBy": "register"
     },
@@ -186,7 +186,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -199,7 +199,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -216,7 +216,7 @@
             0
           ]
         },
-        "register": 2
+        "register": 8
       },
       "enableBy": "register"
     },
@@ -1085,7 +1085,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1098,7 +1098,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1111,7 +1111,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 47
+        "register": 50
       },
       "enableBy": "register"
     },
@@ -1124,7 +1124,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 26
+        "register": 36
       },
       "enableBy": "config"
     },
@@ -1137,7 +1137,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 8
+        "register": 12
       },
       "enableBy": "config"
     },
@@ -1180,7 +1180,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1193,7 +1193,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 19
+        "register": 25
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/mpa/mpa": {
@@ -1243,7 +1243,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1257,7 +1257,7 @@
       "time": {
         "hooks": {
           "modifyConfig": [
-            0
+            1
           ]
         },
         "register": 1
@@ -1272,7 +1272,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1311,7 +1311,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1337,7 +1337,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 4
       },
       "enableBy": "register"
     },
@@ -1350,7 +1350,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1363,7 +1363,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/ssr/ssr": {
@@ -1375,7 +1375,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "config"
     },
@@ -1388,7 +1388,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -1401,7 +1401,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 3
       },
       "enableBy": "register"
     },
@@ -1440,7 +1440,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 4
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/monorepo/redirect": {
@@ -1452,7 +1452,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 14
+        "register": 16
       },
       "enableBy": "config"
     },
@@ -1465,7 +1465,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/clickToComponent/clickToComponent": {
@@ -1477,7 +1477,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/legacy/legacy": {
@@ -1515,7 +1515,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/swc/swc": {
@@ -1544,7 +1544,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 4
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/mako/mako": {
@@ -1556,7 +1556,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1569,7 +1569,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/hmrGuardian/hmrGuardian": {
@@ -1593,7 +1593,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 17
+        "register": 19
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/forget/forget": {
@@ -1605,7 +1605,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1631,7 +1631,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 3
       },
       "enableBy": "register"
     },
@@ -1644,7 +1644,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 23
+        "register": 27
       },
       "enableBy": "register"
     },
@@ -1657,7 +1657,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 18
+        "register": 31
       }
     },
     "./node_modules/@umijs/preset-umi/dist/commands/help": {
@@ -1669,7 +1669,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1682,7 +1682,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1708,7 +1708,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1734,7 +1734,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -1760,7 +1760,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1825,7 +1825,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1890,7 +1890,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1903,7 +1903,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 12
+        "register": 14
       },
       "enableBy": "register"
     },
@@ -1929,7 +1929,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -1970,16 +1970,16 @@
       "time": {
         "hooks": {
           "modifyConfig": [
-            4
+            3
           ],
           "modifyAppData": [
-            1
+            0
           ],
           "onCheck": [
             0
           ]
         },
-        "register": 6
+        "register": 9
       }
     },
     "./node_modules/@umijs/plugins/dist/dva": {
@@ -1991,7 +1991,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 6
       },
       "enableBy": "config"
     },
@@ -2004,7 +2004,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2026,10 +2026,10 @@
             0
           ],
           "modifyAppData": [
-            0
+            1
           ]
         },
-        "register": 2
+        "register": 3
       },
       "enableBy": "config"
     },
@@ -2042,7 +2042,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 2
       },
       "enableBy": "config"
     },
@@ -2055,7 +2055,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "config"
     },
@@ -2119,7 +2119,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/plugins/dist/react-query": {
@@ -2131,7 +2131,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2144,7 +2144,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2157,7 +2157,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2170,7 +2170,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2183,7 +2183,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2200,7 +2200,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -3450,7 +3450,7 @@
       "parentId": "2",
       "id": "3",
       "absPath": "/account/tenant",
-      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProFormText,\n  ProFormSwitch,\n  ProFormCascader,\n  ProTable,\n  ProFormSelect,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, Switch, message } from 'antd';\n\nimport { getRegionTree } from '@/services/region';\nimport {\n  Tenant,\n  TenantPayload,\n  createTenant,\n  deleteTenant,\n  listTenants,\n  updateTenant,\n} from '@/services/tenant';\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | { data?: { detail?: string }; info?: { errorMessage?: string }; message?: string }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst TenantPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [rows, setRows] = useState<Tenant[]>([]);\n  const [query, setQuery] = useState<Record<string, any>>({});\n  const [editing, setEditing] = useState<Tenant | null>(null);\n  const [regionTree, setRegionTree] = useState<any[]>([]);\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      setRows(await listTenants());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n    getRegionTree().then(setRegionTree).catch(() => message.error('获取地区信息失败'));\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    return (Array.isArray(rows) ? rows : []).filter((row) => {\n      if (query.code && !norm(row.code).includes(norm(query.code))) {\n        return false;\n      }\n      if (query.name && !norm(row.name).includes(norm(query.name))) {\n        return false;\n      }\n      if (query.mqtt_server && !norm(row.mqtt_server).includes(norm(query.mqtt_server))) {\n        return false;\n      }\n      if (query.api_server && !norm(row.api_server).includes(norm(query.api_server))) {\n        return false;\n      }\n      return true;\n    });\n  }, [query, rows]);\n\n  const columns: ProColumns<Tenant>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '编码',\n      dataIndex: 'code',\n      width: 120,\n    },\n    {\n      title: '名称',\n      dataIndex: 'name',\n      width: 200,\n    },\n    {\n      title: '所在地区',\n      dataIndex: 'region_id',\n      width: 150,\n      renderText: (val: string) => {\n        if (!val) return '-';\n        for (const prov of regionTree) {\n          if (prov.value === val) return prov.label;\n          if (prov.children) {\n            for (const city of prov.children) {\n              if (city.value === val) return `${prov.label} / ${city.label}`;\n            }\n          }\n        }\n        return val;\n      },\n    },\n    {\n      title: 'MQTT 服务器',\n      dataIndex: 'mqtt_server',\n      width: 200,\n    },\n    {\n      title: 'API 服务器',\n      dataIndex: 'api_server',\n      width: 200,\n    },\n    {\n      title: '状态',\n      dataIndex: 'active',\n      width: 80,\n      valueType: 'select',\n      valueEnum: {\n        true: { text: '启用', status: 'Success' },\n        false: { text: '停用', status: 'Error' },\n      },\n      render: (_, row) => (\n        <Switch\n          checked={row.active}\n          checkedChildren=\"启用\"\n          unCheckedChildren=\"停用\"\n          onChange={async (checked) => {\n            try {\n              await updateTenant(row.id, { active: checked });\n              message.success('更新成功');\n              await loadRows();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        />\n      ),\n    },\n    {\n      title: '邮箱',\n      dataIndex: 'email',\n      width: 180,\n    },\n    {\n      title: '邮件状态',\n      dataIndex: 'email_status',\n      width: 100,\n      valueType: 'select',\n      valueEnum: {\n        0: { text: '默认', status: 'Default' },\n        1: { text: '已送达', status: 'Success' },\n        2: { text: '已打开', status: 'Processing' },\n      },\n    },\n    {\n      title: '业务状态',\n      dataIndex: 'status',\n      width: 100,\n      valueType: 'select',\n      valueEnum: {\n        1: { text: '正常', status: 'Success' },\n        0: { text: '异常/停用', status: 'Error' },\n      },\n    },\n    {\n      title: '行业',\n      dataIndex: 'industry',\n      width: 100,\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      // fixed: 'right',\n      width: 160,\n      render: (_, row) => [\n        <a\n          key=\"edit\"\n          onClick={() => {\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </a>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该租户吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteTenant(row.id);\n              message.success('删除成功');\n              await loadRows();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <a style={{ color: 'red' }}>\n            删除\n          </a>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  return (\n    <PageContainer\n      title=\"租户管理\"\n      subTitle=\"管理系统中的所有租户\"\n    >\n      <ProTable<Tenant>\n        rowKey=\"id\"\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        scroll={{ x: 800 }}\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        options={{ reload: loadRows }}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建租户\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<TenantPayload>\n        title={editing ? '编辑租户' : '新建租户'}\n        open={modalOpen}\n        modalProps={{\n          destroyOnHidden: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        initialValues={\n          editing\n            ? {\n                code: editing.code,\n                name: editing.name,\n                mqtt_server: editing.mqtt_server,\n                api_server: editing.api_server,\n                region_id: (() => {\n                  for (const prov of regionTree) {\n                    if (prov.children) {\n                      for (const city of prov.children) {\n                        if (city.value === editing.region_id) {\n                          return [prov.value, city.value];\n                        }\n                      }\n                    }\n                    if (prov.value === editing.region_id) return [prov.value];\n                  }\n                  return [editing.region_id];\n                })(),\n                active: editing.active,\n                email: editing.email,\n                status: editing.status,\n                industry: editing.industry,\n              }\n            : { active: true, mqtt_server: 'mqtt.api-server.icu', api_server: 'api.api-server.icu', status: 1 }\n        }\n        onFinish={async (values) => {\n          setSaving(true);\n          try {\n            const payload: TenantPayload = {\n              code: values.code.trim(),\n              name: values.name.trim(),\n              mqtt_server: values.mqtt_server.trim(),\n              api_server: values.api_server.trim(),\n              region_id: Array.isArray(values.region_id) ? values.region_id[values.region_id.length - 1] : values.region_id,\n              active: values.active,\n              email: values.email?.trim(),\n              status: values.status,\n              industry: values.industry ? Number(values.industry) : undefined,\n            };\n\n            if (editing) {\n              await updateTenant(editing.id, payload);\n              message.success('更新成功');\n            } else {\n              await createTenant(payload);\n              message.success('创建成功');\n            }\n            setModalOpen(false);\n            setEditing(null);\n            await loadRows();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormText\n          name=\"code\"\n          label=\"编码\"\n          rules={[\n            { required: true, message: '请输入租户编码' },\n            { max: 12, message: '编码最多12个字符' },\n          ]}\n        />\n        <ProFormText\n          name=\"name\"\n          label=\"名称\"\n          rules={[\n            { required: true, message: '请输入租户名称' },\n            { max: 64, message: '名称最多64个字符' },\n          ]}\n        />\n        <ProFormText\n          name=\"mqtt_server\"\n          label=\"MQTT 服务器\"\n          rules={[\n            { required: true, message: '请输入 MQTT 服务器地址' },\n            { max: 255, message: '地址最多255个字符' },\n          ]}\n        />\n        <ProFormText\n          name=\"api_server\"\n          label=\"API 服务器\"\n          rules={[\n            { required: true, message: '请输入 API 服务器地址' },\n            { max: 255, message: '地址最多255个字符' },\n          ]}\n        />\n        <ProFormCascader\n          name=\"region_id\"\n          label=\"省市\"\n          rules={[{ required: true, message: '请选择省市' }]}\n          fieldProps={{\n            options: regionTree,\n            changeOnSelect: true,\n          }}\n        />\n        <ProFormText\n          name=\"email\"\n          label=\"联系邮箱\"\n          rules={[{ type: 'email', message: '请输入有效的邮箱地址' }]}\n        />\n        <ProFormSelect\n          name=\"status\"\n          label=\"业务状态\"\n          options={[\n            { label: '正常', value: 1 },\n            { label: '停用', value: 0 },\n          ]}\n        />\n        <ProFormText\n          name=\"industry\"\n          label=\"行业代码\"\n        />\n        <ProFormSwitch name=\"active\" label=\"系统状态\" />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default TenantPage;\n",
+      "__content": "import { useEffect, useMemo, useState } from 'react';\nimport {\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProFormText,\n  ProFormSwitch,\n  ProFormCascader,\n  ProTable,\n  ProFormSelect,\n} from '@ant-design/pro-components';\nimport { Button, Popconfirm, Switch, message } from 'antd';\n\nimport { getRegionTree } from '@/services/region';\nimport {\n  Tenant,\n  TenantPayload,\n  createTenant,\n  deleteTenant,\n  listTenants,\n  updateTenant,\n} from '@/services/tenant';\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | { data?: { detail?: string }; info?: { errorMessage?: string }; message?: string }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst TenantPage = () => {\n  const [loading, setLoading] = useState(false);\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [rows, setRows] = useState<Tenant[]>([]);\n  const [query, setQuery] = useState<Record<string, any>>({});\n  const [editing, setEditing] = useState<Tenant | null>(null);\n  const [regionTree, setRegionTree] = useState<any[]>([]);\n\n  const loadRows = async () => {\n    setLoading(true);\n    try {\n      setRows(await listTenants());\n    } catch (error) {\n      message.error(toErrorMessage(error));\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  useEffect(() => {\n    loadRows();\n    getRegionTree().then(setRegionTree).catch(() => message.error('获取地区信息失败'));\n  }, []);\n\n  const filteredRows = useMemo(() => {\n    const norm = (v: unknown) => String(v ?? '').trim().toLowerCase();\n    return (Array.isArray(rows) ? rows : []).filter((row) => {\n      if (query.code && !norm(row.code).includes(norm(query.code))) {\n        return false;\n      }\n      if (query.name && !norm(row.name).includes(norm(query.name))) {\n        return false;\n      }\n      if (query.mqtt_server && !norm(row.mqtt_server).includes(norm(query.mqtt_server))) {\n        return false;\n      }\n      if (query.api_server && !norm(row.api_server).includes(norm(query.api_server))) {\n        return false;\n      }\n      return true;\n    });\n  }, [query, rows]);\n\n  const columns: ProColumns<Tenant>[] = [\n    {\n      title: '序号',\n      valueType: 'indexBorder',\n      width: 68,\n      hideInSearch: true,\n      fixed: 'left',\n    },\n    {\n      title: '编码',\n      dataIndex: 'code',\n      width: 120,\n    },\n    {\n      title: '名称',\n      dataIndex: 'name',\n      width: 200,\n    },\n    {\n      title: '业务场景',\n      dataIndex: 'remark',\n      width: 200,\n      hideInSearch: true,\n      ellipsis: true,\n    },\n    {\n      title: '所在地区',\n      dataIndex: 'region_id',\n      width: 150,\n      renderText: (val: string) => {\n        if (!val) return '-';\n        for (const prov of regionTree) {\n          if (prov.value === val) return prov.label;\n          if (prov.children) {\n            for (const city of prov.children) {\n              if (city.value === val) return `${prov.label} / ${city.label}`;\n            }\n          }\n        }\n        return val;\n      },\n    },\n    {\n      title: 'MQTT 服务器',\n      dataIndex: 'mqtt_server',\n      width: 200,\n    },\n    {\n      title: 'API 服务器',\n      dataIndex: 'api_server',\n      width: 200,\n    },\n    {\n      title: '状态',\n      dataIndex: 'active',\n      width: 80,\n      valueType: 'select',\n      valueEnum: {\n        true: { text: '启用', status: 'Success' },\n        false: { text: '停用', status: 'Error' },\n      },\n      render: (_, row) => (\n        <Switch\n          checked={row.active}\n          checkedChildren=\"启用\"\n          unCheckedChildren=\"停用\"\n          onChange={async (checked) => {\n            try {\n              await updateTenant(row.id, { active: checked });\n              message.success('更新成功');\n              await loadRows();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        />\n      ),\n    },\n    {\n      title: '邮箱',\n      dataIndex: 'email',\n      width: 180,\n    },\n    {\n      title: '邮件状态',\n      dataIndex: 'email_status',\n      width: 100,\n      valueType: 'select',\n      valueEnum: {\n        0: { text: '默认', status: 'Default' },\n        1: { text: '已送达', status: 'Success' },\n        2: { text: '已打开', status: 'Processing' },\n      },\n    },\n    {\n      title: '业务状态',\n      dataIndex: 'status',\n      width: 100,\n      valueType: 'select',\n      valueEnum: {\n        1: { text: '正常', status: 'Success' },\n        0: { text: '异常/停用', status: 'Error' },\n      },\n    },\n    {\n      title: '行业',\n      dataIndex: 'industry',\n      width: 100,\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      // fixed: 'right',\n      width: 160,\n      render: (_, row) => [\n        <a\n          key=\"edit\"\n          onClick={() => {\n            setEditing(row);\n            setModalOpen(true);\n          }}\n        >\n          编辑\n        </a>,\n        <Popconfirm\n          key=\"delete\"\n          title=\"确认删除该租户吗？\"\n          onConfirm={async () => {\n            try {\n              await deleteTenant(row.id);\n              message.success('删除成功');\n              await loadRows();\n            } catch (error) {\n              message.error(toErrorMessage(error));\n            }\n          }}\n        >\n          <a style={{ color: 'red' }}>\n            删除\n          </a>\n        </Popconfirm>,\n      ],\n    },\n  ];\n\n  return (\n    <PageContainer\n      title=\"租户管理\"\n      subTitle=\"管理系统中的所有租户\"\n    >\n      <ProTable<Tenant>\n        rowKey=\"id\"\n        loading={loading}\n        columns={columns}\n        dataSource={filteredRows}\n        scroll={{ x: 800 }}\n        search={{ labelWidth: 'auto' }}\n        onSubmit={(values) => setQuery(values)}\n        onReset={() => setQuery({})}\n        options={{ reload: loadRows }}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建租户\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<TenantPayload>\n        title={editing ? '编辑租户' : '新建租户'}\n        open={modalOpen}\n        modalProps={{\n          destroyOnHidden: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        initialValues={\n          editing\n            ? {\n                code: editing.code,\n                name: editing.name,\n                mqtt_server: editing.mqtt_server,\n                api_server: editing.api_server,\n                region_id: (() => {\n                  for (const prov of regionTree) {\n                    if (prov.children) {\n                      for (const city of prov.children) {\n                        if (city.value === editing.region_id) {\n                          return [prov.value, city.value];\n                        }\n                      }\n                    }\n                    if (prov.value === editing.region_id) return [prov.value];\n                  }\n                  return [editing.region_id];\n                })(),\n                active: editing.active,\n                email: editing.email,\n                status: editing.status,\n                industry: editing.industry,\n                remark: editing.remark,\n              }\n            : { active: true, mqtt_server: 'mqtt.api-server.icu', api_server: 'api.api-server.icu', status: 1 }\n        }\n        onFinish={async (values) => {\n          setSaving(true);\n          try {\n            const payload: TenantPayload = {\n              code: values.code.trim(),\n              name: values.name.trim(),\n              mqtt_server: values.mqtt_server.trim(),\n              api_server: values.api_server.trim(),\n              region_id: Array.isArray(values.region_id) ? values.region_id[values.region_id.length - 1] : values.region_id,\n              active: values.active,\n              email: values.email?.trim(),\n              status: values.status,\n              industry: values.industry ? Number(values.industry) : undefined,\n              remark: values.remark?.trim(),\n            };\n\n            if (editing) {\n              await updateTenant(editing.id, payload);\n              message.success('更新成功');\n            } else {\n              await createTenant(payload);\n              message.success('创建成功');\n            }\n            setModalOpen(false);\n            setEditing(null);\n            await loadRows();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormText\n          name=\"code\"\n          label=\"编码\"\n          rules={[\n            { required: true, message: '请输入租户编码' },\n            { max: 12, message: '编码最多12个字符' },\n          ]}\n        />\n        <ProFormText\n          name=\"name\"\n          label=\"名称\"\n          rules={[\n            { required: true, message: '请输入租户名称' },\n            { max: 64, message: '名称最多64个字符' },\n          ]}\n        />\n        <ProFormText\n          name=\"mqtt_server\"\n          label=\"MQTT 服务器\"\n          rules={[\n            { required: true, message: '请输入 MQTT 服务器地址' },\n            { max: 255, message: '地址最多255个字符' },\n          ]}\n        />\n        <ProFormText\n          name=\"api_server\"\n          label=\"API 服务器\"\n          rules={[\n            { required: true, message: '请输入 API 服务器地址' },\n            { max: 255, message: '地址最多255个字符' },\n          ]}\n        />\n        <ProFormCascader\n          name=\"region_id\"\n          label=\"省市\"\n          rules={[{ required: true, message: '请选择省市' }]}\n          fieldProps={{\n            options: regionTree,\n            changeOnSelect: true,\n          }}\n        />\n        <ProFormText\n          name=\"email\"\n          label=\"联系邮箱\"\n          rules={[{ type: 'email', message: '请输入有效的邮箱地址' }]}\n        />\n        <ProFormSelect\n          name=\"status\"\n          label=\"业务状态\"\n          options={[\n            { label: '正常', value: 1 },\n            { label: '停用', value: 0 },\n          ]}\n        />\n        <ProFormText\n          name=\"industry\"\n          label=\"行业代码\"\n        />\n        <ProFormText\n          name=\"remark\"\n          label=\"业务场景\"\n        />\n        <ProFormSwitch name=\"active\" label=\"系统状态\" />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default TenantPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Langhu/Sentinel/Codes/Platform/client/admin/src/pages/Tenant/index.tsx"
     },

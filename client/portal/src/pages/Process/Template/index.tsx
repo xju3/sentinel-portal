@@ -32,6 +32,7 @@ type ProcessFormValues = {
   code: string;
   name: string;
   status: number;
+  remark?: string;
 };
 
 type ProcessItemFormValues = {
@@ -126,6 +127,12 @@ const ProcessTemplatePage = () => {
     },
     { title: '编码', dataIndex: 'code', width: 140, sorter: (a, b) => (a.code || '').localeCompare(b.code || '', 'zh-CN') },
     { title: '名称', dataIndex: 'name', sorter: (a, b) => (a.name || '').localeCompare(b.name || '', 'zh-CN') },
+    {
+      title: '工况及说明',
+      dataIndex: 'remark',
+      hideInSearch: true,
+      ellipsis: true,
+    },
     {
       title: '状态',
       width: 120,
@@ -294,7 +301,7 @@ const ProcessTemplatePage = () => {
         }}
         initialValues={
           editing
-            ? { code: editing.code, name: editing.name, status: Number(editing.status) }
+            ? { code: editing.code, name: editing.name, status: Number(editing.status), remark: editing.remark }
             : { status: 1 }
         }
         onFinish={async (values) => {
@@ -304,6 +311,7 @@ const ProcessTemplatePage = () => {
               code: values.code.trim(),
               name: values.name.trim(),
               status: Number(values.status ?? 1),
+              remark: values.remark?.trim(),
             };
             if (editing) {
               await updateProcess(editing.id, payload);
@@ -348,6 +356,10 @@ const ProcessTemplatePage = () => {
             { label: '停用', value: 0 },
           ]}
           rules={[{ required: true, message: '请选择状态' }]}
+        />
+        <ProFormText
+          name="remark"
+          label="工况/工艺/设备构成"
         />
       </ModalForm>
 
