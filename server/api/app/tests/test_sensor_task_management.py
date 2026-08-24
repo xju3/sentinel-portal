@@ -426,6 +426,59 @@ async def test_record_sensor_task_report_keeps_report_uuid_empty_for_non_uuid_re
 
 
 @pytest.mark.asyncio
+async def test_record_sensor_task_report_allocates_missing_sequence_for_resampling_task():
+    task_id = uuid4()
+    task = SimpleNamespace(
+        id=task_id,
+        sn="STL26SH0001",
+        action=53,
+        status=2,
+        val=3,
+        dispatched_at=None,
+        complete_time=None,
+        task_purpose="RESAMPLING",
+    )
+    task_result = Mock()
+    task_result.scalar_one_or_none.return_value = task
+    by_report_result = Mock()
+    by_report_result.scalar_one_or_none.return_value = None
+    used_sequences_result = Mock()
+    used_sequences_result.scalars.return_value.all.return_value = [1, 3]
+    existing_result = Mock()
+    existing_result.scalar_one_or_none.return_value = None
+    count_result = Mock()
+    count_result.scalar_one.return_value = 2
+    session = Mock()
+    session.execute = AsyncMock(
+        side_effect=[
+            task_result,
+            by_report_result,
+            used_sequences_result,
+            existing_result,
+            count_result,
+        ]
+    )
+    session.flush = AsyncMock()
+    session.commit = AsyncMock()
+    session.refresh = AsyncMock()
+
+    completed = await record_sensor_task_report(
+        session=session,
+        task_id=task_id,
+        sn=task.sn,
+        sequence=None,
+        report_id="report-1",
+        ts_ms=1780814415097,
+    )
+
+    assert completed is task
+    session.add.assert_called_once()
+    saved_report = session.add.call_args.args[0]
+    assert saved_report.sequence == 2
+    session.commit.assert_awaited_once()
+
+
+@pytest.mark.asyncio
 async def test_status_report_persists_and_completes_matching_status_task():
     task_id = uuid4()
     task = SimpleNamespace(id=task_id, sn="STL26SH0001", action=2, status=2, complete_time=None)

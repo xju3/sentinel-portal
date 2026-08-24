@@ -6,6 +6,7 @@ from collections import defaultdict
 from datetime import datetime, timedelta, timezone
 from typing import Any
 
+from app.clients.mqtt import publish_notification_event
 from pub.models.diagnosis import DiagnosisRecordStatus
 from pub.models.report import DiagnosisTriggerPayload
 from pub.services.diagnosis.diagnosis_record_service import DiagnosisRecordService
@@ -103,6 +104,90 @@ def _notification_schema_fields(
     raise ValueError("notification_event_schema_version must be 1 or 2")
 
 
+async def _committed_fault_event(
+    session: Any,
+    source_record: Any,
+    *,
+    schema_version: int,
+) -> dict[str, Any] | None:
+    """Build an MQTT fault event only from committed diagnosis rows."""
+    from sqlalchemy import select
+
+    from pub.models.diagnosis import Diagnosis, DiagnosisItem
+
+    diagnosis = (
+        await session.execute(
+            select(Diagnosis)
+            .where(Diagnosis.report_uuid == source_record.id)
+            .order_by(Diagnosis.created_at.desc())
+            .limit(1)
+        )
+    ).scalar_one_or_none()
+    if diagnosis is None or int(diagnosis.overall_level or 0) <= 0:
+        return None
+
+    items = list(
+        (
+            await session.execute(
+                select(DiagnosisItem).where(
+                    DiagnosisItem.diagnosis_id == diagnosis.id,
+                    DiagnosisItem.level > 0,
+                )
+            )
+        ).scalars().all()
+    )
+    fault_events = [
+        {
+            "diagnosis_item_id": str(item.id),
+            "fault_type": str(item.fault_type),
+            "fault_level": int(item.level),
+        }
+        for item in items
+    ]
+    if schema_version == 2 and not fault_events:
+        return None
+
+    diagnosed_at = diagnosis.diagnosed_at
+    if diagnosed_at.tzinfo is None:
+        diagnosed_at = diagnosed_at.replace(tzinfo=timezone.utc)
+    event = {
+        "event_id": str(diagnosis.id),
+        "diagnosis_id": str(diagnosis.id),
+        "report_id": str(source_record.id),
+        "device_id": str(diagnosis.device_id),
+        "sensor_sn": source_record.sensor_sn,
+        "device_category_id": (
+            str(source_record.device_category_id)
+            if source_record.device_category_id
+            else None
+        ),
+        "process_device_id": (
+            str(source_record.process_device_id)
+            if source_record.process_device_id
+            else None
+        ),
+        "diagnosed_at": diagnosed_at.isoformat(),
+    }
+    event.update(
+        _notification_schema_fields(
+            schema_version,
+            int(diagnosis.overall_level),
+            fault_events,
+        )
+    )
+    return event
+
+
+async def _publish_committed_fault_event(event: dict[str, Any] | None) -> None:
+    if event is None:
+        return
+    if not await publish_notification_event(event):
+        raise RuntimeError(
+            "Failed to publish committed diagnosis fault event: "
+            f"event_id={event.get('event_id')}"
+        )
+
+
 async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
     logger.info("TRIGGER DIAGNOSIS: Executing diagnosis for device_id=%s", report.device_id)
     try:
@@ -123,8 +208,6 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
             DiagnosisConfirmationStatus,
             DiagnosisFaultType,
             DiagnosisItem,
-            DiagnosisNotificationOutbox,
-            DiagnosisNotificationOutboxStatus,
             DiagnosisRecord,
         )
         from pub.models.sensor import SensorTask, SensorTaskReport
@@ -133,7 +216,7 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
             ensure_resampling_followup_fft_task,
             find_open_resampling_task,
         )
-        from sqlalchemy import func, or_, select
+        from sqlalchemy import or_, select
         from pub.utils.redis_keys import (
             REDIS_KEY_DASHBOARD_HEALTH_DIRTY,
             REDIS_KEY_DIA_AMBIENT_TEMP,
@@ -153,11 +236,25 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
                 raise RuntimeError(
                     f"DiagnosisRecord not found for report_id={report.report_id}"
                 )
-            if (
+            already_diagnosed = (
                 source_record.diagnosis_status
                 == int(DiagnosisRecordStatus.DIAGNOSED)
-            ):
-                return int(source_record.overall_level or 0)
+            )
+            if already_diagnosed:
+                committed_event = await _committed_fault_event(
+                    session,
+                    source_record,
+                    schema_version=settings.notification_event_schema_version,
+                )
+                committed_level = int(source_record.overall_level or 0)
+        if already_diagnosed:
+            if committed_level > 0 and committed_event is None:
+                raise RuntimeError(
+                    "Committed fault diagnosis has no publishable event: "
+                    f"report_id={report.report_id}"
+                )
+            await _publish_committed_fault_event(committed_event)
+            return committed_level
         
         context = await DeviceContextService.get_by_device_id_managed(report.device_id)
         if not context:
@@ -248,12 +345,18 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
                             )
                         )
                         if is_resampling_task:
+                            report_identity_filters = [
+                                SensorTaskReport.report_uuid == report_uuid,
+                                SensorTaskReport.report_id == report.report_id,
+                            ]
+                            if report.task_sequence is not None:
+                                report_identity_filters.append(
+                                    SensorTaskReport.sequence
+                                    == int(report.task_sequence)
+                                )
                             task_report_stmt = select(SensorTaskReport).where(
                                 SensorTaskReport.task_id == task.id,
-                                or_(
-                                    SensorTaskReport.report_uuid == report_uuid,
-                                    SensorTaskReport.report_id == report.report_id,
-                                ),
+                                or_(*report_identity_filters),
                             )
                             task_report = (
                                 await session.execute(task_report_stmt)
@@ -310,7 +413,6 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
                 diag_record: Diagnosis | None = None
                 item_temp: DiagnosisItem | None = None
                 item_vib: DiagnosisItem | None = None
-                bearing_items: list[tuple[DiagnosisItem, dict[str, Any]]] = []
                 if overall_level > 0:
                     diag_record = Diagnosis(
                         device_id=device_uuid,
@@ -359,7 +461,6 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
                             evidence=bearing_result["evidence"],
                         )
                         session.add(item_bearing)
-                        bearing_items.append((item_bearing, bearing_result))
                     await session.flush()
 
                 diagnosed_at = datetime.now(timezone.utc)
@@ -525,138 +626,23 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
                         resampling_task.task_purpose = "RESAMPLING"
                         vib_case.resampling_task_id = resampling_task.id
 
-                if diag_record is not None:
-                    fault_events = []
-                    if item_temp is not None:
-                        fault_events.append(
-                            {
-                                "diagnosis_item_id": str(item_temp.id),
-                                "fault_type": DiagnosisFaultType.TEMPERATURE.value,
-                                "fault_level": temp_level,
-                            }
-                        )
-                    if item_vib is not None:
-                        fault_events.append(
-                            {
-                                "diagnosis_item_id": str(item_vib.id),
-                                "fault_type": DiagnosisFaultType.VIBRATION.value,
-                                "fault_level": vib_level,
-                            }
-                        )
-                    bearing_notification_items: dict[
-                        str, tuple[DiagnosisItem, dict[str, Any]]
-                    ] = {}
-                    for item_bearing, bearing_result in bearing_items:
-                        fault_code = str(bearing_result["fault_code"])
-                        current = bearing_notification_items.get(fault_code)
-                        if (
-                            current is None
-                            or int(bearing_result["level"])
-                            > int(current[1]["level"])
-                        ):
-                            bearing_notification_items[fault_code] = (
-                                item_bearing,
-                                bearing_result,
-                            )
-                    for item_bearing, bearing_result in (
-                        bearing_notification_items.values()
-                    ):
-                        previous_stmt = (
-                            select(func.max(DiagnosisItem.level))
-                            .join(
-                                Diagnosis,
-                                Diagnosis.id == DiagnosisItem.diagnosis_id,
-                            )
-                            .where(
-                                Diagnosis.id != diag_record.id,
-                                Diagnosis.device_id == device_uuid,
-                                Diagnosis.location_id == location_uuid,
-                                DiagnosisItem.fault_type
-                                == f"bearing_{bearing_result['fault_code']}",
-                                DiagnosisItem.level > 0,
-                                Diagnosis.diagnosed_at
-                                >= (
-                                    diagnosed_at
-                                    - timedelta(
-                                        hours=settings.bearing_notification_window_hours
-                                    )
-                                ).replace(tzinfo=None),
-                            )
-                            .group_by(Diagnosis.id, Diagnosis.diagnosed_at)
-                            .order_by(Diagnosis.diagnosed_at.desc())
-                            .limit(
-                                max(
-                                    0,
-                                    settings.bearing_notification_confirmation_count
-                                    - 1,
-                                )
-                            )
-                        )
-                        previous_levels = list(
-                            (
-                                await session.execute(previous_stmt)
-                            ).scalars().all()
-                        )
-                        if not BearingDiagnosis.should_notify(
-                            int(bearing_result["level"]),
-                            [int(level) for level in previous_levels],
-                            confirmation_count=(
-                                settings.bearing_notification_confirmation_count
-                            ),
-                            immediate_level=(
-                                settings.bearing_notification_immediate_level
-                            ),
-                        ):
-                            continue
-                        fault_events.append(
-                            {
-                                "diagnosis_item_id": str(item_bearing.id),
-                                "fault_type": (
-                                    f"bearing_{bearing_result['fault_code']}"
-                                ),
-                                "fault_level": int(bearing_result["level"]),
-                            }
-                        )
-                    notification_event = {
-                        "event_id": str(diag_record.id),
-                        "diagnosis_id": str(diag_record.id),
-                        "report_id": report.report_id,
-                        "device_id": str(device_uuid),
-                        "sensor_sn": report.sensor_sn,
-                        "device_category_id": (
-                            str(source_record.device_category_id)
-                            if source_record.device_category_id
-                            else report.device_category_id
-                        ),
-                        "process_device_id": (
-                            str(source_record.process_device_id)
-                            if source_record.process_device_id
-                            else report.process_device_id
-                        ),
-                        "diagnosed_at": diagnosed_at.isoformat(),
-                    }
-                    notification_event.update(
-                        _notification_schema_fields(
-                            settings.notification_event_schema_version,
-                            overall_level,
-                            fault_events,
-                        )
-                    )
-                    if (
-                        settings.notification_event_schema_version != 2
-                        or fault_events
-                    ):
-                        session.add(
-                            DiagnosisNotificationOutbox(
-                                event_id=diag_record.id,
-                                diagnosis_id=diag_record.id,
-                                report_id=report_uuid,
-                                payload=notification_event,
-                                status=(
-                                    DiagnosisNotificationOutboxStatus.PENDING.value
-                                ),
-                            )
-                        )
+        async with db_manager.SessionLocal() as session:
+            committed_source = await session.get(DiagnosisRecord, report_uuid)
+            if committed_source is None:
+                raise RuntimeError(
+                    f"DiagnosisRecord not found after commit: report_id={report.report_id}"
+                )
+            committed_event = await _committed_fault_event(
+                session,
+                committed_source,
+                schema_version=settings.notification_event_schema_version,
+            )
+        if overall_level > 0 and committed_event is None:
+            raise RuntimeError(
+                "Committed fault diagnosis has no publishable event: "
+                f"report_id={report.report_id}"
+            )
+        await _publish_committed_fault_event(committed_event)
 
         # 3. Update Health Status Cache
         if redis_client:

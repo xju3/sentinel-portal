@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from pub.models.diagnosis import (
     Diagnosis,
     DiagnosisCase,
@@ -5,9 +7,9 @@ from pub.models.diagnosis import (
     DiagnosisFft,
     DiagnosisItem,
     DiagnosisNotificationDelivery,
-    DiagnosisNotificationOutbox,
     DiagnosisRecord,
 )
+from pub.models.report import DeviceDiagnosticReport, DiagnosisTriggerPayload
 from pub.models.sensor import SensorTask, SensorTaskReport
 
 
@@ -37,6 +39,33 @@ def test_diagnosis_models_keep_legacy_report_id_and_add_uuid_fk():
         "diagnosis_record.id"
     }
     assert "bearing_features" in DiagnosisRecord.__table__.c
+
+
+def test_task_sequence_survives_persistence_and_diagnosis_payload_models():
+    report_id = uuid4()
+    device_id = uuid4()
+    report = DeviceDiagnosticReport(
+        sensor_sn="SN-001",
+        device_id=str(device_id),
+        report_id=str(report_id),
+        ts_ms=1780814415097,
+        task_id=str(uuid4()),
+        task_sequence=2,
+    )
+    trigger = DiagnosisTriggerPayload(
+        report_id=str(report_id),
+        sensor_sn="SN-001",
+        device_id=str(device_id),
+        location_id=str(uuid4()),
+        max_rms_vel=1.2,
+        ts_ms=report.ts_ms,
+        total=0,
+        task_id=report.task_id,
+        task_sequence=report.task_sequence,
+    )
+
+    assert report.task_sequence == 2
+    assert trigger.task_sequence == 2
 
 
 def test_diagnosis_item_uses_explicit_fault_type():
@@ -92,17 +121,6 @@ def test_delivery_model_tracks_fault_dimensions_and_snapshot_recipient():
         "status",
         "next_attempt_at",
     ]
-
-
-def test_outbox_model_uses_unique_event_id_and_report_fk():
-    assert _constraint_columns(
-        DiagnosisNotificationOutbox.__table__,
-        "uq_diagnosis_notification_outbox_event",
-    ) == ["event_id"]
-    assert _foreign_key_targets(
-        DiagnosisNotificationOutbox.__table__,
-        "report_id",
-    ) == {"diagnosis_record.id"}
 
 
 def test_fft_diagnosis_is_idempotent_by_task_id():

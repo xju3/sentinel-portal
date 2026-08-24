@@ -64,6 +64,22 @@ class LocalNotificationService(NotificationServiceProtocol):
         target_count = 0
         for fault_event in event.expanded_faults():
             async with self._session_factory() as session:
+                should_notify = await NotificationService.should_notify_fault(
+                    session,
+                    fault_event,
+                    confirmation_count=(
+                        self._settings.bearing_notification_confirmation_count
+                    ),
+                    window_hours=self._settings.bearing_notification_window_hours,
+                    immediate_level=(
+                        self._settings.bearing_notification_immediate_level
+                    ),
+                )
+            if not should_notify:
+                skipped += 1
+                continue
+
+            async with self._session_factory() as session:
                 targets = await NotificationService.prepare_delivery_targets(
                     session,
                     fault_event,

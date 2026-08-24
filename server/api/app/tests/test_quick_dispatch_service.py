@@ -209,6 +209,67 @@ async def test_final_resampling_report_creates_fft_in_same_dispatch(monkeypatch)
 
 
 @pytest.mark.asyncio
+async def test_missing_device_sequence_is_added_to_diagnosis_payload(monkeypatch):
+    task = SimpleNamespace(
+        id=uuid4(),
+        task_purpose="RESAMPLING",
+        val=3,
+    )
+    task_report = SimpleNamespace(sequence=2)
+    payload = _payload(task_id=str(task.id))
+    monkeypatch.setattr(
+        quick_dispatch_service,
+        "record_sensor_task_report",
+        AsyncMock(return_value=task),
+    )
+    monkeypatch.setattr(
+        quick_dispatch_service,
+        "get_sensor_task_report_by_report_id",
+        AsyncMock(return_value=task_report),
+    )
+    monkeypatch.setattr(
+        quick_dispatch_service,
+        "dispatch_pending_sensor_tasks",
+        AsyncMock(return_value=[]),
+    )
+
+    await quick_dispatch_service.dispatch_quick_diagnosis_tasks(
+        session=object(),
+        report_id="report-2",
+        sn="STL26SH0001",
+        payload=payload,
+    )
+
+    assert payload["task_sequence"] == 2
+
+
+@pytest.mark.asyncio
+async def test_unrecorded_task_report_never_enters_diagnosis_pipeline(monkeypatch):
+    task_id = str(uuid4())
+    monkeypatch.setattr(
+        quick_dispatch_service,
+        "record_sensor_task_report",
+        AsyncMock(return_value=None),
+    )
+    dispatch = AsyncMock(return_value=[])
+    monkeypatch.setattr(
+        quick_dispatch_service,
+        "dispatch_pending_sensor_tasks",
+        dispatch,
+    )
+
+    with pytest.raises(ValueError, match="could not be recorded"):
+        await quick_dispatch_service.dispatch_quick_diagnosis_tasks(
+            session=object(),
+            report_id="report-invalid",
+            sn="STL26SH0001",
+            payload=_payload(task_id=task_id),
+        )
+
+    dispatch.assert_not_awaited()
+
+
+@pytest.mark.asyncio
 async def test_final_resampling_retry_returns_linked_dispatched_fft(monkeypatch):
     task = SimpleNamespace(id=uuid4(), task_purpose="RESAMPLING", val=3)
     fft_task = SimpleNamespace(id=uuid4(), status=2)

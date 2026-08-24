@@ -65,6 +65,12 @@ class FakeSession:
     async def commit(self):
         self.commit_calls += 1
 
+    async def scalar(self, stmt):
+        self.statements.append(stmt)
+        if not self._responses:
+            raise AssertionError("Unexpected scalar call")
+        return self._responses.pop(0)
+
 
 def _event(
     *,
@@ -134,6 +140,33 @@ def test_parse_event_accepts_bearing_fault():
 
     assert event.fault_events[0].fault_type == "bearing_bpfi"
     assert event.fault_events[0].fault_label == "轴承内圈"
+
+
+@pytest.mark.asyncio
+async def test_bearing_notification_timing_policy_belongs_to_notification_service():
+    attention = _event(fault_type="bearing_bpfi", fault_level=2)
+
+    assert not await NotificationService.should_notify_fault(
+        FakeSession([0]),
+        attention,
+        confirmation_count=2,
+        window_hours=3,
+        immediate_level=3,
+    )
+    assert await NotificationService.should_notify_fault(
+        FakeSession([1]),
+        attention,
+        confirmation_count=2,
+        window_hours=3,
+        immediate_level=3,
+    )
+    assert await NotificationService.should_notify_fault(
+        FakeSession([]),
+        _event(fault_type="bearing_bpfi", fault_level=3),
+        confirmation_count=2,
+        window_hours=3,
+        immediate_level=3,
+    )
 
 
 def test_parse_event_dispatches_v1_and_v2():
@@ -397,7 +430,7 @@ async def test_prepare_delivery_targets_retries_failed_rows(monkeypatch):
     insert_stmt = next(
         stmt for stmt in session.statements if hasattr(stmt, "table")
     )
-    assert insert_stmt.table.name == "diagnosis_notification_delivery"
+    assert insert_stmt.table.name == "notification_delivery"
 
 
 @pytest.mark.asyncio
@@ -465,8 +498,8 @@ async def test_mark_delivery_sending_claims_pending_or_failed_state():
         )
     )
     assert claimed is True
-    assert "UPDATE diagnosis_notification_delivery" in compiled
+    assert "UPDATE notification_delivery" in compiled
     assert "status IN (0, 3)" in compiled or "status IN (__[POSTCOMPILE_status_1])" in compiled
     assert "attempt_count < 3" in compiled
-    assert "WHERE diagnosis_notification_delivery.id" in compiled
+    assert "WHERE notification_delivery.id" in compiled
     assert session.commit_calls == 1

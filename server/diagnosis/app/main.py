@@ -20,7 +20,6 @@ from app.clients.fft_stream_worker import (
 )
 from app.config import settings
 from app.preparation.ingestion import process_incoming_report
-from app.services.notification_outbox import run_notification_outbox_dispatcher
 
 # Configure logging for the new service using shared pub setup
 logger = setup_logging(debug=settings.debug)
@@ -69,12 +68,6 @@ async def lifespan(app: FastAPI):
         asyncio.create_task(
             run_fft_stream_worker("fft-worker-0"),
             name="diagnosis-fft-worker",
-        )
-    )
-    worker_tasks.append(
-        asyncio.create_task(
-            run_notification_outbox_dispatcher(),
-            name="diagnosis-notification-outbox",
         )
     )
     logger.debug("Started %d stream worker(s).", WORKER_COUNT)

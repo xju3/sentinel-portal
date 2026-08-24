@@ -648,18 +648,66 @@ async def record_sensor_task_report(
     same task_id + sequence are ignored and do not increase completion count.
     """
     task_uuid = _parse_task_uuid(task_id)
-    if task_uuid is None or sequence is None:
-        return None
-    if sequence < 1:
+    if task_uuid is None:
         return None
 
-    task = await get_sensor_task_by_id(session, task_uuid)
+    task_stmt = (
+        select(SensorTask)
+        .where(SensorTask.id == task_uuid)
+        .with_for_update()
+    )
+    task = (await session.execute(task_stmt)).scalar_one_or_none()
     if task is None:
         return None
     if task.sn != sn or task.action <= 10:
         return None
     expected_count = int(task.val or 0)
-    if expected_count < 1 or sequence > expected_count:
+    if expected_count < 1:
+        return None
+
+    if sequence is None:
+        existing_upload = await get_sensor_task_report_by_report_id(
+            session,
+            task_uuid,
+            report_id,
+        )
+        if existing_upload is not None:
+            await session.commit()
+            await session.refresh(task)
+            return task
+
+        used_sequences = set(
+            (
+                await session.execute(
+                    select(SensorTaskReport.sequence).where(
+                        SensorTaskReport.task_id == task_uuid,
+                        SensorTaskReport.sequence >= 1,
+                        SensorTaskReport.sequence <= expected_count,
+                    )
+                )
+            ).scalars().all()
+        )
+        sequence = next(
+            (
+                candidate
+                for candidate in range(1, expected_count + 1)
+                if candidate not in used_sequences
+            ),
+            None,
+        )
+        if sequence is None:
+            raise ValueError(
+                f"No task sequence available for task_id={task_uuid} "
+                f"report_id={report_id}"
+            )
+        logger.info(
+            "Assigned server-side task sequence: task_id=%s report_id=%s sequence=%s",
+            task_uuid,
+            report_id,
+            sequence,
+        )
+
+    if sequence < 1 or sequence > expected_count:
         return None
     if task.status == SENSOR_TASK_STATUS_PENDING:
         task.status = SENSOR_TASK_STATUS_DISPATCHED
@@ -773,6 +821,22 @@ async def _get_sensor_task_report(
     stmt = select(SensorTaskReport).where(
         SensorTaskReport.task_id == task_id,
         SensorTaskReport.sequence == sequence,
+    )
+    return (await session.execute(stmt)).scalar_one_or_none()
+
+
+async def get_sensor_task_report_by_report_id(
+    session: AsyncSession,
+    task_id: UUID | str,
+    report_id: str,
+) -> SensorTaskReport | None:
+    """Return the execution row assigned to one uploaded report."""
+    task_uuid = task_id if isinstance(task_id, UUID) else _parse_task_uuid(task_id)
+    if task_uuid is None:
+        return None
+    stmt = select(SensorTaskReport).where(
+        SensorTaskReport.task_id == task_uuid,
+        SensorTaskReport.report_id == report_id,
     )
     return (await session.execute(stmt)).scalar_one_or_none()
 

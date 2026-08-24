@@ -116,6 +116,7 @@ class DeviceDiagnosticReport(BaseModel):
     # Payload metadata
     sample_type: str | None = None
     task_id: str | None = None
+    task_sequence: int | None = None
     quality: DataQuality | None = None
     
     # The actual feature data per axis
@@ -133,6 +134,7 @@ class DiagnosisTriggerPayload(BaseModel):
     fs_hz: int | None = None
     points: int | None = None
     task_id: str | None = None
+    task_sequence: int | None = None
     delay: int | None = 0
     total: int
     sensor_id: str | None = None

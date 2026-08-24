@@ -71,12 +71,6 @@ class DiagnosisCaseAttemptResultStatus(str, Enum):
     INSUFFICIENT_DATA = "INSUFFICIENT_DATA"
 
 
-class DiagnosisNotificationOutboxStatus(str, Enum):
-    PENDING = "PENDING"
-    PUBLISHED = "PUBLISHED"
-    FAILED = "FAILED"
-
-
 class DiagnosisRecord(Base):
     """
     Metadata record for the raw incoming diagnostic JSON report.
@@ -286,7 +280,6 @@ class DiagnosisCase(Base):
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
     )
-
     attempts = relationship(
         "DiagnosisCaseAttempt",
         back_populates="case",
@@ -485,44 +478,3 @@ class DiagnosisNotificationDelivery(Base):
         default=datetime.utcnow,
         onupdate=datetime.utcnow,
     )
-
-
-class DiagnosisNotificationOutbox(Base):
-    """Reliable handoff ledger between diagnosis commits and MQTT publishing."""
-
-    __tablename__ = "notification_outbox"
-    __table_args__ = (
-        UniqueConstraint("event_id", name="uq_diagnosis_notification_outbox_event"),
-        Index(
-            "idx_diagnosis_notification_outbox_status_retry",
-            "status",
-            "next_attempt_at",
-        ),
-    )
-
-    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    event_id = Column(Uuid(as_uuid=True), nullable=False, index=True)
-    diagnosis_id = Column(
-        Uuid(as_uuid=True),
-        ForeignKey("diagnosis.id"),
-        nullable=False,
-        index=True,
-    )
-    report_id = Column(
-        Uuid(as_uuid=True),
-        ForeignKey("diagnosis_record.id"),
-        nullable=False,
-        index=True,
-    )
-    payload = Column(MySQLJSON, nullable=False)
-    status = Column(
-        String(16),
-        nullable=False,
-        default=DiagnosisNotificationOutboxStatus.PENDING.value,
-        comment="PENDING|PUBLISHED|FAILED",
-    )
-    attempt_count = Column(Integer, nullable=False, default=0)
-    next_attempt_at = Column(DateTime, nullable=True, index=True)
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-    published_at = Column(DateTime, nullable=True)
-    last_error = Column(String(1024), nullable=True)

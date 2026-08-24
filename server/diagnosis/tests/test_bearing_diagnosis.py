@@ -91,24 +91,3 @@ def test_bearing_diagnosis_ignores_wrong_location_and_insufficient_axis():
         fs_hz=1000,
         points=1000,
     ) == []
-
-
-def test_bearing_notification_requires_continuity_but_escalates_immediately():
-    assert not BearingDiagnosis.should_notify(
-        2,
-        [],
-        confirmation_count=2,
-        immediate_level=3,
-    )
-    assert BearingDiagnosis.should_notify(
-        2,
-        [1],
-        confirmation_count=2,
-        immediate_level=3,
-    )
-    assert BearingDiagnosis.should_notify(
-        3,
-        [],
-        confirmation_count=2,
-        immediate_level=3,
-    )

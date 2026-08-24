@@ -28,6 +28,7 @@ from pub.services.sensor.sensor_task_service import (
     dispatch_pending_sensor_tasks,
     ensure_resampling_followup_fft_task,
     ensure_daily_fft_task,
+    get_sensor_task_report_by_report_id,
     record_sensor_task_report,
     sensor_task_to_device_payload,
 )
@@ -62,24 +63,41 @@ async def dispatch_quick_diagnosis_tasks(
     task_id = _payload_task_id(payload)
     if task_id:
         followup_fft_task = None
+        sequence = _payload_task_sequence(payload)
         task = await record_sensor_task_report(
             session=session,
             task_id=task_id,
             sn=sn,
-            sequence=_payload_task_sequence(payload),
+            sequence=sequence,
             report_id=report_id,
             ts_ms=_payload_ts_ms(payload),
         )
+        if task is None:
+            raise ValueError(
+                "Task report could not be recorded before diagnosis dispatch: "
+                f"task_id={task_id} report_id={report_id} sn={sn}"
+            )
+        if sequence is None:
+            task_report = await get_sensor_task_report_by_report_id(
+                session,
+                task.id,
+                report_id,
+            )
+            if task_report is None:
+                raise RuntimeError(
+                    "Task report was not persisted before diagnosis dispatch: "
+                    f"task_id={task.id} report_id={report_id}"
+                )
+            sequence = int(task_report.sequence)
+            payload["task_sequence"] = sequence
         logger.debug(
             "Quick dispatch skipped for task report: sn=%s report_id=%s task_id=%s",
             sn,
             report_id,
             task_id,
         )
-        sequence = _payload_task_sequence(payload)
         if (
-            task is not None
-            and (
+            (
                 getattr(task, "task_purpose", None) == TASK_PURPOSE_RESAMPLING
                 or (
                     getattr(task, "action", None) == 53

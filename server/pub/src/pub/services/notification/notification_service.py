@@ -327,6 +327,42 @@ class NotificationMessageContext(BaseModel):
 
 class NotificationService:
     @staticmethod
+    async def should_notify_fault(
+        session: AsyncSession,
+        event: DiagnosisNotificationFaultEvent,
+        *,
+        confirmation_count: int,
+        window_hours: float,
+        immediate_level: int,
+    ) -> bool:
+        """Apply channel timing policy without suppressing diagnosis events."""
+        if not event.fault_type.startswith("bearing_"):
+            return True
+        if event.fault_level >= immediate_level:
+            return True
+
+        required_previous = max(0, confirmation_count - 1)
+        if required_previous == 0:
+            return True
+        window_start = (
+            event.diagnosed_at - timedelta(hours=window_hours)
+        ).replace(tzinfo=None)
+        previous_count = await session.scalar(
+            select(func.count(func.distinct(Diagnosis.id)))
+            .select_from(Diagnosis)
+            .join(DiagnosisItem, DiagnosisItem.diagnosis_id == Diagnosis.id)
+            .where(
+                Diagnosis.id != event.diagnosis_id,
+                Diagnosis.device_id == event.device_id,
+                DiagnosisItem.fault_type == event.fault_type,
+                DiagnosisItem.level > 0,
+                Diagnosis.diagnosed_at >= window_start,
+                Diagnosis.diagnosed_at < event.diagnosed_at.replace(tzinfo=None),
+            )
+        )
+        return int(previous_count or 0) >= required_previous
+
+    @staticmethod
     def parse_event(payload: dict[str, Any] | str | bytes) -> DiagnosisNotificationEvent:
         if isinstance(payload, bytes):
             payload = payload.decode("utf-8")

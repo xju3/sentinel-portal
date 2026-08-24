@@ -31,6 +31,9 @@ class Settings(BaseSettings):
     notification_timezone: str = "Asia/Shanghai"
     notification_delivery_max_attempts: int = 3
     notification_delivery_retry_seconds: float = 30.0
+    bearing_notification_confirmation_count: int = 2
+    bearing_notification_window_hours: float = 3.0
+    bearing_notification_immediate_level: int = 3
 
     model_config = SettingsConfigDict(
         env_file=(

@@ -194,21 +194,3 @@ class BearingDiagnosis:
         if snr_db >= settings.bearing_attention_snr_db:
             return 1
         return 0
-
-    @staticmethod
-    def should_notify(
-        current_level: int,
-        previous_levels: list[int],
-        *,
-        confirmation_count: int,
-        immediate_level: int,
-    ) -> bool:
-        """Separate per-cycle diagnosis from customer-notification confirmation."""
-        if current_level >= immediate_level:
-            return True
-        required_previous = max(0, confirmation_count - 1)
-        return (
-            current_level > 0
-            and sum(level > 0 for level in previous_levels)
-            >= required_previous
-        )

@@ -229,6 +229,11 @@ async def _process_stream_message(bucket: str, path: str) -> bool:
             "fs_hz": str(report.fs_hz) if report.fs_hz is not None else "",
             "points": str(report.points) if report.points is not None else "",
             "task_id": str(report.task_id) if report.task_id else "",
+            "task_sequence": (
+                str(report.task_sequence)
+                if report.task_sequence is not None
+                else ""
+            ),
             "delay": str(report.delay) if report.delay is not None else "0",
             "total": str(report.total),
             "sensor_id": str(report.sensor_id) if report.sensor_id else "",
