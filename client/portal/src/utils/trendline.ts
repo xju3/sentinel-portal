@@ -9,6 +9,7 @@ import dayjs from 'dayjs';
 export function calculateTrendLine(
   timestamps: string[],
   values: (number | null | undefined)[],
+  minThreshold: number = 0.20
 ): {
   markLineData: Array<[{ coord: [string, number] }, { coord: [string, number] }]>;
   slopePerHour: number;
@@ -18,7 +19,8 @@ export function calculateTrendLine(
   
   for (let i = 0; i < timestamps.length; i++) {
     const val = values[i];
-    if (val !== null && val !== undefined) {
+    // Filter out nulls and shutdown noise values (e.g. < 0.20)
+    if (val !== null && val !== undefined && val >= minThreshold) {
       validPoints.push([dayjs(timestamps[i]).valueOf(), val]);
     }
   }
