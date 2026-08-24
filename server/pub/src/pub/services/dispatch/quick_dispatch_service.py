@@ -281,7 +281,10 @@ def _payload_task_id(payload: dict[str, Any]) -> str:
     value = payload.get("task_id")
     if not isinstance(value, str):
         return ""
-    return value.strip()
+    task_id = value.strip()
+    # Firmware uses the sentinel value "0" for anomaly-triggered wakeups.
+    # It is not a server SensorTask UUID and must still enter quick diagnosis.
+    return "" if task_id == "0" else task_id
 
 
 def _payload_task_sequence(payload: dict[str, Any]) -> int | None:

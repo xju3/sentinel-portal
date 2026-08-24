@@ -49,7 +49,7 @@ class QuickDiagnosisSnapshot:
 
     @property
     def is_task_report(self) -> bool:
-        return bool(self.task_id)
+        return bool(self.task_id and self.task_id != "0")
 
 
 def record_quick_diagnosis_snapshot(
@@ -74,7 +74,9 @@ def record_quick_diagnosis_snapshot(
         pipeline = client.pipeline()
         pipeline.lpush(_history_key(sn), raw)
         pipeline.ltrim(_history_key(sn), 0, limit - 1)
-        if not snapshot.is_task_report:
+        # Anomaly wakeups (task_id="0") participate in quick diagnosis but
+        # must not replace the last scheduled regular baseline.
+        if not snapshot.task_id:
             pipeline.set(_last_regular_key(sn), raw)
         pipeline.execute()
     except Exception as e:

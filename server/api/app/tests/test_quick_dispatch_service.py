@@ -125,6 +125,17 @@ def test_quick_dispatch_skips_task_reports():
     assert plan.skipped_reason == "task report"
 
 
+def test_anomaly_wakeup_task_zero_is_not_a_server_task_report():
+    plan = _plan(
+        _payload(task_id="0", rms_z=7.9),
+        _last_regular(rms_z=2.0),
+    )
+
+    assert plan.should_create_task
+    assert plan.spec is not None
+    assert plan.spec.action == 53
+
+
 def test_quick_dispatch_skips_non_normal_samples():
     plan = _plan(_payload(sample_type="debug", temperature_c=60.0, rms_z=8.0), _last_regular())
 
@@ -267,6 +278,44 @@ async def test_unrecorded_task_report_never_enters_diagnosis_pipeline(monkeypatc
         )
 
     dispatch.assert_not_awaited()
+
+
+@pytest.mark.asyncio
+async def test_anomaly_wakeup_does_not_attempt_task_report_registration(monkeypatch):
+    record_report = AsyncMock()
+    create_task = AsyncMock(return_value=SimpleNamespace(id=uuid4(), action=53, val=3))
+    dispatch = AsyncMock(return_value=[])
+    monkeypatch.setattr(
+        quick_dispatch_service,
+        "record_sensor_task_report",
+        record_report,
+    )
+    monkeypatch.setattr(
+        quick_dispatch_service,
+        "create_resampling_task",
+        create_task,
+    )
+    monkeypatch.setattr(
+        quick_dispatch_service,
+        "get_last_regular_snapshot",
+        lambda _sn: _last_regular(rms_z=2.0),
+    )
+    monkeypatch.setattr(
+        quick_dispatch_service,
+        "dispatch_pending_sensor_tasks",
+        dispatch,
+    )
+
+    await quick_dispatch_service.dispatch_quick_diagnosis_tasks(
+        session=object(),
+        report_id="anomaly-wakeup",
+        sn="STL26SH0001",
+        payload=_payload(task_id="0", rms_z=7.9),
+    )
+
+    record_report.assert_not_awaited()
+    create_task.assert_awaited_once()
+    dispatch.assert_awaited_once()
 
 
 @pytest.mark.asyncio
