@@ -31,7 +31,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -44,7 +44,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 7
+        "register": 3
       },
       "enableBy": "register"
     },
@@ -57,7 +57,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 6
       },
       "enableBy": "register"
     },
@@ -74,7 +74,7 @@
             0
           ]
         },
-        "register": 3
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -91,7 +91,7 @@
             1
           ]
         },
-        "register": 3
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -121,7 +121,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -135,10 +135,10 @@
       "time": {
         "hooks": {
           "modifyAppData": [
-            43
+            32
           ]
         },
-        "register": 23
+        "register": 15
       },
       "enableBy": "register"
     },
@@ -151,7 +151,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -218,7 +218,7 @@
             0
           ]
         },
-        "register": 9
+        "register": 5
       },
       "enableBy": "register"
     },
@@ -1087,7 +1087,7 @@
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1100,7 +1100,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1113,7 +1113,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 50
+        "register": 49
       },
       "enableBy": "register"
     },
@@ -1139,7 +1139,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 11
+        "register": 9
       },
       "enableBy": "config"
     },
@@ -1153,10 +1153,10 @@
       "time": {
         "hooks": {
           "modifyAppData": [
-            0
+            1
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1169,7 +1169,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1195,7 +1195,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 23
+        "register": 22
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/mpa/mpa": {
@@ -1207,7 +1207,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1220,7 +1220,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/overrides/overrides": {
@@ -1326,7 +1326,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1339,7 +1339,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -1365,7 +1365,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/ssr/ssr": {
@@ -1377,7 +1377,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1390,7 +1390,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -1403,7 +1403,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -1429,7 +1429,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1442,7 +1442,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 4
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/monorepo/redirect": {
@@ -1454,7 +1454,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 14
+        "register": 15
       },
       "enableBy": "config"
     },
@@ -1491,7 +1491,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1546,7 +1546,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 2
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/mako/mako": {
@@ -1558,7 +1558,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1571,7 +1571,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/hmrGuardian/hmrGuardian": {
@@ -1633,7 +1633,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 3
       },
       "enableBy": "register"
     },
@@ -1646,7 +1646,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 26
+        "register": 25
       },
       "enableBy": "register"
     },
@@ -1659,7 +1659,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 22
+        "register": 21
       }
     },
     "./node_modules/@umijs/preset-umi/dist/commands/help": {
@@ -1671,7 +1671,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1684,7 +1684,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1736,7 +1736,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -1749,7 +1749,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1762,7 +1762,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1775,7 +1775,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1801,7 +1801,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1814,7 +1814,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1840,7 +1840,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1853,7 +1853,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1866,7 +1866,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1905,7 +1905,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 12
+        "register": 13
       },
       "enableBy": "register"
     },
@@ -1931,7 +1931,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 5
       },
       "enableBy": "register"
     },
@@ -1978,10 +1978,10 @@
             0
           ],
           "onCheck": [
-            1
+            0
           ]
         },
-        "register": 6
+        "register": 7
       }
     },
     "./node_modules/@umijs/plugins/dist/dva": {
@@ -1993,7 +1993,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 8
+        "register": 4
       },
       "enableBy": "config"
     },
@@ -2006,7 +2006,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2070,7 +2070,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2146,7 +2146,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2159,7 +2159,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2172,7 +2172,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2202,7 +2202,7 @@
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -2236,7 +2236,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -2249,7 +2249,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     }
@@ -3927,7 +3927,7 @@
       "parentId": "19",
       "id": "22",
       "absPath": "/device/operation-schedules",
-      "__content": "import { useRef, useState } from 'react';\nimport {\n  ActionType,\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProForm,\n  ProFormCheckbox,\n  ProFormDependency,\n  ProFormRadio,\n  ProFormSelect,\n  ProFormText,\n  ProFormTextArea,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Alert, Button, Modal, Popconfirm, Space, Table, Tag, TimePicker, message } from 'antd';\nimport type { ColumnsType } from 'antd/es/table';\nimport dayjs, { type Dayjs } from 'dayjs';\nimport {\n  DeviceOperationSchedule,\n  DeviceOperationScheduleItem,\n  DeviceOperationSchedulePayload,\n  ScheduleCycleType,\n  buildCronFromVisualSlot,\n  calculateDurationFromTimeRange,\n  createOperationSchedule,\n  deleteOperationSchedule,\n  formatDurationMinutes,\n  getOperationScheduleItems,\n  parseCronScheduleItem,\n  queryOperationSchedules,\n  updateOperationSchedule,\n  updateOperationScheduleItems,\n} from '@/services/operationSchedule';\nimport { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';\n\ntype ScheduleFormValues = {\n  code: string;\n  name: string;\n  description?: string;\n  status: number;\n};\n\ntype ScheduleItemDraft = DeviceOperationScheduleItem & {\n  draftKey: string;\n};\n\ntype VisualSlotFormValues = {\n  cycleType: ScheduleCycleType;\n  weekdays?: number[];\n  monthDays?: number[];\n  startTime: Dayjs | string;\n  endTime: Dayjs | string;\n  remark?: string;\n};\n\nconst WEEKDAY_OPTIONS = [\n  { label: '周一', value: 1 },\n  { label: '周二', value: 2 },\n  { label: '周三', value: 3 },\n  { label: '周四', value: 4 },\n  { label: '周五', value: 5 },\n  { label: '周六', value: 6 },\n  { label: '周日', value: 7 },\n];\n\nconst MONTH_DAY_OPTIONS = Array.from({ length: 31 }, (_, idx) => ({\n  label: `${idx + 1}日`,\n  value: idx + 1,\n}));\n\nconst toTimeStr = (val: Dayjs | string | undefined, fallback: string): string => {\n  if (!val) return fallback;\n  if (typeof val === 'string') return val;\n  return val.format('HH:mm');\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | { data?: { detail?: string }; info?: { errorMessage?: string }; message?: string }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst OperationSchedulePage = () => {\n  const actionRef = useRef<ActionType>();\n  const slotFormRef = useRef<any>();\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [editing, setEditing] = useState<DeviceOperationSchedule | null>(null);\n\n  const [itemsModalOpen, setItemsModalOpen] = useState(false);\n  const [currentSchedule, setCurrentSchedule] = useState<DeviceOperationSchedule | null>(null);\n  const [itemsLoading, setItemsLoading] = useState(false);\n  const [itemsSaving, setItemsSaving] = useState(false);\n  const [scheduleItems, setScheduleItems] = useState<ScheduleItemDraft[]>([]);\n\n  const [slotEditorOpen, setSlotEditorOpen] = useState(false);\n  const [editingSlotIndex, setEditingSlotIndex] = useState<number | null>(null);\n\n  const openItemsModal = async (schedule: DeviceOperationSchedule) => {\n    setCurrentSchedule(schedule);\n    setItemsModalOpen(true);\n    setItemsLoading(true);\n    try {\n      const rows = await getOperationScheduleItems(schedule.id);\n      setScheduleItems(\n        rows.map((item, idx) => ({\n          ...item,\n          seq: item.seq ?? idx,\n          draftKey: item.id || `${item.cron_expr}-${item.duration_minutes}-${idx}`,\n        })),\n      );\n    } catch (error) {\n      message.error(toErrorMessage(error));\n      setItemsModalOpen(false);\n      setCurrentSchedule(null);\n    } finally {\n      setItemsLoading(false);\n    }\n  };\n\n  const columns: ProColumns<DeviceOperationSchedule>[] = [\n    { title: '序号', valueType: 'indexBorder', width: 68, hideInSearch: true, fixed: 'left' },\n    { title: '编码', dataIndex: 'code', width: 140, sorter: true },\n    { title: '名称', dataIndex: 'name', width: 180, sorter: true },\n    {\n      title: '运行时段',\n      dataIndex: 'items',\n      hideInSearch: true,\n      render: (_, row) => {\n        const items = row.items || [];\n        if (items.length === 0) {\n          return <span style={{ color: '#999' }}>未配置时段</span>;\n        }\n        return (\n          <Space size={[4, 4]} wrap>\n            {items.map((item, idx) => {\n              const parsed = parseCronScheduleItem(item.cron_expr, item.duration_minutes);\n              return (\n                <Tag color=\"processing\" key={item.id || idx}>\n                  {parsed.summaryLabel}\n                  {item.remark ? ` · ${item.remark}` : ''}\n                </Tag>\n              );\n            })}\n          </Space>\n        );\n      },\n    },\n    {\n      title: '状态',\n      dataIndex: 'status',\n      width: 100,\n      valueType: 'select',\n      valueEnum: {\n        1: { text: '启用' },\n        0: { text: '停用' },\n      },\n      render: (_, row) =>\n        Number(row.status) === 1 ? <Tag color=\"success\">启用</Tag> : <Tag>停用</Tag>,\n      sorter: true,\n    },\n    {\n      title: '备注',\n      dataIndex: 'description',\n      ellipsis: true,\n      hideInSearch: true,\n      render: (_, row) => row.description || '-',\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: OPERATION_COL_WIDTH + 40,\n      fixed: 'right',\n      align: 'center',\n      render: (_, row) => (\n        <Space size=\"small\">\n          <a onClick={() => void openItemsModal(row)}>时段</a>\n          <a\n            onClick={() => {\n              setEditing(row);\n              setModalOpen(true);\n            }}\n          >\n            编辑\n          </a>\n          <Popconfirm\n            title=\"确认删除该运行模式吗？\"\n            onConfirm={async () => {\n              try {\n                await deleteOperationSchedule(row.id);\n                message.success('删除成功');\n                actionRef.current?.reload();\n              } catch (error) {\n                message.error(toErrorMessage(error));\n              }\n            }}\n          >\n            <a style={{ color: '#ff4d4f' }}>删除</a>\n          </Popconfirm>\n        </Space>\n      ),\n    },\n  ];\n\n  const itemColumns: ColumnsType<ScheduleItemDraft> = [\n    {\n      title: '序号',\n      width: 68,\n      render: (_, __, index) => index + 1,\n    },\n    {\n      title: '执行周期',\n      width: 180,\n      render: (_, row) => {\n        const parsed = parseCronScheduleItem(row.cron_expr, row.duration_minutes);\n        return <Tag color=\"geekblue\">{parsed.cycleLabel}</Tag>;\n      },\n    },\n    {\n      title: '运行时间段',\n      width: 180,\n      render: (_, row) => {\n        const parsed = parseCronScheduleItem(row.cron_expr, row.duration_minutes);\n        return <strong>{parsed.timeRangeLabel}</strong>;\n      },\n    },\n    {\n      title: '持续时长',\n      width: 140,\n      render: (_, row) => {\n        const parsed = parseCronScheduleItem(row.cron_expr, row.duration_minutes);\n        return `${parsed.durationLabel} (${row.duration_minutes}分钟)`;\n      },\n    },\n    {\n      title: '时段说明',\n      dataIndex: 'remark',\n      render: (val) => val || '-',\n    },\n    {\n      title: '操作',\n      width: 130,\n      render: (_, row, index) => (\n        <Space>\n          <a\n            onClick={() => {\n              setEditingSlotIndex(index);\n              setSlotEditorOpen(true);\n            }}\n          >\n            编辑\n          </a>\n          <Popconfirm\n            title=\"确认移除该运行时段吗？\"\n            onConfirm={() =>\n              setScheduleItems((current) =>\n                current.filter((item) => item.draftKey !== row.draftKey),\n              )\n            }\n          >\n            <a style={{ color: '#ff4d4f' }}>移除</a>\n          </Popconfirm>\n        </Space>\n      ),\n    },\n  ];\n\n  const getSlotEditorInitialValues = (): VisualSlotFormValues => {\n    if (editingSlotIndex === null || !scheduleItems[editingSlotIndex]) {\n      return {\n        cycleType: 'DAILY',\n        weekdays: [1, 2, 3, 4, 5],\n        monthDays: [1],\n        startTime: dayjs('08:00', 'HH:mm'),\n        endTime: dayjs('12:00', 'HH:mm'),\n        remark: undefined,\n      };\n    }\n    const target = scheduleItems[editingSlotIndex];\n    const parsed = parseCronScheduleItem(target.cron_expr, target.duration_minutes);\n    return {\n      cycleType: parsed.cycleType,\n      weekdays: parsed.weekdays.length > 0 ? parsed.weekdays : [1, 2, 3, 4, 5],\n      monthDays: parsed.monthDays.length > 0 ? parsed.monthDays : [1],\n      startTime: dayjs(parsed.startTime, 'HH:mm'),\n      endTime: dayjs(parsed.endTime, 'HH:mm'),\n      remark: target.remark,\n    };\n  };\n\n  return (\n    <PageContainer title=\"运行模式\">\n      <ProTable<DeviceOperationSchedule>\n        rowKey=\"id\"\n        actionRef={actionRef}\n        columns={columns}\n        request={queryOperationSchedules}\n        search={{ labelWidth: 'auto' }}\n        pagination={{ defaultPageSize: 20, showSizeChanger: true }}\n        optionsRender={renderRefSafeTableOptions}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建运行模式\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<ScheduleFormValues>\n        title={editing ? '编辑运行模式' : '新建运行模式'}\n        open={modalOpen}\n        modalProps={{\n          destroyOnHidden: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        initialValues={\n          editing\n            ? {\n                code: editing.code,\n                name: editing.name,\n                description: editing.description,\n                status: Number(editing.status),\n              }\n            : { status: 1 }\n        }\n        onFinish={async (values) => {\n          const payload: DeviceOperationSchedulePayload = {\n            code: values.code.trim(),\n            name: values.name.trim(),\n            description: values.description?.trim() || undefined,\n            status: Number(values.status ?? 1),\n          };\n          setSaving(true);\n          try {\n            if (editing) {\n              await updateOperationSchedule(editing.id, payload);\n            } else {\n              await createOperationSchedule(payload);\n            }\n            message.success('保存成功');\n            setModalOpen(false);\n            setEditing(null);\n            actionRef.current?.reload();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormText\n          name=\"code\"\n          label=\"编码\"\n          rules={[\n            { required: true, message: '请输入运行模式编码' },\n            { max: 16, message: '编码最多16个字符' },\n          ]}\n        />\n        <ProFormText\n          name=\"name\"\n          label=\"名称\"\n          rules={[\n            { required: true, message: '请输入运行模式名称' },\n            { max: 64, message: '名称最多64个字符' },\n          ]}\n        />\n        <ProFormSelect\n          name=\"status\"\n          label=\"状态\"\n          options={[\n            { label: '启用', value: 1 },\n            { label: '停用', value: 0 },\n          ]}\n          rules={[{ required: true, message: '请选择状态' }]}\n        />\n        <ProFormTextArea\n          name=\"description\"\n          label=\"备注\"\n          fieldProps={{ rows: 3, maxLength: 255 }}\n        />\n      </ModalForm>\n\n      <Modal\n        title={currentSchedule ? `${currentSchedule.name} - 运行时段配置` : '运行时段配置'}\n        open={itemsModalOpen}\n        width={880}\n        destroyOnClose\n        confirmLoading={itemsSaving}\n        okText=\"保存配置\"\n        onCancel={() => {\n          setItemsModalOpen(false);\n          setCurrentSchedule(null);\n          setScheduleItems([]);\n        }}\n        onOk={async () => {\n          if (!currentSchedule) return;\n          setItemsSaving(true);\n          try {\n            await updateOperationScheduleItems(\n              currentSchedule.id,\n              scheduleItems.map((item, idx) => ({\n                cron_expr: item.cron_expr,\n                duration_minutes: item.duration_minutes,\n                remark: item.remark,\n                seq: idx,\n              })),\n            );\n            message.success('运行时段保存成功');\n            setItemsModalOpen(false);\n            setCurrentSchedule(null);\n            setScheduleItems([]);\n            actionRef.current?.reload();\n          } catch (error) {\n            message.error(toErrorMessage(error));\n          } finally {\n            setItemsSaving(false);\n          }\n        }}\n      >\n        <Space style={{ marginBottom: 16 }}>\n          <Button\n            type=\"primary\"\n            onClick={() => {\n              setEditingSlotIndex(null);\n              setSlotEditorOpen(true);\n            }}\n          >\n            添加运行时段\n          </Button>\n          <span style={{ color: '#8c8c8c' }}>\n            支持一天配置多个运行时间段；若结束时间早于或等于开始时间，将自动按跨零点（次日结束）计算。\n          </span>\n        </Space>\n        <Table<ScheduleItemDraft>\n          rowKey=\"draftKey\"\n          loading={itemsLoading}\n          columns={itemColumns}\n          dataSource={scheduleItems}\n          pagination={false}\n          size=\"small\"\n        />\n      </Modal>\n\n      <ModalForm<VisualSlotFormValues>\n        key={editingSlotIndex === null ? 'new-schedule-slot' : `edit-schedule-slot-${editingSlotIndex}`}\n        formRef={slotFormRef}\n        title={editingSlotIndex === null ? '构建运行时段' : '编辑运行时段'}\n        open={slotEditorOpen}\n        width={560}\n        modalProps={{\n          destroyOnHidden: true,\n          onCancel: () => {\n            setSlotEditorOpen(false);\n            setEditingSlotIndex(null);\n          },\n        }}\n        initialValues={getSlotEditorInitialValues()}\n        onFinish={async (values) => {\n          const startTimeStr = toTimeStr(values.startTime, '08:00');\n          const endTimeStr = toTimeStr(values.endTime, '12:00');\n          const built = buildCronFromVisualSlot({\n            cycleType: values.cycleType,\n            weekdays: values.weekdays,\n            monthDays: values.monthDays,\n            startTime: startTimeStr,\n            endTime: endTimeStr,\n          });\n          const previous =\n            editingSlotIndex === null ? undefined : scheduleItems[editingSlotIndex];\n          const nextItem: ScheduleItemDraft = {\n            id: previous?.id,\n            schedule_id: currentSchedule?.id,\n            cron_expr: built.cron_expr,\n            duration_minutes: built.duration_minutes,\n            remark: values.remark?.trim() || undefined,\n            seq: editingSlotIndex ?? scheduleItems.length,\n            draftKey:\n              previous?.draftKey ||\n              `${built.cron_expr}-${built.duration_minutes}-${Date.now().toString(36)}`,\n          };\n          setScheduleItems((current) =>\n            editingSlotIndex === null\n              ? [...current, nextItem]\n              : current.map((item, idx) => (idx === editingSlotIndex ? nextItem : item)),\n          );\n          setSlotEditorOpen(false);\n          setEditingSlotIndex(null);\n          return true;\n        }}\n      >\n        <ProFormRadio.Group\n          name=\"cycleType\"\n          label=\"执行周期\"\n          options={[\n            { label: '每天运行', value: 'DAILY' },\n            { label: '按星期运行', value: 'WEEKLY' },\n            { label: '按每月日期运行', value: 'MONTHLY' },\n          ]}\n          rules={[{ required: true, message: '请选择执行周期' }]}\n        />\n\n        <ProFormDependency name={['cycleType']}>\n          {({ cycleType }) => {\n            if (cycleType === 'WEEKLY') {\n              return (\n                <>\n                  <Space size=\"small\" style={{ marginBottom: 8 }}>\n                    <Button\n                      size=\"small\"\n                      onClick={() => slotFormRef.current?.setFieldsValue({ weekdays: [1, 2, 3, 4, 5] })}\n                    >\n                      选工作日 (周一至周五)\n                    </Button>\n                    <Button\n                      size=\"small\"\n                      onClick={() => slotFormRef.current?.setFieldsValue({ weekdays: [6, 7] })}\n                    >\n                      选周末 (周六、周日)\n                    </Button>\n                  </Space>\n                  <ProFormCheckbox.Group\n                    name=\"weekdays\"\n                    label=\"运行星期\"\n                    options={WEEKDAY_OPTIONS}\n                    rules={[{ required: true, message: '请至少选择一天' }]}\n                  />\n                </>\n              );\n            }\n            if (cycleType === 'MONTHLY') {\n              return (\n                <ProFormSelect\n                  name=\"monthDays\"\n                  label=\"每月运行日期\"\n                  mode=\"multiple\"\n                  options={MONTH_DAY_OPTIONS}\n                  placeholder=\"请选择每月运行的日期\"\n                  rules={[{ required: true, message: '请至少选择一个日期' }]}\n                />\n              );\n            }\n            return null;\n          }}\n        </ProFormDependency>\n\n        <Space size=\"large\" align=\"start\" style={{ display: 'flex' }}>\n          <ProForm.Item\n            name=\"startTime\"\n            label=\"开始时间\"\n            rules={[{ required: true, message: '请选择开始时间' }]}\n          >\n            <TimePicker format=\"HH:mm\" minuteStep={5} needConfirm={false} allowClear={false} />\n          </ProForm.Item>\n\n          <ProForm.Item\n            name=\"endTime\"\n            label=\"结束时间\"\n            rules={[{ required: true, message: '请选择结束时间' }]}\n          >\n            <TimePicker format=\"HH:mm\" minuteStep={5} needConfirm={false} allowClear={false} />\n          </ProForm.Item>\n        </Space>\n\n        <ProFormDependency name={['cycleType', 'weekdays', 'monthDays', 'startTime', 'endTime']}>\n          {({ cycleType, weekdays, monthDays, startTime, endTime }) => {\n            const sStr = toTimeStr(startTime, '08:00');\n            const eStr = toTimeStr(endTime, '12:00');\n            const built = buildCronFromVisualSlot({\n              cycleType: cycleType || 'DAILY',\n              weekdays,\n              monthDays,\n              startTime: sStr,\n              endTime: eStr,\n            });\n            const parsed = parseCronScheduleItem(built.cron_expr, built.duration_minutes);\n            const rangeInfo = calculateDurationFromTimeRange(sStr, eStr);\n            return (\n              <Alert\n                type=\"info\"\n                showIcon\n                style={{ marginBottom: 16 }}\n                message={`时段预览：${parsed.cycleLabel} ${rangeInfo.timeRangeLabel}`}\n                description={`单次持续运行时长：${formatDurationMinutes(\n                  rangeInfo.durationMinutes,\n                )}（共 ${rangeInfo.durationMinutes} 分钟）`}\n              />\n            );\n          }}\n        </ProFormDependency>\n\n        <ProFormText\n          name=\"remark\"\n          label=\"时段说明\"\n          placeholder=\"选填，如：早班、下午班\"\n          fieldProps={{ maxLength: 128 }}\n        />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default OperationSchedulePage;\n",
+      "__content": "import { useRef, useState } from 'react';\nimport {\n  ActionType,\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProForm,\n  ProFormCheckbox,\n  ProFormDependency,\n  ProFormRadio,\n  ProFormSelect,\n  ProFormText,\n  ProFormTextArea,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Alert, Button, Modal, Popconfirm, Space, Table, Tag, TimePicker, message } from 'antd';\nimport type { ColumnsType } from 'antd/es/table';\nimport dayjs, { type Dayjs } from 'dayjs';\nimport {\n  DeviceOperationSchedule,\n  DeviceOperationScheduleItem,\n  DeviceOperationSchedulePayload,\n  ScheduleCycleType,\n  buildCronFromVisualSlot,\n  calculateDurationFromTimeRange,\n  createOperationSchedule,\n  deleteOperationSchedule,\n  formatDurationMinutes,\n  getOperationScheduleItems,\n  parseCronScheduleItem,\n  parseHourMinute,\n  queryOperationSchedules,\n  updateOperationSchedule,\n  updateOperationScheduleItems,\n} from '@/services/operationSchedule';\nimport { OPERATION_COL_WIDTH, renderRefSafeTableOptions } from '@/utils/proTableOptions';\n\ntype ScheduleFormValues = {\n  code: string;\n  name: string;\n  description?: string;\n  status: number;\n};\n\ntype ScheduleItemDraft = DeviceOperationScheduleItem & {\n  draftKey: string;\n};\n\ntype VisualSlotFormValues = {\n  cycleType: ScheduleCycleType;\n  weekdays?: number[];\n  monthDays?: number[];\n  startTime: Dayjs | string;\n  endTime: Dayjs | string;\n  remark?: string;\n};\n\nconst WEEKDAY_OPTIONS = [\n  { label: '周一', value: 1 },\n  { label: '周二', value: 2 },\n  { label: '周三', value: 3 },\n  { label: '周四', value: 4 },\n  { label: '周五', value: 5 },\n  { label: '周六', value: 6 },\n  { label: '周日', value: 7 },\n];\n\nconst MONTH_DAY_OPTIONS = Array.from({ length: 31 }, (_, idx) => ({\n  label: `${idx + 1}日`,\n  value: idx + 1,\n}));\n\nconst timeStrToDayjs = (timeStr: string, defaultHour: number, defaultMin = 0): Dayjs => {\n  const [h, m] = parseHourMinute(timeStr, defaultHour, defaultMin);\n  return dayjs().hour(h).minute(m).second(0).millisecond(0);\n};\n\nconst toTimeStr = (val: Dayjs | string | undefined, fallback: string): string => {\n  if (!val) return fallback;\n  if (typeof val !== 'string' && typeof val.isValid === 'function') {\n    return val.isValid() ? val.format('HH:mm') : fallback;\n  }\n  if (typeof val === 'string') {\n    const match = val.match(/(\\d{1,2}):(\\d{1,2})/);\n    if (match) {\n      const h = Math.min(23, Math.max(0, Number(match[1])));\n      const m = Math.min(59, Math.max(0, Number(match[2])));\n      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;\n    }\n    const parsed = dayjs(val);\n    return parsed.isValid() ? parsed.format('HH:mm') : fallback;\n  }\n  return fallback;\n};\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | { data?: { detail?: string }; info?: { errorMessage?: string }; message?: string }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst OperationSchedulePage = () => {\n  const actionRef = useRef<ActionType>();\n  const slotFormRef = useRef<any>();\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [editing, setEditing] = useState<DeviceOperationSchedule | null>(null);\n\n  const [itemsModalOpen, setItemsModalOpen] = useState(false);\n  const [currentSchedule, setCurrentSchedule] = useState<DeviceOperationSchedule | null>(null);\n  const [itemsLoading, setItemsLoading] = useState(false);\n  const [itemsSaving, setItemsSaving] = useState(false);\n  const [scheduleItems, setScheduleItems] = useState<ScheduleItemDraft[]>([]);\n\n  const [slotEditorOpen, setSlotEditorOpen] = useState(false);\n  const [editingSlotIndex, setEditingSlotIndex] = useState<number | null>(null);\n\n  const openItemsModal = async (schedule: DeviceOperationSchedule) => {\n    setCurrentSchedule(schedule);\n    setItemsModalOpen(true);\n    setItemsLoading(true);\n    try {\n      const rows = await getOperationScheduleItems(schedule.id);\n      setScheduleItems(\n        rows.map((item, idx) => ({\n          ...item,\n          seq: item.seq ?? idx,\n          draftKey: item.id || `${item.cron_expr}-${item.duration_minutes}-${idx}`,\n        })),\n      );\n    } catch (error) {\n      message.error(toErrorMessage(error));\n      setItemsModalOpen(false);\n      setCurrentSchedule(null);\n    } finally {\n      setItemsLoading(false);\n    }\n  };\n\n  const columns: ProColumns<DeviceOperationSchedule>[] = [\n    { title: '序号', valueType: 'indexBorder', width: 68, hideInSearch: true, fixed: 'left' },\n    { title: '编码', dataIndex: 'code', width: 140, sorter: true },\n    { title: '名称', dataIndex: 'name', width: 180, sorter: true },\n    {\n      title: '运行时段',\n      dataIndex: 'items',\n      hideInSearch: true,\n      render: (_, row) => {\n        const items = row.items || [];\n        if (items.length === 0) {\n          return <span style={{ color: '#999' }}>未配置时段</span>;\n        }\n        return (\n          <Space size={[4, 4]} wrap>\n            {items.map((item, idx) => {\n              const parsed = parseCronScheduleItem(item.cron_expr, item.duration_minutes);\n              return (\n                <Tag color=\"processing\" key={item.id || idx}>\n                  {parsed.summaryLabel}\n                  {item.remark ? ` · ${item.remark}` : ''}\n                </Tag>\n              );\n            })}\n          </Space>\n        );\n      },\n    },\n    {\n      title: '状态',\n      dataIndex: 'status',\n      width: 100,\n      valueType: 'select',\n      valueEnum: {\n        1: { text: '启用' },\n        0: { text: '停用' },\n      },\n      render: (_, row) =>\n        Number(row.status) === 1 ? <Tag color=\"success\">启用</Tag> : <Tag>停用</Tag>,\n      sorter: true,\n    },\n    {\n      title: '备注',\n      dataIndex: 'description',\n      ellipsis: true,\n      hideInSearch: true,\n      render: (_, row) => row.description || '-',\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: OPERATION_COL_WIDTH + 40,\n      fixed: 'right',\n      align: 'center',\n      render: (_, row) => (\n        <Space size=\"small\">\n          <a onClick={() => void openItemsModal(row)}>时段</a>\n          <a\n            onClick={() => {\n              setEditing(row);\n              setModalOpen(true);\n            }}\n          >\n            编辑\n          </a>\n          <Popconfirm\n            title=\"确认删除该运行模式吗？\"\n            onConfirm={async () => {\n              try {\n                await deleteOperationSchedule(row.id);\n                message.success('删除成功');\n                actionRef.current?.reload();\n              } catch (error) {\n                message.error(toErrorMessage(error));\n              }\n            }}\n          >\n            <a style={{ color: '#ff4d4f' }}>删除</a>\n          </Popconfirm>\n        </Space>\n      ),\n    },\n  ];\n\n  const itemColumns: ColumnsType<ScheduleItemDraft> = [\n    {\n      title: '序号',\n      width: 68,\n      render: (_, __, index) => index + 1,\n    },\n    {\n      title: '执行周期',\n      width: 180,\n      render: (_, row) => {\n        const parsed = parseCronScheduleItem(row.cron_expr, row.duration_minutes);\n        return <Tag color=\"geekblue\">{parsed.cycleLabel}</Tag>;\n      },\n    },\n    {\n      title: '运行时间段',\n      width: 180,\n      render: (_, row) => {\n        const parsed = parseCronScheduleItem(row.cron_expr, row.duration_minutes);\n        return <strong>{parsed.timeRangeLabel}</strong>;\n      },\n    },\n    {\n      title: '持续时长',\n      width: 140,\n      render: (_, row) => {\n        const parsed = parseCronScheduleItem(row.cron_expr, row.duration_minutes);\n        return `${parsed.durationLabel} (${row.duration_minutes}分钟)`;\n      },\n    },\n    {\n      title: '时段说明',\n      dataIndex: 'remark',\n      render: (val) => val || '-',\n    },\n    {\n      title: '操作',\n      width: 130,\n      render: (_, row, index) => (\n        <Space>\n          <a\n            onClick={() => {\n              setEditingSlotIndex(index);\n              setSlotEditorOpen(true);\n            }}\n          >\n            编辑\n          </a>\n          <Popconfirm\n            title=\"确认移除该运行时段吗？\"\n            onConfirm={() =>\n              setScheduleItems((current) =>\n                current.filter((item) => item.draftKey !== row.draftKey),\n              )\n            }\n          >\n            <a style={{ color: '#ff4d4f' }}>移除</a>\n          </Popconfirm>\n        </Space>\n      ),\n    },\n  ];\n\n  const getSlotEditorInitialValues = (): VisualSlotFormValues => {\n    if (editingSlotIndex === null || !scheduleItems[editingSlotIndex]) {\n      return {\n        cycleType: 'DAILY',\n        weekdays: [1, 2, 3, 4, 5],\n        monthDays: [1],\n        startTime: timeStrToDayjs('08:00', 8, 0),\n        endTime: timeStrToDayjs('12:00', 12, 0),\n        remark: undefined,\n      };\n    }\n    const target = scheduleItems[editingSlotIndex];\n    const parsed = parseCronScheduleItem(target.cron_expr, target.duration_minutes);\n    return {\n      cycleType: parsed.cycleType,\n      weekdays: parsed.weekdays.length > 0 ? parsed.weekdays : [1, 2, 3, 4, 5],\n      monthDays: parsed.monthDays.length > 0 ? parsed.monthDays : [1],\n      startTime: timeStrToDayjs(parsed.startTime, 8, 0),\n      endTime: timeStrToDayjs(parsed.endTime, 12, 0),\n      remark: target.remark,\n    };\n  };\n\n  return (\n    <PageContainer title=\"运行模式\">\n      <ProTable<DeviceOperationSchedule>\n        rowKey=\"id\"\n        actionRef={actionRef}\n        columns={columns}\n        request={queryOperationSchedules}\n        search={{ labelWidth: 'auto' }}\n        pagination={{ defaultPageSize: 20, showSizeChanger: true }}\n        optionsRender={renderRefSafeTableOptions}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建运行模式\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<ScheduleFormValues>\n        title={editing ? '编辑运行模式' : '新建运行模式'}\n        open={modalOpen}\n        modalProps={{\n          destroyOnHidden: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{\n          submitButtonProps: { loading: saving },\n          searchConfig: { submitText: '保存' },\n        }}\n        initialValues={\n          editing\n            ? {\n                code: editing.code,\n                name: editing.name,\n                description: editing.description,\n                status: Number(editing.status),\n              }\n            : { status: 1 }\n        }\n        onFinish={async (values) => {\n          const payload: DeviceOperationSchedulePayload = {\n            code: values.code.trim(),\n            name: values.name.trim(),\n            description: values.description?.trim() || undefined,\n            status: Number(values.status ?? 1),\n          };\n          setSaving(true);\n          try {\n            if (editing) {\n              await updateOperationSchedule(editing.id, payload);\n            } else {\n              await createOperationSchedule(payload);\n            }\n            message.success('保存成功');\n            setModalOpen(false);\n            setEditing(null);\n            actionRef.current?.reload();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <ProFormText\n          name=\"code\"\n          label=\"编码\"\n          rules={[\n            { required: true, message: '请输入运行模式编码' },\n            { max: 16, message: '编码最多16个字符' },\n          ]}\n        />\n        <ProFormText\n          name=\"name\"\n          label=\"名称\"\n          rules={[\n            { required: true, message: '请输入运行模式名称' },\n            { max: 64, message: '名称最多64个字符' },\n          ]}\n        />\n        <ProFormSelect\n          name=\"status\"\n          label=\"状态\"\n          options={[\n            { label: '启用', value: 1 },\n            { label: '停用', value: 0 },\n          ]}\n          rules={[{ required: true, message: '请选择状态' }]}\n        />\n        <ProFormTextArea\n          name=\"description\"\n          label=\"备注\"\n          fieldProps={{ rows: 3, maxLength: 255 }}\n        />\n      </ModalForm>\n\n      <Modal\n        title={currentSchedule ? `${currentSchedule.name} - 运行时段配置` : '运行时段配置'}\n        open={itemsModalOpen}\n        width={880}\n        destroyOnClose\n        confirmLoading={itemsSaving}\n        okText=\"保存配置\"\n        onCancel={() => {\n          setItemsModalOpen(false);\n          setCurrentSchedule(null);\n          setScheduleItems([]);\n        }}\n        onOk={async () => {\n          if (!currentSchedule) return;\n          setItemsSaving(true);\n          try {\n            await updateOperationScheduleItems(\n              currentSchedule.id,\n              scheduleItems.map((item, idx) => ({\n                cron_expr: item.cron_expr,\n                duration_minutes: item.duration_minutes,\n                remark: item.remark,\n                seq: idx,\n              })),\n            );\n            message.success('运行时段保存成功');\n            setItemsModalOpen(false);\n            setCurrentSchedule(null);\n            setScheduleItems([]);\n            actionRef.current?.reload();\n          } catch (error) {\n            message.error(toErrorMessage(error));\n          } finally {\n            setItemsSaving(false);\n          }\n        }}\n      >\n        <Space style={{ marginBottom: 16 }}>\n          <Button\n            type=\"primary\"\n            onClick={() => {\n              setEditingSlotIndex(null);\n              setSlotEditorOpen(true);\n            }}\n          >\n            添加运行时段\n          </Button>\n          <span style={{ color: '#8c8c8c' }}>\n            支持一天配置多个运行时间段；若结束时间早于或等于开始时间，将自动按跨零点（次日结束）计算。\n          </span>\n        </Space>\n        <Table<ScheduleItemDraft>\n          rowKey=\"draftKey\"\n          loading={itemsLoading}\n          columns={itemColumns}\n          dataSource={scheduleItems}\n          pagination={false}\n          size=\"small\"\n        />\n      </Modal>\n\n      <ModalForm<VisualSlotFormValues>\n        key={editingSlotIndex === null ? 'new-schedule-slot' : `edit-schedule-slot-${editingSlotIndex}`}\n        formRef={slotFormRef}\n        title={editingSlotIndex === null ? '构建运行时段' : '编辑运行时段'}\n        open={slotEditorOpen}\n        width={560}\n        dateFormatter={false}\n        modalProps={{\n          destroyOnHidden: true,\n          onCancel: () => {\n            setSlotEditorOpen(false);\n            setEditingSlotIndex(null);\n          },\n        }}\n        initialValues={getSlotEditorInitialValues()}\n        onFinish={async (values) => {\n          const startTimeStr = toTimeStr(values.startTime, '08:00');\n          const endTimeStr = toTimeStr(values.endTime, '12:00');\n          const built = buildCronFromVisualSlot({\n            cycleType: values.cycleType,\n            weekdays: values.weekdays,\n            monthDays: values.monthDays,\n            startTime: startTimeStr,\n            endTime: endTimeStr,\n          });\n          const previous =\n            editingSlotIndex === null ? undefined : scheduleItems[editingSlotIndex];\n          const nextItem: ScheduleItemDraft = {\n            id: previous?.id,\n            schedule_id: currentSchedule?.id,\n            cron_expr: built.cron_expr,\n            duration_minutes: built.duration_minutes,\n            remark: values.remark?.trim() || undefined,\n            seq: editingSlotIndex ?? scheduleItems.length,\n            draftKey:\n              previous?.draftKey ||\n              `${built.cron_expr}-${built.duration_minutes}-${Date.now().toString(36)}`,\n          };\n          setScheduleItems((current) =>\n            editingSlotIndex === null\n              ? [...current, nextItem]\n              : current.map((item, idx) => (idx === editingSlotIndex ? nextItem : item)),\n          );\n          setSlotEditorOpen(false);\n          setEditingSlotIndex(null);\n          return true;\n        }}\n      >\n        <ProFormRadio.Group\n          name=\"cycleType\"\n          label=\"执行周期\"\n          options={[\n            { label: '每天运行', value: 'DAILY' },\n            { label: '按星期运行', value: 'WEEKLY' },\n            { label: '按每月日期运行', value: 'MONTHLY' },\n          ]}\n          rules={[{ required: true, message: '请选择执行周期' }]}\n        />\n\n        <ProFormDependency name={['cycleType']}>\n          {({ cycleType }) => {\n            if (cycleType === 'WEEKLY') {\n              return (\n                <>\n                  <Space size=\"small\" style={{ marginBottom: 8 }}>\n                    <Button\n                      size=\"small\"\n                      onClick={() => slotFormRef.current?.setFieldsValue({ weekdays: [1, 2, 3, 4, 5] })}\n                    >\n                      选工作日 (周一至周五)\n                    </Button>\n                    <Button\n                      size=\"small\"\n                      onClick={() => slotFormRef.current?.setFieldsValue({ weekdays: [6, 7] })}\n                    >\n                      选周末 (周六、周日)\n                    </Button>\n                  </Space>\n                  <ProFormCheckbox.Group\n                    name=\"weekdays\"\n                    label=\"运行星期\"\n                    options={WEEKDAY_OPTIONS}\n                    rules={[{ required: true, message: '请至少选择一天' }]}\n                  />\n                </>\n              );\n            }\n            if (cycleType === 'MONTHLY') {\n              return (\n                <ProFormSelect\n                  name=\"monthDays\"\n                  label=\"每月运行日期\"\n                  mode=\"multiple\"\n                  options={MONTH_DAY_OPTIONS}\n                  placeholder=\"请选择每月运行的日期\"\n                  rules={[{ required: true, message: '请至少选择一个日期' }]}\n                />\n              );\n            }\n            return null;\n          }}\n        </ProFormDependency>\n\n        <Space size=\"large\" align=\"start\" style={{ display: 'flex' }}>\n          <ProForm.Item\n            name=\"startTime\"\n            label=\"开始时间\"\n            rules={[{ required: true, message: '请选择开始时间' }]}\n          >\n            <TimePicker format=\"HH:mm\" minuteStep={5} needConfirm={false} allowClear={false} />\n          </ProForm.Item>\n\n          <ProForm.Item\n            name=\"endTime\"\n            label=\"结束时间\"\n            rules={[{ required: true, message: '请选择结束时间' }]}\n          >\n            <TimePicker format=\"HH:mm\" minuteStep={5} needConfirm={false} allowClear={false} />\n          </ProForm.Item>\n        </Space>\n\n        <ProFormDependency name={['cycleType', 'weekdays', 'monthDays', 'startTime', 'endTime']}>\n          {({ cycleType, weekdays, monthDays, startTime, endTime }) => {\n            const sStr = toTimeStr(startTime, '08:00');\n            const eStr = toTimeStr(endTime, '12:00');\n            const built = buildCronFromVisualSlot({\n              cycleType: cycleType || 'DAILY',\n              weekdays,\n              monthDays,\n              startTime: sStr,\n              endTime: eStr,\n            });\n            const parsed = parseCronScheduleItem(built.cron_expr, built.duration_minutes);\n            const rangeInfo = calculateDurationFromTimeRange(sStr, eStr);\n            return (\n              <Alert\n                type=\"info\"\n                showIcon\n                style={{ marginBottom: 16 }}\n                message={`时段预览：${parsed.cycleLabel} ${rangeInfo.timeRangeLabel}`}\n                description={`单次持续运行时长：${formatDurationMinutes(\n                  rangeInfo.durationMinutes,\n                )}（共 ${rangeInfo.durationMinutes} 分钟）`}\n              />\n            );\n          }}\n        </ProFormDependency>\n\n        <ProFormText\n          name=\"remark\"\n          label=\"时段说明\"\n          placeholder=\"选填，如：早班、下午班\"\n          fieldProps={{ maxLength: 128 }}\n        />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default OperationSchedulePage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Langhu/Codes/Platform/client/portal/src/pages/Device/OperationSchedule/index.tsx"
     },
@@ -3938,7 +3938,7 @@
       "parentId": "19",
       "id": "23",
       "absPath": "/device/specs",
-      "__content": "import { useEffect, useRef, useState } from 'react';\nimport {\n  ActionType,\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProForm,\n  ProFormDependency,\n  ProFormDigit,\n  ProFormRadio,\n  ProFormSwitch,\n  ProFormText,\n  ProFormTextArea,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Modal, Popconfirm, Space, Table, Tag, Tabs, message } from 'antd';\nimport type { ColumnsType } from 'antd/es/table';\nimport { useNavigate } from '@umijs/max';\nimport EntityPicker from '@/components/EntityPicker';\nimport { BearingModel, queryBearings } from '@/services/bearing';\nimport { Location, queryLocations } from '@/services/location';\nimport { DeviceCategory, listAllDeviceCategories, queryDeviceCategories } from '@/services/deviceCategory';\nimport {\n  DeviceOperationSchedule,\n  parseCronScheduleItem,\n  queryOperationSchedules,\n} from '@/services/operationSchedule';\nimport {\n  DeviceSpec,\n  DeviceSpecBearingBinding,\n  DeviceSpecBearingBindingPayload,\n  DeviceSpecPayload,\n  createDeviceSpec,\n  deleteDeviceSpec,\n  getDeviceSpecBearingBindings,\n  queryDeviceSpecs,\n  updateDeviceSpec,\n  updateDeviceSpecBearingBindings,\n} from '@/services/deviceSpec';\nimport { Supplier, querySuppliers } from '@/services/supplier';\nimport { renderRefSafeTableOptions } from '@/utils/proTableOptions';\n\ntype CategoryTreeRow = DeviceCategory & { children?: CategoryTreeRow[] };\ntype DeviceSpecFormValues = DeviceSpecPayload;\ntype BearingBindingFormValues = DeviceSpecBearingBindingPayload;\ntype BearingBindingDraft = DeviceSpecBearingBinding & { draftKey: string };\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | { data?: { detail?: string }; info?: { errorMessage?: string }; message?: string }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst buildCategoryTree = (rows: DeviceCategory[]): CategoryTreeRow[] => {\n  const nodeMap = new Map<string, CategoryTreeRow>();\n  rows.forEach((item) => nodeMap.set(item.id, { ...item, children: [] }));\n  const roots: CategoryTreeRow[] = [];\n  rows.forEach((item) => {\n    const node = nodeMap.get(item.id);\n    if (!node) return;\n    if (item.parent_id && nodeMap.has(item.parent_id)) {\n      nodeMap.get(item.parent_id)?.children?.push(node);\n      return;\n    }\n    roots.push(node);\n  });\n  return roots;\n};\n\nconst DeviceSpecPage = () => {\n  const navigate = useNavigate();\n  const actionRef = useRef<ActionType>();\n  const formRef = useRef<any>();\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [editing, setEditing] = useState<DeviceSpec | null>(null);\n  const [categoryTreeData, setCategoryTreeData] = useState<CategoryTreeRow[]>([]);\n  const [bindingModalOpen, setBindingModalOpen] = useState(false);\n  const [bindingEditorOpen, setBindingEditorOpen] = useState(false);\n  const [bindingSpec, setBindingSpec] = useState<DeviceSpec | null>(null);\n  const [bindingLoading, setBindingLoading] = useState(false);\n  const [bindingSaving, setBindingSaving] = useState(false);\n  const [bindings, setBindings] = useState<BearingBindingDraft[]>([]);\n  const [editingBindingIndex, setEditingBindingIndex] = useState<number | null>(null);\n  const [selectedBearing, setSelectedBearing] = useState<BearingModel | undefined>();\n  const [selectedLocation, setSelectedLocation] = useState<Pick<Location, 'id' | 'name'> | undefined>();\n\n  useEffect(() => {\n    if (!modalOpen || categoryTreeData.length > 0) {\n      return;\n    }\n    void listAllDeviceCategories()\n      .then((rows) => setCategoryTreeData(buildCategoryTree(rows)))\n      .catch(() => undefined);\n  }, [categoryTreeData.length, modalOpen]);\n\n  const columns: ProColumns<DeviceSpec>[] = [\n    { title: '序号', valueType: 'indexBorder', width: 68, hideInSearch: true, fixed: 'left' },\n    { title: '名称', dataIndex: 'name', width: 180, sorter: true },\n    { title: '型号', dataIndex: 'model', width: 120, sorter: true },\n    { title: '品牌', dataIndex: 'brand', width: 120, sorter: true },\n    { title: '电压', dataIndex: 'voltage', width: 90, valueType: 'digit', sorter: true },\n    { title: '转速', dataIndex: 'rpm', width: 90, valueType: 'digit', sorter: true },\n    {\n      title: '分类',\n      dataIndex: 'device_category_id',\n      hideInSearch: true,\n      render: (_, row) => row.device_category?.name || '-',\n    },\n    {\n      title: '供应商',\n      dataIndex: 'supplier_id',\n      hideInSearch: true,\n      render: (_, row) => row.supplier?.name || '-',\n    },\n    {\n      title: '运行模式',\n      dataIndex: 'operation_mode',\n      width: 190,\n      valueType: 'select',\n      valueEnum: {\n        1: { text: '连续运行' },\n        2: { text: '事件触发' },\n        3: { text: '时段运行' },\n      },\n      render: (_, row) => {\n        const mode = row.operation_mode ?? 1;\n        if (mode === 2) {\n          return <Tag color=\"gold\">事件触发</Tag>;\n        }\n        if (mode === 3) {\n          return (\n            <Space size={4} wrap>\n              <Tag color=\"blue\">时段运行</Tag>\n              {row.operation_schedule?.name ? (\n                <span>{row.operation_schedule.name}</span>\n              ) : null}\n            </Space>\n          );\n        }\n        return <Tag color=\"green\">连续运行</Tag>;\n      },\n    },\n    {\n      title: '备注',\n      dataIndex: 'description',\n      ellipsis: true,\n      hideInSearch: true,\n      render: (_, row) => row.description || '-',\n    },\n    {\n      title: '性能标准',\n      dataIndex: 'remark',\n      ellipsis: true,\n      hideInSearch: true,\n      render: (_, row) => row.remark || '-',\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 180,\n      fixed: 'right',\n      render: (_, row) => (\n        <Space size=\"small\">\n          <a\n            onClick={() => {\n              setEditing(row);\n              setModalOpen(true);\n            }}\n          >\n            编辑\n          </a>\n          <Popconfirm\n            title=\"确认删除该设备规格吗？\"\n            onConfirm={async () => {\n              try {\n                await deleteDeviceSpec(row.id);\n                message.success('删除成功');\n                actionRef.current?.reload();\n              } catch (error) {\n                message.error(toErrorMessage(error));\n              }\n            }}\n          >\n            <a style={{ color: '#ff4d4f' }}>删除</a>\n          </Popconfirm>\n          <a onClick={() => void openBindingModal(row)}>轴承</a>\n          {(row.process_device_count || 0) > 0 && (\n            <a\n              onClick={() => {\n                const group = row.process_devices?.[0]?.id;\n                const suffix = group ? `?group=${encodeURIComponent(group)}` : '';\n                navigate(`/device/specs/${row.id}/comparison${suffix}`);\n              }}\n            >\n              对比\n            </a>\n          )}\n        </Space>\n      ),\n    },\n  ];\n\n  const openBindingModal = async (spec: DeviceSpec) => {\n    setBindingSpec(spec);\n    setBindingModalOpen(true);\n    setBindingLoading(true);\n    try {\n      const rows: DeviceSpecBearingBinding[] = await getDeviceSpecBearingBindings(spec.id);\n      setBindings(\n        rows.map((item, index) => ({\n          ...item,\n          draftKey: item.id || `${item.location_id}-${item.bearing_id}-${index}`,\n        })),\n      );\n    } catch (error) {\n      message.error(toErrorMessage(error));\n      setBindingModalOpen(false);\n      setBindingSpec(null);\n    } finally {\n      setBindingLoading(false);\n    }\n  };\n\n  const bindingColumns: ColumnsType<BearingBindingDraft> = [\n    { title: '安装位置', dataIndex: 'location_id', render: (_, row) => row.location?.name || row.location_id },\n    {\n      title: '轴承型号',\n      render: (_, row) => (row.bearing ? `${row.bearing.brand} / ${row.bearing.model}` : row.bearing_id),\n    },\n    { title: '轴转速比', dataIndex: 'shaft_speed_ratio', width: 110 },\n    {\n      title: '诊断状态',\n      dataIndex: 'enabled',\n      width: 100,\n      render: (_, row) => (row.enabled ? <Tag color=\"success\">启用</Tag> : <Tag>停用</Tag>),\n    },\n    {\n      title: '操作',\n      width: 130,\n      render: (_, row, index) => (\n        <Space>\n          <a\n            onClick={() => {\n              setEditingBindingIndex(index);\n              setSelectedBearing(row.bearing);\n              setSelectedLocation(row.location);\n              setBindingEditorOpen(true);\n            }}\n          >\n            编辑\n          </a>\n          <Popconfirm\n            title=\"确认移除该位置的轴承配置吗？\"\n            onConfirm={() => setBindings((current) => current.filter((item) => item.draftKey !== row.draftKey))}\n          >\n            <a style={{ color: '#ff4d4f' }}>移除</a>\n          </Popconfirm>\n        </Space>\n      ),\n    },\n  ];\n\n  return (\n    <PageContainer title=\"设备规格\">\n      <ProTable<DeviceSpec>\n        rowKey=\"id\"\n        actionRef={actionRef}\n        columns={columns}\n        request={queryDeviceSpecs}\n        search={{ labelWidth: 'auto' }}\n        pagination={{ defaultPageSize: 20, showSizeChanger: true }}\n        optionsRender={renderRefSafeTableOptions}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建设备规格\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<DeviceSpecFormValues>\n        title={editing ? '编辑设备规格' : '新建设备规格'}\n        formRef={formRef}\n        open={modalOpen}\n        modalProps={{\n          destroyOnHidden: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{ submitButtonProps: { loading: saving }, searchConfig: { submitText: '保存' } }}\n        initialValues={\n          editing\n            ? {\n                name: editing.name,\n                model: editing.model,\n                description: editing.description,\n                brand: editing.brand,\n                voltage: editing.voltage,\n                rpm: editing.rpm,\n                supplier_id: editing.supplier_id,\n                device_category_id: editing.device_category_id,\n                operation_mode: editing.operation_mode ?? 1,\n                reference_id: editing.reference_id ?? undefined,\n                remark: editing.remark,\n              }\n            : { voltage: 0, rpm: 0, operation_mode: 1 }\n        }\n        onFinish={async (values) => {\n          const operationMode = values.operation_mode ?? 1;\n          const payload: DeviceSpecPayload = {\n            name: values.name.trim(),\n            model: values.model.trim(),\n            description: values.description?.trim() || undefined,\n            brand: values.brand.trim(),\n            voltage: values.voltage,\n            rpm: values.rpm,\n            supplier_id: values.supplier_id,\n            device_category_id: values.device_category_id,\n            operation_mode: operationMode,\n            reference_id: operationMode === 3 ? values.reference_id || null : null,\n            remark: values.remark?.trim() || undefined,\n          };\n          setSaving(true);\n          try {\n            if (editing) {\n              await updateDeviceSpec(editing.id, payload);\n            } else {\n              await createDeviceSpec(payload);\n            }\n            message.success('保存成功');\n            setModalOpen(false);\n            setEditing(null);\n            actionRef.current?.reload();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <Tabs\n          defaultActiveKey=\"1\"\n          items={[\n            {\n              key: '1',\n              label: '基本信息',\n              children: (\n                <>\n                  <ProFormText name=\"name\" label=\"名称\" rules={[{ required: true, message: '请输入规格名称' }]} />\n                  <ProForm.Item name=\"device_category_id\" label=\"设备分类\" rules={[{ required: true, message: '请选择设备分类' }]}>\n                    <EntityPicker<DeviceCategory>\n                      placeholder=\"请点击选择设备分类\"\n                      modalTitle=\"选择设备分类\"\n                      triggerText=\"选择\"\n                      valueLabel={editing?.device_category?.name}\n                      columns={[\n                        { title: '分类名称', dataIndex: 'name' },\n                        { title: '描述', dataIndex: 'description', render: (_, row) => row.description || '-' },\n                      ]}\n                      getRecordLabel={(record) => record.name}\n                      fetcher={async ({ current, pageSize, keyword }) => {\n                        const result = await queryDeviceCategories({ current, pageSize, keyword });\n                        return { items: result.data, total: result.total };\n                      }}\n                      treeData={categoryTreeData}\n                    />\n                  </ProForm.Item>\n                  <ProForm.Item name=\"supplier_id\" label=\"供应商\" rules={[{ required: true, message: '请选择供应商' }]}>\n                    <EntityPicker<Supplier>\n                      placeholder=\"请点击选择供应商\"\n                      modalTitle=\"选择供应商\"\n                      triggerText=\"选择\"\n                      valueLabel={editing?.supplier?.name}\n                      columns={[\n                        { title: '名称', dataIndex: 'name' },\n                        { title: '品牌', dataIndex: 'brand' },\n                        { title: '联系方式', dataIndex: 'contact_info', render: (_, row) => row.contact_info || '-' },\n                      ]}\n                      getRecordLabel={(record) => record.name}\n                      fetcher={async ({ current, pageSize, keyword }) => {\n                        const result = await querySuppliers({ current, pageSize, keyword });\n                        return { items: result.data, total: result.total };\n                      }}\n                      onRecordChange={(record) => formRef.current?.setFieldsValue({ brand: record?.brand || '' })}\n                    />\n                  </ProForm.Item>\n                  <ProFormDigit name=\"rpm\" label=\"转速(RPM)\" min={0} fieldProps={{ precision: 0 }} rules={[{ required: true, message: '请输入转速' }]} />\n                  <ProFormDigit name=\"voltage\" label=\"电压(V)\" min={0} fieldProps={{ precision: 2 }} rules={[{ required: true, message: '请输入电压' }]} />\n                  <ProFormRadio.Group\n                    name=\"operation_mode\"\n                    label=\"运行模式\"\n                    rules={[{ required: true, message: '请选择运行模式' }]}\n                    options={[\n                      { label: '连续运行', value: 1 },\n                      { label: '事件触发', value: 2 },\n                      { label: '时段运行', value: 3 },\n                    ]}\n                    fieldProps={{\n                      onChange: (event) => {\n                        if (event.target.value !== 3) {\n                          formRef.current?.setFieldsValue({ reference_id: undefined });\n                        }\n                      },\n                    }}\n                  />\n                  <ProFormDependency name={['operation_mode']}>\n                    {({ operation_mode }) =>\n                      operation_mode === 3 ? (\n                        <ProForm.Item\n                          name=\"reference_id\"\n                          label=\"关联时段策略\"\n                          rules={[{ required: true, message: '请选择时段运行模式' }]}\n                        >\n                          <EntityPicker<DeviceOperationSchedule>\n                            placeholder=\"请点击选择时段运行模式\"\n                            modalTitle=\"选择时段运行模式\"\n                            triggerText=\"选择\"\n                            valueLabel={\n                              editing?.operation_schedule\n                                ? `${editing.operation_schedule.name} (${editing.operation_schedule.code})`\n                                : undefined\n                            }\n                            columns={[\n                              { title: '编码', dataIndex: 'code', width: 140 },\n                              { title: '名称', dataIndex: 'name', width: 180 },\n                              {\n                                title: '运行时段',\n                                dataIndex: 'items',\n                                render: (_, row) => {\n                                  const items = row.items || [];\n                                  if (items.length === 0) return '-';\n                                  return (\n                                    <Space size={[4, 4]} wrap>\n                                      {items.map((item, idx) => (\n                                        <Tag key={item.id || idx} color=\"blue\">\n                                          {\n                                            parseCronScheduleItem(\n                                              item.cron_expr,\n                                              item.duration_minutes,\n                                            ).summaryText\n                                          }\n                                        </Tag>\n                                      ))}\n                                    </Space>\n                                  );\n                                },\n                              },\n                              {\n                                title: '说明',\n                                dataIndex: 'description',\n                                render: (_, row) => row.description || '-',\n                              },\n                            ]}\n                            getRecordLabel={(record) => `${record.name} (${record.code})`}\n                            fetcher={async ({ current, pageSize, keyword }) => {\n                              const result = await queryOperationSchedules({\n                                current,\n                                pageSize,\n                                keyword,\n                                status: 1,\n                              });\n                              return { items: result.data, total: result.total };\n                            }}\n                          />\n                        </ProForm.Item>\n                      ) : null\n                    }\n                  </ProFormDependency>\n                  <ProFormText name=\"model\" label=\"型号\" />\n                  <ProFormText name=\"brand\" label=\"品牌\" fieldProps={{ readOnly: true }} />\n                  <ProFormText name=\"description\" label=\"备注\" />\n                </>\n              ),\n            },\n            {\n              key: '2',\n              label: '电气性能标准',\n              children: <ProFormTextArea name=\"remark\" label=\"\" fieldProps={{ rows: 14 }} placeholder=\"请输入该设备规格的电气性能标准\" />,\n            },\n          ]}\n        />\n      </ModalForm>\n\n      <Modal\n        title={bindingSpec ? `${bindingSpec.name} - 轴承配置` : '轴承配置'}\n        open={bindingModalOpen}\n        width={960}\n        destroyOnClose\n        confirmLoading={bindingSaving}\n        okText=\"保存配置\"\n        onCancel={() => {\n          setBindingModalOpen(false);\n          setBindingSpec(null);\n          setBindings([]);\n        }}\n        onOk={async () => {\n          if (!bindingSpec) return;\n          setBindingSaving(true);\n          try {\n            await updateDeviceSpecBearingBindings(\n              bindingSpec.id,\n              bindings.map((item) => ({\n                bearing_id: item.bearing_id,\n                location_id: item.location_id,\n                shaft_speed_ratio: item.shaft_speed_ratio,\n                enabled: item.enabled,\n              })),\n            );\n            message.success('轴承配置保存成功');\n            setBindingModalOpen(false);\n            setBindingSpec(null);\n            setBindings([]);\n          } catch (error) {\n            message.error(toErrorMessage(error));\n          } finally {\n            setBindingSaving(false);\n          }\n        }}\n      >\n        <Space style={{ marginBottom: 16 }}>\n          <Button\n            type=\"primary\"\n            onClick={() => {\n              setEditingBindingIndex(null);\n              setSelectedBearing(undefined);\n              setSelectedLocation(undefined);\n              setBindingEditorOpen(true);\n            }}\n          >\n            安装位置\n          </Button>\n          <span style={{ color: '#8c8c8c' }}>轴转速比 = 测点轴承所在轴转速 ÷ 设备规格转速。</span>\n        </Space>\n        <Table<BearingBindingDraft> rowKey=\"draftKey\" loading={bindingLoading} columns={bindingColumns} dataSource={bindings} pagination={false} size=\"small\" />\n      </Modal>\n\n      <ModalForm<BearingBindingFormValues>\n        key={editingBindingIndex === null ? 'new-bearing-binding' : `edit-bearing-binding-${editingBindingIndex}`}\n        title={editingBindingIndex === null ? '添加轴承位置' : '编辑轴承位置'}\n        open={bindingEditorOpen}\n        modalProps={{\n          destroyOnHidden: true,\n          onCancel: () => {\n            setBindingEditorOpen(false);\n            setEditingBindingIndex(null);\n            setSelectedBearing(undefined);\n            setSelectedLocation(undefined);\n          },\n        }}\n        initialValues={\n          editingBindingIndex === null\n            ? { shaft_speed_ratio: 1, enabled: true }\n            : bindings[editingBindingIndex]\n        }\n        onFinish={async (values) => {\n          const previous = editingBindingIndex === null ? undefined : bindings[editingBindingIndex];\n          const next: BearingBindingDraft = {\n            id: previous?.id,\n            device_spec_id: bindingSpec?.id || '',\n            bearing_id: values.bearing_id,\n            location_id: values.location_id,\n            shaft_speed_ratio: values.shaft_speed_ratio,\n            enabled: values.enabled ?? true,\n            bearing: selectedBearing,\n            location: selectedLocation,\n            draftKey: previous?.draftKey || `${values.location_id}-${values.bearing_id}-${Date.now().toString(36)}`,\n          };\n          setBindings((current) =>\n            editingBindingIndex === null\n              ? [...current, next]\n              : current.map((item, index) => (index === editingBindingIndex ? next : item)),\n          );\n          setBindingEditorOpen(false);\n          setEditingBindingIndex(null);\n          setSelectedBearing(undefined);\n          setSelectedLocation(undefined);\n          return true;\n        }}\n      >\n        <ProForm.Item name=\"location_id\" label=\"故障测点\" rules={[{ required: true, message: '请选择故障测点' }]}>\n          <EntityPicker<Location>\n            placeholder=\"请点击选择故障测点\"\n            modalTitle=\"选择故障测点\"\n            triggerText=\"选择\"\n            valueLabel={selectedLocation?.name}\n            columns={[{ title: '名称', dataIndex: 'name', width: 200 }]}\n            getRecordLabel={(record) => record.name}\n            fetcher={async ({ current, pageSize, keyword }) => {\n              const result = await queryLocations(current, pageSize, keyword, true);\n              return { items: result.data, total: result.total };\n            }}\n            onRecordChange={setSelectedLocation}\n          />\n        </ProForm.Item>\n        <ProForm.Item name=\"bearing_id\" label=\"轴承型号\" rules={[{ required: true, message: '请选择轴承型号' }]}>\n          <EntityPicker<BearingModel>\n            placeholder=\"请点击选择轴承型号\"\n            modalTitle=\"选择轴承型号\"\n            triggerText=\"选择\"\n            valueLabel={selectedBearing ? `${selectedBearing.brand} / ${selectedBearing.model}` : undefined}\n            columns={[\n              { title: '品牌', dataIndex: 'brand' },\n              { title: '型号', dataIndex: 'model' },\n              { title: '轴承类型', dataIndex: 'bearing_type' },\n            ]}\n            getRecordLabel={(record) => `${record.brand} / ${record.model}`}\n            fetcher={async ({ current, pageSize, keyword }) => {\n              const result = await queryBearings({ current, pageSize, keyword, activeOnly: true });\n              return { items: result.data, total: result.total };\n            }}\n            onRecordChange={setSelectedBearing}\n          />\n        </ProForm.Item>\n        <ProFormDigit name=\"shaft_speed_ratio\" label=\"轴转速比\" min={0.0001} max={1000} fieldProps={{ precision: 4 }} rules={[{ required: true, message: '请输入轴转速比' }]} />\n        <ProFormSwitch name=\"enabled\" label=\"参与诊断\" />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default DeviceSpecPage;\n",
+      "__content": "import { useEffect, useRef, useState } from 'react';\nimport {\n  ActionType,\n  ModalForm,\n  PageContainer,\n  ProColumns,\n  ProForm,\n  ProFormDependency,\n  ProFormDigit,\n  ProFormRadio,\n  ProFormSwitch,\n  ProFormText,\n  ProFormTextArea,\n  ProTable,\n} from '@ant-design/pro-components';\nimport { Button, Modal, Popconfirm, Space, Table, Tag, Tabs, message } from 'antd';\nimport type { ColumnsType } from 'antd/es/table';\nimport { useNavigate } from '@umijs/max';\nimport EntityPicker from '@/components/EntityPicker';\nimport { BearingModel, queryBearings } from '@/services/bearing';\nimport { Location, queryLocations } from '@/services/location';\nimport { DeviceCategory, listAllDeviceCategories, queryDeviceCategories } from '@/services/deviceCategory';\nimport {\n  DeviceOperationSchedule,\n  parseCronScheduleItem,\n  queryOperationSchedules,\n} from '@/services/operationSchedule';\nimport {\n  DeviceSpec,\n  DeviceSpecBearingBinding,\n  DeviceSpecBearingBindingPayload,\n  DeviceSpecPayload,\n  createDeviceSpec,\n  deleteDeviceSpec,\n  getDeviceSpecBearingBindings,\n  queryDeviceSpecs,\n  updateDeviceSpec,\n  updateDeviceSpecBearingBindings,\n} from '@/services/deviceSpec';\nimport { Supplier, querySuppliers } from '@/services/supplier';\nimport { renderRefSafeTableOptions } from '@/utils/proTableOptions';\n\ntype CategoryTreeRow = DeviceCategory & { children?: CategoryTreeRow[] };\ntype DeviceSpecFormValues = DeviceSpecPayload;\ntype BearingBindingFormValues = DeviceSpecBearingBindingPayload;\ntype BearingBindingDraft = DeviceSpecBearingBinding & { draftKey: string };\n\nconst toErrorMessage = (error: unknown): string => {\n  const e = error as\n    | { data?: { detail?: string }; info?: { errorMessage?: string }; message?: string }\n    | undefined;\n  return e?.data?.detail || e?.info?.errorMessage || e?.message || '请求失败，请稍后重试';\n};\n\nconst buildCategoryTree = (rows: DeviceCategory[]): CategoryTreeRow[] => {\n  const nodeMap = new Map<string, CategoryTreeRow>();\n  rows.forEach((item) => nodeMap.set(item.id, { ...item, children: [] }));\n  const roots: CategoryTreeRow[] = [];\n  rows.forEach((item) => {\n    const node = nodeMap.get(item.id);\n    if (!node) return;\n    if (item.parent_id && nodeMap.has(item.parent_id)) {\n      nodeMap.get(item.parent_id)?.children?.push(node);\n      return;\n    }\n    roots.push(node);\n  });\n  return roots;\n};\n\nconst DeviceSpecPage = () => {\n  const navigate = useNavigate();\n  const actionRef = useRef<ActionType>();\n  const formRef = useRef<any>();\n  const [modalOpen, setModalOpen] = useState(false);\n  const [saving, setSaving] = useState(false);\n  const [editing, setEditing] = useState<DeviceSpec | null>(null);\n  const [categoryTreeData, setCategoryTreeData] = useState<CategoryTreeRow[]>([]);\n  const [bindingModalOpen, setBindingModalOpen] = useState(false);\n  const [bindingEditorOpen, setBindingEditorOpen] = useState(false);\n  const [bindingSpec, setBindingSpec] = useState<DeviceSpec | null>(null);\n  const [bindingLoading, setBindingLoading] = useState(false);\n  const [bindingSaving, setBindingSaving] = useState(false);\n  const [bindings, setBindings] = useState<BearingBindingDraft[]>([]);\n  const [editingBindingIndex, setEditingBindingIndex] = useState<number | null>(null);\n  const [selectedBearing, setSelectedBearing] = useState<BearingModel | undefined>();\n  const [selectedLocation, setSelectedLocation] = useState<Pick<Location, 'id' | 'name'> | undefined>();\n\n  useEffect(() => {\n    if (!modalOpen || categoryTreeData.length > 0) {\n      return;\n    }\n    void listAllDeviceCategories()\n      .then((rows) => setCategoryTreeData(buildCategoryTree(rows)))\n      .catch(() => undefined);\n  }, [categoryTreeData.length, modalOpen]);\n\n  const columns: ProColumns<DeviceSpec>[] = [\n    { title: '序号', valueType: 'indexBorder', width: 68, hideInSearch: true, fixed: 'left' },\n    { title: '名称', dataIndex: 'name', width: 180, sorter: true },\n    { title: '型号', dataIndex: 'model', width: 120, sorter: true },\n    { title: '品牌', dataIndex: 'brand', width: 120, sorter: true },\n    { title: '电压', dataIndex: 'voltage', width: 90, valueType: 'digit', sorter: true },\n    { title: '转速', dataIndex: 'rpm', width: 90, valueType: 'digit', sorter: true },\n    {\n      title: '分类',\n      dataIndex: 'device_category_id',\n      hideInSearch: true,\n      render: (_, row) => row.device_category?.name || '-',\n    },\n    {\n      title: '供应商',\n      dataIndex: 'supplier_id',\n      hideInSearch: true,\n      render: (_, row) => row.supplier?.name || '-',\n    },\n    {\n      title: '运行模式',\n      dataIndex: 'operation_mode',\n      width: 190,\n      valueType: 'select',\n      valueEnum: {\n        1: { text: '连续运行' },\n        2: { text: '事件触发' },\n        3: { text: '时段运行' },\n      },\n      render: (_, row) => {\n        const mode = row.operation_mode ?? 1;\n        if (mode === 2) {\n          return <Tag color=\"gold\">事件触发</Tag>;\n        }\n        if (mode === 3) {\n          return (\n            <Space size={4} wrap>\n              <Tag color=\"blue\">时段运行</Tag>\n              {row.operation_schedule?.name ? (\n                <span>{row.operation_schedule.name}</span>\n              ) : null}\n            </Space>\n          );\n        }\n        return <Tag color=\"green\">连续运行</Tag>;\n      },\n    },\n    {\n      title: '备注',\n      dataIndex: 'description',\n      ellipsis: true,\n      hideInSearch: true,\n      render: (_, row) => row.description || '-',\n    },\n    {\n      title: '性能标准',\n      dataIndex: 'remark',\n      ellipsis: true,\n      hideInSearch: true,\n      render: (_, row) => row.remark || '-',\n    },\n    {\n      title: '操作',\n      valueType: 'option',\n      width: 180,\n      fixed: 'right',\n      render: (_, row) => (\n        <Space size=\"small\">\n          <a\n            onClick={() => {\n              setEditing(row);\n              setModalOpen(true);\n            }}\n          >\n            编辑\n          </a>\n          <Popconfirm\n            title=\"确认删除该设备规格吗？\"\n            onConfirm={async () => {\n              try {\n                await deleteDeviceSpec(row.id);\n                message.success('删除成功');\n                actionRef.current?.reload();\n              } catch (error) {\n                message.error(toErrorMessage(error));\n              }\n            }}\n          >\n            <a style={{ color: '#ff4d4f' }}>删除</a>\n          </Popconfirm>\n          <a onClick={() => void openBindingModal(row)}>轴承</a>\n          {(row.process_device_count || 0) > 0 && (\n            <a\n              onClick={() => {\n                const group = row.process_devices?.[0]?.id;\n                const suffix = group ? `?group=${encodeURIComponent(group)}` : '';\n                navigate(`/device/specs/${row.id}/comparison${suffix}`);\n              }}\n            >\n              对比\n            </a>\n          )}\n        </Space>\n      ),\n    },\n  ];\n\n  const openBindingModal = async (spec: DeviceSpec) => {\n    setBindingSpec(spec);\n    setBindingModalOpen(true);\n    setBindingLoading(true);\n    try {\n      const rows: DeviceSpecBearingBinding[] = await getDeviceSpecBearingBindings(spec.id);\n      setBindings(\n        rows.map((item, index) => ({\n          ...item,\n          draftKey: item.id || `${item.location_id}-${item.bearing_id}-${index}`,\n        })),\n      );\n    } catch (error) {\n      message.error(toErrorMessage(error));\n      setBindingModalOpen(false);\n      setBindingSpec(null);\n    } finally {\n      setBindingLoading(false);\n    }\n  };\n\n  const bindingColumns: ColumnsType<BearingBindingDraft> = [\n    { title: '安装位置', dataIndex: 'location_id', render: (_, row) => row.location?.name || row.location_id },\n    {\n      title: '轴承型号',\n      render: (_, row) => (row.bearing ? `${row.bearing.brand} / ${row.bearing.model}` : row.bearing_id),\n    },\n    { title: '轴转速比', dataIndex: 'shaft_speed_ratio', width: 110 },\n    {\n      title: '诊断状态',\n      dataIndex: 'enabled',\n      width: 100,\n      render: (_, row) => (row.enabled ? <Tag color=\"success\">启用</Tag> : <Tag>停用</Tag>),\n    },\n    {\n      title: '操作',\n      width: 130,\n      render: (_, row, index) => (\n        <Space>\n          <a\n            onClick={() => {\n              setEditingBindingIndex(index);\n              setSelectedBearing(row.bearing);\n              setSelectedLocation(row.location);\n              setBindingEditorOpen(true);\n            }}\n          >\n            编辑\n          </a>\n          <Popconfirm\n            title=\"确认移除该位置的轴承配置吗？\"\n            onConfirm={() => setBindings((current) => current.filter((item) => item.draftKey !== row.draftKey))}\n          >\n            <a style={{ color: '#ff4d4f' }}>移除</a>\n          </Popconfirm>\n        </Space>\n      ),\n    },\n  ];\n\n  return (\n    <PageContainer title=\"设备规格\">\n      <ProTable<DeviceSpec>\n        rowKey=\"id\"\n        actionRef={actionRef}\n        columns={columns}\n        request={queryDeviceSpecs}\n        search={{ labelWidth: 'auto' }}\n        pagination={{ defaultPageSize: 20, showSizeChanger: true }}\n        optionsRender={renderRefSafeTableOptions}\n        toolBarRender={() => [\n          <Button\n            key=\"create\"\n            type=\"primary\"\n            onClick={() => {\n              setEditing(null);\n              setModalOpen(true);\n            }}\n          >\n            新建设备规格\n          </Button>,\n        ]}\n      />\n\n      <ModalForm<DeviceSpecFormValues>\n        title={editing ? '编辑设备规格' : '新建设备规格'}\n        formRef={formRef}\n        open={modalOpen}\n        modalProps={{\n          destroyOnHidden: true,\n          onCancel: () => {\n            setModalOpen(false);\n            setEditing(null);\n          },\n        }}\n        submitter={{ submitButtonProps: { loading: saving }, searchConfig: { submitText: '保存' } }}\n        initialValues={\n          editing\n            ? {\n                name: editing.name,\n                model: editing.model,\n                description: editing.description,\n                brand: editing.brand,\n                voltage: editing.voltage,\n                rpm: editing.rpm,\n                supplier_id: editing.supplier_id,\n                device_category_id: editing.device_category_id,\n                operation_mode: editing.operation_mode ?? 1,\n                reference_id: editing.reference_id ?? undefined,\n                remark: editing.remark,\n              }\n            : { voltage: 0, rpm: 0, operation_mode: 1 }\n        }\n        onFinish={async (values) => {\n          const operationMode = values.operation_mode ?? 1;\n          const payload: DeviceSpecPayload = {\n            name: values.name.trim(),\n            model: values.model.trim(),\n            description: values.description?.trim() || undefined,\n            brand: values.brand.trim(),\n            voltage: values.voltage,\n            rpm: values.rpm,\n            supplier_id: values.supplier_id,\n            device_category_id: values.device_category_id,\n            operation_mode: operationMode,\n            reference_id: operationMode === 3 ? values.reference_id || null : null,\n            remark: values.remark?.trim() || undefined,\n          };\n          setSaving(true);\n          try {\n            if (editing) {\n              await updateDeviceSpec(editing.id, payload);\n            } else {\n              await createDeviceSpec(payload);\n            }\n            message.success('保存成功');\n            setModalOpen(false);\n            setEditing(null);\n            actionRef.current?.reload();\n            return true;\n          } catch (error) {\n            message.error(toErrorMessage(error));\n            return false;\n          } finally {\n            setSaving(false);\n          }\n        }}\n      >\n        <Tabs\n          defaultActiveKey=\"1\"\n          items={[\n            {\n              key: '1',\n              label: '基本信息',\n              children: (\n                <>\n                  <ProFormText name=\"name\" label=\"名称\" rules={[{ required: true, message: '请输入规格名称' }]} />\n                  <ProForm.Item name=\"device_category_id\" label=\"设备分类\" rules={[{ required: true, message: '请选择设备分类' }]}>\n                    <EntityPicker<DeviceCategory>\n                      placeholder=\"请点击选择设备分类\"\n                      modalTitle=\"选择设备分类\"\n                      triggerText=\"选择\"\n                      valueLabel={editing?.device_category?.name}\n                      columns={[\n                        { title: '分类名称', dataIndex: 'name' },\n                        { title: '描述', dataIndex: 'description', render: (_, row) => row.description || '-' },\n                      ]}\n                      getRecordLabel={(record) => record.name}\n                      fetcher={async ({ current, pageSize, keyword }) => {\n                        const result = await queryDeviceCategories({ current, pageSize, keyword });\n                        return { items: result.data, total: result.total };\n                      }}\n                      treeData={categoryTreeData}\n                    />\n                  </ProForm.Item>\n                  <ProForm.Item name=\"supplier_id\" label=\"供应商\" rules={[{ required: true, message: '请选择供应商' }]}>\n                    <EntityPicker<Supplier>\n                      placeholder=\"请点击选择供应商\"\n                      modalTitle=\"选择供应商\"\n                      triggerText=\"选择\"\n                      valueLabel={editing?.supplier?.name}\n                      columns={[\n                        { title: '名称', dataIndex: 'name' },\n                        { title: '品牌', dataIndex: 'brand' },\n                        { title: '联系方式', dataIndex: 'contact_info', render: (_, row) => row.contact_info || '-' },\n                      ]}\n                      getRecordLabel={(record) => record.name}\n                      fetcher={async ({ current, pageSize, keyword }) => {\n                        const result = await querySuppliers({ current, pageSize, keyword });\n                        return { items: result.data, total: result.total };\n                      }}\n                      onRecordChange={(record) => formRef.current?.setFieldsValue({ brand: record?.brand || '' })}\n                    />\n                  </ProForm.Item>\n                  <ProFormDigit name=\"rpm\" label=\"转速(RPM)\" min={0} fieldProps={{ precision: 0 }} rules={[{ required: true, message: '请输入转速' }]} />\n                  <ProFormDigit name=\"voltage\" label=\"电压(V)\" min={0} fieldProps={{ precision: 2 }} rules={[{ required: true, message: '请输入电压' }]} />\n                  <ProFormRadio.Group\n                    name=\"operation_mode\"\n                    label=\"运行模式\"\n                    rules={[{ required: true, message: '请选择运行模式' }]}\n                    options={[\n                      { label: '连续运行', value: 1 },\n                      { label: '事件触发', value: 2 },\n                      { label: '时段运行', value: 3 },\n                    ]}\n                    fieldProps={{\n                      onChange: (event) => {\n                        if (event.target.value !== 3) {\n                          formRef.current?.setFieldsValue({ reference_id: undefined });\n                        }\n                      },\n                    }}\n                  />\n                  <ProFormDependency name={['operation_mode']}>\n                    {({ operation_mode }) =>\n                      operation_mode === 3 ? (\n                        <ProForm.Item\n                          name=\"reference_id\"\n                          label=\"关联时段策略\"\n                          rules={[{ required: true, message: '请选择时段运行模式' }]}\n                        >\n                          <EntityPicker<DeviceOperationSchedule>\n                            placeholder=\"请点击选择时段运行模式\"\n                            modalTitle=\"选择时段运行模式\"\n                            triggerText=\"选择\"\n                            valueLabel={\n                              editing?.operation_schedule\n                                ? `${editing.operation_schedule.name} (${editing.operation_schedule.code})`\n                                : undefined\n                            }\n                            columns={[\n                              { title: '编码', dataIndex: 'code', width: 140 },\n                              { title: '名称', dataIndex: 'name', width: 180 },\n                              {\n                                title: '运行时段',\n                                dataIndex: 'items',\n                                render: (_, row) => {\n                                  const items = row.items || [];\n                                  if (items.length === 0) return '-';\n                                  return (\n                                    <Space size={[4, 4]} wrap>\n                                      {items.map((item, idx) => (\n                                        <Tag key={item.id || idx} color=\"blue\">\n                                          {\n                                            parseCronScheduleItem(\n                                              item.cron_expr,\n                                              item.duration_minutes,\n                                            ).summaryLabel\n                                          }\n                                        </Tag>\n                                      ))}\n                                    </Space>\n                                  );\n                                },\n                              },\n                              {\n                                title: '说明',\n                                dataIndex: 'description',\n                                render: (_, row) => row.description || '-',\n                              },\n                            ]}\n                            getRecordLabel={(record) => `${record.name} (${record.code})`}\n                            fetcher={async ({ current, pageSize, keyword }) => {\n                              const result = await queryOperationSchedules({\n                                current,\n                                pageSize,\n                                keyword,\n                                status: 1,\n                              });\n                              return { items: result.data, total: result.total };\n                            }}\n                          />\n                        </ProForm.Item>\n                      ) : null\n                    }\n                  </ProFormDependency>\n                  <ProFormText name=\"model\" label=\"型号\" />\n                  <ProFormText name=\"brand\" label=\"品牌\" fieldProps={{ readOnly: true }} />\n                  <ProFormText name=\"description\" label=\"备注\" />\n                </>\n              ),\n            },\n            {\n              key: '2',\n              label: '电气性能标准',\n              children: <ProFormTextArea name=\"remark\" label=\"\" fieldProps={{ rows: 14 }} placeholder=\"请输入该设备规格的电气性能标准\" />,\n            },\n          ]}\n        />\n      </ModalForm>\n\n      <Modal\n        title={bindingSpec ? `${bindingSpec.name} - 轴承配置` : '轴承配置'}\n        open={bindingModalOpen}\n        width={960}\n        destroyOnClose\n        confirmLoading={bindingSaving}\n        okText=\"保存配置\"\n        onCancel={() => {\n          setBindingModalOpen(false);\n          setBindingSpec(null);\n          setBindings([]);\n        }}\n        onOk={async () => {\n          if (!bindingSpec) return;\n          setBindingSaving(true);\n          try {\n            await updateDeviceSpecBearingBindings(\n              bindingSpec.id,\n              bindings.map((item) => ({\n                bearing_id: item.bearing_id,\n                location_id: item.location_id,\n                shaft_speed_ratio: item.shaft_speed_ratio,\n                enabled: item.enabled,\n              })),\n            );\n            message.success('轴承配置保存成功');\n            setBindingModalOpen(false);\n            setBindingSpec(null);\n            setBindings([]);\n          } catch (error) {\n            message.error(toErrorMessage(error));\n          } finally {\n            setBindingSaving(false);\n          }\n        }}\n      >\n        <Space style={{ marginBottom: 16 }}>\n          <Button\n            type=\"primary\"\n            onClick={() => {\n              setEditingBindingIndex(null);\n              setSelectedBearing(undefined);\n              setSelectedLocation(undefined);\n              setBindingEditorOpen(true);\n            }}\n          >\n            安装位置\n          </Button>\n          <span style={{ color: '#8c8c8c' }}>轴转速比 = 测点轴承所在轴转速 ÷ 设备规格转速。</span>\n        </Space>\n        <Table<BearingBindingDraft> rowKey=\"draftKey\" loading={bindingLoading} columns={bindingColumns} dataSource={bindings} pagination={false} size=\"small\" />\n      </Modal>\n\n      <ModalForm<BearingBindingFormValues>\n        key={editingBindingIndex === null ? 'new-bearing-binding' : `edit-bearing-binding-${editingBindingIndex}`}\n        title={editingBindingIndex === null ? '添加轴承位置' : '编辑轴承位置'}\n        open={bindingEditorOpen}\n        modalProps={{\n          destroyOnHidden: true,\n          onCancel: () => {\n            setBindingEditorOpen(false);\n            setEditingBindingIndex(null);\n            setSelectedBearing(undefined);\n            setSelectedLocation(undefined);\n          },\n        }}\n        initialValues={\n          editingBindingIndex === null\n            ? { shaft_speed_ratio: 1, enabled: true }\n            : bindings[editingBindingIndex]\n        }\n        onFinish={async (values) => {\n          const previous = editingBindingIndex === null ? undefined : bindings[editingBindingIndex];\n          const next: BearingBindingDraft = {\n            id: previous?.id,\n            device_spec_id: bindingSpec?.id || '',\n            bearing_id: values.bearing_id,\n            location_id: values.location_id,\n            shaft_speed_ratio: values.shaft_speed_ratio,\n            enabled: values.enabled ?? true,\n            bearing: selectedBearing,\n            location: selectedLocation,\n            draftKey: previous?.draftKey || `${values.location_id}-${values.bearing_id}-${Date.now().toString(36)}`,\n          };\n          setBindings((current) =>\n            editingBindingIndex === null\n              ? [...current, next]\n              : current.map((item, index) => (index === editingBindingIndex ? next : item)),\n          );\n          setBindingEditorOpen(false);\n          setEditingBindingIndex(null);\n          setSelectedBearing(undefined);\n          setSelectedLocation(undefined);\n          return true;\n        }}\n      >\n        <ProForm.Item name=\"location_id\" label=\"故障测点\" rules={[{ required: true, message: '请选择故障测点' }]}>\n          <EntityPicker<Location>\n            placeholder=\"请点击选择故障测点\"\n            modalTitle=\"选择故障测点\"\n            triggerText=\"选择\"\n            valueLabel={selectedLocation?.name}\n            columns={[{ title: '名称', dataIndex: 'name', width: 200 }]}\n            getRecordLabel={(record) => record.name}\n            fetcher={async ({ current, pageSize, keyword }) => {\n              const result = await queryLocations(current, pageSize, keyword, true);\n              return { items: result.data, total: result.total };\n            }}\n            onRecordChange={setSelectedLocation}\n          />\n        </ProForm.Item>\n        <ProForm.Item name=\"bearing_id\" label=\"轴承型号\" rules={[{ required: true, message: '请选择轴承型号' }]}>\n          <EntityPicker<BearingModel>\n            placeholder=\"请点击选择轴承型号\"\n            modalTitle=\"选择轴承型号\"\n            triggerText=\"选择\"\n            valueLabel={selectedBearing ? `${selectedBearing.brand} / ${selectedBearing.model}` : undefined}\n            columns={[\n              { title: '品牌', dataIndex: 'brand' },\n              { title: '型号', dataIndex: 'model' },\n              { title: '轴承类型', dataIndex: 'bearing_type' },\n            ]}\n            getRecordLabel={(record) => `${record.brand} / ${record.model}`}\n            fetcher={async ({ current, pageSize, keyword }) => {\n              const result = await queryBearings({ current, pageSize, keyword, activeOnly: true });\n              return { items: result.data, total: result.total };\n            }}\n            onRecordChange={setSelectedBearing}\n          />\n        </ProForm.Item>\n        <ProFormDigit name=\"shaft_speed_ratio\" label=\"轴转速比\" min={0.0001} max={1000} fieldProps={{ precision: 4 }} rules={[{ required: true, message: '请输入轴转速比' }]} />\n        <ProFormSwitch name=\"enabled\" label=\"参与诊断\" />\n      </ModalForm>\n    </PageContainer>\n  );\n};\n\nexport default DeviceSpecPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Langhu/Codes/Platform/client/portal/src/pages/Device/Spec/index.tsx"
     },

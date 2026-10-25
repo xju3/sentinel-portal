@@ -449,7 +449,7 @@ const DeviceSpecPage = () => {
                                             parseCronScheduleItem(
                                               item.cron_expr,
                                               item.duration_minutes,
-                                            ).summaryText
+                                            ).summaryLabel
                                           }
                                         </Tag>
                                       ))}

@@ -28,6 +28,7 @@ import {
   formatDurationMinutes,
   getOperationScheduleItems,
   parseCronScheduleItem,
+  parseHourMinute,
   queryOperationSchedules,
   updateOperationSchedule,
   updateOperationScheduleItems,
@@ -69,10 +70,27 @@ const MONTH_DAY_OPTIONS = Array.from({ length: 31 }, (_, idx) => ({
   value: idx + 1,
 }));
 
+const timeStrToDayjs = (timeStr: string, defaultHour: number, defaultMin = 0): Dayjs => {
+  const [h, m] = parseHourMinute(timeStr, defaultHour, defaultMin);
+  return dayjs().hour(h).minute(m).second(0).millisecond(0);
+};
+
 const toTimeStr = (val: Dayjs | string | undefined, fallback: string): string => {
   if (!val) return fallback;
-  if (typeof val === 'string') return val;
-  return val.format('HH:mm');
+  if (typeof val !== 'string' && typeof val.isValid === 'function') {
+    return val.isValid() ? val.format('HH:mm') : fallback;
+  }
+  if (typeof val === 'string') {
+    const match = val.match(/(\d{1,2}):(\d{1,2})/);
+    if (match) {
+      const h = Math.min(23, Math.max(0, Number(match[1])));
+      const m = Math.min(59, Math.max(0, Number(match[2])));
+      return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+    }
+    const parsed = dayjs(val);
+    return parsed.isValid() ? parsed.format('HH:mm') : fallback;
+  }
+  return fallback;
 };
 
 const toErrorMessage = (error: unknown): string => {
@@ -273,8 +291,8 @@ const OperationSchedulePage = () => {
         cycleType: 'DAILY',
         weekdays: [1, 2, 3, 4, 5],
         monthDays: [1],
-        startTime: dayjs('08:00', 'HH:mm'),
-        endTime: dayjs('12:00', 'HH:mm'),
+        startTime: timeStrToDayjs('08:00', 8, 0),
+        endTime: timeStrToDayjs('12:00', 12, 0),
         remark: undefined,
       };
     }
@@ -284,8 +302,8 @@ const OperationSchedulePage = () => {
       cycleType: parsed.cycleType,
       weekdays: parsed.weekdays.length > 0 ? parsed.weekdays : [1, 2, 3, 4, 5],
       monthDays: parsed.monthDays.length > 0 ? parsed.monthDays : [1],
-      startTime: dayjs(parsed.startTime, 'HH:mm'),
-      endTime: dayjs(parsed.endTime, 'HH:mm'),
+      startTime: timeStrToDayjs(parsed.startTime, 8, 0),
+      endTime: timeStrToDayjs(parsed.endTime, 12, 0),
       remark: target.remark,
     };
   };
@@ -464,6 +482,7 @@ const OperationSchedulePage = () => {
         title={editingSlotIndex === null ? '构建运行时段' : '编辑运行时段'}
         open={slotEditorOpen}
         width={560}
+        dateFormatter={false}
         modalProps={{
           destroyOnHidden: true,
           onCancel: () => {

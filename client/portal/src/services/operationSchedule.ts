@@ -66,7 +66,28 @@ const WEEKDAY_NAMES: Record<number, string> = {
   7: '周日',
 };
 
-const pad2 = (n: number): string => String(Math.max(0, Math.floor(n))).padStart(2, '0');
+const pad2 = (n: number): string =>
+  String(Math.max(0, Math.floor(Number.isNaN(n) ? 0 : n))).padStart(2, '0');
+
+export function parseHourMinute(
+  raw: string | undefined,
+  defaultHour: number,
+  defaultMinute = 0,
+): [number, number] {
+  if (!raw || typeof raw !== 'string') {
+    return [defaultHour, defaultMinute];
+  }
+  const match = raw.match(/(\d{1,2}):(\d{1,2})/);
+  if (!match) {
+    return [defaultHour, defaultMinute];
+  }
+  const h = Number(match[1]);
+  const m = Number(match[2]);
+  if (Number.isNaN(h) || Number.isNaN(m)) {
+    return [defaultHour, defaultMinute];
+  }
+  return [Math.min(23, Math.max(0, h)), Math.min(59, Math.max(0, m))];
+}
 
 export function formatDurationMinutes(minutes: number): string {
   const total = Math.max(0, Math.round(minutes || 0));
@@ -194,8 +215,8 @@ export function calculateDurationFromTimeRange(
   startTime: string,
   endTime: string,
 ): { durationMinutes: number; isNextDay: boolean; timeRangeLabel: string } {
-  const [sh = 8, sm = 0] = (startTime || '08:00').split(':').map(Number);
-  const [eh = 12, em = 0] = (endTime || '12:00').split(':').map(Number);
+  const [sh, sm] = parseHourMinute(startTime, 8, 0);
+  const [eh, em] = parseHourMinute(endTime, 12, 0);
   const startTotal = sh * 60 + sm;
   const endTotal = eh * 60 + em;
 
@@ -223,9 +244,7 @@ export function buildCronFromVisualSlot(input: {
   startTime: string;
   endTime: string;
 }): { cron_expr: string; duration_minutes: number } {
-  const [sh = 8, sm = 0] = (input.startTime || '08:00').split(':').map(Number);
-  const minute = Math.min(59, Math.max(0, Number.isNaN(sm) ? 0 : sm));
-  const hour = Math.min(23, Math.max(0, Number.isNaN(sh) ? 8 : sh));
+  const [hour, minute] = parseHourMinute(input.startTime, 8, 0);
 
   let dom = '*';
   let dow = '*';
