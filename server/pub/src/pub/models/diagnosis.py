@@ -355,45 +355,6 @@ class DiagnosisCaseAttempt(Base):
 
     case = relationship("DiagnosisCase", back_populates="attempts")
 
-class DiagnosisFft(Base):
-    """
-    Standalone FFT diagnosis result, identified by its action=99 task.
-    """
-
-    __tablename__ = "diagnosis_fft"
-    __table_args__ = (
-        UniqueConstraint(
-            "fft_task_id",
-            name="uq_diagnosis_fft_task_id",
-        ),
-    )
-
-    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
-    
-    # The SensorTask (action=99) that generated the FFT data
-    fft_task_id = Column(Uuid(as_uuid=True), nullable=False, index=True)
-    device_fft_record_id = Column(
-        Uuid(as_uuid=True),
-        ForeignKey("device_fft_record.id"),
-        nullable=True,
-        index=True,
-    )
-    
-    # Physical fault code or conclusion string (e.g. "UB", "BPFO")
-    conclusion = Column(String(255), nullable=True)
-    
-    # Confidence level 0.0 ~ 1.0 to handle algorithmic uncertainty
-    confidence = Column(Float, nullable=True)
-    rpm_snapshot = Column(Float, nullable=True)
-    base_frequency_hz = Column(Float, nullable=True)
-    rpm_source = Column(String(32), nullable=True)
-    spectrum_preview_object_key = Column(String(255), nullable=True)
-    
-    # Detailed evidence (e.g. matched frequencies, amplitudes)
-    details = Column(MySQLJSON, nullable=True)
-
-    created_at = Column(DateTime, nullable=False, default=datetime.utcnow)
-
 
 class DiagnosisNotificationDelivery(Base):
     """Daily WeChat delivery ledger for diagnosis notification events."""

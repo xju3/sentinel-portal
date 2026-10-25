@@ -14,10 +14,6 @@ from pub.utils.logger import setup_logging
 
 from app.clients.mqtt import diagnosis_mqtt_manager
 from app.clients.stream_worker import _ensure_consumer_group, run_stream_worker
-from app.clients.fft_stream_worker import (
-    ensure_fft_consumer_group,
-    run_fft_stream_worker,
-)
 from app.config import settings
 from app.preparation.ingestion import process_incoming_report
 
@@ -57,19 +53,12 @@ async def lifespan(app: FastAPI):
 
     logger.debug("Initializing Redis Stream consumer group...")
     _ensure_consumer_group()
-    ensure_fft_consumer_group()
 
     logger.debug("Starting background tasks...")
     worker_tasks = [
         asyncio.create_task(run_stream_worker(f"worker-{i}"))
         for i in range(WORKER_COUNT)
     ]
-    worker_tasks.append(
-        asyncio.create_task(
-            run_fft_stream_worker("fft-worker-0"),
-            name="diagnosis-fft-worker",
-        )
-    )
     logger.debug("Started %d stream worker(s).", WORKER_COUNT)
     yield
     # Shutdown

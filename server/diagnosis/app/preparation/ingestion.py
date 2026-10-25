@@ -213,7 +213,6 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
         from pub.models.sensor import SensorTask, SensorTaskReport
         from pub.services.sensor.sensor_task_service import (
             create_resampling_task,
-            ensure_resampling_followup_fft_task,
             find_open_resampling_task,
         )
         from sqlalchemy import or_, select
@@ -516,15 +515,6 @@ async def dispatch_diagnosis_trigger(report: DiagnosisTriggerPayload) -> int:
                             )
                             resampling_case.confirmed_at = diagnosed_at.replace(
                                 tzinfo=None
-                            )
-                            await ensure_resampling_followup_fft_task(
-                                session=session,
-                                resampling_task_id=task.id,
-                                reason=(
-                                    "深度诊断兜底：最终复采确认振动等级 "
-                                    f"{vib_level}，需要 FFT"
-                                ),
-                                commit=False,
                             )
                         else:
                             resampling_case.confirmation_status = (

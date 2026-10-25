@@ -153,7 +153,7 @@ async def test_list_sensor_tasks_does_not_change_task_state():
 
 @pytest.mark.parametrize(
     "field,value",
-    [("action", 10), ("action", 100), ("action", 10000), ("val", -1)],
+    [("action", 10), ("action", 99), ("action", 100), ("action", 10000), ("val", -1)],
 )
 def test_sensor_task_create_rejects_invalid_action_and_val(field, value):
     payload = {
@@ -183,21 +183,6 @@ def test_sensor_task_create_accepts_firmware_task_with_zero_val():
 def test_sensor_task_create_rejects_collection_task_with_zero_val():
     with pytest.raises(ValueError):
         SensorTaskCreate(sensor_id=uuid4(), name="特征采集", action=15, val=0)
-
-
-def test_sensor_task_create_accepts_only_parameter_free_fft_action():
-    payload = SensorTaskCreate(
-        sensor_id=uuid4(),
-        name="FFT采集",
-        action=99,
-        val=0,
-    )
-
-    assert payload.action == 99
-    assert payload.val == 0
-
-    with pytest.raises(ValueError):
-        SensorTaskCreate(sensor_id=uuid4(), name="旧FFT采集", action=2086, val=3)
 
 
 def test_sensor_task_create_rejects_blank_name():
@@ -503,66 +488,3 @@ async def test_status_report_persists_and_completes_matching_status_task():
     assert status.sn == task.sn
     assert task.status == SENSOR_TASK_STATUS_DONE
     session.commit.assert_awaited_once()
-
-
-@pytest.mark.asyncio
-async def test_fft_upload_accepts_only_action_99_and_enqueues_diagnosis(monkeypatch):
-    task_id = uuid4()
-    task = SimpleNamespace(id=task_id, action=99)
-
-    class Session:
-        async def get(self, _model, key):
-            return task if key == task_id else None
-
-    class Request:
-        async def body(self):
-            return b"fft-binary"
-
-    minio_client = Mock()
-    redis_client = Mock()
-    monkeypatch.setattr(
-        sensors_router.minio_manager,
-        "get_client",
-        lambda: minio_client,
-    )
-    monkeypatch.setattr(
-        sensors_router.stream_redis_manager,
-        "get_client",
-        lambda: redis_client,
-    )
-
-    await sensors_router.upload_sensor_fft_data(
-        task_id=task_id,
-        request=Request(),
-        session=Session(),
-    )
-
-    minio_client.put_object.assert_called_once()
-    assert minio_client.put_object.call_args.kwargs["bucket_name"] == "fft"
-    assert minio_client.put_object.call_args.kwargs["object_name"] == str(task_id)
-    redis_client.xadd.assert_called_once_with(
-        "stream:diagnosis:fft",
-        {"task_id": str(task_id)},
-    )
-
-
-@pytest.mark.asyncio
-async def test_fft_upload_rejects_non_99_task():
-    task_id = uuid4()
-
-    class Session:
-        async def get(self, _model, _key):
-            return SimpleNamespace(id=task_id, action=98)
-
-    class Request:
-        async def body(self):
-            return b"fft-binary"
-
-    with pytest.raises(HTTPException) as exc_info:
-        await sensors_router.upload_sensor_fft_data(
-            task_id=task_id,
-            request=Request(),
-            session=Session(),
-        )
-
-    assert getattr(exc_info.value, "status_code", None) == 409

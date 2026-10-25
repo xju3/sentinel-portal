@@ -207,17 +207,16 @@ const SensorTaskPage = () => {
         <ProFormDigit
           name="action"
           label="动作编码"
-          fieldProps={{ precision: 0, min: 0, max: 9999 }}
-          extra="0=固件升级，1=配置更新，3=状态上报；11..99、1000..9999 为采集任务编码"
+          fieldProps={{ precision: 0, min: 0, max: 98 }}
+          extra="0=固件升级，1=配置更新，3=状态上报；11..98 为采集任务编码"
           rules={[
             { required: true, message: '请输入动作编码' },
             {
               validator: async (_, value) => {
                 const valid = value === 0 || value === 1 || value === 3
-                  || (value >= 11 && value <= 99)
-                  || (value >= 1000 && value <= 9999);
+                  || (value >= 11 && value <= 98);
                 if (!valid) {
-                  throw new Error('动作编码必须为 0、1、3、11..99 或 1000..9999');
+                  throw new Error('动作编码必须为 0、1、3 或 11..98');
                 }
               },
             },

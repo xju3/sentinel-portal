@@ -121,36 +121,3 @@ export async function getDevicePointTrend(
     },
   });
 }
-
-export type DeviceFftRecord = {
-  id: string;
-  ts_ms: number;
-  points: number;
-  range_g: number;
-  fs_hz: number;
-};
-
-export type DeviceFftData = {
-  ts_ms: number;
-  fs_hz: number;
-  range_g: number;
-  fft_size: number;
-  spectrum_bins: number;
-  points_preview: number;
-  freq_hz: number[];
-  x_axis: number[];
-  y_axis: number[];
-  z_axis: number[];
-};
-
-export async function listDeviceFftRecords(deviceId: string) {
-  return request<DeviceFftRecord[]>(`/api/v1/devices/${deviceId}/fft-records`, {
-    method: 'GET',
-  });
-}
-
-export async function getDeviceFftData(deviceId: string, recordId: string) {
-  return request<DeviceFftData>(`/api/v1/devices/${deviceId}/fft-records/${recordId}/data`, {
-    method: 'GET',
-  });
-}

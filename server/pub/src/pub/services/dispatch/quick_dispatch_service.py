@@ -22,15 +22,11 @@ from pub.services.diagnosis.quick_history_cache import (
 )
 from pub.services.sensor.sensor_task_service import (
     SensorTaskSpec,
-    TASK_PURPOSE_RESAMPLING,
     build_resampling_spec,
     create_resampling_task,
     dispatch_pending_sensor_tasks,
-    ensure_resampling_followup_fft_task,
-    ensure_daily_fft_task,
     get_sensor_task_report_by_report_id,
     record_sensor_task_report,
-    sensor_task_to_device_payload,
 )
 
 logger = logging.getLogger(__name__)
@@ -62,7 +58,6 @@ async def dispatch_quick_diagnosis_tasks(
     """Create quick-diagnosis tasks and return pending tasks for the upload response."""
     task_id = _payload_task_id(payload)
     if task_id:
-        followup_fft_task = None
         sequence = _payload_task_sequence(payload)
         task = await record_sensor_task_report(
             session=session,
@@ -96,46 +91,7 @@ async def dispatch_quick_diagnosis_tasks(
             report_id,
             task_id,
         )
-        if (
-            (
-                getattr(task, "task_purpose", None) == TASK_PURPOSE_RESAMPLING
-                or (
-                    getattr(task, "action", None) == 53
-                    and int(getattr(task, "val", 0) or 0) == 3
-                )
-            )
-            and sequence is not None
-            and sequence >= int(task.val or 0)
-        ):
-            reasons = _vibration_trigger_reasons(
-                payload=payload,
-                last_regular=get_last_regular_snapshot(sn),
-            )
-            if reasons:
-                followup_fft_task = await ensure_resampling_followup_fft_task(
-                    session=session,
-                    resampling_task_id=task.id,
-                    reason=(
-                        "复采最终确认仍存在振动或早期轴承冲击异常: "
-                        + "; ".join(reasons)
-                    ),
-                )
-        payloads = await dispatch_pending_sensor_tasks(session, sn)
-        if (
-            followup_fft_task is not None
-            and int(getattr(followup_fft_task, "status", -1)) == 2
-            and not any(
-                item.get("id") == str(followup_fft_task.id)
-                for item in payloads
-            )
-        ):
-            followup_payload = await sensor_task_to_device_payload(
-                session,
-                followup_fft_task,
-            )
-            if followup_payload is not None:
-                payloads.append(followup_payload)
-        return payloads
+        return await dispatch_pending_sensor_tasks(session, sn)
 
     last_regular = get_last_regular_snapshot(sn)
     plan = build_quick_dispatch_plan(
@@ -166,8 +122,6 @@ async def dispatch_quick_diagnosis_tasks(
             report_id,
             plan.skipped_reason,
         )
-        if plan.skipped_reason == "no quick trigger":
-            await ensure_daily_fft_task(session=session, sn=sn)
 
     return await dispatch_pending_sensor_tasks(session, sn)
 

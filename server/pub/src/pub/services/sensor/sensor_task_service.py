@@ -15,14 +15,13 @@ Encoding rules:
   times.
   Example: action=25, val=3 -> collect full data every 5 minutes, repeat 3
   times with temperature as the server-side review focus.
-- action=99: FFT collection. The device chooses FFT size and range locally.
 """
 
 from __future__ import annotations
 
 import hashlib
 from dataclasses import dataclass
-from datetime import datetime, timedelta, timezone
+from datetime import datetime, timezone
 import logging
 from typing import Literal
 from uuid import UUID
@@ -31,13 +30,9 @@ from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from pub.manager.database import db_manager
 from pub.models.diagnosis import DiagnosisRecord
 from pub.models.sensor import (
-    DeviceFftRecord,
     Sensor,
-    SensorBatch,
-    SensorMonitoring,
     SensorStatus,
     SensorTask,
     SensorTaskReport,
@@ -71,21 +66,16 @@ DEFAULT_DENSE_FOCUS_LABELS = {
     DEFAULT_DENSE_FOCUS_RMS: "RMS复核",
     DEFAULT_DENSE_FOCUS_IMPACT_SPECTRUM: "冲击/频谱复核",
 }
-FFT_COLLECTION_ACTION = 99
 RESAMPLING_ACTION = 53
 RESAMPLING_REPEAT_COUNT = 3
-DAILY_FFT_INTERVAL = timedelta(hours=24)
 
 TASK_PURPOSE_RESAMPLING = "RESAMPLING"
-TASK_PURPOSE_FFT_DAILY = "FFT_DAILY"
-TASK_PURPOSE_FFT_DIAGNOSIS = "FFT_DIAGNOSIS"
 
 MIN_REPEAT_COUNT = 1
 
 TaskKind = Literal[
     "default_dense_collection",
     "resampling",
-    "fft_collection",
 ]
 
 
@@ -125,19 +115,6 @@ def build_default_dense_collection_spec(
     )
 
 
-def build_fft_collection_spec() -> SensorTaskSpec:
-    """Build the parameter-free FFT collection command understood by devices."""
-    return SensorTaskSpec(
-        action=FFT_COLLECTION_ACTION,
-        val=0,
-        kind="fft_collection",
-        description=(
-            "FFT 采集：设备根据转速和至少 20 圈采样要求自动决定点数，"
-            "并根据削峰情况自动选择量程"
-        ),
-    )
-
-
 def build_resampling_spec() -> SensorTaskSpec:
     """Build the fixed three-pass vibration confirmation task."""
     return SensorTaskSpec(
@@ -150,12 +127,10 @@ def build_resampling_spec() -> SensorTaskSpec:
 
 def describe_collection_action(action: int, val: int) -> str:
     """Return a human-readable description for a collection task action."""
-    if action == FFT_COLLECTION_ACTION:
-        return build_fft_collection_spec().description
     if action == RESAMPLING_ACTION and val == RESAMPLING_REPEAT_COUNT:
         return build_resampling_spec().description
 
-    if 10 < action < FFT_COLLECTION_ACTION:
+    if 10 < action < 99:
         focus_type = action // 10
         interval = action % 10
         focus_label = DEFAULT_DENSE_FOCUS_LABELS.get(focus_type, f"未知重点({focus_type})")
@@ -385,24 +360,6 @@ async def create_default_dense_collection_task(
     )
 
 
-async def create_fft_collection_task(
-    *,
-    session: AsyncSession,
-    sn: str,
-    reason: str,
-    task_purpose: str = TASK_PURPOSE_FFT_DIAGNOSIS,
-) -> SensorTask:
-    """Create one parameter-free device-managed FFT collection task."""
-    return await create_collection_task(
-        session=session,
-        sn=sn,
-        spec=build_fft_collection_spec(),
-        reason=reason,
-        name="fft_collection",
-        task_purpose=task_purpose,
-    )
-
-
 async def create_resampling_task(
     *,
     session: AsyncSession,
@@ -422,98 +379,6 @@ async def create_resampling_task(
     )
 
 
-async def ensure_resampling_followup_fft_task(
-    *,
-    session: AsyncSession,
-    resampling_task_id: UUID | str,
-    reason: str,
-    commit: bool = True,
-) -> SensorTask | None:
-    """Select exactly one FFT follow-up for a completed resampling task.
-
-    The resampling row is locked while its durable follow-up link is assigned.
-    An already dispatched FFT may be linked and returned so the API can include
-    the same command again when the final resampling upload is retried.
-    """
-    task_uuid = _parse_task_uuid(resampling_task_id)
-    if task_uuid is None:
-        return None
-
-    resampling_stmt = (
-        select(SensorTask)
-        .where(SensorTask.id == task_uuid)
-        .with_for_update()
-    )
-    resampling_task = (
-        await session.execute(resampling_stmt)
-    ).scalar_one_or_none()
-    if (
-        resampling_task is None
-        or resampling_task.action != RESAMPLING_ACTION
-        or int(resampling_task.val or 0) != RESAMPLING_REPEAT_COUNT
-    ):
-        return None
-
-    if resampling_task.followup_fft_task_id is not None:
-        return await get_sensor_task_by_id(
-            session,
-            resampling_task.followup_fft_task_id,
-        )
-
-    open_fft_stmt = (
-        select(SensorTask)
-        .where(
-            SensorTask.sn == resampling_task.sn,
-            SensorTask.action == FFT_COLLECTION_ACTION,
-            SensorTask.status.in_(SENSOR_TASK_OPEN_STATUSES),
-        )
-        .order_by(SensorTask.create_time.desc())
-        .limit(1)
-    )
-    fft_task = (await session.execute(open_fft_stmt)).scalar_one_or_none()
-    if fft_task is None:
-        spec = build_fft_collection_spec()
-        dedupe_key = _automatic_task_dedupe_key(
-            sn=resampling_task.sn,
-            spec=spec,
-        )
-        fft_task = SensorTask(
-            name="fft_collection",
-            sn=resampling_task.sn,
-            action=spec.action,
-            val=spec.val,
-            remark=_task_remark(spec=spec, reason=reason),
-            task_purpose=TASK_PURPOSE_FFT_DIAGNOSIS,
-            dedupe_key=dedupe_key,
-            status=SENSOR_TASK_STATUS_PENDING,
-            create_time=datetime.utcnow(),
-        )
-        try:
-            async with session.begin_nested():
-                session.add(fft_task)
-                await session.flush()
-        except IntegrityError:
-            existing_stmt = select(SensorTask).where(
-                SensorTask.dedupe_key == dedupe_key,
-                SensorTask.status.in_(SENSOR_TASK_OPEN_STATUSES),
-            )
-            fft_task = (
-                await session.execute(existing_stmt)
-            ).scalar_one_or_none()
-            if fft_task is None:
-                raise
-    else:
-        fft_task.task_purpose = TASK_PURPOSE_FFT_DIAGNOSIS
-
-    resampling_task.followup_fft_task_id = fft_task.id
-    if commit:
-        await session.commit()
-        await session.refresh(fft_task)
-    else:
-        await session.flush()
-    return fft_task
-
-
 async def find_open_resampling_task(
     session: AsyncSession,
     sn: str,
@@ -530,40 +395,6 @@ async def find_open_resampling_task(
         .limit(1)
     )
     return (await session.execute(stmt)).scalar_one_or_none()
-
-
-async def ensure_daily_fft_task(
-    *,
-    session: AsyncSession,
-    sn: str,
-    now: datetime | None = None,
-) -> SensorTask | None:
-    """Create one daily health FFT when no recent/open FFT or resampling exists."""
-    if await find_open_resampling_task(session, sn) is not None:
-        return None
-
-    reference_time = now or datetime.utcnow()
-    recent_stmt = (
-        select(SensorTask)
-        .where(
-            SensorTask.sn == sn,
-            SensorTask.action == FFT_COLLECTION_ACTION,
-            SensorTask.status == SENSOR_TASK_STATUS_DONE,
-            SensorTask.complete_time.is_not(None),
-            SensorTask.complete_time >= reference_time - DAILY_FFT_INTERVAL,
-        )
-        .order_by(SensorTask.complete_time.desc())
-        .limit(1)
-    )
-    if (await session.execute(recent_stmt)).scalar_one_or_none() is not None:
-        return None
-
-    return await create_fft_collection_task(
-        session=session,
-        sn=sn,
-        reason="每日健康巡检：最近 24 小时内没有成功完成的 FFT",
-        task_purpose=TASK_PURPOSE_FFT_DAILY,
-    )
 
 
 async def sensor_task_to_device_payload(session: AsyncSession, task: SensorTask) -> dict | None:
@@ -806,8 +637,6 @@ def _automatic_task_dedupe_key(
 ) -> str | None:
     if spec.kind == "resampling":
         purpose = TASK_PURPOSE_RESAMPLING
-    elif spec.kind == "fft_collection":
-        purpose = "FFT"
     else:
         return None
     return hashlib.sha256(f"{sn}:{purpose}".encode("utf-8")).hexdigest()
@@ -886,7 +715,7 @@ async def find_equivalent_pending_collection_task(
                 SensorTask.status.in_(SENSOR_TASK_OPEN_STATUSES),
                 SensorTask.val == spec.val,
                 SensorTask.action > 10,
-                SensorTask.action < FFT_COLLECTION_ACTION,
+                SensorTask.action < 99,
             )
             .order_by(SensorTask.create_time.desc())
         )
@@ -917,7 +746,7 @@ def _task_remark(*, spec: SensorTaskSpec, reason: str) -> str:
         f"编码: action={spec.action}, val={spec.val}; "
         "编码规则: 11..98 表示默认参数密集采集, action=T I, "
         "T=重点类型(1综合/2温度/3RMS/4冲击频谱), I=间隔分钟, "
-        "val=重复次数; action=99 表示设备自主参数的 FFT 采集"
+        "val=重复次数"
     )
 
 
@@ -938,102 +767,3 @@ def _require_int_range(name: str, value: int, minimum: int, maximum: int) -> Non
 
 
 logger = logging.getLogger(__name__)
-
-async def process_fft_metadata_background(task_id: UUID | str) -> bool:
-    """Read device-selected FFT metadata and run diagnosis for action=99."""
-    task_uuid = _parse_task_uuid(task_id)
-    if not task_uuid:
-        return False
-
-    try:
-        async with db_manager.SessionLocal() as session:
-            task = await get_sensor_task_by_id(session, task_uuid)
-            if not task:
-                logger.error(f"FFT metadata process failed: SensorTask {task_uuid} not found")
-                return False
-
-            if task.action != FFT_COLLECTION_ACTION:
-                logger.warning(
-                    "FFT metadata process skipped: Task %s action %s is not FFT action 99",
-                    task_uuid,
-                    task.action,
-                )
-                return False
-
-            import sys
-            from pathlib import Path
-
-            server_path = Path(__file__).parent.parent.parent.parent.parent.parent
-            if str(server_path) not in sys.path:
-                sys.path.append(str(server_path))
-
-            from diagnosis.app.preparation.fft_parser import FftParser
-            from diagnosis.app.handler.fft_analyzer import FftAnalyzer
-
-            fft_data = FftParser.parse_from_minio(str(task_uuid))
-            if fft_data is None:
-                return False
-
-            stmt_exist = select(DeviceFftRecord).where(DeviceFftRecord.task_id == task_uuid)
-            record = (await session.execute(stmt_exist)).scalar_one_or_none()
-
-            stmt = (
-                select(SensorMonitoring)
-                .join(Sensor, Sensor.id == SensorMonitoring.sensor_id)
-                .where(
-                    Sensor.sn == task.sn,
-                    SensorMonitoring.status == 1,
-                )
-            )
-            monitoring = (await session.execute(stmt)).scalar_one_or_none()
-
-            tenant_id = None
-            sensor_id = None
-            if monitoring:
-                sensor_id = monitoring.sensor_id
-                stmt_batch = (
-                    select(SensorBatch.tenant_id)
-                    .join(Sensor, Sensor.sensor_batch_id == SensorBatch.id)
-                    .where(Sensor.sn == task.sn)
-                )
-                tenant_id = (await session.execute(stmt_batch)).scalar_one_or_none()
-
-            if record is None:
-                record = DeviceFftRecord(
-                    task_id=task_uuid,
-                    sn=task.sn,
-                    sensor_id=sensor_id,
-                    device_inst_id=monitoring.device_inst_id if monitoring else None,
-                    tenant_id=tenant_id,
-                    ts_ms=fft_data.timestamp_s * 1000,
-                    fs_hz=round(fft_data.fs),
-                    points=fft_data.points,
-                    range_g=fft_data.range_g,
-                )
-                session.add(record)
-            else:
-                logger.info("FFT metadata already exists for task %s", task_uuid)
-            await session.commit()
-            logger.info(f"Successfully processed FFT metadata for task {task_uuid}")
-
-            try:
-                completed = await FftAnalyzer.analyze_and_save(
-                    str(task_uuid),
-                    fft_data,
-                )
-                if not completed:
-                    return False
-                _mark_sensor_task_done(task)
-                await session.commit()
-            except Exception as inner_e:
-                logger.error(
-                    f"Failed to execute FFT diagnostic engine for task {task_uuid}: {inner_e}",
-                    exc_info=True,
-                )
-                return False
-
-            return True
-
-    except Exception as e:
-        logger.error(f"Error processing FFT metadata for task {task_uuid}: {e}", exc_info=True)
-        return False

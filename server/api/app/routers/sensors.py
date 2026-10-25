@@ -24,7 +24,6 @@ from pub.services import DiagnosisContextService
 from pub.services import SensorTypeService, SensorDbService, SensorBatchService, SensorConfigService
 from pub.services import dispatch_quick_diagnosis_tasks
 from pub.services import (
-    FFT_COLLECTION_ACTION,
     SensorCommunicationService,
     SYSTEM_ACTION_CONFIG_UPDATE,
     complete_device_system_task,
@@ -618,53 +617,3 @@ async def receive_sensor_data(
     except Exception as e:
         logger.error(f"Error processing sensor data: {e}", exc_info=True)
         raise HTTPException(status_code=500, detail="Internal server error processing data")
-
-@router.post("/tasks/{task_id}/fft")
-async def upload_sensor_fft_data(
-    task_id: UUID,
-    request: Request,
-    session: AsyncSession = Depends(get_session),
-):
-    task = await session.get(SensorTask, task_id)
-    if task is None:
-        raise HTTPException(status_code=404, detail="FFT task not found")
-    if task.action != FFT_COLLECTION_ACTION:
-        raise HTTPException(status_code=409, detail="Task is not FFT action 99")
-
-    body = await request.body()
-    if not body:
-        raise HTTPException(status_code=400, detail="Empty payload")
-
-    client = minio_manager.get_client()
-    try:
-        client.put_object(
-            bucket_name=minio_manager.bucket_name,
-            object_name=str(task_id),
-            data=io.BytesIO(body),
-            length=len(body),
-            content_type="application/octet-stream",
-        )
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to upload to MinIO: {str(e)}")
-
-    from pub.utils.redis_keys import REDIS_STREAM_FFT_TRIGGER
-
-    redis_client = stream_redis_manager.get_client()
-    try:
-        await asyncio.to_thread(
-            redis_client.xadd,
-            REDIS_STREAM_FFT_TRIGGER,
-            {"task_id": str(task_id)},
-        )
-    except Exception as exc:
-        logger.error(
-            "FFT file stored but diagnosis trigger failed: task_id=%s",
-            task_id,
-            exc_info=True,
-        )
-        raise HTTPException(
-            status_code=503,
-            detail="FFT stored but diagnosis notification failed; retry upload",
-        ) from exc
-
-    return success({"message": "FFT data uploaded successfully"})

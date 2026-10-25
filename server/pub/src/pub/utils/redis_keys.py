@@ -32,7 +32,7 @@ REDIS_KEY_SENSOR_META = "sensor_meta:{sn}"
 # 格式: task:seq:{task_id}
 # 存储内容: 当前复采任务执行的次数 (int)
 # 过期时间: 24小时 (86400秒)
-# 作用: 追踪复采任务(如 action=53)已执行的次数，用于在达到最后一次时定性告警并下发 FFT
+# 作用: 追踪复采任务(如 action=53)已执行的次数
 REDIS_KEY_TASK_SEQ = "task:seq:{task_id}"
 
 # ==========================================
@@ -106,5 +106,3 @@ REDIS_KEY_PERSISTENCE_PROCESSED_REPORT = "persistence:processed:{report_id}"
 # 存储内容: { "bucket": str, "path": str }
 REDIS_STREAM_DIAGNOSIS_TRIGGER = "stream:diagnosis:trigger"
 REDIS_STREAM_DIAGNOSIS_GROUP = "diagnosis:workers"
-REDIS_STREAM_FFT_TRIGGER = "stream:diagnosis:fft"
-REDIS_STREAM_FFT_GROUP = "diagnosis:fft:workers"

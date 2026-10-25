@@ -4,7 +4,6 @@ from pub.models.diagnosis import (
     Diagnosis,
     DiagnosisCase,
     DiagnosisCaseAttempt,
-    DiagnosisFft,
     DiagnosisItem,
     DiagnosisNotificationDelivery,
     DiagnosisRecord,
@@ -121,17 +120,6 @@ def test_delivery_model_tracks_fault_dimensions_and_snapshot_recipient():
         "status",
         "next_attempt_at",
     ]
-
-
-def test_fft_diagnosis_is_idempotent_by_task_id():
-    assert "report_id" not in DiagnosisFft.__table__.c
-    assert "source_report_id" not in DiagnosisFft.__table__.c
-    assert "source_diagnosis_id" not in DiagnosisFft.__table__.c
-    assert "diagnosis_case_id" not in DiagnosisFft.__table__.c
-    assert _constraint_columns(
-        DiagnosisFft.__table__,
-        "uq_diagnosis_fft_task_id",
-    ) == ["fft_task_id"]
 
 
 def test_sensor_task_models_add_case_and_report_uuid_links():
