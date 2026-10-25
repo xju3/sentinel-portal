@@ -62,11 +62,5 @@ page { min-height: 100vh; background: #0a0f1c; }
 .chart-stage--fullscreen .chart-fullscreen-button { color:#fff; }
 .chart-stage--fullscreen .chart-box { min-height:0; height:auto; margin-top:0; flex:1; }
 .chart-error,.error-panel { margin:24rpx; padding:36rpx; border-radius:16rpx; background:rgba(255,51,102,.08); color:#ff8cab; text-align:center; font-size:24rpx; }
-.advanced-header { display:flex; align-items:center; justify-content:space-between; }
-.advanced-header .section-title,.advanced-header .section-subtitle { display:block; }
-.expand-icon { color:#00d2ff; font-size:24rpx; }
-.tabs--compact { margin-top:18rpx; }
-.mode-chip { font-size:22rpx; padding:10rpx 18rpx; }
-.fft-meta { margin-top:16rpx; color:rgba(255,255,255,.35); font-size:20rpx; }
 .retry-button { margin-top:20rpx; background:#00d2ff; color:#07101e; font-size:24rpx; }
 .safe-bottom { height:calc(40rpx + env(safe-area-inset-bottom)); }

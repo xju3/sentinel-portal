@@ -81,7 +81,7 @@
         </view>
         <view class="entry-item__body">
           <text class="entry-item__name">健康档案</text>
-          <text class="entry-item__desc">设备诊断历史, 健康基线, FFT频谱查看</text>
+          <text class="entry-item__desc">设备诊断历史, 健康基线与测点趋势查看</text>
         </view>
       </view>
     </view>

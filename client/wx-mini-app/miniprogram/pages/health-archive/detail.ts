@@ -1,6 +1,4 @@
 import {
-  getDeviceFftData,
-  getDeviceFftRecords,
   getDeviceHealthArchive,
   getDevicePointTrends,
 } from '../../utils/api'
@@ -80,7 +78,6 @@ function buildTimelineDays(buckets: any[]) {
 
 Page({
   trendChart: null as any,
-  fftChart: null as any,
 
   data: {
     deviceId: '',
@@ -109,17 +106,6 @@ Page({
     trendWindowOptions: WINDOW_OPTIONS[3],
     trendWindowIndex: 0,
     fullscreenChart: '',
-
-    fftEc: { lazyLoad: true },
-    fftExpanded: false,
-    fftListLoading: false,
-    fftDataLoading: false,
-    fftRecords: [] as any[],
-    fftRecordIndex: 0,
-    fftData: null as any,
-    fftAxis: 'x',
-    fftMode: 'low',
-    fftError: '',
   },
 
   async onLoad(options: Record<string, string>) {
@@ -127,12 +113,12 @@ Page({
     const deviceName = decodeURIComponent(options.name || '')
     this.setData({ deviceId, deviceName })
     if (deviceName) wx.setNavigationBarTitle({ title: `${deviceName} · 健康档案` })
-    await Promise.all([this.loadArchive(true), this.loadFftRecords()])
+    await this.loadArchive(true)
   },
 
   async onPullDownRefresh() {
     try {
-      await Promise.all([this.loadArchive(true), this.loadFftRecords()])
+      await this.loadArchive(true)
     } finally {
       wx.stopPullDownRefresh()
     }
@@ -278,16 +264,15 @@ Page({
     const fullscreenChart = this.data.fullscreenChart === requestedChart ? '' : requestedChart
     this.setData({ fullscreenChart }, () => {
       wxApi.setPageOrientation({ orientation: fullscreenChart ? 'landscape' : 'portrait' })
-      setTimeout(() => this.resizeChart(requestedChart), 500)
+      setTimeout(() => this.resizeChart(), 500)
     })
   },
 
-  resizeChart(chartType: string) {
-    const chart = chartType === 'fft' ? this.fftChart : this.trendChart
-    const selector = chartType === 'fft' ? '#fft-chart-box' : '#trend-chart-box'
+  resizeChart() {
+    const chart = this.trendChart
+    const selector = '#trend-chart-box'
     if (!chart) {
-      if (chartType === 'fft') this.renderFftChart()
-      else this.renderTrendChart()
+      this.renderTrendChart()
       return
     }
     wx.createSelectorQuery().select(selector).boundingClientRect((rect) => {
@@ -339,107 +324,6 @@ Page({
     }
   },
 
-  async loadFftRecords() {
-    const token = app.globalData.session?.accessToken
-    if (!token || !this.data.deviceId) return
-    this.setData({ fftListLoading: true, fftError: '' })
-    try {
-      const records = await getDeviceFftRecords(token, this.data.deviceId)
-      const fftRecords = (records || []).map((record: any) => ({
-        ...record,
-        label: formatTime(record.ts_ms, true),
-      }))
-      this.setData({ fftRecords, fftRecordIndex: 0, fftData: null })
-      if (this.data.fftExpanded && fftRecords.length) await this.loadFftData()
-    } catch (error: any) {
-      this.setData({ fftError: error?.message || 'FFT记录加载失败' })
-    } finally {
-      this.setData({ fftListLoading: false })
-    }
-  },
-
-  toggleFft() {
-    const fftExpanded = !this.data.fftExpanded
-    this.setData({ fftExpanded }, () => {
-      if (fftExpanded && this.data.fftRecords.length && !this.data.fftData) this.loadFftData()
-    })
-  },
-
-  changeFftRecord(e: any) {
-    this.setData({ fftRecordIndex: Number(e.detail.value) }, () => this.loadFftData())
-  },
-
-  switchFftAxis(e: any) {
-    this.setData({ fftAxis: e.currentTarget.dataset.axis }, () => this.renderFftChart())
-  },
-
-  switchFftMode(e: any) {
-    this.setData({ fftMode: e.currentTarget.dataset.mode }, () => this.renderFftChart())
-  },
-
-  async loadFftData() {
-    const token = app.globalData.session?.accessToken
-    const record = this.data.fftRecords[this.data.fftRecordIndex]
-    if (!token || !record) return
-    this.setData({ fftDataLoading: true, fftError: '' })
-    try {
-      const fftData = await getDeviceFftData(token, this.data.deviceId, record.id)
-      this.setData({ fftData }, () => this.renderFftChart())
-    } catch (error: any) {
-      this.setData({ fftData: null, fftError: error?.message || 'FFT数据加载失败' })
-    } finally {
-      this.setData({ fftDataLoading: false })
-    }
-  },
-
-  renderFftChart() {
-    const data = this.data.fftData
-    if (!data?.freq_hz?.length) return
-    const axisData = data[`${this.data.fftAxis}_axis`] || []
-    const pairs: Array<[number, number]> = []
-    data.freq_hz.forEach((frequency: number, index: number) => {
-      if (this.data.fftMode === 'full' || Number(frequency) <= 1000) {
-        pairs.push([Number(frequency), Number(axisData[index] || 0)])
-      }
-    })
-    const markLineData: any[] = []
-    const rpm = Number(this.data.archive?.device?.rpm || 0)
-    if (this.data.fftMode === 'low' && rpm > 0) {
-      const baseHz = rpm / 60
-      for (let index = 1; index <= 10 && baseHz * index <= 1000; index += 1) {
-        markLineData.push({ xAxis: baseHz * index, name: `${index}x` })
-      }
-    }
-    const option = {
-      animation: false,
-      tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
-      grid: { top: 24, left: 54, right: 20, bottom: 46 },
-      xAxis: { type: 'value', name: 'Hz', scale: true },
-      yAxis: { type: 'value', name: 'g', scale: true },
-      dataZoom: [{ type: 'inside' }],
-      series: [{
-        type: 'line', data: pairs, showSymbol: false, lineStyle: { color: '#00D2FF', width: 1 },
-        markLine: markLineData.length ? {
-          symbol: ['none', 'none'], label: { formatter: '{b}' }, data: markLineData,
-        } : undefined,
-      }],
-    }
-    const component = this.selectComponent('#health-fft-chart') as any
-    if (!component) return
-    if (!this.fftChart) {
-      component.init((canvas: any, width: number, height: number, dpr: number) => {
-        const chart = echarts.init(canvas, null, { width, height, devicePixelRatio: dpr })
-        canvas.setChart(chart)
-        chart.setOption(option)
-        this.fftChart = chart
-        return chart
-      })
-    } else {
-      this.fftChart.setOption(option, true)
-    }
-  },
-
   retryArchive() { this.loadArchive(true) },
   retryTrend() { this.loadTrend() },
-  retryFft() { this.data.fftRecords.length ? this.loadFftData() : this.loadFftRecords() },
 })

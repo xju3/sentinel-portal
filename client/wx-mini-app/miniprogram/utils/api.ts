@@ -187,21 +187,6 @@ export function getDevicePointTrends(
   return request<any>(`/devices/${deviceId}/point-trends`, 'GET', params, token)
 }
 
-/** Get recent FFT captures for one device. */
-export function getDeviceFftRecords(token: string, deviceId: string) {
-  return request<any[]>(`/devices/${deviceId}/fft-records`, 'GET', undefined, token)
-}
-
-/** Get parsed FFT spectrum data for one capture. */
-export function getDeviceFftData(token: string, deviceId: string, recordId: string) {
-  return request<any>(
-    `/devices/${deviceId}/fft-records/${recordId}/data`,
-    'GET',
-    undefined,
-    token,
-  )
-}
-
 /** Get device categories */
 export function getDeviceCategories(token: string) {
   return request<any[]>('/device-categories', 'GET', { skip: 0, limit: 100 }, token)

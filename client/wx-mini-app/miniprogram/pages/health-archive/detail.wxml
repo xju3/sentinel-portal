@@ -141,50 +141,6 @@
         </view>
       </view>
     </view>
-
-    <view class="section fft-card">
-      <view class="advanced-header" bindtap="toggleFft">
-        <view>
-          <text class="section-title">FFT 频谱分析</text>
-          <text class="section-subtitle">设备级高级分析，不随监测点切换</text>
-        </view>
-        <text class="expand-icon">{{fftExpanded ? '收起' : '展开'}}</text>
-      </view>
-      <block wx:if="{{fftExpanded}}">
-        <view class="chart-loading" wx:if="{{fftListLoading}}">FFT记录加载中...</view>
-        <view class="chart-error" wx:elif="{{fftError}}" bindtap="retryFft">{{fftError}}，点击重试</view>
-        <empty-state wx:elif="{{!fftRecords.length}}" title="暂无 FFT 记录" desc="该设备尚未上传频谱数据" />
-        <block wx:else>
-          <picker value="{{fftRecordIndex}}" range="{{fftRecords}}" range-key="label" bindchange="changeFftRecord">
-            <view class="record-picker">记录：{{fftRecords[fftRecordIndex].label}}⌄</view>
-          </picker>
-          <view class="tabs tabs--compact">
-            <view class="tab {{fftAxis === 'x' ? 'tab--active' : ''}}" data-axis="x" bindtap="switchFftAxis">X轴</view>
-            <view class="tab {{fftAxis === 'y' ? 'tab--active' : ''}}" data-axis="y" bindtap="switchFftAxis">Y轴</view>
-            <view class="tab {{fftAxis === 'z' ? 'tab--active' : ''}}" data-axis="z" bindtap="switchFftAxis">Z轴</view>
-          </view>
-          <view class="mode-row">
-            <view class="mode-chip {{fftMode === 'low' ? 'mode-chip--active' : ''}}" data-mode="low" bindtap="switchFftMode">0-1000Hz</view>
-            <view class="mode-chip {{fftMode === 'full' ? 'mode-chip--active' : ''}}" data-mode="full" bindtap="switchFftMode">全频带</view>
-          </view>
-          <view class="fft-meta">
-            采样 {{fftRecords[fftRecordIndex].fs_hz}}Hz · {{fftRecords[fftRecordIndex].points}}点 · {{fftRecords[fftRecordIndex].range_g}}g
-          </view>
-          <view class="chart-loading" wx:if="{{fftDataLoading}}">频谱加载中...</view>
-          <view wx:else class="chart-stage {{fullscreenChart === 'fft' ? 'chart-stage--fullscreen' : ''}}">
-            <view class="chart-fullscreen-header">
-              <text wx:if="{{fullscreenChart === 'fft'}}">FFT 频谱分析</text>
-              <view class="chart-fullscreen-button" data-chart="fft" bindtap="toggleChartFullscreen">
-                {{fullscreenChart === 'fft' ? '退出全屏' : '全屏'}}
-              </view>
-            </view>
-            <view id="fft-chart-box" class="chart-box">
-              <ec-canvas id="health-fft-chart" canvas-id="health-fft-canvas" force-use-old-canvas="false" ec="{{fftEc}}" style="width:100%;height:100%;display:block;" />
-            </view>
-          </view>
-        </block>
-      </block>
-    </view>
   </block>
 
   <view class="initial-loading" wx:if="{{loading && !archive}}">健康档案加载中...</view>
