@@ -186,16 +186,17 @@ function buildTrendOption(trend: DiagnosisTrend) {
 
   const series: any[] = validSeries.map((item, index) => {
     const pointMap = new Map(item.points.map((point) => [point.sampled_at, point]));
+    const isAmbient = item.key === 'ambient_temperature_72h' || item.label.includes('环境温度');
     const colorPalette = ['#1677ff', '#13c2c2', '#fa8c16', '#722ed1'];
-    const color = colorPalette[index % colorPalette.length];
+    const color = isAmbient ? '#8c8c8c' : colorPalette[index % colorPalette.length];
     return {
       name: item.label,
       type: 'line',
-      smooth: true,
+      smooth: !isAmbient,
       showSymbol: false,
-      connectNulls: false,
+      connectNulls: isAmbient,
       data: times.map((time) => pointMap.get(time)?.value ?? null),
-      lineStyle: { width: 2, color },
+      lineStyle: isAmbient ? { width: 1.5, type: 'dashed', color } : { width: 2, color },
       itemStyle: { color },
       areaStyle:
         index === 0

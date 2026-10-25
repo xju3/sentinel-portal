@@ -121,28 +121,43 @@ const HistoryPage = (props?: HistoryPageProps) => {
         const last = chartData.series?.temp_last?.[i] ?? max;
         return [first, last, min, max];
       });
+      const ambientData: Array<number | null> = chartData.series?.ambient_temperature || [];
+      const hasAmbient = ambientData.some((val) => val !== null && val !== undefined);
+      const tempSeries: any[] = [
+        {
+          name: '温度区间 (Candlestick)',
+          type: 'candlestick',
+          data: candlestickData,
+          barMaxWidth: 16,
+          itemStyle: { 
+            color: '#ff4d4f',       // 阳线: 红色代表升温
+            color0: '#52c41a',      // 阴线: 绿色代表降温
+            borderColor: '#ff4d4f',
+            borderColor0: '#52c41a',
+            borderWidth: 2,
+          },
+          markArea: gapMarkArea,
+        },
+      ];
+      if (hasAmbient) {
+        tempSeries.push({
+          name: '环境温度 (基准)',
+          type: 'line',
+          data: ambientData,
+          connectNulls: true,
+          showSymbol: false,
+          lineStyle: { width: 1.5, type: 'dashed', color: '#8c8c8c' },
+          itemStyle: { color: '#8c8c8c' },
+        });
+      }
 
       chart?.setOption({
         tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+        legend: hasAmbient ? { top: 8 } : undefined,
         grid: { top: 40, left: 40, right: 40, bottom: 40, containLabel: true },
         xAxis: { type: 'category', data: times, boundaryGap: true },
         yAxis: { type: 'value', name: '温度区间 (°C)', scale: true },
-        series: [
-          {
-            name: '温度区间 (Candlestick)',
-            type: 'candlestick',
-            data: candlestickData,
-            barMaxWidth: 16,
-            itemStyle: { 
-              color: '#ff4d4f',       // 阳线: 红色代表升温
-              color0: '#52c41a',      // 阴线: 绿色代表降温
-              borderColor: '#ff4d4f',
-              borderColor0: '#52c41a',
-              borderWidth: 2,
-            },
-            markArea: gapMarkArea,
-          },
-        ],
+        series: tempSeries,
       }, true); // true 参数代表“完全覆盖上一轮配置(notMerge)”，非常关键
     } else {
       // 动态构建用户勾选了的展示维度系列

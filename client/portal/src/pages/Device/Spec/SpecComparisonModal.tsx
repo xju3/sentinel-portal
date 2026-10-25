@@ -234,9 +234,26 @@ const SpecComparisonContent = ({
       });
     });
 
+    if (activeTab === 'temperature' && data.ambientTemperature?.length) {
+      chartSeries.push({
+        name: '环境温度 (基准)',
+        type: 'line',
+        data: data.ambientTemperature.map((pt) => [pt.timestamp, pt.value]),
+        smooth: false,
+        showSymbol: false,
+        connectNulls: true,
+        lineStyle: { width: 1.5, type: 'dashed', color: '#8c8c8c' },
+        itemStyle: { color: '#8c8c8c' },
+        emphasis: { focus: 'series' },
+      });
+    }
+
     return {
       animation: false,
-      color: data.series.map(item => item.device.color || SERIES_COLORS[0]),
+      color: [
+        ...data.series.map((item, idx) => item.device.color || SERIES_COLORS[idx % SERIES_COLORS.length]),
+        '#8c8c8c',
+      ],
       tooltip: {
         trigger: 'axis',
         valueFormatter: (value: number | null) => {

@@ -25,6 +25,7 @@ from pub.models.device import (
     ProcessDeviceItem,
 )
 from pub.models.sensor import SensorMonitoring
+from pub.services.common.weather_service import WeatherService
 from pub.utils.redis_keys import (
     REDIS_KEY_DEVICE_POINT_TREND,
     REDIS_KEY_DEVICE_SPEC_COMPARISON,
@@ -136,6 +137,18 @@ class DevicePointTrendService:
             end_at=end_at,
             window_minutes=effective_window,
         )
+        region_id = await WeatherService.get_region_id_by_tenant(session, tenant_id)
+        ambient_records = await WeatherService.load_ambient_records(
+            session,
+            region_id,
+            start_at,
+            end_at,
+        )
+        result["ambientTemperature"] = WeatherService.align_ambient_to_timestamps(
+            ambient_records,
+            result["timestamps"],
+            window_minutes=effective_window,
+        )
         result["meta"] = {
             "rangeDays": range_days,
             "windowMinutes": effective_window,
@@ -229,6 +242,7 @@ class DevicePointTrendService:
                 ),
                 "selectedLocation": selected_location,
                 "series": [],
+                "ambientTemperature": [],
             }
 
         patrol_minutes = await cls.get_patrol_minutes(session, device_ids[0])
@@ -275,6 +289,26 @@ class DevicePointTrendService:
                     **trend,
                 }
             )
+        all_timestamps = sorted(
+            {ts for item in series for ts in item.get("timestamps", [])}
+        )
+        region_id = await WeatherService.get_region_id_by_tenant(session, tenant_id)
+        ambient_records = await WeatherService.load_ambient_records(
+            session,
+            region_id,
+            start_at,
+            end_at,
+        )
+        ambient_values = WeatherService.align_ambient_to_timestamps(
+            ambient_records,
+            all_timestamps,
+            window_minutes=effective_window,
+        )
+        ambient_temperature = [
+            {"timestamp": ts, "value": val}
+            for ts, val in zip(all_timestamps, ambient_values)
+            if val is not None
+        ]
         result = {
             "meta": {
                 "rangeDays": range_days,
@@ -290,6 +324,7 @@ class DevicePointTrendService:
             "selectedLocationId": str(selected_location_id),
             "selectedLocation": selected_location,
             "series": series,
+            "ambientTemperature": ambient_temperature,
         }
         cls._write_cache(cache_key, result)
         return result

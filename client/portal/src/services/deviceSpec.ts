@@ -111,6 +111,10 @@ export type DeviceSpecComparison = {
     vibration: DeviceSpecComparisonPoint[];
     displacement: DeviceSpecComparisonPoint[];
   }>;
+  ambientTemperature?: Array<{
+    timestamp: string;
+    value: number | null;
+  }>;
 };
 
 export async function listAllDeviceSpecs(processDeviceId?: string) {

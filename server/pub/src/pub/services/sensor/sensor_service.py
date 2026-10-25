@@ -151,6 +151,23 @@ class SensorService:
                         elif f == "temperature": data_map[t]["temp_last"] = v
 
             sorted_times = sorted(data_map.keys())
+            from datetime import datetime, timedelta, timezone
+            from pub.services.common.weather_service import WeatherService
+
+            end_at = datetime.now(timezone.utc)
+            start_at = end_at - timedelta(days=days)
+            region_id = await WeatherService.get_region_id_by_sensor_sn(session, sn)
+            ambient_records = await WeatherService.load_ambient_records(
+                session,
+                region_id,
+                start_at,
+                end_at,
+            )
+            ambient_temperature = WeatherService.align_ambient_to_timestamps(
+                ambient_records,
+                sorted_times,
+                window_minutes=int(target_window_m),
+            )
             
             return {
                 "meta": {
@@ -165,6 +182,7 @@ class SensorService:
                     "temp_min": [data_map[t].get("temp_min") for t in sorted_times],
                     "temp_first": [data_map[t].get("temp_first") for t in sorted_times],
                     "temp_last": [data_map[t].get("temp_last") for t in sorted_times],
+                    "ambient_temperature": ambient_temperature,
                     "rms_x": [data_map[t]["rms_x"] for t in sorted_times],
                     "rms_y": [data_map[t]["rms_y"] for t in sorted_times],
                     "rms_z": [data_map[t]["rms_z"] for t in sorted_times],

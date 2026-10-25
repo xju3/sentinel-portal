@@ -257,6 +257,19 @@ Page({
       }
     })
 
+    if (!isVib && Array.isArray(data.ambientTemperature) && data.ambientTemperature.length > 0) {
+      series.push({
+        name: '环境温度 (基准)',
+        type: 'line',
+        smooth: false,
+        showSymbol: false,
+        connectNulls: true,
+        data: data.ambientTemperature.map((pt: any) => [pt.timestamp, pt.value]),
+        lineStyle: { color: '#8C8C8C', width: 1.5, type: 'dashed' },
+        itemStyle: { color: '#8C8C8C' },
+      })
+    }
+
     // Update the local data to include _displayColor so the wxml can read it
     this.setData({ data: this.data.data })
 

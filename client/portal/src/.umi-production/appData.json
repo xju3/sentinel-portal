@@ -44,7 +44,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 4
       },
       "enableBy": "register"
     },
@@ -74,7 +74,7 @@
             0
           ]
         },
-        "register": 1
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -91,7 +91,7 @@
             1
           ]
         },
-        "register": 4
+        "register": 3
       },
       "enableBy": "register"
     },
@@ -108,7 +108,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -135,10 +135,10 @@
       "time": {
         "hooks": {
           "modifyAppData": [
-            28
+            38
           ]
         },
-        "register": 11
+        "register": 14
       },
       "enableBy": "register"
     },
@@ -218,7 +218,7 @@
             0
           ]
         },
-        "register": 4
+        "register": 5
       },
       "enableBy": "register"
     },
@@ -1087,7 +1087,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1100,7 +1100,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1113,7 +1113,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 45
+        "register": 47
       },
       "enableBy": "register"
     },
@@ -1126,7 +1126,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 15
+        "register": 23
       },
       "enableBy": "config"
     },
@@ -1139,7 +1139,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 9
+        "register": 10
       },
       "enableBy": "config"
     },
@@ -1156,7 +1156,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1195,7 +1195,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 18
+        "register": 21
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/mpa/mpa": {
@@ -1245,7 +1245,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1287,7 +1287,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1300,7 +1300,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1313,7 +1313,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1339,7 +1339,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -1377,7 +1377,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "config"
     },
@@ -1390,7 +1390,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1416,7 +1416,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "config"
     },
@@ -1442,7 +1442,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 3
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/monorepo/redirect": {
@@ -1454,7 +1454,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 12
+        "register": 13
       },
       "enableBy": "config"
     },
@@ -1467,7 +1467,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/clickToComponent/clickToComponent": {
@@ -1479,7 +1479,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/legacy/legacy": {
@@ -1517,7 +1517,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/swc/swc": {
@@ -1558,7 +1558,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -1583,7 +1583,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       }
     },
     "./node_modules/@umijs/preset-umi/dist/features/routePreloadOnLoad/routePreloadOnLoad": {
@@ -1633,7 +1633,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 3
       },
       "enableBy": "register"
     },
@@ -1646,7 +1646,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 21
+        "register": 25
       },
       "enableBy": "register"
     },
@@ -1659,7 +1659,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 9
+        "register": 19
       }
     },
     "./node_modules/@umijs/preset-umi/dist/commands/help": {
@@ -1671,7 +1671,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1710,7 +1710,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1723,7 +1723,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -1736,7 +1736,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1801,7 +1801,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1892,7 +1892,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1905,7 +1905,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 13
+        "register": 12
       },
       "enableBy": "register"
     },
@@ -1918,7 +1918,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -1931,7 +1931,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "register"
     },
@@ -1944,7 +1944,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 2
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -1972,7 +1972,7 @@
       "time": {
         "hooks": {
           "modifyConfig": [
-            4
+            3
           ],
           "modifyAppData": [
             0
@@ -1981,7 +1981,7 @@
             0
           ]
         },
-        "register": 5
+        "register": 6
       }
     },
     "./node_modules/@umijs/plugins/dist/dva": {
@@ -1993,7 +1993,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 3
+        "register": 7
       },
       "enableBy": "config"
     },
@@ -2031,7 +2031,7 @@
             0
           ]
         },
-        "register": 1
+        "register": 2
       },
       "enableBy": "config"
     },
@@ -2057,7 +2057,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 2
       },
       "enableBy": "config"
     },
@@ -2070,7 +2070,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2083,7 +2083,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2096,7 +2096,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -2109,7 +2109,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       }
     },
     "./node_modules/@umijs/plugins/dist/qiankun/slave": {
@@ -2146,7 +2146,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2159,7 +2159,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 1
+        "register": 0
       },
       "enableBy": "config"
     },
@@ -2172,7 +2172,7 @@
       "config": {},
       "time": {
         "hooks": {},
-        "register": 0
+        "register": 1
       },
       "enableBy": "config"
     },
@@ -2219,7 +2219,7 @@
             0
           ]
         },
-        "register": 0
+        "register": 1
       },
       "enableBy": "register"
     },
@@ -2236,7 +2236,7 @@
             0
           ]
         },
-        "register": 1
+        "register": 0
       },
       "enableBy": "register"
     },
@@ -3743,7 +3743,7 @@
       "file": "@/pages/Wx/DiagnosisDetail/index.tsx",
       "id": "4",
       "absPath": "/wx/diagnosis/:reportId",
-      "__content": "import { useEffect, useRef, useState } from 'react';\nimport * as echarts from 'echarts';\nimport {\n  Alert,\n  Button,\n  Card,\n  Descriptions,\n  Empty,\n  Result,\n  Space,\n  Spin,\n  Tag,\n  Timeline,\n  Typography,\n  message,\n} from 'antd';\nimport { ReloadOutlined } from '@ant-design/icons';\nimport { useParams } from '@umijs/max';\n\nimport {\n  DiagnosisAttempt,\n  DiagnosisDetailStatus,\n  DiagnosisFault,\n  DiagnosisTrend,\n  getWxDiagnosisDetail,\n  type DiagnosisReportDetail,\n} from '@/services/diagnosisDetail';\n\nimport styles from './index.less';\n\nconst { Paragraph, Text, Title } = Typography;\n\nconst REPORT_ID_RE =\n  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;\n\nconst LEVEL_COLORS: Record<string, string> = {\n  正常: 'green',\n  关注: 'gold',\n  异常: 'orange',\n  告警: 'red',\n  危险: 'magenta',\n};\n\nconst STATUS_META: Record<\n  DiagnosisDetailStatus,\n  { label: string; color: string; note: string }\n> = {\n  pending: {\n    label: '处理中',\n    color: 'processing',\n    note: '分析流程还没有完成，页面会在数据就绪后显示完整依据。',\n  },\n  complete: {\n    label: '已完成',\n    color: 'success',\n    note: '当前区域已拿到完整可展示数据。',\n  },\n  unavailable: {\n    label: '暂不可用',\n    color: 'default',\n    note: '当前没有可展示的结构化数据，不能把它解释为正常。',\n  },\n  legacy_partial: {\n    label: '历史数据不完整',\n    color: 'warning',\n    note: '该报告来自旧链路，只能展示已留存的部分证据。',\n  },\n};\n\nfunction formatDateTime(value?: string | null) {\n  if (!value) {\n    return '-';\n  }\n  const date = new Date(value);\n  if (Number.isNaN(date.getTime())) {\n    return value;\n  }\n  return date.toLocaleString('zh-CN', {\n    year: 'numeric',\n    month: '2-digit',\n    day: '2-digit',\n    hour: '2-digit',\n    minute: '2-digit',\n  });\n}\n\nfunction formatNumber(value?: number | null, digits = 2) {\n  if (value === null || value === undefined || Number.isNaN(value)) {\n    return '-';\n  }\n  return value.toFixed(digits);\n}\n\nfunction formatMaybeNumber(value: string | number | null, unit?: string | null) {\n  if (value === null || value === undefined || value === '') {\n    return '-';\n  }\n  if (typeof value === 'number') {\n    return `${formatNumber(value)}${unit ? ` ${unit}` : ''}`;\n  }\n  return `${value}${unit ? ` ${unit}` : ''}`;\n}\n\nfunction truncateId(value?: string | null) {\n  if (!value) {\n    return '-';\n  }\n  if (value.length <= 16) {\n    return value;\n  }\n  return `${value.slice(0, 8)}...${value.slice(-6)}`;\n}\n\nfunction sortAttempts(attempts: DiagnosisAttempt[]) {\n  return [...attempts].sort((left, right) => {\n    const leftSequence = left.sequence ?? 0;\n    const rightSequence = right.sequence ?? 0;\n    if (leftSequence !== rightSequence) {\n      return leftSequence - rightSequence;\n    }\n    return (left.diagnosed_at || '').localeCompare(right.diagnosed_at || '');\n  });\n}\n\nfunction getStatusMeta(status: DiagnosisDetailStatus) {\n  return STATUS_META[status] || STATUS_META.unavailable;\n}\n\nfunction getGapMarkArea(points: Array<number | null>, times: string[]) {\n  const markAreas: Array<Array<{ xAxis: string }>> = [];\n  let gapStartIndex = -1;\n\n  for (let index = 0; index < points.length; index += 1) {\n    if (points[index] === null) {\n      if (gapStartIndex === -1) {\n        gapStartIndex = index;\n      }\n    } else if (gapStartIndex !== -1) {\n      const startIndex = Math.max(0, gapStartIndex - 1);\n      markAreas.push([{ xAxis: times[startIndex] }, { xAxis: times[index] }]);\n      gapStartIndex = -1;\n    }\n  }\n\n  if (gapStartIndex !== -1 && times.length) {\n    const startIndex = Math.max(0, gapStartIndex - 1);\n    markAreas.push([{ xAxis: times[startIndex] }, { xAxis: times[times.length - 1] }]);\n  }\n\n  if (!markAreas.length) {\n    return undefined;\n  }\n\n  return {\n    itemStyle: { color: 'rgba(148, 163, 184, 0.16)' },\n    label: {\n      show: true,\n      position: 'insideTop',\n      color: '#64748b',\n      formatter: '缺失/离线',\n      padding: [8, 0, 0, 0],\n    },\n    data: markAreas,\n  };\n}\n\nfunction buildTrendOption(trend: DiagnosisTrend) {\n  const validSeries = trend.series.filter((series) => series.points.length > 0);\n  if (!validSeries.length) {\n    return null;\n  }\n\n  const timeSet = new Set<string>();\n  validSeries.forEach((series) => {\n    series.points.forEach((point) => {\n      timeSet.add(point.sampled_at);\n    });\n  });\n\n  const times = Array.from(timeSet).sort((left, right) => left.localeCompare(right));\n  const primarySeries = validSeries[0];\n  const primaryValues = times.map((time) => {\n    const point = primarySeries.points.find((item) => item.sampled_at === time);\n    return point?.value ?? null;\n  });\n\n  const series: any[] = validSeries.map((item, index) => {\n    const pointMap = new Map(item.points.map((point) => [point.sampled_at, point]));\n    const colorPalette = ['#1677ff', '#13c2c2', '#fa8c16', '#722ed1'];\n    const color = colorPalette[index % colorPalette.length];\n    return {\n      name: item.label,\n      type: 'line',\n      smooth: true,\n      showSymbol: false,\n      connectNulls: false,\n      data: times.map((time) => pointMap.get(time)?.value ?? null),\n      lineStyle: { width: 2, color },\n      itemStyle: { color },\n      areaStyle:\n        index === 0\n          ? {\n              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [\n                { offset: 0, color: 'rgba(22, 119, 255, 0.20)' },\n                { offset: 1, color: 'rgba(22, 119, 255, 0.02)' },\n              ]),\n            }\n          : undefined,\n      markArea: index === 0 ? getGapMarkArea(primaryValues, times) : undefined,\n    };\n  });\n\n  const thresholdConfigs = [\n    { field: 'threshold', name: '阈值', color: '#cf1322' },\n    { field: 'upper_threshold', name: '上阈值', color: '#d4380d' },\n    { field: 'lower_threshold', name: '下阈值', color: '#389e0d' },\n  ] as const;\n\n  thresholdConfigs.forEach((config) => {\n    const values = times.map((time) => {\n      const point = primarySeries.points.find((item) => item.sampled_at === time);\n      return point?.[config.field] ?? null;\n    });\n    if (values.some((value) => value !== null)) {\n      series.push({\n        name: config.name,\n        type: 'line',\n        showSymbol: false,\n        connectNulls: false,\n        data: values,\n        lineStyle: { width: 1.5, type: 'dashed', color: config.color },\n        itemStyle: { color: config.color },\n      });\n    }\n  });\n\n  return {\n    animation: false,\n    tooltip: { trigger: 'axis' },\n    legend: { top: 8, type: 'scroll' },\n    grid: { left: 52, right: 18, top: 48, bottom: 52, containLabel: true },\n    xAxis: {\n      type: 'category',\n      boundaryGap: false,\n      data: times.map((time) => formatDateTime(time)),\n      axisLabel: { color: '#64748b', hideOverlap: true },\n    },\n    yAxis: {\n      type: 'value',\n      name: primarySeries.unit || '',\n      axisLabel: { color: '#64748b' },\n      splitLine: { lineStyle: { color: '#e5e7eb' } },\n    },\n    dataZoom: [\n      { type: 'inside' },\n      { type: 'slider', height: 16, bottom: 16 },\n    ],\n    series,\n  };\n}\n\nconst EChartPanel = ({\n  option,\n  height = 280,\n}: {\n  option: any;\n  height?: number;\n}) => {\n  const chartRef = useRef<HTMLDivElement>(null);\n\n  useEffect(() => {\n    if (!chartRef.current || !option) {\n      return undefined;\n    }\n    const chart = echarts.getInstanceByDom(chartRef.current) || echarts.init(chartRef.current);\n    chart.setOption(option, true);\n    const handleResize = () => chart.resize();\n    window.addEventListener('resize', handleResize);\n    return () => {\n      window.removeEventListener('resize', handleResize);\n      chart.dispose();\n    };\n  }, [option]);\n\n  return <div ref={chartRef} style={{ width: '100%', height }} />;\n};\n\nconst StateHint = ({\n  status,\n  title,\n}: {\n  status: DiagnosisDetailStatus;\n  title: string;\n}) => {\n  const meta = getStatusMeta(status);\n  const type =\n    status === 'complete'\n      ? 'success'\n      : status === 'pending'\n        ? 'info'\n        : status === 'legacy_partial'\n          ? 'warning'\n          : 'info';\n  return (\n    <Alert\n      showIcon\n      type={type}\n      message={`${title}：${meta.label}`}\n      description={meta.note}\n    />\n  );\n};\n\nconst FaultHeader = ({ fault }: { fault: DiagnosisFault }) => (\n  <div className={styles.faultHeader}>\n    <div>\n      <Space wrap size={[8, 8]}>\n        <Tag color=\"blue\">{fault.fault_label}</Tag>\n        {fault.level_label ? (\n          <Tag color={LEVEL_COLORS[fault.level_label] || 'default'}>{fault.level_label}</Tag>\n        ) : null}\n        <Tag color={getStatusMeta(fault.status).color}>{getStatusMeta(fault.status).label}</Tag>\n        {fault.evidence_schema_version ? (\n          <Tag bordered={false}>evidence v{fault.evidence_schema_version}</Tag>\n        ) : null}\n      </Space>\n      <Title level={4} className={styles.faultTitle}>\n        {fault.summary || `${fault.fault_label}诊断详情`}\n      </Title>\n    </div>\n  </div>\n);\n\nfunction renderChecks(fault: DiagnosisFault) {\n  if (!fault.checks.length) {\n    return <StateHint status={fault.status} title=\"规则判定\" />;\n  }\n\n  return (\n    <div className={styles.checkList}>\n      {fault.checks.map((check) => (\n        <div key={check.key} className={styles.checkRow}>\n          <div className={styles.checkTitleRow}>\n            <Text strong>{check.label}</Text>\n            <Tag color={check.triggered ? 'red' : 'default'}>\n              {check.triggered ? '触发' : '未触发'}\n            </Tag>\n          </div>\n          <div className={styles.checkMetaGrid}>\n            <div>\n              <Text type=\"secondary\">实际值</Text>\n              <div>{formatMaybeNumber(check.actual, check.unit)}</div>\n            </div>\n            <div>\n              <Text type=\"secondary\">比较符</Text>\n              <div>{check.comparator || '-'}</div>\n            </div>\n            <div>\n              <Text type=\"secondary\">阈值</Text>\n              <div>{formatMaybeNumber(check.threshold, check.unit)}</div>\n            </div>\n          </div>\n          {check.summary ? <Text type=\"secondary\">{check.summary}</Text> : null}\n        </div>\n      ))}\n    </div>\n  );\n}\n\nfunction renderTrend(fault: DiagnosisFault) {\n  const trend = fault.trend;\n  if (!trend) {\n    return <StateHint status=\"unavailable\" title=\"温度趋势\" />;\n  }\n\n  const option = buildTrendOption(trend);\n  return (\n    <div className={styles.sectionBlock}>\n      <div className={styles.sectionTitleRow}>\n        <Title level={5}>24 / 72 小时趋势</Title>\n        <Tag color={getStatusMeta(trend.status).color}>{getStatusMeta(trend.status).label}</Tag>\n      </div>\n      {trend.note ? <Paragraph type=\"secondary\">{trend.note}</Paragraph> : null}\n      {option ? (\n        <div className={styles.chartScroller}>\n          <div className={styles.chartCanvas}>\n            <EChartPanel option={option} height={300} />\n          </div>\n        </div>\n      ) : (\n        <StateHint status={trend.status} title=\"温度趋势\" />\n      )}\n    </div>\n  );\n}\n\nfunction renderAttempts(fault: DiagnosisFault) {\n  if (!fault.attempts.length) {\n    return <StateHint status={fault.status} title=\"复采时间线\" />;\n  }\n\n  return (\n    <Timeline\n      items={sortAttempts(fault.attempts).map((attempt) => ({\n        color:\n          attempt.level_label && LEVEL_COLORS[attempt.level_label]\n            ? LEVEL_COLORS[attempt.level_label]\n            : '#1677ff',\n        children: (\n          <div className={styles.attemptCard}>\n            <Space wrap size={[8, 8]}>\n              <Tag>{attempt.phase || '未知阶段'}</Tag>\n              {attempt.sequence !== null ? <Tag>序号 {attempt.sequence}</Tag> : null}\n              {attempt.result_status ? <Tag>{attempt.result_status}</Tag> : null}\n              {attempt.level_label ? (\n                <Tag color={LEVEL_COLORS[attempt.level_label] || 'default'}>\n                  {attempt.level_label}\n                </Tag>\n              ) : null}\n            </Space>\n            <div className={styles.attemptMetaGrid}>\n              <div>\n                <Text type=\"secondary\">时间</Text>\n                <div>{formatDateTime(attempt.diagnosed_at)}</div>\n              </div>\n              <div>\n                <Text type=\"secondary\">RMS</Text>\n                <div>{formatMaybeNumber(attempt.rms, 'mm/s')}</div>\n              </div>\n              <div>\n                <Text type=\"secondary\">报告</Text>\n                <div className={styles.breakAll}>{truncateId(attempt.report_id)}</div>\n              </div>\n            </div>\n            {attempt.confirmation_status ? (\n              <Text type=\"secondary\">{`确认状态：${attempt.confirmation_status}`}</Text>\n            ) : null}\n            {attempt.description ? <Paragraph>{attempt.description}</Paragraph> : null}\n          </div>\n        ),\n      }))}\n    />\n  );\n}\n\nconst WxDiagnosisDetailPage = () => {\n  const { reportId = '' } = useParams<{ reportId: string }>();\n  const [loading, setLoading] = useState(true);\n  const [detail, setDetail] = useState<DiagnosisReportDetail | null>(null);\n  const [pageError, setPageError] = useState<\n    'invalid' | 'forbidden' | 'not_found' | 'load_failed' | null\n  >(null);\n  const [reloadTick, setReloadTick] = useState(0);\n\n  useEffect(() => {\n    const run = async () => {\n      if (!REPORT_ID_RE.test(reportId)) {\n        setDetail(null);\n        setPageError('invalid');\n        setLoading(false);\n        return;\n      }\n\n      setLoading(true);\n      setPageError(null);\n      try {\n        const data = await getWxDiagnosisDetail(reportId);\n        setDetail(data);\n      } catch (error: any) {\n        const code = Number(error?.code || error?.response?.status || 0);\n        setDetail(null);\n        if (code === 401 || code === 403) {\n          setPageError('forbidden');\n        } else if (code === 404) {\n          setPageError('not_found');\n        } else {\n          setPageError('load_failed');\n          if (!error?.businessErrorShown) {\n            message.error(error?.data?.detail || error?.message || '诊断详情加载失败');\n          }\n        }\n      } finally {\n        setLoading(false);\n      }\n    };\n\n    void run();\n  }, [reportId, reloadTick]);\n\n  let content = null;\n\n  if (loading) {\n    content = (\n      <Card className={styles.contentCard}>\n        <div className={styles.loadingWrap}>\n          <Spin size=\"large\" />\n          <Text type=\"secondary\">正在加载诊断详情…</Text>\n        </div>\n      </Card>\n    );\n  } else if (pageError === 'invalid') {\n    content = (\n      <Result\n        status=\"warning\"\n        title=\"报告编号格式不正确\"\n        subTitle=\"该页面只能通过合法的诊断详情链接访问。\"\n      />\n    );\n  } else if (pageError === 'forbidden') {\n    content = (\n      <Result\n        status=\"403\"\n        title=\"授权已失效或无权查看\"\n        subTitle=\"请从微信通知消息重新进入该页面，或联系管理员确认接收权限。\"\n      />\n    );\n  } else if (pageError === 'not_found') {\n    content = (\n      <Result\n        status=\"404\"\n        title=\"没有找到这次诊断记录\"\n        subTitle=\"该 report_id 可能已失效，或当前账号不在可查看范围内。\"\n      />\n    );\n  } else if (!detail || pageError === 'load_failed') {\n    content = (\n      <Result\n        status=\"error\"\n        title=\"诊断详情暂时无法打开\"\n        subTitle=\"请稍后刷新重试；如果持续失败，请联系系统管理员检查服务状态。\"\n        extra={\n          <Button icon={<ReloadOutlined />} onClick={() => setReloadTick((value) => value + 1)}>\n            重新加载\n          </Button>\n        }\n      />\n    );\n  } else {\n    const orderedFaults = [...detail.faults].sort((left, right) => {\n      const order = { temperature: 0, vibration: 1 } as Record<string, number>;\n      return (order[left.fault_type] ?? 99) - (order[right.fault_type] ?? 99);\n    });\n\n    content = (\n      <>\n        <Card className={styles.heroCard}>\n          <div className={styles.heroHead}>\n            <div>\n              <Space wrap size={[8, 8]}>\n                {detail.report.overall_label ? (\n                  <Tag color={LEVEL_COLORS[detail.report.overall_label] || 'default'}>\n                    {detail.report.overall_label}\n                  </Tag>\n                ) : null}\n                {orderedFaults.map((fault) => (\n                  <Tag key={fault.case_id} color=\"blue\">\n                    {fault.fault_label}\n                  </Tag>\n                ))}\n              </Space>\n              <Title level={3} className={styles.heroTitle}>\n                {detail.device.name || '诊断详情'}\n              </Title>\n              <Paragraph type=\"secondary\" className={styles.heroSubtitle}>\n                以本次报告为主线展示当时的判定依据、复采过程和频谱分析结果。\n              </Paragraph>\n            </div>\n            <Button icon={<ReloadOutlined />} onClick={() => setReloadTick((value) => value + 1)}>\n              刷新\n            </Button>\n          </div>\n          <Descriptions column={1} size=\"small\" className={styles.summaryDescriptions}>\n            <Descriptions.Item label=\"设备编码\">{detail.device.code || '-'}</Descriptions.Item>\n            <Descriptions.Item label=\"设备分类\">{detail.device.category || '-'}</Descriptions.Item>\n            <Descriptions.Item label=\"设备分组\">{detail.device.process || '-'}</Descriptions.Item>\n            <Descriptions.Item label=\"安装位置\">{detail.device.location || '-'}</Descriptions.Item>\n            <Descriptions.Item label=\"采样时间\">{formatDateTime(detail.report.sampled_at)}</Descriptions.Item>\n            <Descriptions.Item label=\"诊断时间\">{formatDateTime(detail.report.diagnosed_at)}</Descriptions.Item>\n            <Descriptions.Item label=\"报告编号\">\n              <span className={styles.breakAll}>{detail.report.report_id || reportId}</span>\n            </Descriptions.Item>\n          </Descriptions>\n        </Card>\n\n        {!orderedFaults.length ? (\n          <Card className={styles.contentCard}>\n            <Empty description=\"该诊断记录没有可展示的故障项。\" />\n          </Card>\n        ) : null}\n\n        {orderedFaults.map((fault) => (\n          <Card key={fault.case_id} className={styles.contentCard}>\n            <FaultHeader fault={fault} />\n            {fault.status === 'legacy_partial' ? (\n              <Alert\n                showIcon\n                type=\"warning\"\n                message=\"该故障项来自旧链路\"\n                description=\"页面只展示已留存字段；缺失数据不会被伪造成正常或已完成。\"\n                style={{ marginBottom: 16 }}\n              />\n            ) : null}\n\n            {fault.fault_type === 'temperature' ? (\n              <div className={styles.sectionStack}>\n                <div className={styles.sectionBlock}>\n                  <Title level={5}>规则判定</Title>\n                  {renderChecks(fault)}\n                </div>\n                {renderTrend(fault)}\n              </div>\n            ) : (\n              <div className={styles.sectionStack}>\n                <div className={styles.sectionBlock}>\n                  <Title level={5}>复采时间线</Title>\n                  {renderAttempts(fault)}\n                </div>\n              </div>\n            )}\n          </Card>\n        ))}\n\n        <Card className={styles.contentCard}>\n          <Title level={5}>数据来源与说明</Title>\n          <Descriptions column={1} size=\"small\">\n            <Descriptions.Item label=\"阈值快照\">\n              {detail.provenance.thresholds || '-'}\n            </Descriptions.Item>\n            <Descriptions.Item label=\"趋势数据\">\n              {detail.provenance.trend_series || '-'}\n            </Descriptions.Item>\n          </Descriptions>\n        </Card>\n      </>\n    );\n  }\n\n  return <div className={styles.page}>{content}</div>;\n};\n\nexport default WxDiagnosisDetailPage;\n",
+      "__content": "import { useEffect, useRef, useState } from 'react';\nimport * as echarts from 'echarts';\nimport {\n  Alert,\n  Button,\n  Card,\n  Descriptions,\n  Empty,\n  Result,\n  Space,\n  Spin,\n  Tag,\n  Timeline,\n  Typography,\n  message,\n} from 'antd';\nimport { ReloadOutlined } from '@ant-design/icons';\nimport { useParams } from '@umijs/max';\n\nimport {\n  DiagnosisAttempt,\n  DiagnosisDetailStatus,\n  DiagnosisFault,\n  DiagnosisTrend,\n  getWxDiagnosisDetail,\n  type DiagnosisReportDetail,\n} from '@/services/diagnosisDetail';\n\nimport styles from './index.less';\n\nconst { Paragraph, Text, Title } = Typography;\n\nconst REPORT_ID_RE =\n  /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;\n\nconst LEVEL_COLORS: Record<string, string> = {\n  正常: 'green',\n  关注: 'gold',\n  异常: 'orange',\n  告警: 'red',\n  危险: 'magenta',\n};\n\nconst STATUS_META: Record<\n  DiagnosisDetailStatus,\n  { label: string; color: string; note: string }\n> = {\n  pending: {\n    label: '处理中',\n    color: 'processing',\n    note: '分析流程还没有完成，页面会在数据就绪后显示完整依据。',\n  },\n  complete: {\n    label: '已完成',\n    color: 'success',\n    note: '当前区域已拿到完整可展示数据。',\n  },\n  unavailable: {\n    label: '暂不可用',\n    color: 'default',\n    note: '当前没有可展示的结构化数据，不能把它解释为正常。',\n  },\n  legacy_partial: {\n    label: '历史数据不完整',\n    color: 'warning',\n    note: '该报告来自旧链路，只能展示已留存的部分证据。',\n  },\n};\n\nfunction formatDateTime(value?: string | null) {\n  if (!value) {\n    return '-';\n  }\n  const date = new Date(value);\n  if (Number.isNaN(date.getTime())) {\n    return value;\n  }\n  return date.toLocaleString('zh-CN', {\n    year: 'numeric',\n    month: '2-digit',\n    day: '2-digit',\n    hour: '2-digit',\n    minute: '2-digit',\n  });\n}\n\nfunction formatNumber(value?: number | null, digits = 2) {\n  if (value === null || value === undefined || Number.isNaN(value)) {\n    return '-';\n  }\n  return value.toFixed(digits);\n}\n\nfunction formatMaybeNumber(value: string | number | null, unit?: string | null) {\n  if (value === null || value === undefined || value === '') {\n    return '-';\n  }\n  if (typeof value === 'number') {\n    return `${formatNumber(value)}${unit ? ` ${unit}` : ''}`;\n  }\n  return `${value}${unit ? ` ${unit}` : ''}`;\n}\n\nfunction truncateId(value?: string | null) {\n  if (!value) {\n    return '-';\n  }\n  if (value.length <= 16) {\n    return value;\n  }\n  return `${value.slice(0, 8)}...${value.slice(-6)}`;\n}\n\nfunction sortAttempts(attempts: DiagnosisAttempt[]) {\n  return [...attempts].sort((left, right) => {\n    const leftSequence = left.sequence ?? 0;\n    const rightSequence = right.sequence ?? 0;\n    if (leftSequence !== rightSequence) {\n      return leftSequence - rightSequence;\n    }\n    return (left.diagnosed_at || '').localeCompare(right.diagnosed_at || '');\n  });\n}\n\nfunction getStatusMeta(status: DiagnosisDetailStatus) {\n  return STATUS_META[status] || STATUS_META.unavailable;\n}\n\nfunction getGapMarkArea(points: Array<number | null>, times: string[]) {\n  const markAreas: Array<Array<{ xAxis: string }>> = [];\n  let gapStartIndex = -1;\n\n  for (let index = 0; index < points.length; index += 1) {\n    if (points[index] === null) {\n      if (gapStartIndex === -1) {\n        gapStartIndex = index;\n      }\n    } else if (gapStartIndex !== -1) {\n      const startIndex = Math.max(0, gapStartIndex - 1);\n      markAreas.push([{ xAxis: times[startIndex] }, { xAxis: times[index] }]);\n      gapStartIndex = -1;\n    }\n  }\n\n  if (gapStartIndex !== -1 && times.length) {\n    const startIndex = Math.max(0, gapStartIndex - 1);\n    markAreas.push([{ xAxis: times[startIndex] }, { xAxis: times[times.length - 1] }]);\n  }\n\n  if (!markAreas.length) {\n    return undefined;\n  }\n\n  return {\n    itemStyle: { color: 'rgba(148, 163, 184, 0.16)' },\n    label: {\n      show: true,\n      position: 'insideTop',\n      color: '#64748b',\n      formatter: '缺失/离线',\n      padding: [8, 0, 0, 0],\n    },\n    data: markAreas,\n  };\n}\n\nfunction buildTrendOption(trend: DiagnosisTrend) {\n  const validSeries = trend.series.filter((series) => series.points.length > 0);\n  if (!validSeries.length) {\n    return null;\n  }\n\n  const timeSet = new Set<string>();\n  validSeries.forEach((series) => {\n    series.points.forEach((point) => {\n      timeSet.add(point.sampled_at);\n    });\n  });\n\n  const times = Array.from(timeSet).sort((left, right) => left.localeCompare(right));\n  const primarySeries = validSeries[0];\n  const primaryValues = times.map((time) => {\n    const point = primarySeries.points.find((item) => item.sampled_at === time);\n    return point?.value ?? null;\n  });\n\n  const series: any[] = validSeries.map((item, index) => {\n    const pointMap = new Map(item.points.map((point) => [point.sampled_at, point]));\n    const isAmbient = item.key === 'ambient_temperature_72h' || item.label.includes('环境温度');\n    const colorPalette = ['#1677ff', '#13c2c2', '#fa8c16', '#722ed1'];\n    const color = isAmbient ? '#8c8c8c' : colorPalette[index % colorPalette.length];\n    return {\n      name: item.label,\n      type: 'line',\n      smooth: !isAmbient,\n      showSymbol: false,\n      connectNulls: isAmbient,\n      data: times.map((time) => pointMap.get(time)?.value ?? null),\n      lineStyle: isAmbient ? { width: 1.5, type: 'dashed', color } : { width: 2, color },\n      itemStyle: { color },\n      areaStyle:\n        index === 0\n          ? {\n              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [\n                { offset: 0, color: 'rgba(22, 119, 255, 0.20)' },\n                { offset: 1, color: 'rgba(22, 119, 255, 0.02)' },\n              ]),\n            }\n          : undefined,\n      markArea: index === 0 ? getGapMarkArea(primaryValues, times) : undefined,\n    };\n  });\n\n  const thresholdConfigs = [\n    { field: 'threshold', name: '阈值', color: '#cf1322' },\n    { field: 'upper_threshold', name: '上阈值', color: '#d4380d' },\n    { field: 'lower_threshold', name: '下阈值', color: '#389e0d' },\n  ] as const;\n\n  thresholdConfigs.forEach((config) => {\n    const values = times.map((time) => {\n      const point = primarySeries.points.find((item) => item.sampled_at === time);\n      return point?.[config.field] ?? null;\n    });\n    if (values.some((value) => value !== null)) {\n      series.push({\n        name: config.name,\n        type: 'line',\n        showSymbol: false,\n        connectNulls: false,\n        data: values,\n        lineStyle: { width: 1.5, type: 'dashed', color: config.color },\n        itemStyle: { color: config.color },\n      });\n    }\n  });\n\n  return {\n    animation: false,\n    tooltip: { trigger: 'axis' },\n    legend: { top: 8, type: 'scroll' },\n    grid: { left: 52, right: 18, top: 48, bottom: 52, containLabel: true },\n    xAxis: {\n      type: 'category',\n      boundaryGap: false,\n      data: times.map((time) => formatDateTime(time)),\n      axisLabel: { color: '#64748b', hideOverlap: true },\n    },\n    yAxis: {\n      type: 'value',\n      name: primarySeries.unit || '',\n      axisLabel: { color: '#64748b' },\n      splitLine: { lineStyle: { color: '#e5e7eb' } },\n    },\n    dataZoom: [\n      { type: 'inside' },\n      { type: 'slider', height: 16, bottom: 16 },\n    ],\n    series,\n  };\n}\n\nconst EChartPanel = ({\n  option,\n  height = 280,\n}: {\n  option: any;\n  height?: number;\n}) => {\n  const chartRef = useRef<HTMLDivElement>(null);\n\n  useEffect(() => {\n    if (!chartRef.current || !option) {\n      return undefined;\n    }\n    const chart = echarts.getInstanceByDom(chartRef.current) || echarts.init(chartRef.current);\n    chart.setOption(option, true);\n    const handleResize = () => chart.resize();\n    window.addEventListener('resize', handleResize);\n    return () => {\n      window.removeEventListener('resize', handleResize);\n      chart.dispose();\n    };\n  }, [option]);\n\n  return <div ref={chartRef} style={{ width: '100%', height }} />;\n};\n\nconst StateHint = ({\n  status,\n  title,\n}: {\n  status: DiagnosisDetailStatus;\n  title: string;\n}) => {\n  const meta = getStatusMeta(status);\n  const type =\n    status === 'complete'\n      ? 'success'\n      : status === 'pending'\n        ? 'info'\n        : status === 'legacy_partial'\n          ? 'warning'\n          : 'info';\n  return (\n    <Alert\n      showIcon\n      type={type}\n      message={`${title}：${meta.label}`}\n      description={meta.note}\n    />\n  );\n};\n\nconst FaultHeader = ({ fault }: { fault: DiagnosisFault }) => (\n  <div className={styles.faultHeader}>\n    <div>\n      <Space wrap size={[8, 8]}>\n        <Tag color=\"blue\">{fault.fault_label}</Tag>\n        {fault.level_label ? (\n          <Tag color={LEVEL_COLORS[fault.level_label] || 'default'}>{fault.level_label}</Tag>\n        ) : null}\n        <Tag color={getStatusMeta(fault.status).color}>{getStatusMeta(fault.status).label}</Tag>\n        {fault.evidence_schema_version ? (\n          <Tag bordered={false}>evidence v{fault.evidence_schema_version}</Tag>\n        ) : null}\n      </Space>\n      <Title level={4} className={styles.faultTitle}>\n        {fault.summary || `${fault.fault_label}诊断详情`}\n      </Title>\n    </div>\n  </div>\n);\n\nfunction renderChecks(fault: DiagnosisFault) {\n  if (!fault.checks.length) {\n    return <StateHint status={fault.status} title=\"规则判定\" />;\n  }\n\n  return (\n    <div className={styles.checkList}>\n      {fault.checks.map((check) => (\n        <div key={check.key} className={styles.checkRow}>\n          <div className={styles.checkTitleRow}>\n            <Text strong>{check.label}</Text>\n            <Tag color={check.triggered ? 'red' : 'default'}>\n              {check.triggered ? '触发' : '未触发'}\n            </Tag>\n          </div>\n          <div className={styles.checkMetaGrid}>\n            <div>\n              <Text type=\"secondary\">实际值</Text>\n              <div>{formatMaybeNumber(check.actual, check.unit)}</div>\n            </div>\n            <div>\n              <Text type=\"secondary\">比较符</Text>\n              <div>{check.comparator || '-'}</div>\n            </div>\n            <div>\n              <Text type=\"secondary\">阈值</Text>\n              <div>{formatMaybeNumber(check.threshold, check.unit)}</div>\n            </div>\n          </div>\n          {check.summary ? <Text type=\"secondary\">{check.summary}</Text> : null}\n        </div>\n      ))}\n    </div>\n  );\n}\n\nfunction renderTrend(fault: DiagnosisFault) {\n  const trend = fault.trend;\n  if (!trend) {\n    return <StateHint status=\"unavailable\" title=\"温度趋势\" />;\n  }\n\n  const option = buildTrendOption(trend);\n  return (\n    <div className={styles.sectionBlock}>\n      <div className={styles.sectionTitleRow}>\n        <Title level={5}>24 / 72 小时趋势</Title>\n        <Tag color={getStatusMeta(trend.status).color}>{getStatusMeta(trend.status).label}</Tag>\n      </div>\n      {trend.note ? <Paragraph type=\"secondary\">{trend.note}</Paragraph> : null}\n      {option ? (\n        <div className={styles.chartScroller}>\n          <div className={styles.chartCanvas}>\n            <EChartPanel option={option} height={300} />\n          </div>\n        </div>\n      ) : (\n        <StateHint status={trend.status} title=\"温度趋势\" />\n      )}\n    </div>\n  );\n}\n\nfunction renderAttempts(fault: DiagnosisFault) {\n  if (!fault.attempts.length) {\n    return <StateHint status={fault.status} title=\"复采时间线\" />;\n  }\n\n  return (\n    <Timeline\n      items={sortAttempts(fault.attempts).map((attempt) => ({\n        color:\n          attempt.level_label && LEVEL_COLORS[attempt.level_label]\n            ? LEVEL_COLORS[attempt.level_label]\n            : '#1677ff',\n        children: (\n          <div className={styles.attemptCard}>\n            <Space wrap size={[8, 8]}>\n              <Tag>{attempt.phase || '未知阶段'}</Tag>\n              {attempt.sequence !== null ? <Tag>序号 {attempt.sequence}</Tag> : null}\n              {attempt.result_status ? <Tag>{attempt.result_status}</Tag> : null}\n              {attempt.level_label ? (\n                <Tag color={LEVEL_COLORS[attempt.level_label] || 'default'}>\n                  {attempt.level_label}\n                </Tag>\n              ) : null}\n            </Space>\n            <div className={styles.attemptMetaGrid}>\n              <div>\n                <Text type=\"secondary\">时间</Text>\n                <div>{formatDateTime(attempt.diagnosed_at)}</div>\n              </div>\n              <div>\n                <Text type=\"secondary\">RMS</Text>\n                <div>{formatMaybeNumber(attempt.rms, 'mm/s')}</div>\n              </div>\n              <div>\n                <Text type=\"secondary\">报告</Text>\n                <div className={styles.breakAll}>{truncateId(attempt.report_id)}</div>\n              </div>\n            </div>\n            {attempt.confirmation_status ? (\n              <Text type=\"secondary\">{`确认状态：${attempt.confirmation_status}`}</Text>\n            ) : null}\n            {attempt.description ? <Paragraph>{attempt.description}</Paragraph> : null}\n          </div>\n        ),\n      }))}\n    />\n  );\n}\n\nconst WxDiagnosisDetailPage = () => {\n  const { reportId = '' } = useParams<{ reportId: string }>();\n  const [loading, setLoading] = useState(true);\n  const [detail, setDetail] = useState<DiagnosisReportDetail | null>(null);\n  const [pageError, setPageError] = useState<\n    'invalid' | 'forbidden' | 'not_found' | 'load_failed' | null\n  >(null);\n  const [reloadTick, setReloadTick] = useState(0);\n\n  useEffect(() => {\n    const run = async () => {\n      if (!REPORT_ID_RE.test(reportId)) {\n        setDetail(null);\n        setPageError('invalid');\n        setLoading(false);\n        return;\n      }\n\n      setLoading(true);\n      setPageError(null);\n      try {\n        const data = await getWxDiagnosisDetail(reportId);\n        setDetail(data);\n      } catch (error: any) {\n        const code = Number(error?.code || error?.response?.status || 0);\n        setDetail(null);\n        if (code === 401 || code === 403) {\n          setPageError('forbidden');\n        } else if (code === 404) {\n          setPageError('not_found');\n        } else {\n          setPageError('load_failed');\n          if (!error?.businessErrorShown) {\n            message.error(error?.data?.detail || error?.message || '诊断详情加载失败');\n          }\n        }\n      } finally {\n        setLoading(false);\n      }\n    };\n\n    void run();\n  }, [reportId, reloadTick]);\n\n  let content = null;\n\n  if (loading) {\n    content = (\n      <Card className={styles.contentCard}>\n        <div className={styles.loadingWrap}>\n          <Spin size=\"large\" />\n          <Text type=\"secondary\">正在加载诊断详情…</Text>\n        </div>\n      </Card>\n    );\n  } else if (pageError === 'invalid') {\n    content = (\n      <Result\n        status=\"warning\"\n        title=\"报告编号格式不正确\"\n        subTitle=\"该页面只能通过合法的诊断详情链接访问。\"\n      />\n    );\n  } else if (pageError === 'forbidden') {\n    content = (\n      <Result\n        status=\"403\"\n        title=\"授权已失效或无权查看\"\n        subTitle=\"请从微信通知消息重新进入该页面，或联系管理员确认接收权限。\"\n      />\n    );\n  } else if (pageError === 'not_found') {\n    content = (\n      <Result\n        status=\"404\"\n        title=\"没有找到这次诊断记录\"\n        subTitle=\"该 report_id 可能已失效，或当前账号不在可查看范围内。\"\n      />\n    );\n  } else if (!detail || pageError === 'load_failed') {\n    content = (\n      <Result\n        status=\"error\"\n        title=\"诊断详情暂时无法打开\"\n        subTitle=\"请稍后刷新重试；如果持续失败，请联系系统管理员检查服务状态。\"\n        extra={\n          <Button icon={<ReloadOutlined />} onClick={() => setReloadTick((value) => value + 1)}>\n            重新加载\n          </Button>\n        }\n      />\n    );\n  } else {\n    const orderedFaults = [...detail.faults].sort((left, right) => {\n      const order = { temperature: 0, vibration: 1 } as Record<string, number>;\n      return (order[left.fault_type] ?? 99) - (order[right.fault_type] ?? 99);\n    });\n\n    content = (\n      <>\n        <Card className={styles.heroCard}>\n          <div className={styles.heroHead}>\n            <div>\n              <Space wrap size={[8, 8]}>\n                {detail.report.overall_label ? (\n                  <Tag color={LEVEL_COLORS[detail.report.overall_label] || 'default'}>\n                    {detail.report.overall_label}\n                  </Tag>\n                ) : null}\n                {orderedFaults.map((fault) => (\n                  <Tag key={fault.case_id} color=\"blue\">\n                    {fault.fault_label}\n                  </Tag>\n                ))}\n              </Space>\n              <Title level={3} className={styles.heroTitle}>\n                {detail.device.name || '诊断详情'}\n              </Title>\n              <Paragraph type=\"secondary\" className={styles.heroSubtitle}>\n                以本次报告为主线展示当时的判定依据、复采过程和频谱分析结果。\n              </Paragraph>\n            </div>\n            <Button icon={<ReloadOutlined />} onClick={() => setReloadTick((value) => value + 1)}>\n              刷新\n            </Button>\n          </div>\n          <Descriptions column={1} size=\"small\" className={styles.summaryDescriptions}>\n            <Descriptions.Item label=\"设备编码\">{detail.device.code || '-'}</Descriptions.Item>\n            <Descriptions.Item label=\"设备分类\">{detail.device.category || '-'}</Descriptions.Item>\n            <Descriptions.Item label=\"设备分组\">{detail.device.process || '-'}</Descriptions.Item>\n            <Descriptions.Item label=\"安装位置\">{detail.device.location || '-'}</Descriptions.Item>\n            <Descriptions.Item label=\"采样时间\">{formatDateTime(detail.report.sampled_at)}</Descriptions.Item>\n            <Descriptions.Item label=\"诊断时间\">{formatDateTime(detail.report.diagnosed_at)}</Descriptions.Item>\n            <Descriptions.Item label=\"报告编号\">\n              <span className={styles.breakAll}>{detail.report.report_id || reportId}</span>\n            </Descriptions.Item>\n          </Descriptions>\n        </Card>\n\n        {!orderedFaults.length ? (\n          <Card className={styles.contentCard}>\n            <Empty description=\"该诊断记录没有可展示的故障项。\" />\n          </Card>\n        ) : null}\n\n        {orderedFaults.map((fault) => (\n          <Card key={fault.case_id} className={styles.contentCard}>\n            <FaultHeader fault={fault} />\n            {fault.status === 'legacy_partial' ? (\n              <Alert\n                showIcon\n                type=\"warning\"\n                message=\"该故障项来自旧链路\"\n                description=\"页面只展示已留存字段；缺失数据不会被伪造成正常或已完成。\"\n                style={{ marginBottom: 16 }}\n              />\n            ) : null}\n\n            {fault.fault_type === 'temperature' ? (\n              <div className={styles.sectionStack}>\n                <div className={styles.sectionBlock}>\n                  <Title level={5}>规则判定</Title>\n                  {renderChecks(fault)}\n                </div>\n                {renderTrend(fault)}\n              </div>\n            ) : (\n              <div className={styles.sectionStack}>\n                <div className={styles.sectionBlock}>\n                  <Title level={5}>复采时间线</Title>\n                  {renderAttempts(fault)}\n                </div>\n              </div>\n            )}\n          </Card>\n        ))}\n\n        <Card className={styles.contentCard}>\n          <Title level={5}>数据来源与说明</Title>\n          <Descriptions column={1} size=\"small\">\n            <Descriptions.Item label=\"阈值快照\">\n              {detail.provenance.thresholds || '-'}\n            </Descriptions.Item>\n            <Descriptions.Item label=\"趋势数据\">\n              {detail.provenance.trend_series || '-'}\n            </Descriptions.Item>\n          </Descriptions>\n        </Card>\n      </>\n    );\n  }\n\n  return <div className={styles.page}>{content}</div>;\n};\n\nexport default WxDiagnosisDetailPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Langhu/Codes/Platform/client/portal/src/pages/Wx/DiagnosisDetail/index.tsx"
     },
@@ -3990,7 +3990,7 @@
       "parentId": "27",
       "id": "29",
       "absPath": "/monitoring/sensors/:sn/history",
-      "__content": "import React, { useEffect, useRef, useState } from 'react';\nimport { PageContainer } from '@ant-design/pro-components';\nimport { Card, Select, Space, message, Spin, Typography, Checkbox } from 'antd';\nimport { useParams, useSearchParams, useNavigate } from '@umijs/max';\nimport * as echarts from 'echarts';\nimport dayjs from 'dayjs';\n\nimport { getSensorHistory } from '@/services/sensorTrends';\n\nconst { Text } = Typography;\n\ninterface HistoryPageProps {\n  sensorSn?: string;\n  locationName?: string;\n  embedded?: boolean;\n}\n\nconst HistoryPage = (props?: HistoryPageProps) => {\n  const { sn: routeSn } = useParams<{ sn: string }>();\n  const [searchParams] = useSearchParams();\n  const navigate = useNavigate();\n\n  // 支持两种模式：路由参数（URL路径）或 props 传入（嵌入模式）\n  const sn = props?.sensorSn || routeSn;\n  const locationName = props?.locationName || searchParams.get('location') || '未知测点';\n  const embedded = props?.embedded || false;\n\n  const [loading, setLoading] = useState(false);\n  const [range, setRange] = useState('1w');\n  const [windowSize, setWindowSize] = useState('auto');\n  const [meta, setMeta] = useState<any>({});\n  const [chartData, setChartData] = useState<any>(null);\n  const [activeTab, setActiveTab] = useState<'temp' | 'vibration'>('temp');\n  const [selectedVibs, setSelectedVibs] = useState<string[]>(['rms_m']); // 默认只展示综合振动\n\n  const chartRef = useRef<HTMLDivElement>(null);\n\n  // 根据传感器安装方向推算 XYZ 对应的真实物理意义 (假设安装时遵守了 X/Y 对齐规范)\n  const getAxisLabels = (direction?: string) => {\n    switch (direction) {\n      case 'vertical': // 垂直安装：Z轴为垂直，X水平，Y轴向\n        return { x: 'X轴(水平)', y: 'Y轴(轴向)', z: 'Z轴(垂直)' };\n      case 'horizontal': // 水平安装：Z轴为水平，X垂直，Y轴向\n        return { x: 'X轴(垂直)', y: 'Y轴(轴向)', z: 'Z轴(水平)' };\n      case 'axial': // 轴向安装：Z轴为轴向，X垂直，Y水平\n        return { x: 'X轴(垂直)', y: 'Y轴(水平)', z: 'Z轴(轴向)' };\n      default:\n        return { x: 'X轴', y: 'Y轴', z: 'Z轴' };\n    }\n  };\n\n  // 获取灰色缺省遮罩配置：自动找到 null 的范围\n  const getGapMarkArea = (dataArr: (number | null)[], times: string[]) => {\n    const markAreas = [];\n    let gapStartIndex = -1;\n\n    for (let i = 0; i < dataArr.length; i++) {\n      if (dataArr[i] === null) {\n        if (gapStartIndex === -1) gapStartIndex = i;\n      } else {\n        if (gapStartIndex !== -1) {\n          const start = Math.max(0, gapStartIndex - 1);\n          markAreas.push([{ xAxis: times[start] }, { xAxis: times[i] }]);\n          gapStartIndex = -1;\n        }\n      }\n    }\n    // 结尾如果也是缺失的\n    if (gapStartIndex !== -1) {\n      const start = Math.max(0, gapStartIndex - 1);\n      markAreas.push([{ xAxis: times[start] }, { xAxis: times[dataArr.length - 1] }]);\n    }\n\n    if (!markAreas.length) return undefined;\n\n    return {\n      itemStyle: { color: 'rgba(200, 200, 200, 0.2)' },\n      label: { show: true, position: 'insideTop', color: '#888', formatter: '设备离线/数据缺失', padding: [10, 0, 0, 0] },\n      data: markAreas,\n    };\n  };\n\n  const fetchData = async () => {\n    if (!sn) return;\n    setLoading(true);\n    try {\n      const res = await getSensorHistory(sn, range, windowSize);\n      \n      // 兼容判断：针对外层带有 { code, message, data } 的原生接口返回解包\n      const payload = res?.data?.timestamps ? res.data : res;\n\n      if (!payload || !payload.timestamps) {\n        return;\n      }\n\n      setMeta(payload.meta || {});\n      setChartData(payload); // 缓存数据给渲染副作用使用\n    } catch (err: any) {\n      message.error(err.message || '数据拉取失败');\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  // ECharts 渲染与 Tab 切换逻辑\n  useEffect(() => {\n    if (!chartRef.current || !chartData) return;\n    \n    const chart = echarts.getInstanceByDom(chartRef.current) || echarts.init(chartRef.current);\n    const times = (chartData.timestamps || []).map((t: string) => dayjs(t).format('YYYY-MM-DD HH:mm'));\n    const gapMarkArea = chartData.series?.temperature ? getGapMarkArea(chartData.series.temperature, times) : undefined;\n\n    const labels = getAxisLabels(meta.direction);\n\n    if (activeTab === 'temp') {\n      const candlestickData = times.map((_, i) => {\n        const max = chartData.series?.temperature?.[i];\n        if (max === null || max === undefined) return '-'; \n        const min = chartData.series?.temp_min?.[i] ?? max;\n        const first = chartData.series?.temp_first?.[i] ?? max;\n        const last = chartData.series?.temp_last?.[i] ?? max;\n        return [first, last, min, max];\n      });\n\n      chart?.setOption({\n        tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },\n        grid: { top: 40, left: 40, right: 40, bottom: 40, containLabel: true },\n        xAxis: { type: 'category', data: times, boundaryGap: true },\n        yAxis: { type: 'value', name: '温度区间 (°C)', scale: true },\n        series: [\n          {\n            name: '温度区间 (Candlestick)',\n            type: 'candlestick',\n            data: candlestickData,\n            barMaxWidth: 16,\n            itemStyle: { \n              color: '#ff4d4f',       // 阳线: 红色代表升温\n              color0: '#52c41a',      // 阴线: 绿色代表降温\n              borderColor: '#ff4d4f',\n              borderColor0: '#52c41a',\n              borderWidth: 2,\n            },\n            markArea: gapMarkArea,\n          },\n        ],\n      }, true); // true 参数代表“完全覆盖上一轮配置(notMerge)”，非常关键\n    } else {\n      // 动态构建用户勾选了的展示维度系列\n      const series: any[] = [];\n\n      if (selectedVibs.includes('rms_m')) {\n        const candlestickData = times.map((_, i) => {\n          const max = chartData.series?.rms_m?.[i];\n          if (max === null || max === undefined) return '-'; // Echarts 中 K线图的缺失断连必须用 '-' 而不能用 null\n          const min = chartData.series?.rms_m_min?.[i] ?? max;\n          const first = chartData.series?.rms_m_first?.[i] ?? max;\n          const last = chartData.series?.rms_m_last?.[i] ?? max;\n          // ECharts candlestick 所需格式: [期初(open), 期末(close), 最低(lowest), 最高(highest)]\n          return [first, last, min, max];\n        });\n\n        series.push({\n          name: '综合区间 (Candlestick)',\n          type: 'candlestick',\n          data: candlestickData,\n          barMaxWidth: 16,\n          itemStyle: { \n            color: '#ff4d4f',       // 阳线: 红色代表振动呈\"上升/恶化\"趋势 (收盘 > 开盘)\n            color0: '#52c41a',      // 阴线: 绿色代表振动呈\"下降/好转\"趋势 (收盘 < 开盘)\n            borderColor: '#ff4d4f',\n            borderColor0: '#52c41a',\n            borderWidth: 2,\n          },\n          markArea: gapMarkArea,\n        });\n      }\n      if (selectedVibs.includes('rms_x')) {\n        series.push({ name: `RMS ${labels.x}`, type: 'line', data: chartData.series?.rms_x || [], connectNulls: false, smooth: true, showSymbol: true, symbol: 'circle', symbolSize: 4, lineStyle: { width: 2, color: '#1890ff' }, itemStyle: { color: '#1890ff' } });\n      }\n      if (selectedVibs.includes('rms_y')) {\n        series.push({ name: `RMS ${labels.y}`, type: 'line', data: chartData.series?.rms_y || [], connectNulls: false, smooth: true, showSymbol: true, symbol: 'circle', symbolSize: 4, lineStyle: { width: 2, color: '#52c41a' }, itemStyle: { color: '#52c41a' } });\n      }\n      if (selectedVibs.includes('rms_z')) {\n        series.push({ name: `RMS ${labels.z}`, type: 'line', data: chartData.series?.rms_z || [], connectNulls: false, smooth: true, showSymbol: true, symbol: 'circle', symbolSize: 4, lineStyle: { width: 2, color: '#faad14' }, itemStyle: { color: '#faad14' } });\n      }\n\n      chart?.setOption({\n        tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },\n        grid: { top: 40, left: 40, right: 40, bottom: 40, containLabel: true },\n        xAxis: { type: 'category', data: times, boundaryGap: true },\n        yAxis: { type: 'value', name: '振动 RMS (mm/s)', scale: true },\n        series: series,\n      }, true);\n    }\n  }, [chartData, activeTab, selectedVibs, meta.direction]);\n\n  useEffect(() => {\n    fetchData();\n  }, [sn, range, windowSize]);\n\n  // Echarts 响应式与卸载处理\n  useEffect(() => {\n    const handleResize = () => {\n      chartRef.current && echarts.getInstanceByDom(chartRef.current)?.resize();\n    };\n    window.addEventListener('resize', handleResize);\n    return () => {\n      window.removeEventListener('resize', handleResize);\n      chartRef.current && echarts.getInstanceByDom(chartRef.current)?.dispose();\n    };\n  }, []);\n\n  const labels = getAxisLabels(meta.direction);\n\n  return (\n    <PageContainer\n      title={`测点分析: ${locationName}`}\n      subTitle={`传感器 SN: ${sn}`}\n      onBack={() => navigate(-1)}\n      extra={[\n        <Select key=\"range\" value={range} onChange={setRange} style={{ width: 140 }}>\n          <Select.Option value=\"1w\">最近 1 周</Select.Option>\n          <Select.Option value=\"2w\">最近 2 周</Select.Option>\n          <Select.Option value=\"1m\">最近 1 个月</Select.Option>\n          <Select.Option value=\"2m\">最近 2 个月</Select.Option>\n          <Select.Option value=\"3m\">最近 3 个月</Select.Option>\n        </Select>,\n        <Select key=\"windowSize\" value={windowSize} onChange={setWindowSize} style={{ width: 140 }}>\n          <Select.Option value=\"auto\">智能适配粒度</Select.Option>\n          <Select.Option value=\"1h\">1 小时 (1h)</Select.Option>\n          <Select.Option value=\"4h\">4 小时 (4h)</Select.Option>\n          <Select.Option value=\"8h\">8 小时 (8h)</Select.Option>\n          <Select.Option value=\"12h\">12 小时 (12h)</Select.Option>\n          <Select.Option value=\"1d\">1 天 (1d)</Select.Option>\n        </Select>,\n      ]}\n    >\n      <Spin spinning={loading}>\n        <Space direction=\"vertical\" size=\"middle\" style={{ display: 'flex' }}>\n          {meta.patrol && (\n            <Text type=\"secondary\">\n              数据说明: 此设备巡检频率为 {meta.patrol} 分钟/次，为保证图表清晰，当前时间跨度下您的数据点基于 <Text strong>{meta.window}</Text> 为窗口进行了最高值聚拢降采样。\n            </Text>\n          )}\n          <Card \n            tabList={[\n              { key: 'temp', tab: '温度趋势' },\n              { key: 'vibration', tab: '振动趋势' }\n            ]}\n            activeTabKey={activeTab}\n            onTabChange={(key) => setActiveTab(key as 'temp' | 'vibration')}\n            title=\"分析图表 (断连期间自动标记为灰色离线区)\"\n            tabBarExtraContent={\n              activeTab === 'vibration' && (\n                <Checkbox.Group\n                  options={[\n                    { label: '综合区间 (K线)', value: 'rms_m' },\n                    { label: labels.x, value: 'rms_x' },\n                    { label: labels.y, value: 'rms_y' },\n                    { label: labels.z, value: 'rms_z' },\n                  ]}\n                  value={selectedVibs}\n                  onChange={(vals) => setSelectedVibs(vals as string[])}\n                />\n              )\n            }\n          >\n            <div ref={chartRef} style={{ width: '100%', height: 450 }} />\n          </Card>\n        </Space>\n      </Spin>\n    </PageContainer>\n  );\n};\n\nexport default HistoryPage;\n",
+      "__content": "import React, { useEffect, useRef, useState } from 'react';\nimport { PageContainer } from '@ant-design/pro-components';\nimport { Card, Select, Space, message, Spin, Typography, Checkbox } from 'antd';\nimport { useParams, useSearchParams, useNavigate } from '@umijs/max';\nimport * as echarts from 'echarts';\nimport dayjs from 'dayjs';\n\nimport { getSensorHistory } from '@/services/sensorTrends';\n\nconst { Text } = Typography;\n\ninterface HistoryPageProps {\n  sensorSn?: string;\n  locationName?: string;\n  embedded?: boolean;\n}\n\nconst HistoryPage = (props?: HistoryPageProps) => {\n  const { sn: routeSn } = useParams<{ sn: string }>();\n  const [searchParams] = useSearchParams();\n  const navigate = useNavigate();\n\n  // 支持两种模式：路由参数（URL路径）或 props 传入（嵌入模式）\n  const sn = props?.sensorSn || routeSn;\n  const locationName = props?.locationName || searchParams.get('location') || '未知测点';\n  const embedded = props?.embedded || false;\n\n  const [loading, setLoading] = useState(false);\n  const [range, setRange] = useState('1w');\n  const [windowSize, setWindowSize] = useState('auto');\n  const [meta, setMeta] = useState<any>({});\n  const [chartData, setChartData] = useState<any>(null);\n  const [activeTab, setActiveTab] = useState<'temp' | 'vibration'>('temp');\n  const [selectedVibs, setSelectedVibs] = useState<string[]>(['rms_m']); // 默认只展示综合振动\n\n  const chartRef = useRef<HTMLDivElement>(null);\n\n  // 根据传感器安装方向推算 XYZ 对应的真实物理意义 (假设安装时遵守了 X/Y 对齐规范)\n  const getAxisLabels = (direction?: string) => {\n    switch (direction) {\n      case 'vertical': // 垂直安装：Z轴为垂直，X水平，Y轴向\n        return { x: 'X轴(水平)', y: 'Y轴(轴向)', z: 'Z轴(垂直)' };\n      case 'horizontal': // 水平安装：Z轴为水平，X垂直，Y轴向\n        return { x: 'X轴(垂直)', y: 'Y轴(轴向)', z: 'Z轴(水平)' };\n      case 'axial': // 轴向安装：Z轴为轴向，X垂直，Y水平\n        return { x: 'X轴(垂直)', y: 'Y轴(水平)', z: 'Z轴(轴向)' };\n      default:\n        return { x: 'X轴', y: 'Y轴', z: 'Z轴' };\n    }\n  };\n\n  // 获取灰色缺省遮罩配置：自动找到 null 的范围\n  const getGapMarkArea = (dataArr: (number | null)[], times: string[]) => {\n    const markAreas = [];\n    let gapStartIndex = -1;\n\n    for (let i = 0; i < dataArr.length; i++) {\n      if (dataArr[i] === null) {\n        if (gapStartIndex === -1) gapStartIndex = i;\n      } else {\n        if (gapStartIndex !== -1) {\n          const start = Math.max(0, gapStartIndex - 1);\n          markAreas.push([{ xAxis: times[start] }, { xAxis: times[i] }]);\n          gapStartIndex = -1;\n        }\n      }\n    }\n    // 结尾如果也是缺失的\n    if (gapStartIndex !== -1) {\n      const start = Math.max(0, gapStartIndex - 1);\n      markAreas.push([{ xAxis: times[start] }, { xAxis: times[dataArr.length - 1] }]);\n    }\n\n    if (!markAreas.length) return undefined;\n\n    return {\n      itemStyle: { color: 'rgba(200, 200, 200, 0.2)' },\n      label: { show: true, position: 'insideTop', color: '#888', formatter: '设备离线/数据缺失', padding: [10, 0, 0, 0] },\n      data: markAreas,\n    };\n  };\n\n  const fetchData = async () => {\n    if (!sn) return;\n    setLoading(true);\n    try {\n      const res = await getSensorHistory(sn, range, windowSize);\n      \n      // 兼容判断：针对外层带有 { code, message, data } 的原生接口返回解包\n      const payload = res?.data?.timestamps ? res.data : res;\n\n      if (!payload || !payload.timestamps) {\n        return;\n      }\n\n      setMeta(payload.meta || {});\n      setChartData(payload); // 缓存数据给渲染副作用使用\n    } catch (err: any) {\n      message.error(err.message || '数据拉取失败');\n    } finally {\n      setLoading(false);\n    }\n  };\n\n  // ECharts 渲染与 Tab 切换逻辑\n  useEffect(() => {\n    if (!chartRef.current || !chartData) return;\n    \n    const chart = echarts.getInstanceByDom(chartRef.current) || echarts.init(chartRef.current);\n    const times = (chartData.timestamps || []).map((t: string) => dayjs(t).format('YYYY-MM-DD HH:mm'));\n    const gapMarkArea = chartData.series?.temperature ? getGapMarkArea(chartData.series.temperature, times) : undefined;\n\n    const labels = getAxisLabels(meta.direction);\n\n    if (activeTab === 'temp') {\n      const candlestickData = times.map((_, i) => {\n        const max = chartData.series?.temperature?.[i];\n        if (max === null || max === undefined) return '-'; \n        const min = chartData.series?.temp_min?.[i] ?? max;\n        const first = chartData.series?.temp_first?.[i] ?? max;\n        const last = chartData.series?.temp_last?.[i] ?? max;\n        return [first, last, min, max];\n      });\n      const ambientData: Array<number | null> = chartData.series?.ambient_temperature || [];\n      const hasAmbient = ambientData.some((val) => val !== null && val !== undefined);\n      const tempSeries: any[] = [\n        {\n          name: '温度区间 (Candlestick)',\n          type: 'candlestick',\n          data: candlestickData,\n          barMaxWidth: 16,\n          itemStyle: { \n            color: '#ff4d4f',       // 阳线: 红色代表升温\n            color0: '#52c41a',      // 阴线: 绿色代表降温\n            borderColor: '#ff4d4f',\n            borderColor0: '#52c41a',\n            borderWidth: 2,\n          },\n          markArea: gapMarkArea,\n        },\n      ];\n      if (hasAmbient) {\n        tempSeries.push({\n          name: '环境温度 (基准)',\n          type: 'line',\n          data: ambientData,\n          connectNulls: true,\n          showSymbol: false,\n          lineStyle: { width: 1.5, type: 'dashed', color: '#8c8c8c' },\n          itemStyle: { color: '#8c8c8c' },\n        });\n      }\n\n      chart?.setOption({\n        tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },\n        legend: hasAmbient ? { top: 8 } : undefined,\n        grid: { top: 40, left: 40, right: 40, bottom: 40, containLabel: true },\n        xAxis: { type: 'category', data: times, boundaryGap: true },\n        yAxis: { type: 'value', name: '温度区间 (°C)', scale: true },\n        series: tempSeries,\n      }, true); // true 参数代表“完全覆盖上一轮配置(notMerge)”，非常关键\n    } else {\n      // 动态构建用户勾选了的展示维度系列\n      const series: any[] = [];\n\n      if (selectedVibs.includes('rms_m')) {\n        const candlestickData = times.map((_, i) => {\n          const max = chartData.series?.rms_m?.[i];\n          if (max === null || max === undefined) return '-'; // Echarts 中 K线图的缺失断连必须用 '-' 而不能用 null\n          const min = chartData.series?.rms_m_min?.[i] ?? max;\n          const first = chartData.series?.rms_m_first?.[i] ?? max;\n          const last = chartData.series?.rms_m_last?.[i] ?? max;\n          // ECharts candlestick 所需格式: [期初(open), 期末(close), 最低(lowest), 最高(highest)]\n          return [first, last, min, max];\n        });\n\n        series.push({\n          name: '综合区间 (Candlestick)',\n          type: 'candlestick',\n          data: candlestickData,\n          barMaxWidth: 16,\n          itemStyle: { \n            color: '#ff4d4f',       // 阳线: 红色代表振动呈\"上升/恶化\"趋势 (收盘 > 开盘)\n            color0: '#52c41a',      // 阴线: 绿色代表振动呈\"下降/好转\"趋势 (收盘 < 开盘)\n            borderColor: '#ff4d4f',\n            borderColor0: '#52c41a',\n            borderWidth: 2,\n          },\n          markArea: gapMarkArea,\n        });\n      }\n      if (selectedVibs.includes('rms_x')) {\n        series.push({ name: `RMS ${labels.x}`, type: 'line', data: chartData.series?.rms_x || [], connectNulls: false, smooth: true, showSymbol: true, symbol: 'circle', symbolSize: 4, lineStyle: { width: 2, color: '#1890ff' }, itemStyle: { color: '#1890ff' } });\n      }\n      if (selectedVibs.includes('rms_y')) {\n        series.push({ name: `RMS ${labels.y}`, type: 'line', data: chartData.series?.rms_y || [], connectNulls: false, smooth: true, showSymbol: true, symbol: 'circle', symbolSize: 4, lineStyle: { width: 2, color: '#52c41a' }, itemStyle: { color: '#52c41a' } });\n      }\n      if (selectedVibs.includes('rms_z')) {\n        series.push({ name: `RMS ${labels.z}`, type: 'line', data: chartData.series?.rms_z || [], connectNulls: false, smooth: true, showSymbol: true, symbol: 'circle', symbolSize: 4, lineStyle: { width: 2, color: '#faad14' }, itemStyle: { color: '#faad14' } });\n      }\n\n      chart?.setOption({\n        tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },\n        grid: { top: 40, left: 40, right: 40, bottom: 40, containLabel: true },\n        xAxis: { type: 'category', data: times, boundaryGap: true },\n        yAxis: { type: 'value', name: '振动 RMS (mm/s)', scale: true },\n        series: series,\n      }, true);\n    }\n  }, [chartData, activeTab, selectedVibs, meta.direction]);\n\n  useEffect(() => {\n    fetchData();\n  }, [sn, range, windowSize]);\n\n  // Echarts 响应式与卸载处理\n  useEffect(() => {\n    const handleResize = () => {\n      chartRef.current && echarts.getInstanceByDom(chartRef.current)?.resize();\n    };\n    window.addEventListener('resize', handleResize);\n    return () => {\n      window.removeEventListener('resize', handleResize);\n      chartRef.current && echarts.getInstanceByDom(chartRef.current)?.dispose();\n    };\n  }, []);\n\n  const labels = getAxisLabels(meta.direction);\n\n  return (\n    <PageContainer\n      title={`测点分析: ${locationName}`}\n      subTitle={`传感器 SN: ${sn}`}\n      onBack={() => navigate(-1)}\n      extra={[\n        <Select key=\"range\" value={range} onChange={setRange} style={{ width: 140 }}>\n          <Select.Option value=\"1w\">最近 1 周</Select.Option>\n          <Select.Option value=\"2w\">最近 2 周</Select.Option>\n          <Select.Option value=\"1m\">最近 1 个月</Select.Option>\n          <Select.Option value=\"2m\">最近 2 个月</Select.Option>\n          <Select.Option value=\"3m\">最近 3 个月</Select.Option>\n        </Select>,\n        <Select key=\"windowSize\" value={windowSize} onChange={setWindowSize} style={{ width: 140 }}>\n          <Select.Option value=\"auto\">智能适配粒度</Select.Option>\n          <Select.Option value=\"1h\">1 小时 (1h)</Select.Option>\n          <Select.Option value=\"4h\">4 小时 (4h)</Select.Option>\n          <Select.Option value=\"8h\">8 小时 (8h)</Select.Option>\n          <Select.Option value=\"12h\">12 小时 (12h)</Select.Option>\n          <Select.Option value=\"1d\">1 天 (1d)</Select.Option>\n        </Select>,\n      ]}\n    >\n      <Spin spinning={loading}>\n        <Space direction=\"vertical\" size=\"middle\" style={{ display: 'flex' }}>\n          {meta.patrol && (\n            <Text type=\"secondary\">\n              数据说明: 此设备巡检频率为 {meta.patrol} 分钟/次，为保证图表清晰，当前时间跨度下您的数据点基于 <Text strong>{meta.window}</Text> 为窗口进行了最高值聚拢降采样。\n            </Text>\n          )}\n          <Card \n            tabList={[\n              { key: 'temp', tab: '温度趋势' },\n              { key: 'vibration', tab: '振动趋势' }\n            ]}\n            activeTabKey={activeTab}\n            onTabChange={(key) => setActiveTab(key as 'temp' | 'vibration')}\n            title=\"分析图表 (断连期间自动标记为灰色离线区)\"\n            tabBarExtraContent={\n              activeTab === 'vibration' && (\n                <Checkbox.Group\n                  options={[\n                    { label: '综合区间 (K线)', value: 'rms_m' },\n                    { label: labels.x, value: 'rms_x' },\n                    { label: labels.y, value: 'rms_y' },\n                    { label: labels.z, value: 'rms_z' },\n                  ]}\n                  value={selectedVibs}\n                  onChange={(vals) => setSelectedVibs(vals as string[])}\n                />\n              )\n            }\n          >\n            <div ref={chartRef} style={{ width: '100%', height: 450 }} />\n          </Card>\n        </Space>\n      </Spin>\n    </PageContainer>\n  );\n};\n\nexport default HistoryPage;\n",
       "__isJSFile": true,
       "__absFile": "/Users/tju/Langhu/Codes/Platform/client/portal/src/pages/Monitoring/Sensors/History/index.tsx"
     },

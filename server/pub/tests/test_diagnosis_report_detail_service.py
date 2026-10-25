@@ -113,3 +113,64 @@ async def test_get_report_detail_marks_legacy_partial_fault(monkeypatch):
     assert filtered["report"]["overall_level"] is None
     assert filtered["provenance"]["thresholds"] == "legacy_partial"
     assert "fft_series" not in filtered["provenance"]
+
+
+@pytest.mark.asyncio
+async def test_temperature_trend_includes_ambient_baseline(monkeypatch):
+    report_id = uuid4()
+    report = SimpleNamespace(
+        id=report_id,
+        tenant_id=uuid4(),
+        diagnosed_at=None,
+        overall_level=2,
+        diagnosis_status=2,
+        ts_ms=1_721_110_000_000,
+        sensor_sn="SN-TEMP",
+    )
+    item = SimpleNamespace(
+        id=uuid4(),
+        metric_id=0,
+        fault_type="temperature",
+        level=2,
+        description="Temperature high",
+        evidence={"schema_version": 2, "current": 65.0},
+    )
+    trend_records = [
+        SimpleNamespace(ts_ms=1_721_106_400_000, temperature_c=60.5),
+        SimpleNamespace(ts_ms=1_721_110_000_000, temperature_c=65.0),
+    ]
+
+    async def fake_load_bundle(*, session, report_id):
+        return DiagnosisReportBundle(
+            report=report,
+            diagnosis=None,
+            items=[item],
+            cases=[],
+            attempts=[],
+            temperature_trend=trend_records,
+            device=None,
+            device_spec=None,
+            device_category=None,
+            process_device=None,
+            process=None,
+            location=None,
+            ambient_temperature_trend=[26.5, 27.0],
+        )
+
+    monkeypatch.setattr(
+        DiagnosisReportDetailService,
+        "_load_bundle",
+        fake_load_bundle,
+    )
+
+    payload = await DiagnosisReportDetailService.get_report_detail(
+        session=object(),
+        report_id=report_id,
+        fault_type="temperature",
+    )
+    trend_series = payload["faults"][0]["trend"]["series"]
+    assert len(trend_series) == 2
+    assert trend_series[0]["key"] == "temperature_72h"
+    assert trend_series[1]["key"] == "ambient_temperature_72h"
+    assert [pt["value"] for pt in trend_series[1]["points"]] == [26.5, 27.0]
+

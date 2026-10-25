@@ -1,19 +1,187 @@
 import asyncio
-import logging
-import json
+from bisect import bisect_right
+from datetime import datetime, timedelta, timezone
 from decimal import Decimal
+import json
+import logging
+from uuid import UUID
+
 import httpx
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from pub.models.customer import Tenant, Region
-from pub.models.weather import Temperature
 from pub.manager.database import redis_manager
+from pub.models.customer import Location, Region, Tenant, TenantSensor
+from pub.models.sensor import Sensor, SensorMonitoring
+from pub.models.weather import Temperature
 from pub.utils.redis_keys import REDIS_KEY_DIA_AMBIENT_TEMP
 
 logger = logging.getLogger(__name__)
 
+SHANGHAI_TZ = timezone(timedelta(hours=8))
+
+
 class WeatherService:
+    @staticmethod
+    async def get_region_id_by_tenant(
+        session: AsyncSession,
+        tenant_id: UUID | None,
+    ) -> str | None:
+        if tenant_id is None or not hasattr(session, "execute"):
+            return None
+        try:
+            stmt = select(Tenant.region_id).where(Tenant.id == tenant_id)
+            return (await session.execute(stmt)).scalar_one_or_none()
+        except Exception as exc:
+            logger.debug("Failed to resolve region_id for tenant %s: %s", tenant_id, exc)
+            return None
+
+    @staticmethod
+    async def get_region_id_by_sensor_sn(
+        session: AsyncSession,
+        sn: str,
+    ) -> str | None:
+        if not sn or not hasattr(session, "execute"):
+            return None
+        try:
+            stmt = (
+                select(Tenant.region_id)
+                .join(Location, Location.tenant_id == Tenant.id)
+                .join(SensorMonitoring, SensorMonitoring.location_id == Location.id)
+                .join(Sensor, Sensor.id == SensorMonitoring.sensor_id)
+                .where(Sensor.sn == sn)
+                .order_by(SensorMonitoring.status.desc())
+            )
+            region_id = (await session.execute(stmt)).scalars().first()
+            if region_id:
+                return str(region_id)
+
+            fallback_stmt = (
+                select(Tenant.region_id)
+                .join(TenantSensor, TenantSensor.tenant_id == Tenant.id)
+                .join(Sensor, Sensor.id == TenantSensor.sensor_id)
+                .where(Sensor.sn == sn)
+                .order_by(TenantSensor.available.desc())
+            )
+            region_id = (await session.execute(fallback_stmt)).scalars().first()
+            return str(region_id) if region_id else None
+        except Exception as exc:
+            logger.debug("Failed to resolve region_id for sensor %s: %s", sn, exc)
+            return None
+
+    @staticmethod
+    async def load_ambient_records(
+        session: AsyncSession,
+        region_id: str | None,
+        start_at_utc: datetime,
+        end_at_utc: datetime,
+    ) -> list[tuple[datetime, float]]:
+        """
+        Load ambient temperature records for a region within [start_at_utc, end_at_utc],
+        plus the most recent record at or before start_at_utc for forward-fill anchoring.
+        Returns sorted list of (utc_datetime, temperature_float).
+        """
+        if not region_id or not hasattr(session, "execute"):
+            return []
+        try:
+            if start_at_utc.tzinfo is None:
+                start_at_utc = start_at_utc.replace(tzinfo=timezone.utc)
+            if end_at_utc.tzinfo is None:
+                end_at_utc = end_at_utc.replace(tzinfo=timezone.utc)
+
+            start_shanghai = start_at_utc.astimezone(SHANGHAI_TZ).replace(tzinfo=None)
+            end_shanghai = end_at_utc.astimezone(SHANGHAI_TZ).replace(tzinfo=None)
+
+            anchor_stmt = (
+                select(Temperature.dt, Temperature.temperature)
+                .where(
+                    Temperature.region_id == str(region_id),
+                    Temperature.dt <= start_shanghai,
+                )
+                .order_by(Temperature.dt.desc())
+                .limit(1)
+            )
+            range_stmt = (
+                select(Temperature.dt, Temperature.temperature)
+                .where(
+                    Temperature.region_id == str(region_id),
+                    Temperature.dt > start_shanghai,
+                    Temperature.dt <= end_shanghai,
+                )
+                .order_by(Temperature.dt.asc())
+            )
+
+            anchor_rows = (await session.execute(anchor_stmt)).all()
+            range_rows = (await session.execute(range_stmt)).all()
+
+            records: list[tuple[datetime, float]] = []
+            for row in [*anchor_rows, *range_rows]:
+                dt_val, temp_val = row[0], row[1]
+                if dt_val is None or temp_val is None:
+                    continue
+                if dt_val.tzinfo is None:
+                    utc_dt = dt_val.replace(tzinfo=SHANGHAI_TZ).astimezone(timezone.utc)
+                else:
+                    utc_dt = dt_val.astimezone(timezone.utc)
+                records.append((utc_dt, round(float(temp_val), 2)))
+
+            records.sort(key=lambda item: item[0])
+            return records
+        except Exception as exc:
+            logger.debug("Failed to load ambient records for region %s: %s", region_id, exc)
+            return []
+
+    @staticmethod
+    def align_ambient_to_timestamps(
+        ambient_records: list[tuple[datetime, float]],
+        timestamps: list[str],
+        window_minutes: int = 0,
+    ) -> list[float | None]:
+        """
+        Align sparse ambient temperature records onto sensor timestamps using
+        window averaging (when multiple ambient samples fall inside an aggregation window)
+        and forward-fill (as-of matching for the latest sample <= timestamp).
+        """
+        if not timestamps:
+            return []
+        if not ambient_records:
+            return [None] * len(timestamps)
+
+        record_times = [item[0] for item in ambient_records]
+        record_values = [item[1] for item in ambient_records]
+        window_delta = timedelta(minutes=max(0, int(window_minutes or 0)))
+
+        aligned: list[float | None] = []
+        for ts_str in timestamps:
+            try:
+                target_dt = datetime.fromisoformat(
+                    str(ts_str).replace("Z", "+00:00")
+                )
+                if target_dt.tzinfo is None:
+                    target_dt = target_dt.replace(tzinfo=timezone.utc)
+                else:
+                    target_dt = target_dt.astimezone(timezone.utc)
+            except Exception:
+                aligned.append(None)
+                continue
+
+            right_idx = bisect_right(record_times, target_dt)
+            if window_minutes and window_minutes > 0:
+                window_start = target_dt - window_delta
+                left_idx = bisect_right(record_times, window_start)
+                if left_idx < right_idx:
+                    window_slice = record_values[left_idx:right_idx]
+                    aligned.append(round(sum(window_slice) / len(window_slice), 2))
+                    continue
+
+            if right_idx > 0:
+                aligned.append(record_values[right_idx - 1])
+            else:
+                # Fallback to earliest available record in the queried range
+                aligned.append(record_values[0])
+
+        return aligned
+
     @staticmethod
     async def fetch_and_store_ambient_temperatures(session: AsyncSession) -> None:
         """

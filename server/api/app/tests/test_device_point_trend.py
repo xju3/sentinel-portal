@@ -186,3 +186,34 @@ async def test_comparison_locations_preserve_the_device_dimension():
         second_device_id,
     }
     assert location_devices[second_location_id] == {second_device_id}
+
+
+def test_align_ambient_to_timestamps_forward_fill_and_window_average():
+    from pub.services.common.weather_service import WeatherService
+
+    ambient_records = [
+        (datetime(2026, 8, 4, 0, 0, tzinfo=timezone.utc), 22.0),
+        (datetime(2026, 8, 4, 6, 0, tzinfo=timezone.utc), 28.0),
+        (datetime(2026, 8, 4, 12, 0, tzinfo=timezone.utc), 30.0),
+    ]
+    sensor_timestamps = [
+        "2026-08-04T01:00:00Z",
+        "2026-08-04T05:30:00Z",
+        "2026-08-04T06:00:00Z",
+        "2026-08-04T09:00:00Z",
+        "2026-08-04T14:00:00Z",
+    ]
+    raw_aligned = WeatherService.align_ambient_to_timestamps(
+        ambient_records,
+        sensor_timestamps,
+        window_minutes=0,
+    )
+    assert raw_aligned == [22.0, 22.0, 28.0, 28.0, 30.0]
+
+    window_aligned = WeatherService.align_ambient_to_timestamps(
+        ambient_records,
+        ["2026-08-04T12:00:00Z"],
+        window_minutes=720,  # 12h window (00:00, 12:00] covers 06:00 (28.0) and 12:00 (30.0)
+    )
+    assert window_aligned == [29.0]
+

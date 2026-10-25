@@ -78,6 +78,8 @@ function withRawGaps(data: DevicePointTrend) {
   const timestamps: string[] = [];
   const temperature: Array<PointTrendValue | null> = [];
   const vibration: Array<PointTrendValue | null> = [];
+  const displacement: Array<PointTrendValue | null> = [];
+  const ambientTemperature: Array<number | null> = [];
   const gapMs = Math.max(1, data.meta.patrolMinutes) * 60_000 * 1.5;
 
   data.timestamps.forEach((timestamp, index) => {
@@ -88,13 +90,19 @@ function withRawGaps(data: DevicePointTrend) {
         timestamps.push(dayjs(previous + Math.min(current - previous, gapMs)).toISOString());
         temperature.push(null);
         vibration.push(null);
+        displacement.push(null);
+        ambientTemperature.push(
+          data.ambientTemperature?.[index - 1] ?? data.ambientTemperature?.[index] ?? null,
+        );
       }
     }
     timestamps.push(timestamp);
     temperature.push(data.temperature[index] || null);
     vibration.push(data.vibration[index] || null);
+    displacement.push(data.displacement?.[index] || null);
+    ambientTemperature.push(data.ambientTemperature?.[index] ?? null);
   });
-  return { ...data, timestamps, temperature, vibration };
+  return { ...data, timestamps, temperature, vibration, displacement, ambientTemperature };
 }
 
 const PointTrendCard = ({
@@ -148,6 +156,8 @@ const PointTrendCard = ({
     if (activeTab === 'temperature') {
       const source = data.temperature;
       const values = source.map((item) => (item ? item.value : null));
+      const ambientValues = data.ambientTemperature || [];
+      const hasAmbient = ambientValues.some((val) => val !== null && val !== undefined);
       series.push({
         name: '温度',
         type: 'line',
@@ -160,16 +170,35 @@ const PointTrendCard = ({
         itemStyle: { color: '#fa8c16' },
         areaStyle: { opacity: 0.06 },
       });
+      if (hasAmbient) {
+        series.push({
+          name: '环境温度 (基准)',
+          type: 'line',
+          data: ambientValues,
+          connectNulls: true,
+          showSymbol: false,
+          lineStyle: { width: 1.5, type: 'dashed', color: '#8c8c8c' },
+          itemStyle: { color: '#8c8c8c' },
+        });
+      }
       yAxis = { type: 'value', name: '°C', scale: true };
       
       tooltipFormatter = (params: any[]) => {
         const index = params?.[0]?.dataIndex;
         const item = source[index];
-        if (!item) return `${times[index]}<br/>无数据`;
+        const ambientVal = ambientValues[index];
+        if (!item) {
+          return ambientVal !== null && ambientVal !== undefined
+            ? `${times[index]}<br/>温度：无数据<br/>环境温度：${Number(ambientVal).toFixed(2)} °C`
+            : `${times[index]}<br/>无数据`;
+        }
         const lines = [
           dayjs(data.timestamps[index]).format('YYYY-MM-DD HH:mm'),
           `温度：${values[index]?.toFixed(3)} °C`,
         ];
+        if (ambientVal !== null && ambientVal !== undefined) {
+          lines.push(`环境温度：${Number(ambientVal).toFixed(2)} °C`);
+        }
         if (!data.meta.raw) {
           lines.push(
             `最小：${item.min?.toFixed(3) ?? '-'} °C`,
@@ -268,6 +297,7 @@ const PointTrendCard = ({
 
     return {
       animation: false,
+      legend: activeTab === 'temperature' && series.length > 1 ? { top: 4 } : undefined,
       tooltip: {
         trigger: 'axis',
         formatter: tooltipFormatter,

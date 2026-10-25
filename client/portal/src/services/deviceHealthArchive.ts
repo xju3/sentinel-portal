@@ -102,6 +102,7 @@ export type DevicePointTrend = {
   temperature: Array<PointTrendValue | null>;
   vibration: Array<PointTrendValue | null>;
   displacement: Array<PointTrendValue | null>;
+  ambientTemperature?: Array<number | null>;
 };
 
 export async function getDevicePointTrend(

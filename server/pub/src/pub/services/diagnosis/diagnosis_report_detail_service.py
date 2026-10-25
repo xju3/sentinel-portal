@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from datetime import UTC, datetime
 from typing import Any
 from uuid import UUID
@@ -9,6 +9,7 @@ from sqlalchemy import desc, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from pub.models.customer import Location
+from pub.services.common.weather_service import WeatherService
 from pub.models.device import (
     DeviceCategory,
     DeviceInst,
@@ -64,6 +65,7 @@ class DiagnosisReportBundle:
     process_device: ProcessDevice | None
     process: Process | None
     location: Location | None
+    ambient_temperature_trend: list[float | None] = field(default_factory=list)
 
 
 class DiagnosisReportDetailService:
@@ -133,6 +135,30 @@ class DiagnosisReportDetailService:
             session=session,
             report=report,
         )
+        ambient_temperature_trend: list[float | None] = []
+        if temperature_trend and report.ts_ms is not None:
+            region_id = getattr(report, "region_id", None) or (
+                await WeatherService.get_region_id_by_tenant(session, report.tenant_id)
+            )
+            start_at = datetime.fromtimestamp(
+                (int(report.ts_ms) - 72 * 60 * 60 * 1000) / 1000,
+                tz=UTC,
+            )
+            end_at = datetime.fromtimestamp(int(report.ts_ms) / 1000, tz=UTC)
+            ambient_records = await WeatherService.load_ambient_records(
+                session,
+                region_id,
+                start_at,
+                end_at,
+            )
+            trend_timestamps = [
+                _ts_ms_to_iso(item.ts_ms) or "" for item in temperature_trend
+            ]
+            ambient_temperature_trend = WeatherService.align_ambient_to_timestamps(
+                ambient_records,
+                trend_timestamps,
+                window_minutes=0,
+            )
         device = await session.get(DeviceInst, report.device_id) if report.device_id else None
         device_spec = (
             await session.get(DeviceSpec, device.device_spec_id)
@@ -171,6 +197,7 @@ class DiagnosisReportDetailService:
             process_device=process_device,
             process=process,
             location=location,
+            ambient_temperature_trend=ambient_temperature_trend,
         )
 
     @staticmethod
@@ -304,6 +331,11 @@ class DiagnosisReportDetailService:
                     if fault_type == "temperature"
                     else []
                 ),
+                ambient_temperature_trend=(
+                    bundle.ambient_temperature_trend
+                    if fault_type == "temperature"
+                    else []
+                ),
             )
             for fault_type in fault_types
         ]
@@ -349,6 +381,7 @@ class DiagnosisReportDetailService:
         case: DiagnosisCase | None,
         attempts: list[DiagnosisCaseAttempt],
         temperature_trend: list[DiagnosisRecord],
+        ambient_temperature_trend: list[float | None] | None = None,
     ) -> dict[str, Any]:
         primary_item = (
             max(items, key=lambda item: int(item.level or 0))
@@ -378,6 +411,7 @@ class DiagnosisReportDetailService:
                 primary_item=primary_item,
                 evidence_schema_version=evidence_schema_version,
                 records=temperature_trend,
+                ambient_temperature_trend=ambient_temperature_trend or [],
             ),
         }
 
@@ -388,26 +422,45 @@ class DiagnosisReportDetailService:
         primary_item: DiagnosisItem | None,
         evidence_schema_version: int | None,
         records: list[DiagnosisRecord],
+        ambient_temperature_trend: list[float | None] | None = None,
     ) -> dict[str, Any]:
         status = cls._trend_status(primary_item, evidence_schema_version)
         if not records:
             return {"status": status, "series": []}
+        series: list[dict[str, Any]] = [
+            {
+                "key": "temperature_72h",
+                "label": "72小时温度",
+                "unit": "°C",
+                "points": [
+                    {
+                        "sampled_at": _ts_ms_to_iso(record.ts_ms),
+                        "value": record.temperature_c,
+                    }
+                    for record in records
+                ],
+            }
+        ]
+        ambient_points = [
+            {
+                "sampled_at": _ts_ms_to_iso(record.ts_ms),
+                "value": ambient_val,
+            }
+            for record, ambient_val in zip(records, ambient_temperature_trend or [])
+            if ambient_val is not None
+        ]
+        if ambient_points:
+            series.append(
+                {
+                    "key": "ambient_temperature_72h",
+                    "label": "环境温度 (基准)",
+                    "unit": "°C",
+                    "points": ambient_points,
+                }
+            )
         return {
             "status": status,
-            "series": [
-                {
-                    "key": "temperature_72h",
-                    "label": "72小时温度",
-                    "unit": "°C",
-                    "points": [
-                        {
-                            "sampled_at": _ts_ms_to_iso(record.ts_ms),
-                            "value": record.temperature_c,
-                        }
-                        for record in records
-                    ],
-                }
-            ],
+            "series": series,
         }
 
     @staticmethod

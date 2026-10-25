@@ -295,19 +295,40 @@ Page({
       const value = item ? (vibration && !data.meta?.raw ? item.max : item.value) : null
       return [time, value]
     })
+    const series: any[] = [{
+      name: vibration ? '振动' : '设备温度',
+      type: 'line', data: points, showSymbol: points.length <= 80,
+      connectNulls: false, smooth: false,
+      lineStyle: { color: vibration ? '#00D2FF' : '#FA8C16', width: 2 },
+      itemStyle: { color: vibration ? '#00D2FF' : '#FA8C16' },
+    }]
+    if (!vibration && Array.isArray(data.ambientTemperature)) {
+      const ambientPoints = data.timestamps.map((time: string, index: number) => [
+        time,
+        data.ambientTemperature[index] ?? null,
+      ])
+      if (ambientPoints.some((pt: any) => pt[1] !== null && pt[1] !== undefined)) {
+        series.push({
+          name: '环境温度 (基准)',
+          type: 'line',
+          data: ambientPoints,
+          showSymbol: false,
+          connectNulls: true,
+          smooth: false,
+          lineStyle: { color: '#8C8C8C', width: 1.5, type: 'dashed' },
+          itemStyle: { color: '#8C8C8C' },
+        })
+      }
+    }
     const option = {
       animation: false,
       tooltip: { trigger: 'axis' },
+      legend: series.length > 1 ? { top: 0, textStyle: { color: 'rgba(255,255,255,0.65)', fontSize: 11 } } : undefined,
       grid: { top: 30, left: 52, right: 20, bottom: 48 },
       xAxis: { type: 'time', axisLabel: { hideOverlap: true } },
       yAxis: { type: 'value', name: unit, scale: true },
       dataZoom: [{ type: 'inside' }],
-      series: [{
-        type: 'line', data: points, showSymbol: points.length <= 80,
-        connectNulls: false, smooth: false,
-        lineStyle: { color: vibration ? '#00D2FF' : '#FA8C16', width: 2 },
-        itemStyle: { color: vibration ? '#00D2FF' : '#FA8C16' },
-      }],
+      series,
     }
     const component = this.selectComponent('#health-trend-chart') as any
     if (!component) return
