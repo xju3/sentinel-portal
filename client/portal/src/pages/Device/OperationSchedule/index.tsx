@@ -140,11 +140,12 @@ const OperationSchedulePage = () => {
 
   const columns: ProColumns<DeviceOperationSchedule>[] = [
     { title: '序号', valueType: 'indexBorder', width: 68, hideInSearch: true, fixed: 'left' },
-    { title: '编码', dataIndex: 'code', width: 140, sorter: true },
-    { title: '名称', dataIndex: 'name', width: 180, sorter: true },
+    { title: '编码', dataIndex: 'code', width: 140, ellipsis: true, sorter: true },
+    { title: '名称', dataIndex: 'name', width: 180, ellipsis: true, sorter: true },
     {
       title: '运行时段',
       dataIndex: 'items',
+      width: 380,
       hideInSearch: true,
       render: (_, row) => {
         const items = row.items || [];
@@ -182,6 +183,7 @@ const OperationSchedulePage = () => {
     {
       title: '备注',
       dataIndex: 'description',
+      width: 180,
       ellipsis: true,
       hideInSearch: true,
       render: (_, row) => row.description || '-',
@@ -315,6 +317,7 @@ const OperationSchedulePage = () => {
         actionRef={actionRef}
         columns={columns}
         request={queryOperationSchedules}
+        scroll={{ x: 'max-content' }}
         search={{ labelWidth: 'auto' }}
         pagination={{ defaultPageSize: 20, showSizeChanger: true }}
         optionsRender={renderRefSafeTableOptions}

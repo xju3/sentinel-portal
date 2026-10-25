@@ -137,6 +137,7 @@ const DeviceListPage = () => {
     },
     {
       title: '测点',
+      width: 220,
       hideInSearch: true,
       render: (_, row) => {
         const monitorings = row.sensor_monitorings || [];
@@ -184,6 +185,7 @@ const DeviceListPage = () => {
     {
       title: '描述',
       dataIndex: 'desc',
+      width: 180,
       ellipsis: true,
       hideInSearch: true,
       render: (_, row) => row.desc || '-',
@@ -191,6 +193,7 @@ const DeviceListPage = () => {
     {
       title: '操作',
       valueType: 'option',
+      width: 180,
       fixed: 'right',
       align: 'center',
       render: (_, row) => (
@@ -244,6 +247,7 @@ const DeviceListPage = () => {
         rowKey="id"
         actionRef={actionRef}
         columns={columns}
+        scroll={{ x: 'max-content' }}
         request={(params, sort) =>
           requestPagedList<DeviceInstRecord>('/api/v1/device-insts', {
             params,

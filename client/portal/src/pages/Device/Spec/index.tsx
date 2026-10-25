@@ -97,27 +97,31 @@ const DeviceSpecPage = () => {
 
   const columns: ProColumns<DeviceSpec>[] = [
     { title: '序号', valueType: 'indexBorder', width: 68, hideInSearch: true, fixed: 'left' },
-    { title: '名称', dataIndex: 'name', width: 180, sorter: true },
-    { title: '型号', dataIndex: 'model', width: 120, sorter: true },
-    { title: '品牌', dataIndex: 'brand', width: 120, sorter: true },
+    { title: '名称', dataIndex: 'name', width: 180, ellipsis: true, sorter: true },
+    { title: '型号', dataIndex: 'model', width: 120, ellipsis: true, sorter: true },
+    { title: '品牌', dataIndex: 'brand', width: 120, ellipsis: true, sorter: true },
     { title: '电压', dataIndex: 'voltage', width: 90, valueType: 'digit', sorter: true },
     { title: '转速', dataIndex: 'rpm', width: 90, valueType: 'digit', sorter: true },
     {
       title: '分类',
       dataIndex: 'device_category_id',
+      width: 140,
+      ellipsis: true,
       hideInSearch: true,
       render: (_, row) => row.device_category?.name || '-',
     },
     {
       title: '供应商',
       dataIndex: 'supplier_id',
+      width: 140,
+      ellipsis: true,
       hideInSearch: true,
       render: (_, row) => row.supplier?.name || '-',
     },
     {
       title: '运行模式',
       dataIndex: 'operation_mode',
-      width: 190,
+      width: 180,
       valueType: 'select',
       valueEnum: {
         1: { text: '连续运行' },
@@ -145,6 +149,7 @@ const DeviceSpecPage = () => {
     {
       title: '备注',
       dataIndex: 'description',
+      width: 160,
       ellipsis: true,
       hideInSearch: true,
       render: (_, row) => row.description || '-',
@@ -152,6 +157,7 @@ const DeviceSpecPage = () => {
     {
       title: '性能标准',
       dataIndex: 'remark',
+      width: 180,
       ellipsis: true,
       hideInSearch: true,
       render: (_, row) => row.remark || '-',
@@ -161,6 +167,7 @@ const DeviceSpecPage = () => {
       valueType: 'option',
       width: 180,
       fixed: 'right',
+      align: 'center',
       render: (_, row) => (
         <Space size="small">
           <a
@@ -269,6 +276,7 @@ const DeviceSpecPage = () => {
         actionRef={actionRef}
         columns={columns}
         request={queryDeviceSpecs}
+        scroll={{ x: 'max-content' }}
         search={{ labelWidth: 'auto' }}
         pagination={{ defaultPageSize: 20, showSizeChanger: true }}
         optionsRender={renderRefSafeTableOptions}
