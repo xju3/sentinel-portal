@@ -41,12 +41,22 @@ class SensorDbService:
     @staticmethod
     async def get_by_id(session: AsyncSession, obj_id: UUID) -> Optional[Sensor]:
         from sqlalchemy.orm import joinedload
+        from pub.models.sensor import SensorStatus
         stmt = select(Sensor).options(
-            joinedload(Sensor.sim_card),
-            joinedload(Sensor.latest_status)
+            joinedload(Sensor.sim_card)
         ).where(Sensor.id == obj_id)
         result = await session.execute(stmt)
-        return result.scalar_one_or_none()
+        sensor = result.scalar_one_or_none()
+        if sensor:
+            status_stmt = (
+                select(SensorStatus)
+                .where(SensorStatus.sn == sensor.sn)
+                .order_by(SensorStatus.ts.desc())
+                .limit(1)
+            )
+            status_res = await session.execute(status_stmt)
+            sensor.latest_status = status_res.scalar_one_or_none()
+        return sensor
 
     @staticmethod
     async def get_binding_by_sn(session: AsyncSession, sn: str) -> Optional[dict]:
@@ -241,8 +251,7 @@ class SensorDbService:
         from sqlalchemy import func
 
         base_stmt = select(Sensor).options(
-            joinedload(Sensor.sim_card),
-            joinedload(Sensor.latest_status)
+            joinedload(Sensor.sim_card)
         )
         
         if not sort_by:
