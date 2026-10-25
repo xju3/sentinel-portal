@@ -81,7 +81,7 @@ class WeatherService:
         plus the most recent record at or before start_at_utc for forward-fill anchoring.
         Returns sorted list of (utc_datetime, temperature_float).
         """
-        if not region_id or not hasattr(session, "execute"):
+        if not hasattr(session, "execute"):
             return []
         try:
             if start_at_utc.tzinfo is None:
@@ -92,30 +92,49 @@ class WeatherService:
             start_shanghai = start_at_utc.astimezone(SHANGHAI_TZ).replace(tzinfo=None)
             end_shanghai = end_at_utc.astimezone(SHANGHAI_TZ).replace(tzinfo=None)
 
-            anchor_stmt = (
-                select(Temperature.dt, Temperature.temperature)
-                .where(
-                    Temperature.region_id == str(region_id),
-                    Temperature.dt <= start_shanghai,
+            async def _query_rows(target_region_id: str | None):
+                region_filter = (
+                    [Temperature.region_id == str(target_region_id)]
+                    if target_region_id
+                    else []
                 )
-                .order_by(Temperature.dt.desc())
-                .limit(1)
-            )
-            range_stmt = (
-                select(Temperature.dt, Temperature.temperature)
-                .where(
-                    Temperature.region_id == str(region_id),
-                    Temperature.dt > start_shanghai,
-                    Temperature.dt <= end_shanghai,
+                anchor_stmt = (
+                    select(Temperature.dt, Temperature.temperature)
+                    .where(
+                        *region_filter,
+                        Temperature.dt <= start_shanghai,
+                    )
+                    .order_by(Temperature.dt.desc())
+                    .limit(1)
                 )
-                .order_by(Temperature.dt.asc())
-            )
+                range_stmt = (
+                    select(Temperature.dt, Temperature.temperature)
+                    .where(
+                        *region_filter,
+                        Temperature.dt > start_shanghai,
+                        Temperature.dt <= end_shanghai,
+                    )
+                    .order_by(Temperature.dt.asc())
+                )
+                a_rows = (await session.execute(anchor_stmt)).all()
+                r_rows = (await session.execute(range_stmt)).all()
+                combined = [*a_rows, *r_rows]
+                if not combined:
+                    latest_stmt = (
+                        select(Temperature.dt, Temperature.temperature)
+                        .where(*region_filter)
+                        .order_by(Temperature.dt.desc())
+                        .limit(1)
+                    )
+                    combined = list((await session.execute(latest_stmt)).all())
+                return combined
 
-            anchor_rows = (await session.execute(anchor_stmt)).all()
-            range_rows = (await session.execute(range_stmt)).all()
+            raw_rows = await _query_rows(region_id)
+            if not raw_rows and region_id is not None:
+                raw_rows = await _query_rows(None)
 
             records: list[tuple[datetime, float]] = []
-            for row in [*anchor_rows, *range_rows]:
+            for row in raw_rows:
                 dt_val, temp_val = row[0], row[1]
                 if dt_val is None or temp_val is None:
                     continue

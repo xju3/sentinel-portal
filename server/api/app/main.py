@@ -72,11 +72,17 @@ async def wechat_verify_2():
 
 def start_server():
     import uvicorn
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    pub_dir = os.path.abspath(os.path.join(base_dir, "..", "pub", "src"))
+    reload_dirs = [os.path.join(base_dir, "app")]
+    if os.path.isdir(pub_dir):
+        reload_dirs.append(pub_dir)
     uvicorn.run(
         "app.main:app",
         host=settings.host,
         port=3010,
         reload=settings.debug,
+        reload_dirs=reload_dirs if settings.debug else None,
         log_level="debug" if settings.debug else "info",
     )
 

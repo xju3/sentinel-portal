@@ -71,12 +71,12 @@ REDIS_KEY_DIA_DIAGNOSED_REPORT = "dia:diagnosed:report:{report_id}"
 # 设备健康档案中的测点趋势短缓存，避免切换温度/振动 TAB 时重复读取 InfluxDB。
 # 数据为同一设备、测点、范围和显示窗口的完整趋势响应，60 秒过期。
 REDIS_KEY_DEVICE_POINT_TREND = (
-    "dia:trend:v2:{tenant_id}:{device_id}:{location_id}:{range_days}:{window_minutes}"
+    "dia:trend:v3:{tenant_id}:{device_id}:{location_id}:{range_days}:{window_minutes}"
 )
 
 # 同一设备分组、同一规格、同一测点的多设备趋势对比结果，60 秒过期。
 REDIS_KEY_DEVICE_SPEC_COMPARISON = (
-    "dia:compare:v3:{tenant_id}:{process_device_id}:{device_spec_id}:"
+    "dia:compare:v4:{tenant_id}:{process_device_id}:{device_spec_id}:"
     "{location_id}:{range_days}:{window_minutes}"
 )
 
