@@ -421,6 +421,9 @@ def _device_spec_context(device_spec: DeviceSpec | None) -> dict[str, Any] | Non
         "name": device_spec.name,
         "model": device_spec.model,
         "brand": device_spec.brand,
+        "speed_mode": getattr(device_spec, "speed_mode", 1),
+        "poles": getattr(device_spec, "poles", None),
+        "frequency_hz": getattr(device_spec, "frequency_hz", None),
         "rpm": device_spec.rpm,
         "device_category_id": device_spec.device_category_id,
     }

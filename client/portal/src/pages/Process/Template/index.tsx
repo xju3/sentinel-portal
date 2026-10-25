@@ -215,7 +215,11 @@ const ProcessTemplatePage = () => {
     { title: '型号', dataIndex: 'model' },
     { title: '品牌', dataIndex: 'brand' },
     { title: '电压(V)', dataIndex: 'voltage' },
-    { title: '转速(RPM)', dataIndex: 'rpm' },
+    {
+      title: '转速(RPM)',
+      dataIndex: 'rpm',
+      render: (_, row) => (row.rpm !== undefined && row.rpm < 0 ? '变频(未定速)' : row.rpm),
+    },
   ];
 
   return (

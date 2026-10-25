@@ -91,7 +91,7 @@ async def ensure_device_inst_optional_fields(conn) -> None:
 
 
 async def ensure_device_spec_operation_fields(conn) -> None:
-    """Ensure device_spec has operation_mode and reference_id columns."""
+    """Ensure device_spec has operation_mode, reference_id, speed_mode, poles, and frequency_hz columns."""
     if conn.dialect.name != "mysql":
         return
 
@@ -102,12 +102,30 @@ async def ensure_device_spec_operation_fields(conn) -> None:
             FROM information_schema.columns
             WHERE table_schema = DATABASE()
               AND table_name = 'device_spec'
-              AND column_name IN ('operation_mode', 'reference_id')
+              AND column_name IN (
+                  'operation_mode',
+                  'reference_id',
+                  'speed_mode',
+                  'poles',
+                  'frequency_hz'
+              )
             """
         )
     )
     existing_columns = {row[0] for row in result.fetchall()}
     alterations = []
+    if "speed_mode" not in existing_columns:
+        alterations.append(
+            "ADD COLUMN `speed_mode` SMALLINT NOT NULL DEFAULT 1 COMMENT '1:定速, 2:变频' AFTER `voltage`"
+        )
+    if "poles" not in existing_columns:
+        alterations.append(
+            "ADD COLUMN `poles` INT NULL COMMENT '电机极数' AFTER `speed_mode`"
+        )
+    if "frequency_hz" not in existing_columns:
+        alterations.append(
+            "ADD COLUMN `frequency_hz` DOUBLE NULL COMMENT '变频运行频率(Hz)' AFTER `poles`"
+        )
     if "operation_mode" not in existing_columns:
         alterations.append(
             "ADD COLUMN `operation_mode` SMALLINT NOT NULL DEFAULT 1 COMMENT '1:连续运行, 2:事件触发, 3:时段运行' AFTER `remark`"

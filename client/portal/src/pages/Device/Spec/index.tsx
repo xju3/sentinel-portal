@@ -8,6 +8,7 @@ import {
   ProFormDependency,
   ProFormDigit,
   ProFormRadio,
+  ProFormSelect,
   ProFormSwitch,
   ProFormText,
   ProFormTextArea,
@@ -101,7 +102,42 @@ const DeviceSpecPage = () => {
     { title: '型号', dataIndex: 'model', width: 120, ellipsis: true, sorter: true },
     { title: '品牌', dataIndex: 'brand', width: 120, ellipsis: true, sorter: true },
     { title: '电压', dataIndex: 'voltage', width: 90, valueType: 'digit', sorter: true },
-    { title: '转速', dataIndex: 'rpm', width: 90, valueType: 'digit', sorter: true },
+    {
+      title: '转速特征',
+      dataIndex: 'speed_mode',
+      width: 100,
+      valueType: 'select',
+      valueEnum: {
+        1: { text: '定速' },
+        2: { text: '变频' },
+      },
+      render: (_, row) =>
+        (row.speed_mode ?? 1) === 2 ? (
+          <Tag color="purple">变频</Tag>
+        ) : (
+          <Tag color="cyan">定速</Tag>
+        ),
+    },
+    {
+      title: '转速(RPM)',
+      dataIndex: 'rpm',
+      width: 150,
+      valueType: 'digit',
+      sorter: true,
+      render: (_, row) => {
+        if ((row.speed_mode ?? 1) === 2) {
+          if (row.rpm === undefined || row.rpm === null || row.rpm < 0) {
+            return <span style={{ color: '#8c8c8c' }}>未定速</span>;
+          }
+          const extra =
+            row.frequency_hz && row.poles
+              ? ` (${row.frequency_hz}Hz/${row.poles}极)`
+              : '';
+          return `${row.rpm}${extra}`;
+        }
+        return row.rpm ?? 0;
+      },
+    },
     {
       title: '分类',
       dataIndex: 'device_category_id',
@@ -314,24 +350,49 @@ const DeviceSpecPage = () => {
                 description: editing.description,
                 brand: editing.brand,
                 voltage: editing.voltage,
-                rpm: editing.rpm,
+                speed_mode: editing.speed_mode ?? 1,
+                poles: editing.poles ?? 4,
+                frequency_hz:
+                  editing.frequency_hz !== null &&
+                  editing.frequency_hz !== undefined &&
+                  editing.frequency_hz > 0
+                    ? editing.frequency_hz
+                    : undefined,
+                rpm: editing.rpm >= 0 ? editing.rpm : 0,
                 supplier_id: editing.supplier_id,
                 device_category_id: editing.device_category_id,
                 operation_mode: editing.operation_mode ?? 1,
                 reference_id: editing.reference_id ?? undefined,
                 remark: editing.remark,
               }
-            : { voltage: 0, rpm: 0, operation_mode: 1 }
+            : { voltage: 0, speed_mode: 1, poles: 4, rpm: 0, operation_mode: 1 }
         }
         onFinish={async (values) => {
+          const speedMode = values.speed_mode ?? 1;
           const operationMode = values.operation_mode ?? 1;
+          const freqVal =
+            values.frequency_hz !== undefined &&
+            values.frequency_hz !== null &&
+            Number(values.frequency_hz) > 0
+              ? Number(values.frequency_hz)
+              : null;
+          const polesVal = speedMode === 2 ? Number(values.poles || 4) : null;
+          const computedRpm =
+            speedMode === 1
+              ? Number(values.rpm ?? 0)
+              : freqVal && polesVal
+                ? Math.round((120 * freqVal) / polesVal)
+                : -1;
           const payload: DeviceSpecPayload = {
             name: values.name.trim(),
             model: values.model.trim(),
             description: values.description?.trim() || undefined,
             brand: values.brand.trim(),
             voltage: values.voltage,
-            rpm: values.rpm,
+            speed_mode: speedMode,
+            poles: polesVal,
+            frequency_hz: freqVal,
+            rpm: computedRpm,
             supplier_id: values.supplier_id,
             device_category_id: values.device_category_id,
             operation_mode: operationMode,
@@ -404,7 +465,67 @@ const DeviceSpecPage = () => {
                       onRecordChange={(record) => formRef.current?.setFieldsValue({ brand: record?.brand || '' })}
                     />
                   </ProForm.Item>
-                  <ProFormDigit name="rpm" label="转速(RPM)" min={0} fieldProps={{ precision: 0 }} rules={[{ required: true, message: '请输入转速' }]} />
+                  <ProFormRadio.Group
+                    name="speed_mode"
+                    label="转速特征"
+                    rules={[{ required: true, message: '请选择转速特征' }]}
+                    options={[
+                      { label: '定速', value: 1 },
+                      { label: '变频', value: 2 },
+                    ]}
+                  />
+                  <ProFormDependency name={['speed_mode', 'poles', 'frequency_hz']}>
+                    {({ speed_mode, poles, frequency_hz }) => {
+                      if ((speed_mode ?? 1) === 2) {
+                        const freqNum = Number(frequency_hz);
+                        const polesNum = Number(poles);
+                        const previewRpm =
+                          !Number.isNaN(freqNum) &&
+                          freqNum > 0 &&
+                          !Number.isNaN(polesNum) &&
+                          polesNum >= 2
+                            ? Math.round((120 * freqNum) / polesNum)
+                            : null;
+                        return (
+                          <>
+                            <ProFormSelect
+                              name="poles"
+                              label="电机极数"
+                              options={[
+                                { label: '2极 (同步3000 RPM @50Hz)', value: 2 },
+                                { label: '4极 (同步1500 RPM @50Hz)', value: 4 },
+                                { label: '6极 (同步1000 RPM @50Hz)', value: 6 },
+                                { label: '8极 (同步750 RPM @50Hz)', value: 8 },
+                                { label: '10极 (同步600 RPM @50Hz)', value: 10 },
+                                { label: '12极 (同步500 RPM @50Hz)', value: 12 },
+                              ]}
+                              placeholder="请选择电机极数"
+                            />
+                            <ProFormDigit
+                              name="frequency_hz"
+                              label="运行频率(Hz)"
+                              placeholder="选填，留空或填0表示变频转速不固定"
+                              fieldProps={{ precision: 2 }}
+                              extra={
+                                previewRpm !== null
+                                  ? `按公式 (120 × ${freqNum}Hz ÷ ${polesNum}极) 换算转速：${previewRpm} RPM`
+                                  : '未填写正数运行频率时，表示该设备为动态变频（无固定转速，RPM = -1）'
+                              }
+                            />
+                          </>
+                        );
+                      }
+                      return (
+                        <ProFormDigit
+                          name="rpm"
+                          label="转速(RPM)"
+                          min={0}
+                          fieldProps={{ precision: 0 }}
+                          rules={[{ required: true, message: '请输入转速' }]}
+                        />
+                      );
+                    }}
+                  </ProFormDependency>
                   <ProFormDigit name="voltage" label="电压(V)" min={0} fieldProps={{ precision: 2 }} rules={[{ required: true, message: '请输入电压' }]} />
                   <ProFormRadio.Group
                     name="operation_mode"

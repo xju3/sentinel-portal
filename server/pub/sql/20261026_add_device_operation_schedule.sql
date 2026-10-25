@@ -35,6 +35,42 @@ BEGIN
         FROM information_schema.COLUMNS
         WHERE TABLE_SCHEMA = DATABASE()
           AND TABLE_NAME = 'device_spec'
+          AND COLUMN_NAME = 'speed_mode'
+    ) THEN
+        ALTER TABLE device_spec
+            ADD COLUMN speed_mode SMALLINT NOT NULL DEFAULT 1 COMMENT '1:定速, 2:变频'
+            AFTER voltage;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'device_spec'
+          AND COLUMN_NAME = 'poles'
+    ) THEN
+        ALTER TABLE device_spec
+            ADD COLUMN poles INT NULL COMMENT '电机极数(如2,4,6,8)'
+            AFTER speed_mode;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'device_spec'
+          AND COLUMN_NAME = 'frequency_hz'
+    ) THEN
+        ALTER TABLE device_spec
+            ADD COLUMN frequency_hz DOUBLE NULL COMMENT '变频运行频率(Hz)'
+            AFTER poles;
+    END IF;
+
+    IF NOT EXISTS (
+        SELECT 1
+        FROM information_schema.COLUMNS
+        WHERE TABLE_SCHEMA = DATABASE()
+          AND TABLE_NAME = 'device_spec'
           AND COLUMN_NAME = 'operation_mode'
     ) THEN
         ALTER TABLE device_spec

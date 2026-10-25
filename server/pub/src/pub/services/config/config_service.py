@@ -30,7 +30,7 @@ def init_sensitive_fields():
     CONFIG_SENSITIVE_FIELDS.update({
         SensorMonitoring:    {"device_inst_id", "location_id", "sensor_id", "direction", "status"},
         DeviceInst:          {"device_spec_id", "status", "active", "available"},
-        DeviceSpec:          {"rpm", "device_category_id", "operation_mode", "reference_id"},
+        DeviceSpec:          {"rpm", "speed_mode", "poles", "frequency_hz", "device_category_id", "operation_mode", "reference_id"},
         DeviceOperationSchedule: {"status"},
         DeviceCategory:      {"iso_standard_id", "health_check_freq_id", "vib_threshold_id", "temp_threshold_id"},
         SensorThreshold:     {

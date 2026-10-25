@@ -804,17 +804,18 @@ async def list_device_specs(
     device_category_id: Optional[UUID] = Query(None),
     rpm: Optional[int] = Query(None),
     voltage: Optional[float] = Query(None),
+    speed_mode: Optional[int] = Query(None),
     operation_mode: Optional[int] = Query(None),
     process_device_id: Optional[UUID] = Query(None),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
-    extra_kwargs = (
-        {"operation_mode": operation_mode}
-        if isinstance(operation_mode, int)
-        else {}
-    )
+    extra_kwargs: dict = {}
+    if isinstance(speed_mode, int):
+        extra_kwargs["speed_mode"] = speed_mode
+    if isinstance(operation_mode, int):
+        extra_kwargs["operation_mode"] = operation_mode
     specs, total = await DeviceSpecService.get_all(
         session,
         tenant_id,
@@ -951,6 +952,54 @@ async def update_device_spec(
         )
     if effective_mode in (1, 2):
         update_data["reference_id"] = None
+
+    effective_speed_mode = update_data.get(
+        "speed_mode", getattr(db_obj, "speed_mode", 1)
+    )
+    if effective_speed_mode == 1:
+        update_data["poles"] = None
+        update_data["frequency_hz"] = None
+        effective_rpm = (
+            update_data.get("rpm")
+            if "rpm" in update_data
+            else getattr(db_obj, "rpm", 0)
+        )
+        if effective_rpm is None or effective_rpm < 0:
+            raise HTTPException(
+                status_code=400,
+                detail="定速模式下转速(rpm)必须为非负整数",
+            )
+    else:
+        effective_poles = (
+            update_data.get("poles")
+            if "poles" in update_data
+            else getattr(db_obj, "poles", None)
+        )
+        effective_freq = (
+            update_data.get("frequency_hz")
+            if "frequency_hz" in update_data
+            else getattr(db_obj, "frequency_hz", None)
+        )
+        if effective_poles is not None and (
+            effective_poles < 2 or effective_poles % 2 != 0
+        ):
+            raise HTTPException(
+                status_code=400,
+                detail="电机极数(poles)必须为大于等于2的偶数（如2、4、6、8）",
+            )
+        if effective_freq is None or effective_freq <= 0:
+            update_data["frequency_hz"] = None
+            update_data["rpm"] = -1
+        else:
+            if effective_poles is None:
+                raise HTTPException(
+                    status_code=400,
+                    detail="变频模式下填写运行频率(Hz)时必须指定电机极数(poles)",
+                )
+            update_data["rpm"] = int(
+                round(120.0 * float(effective_freq) / int(effective_poles))
+            )
+
     await _validate_device_spec_refs(session, tenant_id, update_data)
     updated = await DeviceSpecService.update(session, db_obj, update_data)
     await BearingService.invalidate_diagnosis_cache(session, [obj_id])

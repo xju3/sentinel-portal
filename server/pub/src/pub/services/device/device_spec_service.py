@@ -59,6 +59,7 @@ class DeviceSpecService:
         device_category_id: UUID | None = None,
         rpm: int | None = None,
         voltage: float | None = None,
+        speed_mode: int | None = None,
         operation_mode: int | None = None,
     ) -> tuple[List[DeviceSpec], int]:
         stmt = (
@@ -113,6 +114,8 @@ class DeviceSpecService:
             stmt = stmt.where(DeviceSpec.rpm == rpm)
         if voltage is not None:
             stmt = stmt.where(DeviceSpec.voltage == voltage)
+        if speed_mode is not None:
+            stmt = stmt.where(DeviceSpec.speed_mode == speed_mode)
         if operation_mode is not None:
             stmt = stmt.where(DeviceSpec.operation_mode == operation_mode)
 

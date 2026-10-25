@@ -240,6 +240,9 @@ class DeviceSpecCreate(BaseModel):
     description: Optional[str] = None
     brand: str
     voltage: Optional[float] = 0.0
+    speed_mode: int = 1
+    poles: Optional[int] = None
+    frequency_hz: Optional[float] = None
     rpm: Optional[int] = 0
     remark: Optional[str] = None
     operation_mode: int = 1
@@ -248,13 +251,31 @@ class DeviceSpecCreate(BaseModel):
     device_category_id: UUID
 
     @model_validator(mode="after")
-    def validate_operation_mode(self):
+    def validate_modes_and_rpm(self):
         if self.operation_mode not in (1, 2, 3):
             raise ValueError("operation_mode must be 1 (连续运行), 2 (事件触发), or 3 (时段运行)")
         if self.operation_mode == 3 and self.reference_id is None:
             raise ValueError("reference_id is required when operation_mode is 3 (时段运行)")
         if self.operation_mode in (1, 2):
             self.reference_id = None
+
+        if self.speed_mode not in (1, 2):
+            raise ValueError("speed_mode must be 1 (定速) or 2 (变频)")
+        if self.speed_mode == 1:
+            self.poles = None
+            self.frequency_hz = None
+            if self.rpm is None or self.rpm < 0:
+                raise ValueError("定速模式下转速(rpm)必须为非负整数")
+        else:
+            if self.poles is not None and (self.poles < 2 or self.poles % 2 != 0):
+                raise ValueError("电机极数(poles)必须为大于等于2的偶数（如2、4、6、8）")
+            if self.frequency_hz is None or self.frequency_hz <= 0:
+                self.frequency_hz = None
+                self.rpm = -1
+            else:
+                if self.poles is None:
+                    raise ValueError("变频模式下填写运行频率(Hz)时必须指定电机极数(poles)")
+                self.rpm = int(round(120.0 * float(self.frequency_hz) / int(self.poles)))
         return self
 
 
@@ -264,6 +285,9 @@ class DeviceSpecUpdate(BaseModel):
     description: Optional[str] = None
     brand: Optional[str] = None
     voltage: Optional[float] = None
+    speed_mode: Optional[int] = None
+    poles: Optional[int] = None
+    frequency_hz: Optional[float] = None
     rpm: Optional[int] = None
     remark: Optional[str] = None
     operation_mode: Optional[int] = None
@@ -277,6 +301,8 @@ class DeviceSpecUpdate(BaseModel):
             raise ValueError("operation_mode must be 1 (连续运行), 2 (事件触发), or 3 (时段运行)")
         if self.operation_mode in (1, 2):
             self.reference_id = None
+        if self.speed_mode is not None and self.speed_mode not in (1, 2):
+            raise ValueError("speed_mode must be 1 (定速) or 2 (变频)")
         return self
 
 
@@ -308,6 +334,9 @@ class DeviceSpecResponse(BaseModel):
     description: Optional[str] = None
     brand: str
     voltage: float
+    speed_mode: int = 1
+    poles: Optional[int] = None
+    frequency_hz: Optional[float] = None
     rpm: int
     remark: Optional[str] = None
     operation_mode: int = 1

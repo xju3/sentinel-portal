@@ -7,6 +7,9 @@ export type DeviceSpec = {
   description?: string;
   brand: string;
   voltage: number;
+  speed_mode?: number;
+  poles?: number | null;
+  frequency_hz?: number | null;
   rpm: number;
   supplier_id: string;
   device_category_id: string;
@@ -20,6 +23,9 @@ export type DeviceSpecPayload = {
   description?: string;
   brand: string;
   voltage?: number;
+  speed_mode?: number;
+  poles?: number | null;
+  frequency_hz?: number | null;
   rpm?: number;
   supplier_id: string;
   device_category_id: string;

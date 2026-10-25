@@ -127,6 +127,14 @@ class DeviceSpec(Base):
     description = Column(String(255))
     brand = Column(String(64), nullable=False)
     voltage = Column(Float, nullable=False, default=0.0)
+    speed_mode = Column(
+        SmallInteger,
+        nullable=False,
+        default=1,
+        comment="1:定速, 2:变频",
+    )
+    poles = Column(Integer, nullable=True, comment="电机极数(如2,4,6,8)")
+    frequency_hz = Column(Float, nullable=True, comment="变频运行频率(Hz)")
     rpm = Column(Integer, nullable=False, default=0)
     remark = Column(Text, nullable=True, comment="电气性能标准")
     operation_mode = Column(

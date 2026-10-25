@@ -400,3 +400,86 @@ async def test_device_spec_refs_validates_operation_schedule_for_mode_3(monkeypa
     assert exc_info.value.status_code == 400
     assert exc_info.value.detail == "reference_id is not owned by current tenant"
 
+
+def test_device_spec_speed_mode_calculates_rpm():
+    from pydantic import ValidationError
+    from pub.contract.devices import DeviceSpecCreate
+
+    supplier_id = uuid4()
+    category_id = uuid4()
+
+    # 1. Fixed speed clears poles and frequency_hz
+    fixed = DeviceSpecCreate(
+        name="定速电机",
+        model="M1",
+        brand="B1",
+        supplier_id=supplier_id,
+        device_category_id=category_id,
+        speed_mode=1,
+        poles=4,
+        frequency_hz=50.0,
+        rpm=1480,
+    )
+    assert fixed.speed_mode == 1
+    assert fixed.poles is None
+    assert fixed.frequency_hz is None
+    assert fixed.rpm == 1480
+
+    # 2. Variable frequency without frequency_hz (None / 0 / -1) sets rpm = -1
+    for empty_freq in (None, 0, -1):
+        vf_dynamic = DeviceSpecCreate(
+            name="变频无固定转速",
+            model="M1",
+            brand="B1",
+            supplier_id=supplier_id,
+            device_category_id=category_id,
+            speed_mode=2,
+            poles=4,
+            frequency_hz=empty_freq,
+            rpm=1480,
+        )
+        assert vf_dynamic.speed_mode == 2
+        assert vf_dynamic.frequency_hz is None
+        assert vf_dynamic.rpm == -1
+
+    # 3. Variable frequency with poles=4 and frequency_hz=40.0 -> rpm = 120 * 40 / 4 = 1200
+    vf_fixed_freq = DeviceSpecCreate(
+        name="变频恒频电机",
+        model="M1",
+        brand="B1",
+        supplier_id=supplier_id,
+        device_category_id=category_id,
+        speed_mode=2,
+        poles=4,
+        frequency_hz=40.0,
+    )
+    assert vf_fixed_freq.speed_mode == 2
+    assert vf_fixed_freq.poles == 4
+    assert vf_fixed_freq.frequency_hz == 40.0
+    assert vf_fixed_freq.rpm == 1200
+
+    # 4. Variable frequency with frequency_hz > 0 but missing or odd poles fails validation
+    with pytest.raises(ValidationError):
+        DeviceSpecCreate(
+            name="变频缺少极数",
+            model="M1",
+            brand="B1",
+            supplier_id=supplier_id,
+            device_category_id=category_id,
+            speed_mode=2,
+            poles=None,
+            frequency_hz=40.0,
+        )
+    with pytest.raises(ValidationError):
+        DeviceSpecCreate(
+            name="变频奇数极数",
+            model="M1",
+            brand="B1",
+            supplier_id=supplier_id,
+            device_category_id=category_id,
+            speed_mode=2,
+            poles=3,
+            frequency_hz=40.0,
+        )
+
+

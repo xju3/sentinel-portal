@@ -133,7 +133,9 @@ class SensorDbService:
                 "bearing_type": row.bearing_type,
                 "shaft_speed_ratio": speed_ratio,
                 "shaft_rpm": (
-                    float(row.rpm) * speed_ratio if row.rpm is not None else None
+                    float(row.rpm) * speed_ratio
+                    if row.rpm is not None and row.rpm > 0
+                    else None
                 ),
                 "fault_orders": {
                     "bpfo": orders["BPFO"],

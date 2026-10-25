@@ -17,6 +17,9 @@ export type DeviceSpec = {
   description?: string;
   brand: string;
   voltage: number;
+  speed_mode?: number;
+  poles?: number | null;
+  frequency_hz?: number | null;
   rpm: number;
   supplier_id: string;
   device_category_id: string;
@@ -36,7 +39,10 @@ export type DeviceSpecPayload = {
   description?: string;
   brand: string;
   voltage: number;
-  rpm: number;
+  speed_mode?: number;
+  poles?: number | null;
+  frequency_hz?: number | null;
+  rpm?: number;
   supplier_id: string;
   device_category_id: string;
   operation_mode?: number;
@@ -73,6 +79,7 @@ export type DeviceSpecQueryParams = {
   device_category_id?: string;
   rpm?: number;
   voltage?: number;
+  speed_mode?: number;
   operation_mode?: number;
   process_device_id?: string;
 };
