@@ -59,6 +59,7 @@ class DeviceSpecService:
         device_category_id: UUID | None = None,
         rpm: int | None = None,
         voltage: float | None = None,
+        operation_mode: int | None = None,
     ) -> tuple[List[DeviceSpec], int]:
         stmt = (
             select(DeviceSpec)
@@ -112,6 +113,8 @@ class DeviceSpecService:
             stmt = stmt.where(DeviceSpec.rpm == rpm)
         if voltage is not None:
             stmt = stmt.where(DeviceSpec.voltage == voltage)
+        if operation_mode is not None:
+            stmt = stmt.where(DeviceSpec.operation_mode == operation_mode)
 
         count_stmt = select(func.count()).select_from(stmt.subquery())
         total = (await session.execute(count_stmt)).scalar() or 0
@@ -123,6 +126,7 @@ class DeviceSpecService:
         stmt = stmt.options(
             selectinload(DeviceSpec.supplier),
             selectinload(DeviceSpec.device_category),
+            selectinload(DeviceSpec.operation_schedule),
         ).offset(skip).limit(limit)
         result = await session.execute(stmt)
         items = result.scalars().all()

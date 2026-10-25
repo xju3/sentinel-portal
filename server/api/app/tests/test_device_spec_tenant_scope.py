@@ -317,3 +317,86 @@ async def test_device_category_update_explicitly_loads_employees_before_serializ
     assert session.refresh.await_args_list[1].kwargs == {
         "attribute_names": ["employees"],
     }
+
+
+def test_device_spec_create_validates_operation_mode_and_reference_id():
+    from pydantic import ValidationError
+    from pub.contract.devices import DeviceSpecCreate
+
+    supplier_id = uuid4()
+    category_id = uuid4()
+    schedule_id = uuid4()
+
+    # mode 1 and 2 clear reference_id automatically
+    spec_continuous = DeviceSpecCreate(
+        name="泵A",
+        model="M1",
+        brand="B1",
+        supplier_id=supplier_id,
+        device_category_id=category_id,
+        operation_mode=1,
+        reference_id=schedule_id,
+    )
+    assert spec_continuous.operation_mode == 1
+    assert spec_continuous.reference_id is None
+
+    spec_event = DeviceSpecCreate(
+        name="泵B",
+        model="M1",
+        brand="B1",
+        supplier_id=supplier_id,
+        device_category_id=category_id,
+        operation_mode=2,
+        reference_id=schedule_id,
+    )
+    assert spec_event.operation_mode == 2
+    assert spec_event.reference_id is None
+
+    # mode 3 requires reference_id
+    with pytest.raises(ValidationError):
+        DeviceSpecCreate(
+            name="泵C",
+            model="M1",
+            brand="B1",
+            supplier_id=supplier_id,
+            device_category_id=category_id,
+            operation_mode=3,
+            reference_id=None,
+        )
+
+    spec_scheduled = DeviceSpecCreate(
+        name="泵C",
+        model="M1",
+        brand="B1",
+        supplier_id=supplier_id,
+        device_category_id=category_id,
+        operation_mode=3,
+        reference_id=schedule_id,
+    )
+    assert spec_scheduled.operation_mode == 3
+    assert spec_scheduled.reference_id == schedule_id
+
+
+@pytest.mark.asyncio
+async def test_device_spec_refs_validates_operation_schedule_for_mode_3(monkeypatch):
+    tenant_id = uuid4()
+    schedule_id = uuid4()
+    monkeypatch.setattr(
+        devices.DeviceOperationScheduleService,
+        "get_by_id",
+        AsyncMock(return_value=None),
+    )
+
+    with pytest.raises(devices.HTTPException) as exc_info:
+        await devices._validate_device_spec_refs(
+            Mock(),
+            tenant_id,
+            {
+                "operation_mode": 3,
+                "reference_id": schedule_id,
+            },
+        )
+
+    assert exc_info.value.status_code == 400
+    assert exc_info.value.detail == "reference_id is not owned by current tenant"
+

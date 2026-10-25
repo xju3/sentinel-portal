@@ -90,6 +90,39 @@ async def ensure_device_inst_optional_fields(conn) -> None:
         )
 
 
+async def ensure_device_spec_operation_fields(conn) -> None:
+    """Ensure device_spec has operation_mode and reference_id columns."""
+    if conn.dialect.name != "mysql":
+        return
+
+    result = await conn.execute(
+        text(
+            """
+            SELECT column_name
+            FROM information_schema.columns
+            WHERE table_schema = DATABASE()
+              AND table_name = 'device_spec'
+              AND column_name IN ('operation_mode', 'reference_id')
+            """
+        )
+    )
+    existing_columns = {row[0] for row in result.fetchall()}
+    alterations = []
+    if "operation_mode" not in existing_columns:
+        alterations.append(
+            "ADD COLUMN `operation_mode` SMALLINT NOT NULL DEFAULT 1 COMMENT '1:连续运行, 2:事件触发, 3:时段运行' AFTER `remark`"
+        )
+    if "reference_id" not in existing_columns:
+        alterations.append(
+            "ADD COLUMN `reference_id` CHAR(32) NULL COMMENT '关联运行模式ID' AFTER `operation_mode`"
+        )
+        alterations.append("ADD INDEX `ix_device_spec_reference_id` (`reference_id`)")
+    if alterations:
+        await conn.execute(
+            text(f"ALTER TABLE `device_spec` {', '.join(alterations)}")
+        )
+
+
 class DatabaseManager:
     """Manager for MySQL database connections"""
 

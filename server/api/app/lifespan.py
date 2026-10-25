@@ -23,6 +23,7 @@ from app.database import (
 )
 from pub.manager.mysql_manager import (
     ensure_device_inst_optional_fields,
+    ensure_device_spec_operation_fields,
     ensure_process_code_tenant_unique,
 )
 from pub.models.customer import Tenant
@@ -86,6 +87,7 @@ async def lifespan(app: FastAPI):
         async with db_manager.engine.begin() as conn:
             await ensure_process_code_tenant_unique(conn)
             await ensure_device_inst_optional_fields(conn)
+            await ensure_device_spec_operation_fields(conn)
         redis_manager.init(settings.redis_url)
         stream_redis_manager.init(settings.stream_redis_url)
         influxdb_manager.init(

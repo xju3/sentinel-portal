@@ -5,7 +5,9 @@ import {
   PageContainer,
   ProColumns,
   ProForm,
+  ProFormDependency,
   ProFormDigit,
+  ProFormRadio,
   ProFormSwitch,
   ProFormText,
   ProFormTextArea,
@@ -18,6 +20,11 @@ import EntityPicker from '@/components/EntityPicker';
 import { BearingModel, queryBearings } from '@/services/bearing';
 import { Location, queryLocations } from '@/services/location';
 import { DeviceCategory, listAllDeviceCategories, queryDeviceCategories } from '@/services/deviceCategory';
+import {
+  DeviceOperationSchedule,
+  parseCronScheduleItem,
+  queryOperationSchedules,
+} from '@/services/operationSchedule';
 import {
   DeviceSpec,
   DeviceSpecBearingBinding,
@@ -106,6 +113,34 @@ const DeviceSpecPage = () => {
       dataIndex: 'supplier_id',
       hideInSearch: true,
       render: (_, row) => row.supplier?.name || '-',
+    },
+    {
+      title: '运行模式',
+      dataIndex: 'operation_mode',
+      width: 190,
+      valueType: 'select',
+      valueEnum: {
+        1: { text: '连续运行' },
+        2: { text: '事件触发' },
+        3: { text: '时段运行' },
+      },
+      render: (_, row) => {
+        const mode = row.operation_mode ?? 1;
+        if (mode === 2) {
+          return <Tag color="gold">事件触发</Tag>;
+        }
+        if (mode === 3) {
+          return (
+            <Space size={4} wrap>
+              <Tag color="blue">时段运行</Tag>
+              {row.operation_schedule?.name ? (
+                <span>{row.operation_schedule.name}</span>
+              ) : null}
+            </Space>
+          );
+        }
+        return <Tag color="green">连续运行</Tag>;
+      },
     },
     {
       title: '备注',
@@ -274,11 +309,14 @@ const DeviceSpecPage = () => {
                 rpm: editing.rpm,
                 supplier_id: editing.supplier_id,
                 device_category_id: editing.device_category_id,
+                operation_mode: editing.operation_mode ?? 1,
+                reference_id: editing.reference_id ?? undefined,
                 remark: editing.remark,
               }
-            : { voltage: 0, rpm: 0 }
+            : { voltage: 0, rpm: 0, operation_mode: 1 }
         }
         onFinish={async (values) => {
+          const operationMode = values.operation_mode ?? 1;
           const payload: DeviceSpecPayload = {
             name: values.name.trim(),
             model: values.model.trim(),
@@ -288,6 +326,8 @@ const DeviceSpecPage = () => {
             rpm: values.rpm,
             supplier_id: values.supplier_id,
             device_category_id: values.device_category_id,
+            operation_mode: operationMode,
+            reference_id: operationMode === 3 ? values.reference_id || null : null,
             remark: values.remark?.trim() || undefined,
           };
           setSaving(true);
@@ -358,6 +398,86 @@ const DeviceSpecPage = () => {
                   </ProForm.Item>
                   <ProFormDigit name="rpm" label="转速(RPM)" min={0} fieldProps={{ precision: 0 }} rules={[{ required: true, message: '请输入转速' }]} />
                   <ProFormDigit name="voltage" label="电压(V)" min={0} fieldProps={{ precision: 2 }} rules={[{ required: true, message: '请输入电压' }]} />
+                  <ProFormRadio.Group
+                    name="operation_mode"
+                    label="运行模式"
+                    rules={[{ required: true, message: '请选择运行模式' }]}
+                    options={[
+                      { label: '连续运行', value: 1 },
+                      { label: '事件触发', value: 2 },
+                      { label: '时段运行', value: 3 },
+                    ]}
+                    fieldProps={{
+                      onChange: (event) => {
+                        if (event.target.value !== 3) {
+                          formRef.current?.setFieldsValue({ reference_id: undefined });
+                        }
+                      },
+                    }}
+                  />
+                  <ProFormDependency name={['operation_mode']}>
+                    {({ operation_mode }) =>
+                      operation_mode === 3 ? (
+                        <ProForm.Item
+                          name="reference_id"
+                          label="关联时段策略"
+                          rules={[{ required: true, message: '请选择时段运行模式' }]}
+                        >
+                          <EntityPicker<DeviceOperationSchedule>
+                            placeholder="请点击选择时段运行模式"
+                            modalTitle="选择时段运行模式"
+                            triggerText="选择"
+                            valueLabel={
+                              editing?.operation_schedule
+                                ? `${editing.operation_schedule.name} (${editing.operation_schedule.code})`
+                                : undefined
+                            }
+                            columns={[
+                              { title: '编码', dataIndex: 'code', width: 140 },
+                              { title: '名称', dataIndex: 'name', width: 180 },
+                              {
+                                title: '运行时段',
+                                dataIndex: 'items',
+                                render: (_, row) => {
+                                  const items = row.items || [];
+                                  if (items.length === 0) return '-';
+                                  return (
+                                    <Space size={[4, 4]} wrap>
+                                      {items.map((item, idx) => (
+                                        <Tag key={item.id || idx} color="blue">
+                                          {
+                                            parseCronScheduleItem(
+                                              item.cron_expr,
+                                              item.duration_minutes,
+                                            ).summaryText
+                                          }
+                                        </Tag>
+                                      ))}
+                                    </Space>
+                                  );
+                                },
+                              },
+                              {
+                                title: '说明',
+                                dataIndex: 'description',
+                                render: (_, row) => row.description || '-',
+                              },
+                            ]}
+                            getRecordLabel={(record) => `${record.name} (${record.code})`}
+                            fetcher={async ({ current, pageSize, keyword }) => {
+                              const result = await queryOperationSchedules({
+                                current,
+                                pageSize,
+                                keyword,
+                                status: 1,
+                              });
+                              return { items: result.data, total: result.total };
+                            }}
+                          />
+                        </ProForm.Item>
+                      ) : null
+                    }
+                  </ProFormDependency>
                   <ProFormText name="model" label="型号" />
                   <ProFormText name="brand" label="品牌" fieldProps={{ readOnly: true }} />
                   <ProFormText name="description" label="备注" />

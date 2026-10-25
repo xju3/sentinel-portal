@@ -11,7 +11,13 @@ from pydantic import ValidationError
 
 from pub.services import get_session
 from pub.models.customer import Account as AccountModel
-from pub.models.device import DeviceCategory, DeviceInst, DeviceSpec, ProcessDeviceItem
+from pub.models.device import (
+    DeviceCategory,
+    DeviceInst,
+    DeviceOperationSchedule,
+    DeviceSpec,
+    ProcessDeviceItem,
+)
 from pub.models.sensor import SensorMonitoring
 from pub.services import LocationService
 
@@ -19,6 +25,7 @@ from pub.services import (
     DeviceCategoryService,
     DeviceSpecService,
     BearingService,
+    DeviceOperationScheduleService,
     DeviceInstService,
     SupplierService,
     SensorMonitoringService,
@@ -39,6 +46,11 @@ from pub.contract.devices import (
     HealthCheckFreqBrief,
     DeviceCategoryResponse,
     PagedCountResponse,
+    DeviceOperationScheduleCreate,
+    DeviceOperationScheduleUpdate,
+    DeviceOperationScheduleResponse,
+    DeviceOperationScheduleItemResponse,
+    DeviceOperationScheduleItemsReplace,
     DeviceSpecCreate,
     DeviceSpecUpdate,
     DeviceSpecResponse,
@@ -124,6 +136,33 @@ async def _validate_device_spec_refs(
             raise HTTPException(
                 status_code=400,
                 detail="supplier_id is not owned by current tenant",
+            )
+
+    operation_mode = data.get("operation_mode")
+    if operation_mode in (1, 2):
+        data["reference_id"] = None
+    elif operation_mode == 3 and "reference_id" in data and data.get("reference_id") is None:
+        raise HTTPException(
+            status_code=400,
+            detail="reference_id is required when operation_mode is 3 (时段运行)",
+        )
+
+    reference_id = data.get("reference_id")
+    if reference_id is not None:
+        schedule = await DeviceOperationScheduleService.get_by_id(
+            session,
+            tenant_id,
+            reference_id,
+        )
+        if schedule is None:
+            raise HTTPException(
+                status_code=400,
+                detail="reference_id is not owned by current tenant",
+            )
+        if int(schedule.status or 0) != 1:
+            raise HTTPException(
+                status_code=400,
+                detail="reference_id must reference an active operation schedule",
             )
 
 
@@ -545,7 +584,212 @@ async def delete_bearing(
 
 
 # ==========================================
-# 4. DeviceSpec
+# 4. DeviceOperationSchedule (运行模式)
+# ==========================================
+@router.get("/operation-schedules")
+async def list_operation_schedules(
+    skip: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=200),
+    keyword: Optional[str] = Query(None),
+    code: Optional[str] = Query(None),
+    name: Optional[str] = Query(None),
+    description: Optional[str] = Query(None),
+    status: Optional[int] = Query(None),
+    sort_by: Optional[str] = Query(None),
+    sort_order: Optional[str] = Query("ascend"),
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    items, total = await DeviceOperationScheduleService.list_schedules(
+        session,
+        tenant_id,
+        skip=skip,
+        limit=limit,
+        sort_by=sort_by,
+        sort_order=sort_order or "ascend",
+        keyword=keyword,
+        code=code,
+        name=name,
+        description=description,
+        status=status,
+    )
+    return success(
+        {
+            "items": [
+                DeviceOperationScheduleResponse.model_validate(item)
+                for item in items
+            ],
+            "total": total,
+        }
+    )
+
+
+@router.get("/operation-schedules/{obj_id}")
+async def get_operation_schedule(
+    obj_id: UUID,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    obj = await DeviceOperationScheduleService.get_by_id(
+        session, tenant_id, obj_id
+    )
+    if obj is None:
+        raise HTTPException(
+            status_code=404, detail="Operation schedule not found"
+        )
+    return success(DeviceOperationScheduleResponse.model_validate(obj))
+
+
+@router.post("/operation-schedules")
+async def create_operation_schedule(
+    item: DeviceOperationScheduleCreate,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    data = item.model_dump()
+    duplicate = await DeviceOperationScheduleService.find_duplicate(
+        session, tenant_id, data["code"]
+    )
+    if duplicate is not None:
+        raise HTTPException(
+            status_code=409,
+            detail="运行模式编码已存在",
+        )
+    try:
+        created = await DeviceOperationScheduleService.create(
+            session, tenant_id, data
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return success(DeviceOperationScheduleResponse.model_validate(created))
+
+
+@router.put("/operation-schedules/{obj_id}")
+@monitor_config_change(DeviceOperationSchedule, "obj_id", "item")
+async def update_operation_schedule(
+    obj_id: UUID,
+    item: DeviceOperationScheduleUpdate,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    obj = await DeviceOperationScheduleService.get_by_id(
+        session, tenant_id, obj_id
+    )
+    if obj is None:
+        raise HTTPException(
+            status_code=404, detail="Operation schedule not found"
+        )
+
+    update_data = item.model_dump(exclude_unset=True)
+    merged = {
+        "code": obj.code,
+        "name": obj.name,
+        "description": obj.description,
+        "status": obj.status,
+        **update_data,
+    }
+    try:
+        validated = DeviceOperationScheduleCreate(**merged)
+    except ValidationError as exc:
+        raise HTTPException(status_code=422, detail=str(exc)) from exc
+    normalized = validated.model_dump()
+    update_data = {key: normalized[key] for key in update_data}
+
+    duplicate = await DeviceOperationScheduleService.find_duplicate(
+        session,
+        tenant_id,
+        normalized["code"],
+        exclude_id=obj_id,
+    )
+    if duplicate is not None:
+        raise HTTPException(
+            status_code=409,
+            detail="运行模式编码已存在",
+        )
+    try:
+        updated = await DeviceOperationScheduleService.update(
+            session, obj, update_data
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return success(DeviceOperationScheduleResponse.model_validate(updated))
+
+
+@router.delete("/operation-schedules/{obj_id}")
+async def delete_operation_schedule(
+    obj_id: UUID,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    obj = await DeviceOperationScheduleService.get_by_id(
+        session, tenant_id, obj_id
+    )
+    if obj is None:
+        raise HTTPException(
+            status_code=404, detail="Operation schedule not found"
+        )
+    try:
+        await DeviceOperationScheduleService.delete(session, obj)
+    except ValueError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    return success({"message": "Operation schedule deleted successfully"})
+
+
+@router.get("/operation-schedules/{obj_id}/items")
+async def list_operation_schedule_items(
+    obj_id: UUID,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    items = await DeviceOperationScheduleService.list_items(
+        session, tenant_id, obj_id
+    )
+    if items is None:
+        raise HTTPException(
+            status_code=404, detail="Operation schedule not found"
+        )
+    return success(
+        [
+            DeviceOperationScheduleItemResponse.model_validate(item)
+            for item in items
+        ]
+    )
+
+
+@router.put("/operation-schedules/{obj_id}/items")
+async def replace_operation_schedule_items(
+    obj_id: UUID,
+    item: DeviceOperationScheduleItemsReplace,
+    current_account: AccountModel = Depends(get_current_account),
+    session: AsyncSession = Depends(get_session),
+):
+    tenant_id = cast(UUID, current_account.tenant_id)
+    items = await DeviceOperationScheduleService.replace_items(
+        session,
+        tenant_id,
+        obj_id,
+        [entry.model_dump() for entry in item.items],
+    )
+    if items is None:
+        raise HTTPException(
+            status_code=404, detail="Operation schedule not found"
+        )
+    return success(
+        [
+            DeviceOperationScheduleItemResponse.model_validate(entry)
+            for entry in items
+        ]
+    )
+
+
+# ==========================================
+# 5. DeviceSpec
 # ==========================================
 @router.get("/device-specs")
 async def list_device_specs(
@@ -560,11 +804,17 @@ async def list_device_specs(
     device_category_id: Optional[UUID] = Query(None),
     rpm: Optional[int] = Query(None),
     voltage: Optional[float] = Query(None),
+    operation_mode: Optional[int] = Query(None),
     process_device_id: Optional[UUID] = Query(None),
     current_account: AccountModel = Depends(get_current_account),
     session: AsyncSession = Depends(get_session),
 ):
     tenant_id = cast(UUID, current_account.tenant_id)
+    extra_kwargs = (
+        {"operation_mode": operation_mode}
+        if isinstance(operation_mode, int)
+        else {}
+    )
     specs, total = await DeviceSpecService.get_all(
         session,
         tenant_id,
@@ -581,6 +831,7 @@ async def list_device_specs(
         device_category_id=device_category_id,
         rpm=rpm,
         voltage=voltage,
+        **extra_kwargs,
     )
     return success({"items": specs, "total": total})
 
@@ -685,6 +936,21 @@ async def update_device_spec(
         raise HTTPException(status_code=404, detail="DeviceSpec not found")
 
     update_data = item.model_dump(exclude_unset=True)
+    effective_mode = update_data.get(
+        "operation_mode", getattr(db_obj, "operation_mode", 1)
+    )
+    effective_ref = (
+        update_data.get("reference_id")
+        if "reference_id" in update_data
+        else getattr(db_obj, "reference_id", None)
+    )
+    if effective_mode == 3 and effective_ref is None:
+        raise HTTPException(
+            status_code=400,
+            detail="reference_id is required when operation_mode is 3 (时段运行)",
+        )
+    if effective_mode in (1, 2):
+        update_data["reference_id"] = None
     await _validate_device_spec_refs(session, tenant_id, update_data)
     updated = await DeviceSpecService.update(session, db_obj, update_data)
     await BearingService.invalidate_diagnosis_cache(session, [obj_id])

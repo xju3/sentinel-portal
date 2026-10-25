@@ -10,6 +10,8 @@ export type DeviceSpec = {
   rpm: number;
   supplier_id: string;
   device_category_id: string;
+  operation_mode?: number;
+  reference_id?: string | null;
 };
 
 export type DeviceSpecPayload = {
@@ -21,6 +23,8 @@ export type DeviceSpecPayload = {
   rpm?: number;
   supplier_id: string;
   device_category_id: string;
+  operation_mode?: number;
+  reference_id?: string | null;
 };
 
 export async function listDeviceSpecs(skip = 0, limit = 100) {

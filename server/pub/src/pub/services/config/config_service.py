@@ -21,7 +21,7 @@ def init_sensitive_fields():
         return
 
     from pub.models.sensor import SensorMonitoring, SensorThreshold
-    from pub.models.device import DeviceInst, DeviceSpec, DeviceCategory
+    from pub.models.device import DeviceInst, DeviceSpec, DeviceCategory, DeviceOperationSchedule
     from pub.models.customer import HealthCheckFreq, IsoStandard, Area
     from pub.models.device import ProcessDevice, ProcessDeviceItem
 
@@ -30,7 +30,8 @@ def init_sensitive_fields():
     CONFIG_SENSITIVE_FIELDS.update({
         SensorMonitoring:    {"device_inst_id", "location_id", "sensor_id", "direction", "status"},
         DeviceInst:          {"device_spec_id", "status", "active", "available"},
-        DeviceSpec:          {"rpm", "device_category_id"},
+        DeviceSpec:          {"rpm", "device_category_id", "operation_mode", "reference_id"},
+        DeviceOperationSchedule: {"status"},
         DeviceCategory:      {"iso_standard_id", "health_check_freq_id", "vib_threshold_id", "temp_threshold_id"},
         SensorThreshold:     {
             "code",
@@ -54,7 +55,14 @@ def init_sensitive_fields():
 async def find_affected_sns(session: AsyncSession, model_class: Type, obj_id: UUID) -> List[str]:
     """根据模型类和记录 ID，反向追溯所有受影响的 sensor.sn。"""
     from pub.models.sensor import Sensor, SensorMonitoring, SensorThreshold
-    from pub.models.device import DeviceInst, DeviceSpec, DeviceCategory, ProcessDevice, ProcessDeviceItem
+    from pub.models.device import (
+        DeviceInst,
+        DeviceSpec,
+        DeviceCategory,
+        DeviceOperationSchedule,
+        ProcessDevice,
+        ProcessDeviceItem,
+    )
     from pub.models.customer import IsoStandard, HealthCheckFreq, Area
 
     sns: List[str] = []
@@ -93,6 +101,19 @@ async def find_affected_sns(session: AsyncSession, model_class: Type, obj_id: UU
             .join(Sensor, Sensor.id == SensorMonitoring.sensor_id)
             .join(DeviceInst, DeviceInst.id == SensorMonitoring.device_inst_id)
             .where(DeviceInst.device_spec_id == obj_id)
+        )
+
+    elif model_class is DeviceOperationSchedule:
+        stmt = (
+            select(Sensor.sn)
+            .select_from(SensorMonitoring)
+            .join(Sensor, Sensor.id == SensorMonitoring.sensor_id)
+            .join(DeviceInst, DeviceInst.id == SensorMonitoring.device_inst_id)
+            .join(DeviceSpec, DeviceSpec.id == DeviceInst.device_spec_id)
+            .where(
+                DeviceSpec.operation_mode == 3,
+                DeviceSpec.reference_id == obj_id,
+            )
         )
 
     elif model_class is DeviceCategory:

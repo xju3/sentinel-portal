@@ -73,6 +73,49 @@ class DeviceCategory(Base):
         backref="device_categories"
     )
 
+class DeviceOperationSchedule(Base):
+    """Reusable operation schedule definition for scheduled device operation."""
+
+    __tablename__ = "device_operation_schedule"
+    __table_args__ = (
+        UniqueConstraint("tenant_id", "code", name="uq_op_schedule_tenant_code"),
+    )
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    tenant_id = Column(Uuid(as_uuid=True), nullable=False, index=True)
+    code = Column(String(16), nullable=False)
+    name = Column(String(64), nullable=False)
+    description = Column(String(255), nullable=True)
+    status = Column(SmallInteger, nullable=False, default=1, comment="1:启用, 0:停用")
+
+    items = relationship(
+        "DeviceOperationScheduleItem",
+        primaryjoin="DeviceOperationSchedule.id == foreign(DeviceOperationScheduleItem.schedule_id)",
+        order_by="DeviceOperationScheduleItem.seq.asc()",
+        lazy="selectin",
+        uselist=True,
+        cascade="all, delete-orphan",
+    )
+
+
+class DeviceOperationScheduleItem(Base):
+    """Time-slot item belonging to a DeviceOperationSchedule."""
+
+    __tablename__ = "device_operation_schedule_items"
+
+    id = Column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4, index=True)
+    schedule_id = Column(
+        Uuid(as_uuid=True),
+        ForeignKey("device_operation_schedule.id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    cron_expr = Column(String(64), nullable=False, comment="启动时刻Crontab表达式")
+    duration_minutes = Column(Integer, nullable=False, comment="持续运行时长(分钟)")
+    remark = Column(String(128), nullable=True, comment="时段说明")
+    seq = Column(Integer, nullable=False, default=0, comment="排序号")
+
+
 class DeviceSpec(Base):
     """Device specification entity model"""
 
@@ -86,11 +129,30 @@ class DeviceSpec(Base):
     voltage = Column(Float, nullable=False, default=0.0)
     rpm = Column(Integer, nullable=False, default=0)
     remark = Column(Text, nullable=True, comment="电气性能标准")
+    operation_mode = Column(
+        SmallInteger,
+        nullable=False,
+        default=1,
+        comment="1:连续运行, 2:事件触发, 3:时段运行",
+    )
+    reference_id = Column(
+        Uuid(as_uuid=True),
+        ForeignKey("device_operation_schedule.id", ondelete="RESTRICT"),
+        nullable=True,
+        index=True,
+        comment="关联运行模式(device_operation_schedule)ID",
+    )
     supplier_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to supplier for multi-tenant support
     device_category_id = Column(Uuid(as_uuid=True), nullable=False, index=True)  # Link to device_category
 
     supplier = relationship("Supplier", primaryjoin="foreign(DeviceSpec.supplier_id) == Supplier.id", lazy="selectin", uselist=False)
     device_category = relationship("DeviceCategory", primaryjoin="foreign(DeviceSpec.device_category_id) == DeviceCategory.id", lazy="selectin", uselist=False)
+    operation_schedule = relationship(
+        "DeviceOperationSchedule",
+        primaryjoin="foreign(DeviceSpec.reference_id) == DeviceOperationSchedule.id",
+        lazy="selectin",
+        uselist=False,
+    )
 
 
     def __repr__(self):

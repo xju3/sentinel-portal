@@ -126,6 +126,112 @@ class PagedCountResponse(BaseModel):
 
 
 # ==========================================
+# DeviceOperationSchedule / DeviceOperationScheduleItem
+# ==========================================
+OperationModeType = Literal[1, 2, 3]
+
+
+class DeviceOperationScheduleItemInput(BaseModel):
+    cron_expr: str = Field(min_length=1, max_length=64)
+    duration_minutes: int = Field(gt=0, le=10080)
+    remark: Optional[str] = Field(default=None, max_length=128)
+    seq: int = Field(default=0, ge=0)
+
+    @field_validator("cron_expr")
+    @classmethod
+    def validate_cron_expr(cls, value: str) -> str:
+        normalized = " ".join(value.strip().split())
+        parts = normalized.split(" ")
+        if len(parts) != 5:
+            raise ValueError("cron_expr must be a standard 5-field cron expression")
+        return normalized
+
+    @field_validator("remark")
+    @classmethod
+    def strip_remark(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        normalized = value.strip()
+        return normalized or None
+
+
+class DeviceOperationScheduleItemResponse(DeviceOperationScheduleItemInput):
+    id: UUID
+    schedule_id: UUID
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class DeviceOperationScheduleItemsReplace(BaseModel):
+    items: List[DeviceOperationScheduleItemInput]
+
+
+class DeviceOperationScheduleCreate(BaseModel):
+    code: str = Field(min_length=1, max_length=16)
+    name: str = Field(min_length=1, max_length=64)
+    description: Optional[str] = Field(default=None, max_length=255)
+    status: int = Field(default=1)
+
+    @field_validator("code", "name", "description")
+    @classmethod
+    def strip_text(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        normalized = value.strip()
+        return normalized or None
+
+    @model_validator(mode="after")
+    def validate_required_fields(self):
+        if not self.code or not self.name:
+            raise ValueError("code and name cannot be blank")
+        if self.status not in (0, 1):
+            raise ValueError("status must be 0 or 1")
+        return self
+
+
+class DeviceOperationScheduleUpdate(BaseModel):
+    code: Optional[str] = Field(default=None, min_length=1, max_length=16)
+    name: Optional[str] = Field(default=None, min_length=1, max_length=64)
+    description: Optional[str] = Field(default=None, max_length=255)
+    status: Optional[int] = None
+
+    @field_validator("code", "name", "description")
+    @classmethod
+    def strip_text(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return None
+        normalized = value.strip()
+        return normalized or None
+
+    @model_validator(mode="after")
+    def validate_status(self):
+        if self.status is not None and self.status not in (0, 1):
+            raise ValueError("status must be 0 or 1")
+        return self
+
+
+class DeviceOperationScheduleBrief(BaseModel):
+    id: UUID
+    code: str
+    name: str
+    status: int = 1
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+class DeviceOperationScheduleResponse(BaseModel):
+    id: UUID
+    tenant_id: UUID
+    code: str
+    name: str
+    description: Optional[str] = None
+    status: int
+    items: List[DeviceOperationScheduleItemResponse] = Field(default_factory=list)
+
+    model_config = ConfigDict(from_attributes=True)
+
+
+# ==========================================
 # DeviceSpec
 # ==========================================
 class DeviceSpecCreate(BaseModel):
@@ -136,8 +242,20 @@ class DeviceSpecCreate(BaseModel):
     voltage: Optional[float] = 0.0
     rpm: Optional[int] = 0
     remark: Optional[str] = None
+    operation_mode: int = 1
+    reference_id: Optional[UUID] = None
     supplier_id: UUID
     device_category_id: UUID
+
+    @model_validator(mode="after")
+    def validate_operation_mode(self):
+        if self.operation_mode not in (1, 2, 3):
+            raise ValueError("operation_mode must be 1 (连续运行), 2 (事件触发), or 3 (时段运行)")
+        if self.operation_mode == 3 and self.reference_id is None:
+            raise ValueError("reference_id is required when operation_mode is 3 (时段运行)")
+        if self.operation_mode in (1, 2):
+            self.reference_id = None
+        return self
 
 
 class DeviceSpecUpdate(BaseModel):
@@ -148,8 +266,18 @@ class DeviceSpecUpdate(BaseModel):
     voltage: Optional[float] = None
     rpm: Optional[int] = None
     remark: Optional[str] = None
+    operation_mode: Optional[int] = None
+    reference_id: Optional[UUID] = None
     supplier_id: Optional[UUID] = None
     device_category_id: Optional[UUID] = None
+
+    @model_validator(mode="after")
+    def validate_operation_mode(self):
+        if self.operation_mode is not None and self.operation_mode not in (1, 2, 3):
+            raise ValueError("operation_mode must be 1 (连续运行), 2 (事件触发), or 3 (时段运行)")
+        if self.operation_mode in (1, 2):
+            self.reference_id = None
+        return self
 
 
 class SupplierBrief(BaseModel):
@@ -182,12 +310,15 @@ class DeviceSpecResponse(BaseModel):
     voltage: float
     rpm: int
     remark: Optional[str] = None
+    operation_mode: int = 1
+    reference_id: Optional[UUID] = None
     supplier_id: UUID
     device_category_id: UUID
     process_device_count: int = 0
     process_devices: List[ProcessDeviceBrief] = Field(default_factory=list)
     supplier: Optional[SupplierBrief] = None
     device_category: Optional[DeviceCategoryBrief] = None
+    operation_schedule: Optional[DeviceOperationScheduleBrief] = None
 
     model_config = ConfigDict(from_attributes=True)
 

@@ -16,7 +16,15 @@ from influxdb_client.client.query_api import QueryApi
 from pub.manager.database import influxdb_manager, db_manager
 from fastapi import BackgroundTasks
 from pub.models.sensor import SensorType, Sensor, SensorBatch, SensorThreshold, SensorMonitoring, SimCard
-from pub.models.device import DeviceInst, DeviceSpec, DeviceCategory, ProcessDeviceItem, ProcessDevice
+from pub.models.device import (
+    DeviceInst,
+    DeviceSpec,
+    DeviceCategory,
+    DeviceOperationSchedule,
+    DeviceOperationScheduleItem,
+    ProcessDeviceItem,
+    ProcessDevice,
+)
 from pub.models.customer import Tenant, Area, HealthCheckFreq, IsoStandard, Region
 from pub.exceptions.domain_exception import DomainException
 from pub.utils.sorting import apply_sorting
@@ -80,9 +88,40 @@ class SensorConfigService:
 
         device_inst, device_spec, device_cat = device_row
 
-        # 3. rpm from DeviceSpec
+        # 3. rpm and operation schedule from DeviceSpec
         if device_spec and device_spec.rpm is not None:
             config["rpm"] = device_spec.rpm
+        if device_spec:
+            op_mode = int(getattr(device_spec, "operation_mode", None) or 1)
+            schedules_payload = []
+            if op_mode == 3 and getattr(device_spec, "reference_id", None):
+                op_schedule = await session.get(
+                    DeviceOperationSchedule, device_spec.reference_id
+                )
+                if op_schedule and int(op_schedule.status or 0) == 1:
+                    items_stmt = (
+                        select(DeviceOperationScheduleItem)
+                        .where(
+                            DeviceOperationScheduleItem.schedule_id
+                            == op_schedule.id
+                        )
+                        .order_by(
+                            DeviceOperationScheduleItem.seq.asc(),
+                            DeviceOperationScheduleItem.id.asc(),
+                        )
+                    )
+                    items_res = await session.execute(items_stmt)
+                    schedules_payload = [
+                        {
+                            "cron": item.cron_expr,
+                            "duration_minutes": item.duration_minutes,
+                        }
+                        for item in items_res.scalars().all()
+                    ]
+            config["operation"] = {
+                "mode": op_mode,
+                "schedules": schedules_payload,
+            }
 
         if not device_cat:
             return config

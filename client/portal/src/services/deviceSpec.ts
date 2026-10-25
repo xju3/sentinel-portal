@@ -20,9 +20,12 @@ export type DeviceSpec = {
   rpm: number;
   supplier_id: string;
   device_category_id: string;
+  operation_mode?: number;
+  reference_id?: string | null;
   remark?: string;
   supplier?: { id: string; name: string };
   device_category?: { id: string; name: string };
+  operation_schedule?: { id: string; code: string; name: string; status?: number } | null;
   process_device_count?: number;
   process_devices?: Array<{ id: string; code: string; sn: string }>;
 };
@@ -36,6 +39,8 @@ export type DeviceSpecPayload = {
   rpm: number;
   supplier_id: string;
   device_category_id: string;
+  operation_mode?: number;
+  reference_id?: string | null;
   remark?: string;
 };
 
@@ -68,6 +73,7 @@ export type DeviceSpecQueryParams = {
   device_category_id?: string;
   rpm?: number;
   voltage?: number;
+  operation_mode?: number;
   process_device_id?: string;
 };
 

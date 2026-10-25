@@ -139,6 +139,11 @@ export default defineConfig({
           component: '@/pages/Device/Bearing',
         },
         {
+          path: '/device/operation-schedules',
+          name: '运行模式',
+          component: '@/pages/Device/OperationSchedule',
+        },
+        {
           path: '/device/specs',
           name: '设备规格',
           component: '@/pages/Device/Spec',
